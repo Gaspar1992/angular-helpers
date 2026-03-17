@@ -1,0 +1,46 @@
+{
+  "name": "@angular-helpers/security",
+  "version": "0.1.0",
+  "description": "Angular security helpers for preventing ReDoS and other security vulnerabilities",
+  "keywords": [
+    "angular",
+    "security",
+    "regex",
+    "redos",
+    "prevention",
+    "web-worker",
+    "builder-pattern"
+  ],
+  "author": "Angular Helpers Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/angular-helpers/security"
+  },
+  "bugs": {
+    "url": "https://github.com/angular-helpers/security/issues"
+  },
+  "homepage": "https://github.com/angular-helpers/security#readme",
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json"
+  },
+  "peerDependencies": {
+    "@angular/common": "^17.0.0 || ^18.0.0",
+    "@angular/core": "^17.0.0 || ^18.0.0",
+    "@angular-helpers/browser-web-apis": "^0.1.0",
+    "rxjs": "^7.0.0 || ^8.0.0",
+    "tslib": "^2.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.0.0"
+  },
+  "ngPackage": {
+    "lib": {
+      "entryFile": "src/index.ts"
+    },
+    "dest": "../../dist/security",
+    "allowedNonPeerDependencies": [
+      "tslib"
+    ]
+  }
+}

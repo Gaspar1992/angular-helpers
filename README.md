@@ -168,7 +168,46 @@ export class MyComponent {
 }
 ```
 
-## 🔧 Desarrollo
+## � HTTPS y Seguridad
+
+### ¿Por qué HTTPS es necesario?
+
+Las siguientes Browser Web APIs requieren un **contexto seguro** (HTTPS) para funcionar:
+
+- 📸 **Camera API** - Acceso a cámaras del dispositivo
+- 🎤 **Microphone API** - Acceso a micrófonos
+- 📍 **Geolocation API** - Ubicación GPS del usuario
+- 🔔 **Notification API** - Notificaciones del sistema
+- 📋 **Clipboard API** - Acceso al portapapeles
+- 🔐 **Permissions API** - Gestión de permisos
+- 📱 **Device Orientation/Motion** - Sensores del dispositivo
+- 🔋 **Battery API** - Estado de batería
+
+### Configuración SSL
+
+El proyecto incluye certificados SSL autofirmados para desarrollo local:
+
+```
+ssl/
+├── localhost.key     # Clave privada
+├── localhost.crt     # Certificado público
+└── localhost.conf    # Configuración OpenSSL
+```
+
+### Advertencia del Navegador
+
+Al acceder a `https://localhost:4200/`, el navegador mostrará una advertencia de seguridad porque el certificado es autofirmado. 
+
+**Solución:** Haz clic en "Avanzado" → "Continuar a localhost (inseguro)" para continuar.
+
+### Certificado de Confianza (Opcional)
+
+Para evitar la advertencia permanentemente:
+
+1. **Chrome/Edge**: Importa `localhost.crt` en "Configuración" → "Privacidad y seguridad" → "Administrar certificados" → "Autoridades de certificación raíz de confianza"
+2. **Firefox**: Importa en "Opciones" → "Privacidad y seguridad" → "Certificados" → "Autoridades"
+
+## �🔧 Desarrollo
 
 ### Instalación
 ```bash
@@ -176,9 +215,21 @@ export class MyComponent {
 npm install
 ```
 
+### Desarrollo con HTTPS
+
+Las Browser Web APIs requieren HTTPS para funcionar correctamente. El proyecto está configurado con SSL autofirmado:
+
+```bash
+# Iniciar con HTTPS (recomendado para APIs del navegador)
+npm run start:https
+
+# O iniciar sin HTTPS (limitado para algunas APIs)
+npm start
+```
+
 ### Desarrollo simultáneo
 ```bash
-# Iniciar app principal y watch de packages
+# Iniciar app principal con HTTPS y watch de packages
 npm run dev
 ```
 
@@ -195,6 +246,9 @@ npm run lint
 
 # Limpiar builds
 npm run clean
+
+# Generar certificados SSL
+npm run ssl:generate
 ```
 
 ### Flujo de Trabajo

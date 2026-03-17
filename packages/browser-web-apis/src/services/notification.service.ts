@@ -1,6 +1,6 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { from, Observable } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { Injectable, signal, inject, computed, OnDestroy } from '@angular/core';
+import { from, Observable, Subject } from 'rxjs';
+import { map, catchError, takeUntil } from 'rxjs/operators';
 import { BrowserSupportUtil } from '../utils/browser-support.util';
 import { PermissionsService } from './permissions.service';
 
@@ -29,19 +29,17 @@ export interface NotificationAction {
 
 type NotificationPermission = 'default' | 'granted' | 'denied';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class NotificationService {
-  private notifications = signal<Map<string, Notification>>(new Map());
+@Injectable()
+export class NotificationService implements OnDestroy {
   private permission = signal<NotificationPermission>('default');
+  private notifications = signal<Map<string, Notification>>(new Map());
+  private error = signal<string>('');
+  private destroy$ = new Subject<void>();
+  
+  private permissionsService = inject(PermissionsService);
 
-  readonly notifications$ = computed(() => this.notifications());
-  readonly permission$ = computed(() => this.permission());
-
-  constructor(private permissionsService: PermissionsService) {
-    this.initializeNotifications();
-  }
+  readonly notifications$ = this.notifications.asReadonly();
+  readonly permission$ = this.permission.asReadonly();
 
   private async initializeNotifications(): Promise<void> {
     if (!this.isSupported()) {

@@ -1,6 +1,6 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { from, Observable, Subject } from 'rxjs';
-import { map, catchError, takeUntil } from 'rxjs/operators';
+import { Injectable, signal, inject } from '@angular/core';
+import { from, Observable } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { 
   GeolocationPosition, 
   GeolocationOptions, 
@@ -9,29 +9,25 @@ import {
 } from '../interfaces/geolocation.interface';
 import { BrowserSupportUtil } from '../utils/browser-support.util';
 import { PermissionsService } from './permissions.service';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class GeolocationService {
+@Injectable()
+export class GeolocationService extends BrowserApiBaseService {
   private currentPosition = signal<GeolocationPosition | null>(null);
   private watchPositions = signal<Map<number, GeolocationPosition>>(new Map());
   private watchErrors = signal<Map<number, GeolocationError>>(new Map());
-  private destroy$ = new Subject<void>();
 
-  readonly currentPosition$ = computed(() => this.currentPosition());
-  readonly watchPositions$ = computed(() => this.watchPositions());
-  readonly watchErrors$ = computed(() => this.watchErrors());
+  readonly currentPosition$ = this.currentPosition.asReadonly();
+  readonly watchPositions$ = this.watchPositions.asReadonly();
+  readonly watchErrors$ = this.watchErrors.asReadonly();
 
-  constructor(private permissionsService: PermissionsService) {
-    this.initializeGeolocation();
+  protected override getApiName(): string {
+    return 'geolocation';
   }
 
-  private initializeGeolocation(): void {
-    if (!this.isSupported()) {
-      console.warn('Geolocation API not supported in this browser');
-      return;
-    }
+  protected override async onInitialize(): Promise<void> {
+    await super.onInitialize();
+    this.logInfo('Geolocation service initialized');
   }
 
   async getCurrentPosition(options?: GeolocationOptions): Promise<GeolocationPosition> {
@@ -108,8 +104,8 @@ export class GeolocationService {
     watchIds.forEach(id => this.clearWatch(id));
   }
 
-  isSupported(): boolean {
-    return BrowserSupportUtil.isSupported('geolocation');
+  override isSupported(): boolean {
+    return super.isSupported();
   }
 
   hasPermission(): Promise<boolean> {
@@ -207,9 +203,8 @@ export class GeolocationService {
     return geoError;
   }
 
-  ngOnDestroy(): void {
+  protected override onDestroy(): void {
     this.clearAllWatches();
-    this.destroy$.next();
-    this.destroy$.complete();
+    super.onDestroy();
   }
 }

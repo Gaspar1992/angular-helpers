@@ -1,31 +1,28 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, inject, computed } from '@angular/core';
 import { from, Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { 
   MediaDevice, 
   MediaDeviceKind, 
   MediaStreamConstraints,
-  MediaDevicesInfo 
+  MediaDevicesInfo
 } from '../interfaces/media.interface';
 import { BrowserSupportUtil } from '../utils/browser-support.util';
 import { PermissionsService } from './permissions.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class MediaDevicesService {
   private devices = signal<MediaDevice[]>([]);
   private activeStreams = signal<Map<string, MediaStream>>(new Map());
+  private error = signal<string>('');
 
-  readonly devices$ = computed(() => this.devices());
-  readonly activeStreams$ = computed(() => this.activeStreams());
+  private permissionsService = inject(PermissionsService);
+
+  readonly devices$ = this.devices.asReadonly();
+  readonly activeStreams$ = this.activeStreams.asReadonly();
   readonly videoInputs = computed(() => this.devices().filter(d => d.kind === 'videoinput'));
   readonly audioInputs = computed(() => this.devices().filter(d => d.kind === 'audioinput'));
   readonly audioOutputs = computed(() => this.devices().filter(d => d.kind === 'audiooutput'));
-
-  constructor(private permissionsService: PermissionsService) {
-    this.initializeDevices();
-  }
 
   private async initializeDevices(): Promise<void> {
     if (!this.isSupported()) {

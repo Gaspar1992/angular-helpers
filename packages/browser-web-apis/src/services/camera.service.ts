@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, inject, computed } from '@angular/core';
 import { from, Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { 
@@ -8,67 +8,41 @@ import {
   CameraInfo,
   MediaDevicesInfo 
 } from '../interfaces/media.interface';
-import { BrowserSupportUtil } from '../utils/browser-support.util';
-import { PermissionsService } from './permissions.service';
+import { DomSanitizer } from '@angular/platform-browser';
+import { CameraPermissionHelperService } from './camera-permission-helper.service';
+import { MediaDeviceBaseService } from './base/media-device-base.service';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class CameraService {
+@Injectable()
+export class CameraService extends MediaDeviceBaseService {
   private currentStream = signal<MediaStream | null>(null);
-  private availableDevices = signal<MediaDevice[]>([]);
   private isStreaming = signal<boolean>(false);
 
-  readonly currentStream$ = computed(() => this.currentStream());
-  readonly availableDevices$ = computed(() => this.availableDevices());
-  readonly isStreaming$ = computed(() => this.isStreaming());
+  readonly currentStream$ = this.currentStream.asReadonly();
+  readonly isStreaming$ = this.isStreaming.asReadonly();
+  readonly videoInputs$ = this.videoInputs.asReadonly();
 
-  constructor(private permissionsService: PermissionsService) {
-    this.initializeDevices();
+  private sanitizer = inject(DomSanitizer);
+  private permissionHelper = inject(CameraPermissionHelperService);
+
+  protected override getApiName(): string {
+    return 'camera';
   }
 
-  private async initializeDevices(): Promise<void> {
-    if (!this.isSupported()) {
-      console.warn('Camera API not supported in this browser');
-      return;
-    }
-
-    try {
-      await this.refreshDevices();
-    } catch (error) {
-      console.error('Error initializing camera devices:', error);
-    }
-  }
-
-  async refreshDevices(): Promise<void> {
-    if (!this.isSupported()) {
-      throw new Error('Camera API not supported');
-    }
-
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(device => device.kind === 'videoinput');
-      this.availableDevices.set(videoDevices);
-    } catch (error) {
-      console.error('Error enumerating devices:', error);
-      throw error;
-    }
+  protected override getMediaConstraintType(): 'video' | 'audio' {
+    return 'video';
   }
 
   async startCamera(constraints?: MediaStreamConstraints): Promise<MediaStream> {
-    if (!this.isSupported()) {
-      throw new Error('Camera API not supported');
-    }
-
     if (this.isStreaming()) {
       this.stopCamera();
     }
 
     try {
-      // Verificar permisos
-      const hasPermission = await this.permissionsService.isGranted('camera');
+      // Usar el helper para verificar y solicitar permisos
+      const hasPermission = await this.permissionHelper.checkAndRequestPermission();
+      
       if (!hasPermission) {
-        await this.permissionsService.request({ name: 'camera' });
+        throw new Error('Camera permission is required to use the camera. Please allow camera access in your browser settings.');
       }
 
       const streamConstraints: MediaStreamConstraints = constraints || {
@@ -79,17 +53,27 @@ export class CameraService {
         }
       };
 
-      const stream = await navigator.mediaDevices.getUserMedia(streamConstraints);
+      // Obtener el stream de la cámara usando el método base
+      const stream = await this.getUserMedia(streamConstraints);
       this.currentStream.set(stream);
       this.isStreaming.set(true);
 
-      // Escuchar cambios en dispositivos
-      this.setupDeviceChangeListener();
-
       return stream;
-    } catch (error) {
-      console.error('Error starting camera:', error);
-      throw error;
+    } catch (error: any) {
+      this.logError('Error starting camera:', error);
+      
+      // Proporcionar un error más descriptivo
+      if (error.name === 'NotAllowedError') {
+        throw new Error('Camera permission denied by user. Please allow camera access in your browser settings and refresh the page.');
+      } else if (error.name === 'NotFoundError') {
+        throw new Error('No camera device found. Please connect a camera and try again.');
+      } else if (error.name === 'NotReadableError') {
+        throw new Error('Camera is already in use by another application. Please close other applications using the camera and try again.');
+      } else if (error.name === 'OverconstrainedError') {
+        throw new Error('Camera constraints cannot be satisfied. Try with different camera settings.');
+      } else {
+        throw new Error(`Camera error: ${error.message || 'Unknown error occurred'}`);
+      }
     }
   }
 
@@ -105,10 +89,6 @@ export class CameraService {
   }
 
   async switchCamera(deviceId: string): Promise<MediaStream> {
-    if (!this.isSupported()) {
-      throw new Error('Camera API not supported');
-    }
-
     this.stopCamera();
 
     const constraints: MediaStreamConstraints = {
@@ -123,12 +103,8 @@ export class CameraService {
   }
 
   async getCameraCapabilities(deviceId: string): Promise<MediaTrackCapabilities | null> {
-    if (!this.isSupported()) {
-      return null;
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+    return this.executeWithErrorHandling(async () => {
+      const stream = await this.getUserMedia({
         video: { deviceId: { exact: deviceId } }
       });
 
@@ -137,14 +113,11 @@ export class CameraService {
       
       stream.getTracks().forEach(t => t.stop());
       return capabilities;
-    } catch (error) {
-      console.error('Error getting camera capabilities:', error);
-      return null;
-    }
+    }, 'Failed to get camera capabilities');
   }
 
   async getCameraInfo(deviceId: string): Promise<CameraInfo | null> {
-    const devices = this.availableDevices();
+    const devices = this.devices();
     const device = devices.find(d => d.deviceId === deviceId);
     
     if (!device) {
@@ -184,7 +157,7 @@ export class CameraService {
   }
 
   getMediaDevicesInfo(): MediaDevicesInfo {
-    const devices = this.availableDevices();
+    const devices = this.devices();
     
     return {
       videoInputs: devices.filter(d => d.kind === 'videoinput').map(d => ({
@@ -208,18 +181,17 @@ export class CameraService {
       const imageCapture = new ImageCapture(track);
       return await imageCapture.takePhoto();
     } catch (error) {
-      console.error('Error taking picture:', error);
+      this.logError('Error taking picture:', error);
       return null;
     }
   }
 
-  isSupported(): boolean {
-    return BrowserSupportUtil.isSupported('camera');
+  override isSupported(): boolean {
+    return super.isSupported();
   }
 
   hasMultipleCameras(): boolean {
-    const videoDevices = this.availableDevices().filter(d => d.kind === 'videoinput');
-    return videoDevices.length > 1;
+    return this.videoInputs().length > 1;
   }
 
   getActiveCamera(): MediaDevice | null {
@@ -231,23 +203,42 @@ export class CameraService {
     const track = stream.getVideoTracks()[0];
     const deviceId = track.getSettings().deviceId;
     
-    return this.availableDevices().find(d => d.deviceId === deviceId) || null;
+    return this.devices().find(d => d.deviceId === deviceId) || null;
   }
 
   observeDevices(): Observable<MediaDevice[]> {
     return from(this.refreshDevices()).pipe(
-      map(() => this.availableDevices()),
+      map(() => this.devices()),
       catchError(() => from([[]]))
     );
   }
 
-  private setupDeviceChangeListener(): void {
-    navigator.mediaDevices.addEventListener('devicechange', () => {
-      this.refreshDevices();
-    });
+  // Métodos públicos para manejo de permisos
+  async requestCameraPermission(): Promise<boolean> {
+    return await this.permissionHelper.checkAndRequestPermission();
   }
 
-  ngOnDestroy(): void {
-    this.stopCamera();
+  async requestCameraPermissionWithDialog(): Promise<boolean> {
+    return await this.permissionHelper.requestPermissionWithUserPrompt();
+  }
+
+  getCameraPermissionState(): 'prompt' | 'granted' | 'denied' {
+    return this.permissionHelper.getPermissionState();
+  }
+
+  isCameraPermissionGranted(): boolean {
+    return this.permissionHelper.isPermissionGranted();
+  }
+
+  isCameraPermissionDenied(): boolean {
+    return this.permissionHelper.isPermissionDenied();
+  }
+
+  needsCameraPermission(): boolean {
+    return this.permissionHelper.needsPermission();
+  }
+
+  resetCameraPermission(): void {
+    this.permissionHelper.resetPermissionState();
   }
 }

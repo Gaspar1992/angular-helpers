@@ -10,13 +10,11 @@ import {
 } from '../interfaces/permissions.interface';
 import { BrowserSupportUtil } from '../utils/browser-support.util';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class PermissionsService implements BrowserPermissions {
   private permissions = signal<Map<PermissionName, PermissionState>>(new Map());
 
-  readonly permissionStates = computed(() => this.permissions());
+  readonly permissionStates = this.permissions.asReadonly();
 
   constructor() {
     this.initializePermissions();
@@ -149,6 +147,11 @@ export class PermissionsService implements BrowserPermissions {
       map(status => status.state as PermissionState),
       catchError(() => from(['prompt' as PermissionState]))
     );
+  }
+
+  // Método para actualizar manualmente el estado de un permiso
+  updatePermissionState(permission: PermissionName, state: PermissionState): void {
+    this.permissions.update(map => map.set(permission, state));
   }
 
   private async requestPermission(permission: PermissionName): Promise<PermissionStatus> {

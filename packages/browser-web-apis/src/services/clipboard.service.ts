@@ -1,22 +1,18 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, inject, computed } from '@angular/core';
 import { from, Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { BrowserSupportUtil } from '../utils/browser-support.util';
 import { PermissionsService } from './permissions.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class ClipboardService {
   private clipboardContent = signal<string>('');
   private isSupported = signal<boolean>(false);
 
-  readonly clipboardContent$ = computed(() => this.clipboardContent());
-  readonly isSupported$ = computed(() => this.isSupported());
+  readonly clipboardContent$ = this.clipboardContent.asReadonly();
+  readonly isSupported$ = this.isSupported.asReadonly();
 
-  constructor(private permissionsService: PermissionsService) {
-    this.isSupported.set(this.checkSupport());
-  }
+  private permissionsService = inject(PermissionsService);
 
   private checkSupport(): boolean {
     return BrowserSupportUtil.isSupported('clipboard');
