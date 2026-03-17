@@ -1,0 +1,39 @@
+{
+  "name": "@angular-helpers/browser-web-apis",
+  "version": "0.1.0",
+  "description": "Sistema de servicios Angular para acceso formalizado a Browser Web APIs (cámara, permisos, geolocalización, etc.)",
+  "main": "dist/browser-web-apis/browser-web-apis.d.ts",
+  "types": "dist/browser-web-apis/browser-web-apis.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json",
+    "build:watch": "ng-packagr -p ng-package.json --watch",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "clean": "rm -rf dist",
+    "lint": "eslint src/**/*.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "angular",
+    "typescript",
+    "browser",
+    "web-apis",
+    "camera",
+    "permissions",
+    "geolocation",
+    "media",
+    "sensors"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "@angular/core": "^21.0.0",
+    "@angular/common": "^21.0.0",
+    "@angular/platform-browser": "^21.0.0",
+    "rxjs": "^7.0.0"
+  }
+}
