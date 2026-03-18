@@ -3,38 +3,43 @@ import { from, Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { BrowserSupportUtil } from '../utils/browser-support.util';
 import { PermissionsService } from './permissions.service';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 @Injectable()
-export class ClipboardService {
+export class ClipboardService extends BrowserApiBaseService {
   private clipboardContent = signal<string>('');
-  private isSupported = signal<boolean>(false);
 
   readonly clipboardContent$ = this.clipboardContent.asReadonly();
-  readonly isSupported$ = this.isSupported.asReadonly();
 
-  private permissionsService = inject(PermissionsService);
+  constructor() {
+    super();
+  }
 
-  private checkSupport(): boolean {
+  protected override getApiName(): string {
+    return 'clipboard';
+  }
+
+  override isSupported(): boolean {
     return BrowserSupportUtil.isSupported('clipboard');
   }
 
   async writeText(text: string): Promise<void> {
-    if (!this.isSupported()) {
-      throw new Error('Clipboard API not supported');
+    if (!this.isSupported() || !this.isBrowserEnvironment()) {
+      throw new Error('Clipboard API not supported or not available in server environment');
     }
 
     try {
       await navigator.clipboard.writeText(text);
       this.clipboardContent.set(text);
     } catch (error) {
-      console.error('Error writing to clipboard:', error);
+      this.logError('Error writing to clipboard:', error);
       throw error;
     }
   }
 
   async readText(): Promise<string> {
-    if (!this.isSupported()) {
-      throw new Error('Clipboard API not supported');
+    if (!this.isSupported() || !this.isBrowserEnvironment()) {
+      throw new Error('Clipboard API not supported or not available in server environment');
     }
 
     try {
@@ -42,33 +47,33 @@ export class ClipboardService {
       this.clipboardContent.set(text);
       return text;
     } catch (error) {
-      console.error('Error reading from clipboard:', error);
+      this.logError('Error reading from clipboard:', error);
       throw error;
     }
   }
 
   async write(data: ClipboardItem[]): Promise<void> {
-    if (!this.isSupported()) {
-      throw new Error('Clipboard API not supported');
+    if (!this.isSupported() || !this.isBrowserEnvironment()) {
+      throw new Error('Clipboard API not supported or not available in server environment');
     }
 
     try {
       await navigator.clipboard.write(data);
     } catch (error) {
-      console.error('Error writing to clipboard:', error);
+      this.logError('Error writing to clipboard:', error);
       throw error;
     }
   }
 
   async read(): Promise<ClipboardItem[]> {
-    if (!this.isSupported()) {
-      throw new Error('Clipboard API not supported');
+    if (!this.isSupported() || !this.isBrowserEnvironment()) {
+      throw new Error('Clipboard API not supported or not available in server environment');
     }
 
     try {
       return await navigator.clipboard.read();
     } catch (error) {
-      console.error('Error reading from clipboard:', error);
+      this.logError('Error reading from clipboard:', error);
       throw error;
     }
   }
@@ -82,16 +87,24 @@ export class ClipboardService {
   }
 
   async copyImage(imageBlob: Blob): Promise<void> {
+    if (this.isServerEnvironment()) {
+      throw new Error('Clipboard API not available in server environment');
+    }
+
     try {
       const item = new ClipboardItem({ [imageBlob.type]: imageBlob });
       await this.write([item]);
     } catch (error) {
-      console.error('Error copying image to clipboard:', error);
+      this.logError('Error copying image to clipboard:', error);
       throw error;
     }
   }
 
   async pasteImage(): Promise<Blob | null> {
+    if (this.isServerEnvironment()) {
+      return null;
+    }
+
     try {
       const items = await this.read();
       for (const item of items) {
@@ -104,7 +117,7 @@ export class ClipboardService {
       }
       return null;
     } catch (error) {
-      console.error('Error pasting image from clipboard:', error);
+      this.logError('Error pasting image from clipboard:', error);
       return null;
     }
   }
@@ -114,7 +127,7 @@ export class ClipboardService {
       await this.writeText('');
       this.clipboardContent.set('');
     } catch (error) {
-      console.error('Error clearing clipboard:', error);
+      this.logError('Error clearing clipboard:', error);
       throw error;
     }
   }
@@ -133,24 +146,26 @@ export class ClipboardService {
     return BrowserSupportUtil.isSupported('clipboard-write');
   }
 
-  async requestReadPermission(): Promise<boolean> {
+  override async requestPermission(permission?: string): Promise<boolean> {
     try {
-      await this.permissionsService.request({ name: 'clipboard-read' });
+      if (permission === 'clipboard-read') {
+        await this.permissionsService.request({ name: 'clipboard-read' });
+      } else if (permission === 'clipboard-write') {
+        await this.permissionsService.request({ name: 'clipboard-write' });
+      }
       return true;
     } catch (error) {
-      console.error('Error requesting clipboard read permission:', error);
+      this.logError('Error requesting clipboard permission:', error);
       return false;
     }
   }
 
+  async requestReadPermission(): Promise<boolean> {
+    return this.requestPermission('clipboard-read');
+  }
+
   async requestWritePermission(): Promise<boolean> {
-    try {
-      await this.permissionsService.request({ name: 'clipboard-write' });
-      return true;
-    } catch (error) {
-      console.error('Error requesting clipboard write permission:', error);
-      return false;
-    }
+    return this.requestPermission('clipboard-write');
   }
 
   isClipboardSupported(): boolean {

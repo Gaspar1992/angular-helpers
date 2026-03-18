@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 export interface ShareData {
   title?: string;
@@ -15,16 +16,24 @@ export interface ShareResult {
 }
 
 @Injectable()
-export class WebShareService {
-  private isSupported = signal<boolean>(false);
+export class WebShareService extends BrowserApiBaseService {
   private shareResult = signal<ShareResult>({ shared: false });
 
   constructor() {
+    super();
     this.checkSupport();
   }
 
+  protected override getApiName(): string {
+    return 'web-share';
+  }
+
+  override isSupported(): boolean {
+    return this.isBrowserEnvironment() && 'share' in navigator;
+  }
+
   private checkSupport(): void {
-    this.isSupported.set('share' in navigator);
+    // Already handled by isSupported()
   }
 
   isShareSupported(): boolean {
@@ -32,8 +41,8 @@ export class WebShareService {
   }
 
   async share(data: ShareData): Promise<ShareResult> {
-    if (!this.isSupported()) {
-      const error = 'Web Share API not supported';
+    if (!this.isSupported() || this.isServerEnvironment()) {
+      const error = 'Web Share API not supported or not available in server environment';
       this.shareResult.set({ shared: false, error });
       return { shared: false, error };
     }
@@ -44,6 +53,7 @@ export class WebShareService {
       return { shared: true };
     } catch (error: any) {
       const errorMessage = error.message || 'Share failed';
+      this.logError('Error sharing:', error);
       this.shareResult.set({ shared: false, error: errorMessage });
       return { shared: false, error: errorMessage };
     }
@@ -62,7 +72,7 @@ export class WebShareService {
   }
 
   canShare(data: Partial<ShareData>): boolean {
-    if (!this.isSupported()) {
+    if (!this.isSupported() || this.isServerEnvironment()) {
       return false;
     }
 
@@ -97,6 +107,12 @@ export class WebShareService {
 
   // Helper methods for common sharing scenarios
   async shareCurrentPage(title?: string): Promise<ShareResult> {
+    if (this.isServerEnvironment()) {
+      const error = 'Web Share API not available in server environment';
+      this.shareResult.set({ shared: false, error });
+      return { shared: false, error };
+    }
+
     const url = window.location.href;
     const pageTitle = title || document.title;
     return this.shareUrl(url, pageTitle);

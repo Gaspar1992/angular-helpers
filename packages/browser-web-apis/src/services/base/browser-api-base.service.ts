@@ -1,5 +1,6 @@
-import { Injectable, signal, inject, OnDestroy, DestroyRef } from '@angular/core';
+import { Injectable, signal, inject, OnDestroy, DestroyRef, PLATFORM_ID } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { BrowserSupportUtil } from '../../utils/browser-support.util';
 import { PermissionsService } from '../permissions.service';
 
@@ -16,6 +17,7 @@ import { PermissionsService } from '../permissions.service';
 export abstract class BrowserApiBaseService {
   protected permissionsService = inject(PermissionsService);
   protected destroyRef = inject(DestroyRef);
+  protected platformId = inject(PLATFORM_ID);
   
   /**
    * Abstract method that must be implemented by child services
@@ -42,6 +44,20 @@ export abstract class BrowserApiBaseService {
    */
   protected isSupported(): boolean {
     return BrowserSupportUtil.isSupported(this.getApiName());
+  }
+
+  /**
+   * Check if running in browser environment using Angular's platform detection
+   */
+  protected isBrowserEnvironment(): boolean {
+    return isPlatformBrowser(this.platformId);
+  }
+
+  /**
+   * Check if running in server environment using Angular's platform detection
+   */
+  protected isServerEnvironment(): boolean {
+    return isPlatformServer(this.platformId);
   }
   
   /**
@@ -81,6 +97,11 @@ export abstract class BrowserApiBaseService {
    * Initialize the service with support check
    */
   protected async initialize(): Promise<void> {
+    if (this.isServerEnvironment()) {
+      this.logWarning(`${this.getApiName()} API not available in server environment`);
+      return;
+    }
+
     if (!this.isSupported()) {
       this.logWarning(`${this.getApiName()} API not supported in this browser`);
       return;
@@ -111,21 +132,27 @@ export abstract class BrowserApiBaseService {
    * Log API-specific warnings
    */
   protected logWarning(message: string, ...args: any[]): void {
-    console.warn(`${this.getApiName()}: ${message}`, ...args);
+    if (this.isBrowserEnvironment()) {
+      console.warn(`${this.getApiName()}: ${message}`, ...args);
+    }
   }
   
   /**
    * Log API-specific errors
    */
   protected logError(message: string, ...args: any[]): void {
-    console.error(`${this.getApiName()}: ${message}`, ...args);
+    if (this.isBrowserEnvironment()) {
+      console.error(`${this.getApiName()}: ${message}`, ...args);
+    }
   }
   
   /**
    * Log API-specific info
    */
   protected logInfo(message: string, ...args: any[]): void {
-    console.info(`${this.getApiName()}: ${message}`, ...args);
+    if (this.isBrowserEnvironment()) {
+      console.info(`${this.getApiName()}: ${message}`, ...args);
+    }
   }
   
   /**
@@ -135,8 +162,8 @@ export abstract class BrowserApiBaseService {
     operation: () => Promise<T>,
     errorMessage?: string
   ): Promise<T> {
-    if (!this.isSupported()) {
-      throw this.createError('API not supported');
+    if (this.isServerEnvironment() || !this.isSupported()) {
+      throw this.createError('API not supported or not available in current environment');
     }
     
     try {
@@ -154,8 +181,8 @@ export abstract class BrowserApiBaseService {
     operation: () => T,
     errorMessage?: string
   ): T {
-    if (!this.isSupported()) {
-      throw this.createError('API not supported');
+    if (this.isServerEnvironment() || !this.isSupported()) {
+      throw this.createError('API not supported or not available in current environment');
     }
     
     try {

@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import '@angular/compiler';
 import { version } from '../src/public-api';
 
 describe('browser-web-apis', () => {

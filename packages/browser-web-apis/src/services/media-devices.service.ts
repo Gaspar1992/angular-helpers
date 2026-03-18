@@ -1,6 +1,7 @@
-import { Injectable, signal, inject, computed } from '@angular/core';
-import { from, Observable } from 'rxjs';
+import { Injectable, signal, inject, computed, OnDestroy } from '@angular/core';
+import { from, Observable, Subject } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { 
   MediaDevice, 
   MediaDeviceKind, 
@@ -9,24 +10,30 @@ import {
 } from '../interfaces/media.interface';
 import { BrowserSupportUtil } from '../utils/browser-support.util';
 import { PermissionsService } from './permissions.service';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 @Injectable()
-export class MediaDevicesService {
+export class MediaDevicesService extends BrowserApiBaseService implements OnDestroy {
   private devices = signal<MediaDevice[]>([]);
   private activeStreams = signal<Map<string, MediaStream>>(new Map());
   private error = signal<string>('');
 
-  private permissionsService = inject(PermissionsService);
+  constructor() {
+    super();
+    this.initializeDevices();
+  }
 
-  readonly devices$ = this.devices.asReadonly();
-  readonly activeStreams$ = this.activeStreams.asReadonly();
-  readonly videoInputs = computed(() => this.devices().filter(d => d.kind === 'videoinput'));
-  readonly audioInputs = computed(() => this.devices().filter(d => d.kind === 'audioinput'));
-  readonly audioOutputs = computed(() => this.devices().filter(d => d.kind === 'audiooutput'));
+  protected override getApiName(): string {
+    return 'media-devices';
+  }
+
+  override isSupported(): boolean {
+    return BrowserSupportUtil.isSupported('camera') || BrowserSupportUtil.isSupported('microphone');
+  }
 
   private async initializeDevices(): Promise<void> {
-    if (!this.isSupported()) {
-      console.warn('Media Devices API not supported in this browser');
+    if (!this.isSupported() || this.isServerEnvironment()) {
+      this.logWarning('Media Devices API not supported in this browser or server environment');
       return;
     }
 
@@ -34,7 +41,7 @@ export class MediaDevicesService {
       await this.refreshDevices();
       this.setupDeviceChangeListener();
     } catch (error) {
-      console.error('Error initializing media devices:', error);
+      this.logError('Error initializing media devices:', error);
     }
   }
 
@@ -193,10 +200,6 @@ export class MediaDevicesService {
     );
   }
 
-  isSupported(): boolean {
-    return BrowserSupportUtil.isSupported('camera') || BrowserSupportUtil.isSupported('microphone');
-  }
-
   hasVideoInputs(): boolean {
     return this.getDevicesByKind('videoinput').length > 0;
   }
@@ -234,12 +237,17 @@ export class MediaDevicesService {
   }
 
   private setupDeviceChangeListener(): void {
-    navigator.mediaDevices.addEventListener('devicechange', () => {
-      this.refreshDevices();
-    });
+    if (this.isBrowserEnvironment()) {
+      if (navigator.mediaDevices) {
+        navigator.mediaDevices.addEventListener('devicechange', () => {
+          this.refreshDevices();
+        });
+      }
+    }
   }
 
   ngOnDestroy(): void {
     this.stopAllStreams();
+    // No manual cleanup needed with takeUntilDestroyed
   }
 }

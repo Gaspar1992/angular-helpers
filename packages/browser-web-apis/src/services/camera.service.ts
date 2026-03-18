@@ -3,7 +3,6 @@ import { from, Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { 
   MediaDevice, 
-  MediaDeviceKind, 
   MediaStreamConstraints, 
   CameraInfo,
   MediaDevicesInfo 
@@ -21,7 +20,6 @@ export class CameraService extends MediaDeviceBaseService {
   readonly isStreaming$ = this.isStreaming.asReadonly();
   readonly videoInputs$ = this.videoInputs.asReadonly();
 
-  private sanitizer = inject(DomSanitizer);
   private permissionHelper = inject(CameraPermissionHelperService);
 
   protected override getApiName(): string {
@@ -33,6 +31,10 @@ export class CameraService extends MediaDeviceBaseService {
   }
 
   async startCamera(constraints?: MediaStreamConstraints): Promise<MediaStream> {
+    if (this.isServerEnvironment()) {
+      throw new Error('Camera API not available in server environment');
+    }
+
     if (this.isStreaming()) {
       this.stopCamera();
     }
@@ -171,6 +173,10 @@ export class CameraService extends MediaDeviceBaseService {
   }
 
   async takePicture(): Promise<Blob | null> {
+    if (this.isServerEnvironment()) {
+      throw new Error('Camera API not available in server environment');
+    }
+
     const stream = this.currentStream();
     if (!stream) {
       throw new Error('No active camera stream');

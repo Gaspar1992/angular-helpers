@@ -1,7 +1,8 @@
-import { Injectable, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Injectable, signal, inject, OnDestroy } from '@angular/core';
+import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, fromEvent } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 export interface StorageOptions {
   prefix?: string;
@@ -17,22 +18,32 @@ export interface StorageEvent {
 }
 
 @Injectable()
-export class WebStorageService {
-  private isSupported = signal<boolean>(false);
+export class WebStorageService extends BrowserApiBaseService implements OnDestroy {
   private storageEvents = signal<StorageEvent | null>(null);
 
   constructor() {
+    super();
     this.checkSupport();
     this.setupEventListeners();
   }
 
+  protected override getApiName(): string {
+    return 'storage';
+  }
+
+  override isSupported(): boolean {
+    return this.isBrowserEnvironment() && typeof Storage !== 'undefined';
+  }
+
   private checkSupport(): void {
-    this.isSupported.set(typeof Storage !== 'undefined');
+    // Already handled by isSupported()
   }
 
   private setupEventListeners(): void {
-    if (typeof window !== 'undefined') {
-      fromEvent(window, 'storage').subscribe((event: any) => {
+    if (this.isBrowserEnvironment()) {
+      fromEvent(window, 'storage').pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe((event: any) => {
         if (event.key && event.newValue !== null) {
           this.storageEvents.set({
             key: event.key,
@@ -294,5 +305,9 @@ export class WebStorageService {
 
   removeAuthToken(): boolean {
     return this.removeSessionStorage('authToken', { prefix: 'auth' });
+  }
+
+  ngOnDestroy(): void {
+    // No manual cleanup needed with takeUntilDestroyed
   }
 }

@@ -51,12 +51,18 @@ export class WebWorkerService extends BrowserApiBaseService {
   }
 
   override isSupported(): boolean {
-    return typeof Worker !== 'undefined';
+    return this.isBrowserEnvironment() && typeof Worker !== 'undefined';
   }
 
   createWorker(name: string, scriptUrl: string): Observable<WorkerStatus> {
     if (!this.isSupported()) {
-      const error = 'Web Workers not supported';
+      const error = 'Web Workers not supported or not available in server environment';
+      this.updateWorkerStatus(name, { initialized: false, running: false, error, messageCount: 0 });
+      return this.getWorkerStatus(name);
+    }
+
+    if (!this.isBrowserEnvironment()) {
+      const error = 'Web Workers not available in server environment';
       this.updateWorkerStatus(name, { initialized: false, running: false, error, messageCount: 0 });
       return this.getWorkerStatus(name);
     }
@@ -107,7 +113,13 @@ export class WebWorkerService extends BrowserApiBaseService {
 
   createWorkerFromCode(name: string, workerCode: string): Observable<WorkerStatus> {
     if (!this.isSupported()) {
-      const error = 'Web Workers not supported';
+      const error = 'Web Workers not supported or not available in server environment';
+      this.updateWorkerStatus(name, { initialized: false, running: false, error, messageCount: 0 });
+      return this.getWorkerStatus(name);
+    }
+
+    if (!this.isBrowserEnvironment()) {
+      const error = 'Web Workers not available in server environment';
       this.updateWorkerStatus(name, { initialized: false, running: false, error, messageCount: 0 });
       return this.getWorkerStatus(name);
     }

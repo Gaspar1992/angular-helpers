@@ -3,9 +3,10 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 import { BatteryManager, BatteryInfo } from '../interfaces/battery.interface';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 @Injectable()
-export class BatteryService {
+export class BatteryService extends BrowserApiBaseService {
   private battery = signal<BatteryManager | null>(null);
   private batteryInfo = signal<BatteryInfo>({
     charging: false,
@@ -13,18 +14,29 @@ export class BatteryService {
     dischargingTime: Infinity,
     level: 1
   });
+  private initialized = false;
 
   constructor() {
-    this.initBattery();
+    super();
+    // No auto-initialization in constructor for SSR safety
+  }
+
+  protected override getApiName(): string {
+    return 'battery';
   }
 
   private async initBattery(): Promise<void> {
+    if (this.initialized || !this.isBrowserEnvironment()) {
+      return;
+    }
+
     if ('getBattery' in navigator) {
       try {
         const battery = await (navigator as any).getBattery();
         this.battery.set(battery);
         this.updateBatteryInfo();
         this.setupEventListeners();
+        this.initialized = true;
       } catch (error) {
         console.warn('Battery API not available:', error);
       }
@@ -56,8 +68,15 @@ export class BatteryService {
     });
   }
 
-  isSupported(): boolean {
-    return 'getBattery' in navigator;
+  override isSupported(): boolean {
+    return this.isBrowserEnvironment() && 'getBattery' in navigator;
+  }
+
+  /**
+   * Ensure the service is initialized before use
+   */
+  async ensureInitialized(): Promise<void> {
+    await this.initBattery();
   }
 
   getBatteryInfo(): Observable<BatteryInfo> {

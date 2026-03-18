@@ -1,8 +1,10 @@
 import { Injectable, signal, inject, computed, OnDestroy } from '@angular/core';
 import { from, Observable, Subject } from 'rxjs';
-import { map, catchError, takeUntil } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BrowserSupportUtil } from '../utils/browser-support.util';
 import { PermissionsService } from './permissions.service';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 export interface NotificationOptions {
   title: string;
@@ -30,37 +32,48 @@ export interface NotificationAction {
 type NotificationPermission = 'default' | 'granted' | 'denied';
 
 @Injectable()
-export class NotificationService implements OnDestroy {
+export class NotificationService extends BrowserApiBaseService implements OnDestroy {
   private permission = signal<NotificationPermission>('default');
   private notifications = signal<Map<string, Notification>>(new Map());
-  private error = signal<string>('');
-  private destroy$ = new Subject<void>();
   
-  private permissionsService = inject(PermissionsService);
+  constructor() {
+    super();
+    this.initializeNotifications();
+  }
+
+  protected override getApiName(): string {
+    return 'notifications';
+  }
+
+  private async initializeNotifications(): Promise<void> {
+    if (!this.isSupported() || this.isServerEnvironment()) {
+      this.logWarning('Notification API not supported in this browser or server environment');
+      return;
+    }
+
+    if ('Notification' in window) {
+      this.permission.set((window as any).Notification.permission);
+    }
+  }
 
   readonly notifications$ = this.notifications.asReadonly();
   readonly permission$ = this.permission.asReadonly();
 
-  private async initializeNotifications(): Promise<void> {
-    if (!this.isSupported()) {
-      console.warn('Notification API not supported in this browser');
-      return;
+  override async requestPermission(permission?: string): Promise<boolean> {
+    if (!this.isSupported() || this.isServerEnvironment()) {
+      throw new Error('Notification API not supported or not available in server environment');
     }
 
-    this.permission.set(Notification.permission);
-  }
-
-  async requestPermission(): Promise<NotificationPermission> {
-    if (!this.isSupported()) {
-      throw new Error('Notification API not supported');
+    if (!('Notification' in window)) {
+      throw new Error('Notification API not available');
     }
 
     try {
-      const permission = await Notification.requestPermission();
-      this.permission.set(permission);
-      return permission;
+      const permissionResult = await (window as any).Notification.requestPermission();
+      this.permission.set(permissionResult);
+      return permissionResult === 'granted';
     } catch (error) {
-      console.error('Error requesting notification permission:', error);
+      this.logError('Error requesting notification permission:', error);
       throw error;
     }
   }
@@ -70,13 +83,17 @@ export class NotificationService implements OnDestroy {
       throw new Error('Notification API not supported');
     }
 
+    if (!('Notification' in window)) {
+      throw new Error('Notification API not available');
+    }
+
     const permission = await this.ensurePermission();
     if (permission !== 'granted') {
       throw new Error('Notification permission not granted');
     }
 
     try {
-      const notification = new Notification(options.title, {
+      const notification = new (window as any).Notification(options.title, {
         body: options.body,
         icon: options.icon,
         badge: options.badge,
@@ -120,7 +137,7 @@ export class NotificationService implements OnDestroy {
     return Array.from(this.notifications().values());
   }
 
-  isSupported(): boolean {
+  override isSupported(): boolean {
     return BrowserSupportUtil.isSupported('notifications');
   }
 
@@ -138,7 +155,8 @@ export class NotificationService implements OnDestroy {
 
   observePermission(): Observable<NotificationPermission> {
     return from(this.requestPermission()).pipe(
-      catchError(() => from(['denied' as NotificationPermission]))
+      catchError(() => from(['denied' as NotificationPermission])),
+      map(result => result ? 'granted' as NotificationPermission : 'denied' as NotificationPermission)
     );
   }
 
@@ -146,7 +164,8 @@ export class NotificationService implements OnDestroy {
     let permission = this.permission();
     
     if (permission === 'default') {
-      permission = await this.requestPermission();
+      const granted = await this.requestPermission();
+      permission = granted ? 'granted' : 'denied';
     }
     
     return permission;
@@ -189,7 +208,7 @@ export class NotificationService implements OnDestroy {
   }
 
   private handleNotificationClick(notification: Notification): void {
-    if (!window.document.hasFocus()) {
+    if (!document.hasFocus()) {
       window.focus();
     }
 
@@ -200,5 +219,6 @@ export class NotificationService implements OnDestroy {
 
   ngOnDestroy(): void {
     this.closeAllNotifications();
+    // No manual cleanup needed with takeUntilDestroyed
   }
 }

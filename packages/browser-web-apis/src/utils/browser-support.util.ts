@@ -1,7 +1,9 @@
-import { inject } from '@angular/core';
-
 export class BrowserSupportUtil {
   static isSupported(feature: string): boolean {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      return false;
+    }
+
     switch (feature) {
       case 'permissions':
         return 'permissions' in navigator;
@@ -43,11 +45,11 @@ export class BrowserSupportUtil {
   }
 
   static isSecureContext(): boolean {
-    return window.isSecureContext;
+    return typeof window !== 'undefined' ? window.isSecureContext : false;
   }
 
   static getUserAgent(): string {
-    return navigator.userAgent;
+    return typeof navigator !== 'undefined' ? navigator.userAgent : '';
   }
 
   static isMobile(): boolean {

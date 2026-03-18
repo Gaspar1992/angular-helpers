@@ -31,8 +31,12 @@ export class GeolocationService extends BrowserApiBaseService {
   }
 
   async getCurrentPosition(options?: GeolocationOptions): Promise<GeolocationPosition> {
-    if (!this.isSupported()) {
-      throw new Error('Geolocation API not supported');
+    if (!this.isSupported() || !this.isBrowserEnvironment()) {
+      throw new Error('Geolocation API not supported or not available in server environment');
+    }
+
+    if (!navigator.geolocation) {
+      throw new Error('Geolocation API not available');
     }
 
     try {
@@ -56,8 +60,12 @@ export class GeolocationService extends BrowserApiBaseService {
     errorCallback?: (error: GeolocationError) => void,
     options?: GeolocationWatchOptions
   ): number {
-    if (!this.isSupported()) {
-      throw new Error('Geolocation API not supported');
+    if (!this.isSupported() || !this.isBrowserEnvironment()) {
+      throw new Error('Geolocation API not supported or not available in server environment');
+    }
+
+    if (!navigator.geolocation) {
+      throw new Error('Geolocation API not available');
     }
 
     const watchId = navigator.geolocation.watchPosition(
@@ -84,11 +92,14 @@ export class GeolocationService extends BrowserApiBaseService {
   }
 
   clearWatch(watchId: number): void {
-    if (!this.isSupported()) {
+    if (!this.isSupported() || !this.isBrowserEnvironment()) {
       return;
     }
 
-    navigator.geolocation.clearWatch(watchId);
+    if (navigator.geolocation) {
+      navigator.geolocation.clearWatch(watchId);
+    }
+
     this.watchPositions.update(map => {
       map.delete(watchId);
       return map;
@@ -112,7 +123,7 @@ export class GeolocationService extends BrowserApiBaseService {
     return Promise.resolve(this.permissionsService.isGranted('geolocation'));
   }
 
-  requestPermission(): Promise<boolean> {
+  override requestPermission(): Promise<boolean> {
     return this.permissionsService.request({ name: 'geolocation' })
       .then(status => status.state === 'granted');
   }
@@ -176,6 +187,10 @@ export class GeolocationService extends BrowserApiBaseService {
   }
 
   private async requestCurrentPosition(options?: GeolocationOptions): Promise<GeolocationPosition> {
+    if (!navigator.geolocation) {
+      throw new Error('Geolocation API not available');
+    }
+
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
         (position) => {

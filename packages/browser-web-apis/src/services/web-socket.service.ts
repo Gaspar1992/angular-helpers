@@ -1,7 +1,8 @@
-import { Injectable, signal, OnDestroy } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Injectable, signal, OnDestroy, inject } from '@angular/core';
+import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, Subject, interval } from 'rxjs';
-import { takeUntil, retry, filter } from 'rxjs/operators';
+import { retry, filter } from 'rxjs/operators';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 export interface WebSocketConfig {
   url: string;
@@ -27,7 +28,7 @@ export interface WebSocketStatus {
 }
 
 @Injectable()
-export class WebSocketService implements OnDestroy {
+export class WebSocketService extends BrowserApiBaseService implements OnDestroy {
   private websocket = signal<WebSocket | null>(null);
   private status = signal<WebSocketStatus>({
     connected: false,
@@ -37,20 +38,19 @@ export class WebSocketService implements OnDestroy {
   });
   
   private messages = new Subject<WebSocketMessage>();
-  private destroy$ = new Subject<void>();
   private reconnectAttempts = 0;
   private heartbeatTimer: any = null;
 
-  constructor() {}
-
-  ngOnDestroy(): void {
-    this.disconnect();
-    this.destroy$.next();
-    this.destroy$.complete();
+  constructor() {
+    super();
   }
 
-  isSupported(): boolean {
-    return typeof WebSocket !== 'undefined';
+  protected override getApiName(): string {
+    return 'websocket';
+  }
+
+  override isSupported(): boolean {
+    return this.isBrowserEnvironment() && typeof WebSocket !== 'undefined';
   }
 
   connect(config: WebSocketConfig): Observable<WebSocketStatus> {
@@ -157,7 +157,7 @@ export class WebSocketService implements OnDestroy {
   private startHeartbeat(config: WebSocketConfig): void {
     if (config.heartbeatInterval && config.heartbeatMessage) {
       this.heartbeatTimer = interval(config.heartbeatInterval).pipe(
-        takeUntil(this.destroy$)
+        takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => {
         this.send(config.heartbeatMessage);
       });
@@ -280,5 +280,10 @@ export class WebSocketService implements OnDestroy {
   static createSecureConfig(url: string, protocols?: string[], options: Partial<WebSocketConfig> = {}): WebSocketConfig {
     const secureUrl = url.startsWith('wss://') ? url : `wss://${url.replace(/^https?:\/\//, '')}`;
     return this.createConfig(secureUrl, { ...options, protocols });
+  }
+
+  ngOnDestroy(): void {
+    this.disconnect();
+    // No manual cleanup needed with takeUntilDestroyed
   }
 }
