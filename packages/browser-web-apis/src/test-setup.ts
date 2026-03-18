@@ -1,5 +1,11 @@
 import { vi } from 'vitest';
 
+// Mock de Blob para tests
+Object.defineProperty(globalThis, 'Blob', {
+  value: vi.fn((content, options) => ({ content, options })),
+  writable: true
+});
+
 // Mock de las APIs del navegador
 Object.defineProperty(globalThis, 'navigator', {
   value: {
@@ -43,11 +49,12 @@ Object.defineProperty(globalThis, 'MediaStream', {
   writable: true
 });
 
-// Mock de URL.createObjectURL
+// Mock de URL.createObjectURL y constructor
 Object.defineProperty(globalThis, 'URL', {
-  value: {
-    createObjectURL: vi.fn(() => 'mock-url'),
-    revokeObjectURL: vi.fn()
+  value: class MockURL {
+    constructor(public url: string, base?: string) {}
+    static createObjectURL = vi.fn(() => 'mock-url');
+    static revokeObjectURL = vi.fn();
   },
   writable: true
 });

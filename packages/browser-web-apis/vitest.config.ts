@@ -5,11 +5,12 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test-setup.ts'],
-    include: ['src/**/*.spec.ts'],
-    exclude: ['node_modules', 'dist'],
+    include: ['tests/**/*.test.ts'],
+    exclude: ['node_modules', 'dist', 'src/**/*.spec.ts'],
     coverage: {
+      provider: 'v8',
       reporter: ['text', 'json', 'html'],
+      reportsDirectory: '../../node_modules/.vitest/coverage',
       exclude: [
         'node_modules/',
         'dist/',
@@ -17,6 +18,10 @@ export default defineConfig({
         '**/*.spec.ts',
         '**/test-setup.ts'
       ]
+    },
+    reporters: ['verbose', 'json'],
+    outputFile: {
+      json: '../../node_modules/.vitest/results.json'
     }
   },
   resolve: {

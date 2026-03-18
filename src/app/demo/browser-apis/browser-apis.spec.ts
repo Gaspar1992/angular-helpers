@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BrowserApis } from './browser-apis';
+import { BrowserApisComponent } from './browser-apis';
 
-describe('BrowserApis', () => {
-  let component: BrowserApis;
-  let fixture: ComponentFixture<BrowserApis>;
+describe('BrowserApisComponent', () => {
+  let component: BrowserApisComponent;
+  let fixture: ComponentFixture<BrowserApisComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BrowserApis],
+      imports: [BrowserApisComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(BrowserApis);
+    fixture = TestBed.createComponent(BrowserApisComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { PermissionsService } from './permissions.service';
 
+// Mockear las dependencias antes de importar
+vi.mock('../utils/browser-support.util', () => ({
+  BrowserSupportUtil: {
+    isSupported: vi.fn(() => true)
+  }
+}));
+
 describe('PermissionsService', () => {
   let service: PermissionsService;
 
