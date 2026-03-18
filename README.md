@@ -1,262 +1,252 @@
-# Angular Helpers
+# 🚀 Angular Helpers
 
-Monorepo de utilidades y packages para Angular.
+Suite de librerías Angular especializadas para potenciar tus aplicaciones con seguridad, acceso a APIs del navegador y utilidades avanzadas.
 
-## 📦 Estructura del Proyecto
+---
 
-Este es un monorepo que contiene:
+## 📦 **Packages Disponibles**
 
-- **Aplicación demo**: Proyecto Angular principal en `src/`
-- **Packages publicables**: Bibliotecas reutilizables en `packages/`
+### 🔐 **@angular-helpers/security**  
+*Seguridad avanzada para expresiones regulares y prevención de ataques ReDoS*
 
-## 🚀 Scripts Disponibles
+**🎯 Problema que resuelve:**
+- **ReDoS (Regular Expression Denial of Service)** - Ataques que pueden colapsar tu servidor con patrones maliciosos
+- **Validación de patrones complejos** sin comprometer el rendimiento
+- **Ejecución segura** de expresiones regulares con timeout y análisis de seguridad
 
-### Aplicación Principal
+**✨ Características principales:**
+- 🛡️ **Prevención de ReDoS** - Análisis automático de patrones peligrosos
+- ⚡ **Ejecución con Web Workers** - Sin bloqueo del hilo principal
+- 🕐 **Timeout configurable** - Protección contra patrones lentos
+- 📊 **Análisis de complejidad** - Métricas de riesgo y recomendaciones
+- 🏗️ **Builder Pattern** - API fluida para construcción de patrones seguros
+
+**💡 Casos de uso:**
+```typescript
+// Validación segura de input de usuario
+const result = await securityService.testRegex(userInput, text, {
+  timeout: 5000,
+  safeMode: true
+});
+
+// Builder pattern para patrones complejos
+const pattern = RegexSecurityService.builder()
+  .pattern('\\d+')
+  .timeout(3000)
+  .safeMode(true)
+  .build();
+```
+
+**📥 Instalación:**
 ```bash
-npm start          # Iniciar aplicación de desarrollo
-npm run build      # Build de producción
-npm test           # Ejecutar tests
+npm install @angular-helpers/security
 ```
 
-### Gestión de Packages
+---
 
-#### 📦 Build de Packages
+### 🌐 **@angular-helpers/browser-web-apis**  
+*Acceso unificado y seguro a las APIs del navegador con soporte para permisos y gestión de errores*
 
-Este monorepo utiliza **ng-packagr** para construir los paquetes Angular de manera estándar y distribuible.
+**🎯 Problema que resuelve:**
+- **Fragmentación de APIs** - Cada navegador implementa las APIs de manera diferente
+- **Gestión de permisos** - Proceso complejo y repetitivo para solicitar permisos
+- **Detección de compatibilidad** - Código boilerplate para verificar soporte
+- **Manejo de errores** - Diferentes tipos de errores entre navegadores
 
-##### Build Individual
+**✨ Características principales:**
+- 📸 **Cámara** - Captura de fotos y video con gestión de permisos
+- 🗺️ **Geolocalización** - GPS y watch position con manejo de errores
+- 🔔 **Notificaciones** - Sistema de notificaciones del navegador
+- 📋 **Clipboard** - Copiar/pegar texto e imágenes
+- 🎥 **Media Devices** - Enumeración de cámaras y micrófonos
+- 🔐 **Gestión de permisos** - API centralizada para todos los permisos
+- 📱 **Sensores** - Orientación, movimiento y batería
+- 🌍 **Soporte universal** - Detección automática de compatibilidad
 
-```bash
-# Construir un package específico
-cd packages/browser-web-apis
-npm run build
-
-# Watch mode para desarrollo
-npm run build:watch
-```
-
-##### Build de Todos los Packages
-
-```bash
-# Construir todos los packages del workspace
-npm run build:packages
-```
-
-##### Estructura de Build
-
-Cada package genera su distribución en `dist/[package-name]/`:
-
-```
-dist/
-└── browser-web-apis/
-    ├── package.json              # Package.json limpio para distribución
-    ├── fesm2022/                 # ES Modules
-    │   ├── angular-helpers-browser-web-apis.mjs
-    │   └── angular-helpers-browser-web-apis.mjs.map
-    └── types/                    # Declaraciones TypeScript
-        └── angular-helpers-browser-web-apis.d.ts
-```
-
-## 🏗️ Estructura del Workspace
-
-Este es un **monorepo Angular** que utiliza npm workspaces para gestionar múltiples paquetes de manera eficiente.
-
-```
-angular-helpers/
-├── packages/                    # Paquetes Angular
-│   └── browser-web-apis/       # Package de Browser Web APIs
-├── src/                       # Aplicación principal de demo
-├── scripts/                   # Scripts de automatización
-├── dist/                      # Builds de distribución
-└── package.json              # Configuración del workspace
-```
-
-### 🎯 Ventajas del Workspace
-
-- **📦 Dependencias Compartidas** - Todas las dependencias viven en el root
-- **⚡ Instalación Rápida** - Un solo `npm install` para todo
-- **🔄 Versiones Consistentes** - Evita conflictos de versiones
-- **🚀 Build Centralizado** - Scripts unificados para todos los packages
-- **💾 Ahorro de Espacio** - No duplicar node_modules
-
-##### Configuración de ng-packagr
-
-Cada package incluye un `ng-package.json`:
-
-```json
-{
-  "$schema": "https://raw.githubusercontent.com/ng-packagr/ng-packagr/main/src/ng-package.schema.json",
-  "dest": "../../dist/browser-web-apis",
-  "lib": {
-    "entryFile": "src/public-api.ts"
+**💡 Casos de uso:**
+```typescript
+// Acceso a cámara con permisos automáticos
+async takePhoto() {
+  if (await this.cameraService.requestPermission()) {
+    const photo = await this.cameraService.capturePhoto();
+    console.log('Foto capturada:', photo);
   }
 }
+
+// Geolocalización con watch
+this.geolocationService.watchPosition({
+  enableHighAccuracy: true,
+  timeout: 10000
+}).subscribe(position => {
+  console.log('Ubicación actual:', position);
+});
 ```
 
-### 🔄 Workspace Management
-
-#### Instalación de Dependencias
-```bash
-# Instalar todas las dependencias del workspace
-npm install
-
-# Agregar nueva dependencia al workspace
-npm install --save <package>
-
-# Agregar devDependency al workspace
-npm install --save-dev <package>
-```
-
-#### Scripts del Workspace
-```bash
-# Ejecutar scripts en todos los packages
-npm run build:packages
-npm run test:packages
-npm run lint
-
-# Ejecutar script en un package específico
-npm run build --workspace=@angular-helpers/browser-web-apis
-npm run test --workspace=@angular-helpers/browser-web-apis
-```
-
-#### Crear Nuevo Package
-```bash
-# Crear un nuevo package con el script automatizado
-./scripts/create-package.sh <nombre-package>
-
-# Ejemplo:
-./scripts/create-package.sh browser-storage
-```
-
-## 📦 Crear Nuevo Package
-
-Usa el script automatizado:
-
-```bash
-./scripts/create-package.sh <package-name>
-```
-
-## 📦 Packages Disponibles
-
-### @angular-helpers/browser-web-apis
-
-Sistema de servicios Angular para acceso formalizado a Browser Web APIs.
-
-**Features:**
-- 📸 Cámara - Captura de fotos y video
-- 🗺️ Geolocalización - GPS y watch position
-- � Notificaciones - Sistema de notificaciones del navegador
-- 📋 Clipboard - Copiar/pegar texto e imágenes
-- 🔐 Permisos - Gestión centralizada de permisos
-- 🎥 Media Devices - Enumeración de dispositivos de medios
-
-**Instalación:**
+**📥 Instalación:**
 ```bash
 npm install @angular-helpers/browser-web-apis
 ```
 
-**Uso:**
-```typescript
-import { CameraService, GeolocationService } from '@angular-helpers/browser-web-apis';
+---
 
-@Component({...})
-export class MyComponent {
-  constructor(
-    private cameraService: CameraService,
-    private geolocationService: GeolocationService
-  ) {}
-}
-```
+## 🎯 **¿Por qué Angular Helpers?**
 
-## � HTTPS y Seguridad
+### ⚡ **Productividad Inmediata**
+- **APIs unificadas** - No más código boilerplate para cada navegador
+- **TypeScript completo** - Tipado estricto y autocompletado
+- **Documentación integrada** - Cada método incluye ejemplos y casos de uso
+- **Testing incluido** - Suite de tests completa para cada package
 
-### ¿Por qué HTTPS es necesario?
+### 🛡️ **Seguridad por Defecto**
+- **Prevención de ataques** - Protección contra ReDoS y otras vulnerabilidades
+- **Validación de permisos** - Gestión segura de APIs sensibles
+- **Contextos aislados** - Ejecución segura con Web Workers
+- **Manejo de errores** - Gestión robusta de casos límite
 
-Las siguientes Browser Web APIs requieren un **contexto seguro** (HTTPS) para funcionar:
+### 🔄 **Actualizaciones Constantes**
+- **Angular moderno** - Compatible con las últimas versiones de Angular
+- **Navegadores actuales** - Soporte para Chrome, Firefox, Safari, Edge
+- **Mantenimiento activo** - Corrección de bugs y nuevas funcionalidades
 
-- 📸 **Camera API** - Acceso a cámaras del dispositivo
-- 🎤 **Microphone API** - Acceso a micrófonos
-- 📍 **Geolocation API** - Ubicación GPS del usuario
-- 🔔 **Notification API** - Notificaciones del sistema
-- 📋 **Clipboard API** - Acceso al portapapeles
-- 🔐 **Permissions API** - Gestión de permisos
-- 📱 **Device Orientation/Motion** - Sensores del dispositivo
-- 🔋 **Battery API** - Estado de batería
+---
 
-### Configuración SSL
+## 🚀 **Empezar Rápido**
 
-El proyecto incluye certificados SSL autofirmados para desarrollo local:
-
-```
-ssl/
-├── localhost.key     # Clave privada
-├── localhost.crt     # Certificado público
-└── localhost.conf    # Configuración OpenSSL
-```
-
-### Advertencia del Navegador
-
-Al acceder a `https://localhost:4200/`, el navegador mostrará una advertencia de seguridad porque el certificado es autofirmado. 
-
-**Solución:** Haz clic en "Avanzado" → "Continuar a localhost (inseguro)" para continuar.
-
-### Certificado de Confianza (Opcional)
-
-Para evitar la advertencia permanentemente:
-
-1. **Chrome/Edge**: Importa `localhost.crt` en "Configuración" → "Privacidad y seguridad" → "Administrar certificados" → "Autoridades de certificación raíz de confianza"
-2. **Firefox**: Importa en "Opciones" → "Privacidad y seguridad" → "Certificados" → "Autoridades"
-
-## �🔧 Desarrollo
-
-### Instalación
+### **Instalación del Workspace**
 ```bash
-# Instalar todas las dependencias del workspace
+# Clonar el repositorio
+git clone https://github.com/angular-helpers/angular-helpers
+cd angular-helpers
+
+# Instalar dependencias
 npm install
+
+# Iniciar demo
+npm run start:https
 ```
 
-### Desarrollo con HTTPS
-
-Las Browser Web APIs requieren HTTPS para funcionar correctamente. El proyecto está configurado con SSL autofirmado:
-
+### **Uso en tu Proyecto**
 ```bash
-# Iniciar con HTTPS (recomendado para APIs del navegador)
+# Instalar packages deseados
+npm install @angular-helpers/security
+npm install @angular-helpers/browser-web-apis
+
+# Importar en tu módulo
+import { SecurityModule } from '@angular-helpers/security';
+import { BrowserWebApisModule } from '@angular-helpers/browser-web-apis';
+
+@NgModule({
+  imports: [SecurityModule, BrowserWebApisModule]
+})
+export class AppModule {}
+```
+
+---
+
+## 📊 **Comparativa con Alternativas**
+
+| Característica | Angular Helpers | Implementación Manual | Otras Librerías |
+|----------------|------------------|---------------------|------------------|
+| **ReDoS Protection** | ✅ Integrado | ❌ Manual | ⚠️ Parcial |
+| **Browser APIs** | ✅ Unificadas | ❌ Fragmentadas | ⚠️ Limitadas |
+| **TypeScript** | ✅ Completo | ⚠️ Parcial | ❌ Mínimo |
+| **Testing** | ✅ Incluido | ❌ Manual | ⚠️ Básico |
+| **Documentación** | ✅ Completa | ❌ Inexistente | ⚠️ Básica |
+| **Soporte** | ✅ Activo | ❌ Propio | ⚠️ Variable |
+
+---
+
+## 🛠️ **Desarrollo**
+
+### **Scripts Disponibles**
+```bash
+# Desarrollo con HTTPS (requerido para APIs del navegador)
 npm run start:https
 
-# O iniciar sin HTTPS (limitado para algunas APIs)
-npm start
-```
-
-### Desarrollo simultáneo
-```bash
-# Iniciar app principal con HTTPS y watch de packages
-npm run dev
-```
-
-### Scripts de Desarrollo
-```bash
 # Build de todos los packages
 npm run build:packages
 
-# Test de todos los packages
+# Testing completo
 npm run test:packages
 
-# Lint de todo el workspace
+# Linting del workspace
 npm run lint
-
-# Limpiar builds
-npm run clean
-
-# Generar certificados SSL
-npm run ssl:generate
 ```
 
-### Flujo de Trabajo
-1. **Desarrollo**: `npm run dev` (app + packages)
-2. **Testing**: `npm run test:packages` 
-3. **Build**: `npm run build:packages`
-4. **Lint**: `npm run lint`
+### **Estructura del Proyecto**
+```
+angular-helpers/
+├── packages/
+│   ├── security/           # 📦 @angular-helpers/security
+│   └── browser-web-apis/  # 📦 @angular-helpers/browser-web-apis
+├── src/                   # 🚀 Aplicación demo
+├── docs/                  # 📚 Documentación completa
+└── scripts/              # 🔧 Scripts de automatización
+```
 
-## 📄 Licencia
+---
 
-MIT
+## 📈 **Roadmap**
+
+### **Próximamente** 🚧
+- **@angular-helpers/storage** - APIs de almacenamiento unificadas
+- **@angular-helpers/network** - Conectividad y estado de red
+- **@angular-helpers/performance** - Monitoreo y optimización
+- **@angular-helpers/pwa** - Service Workers y características PWA
+
+### **En Desarrollo** 🔄
+- **Mejoras de performance** - Optimización de bundle y runtime
+- **Más ejemplos** - Casos de uso reales y demos interactivas
+- **Integración CLI** - Scaffolding automático para nuevos proyectos
+
+---
+
+## 🤝 **Contribuir**
+
+¡Nos encantaría tu contribución! 
+
+### **Cómo Empezar**
+```bash
+# Fork del repositorio
+git clone https://github.com/tu-usuario/angular-helpers
+cd angular-helpers
+
+# Crear rama de feature
+git checkout -b feature/nueva-funcionalidad
+
+# Hacer cambios y commits
+git commit -m "feat: agregar nueva funcionalidad"
+
+# Push y PR
+git push origin feature/nueva-funcionalidad
+```
+
+### **Guías de Contribución**
+- 📖 [Guía de Desarrollo](./docs/CONTRIBUTING.md)
+- 🧪 [Guía de Testing](./docs/testing-guide.md)
+- 📦 [Guía de Packages](./docs/package-development.md)
+
+---
+
+## 📄 **Licencia**
+
+MIT License - Ver [LICENSE](./LICENSE) para detalles
+
+---
+
+## 🔗 **Enlaces Útiles**
+
+- **📚 Documentación Completa**: [docs.angular-helpers.dev](https://docs.angular-helpers.dev)
+- **🐛 Issues y Feature Requests**: [GitHub Issues](https://github.com/angular-helpers/angular-helpers/issues)
+- **💬 Discusiones**: [GitHub Discussions](https://github.com/angular-helpers/angular-helpers/discussions)
+- **📦 NPM Packages**: [npmjs.com/org/angular-helpers](https://www.npmjs.com/org/angular-helpers)
+
+---
+
+<div align="center">
+
+**⭐ Si Angular Helpers te ayuda, danos una estrella!**
+
+Made with ❤️ by the Angular Helpers Team
+
+</div>
