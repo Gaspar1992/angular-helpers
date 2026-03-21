@@ -33,6 +33,20 @@ export default defineConfig({
           args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream']
         }
       }
+    },
+    {
+      name: 'firefox-smoke',
+      testMatch: '**/smoke.spec.ts',
+      use: {
+        ...devices['Desktop Firefox']
+      }
+    },
+    {
+      name: 'webkit-smoke',
+      testMatch: '**/smoke.spec.ts',
+      use: {
+        ...devices['Desktop Safari']
+      }
     }
   ],
   webServer: {
