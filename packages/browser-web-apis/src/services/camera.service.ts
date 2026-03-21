@@ -10,31 +10,6 @@ import {
 import { CameraPermissionHelperService } from './camera-permission-helper.service';
 import { MediaDeviceBaseService } from './base/media-device-base.service';
 
-// Types for camera capabilities
-interface CapabilityRange {
-  min?: number;
-  max?: number;
-}
-
-interface ULongRange extends CapabilityRange {
-  min: number;
-  max: number;
-}
-
-interface DoubleRange extends CapabilityRange {
-  min: number;
-  max: number;
-}
-
-interface MediaTrackCapabilitiesWithRanges {
-  width?: ULongRange;
-  height?: ULongRange;
-  aspectRatio?: DoubleRange;
-  frameRate?: DoubleRange;
-  facingMode?: string[];
-  [key: string]: CapabilityRange | string[] | undefined;
-}
-
 @Injectable()
 export class CameraService extends MediaDeviceBaseService {
   private currentStream = signal<MediaStream | null>(null);

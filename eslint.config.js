@@ -58,9 +58,6 @@ export default [
       // TypeScript ESLint rules
       ...tseslint.configs.recommended.rules,
       // Custom rules
-      // '@typescript-eslint/no-explicit-any': 'off', // Reactivado para terminar los errores restantes
-      '@typescript-eslint/no-unused-vars': 'off',
-      'no-useless-assignment': 'off',
       '@angular-eslint/directive-selector': [
         'error',
         {

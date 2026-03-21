@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, fromEvent, merge } from 'rxjs';
+import { Observable, fromEvent } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 import { BatteryManager, BatteryInfo } from '../interfaces/battery.interface';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
