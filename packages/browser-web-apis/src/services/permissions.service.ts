@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { from, Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { 
@@ -177,7 +177,7 @@ export class PermissionsService implements BrowserPermissions {
       const stream = await navigator.mediaDevices.getUserMedia({ [type]: true });
       stream.getTracks().forEach(track => track.stop());
       return { name: type === 'video' ? 'camera' : 'microphone', state: 'granted' };
-    } catch (error) {
+    } catch {
       return { 
         name: type === 'video' ? 'camera' : 'microphone', 
         state: 'denied' 
@@ -189,7 +189,7 @@ export class PermissionsService implements BrowserPermissions {
     try {
       const permission = await Notification.requestPermission();
       return { name: 'notifications', state: permission as PermissionState };
-    } catch (error) {
+    } catch {
       return { name: 'notifications', state: 'denied' };
     }
   }
@@ -211,7 +211,7 @@ export class PermissionsService implements BrowserPermissions {
         await navigator.clipboard.writeText('');
       }
       return { name: permission, state: 'granted' };
-    } catch (error) {
+    } catch {
       return { name: permission, state: 'denied' };
     }
   }
