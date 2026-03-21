@@ -9,6 +9,8 @@ import prettierPlugin from 'eslint-plugin-prettier';
 
 export default [
   eslint.configs.recommended,
+  ...tseslint.configs.recommended,
+  ...angularEslint.configs.recommended,
   {
     files: ['**/*.ts'],
     languageOptions: {
@@ -23,11 +25,6 @@ export default [
       '@angular-eslint': angularEslint,
       prettier: prettierPlugin,
     },
-    extends: [
-      'plugin:@typescript-eslint/recommended',
-      'plugin:@angular-eslint/recommended',
-      'plugin:prettier/recommended',
-    ],
     rules: {
       '@angular-eslint/directive-selector': [
         'error',
@@ -56,11 +53,6 @@ export default [
       '@angular-eslint/template': angularTemplateEslint,
       prettier: prettierPlugin,
     },
-    extends: [
-      'plugin:@angular-eslint/template/recommended',
-      'plugin:@angular-eslint/template/accessibility',
-      'plugin:prettier/recommended',
-    ],
     rules: {},
   },
   prettierConfig,
