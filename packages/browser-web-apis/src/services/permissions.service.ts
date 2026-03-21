@@ -1,8 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Observable, from } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { BrowserApiBaseService } from './base/browser-api-base.service';
-
 import { 
   PermissionName, 
   PermissionState, 
