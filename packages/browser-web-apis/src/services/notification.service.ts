@@ -4,6 +4,14 @@ import { map, catchError } from 'rxjs/operators';
 import { BrowserSupportUtil } from '../utils/browser-support.util';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
+// Type extension for Notification API
+interface WindowWithNotification extends Window {
+  Notification: typeof Notification & {
+    permission: NotificationPermission;
+    requestPermission(): Promise<NotificationPermission>;
+  };
+}
+
 export interface NotificationOptions {
   title: string;
   body?: string;
@@ -15,7 +23,7 @@ export interface NotificationOptions {
   requireInteraction?: boolean;
   silent?: boolean;
   tag?: string;
-  data?: any;
+  data?: unknown;
   actions?: NotificationAction[];
   vibrate?: number[];
   timestamp?: number;
@@ -50,7 +58,7 @@ export class NotificationService extends BrowserApiBaseService implements OnDest
     }
 
     if ('Notification' in window) {
-      this.permission.set((window as any).Notification.permission);
+      this.permission.set((window as WindowWithNotification).Notification.permission);
     }
   }
 
@@ -67,7 +75,7 @@ export class NotificationService extends BrowserApiBaseService implements OnDest
     }
 
     try {
-      const permissionResult = await (window as any).Notification.requestPermission();
+      const permissionResult = await (window as WindowWithNotification).Notification.requestPermission();
       this.permission.set(permissionResult);
       return permissionResult === 'granted';
     } catch (error) {

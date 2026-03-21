@@ -10,6 +10,12 @@ import {
 import { BrowserSupportUtil } from '../utils/browser-support.util';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
+// Type for display media constraints
+interface DisplayMediaConstraints {
+  video?: boolean | MediaTrackConstraints;
+  audio?: boolean | MediaTrackConstraints;
+}
+
 @Injectable()
 export class MediaDevicesService extends BrowserApiBaseService implements OnDestroy {
   private devices = signal<MediaDevice[]>([]);
@@ -80,7 +86,7 @@ export class MediaDevicesService extends BrowserApiBaseService implements OnDest
     }
   }
 
-  async getDisplayMedia(constraints?: any): Promise<MediaStream> {
+  async getDisplayMedia(constraints?: DisplayMediaConstraints): Promise<MediaStream> {
     if (!this.isSupported()) {
       throw new Error('Media Devices API not supported');
     }
