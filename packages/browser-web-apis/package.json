@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/browser-web-apis",
-  "version": "0.1.0",
+  "version": "21.0.0",
   "description": "Sistema de servicios Angular para acceso formalizado a Browser Web APIs (cámara, permisos, geolocalización, etc.)",
   "main": "dist/browser-web-apis/browser-web-apis.d.ts",
   "types": "dist/browser-web-apis/browser-web-apis.d.ts",
