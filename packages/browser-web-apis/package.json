@@ -14,7 +14,7 @@
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
     "clean": "rm -rf dist",
-    "lint": "../../node_modules/.bin/eslint src/**/*.ts",
+    "lint": "eslint src/**/*.ts",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
