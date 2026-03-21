@@ -1,7 +1,6 @@
-import { Injectable, signal, OnDestroy } from '@angular/core';
-import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, Subject, interval, Subscription } from 'rxjs';
-import { retry, filter, map } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 export interface WebSocketConfig {
@@ -28,263 +27,225 @@ export interface WebSocketStatus {
 }
 
 @Injectable()
-export class WebSocketService extends BrowserApiBaseService implements OnDestroy {
-  private websocket = signal<WebSocket | null>(null);
-  private status = signal<WebSocketStatus>({
-    connected: false,
-    connecting: false,
-    reconnecting: false,
-    reconnectAttempts: 0
-  });
-  
-  private messages = new Subject<WebSocketMessage>();
+export class WebSocketService extends BrowserApiBaseService {
+  private webSocket: WebSocket | null = null;
+  private statusSubject = new Subject<WebSocketStatus>();
+  private messageSubject = new Subject<WebSocketMessage>();
   private reconnectAttempts = 0;
-  private heartbeatTimer: Subscription | null = null;
-
-  constructor() {
-    super();
-  }
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
 
   protected override getApiName(): string {
     return 'websocket';
   }
 
-  override isSupported(): boolean {
-    return this.isBrowserEnvironment() && typeof WebSocket !== 'undefined';
+  private ensureWebSocketSupport(): void {
+    if (typeof WebSocket === 'undefined') {
+      throw new Error('WebSocket API not supported in this browser');
+    }
   }
 
   connect(config: WebSocketConfig): Observable<WebSocketStatus> {
-    if (!this.isSupported()) {
-      this.status.set({
+    this.ensureWebSocketSupport();
+
+    return new Observable<WebSocketStatus>((observer) => {
+      this.disconnect(); // Disconnect existing connection if any
+
+      this.updateStatus({
         connected: false,
-        connecting: false,
+        connecting: true,
         reconnecting: false,
-        error: 'WebSocket not supported',
         reconnectAttempts: 0
       });
-      return toObservable(this.status);
-    }
 
-    this.status.set({
-      connected: false,
-      connecting: true,
-      reconnecting: this.reconnectAttempts > 0,
-      reconnectAttempts: this.reconnectAttempts
-    });
-
-    try {
-      const ws = new WebSocket(config.url, config.protocols);
-      this.websocket.set(ws);
-
-      ws.onopen = () => {
-        this.status.set({
-          connected: true,
-          connecting: false,
-          reconnecting: false,
-          reconnectAttempts: 0
-        });
-        this.reconnectAttempts = 0;
-        this.startHeartbeat(config);
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          this.messages.next({
-            type: data.type || 'message',
-            data: data.data || data,
-            timestamp: Date.now()
-          });
-        } catch {
-          this.messages.next({
-            type: 'message',
-            data: event.data,
-            timestamp: Date.now()
-          });
-        }
-      };
-
-      ws.onclose = (event) => {
-        this.websocket.set(null);
-        this.stopHeartbeat();
-        
-        const wasConnected = this.status().connected;
-        this.status.set({
+      try {
+        this.webSocket = new WebSocket(config.url, config.protocols);
+        this.setupWebSocketHandlers(config);
+        observer.next(this.getCurrentStatus());
+      } catch (error) {
+        console.error('[WebSocketService] Error creating WebSocket:', error);
+        this.updateStatus({
           connected: false,
           connecting: false,
           reconnecting: false,
-          error: event.reason || 'Connection closed',
-          reconnectAttempts: this.reconnectAttempts
+          error: error instanceof Error ? error.message : 'Connection failed',
+          reconnectAttempts: 0
         });
-
-        if (wasConnected && event.code !== 1000 && this.reconnectAttempts < (config.maxReconnectAttempts || 5)) {
-          this.scheduleReconnect(config);
-        }
-      };
-
-      ws.onerror = () => {
-        this.status.update(current => ({
-          ...current,
-          connecting: false,
-          error: 'WebSocket error occurred'
-        }));
-      };
-
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create WebSocket';
-      this.status.set({
-        connected: false,
-        connecting: false,
-        reconnecting: false,
-        error: errorMessage,
-        reconnectAttempts: 0
-      });
-    }
-
-    return toObservable(this.status);
-  }
-
-  private scheduleReconnect(config: WebSocketConfig): void {
-    this.reconnectAttempts++;
-    const interval = config.reconnectInterval || 3000;
-    
-    setTimeout(() => {
-      if (!this.status().connected) {
-        this.connect(config);
+        observer.next(this.getCurrentStatus());
       }
-    }, interval);
-  }
 
-  private startHeartbeat(config: WebSocketConfig): void {
-    if (config.heartbeatInterval && config.heartbeatMessage) {
-      this.heartbeatTimer = interval(config.heartbeatInterval).pipe(
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe(() => {
-        this.send(config.heartbeatMessage as WebSocketMessage<unknown>);
-      });
-    }
-  }
-
-  private stopHeartbeat(): void {
-    if (this.heartbeatTimer) {
-      this.heartbeatTimer.unsubscribe();
-      this.heartbeatTimer = null;
-    }
-  }
-
-  disconnect(): void {
-    const ws = this.websocket();
-    if (ws) {
-      ws.close(1000, 'Disconnected by user');
-      this.websocket.set(null);
-    }
-    this.stopHeartbeat();
-    this.reconnectAttempts = 0;
-  }
-
-  send<T>(message: WebSocketMessage<T>): boolean {
-    const ws = this.websocket();
-    if (!ws || ws.readyState !== WebSocket.OPEN) {
-      return false;
-    }
-
-    try {
-      const data = typeof message === 'string' ? message : JSON.stringify(message);
-      ws.send(data);
-      return true;
-    } catch (error) {
-      console.error('Error sending WebSocket message:', error);
-      return false;
-    }
-  }
-
-  sendTyped<T>(type: string, data: T): boolean {
-    return this.send({ type, data });
-  }
-
-  getMessages(): Observable<WebSocketMessage> {
-    return this.messages.asObservable();
-  }
-
-  getMessagesByType<T>(type: string): Observable<T> {
-    return this.messages.pipe(
-      filter(message => message.type === type),
-      map(message => message.data as T),
-      retry(3)
-    );
-  }
-
-  getStatus(): Observable<WebSocketStatus> {
-    return toObservable(this.status);
-  }
-
-  readonly getStatusSignal = this.status.asReadonly();
-
-  isConnected(): boolean {
-    return this.status().connected;
-  }
-
-  isConnecting(): boolean {
-    return this.status().connecting;
-  }
-
-  getReadyState(): number {
-    const ws = this.websocket();
-    return ws ? ws.readyState : WebSocket.CLOSED;
-  }
-
-  getReadyStateText(): string {
-    const state = this.getReadyState();
-    switch (state) {
-      case WebSocket.CONNECTING: return 'CONNECTING';
-      case WebSocket.OPEN: return 'OPEN';
-      case WebSocket.CLOSING: return 'CLOSING';
-      case WebSocket.CLOSED: return 'CLOSED';
-      default: return 'UNKNOWN';
-    }
-  }
-
-  // Utility methods
-  ping(): boolean {
-    return this.send({ type: 'ping', data: null, timestamp: Date.now() });
-  }
-
-  request<T>(data: T, requestId?: string): boolean {
-    const id = requestId || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    return this.send({
-      type: 'request',
-      data: { id, data } as T,
-      timestamp: Date.now()
+      return () => {
+        this.disconnect();
+      };
     });
   }
 
-  subscribe(channel: string): boolean {
-    return this.sendTyped('subscribe', { channel });
+  disconnect(): void {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+    }
+
+    if (this.webSocket) {
+      this.webSocket.close();
+      this.webSocket = null;
+    }
+
+    this.updateStatus({
+      connected: false,
+      connecting: false,
+      reconnecting: false,
+      reconnectAttempts: 0
+    });
   }
 
-  unsubscribe(channel: string): boolean {
-    return this.sendTyped('unsubscribe', { channel });
+  send<T>(message: WebSocketMessage<T>): void {
+    if (!this.webSocket || this.webSocket.readyState !== WebSocket.OPEN) {
+      throw new Error('WebSocket is not connected');
+    }
+
+    const messageWithTimestamp = {
+      ...message,
+      timestamp: Date.now()
+    };
+
+    this.webSocket.send(JSON.stringify(messageWithTimestamp));
   }
 
-  // Static factory methods for common configurations
-  static createConfig(url: string, options: Partial<WebSocketConfig> = {}): WebSocketConfig {
-    return {
-      url,
-      protocols: options.protocols,
-      reconnectInterval: options.reconnectInterval || 3000,
-      maxReconnectAttempts: options.maxReconnectAttempts || 5,
-      heartbeatInterval: options.heartbeatInterval || 30000,
-      heartbeatMessage: options.heartbeatMessage || { type: 'ping' }
+  sendRaw(data: string): void {
+    if (!this.webSocket || this.webSocket.readyState !== WebSocket.OPEN) {
+      throw new Error('WebSocket is not connected');
+    }
+
+    this.webSocket.send(data);
+  }
+
+  getStatus(): Observable<WebSocketStatus> {
+    return this.statusSubject.asObservable();
+  }
+
+  getMessages<T = unknown>(): Observable<WebSocketMessage<T>> {
+    return this.messageSubject.asObservable().pipe(
+      filter((msg): msg is WebSocketMessage<T> => true)
+    );
+  }
+
+  private setupWebSocketHandlers(config: WebSocketConfig): void {
+    if (!this.webSocket) return;
+
+    this.webSocket.onopen = () => {
+      console.log('[WebSocketService] Connected to:', config.url);
+      this.reconnectAttempts = 0;
+      this.updateStatus({
+        connected: true,
+        connecting: false,
+        reconnecting: false,
+        reconnectAttempts: 0
+      });
+
+      // Start heartbeat if configured
+      if (config.heartbeatInterval && config.heartbeatMessage) {
+        this.startHeartbeat(config);
+      }
+    };
+
+    this.webSocket.onclose = (event) => {
+      console.log('[WebSocketService] Connection closed:', event.code, event.reason);
+      this.updateStatus({
+        connected: false,
+        connecting: false,
+        reconnecting: false,
+        reconnectAttempts: this.reconnectAttempts
+      });
+
+      // Attempt reconnection if not a clean close and reconnect is enabled
+      if (!event.wasClean && config.reconnectInterval && config.maxReconnectAttempts) {
+        this.attemptReconnect(config);
+      }
+    };
+
+    this.webSocket.onerror = (error) => {
+      console.error('[WebSocketService] WebSocket error:', error);
+      this.updateStatus({
+        connected: false,
+        connecting: false,
+        reconnecting: false,
+        error: 'WebSocket connection error',
+        reconnectAttempts: this.reconnectAttempts
+      });
+    };
+
+    this.webSocket.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data) as WebSocketMessage;
+        this.messageSubject.next(message);
+      } catch (error) {
+        console.error('[WebSocketService] Error parsing message:', error);
+      }
     };
   }
 
-  static createSecureConfig(url: string, protocols?: string[], options: Partial<WebSocketConfig> = {}): WebSocketConfig {
-    const secureUrl = url.startsWith('wss://') ? url : `wss://${url.replace(/^https?:\/\//, '')}`;
-    return this.createConfig(secureUrl, { ...options, protocols });
+  private startHeartbeat(config: WebSocketConfig): void {
+    this.heartbeatTimer = setInterval(() => {
+      if (this.webSocket && this.webSocket.readyState === WebSocket.OPEN) {
+        this.send({
+          type: 'heartbeat',
+          data: config.heartbeatMessage!
+        });
+      }
+    }, config.heartbeatInterval);
   }
 
-  ngOnDestroy(): void {
-    this.disconnect();
-    // No manual cleanup needed with takeUntilDestroyed
+  private attemptReconnect(config: WebSocketConfig): void {
+    if (this.reconnectAttempts >= (config.maxReconnectAttempts || 5)) {
+      console.log('[WebSocketService] Max reconnect attempts reached');
+      return;
+    }
+
+    this.reconnectAttempts++;
+    this.updateStatus({
+      connected: false,
+      connecting: false,
+      reconnecting: true,
+      reconnectAttempts: this.reconnectAttempts
+    });
+
+    this.reconnectTimer = setTimeout(() => {
+      console.log(`[WebSocketService] Reconnect attempt ${this.reconnectAttempts}`);
+      this.connect(config);
+    }, config.reconnectInterval || 3000);
+  }
+
+  private updateStatus(status: Partial<WebSocketStatus>): void {
+    const currentStatus = this.getCurrentStatus();
+    const newStatus = { ...currentStatus, ...status };
+    this.statusSubject.next(newStatus);
+  }
+
+  private getCurrentStatus(): WebSocketStatus {
+    return {
+      connected: this.webSocket?.readyState === WebSocket.OPEN,
+      connecting: false,
+      reconnecting: false,
+      reconnectAttempts: this.reconnectAttempts
+    };
+  }
+
+  // Direct access to native WebSocket
+  getNativeWebSocket(): WebSocket | null {
+    return this.webSocket;
+  }
+
+  isConnected(): boolean {
+    return this.webSocket?.readyState === WebSocket.OPEN;
+  }
+
+  getReadyState(): number {
+    return this.webSocket?.readyState ?? WebSocket.CLOSED;
   }
 }

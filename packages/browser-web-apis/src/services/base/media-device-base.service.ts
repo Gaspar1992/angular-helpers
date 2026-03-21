@@ -1,9 +1,6 @@
 import { Injectable, signal } from '@angular/core';
-import { from, Observable } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
 import { BrowserApiBaseService } from './browser-api-base.service';
 import { MediaDevice, MediaDeviceKind } from '../../interfaces/media.interface';
-import { BrowserSupportUtil } from '../../utils/browser-support.util';
 
 /**
  * Base class for media device services (Camera, Microphone, etc.)
@@ -83,7 +80,7 @@ export abstract class MediaDeviceBaseService extends BrowserApiBaseService {
       
       // Check permissions first
       const permissionType = this.getMediaConstraintType() === 'video' ? 'camera' : 'microphone';
-      const hasPermission = await this.checkPermission(permissionType);
+      const hasPermission = await this.requestPermission(permissionType);
       
       if (!hasPermission) {
         const granted = await this.requestPermission(permissionType);
@@ -115,7 +112,7 @@ export abstract class MediaDeviceBaseService extends BrowserApiBaseService {
       };
       
       const finalConstraints = constraints || defaultConstraints;
-      const stream = await (navigator.mediaDevices as any).getDisplayMedia(finalConstraints);
+      const stream = await (navigator.mediaDevices).getDisplayMedia(finalConstraints);
       
       // Store the stream
       const streamId = this.generateStreamId();
@@ -208,25 +205,31 @@ export abstract class MediaDeviceBaseService extends BrowserApiBaseService {
   /**
    * Handle media-specific errors
    */
-  protected handleMediaError(error: any): Error {
-    let message = 'Media access failed';
+  protected handleMediaError(error: unknown): Error {
+    let message: string;
     
-    switch (error.name) {
-      case 'NotAllowedError':
-        message = 'Permission denied by user';
-        break;
-      case 'NotFoundError':
-        message = 'No media device found';
-        break;
-      case 'NotReadableError':
-        message = 'Media device is already in use';
-        break;
-      case 'OverconstrainedError':
-        message = 'Media constraints cannot be satisfied';
-        break;
-      case 'TypeError':
-        message = 'Invalid media constraints';
-        break;
+    if (error instanceof Error) {
+      switch (error.name) {
+        case 'NotAllowedError':
+          message = 'Permission denied by user';
+          break;
+        case 'NotFoundError':
+          message = 'No media device found';
+          break;
+        case 'NotReadableError':
+          message = 'Media device is already in use';
+          break;
+        case 'OverconstrainedError':
+          message = 'Media constraints cannot be satisfied';
+          break;
+        case 'TypeError':
+          message = 'Invalid media constraints provided';
+          break;
+        default:
+          message = `Media error: ${error.message}`;
+      }
+    } else {
+      message = 'Unknown media error occurred';
     }
     
     return this.createError(message, error);

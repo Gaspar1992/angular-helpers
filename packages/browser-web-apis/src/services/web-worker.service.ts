@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, DestroyRef } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
@@ -25,169 +25,89 @@ export interface WorkerTask<T = unknown> {
 
 @Injectable()
 export class WebWorkerService extends BrowserApiBaseService {
+  protected override destroyRef = inject(DestroyRef);
   private workers = new Map<string, Worker>();
   private workerStatuses = new Map<string, Subject<WorkerStatus>>();
   private workerMessages = new Map<string, Subject<WorkerMessage>>();
   private currentWorkerStatuses = new Map<string, WorkerStatus>();
-  private destroy$ = new Subject<void>();
-
-  constructor() {
-    super();
-  }
 
   protected override getApiName(): string {
     return 'webworker';
   }
 
-  protected override async onInitialize(): Promise<void> {
-    await super.onInitialize();
-    this.logInfo('WebWorker service initialized');
-  }
-
-  ngOnDestroy(): void {
-    this.terminateAllWorkers();
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  override isSupported(): boolean {
-    return this.isBrowserEnvironment() && typeof Worker !== 'undefined';
+  private ensureWorkerSupport(): void {
+    if (typeof Worker === 'undefined') {
+      throw new Error('Web Workers not supported in this browser');
+    }
   }
 
   createWorker(name: string, scriptUrl: string): Observable<WorkerStatus> {
-    if (!this.isSupported()) {
-      const error = 'Web Workers not supported or not available in server environment';
-      this.updateWorkerStatus(name, { initialized: false, running: false, error, messageCount: 0 });
-      return this.getWorkerStatus(name);
-    }
+    this.ensureWorkerSupport();
 
-    if (!this.isBrowserEnvironment()) {
-      const error = 'Web Workers not available in server environment';
-      this.updateWorkerStatus(name, { initialized: false, running: false, error, messageCount: 0 });
-      return this.getWorkerStatus(name);
-    }
+    return new Observable<WorkerStatus>((observer) => {
+      if (this.workers.has(name)) {
+        observer.next(this.currentWorkerStatuses.get(name)!);
+        observer.complete();
+        return;
+      }
 
-    try {
-      this.terminateWorker(name);
-      const worker = new Worker(scriptUrl);
-      this.workers.set(name, worker);
+      try {
+        const worker = new Worker(scriptUrl);
+        this.workers.set(name, worker);
+        this.setupWorker(name, worker);
 
-      this.updateWorkerStatus(name, {
-        initialized: true,
-        running: true,
-        messageCount: 0
-      });
-
-      worker.onmessage = (event) => {
-        const message: WorkerMessage = {
-          id: event.data.id || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          type: event.data.type || 'message',
-          data: event.data.data || event.data,
-          timestamp: Date.now()
-        };
-        this.handleWorkerMessage(name, message);
-      };
-
-      worker.onerror = (error) => {
-        const errorMessage = `Worker error: ${error.message || 'Unknown error'}`;
-        this.updateWorkerStatus(name, {
+        const status: WorkerStatus = {
           initialized: true,
-          running: false,
-          error: errorMessage,
-          messageCount: this.getCurrentWorkerStatus(name).messageCount
-        });
-      };
-
-    } catch (error) {
-      const errorMessage = `Failed to create worker: ${error}`;
-      this.updateWorkerStatus(name, {
-        initialized: false,
-        running: false,
-        error: errorMessage,
-        messageCount: 0
-      });
-    }
-
-    return this.getWorkerStatus(name);
-  }
-
-  createWorkerFromCode(name: string, workerCode: string): Observable<WorkerStatus> {
-    if (!this.isSupported()) {
-      const error = 'Web Workers not supported or not available in server environment';
-      this.updateWorkerStatus(name, { initialized: false, running: false, error, messageCount: 0 });
-      return this.getWorkerStatus(name);
-    }
-
-    if (!this.isBrowserEnvironment()) {
-      const error = 'Web Workers not available in server environment';
-      this.updateWorkerStatus(name, { initialized: false, running: false, error, messageCount: 0 });
-      return this.getWorkerStatus(name);
-    }
-
-    try {
-      this.terminateWorker(name);
-      const blob = new Blob([workerCode], { type: 'application/javascript' });
-      const worker = new Worker(URL.createObjectURL(blob));
-      this.workers.set(name, worker);
-
-      this.updateWorkerStatus(name, {
-        initialized: true,
-        running: true,
-        messageCount: 0
-      });
-
-      worker.onmessage = (event) => {
-        const message: WorkerMessage = {
-          id: event.data.id || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          type: event.data.type || 'message',
-          data: event.data.data || event.data,
-          timestamp: Date.now()
+          running: true,
+          messageCount: 0
         };
-        this.handleWorkerMessage(name, message);
-      };
 
-      worker.onerror = (error) => {
-        const errorMessage = `Worker error: ${error.message || 'Unknown error'}`;
-        this.updateWorkerStatus(name, {
-          initialized: true,
+        this.currentWorkerStatuses.set(name, status);
+        this.updateWorkerStatus(name, status);
+        observer.next(status);
+        observer.complete();
+
+      } catch (error) {
+        console.error(`[WebWorkerService] Failed to create worker ${name}:`, error);
+        const status: WorkerStatus = {
+          initialized: false,
           running: false,
-          error: errorMessage,
-          messageCount: this.getCurrentWorkerStatus(name).messageCount
-        });
+          error: error instanceof Error ? error.message : 'Unknown error',
+          messageCount: 0
+        };
+        this.currentWorkerStatuses.set(name, status);
+        this.updateWorkerStatus(name, status);
+        observer.next(status);
+        observer.complete();
+      }
+
+      return () => {
+        this.terminateWorker(name);
       };
-
-    } catch (error) {
-      const errorMessage = `Failed to create worker from code: ${error}`;
-      this.updateWorkerStatus(name, {
-        initialized: false,
-        running: false,
-        error: errorMessage,
-        messageCount: 0
-      });
-    }
-
-    return this.getWorkerStatus(name);
-  }
-
-  private handleWorkerMessage(workerName: string, message: WorkerMessage): void {
-    const currentStatus = this.getCurrentWorkerStatus(workerName);
-    this.updateWorkerStatus(workerName, {
-      ...currentStatus,
-      messageCount: currentStatus.messageCount + 1
     });
+  }
 
-    let subject = this.workerMessages.get(workerName);
-    if (!subject) {
-      subject = new Subject<WorkerMessage>();
-      this.workerMessages.set(workerName, subject);
+  terminateWorker(name: string): void {
+    const worker = this.workers.get(name);
+    if (worker) {
+      worker.terminate();
+      this.workers.delete(name);
+      this.workerStatuses.delete(name);
+      this.workerMessages.delete(name);
+      this.currentWorkerStatuses.delete(name);
     }
-    subject.next(message);
+  }
+
+  terminateAllWorkers(): void {
+    this.workers.forEach((_, name) => {
+      this.terminateWorker(name);
+    });
   }
 
   postMessage(workerName: string, task: WorkerTask): void {
     const worker = this.workers.get(workerName);
     if (!worker) {
-      this.logError(`Worker ${workerName} not found`);
+      console.error(`[WebWorkerService] Worker ${workerName} not found`);
       return;
     }
 
@@ -200,13 +120,13 @@ export class WebWorkerService extends BrowserApiBaseService {
         worker.postMessage(message);
       }
 
-      const currentStatus = this.getCurrentWorkerStatus(workerName);
-      this.updateWorkerStatus(workerName, {
-        ...currentStatus,
-        messageCount: currentStatus.messageCount + 1
-      });
+      const currentStatus = this.currentWorkerStatuses.get(workerName);
+      if (currentStatus) {
+        currentStatus.messageCount++;
+        this.updateWorkerStatus(workerName, currentStatus);
+      }
     } catch (error) {
-      this.logError(`Failed to post message to worker ${workerName}:`, error);
+      console.error(`[WebWorkerService] Failed to post message to worker ${workerName}:`, error);
     }
   }
 
@@ -217,59 +137,72 @@ export class WebWorkerService extends BrowserApiBaseService {
     return this.workerMessages.get(workerName)!.asObservable();
   }
 
-  getWorkerStatus(workerName: string): Observable<WorkerStatus> {
-    let subject = this.workerStatuses.get(workerName);
-    if (!subject) {
-      subject = new Subject<WorkerStatus>();
-      this.workerStatuses.set(workerName, subject);
+  getStatus(workerName: string): Observable<WorkerStatus> {
+    if (!this.workerStatuses.has(workerName)) {
+      this.workerStatuses.set(workerName, new Subject<WorkerStatus>());
     }
-    return subject.asObservable();
+    return this.workerStatuses.get(workerName)!.asObservable();
   }
 
-  private getCurrentWorkerStatus(workerName: string): WorkerStatus {
-    return this.currentWorkerStatuses.get(workerName) || {
-      initialized: false,
-      running: false,
-      messageCount: 0
+  getCurrentStatus(workerName: string): WorkerStatus | undefined {
+    return this.currentWorkerStatuses.get(workerName);
+  }
+
+  getAllStatuses(): Map<string, WorkerStatus> {
+    return new Map(this.currentWorkerStatuses);
+  }
+
+  isWorkerRunning(workerName: string): boolean {
+    const status = this.currentWorkerStatuses.get(workerName);
+    return status?.running ?? false;
+  }
+
+  private setupWorker(name: string, worker: Worker): void {
+    worker.onmessage = (event) => {
+      const message: WorkerMessage = {
+        id: event.data.id || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        type: event.data.type || 'message',
+        data: event.data.data,
+        timestamp: event.data.timestamp || Date.now()
+      };
+
+      if (!this.workerMessages.has(name)) {
+        this.workerMessages.set(name, new Subject<WorkerMessage>());
+      }
+      this.workerMessages.get(name)!.next(message);
     };
-  }
 
-  private updateWorkerStatus(workerName: string, status: WorkerStatus): void {
-    let subject = this.workerStatuses.get(workerName);
-    if (!subject) {
-      subject = new Subject<WorkerStatus>();
-      this.workerStatuses.set(workerName, subject);
-    }
-    
-    // Store the current status
-    this.currentWorkerStatuses.set(workerName, status);
-    
-    // Emit the new status
-    subject.next(status);
-  }
-
-  terminateWorker(workerName: string): boolean {
-    const worker = this.workers.get(workerName);
-    if (worker) {
-      worker.terminate();
-      this.workers.delete(workerName);
-      this.updateWorkerStatus(workerName, {
-        initialized: false,
+    worker.onerror = (error) => {
+      console.error(`[WebWorkerService] Worker ${name} error:`, error);
+      const status: WorkerStatus = {
+        initialized: true,
         running: false,
-        messageCount: this.getCurrentWorkerStatus(workerName).messageCount
-      });
-      return true;
-    }
-    return false;
-  }
+        error: error instanceof Error ? error.message : 'Worker error',
+        messageCount: this.currentWorkerStatuses.get(name)?.messageCount ?? 0
+      };
+      this.currentWorkerStatuses.set(name, status);
+      this.updateWorkerStatus(name, status);
+    };
 
-  terminateAllWorkers(): void {
-    this.workers.forEach((worker, name) => {
+    // Auto-cleanup when service is destroyed
+    this.destroyRef.onDestroy(() => {
       this.terminateWorker(name);
     });
   }
 
-  isWorkerInitialized(workerName: string): boolean {
-    return this.getCurrentWorkerStatus(workerName).initialized;
+  private updateWorkerStatus(name: string, status: WorkerStatus): void {
+    if (!this.workerStatuses.has(name)) {
+      this.workerStatuses.set(name, new Subject<WorkerStatus>());
+    }
+    this.workerStatuses.get(name)!.next(status);
+  }
+
+  // Direct access to native Worker API
+  getNativeWorker(name: string): Worker | undefined {
+    return this.workers.get(name);
+  }
+
+  getAllWorkers(): Map<string, Worker> {
+    return new Map(this.workers);
   }
 }
