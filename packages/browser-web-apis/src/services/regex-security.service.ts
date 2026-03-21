@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { WebWorkerService } from './web-worker.service';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
-import { map, catchError } from 'rxjs/operators';
 
 export interface RegexSecurityConfig {
   timeout?: number; // Timeout in milliseconds (default: 5000)
@@ -43,10 +42,14 @@ export interface RegexBuilderOptions {
 @Injectable()
 export class RegexSecurityService extends BrowserApiBaseService {
   private webWorkerService = inject(WebWorkerService);
-  private workerName = 'regex-security-worker';
+  private readonly workerName = 'regex-security-worker';
 
   protected override getApiName(): string {
     return 'regex-security';
+  }
+
+  override isSupported(): boolean {
+    return this.isBrowserEnvironment() && this.webWorkerService.isSupported();
   }
 
   protected override async onInitialize(): Promise<void> {
@@ -85,6 +88,8 @@ export class RegexSecurityService extends BrowserApiBaseService {
           error: `Pattern rejected: ${securityCheck.warnings.join(', ')}`
         };
       }
+
+      await this.initializeRegexWorker();
 
       // Execute in Web Worker with timeout
       const result = await this.executeInWorker(pattern, text, finalConfig);
@@ -176,6 +181,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
   ): Promise<RegexTestResult> {
     return new Promise((resolve) => {
       const taskId = `regex_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const timeoutMs = config.timeout || 5000;
       
       const task = {
         id: taskId,
@@ -183,35 +189,41 @@ export class RegexSecurityService extends BrowserApiBaseService {
         data: {
           pattern,
           text,
-          timeout: config.timeout || 5000
+          timeout: timeoutMs
         }
       };
 
-      const subscription = this.webWorkerService
-        .getMessages(this.workerName)
-        .pipe(
-          map(message => {
-            if (message.id === taskId) {
-              return message.data as RegexTestResult;
-            }
-            return null;
-          }),
-          catchError(error => {
-            resolve({
-              match: false,
-              executionTime: 0,
-              timeout: true,
-              error: error.message || 'Timeout or execution error'
-            });
-            return [];
-          })
-        )
-        .subscribe(result => {
-          if (result) {
-            subscription.unsubscribe();
-            resolve(result);
-          }
+      const timeoutId = setTimeout(() => {
+        subscription.unsubscribe();
+        resolve({
+          match: false,
+          executionTime: 0,
+          timeout: true,
+          error: 'Execution timeout'
         });
+      }, timeoutMs);
+
+      const subscription = this.webWorkerService.getMessages(this.workerName).subscribe({
+        next: (message) => {
+          if (message.id !== taskId) {
+            return;
+          }
+
+          clearTimeout(timeoutId);
+          subscription.unsubscribe();
+          resolve(message.data as RegexTestResult);
+        },
+        error: (error: unknown) => {
+          clearTimeout(timeoutId);
+          subscription.unsubscribe();
+          resolve({
+            match: false,
+            executionTime: 0,
+            timeout: true,
+            error: error instanceof Error ? error.message : 'Timeout or execution error'
+          });
+        }
+      });
 
       this.webWorkerService.postMessage(this.workerName, task);
     });
@@ -221,11 +233,9 @@ export class RegexSecurityService extends BrowserApiBaseService {
    * Initializes the Web Worker for regular expressions
    */
   private async initializeRegexWorker(): Promise<void> {
-    if (!this.webWorkerService.isWorkerInitialized(this.workerName)) {
-      const workerCode = this.generateWorkerCode();
-      await this.webWorkerService.createWorkerFromCode(this.workerName, workerCode);
-      this.logInfo('Regex security worker initialized');
-    }
+    const workerCode = this.generateWorkerCode();
+    this.webWorkerService.createWorkerFromCode(this.workerName, workerCode);
+    this.logInfo('Regex security worker initialized');
   }
 
   /**

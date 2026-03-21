@@ -47,6 +47,8 @@ yarn.lock
 *.lcov
 .nyc_output
 test-results/
+playwright-report/
+blob-report/
 junit.xml
 
 # Vitest
