@@ -1,14 +1,12 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { from, Observable } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { 
   GeolocationPosition, 
   GeolocationOptions, 
   GeolocationError,
   GeolocationWatchOptions 
 } from '../interfaces/geolocation.interface';
-import { BrowserSupportUtil } from '../utils/browser-support.util';
-import { PermissionsService } from './permissions.service';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 @Injectable()

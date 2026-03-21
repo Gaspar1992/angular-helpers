@@ -1,7 +1,6 @@
-import { Injectable, signal, inject, computed, OnDestroy } from '@angular/core';
-import { from, Observable, Subject } from 'rxjs';
+import { Injectable, signal, OnDestroy } from '@angular/core';
+import { from, Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { 
   MediaDevice, 
   MediaDeviceKind, 
@@ -9,7 +8,6 @@ import {
   MediaDevicesInfo
 } from '../interfaces/media.interface';
 import { BrowserSupportUtil } from '../utils/browser-support.util';
-import { PermissionsService } from './permissions.service';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 @Injectable()

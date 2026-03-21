@@ -1,9 +1,7 @@
-import { Injectable, signal, inject, computed, OnDestroy } from '@angular/core';
-import { from, Observable, Subject } from 'rxjs';
+import { Injectable, signal, OnDestroy } from '@angular/core';
+import { from, Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BrowserSupportUtil } from '../utils/browser-support.util';
-import { PermissionsService } from './permissions.service';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 export interface NotificationOptions {
@@ -59,7 +57,7 @@ export class NotificationService extends BrowserApiBaseService implements OnDest
   readonly notifications$ = this.notifications.asReadonly();
   readonly permission$ = this.permission.asReadonly();
 
-  override async requestPermission(permission?: string): Promise<boolean> {
+  override async requestPermission(): Promise<boolean> {
     if (!this.isSupported() || this.isServerEnvironment()) {
       throw new Error('Notification API not supported or not available in server environment');
     }
@@ -123,7 +121,7 @@ export class NotificationService extends BrowserApiBaseService implements OnDest
 
   closeAllNotifications(): void {
     const notifications = this.notifications();
-    notifications.forEach((notification, id) => {
+    notifications.forEach((notification) => {
       notification.close();
     });
     this.notifications.set(new Map());
