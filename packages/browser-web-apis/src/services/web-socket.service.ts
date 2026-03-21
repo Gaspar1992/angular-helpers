@@ -1,7 +1,7 @@
 import { Injectable, signal, OnDestroy } from '@angular/core';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, Subject, interval } from 'rxjs';
-import { retry, filter } from 'rxjs/operators';
+import { Observable, Subject, interval, Subscription } from 'rxjs';
+import { retry, filter, map } from 'rxjs/operators';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 export interface WebSocketConfig {
@@ -10,12 +10,12 @@ export interface WebSocketConfig {
   reconnectInterval?: number;
   maxReconnectAttempts?: number;
   heartbeatInterval?: number;
-  heartbeatMessage?: any;
+  heartbeatMessage?: unknown;
 }
 
-export interface WebSocketMessage {
+export interface WebSocketMessage<T = unknown> {
   type: string;
-  data: any;
+  data: T;
   timestamp?: number;
 }
 
@@ -39,7 +39,7 @@ export class WebSocketService extends BrowserApiBaseService implements OnDestroy
   
   private messages = new Subject<WebSocketMessage>();
   private reconnectAttempts = 0;
-  private heartbeatTimer: any = null;
+  private heartbeatTimer: Subscription | null = null;
 
   constructor() {
     super();
@@ -130,12 +130,13 @@ export class WebSocketService extends BrowserApiBaseService implements OnDestroy
         }));
       };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create WebSocket';
       this.status.set({
         connected: false,
         connecting: false,
         reconnecting: false,
-        error: error.message || 'Failed to create WebSocket',
+        error: errorMessage,
         reconnectAttempts: 0
       });
     }
@@ -159,7 +160,7 @@ export class WebSocketService extends BrowserApiBaseService implements OnDestroy
       this.heartbeatTimer = interval(config.heartbeatInterval).pipe(
         takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => {
-        this.send(config.heartbeatMessage);
+        this.send(config.heartbeatMessage as WebSocketMessage<unknown>);
       });
     }
   }
@@ -181,7 +182,7 @@ export class WebSocketService extends BrowserApiBaseService implements OnDestroy
     this.reconnectAttempts = 0;
   }
 
-  send(message: any): boolean {
+  send<T>(message: WebSocketMessage<T>): boolean {
     const ws = this.websocket();
     if (!ws || ws.readyState !== WebSocket.OPEN) {
       return false;
@@ -197,7 +198,7 @@ export class WebSocketService extends BrowserApiBaseService implements OnDestroy
     }
   }
 
-  sendTyped(type: string, data: any): boolean {
+  sendTyped<T>(type: string, data: T): boolean {
     return this.send({ type, data });
   }
 
@@ -205,9 +206,10 @@ export class WebSocketService extends BrowserApiBaseService implements OnDestroy
     return this.messages.asObservable();
   }
 
-  getMessagesByType(type: string): Observable<any> {
+  getMessagesByType<T>(type: string): Observable<T> {
     return this.messages.pipe(
       filter(message => message.type === type),
+      map(message => message.data as T),
       retry(3)
     );
   }
@@ -244,15 +246,14 @@ export class WebSocketService extends BrowserApiBaseService implements OnDestroy
 
   // Utility methods
   ping(): boolean {
-    return this.send({ type: 'ping', timestamp: Date.now() });
+    return this.send({ type: 'ping', data: null, timestamp: Date.now() });
   }
 
-  request(data: any, requestId?: string): boolean {
+  request<T>(data: T, requestId?: string): boolean {
     const id = requestId || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     return this.send({
       type: 'request',
-      id,
-      data,
+      data: { id, data } as T,
       timestamp: Date.now()
     });
   }
