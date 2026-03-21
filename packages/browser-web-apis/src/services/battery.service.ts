@@ -1,168 +1,135 @@
-import { Injectable, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, fromEvent } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
-import { BatteryManager, BatteryInfo } from '../interfaces/battery.interface';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
-// Type extension for Battery API
+// Battery API is not standardized in TypeScript, so we need these interfaces
 interface NavigatorWithBattery extends Navigator {
   getBattery?: () => Promise<BatteryManager>;
 }
 
+interface BatteryManager extends EventTarget {
+  charging: boolean;
+  chargingTime: number;
+  dischargingTime: number;
+  level: number;
+  addEventListener(type: string, listener: EventListener): void;
+  removeEventListener(type: string, listener: EventListener): void;
+}
+
+interface BatteryInfo {
+  charging: boolean;
+  chargingTime: number;
+  dischargingTime: number;
+  level: number;
+}
+
 @Injectable()
 export class BatteryService extends BrowserApiBaseService {
-  private battery = signal<BatteryManager | null>(null);
-  private batteryInfo = signal<BatteryInfo>({
-    charging: false,
-    chargingTime: 0,
-    dischargingTime: Infinity,
-    level: 1
-  });
-  private initialized = false;
-
-  constructor() {
-    super();
-    // No auto-initialization in constructor for SSR safety
-  }
+  private batteryManager: BatteryManager | null = null;
 
   protected override getApiName(): string {
     return 'battery';
   }
 
-  private async initBattery(): Promise<void> {
-    if (this.initialized || !this.isBrowserEnvironment()) {
-      return;
-    }
-
-    if ('getBattery' in navigator) {
-      try {
-        const battery = await (navigator as NavigatorWithBattery).getBattery!();
-        this.battery.set(battery);
-        this.updateBatteryInfo();
-        this.setupEventListeners();
-        this.initialized = true;
-      } catch (error) {
-        console.warn('Battery API not available:', error);
-      }
+  private ensureBatterySupport(): void {
+    const nav = navigator as NavigatorWithBattery;
+    if (!('getBattery' in nav)) {
+      throw new Error('Battery API not supported in this browser');
     }
   }
 
-  private updateBatteryInfo(): void {
-    const battery = this.battery();
-    if (battery) {
-      this.batteryInfo.set({
-        charging: battery.charging,
-        chargingTime: battery.chargingTime,
-        dischargingTime: battery.dischargingTime,
-        level: battery.level
-      });
+  async initialize(): Promise<BatteryInfo> {
+    this.ensureBatterySupport();
+
+    try {
+      const nav = navigator as NavigatorWithBattery;
+      this.batteryManager = await nav.getBattery!();
+
+      const batteryInfo = this.getBatteryInfo();
+      this.setupEventListeners();
+
+      return batteryInfo;
+    } catch (error) {
+      console.error('[BatteryService] Error initializing battery API:', error);
+      throw new Error('Failed to initialize battery API', { cause: error });
     }
   }
 
-  private setupEventListeners(): void {
-    const battery = this.battery();
-    if (!battery) return;
+  getBatteryInfo(): BatteryInfo {
+    if (!this.batteryManager) {
+      throw new Error('Battery service not initialized. Call initialize() first.');
+    }
 
-    const events = ['chargingchange', 'levelchange', 'chargingtimechange', 'dischargingtimechange'];
-    
-    events.forEach(eventType => {
-      fromEvent(battery, eventType).subscribe(() => {
-        this.updateBatteryInfo();
-      });
+    return {
+      charging: this.batteryManager.charging,
+      chargingTime: this.batteryManager.chargingTime,
+      dischargingTime: this.batteryManager.dischargingTime,
+      level: this.batteryManager.level
+    };
+  }
+
+  watchBatteryInfo(): Observable<BatteryInfo> {
+    if (!this.batteryManager) {
+      throw new Error('Battery service not initialized. Call initialize() first.');
+    }
+
+    return new Observable<BatteryInfo>((observer) => {
+      const updateBatteryInfo = () => {
+        observer.next(this.getBatteryInfo());
+      };
+
+      // Listen to all battery events
+      this.batteryManager!.addEventListener('chargingchange', updateBatteryInfo);
+      this.batteryManager!.addEventListener('levelchange', updateBatteryInfo);
+      this.batteryManager!.addEventListener('chargingtimechange', updateBatteryInfo);
+      this.batteryManager!.addEventListener('dischargingtimechange', updateBatteryInfo);
+
+      // Send initial value
+      updateBatteryInfo();
+
+      return () => {
+        // Cleanup event listeners
+        this.batteryManager!.removeEventListener('chargingchange', updateBatteryInfo);
+        this.batteryManager!.removeEventListener('levelchange', updateBatteryInfo);
+        this.batteryManager!.removeEventListener('chargingtimechange', updateBatteryInfo);
+        this.batteryManager!.removeEventListener('dischargingtimechange', updateBatteryInfo);
+      };
     });
   }
 
-  override isSupported(): boolean {
-    return this.isBrowserEnvironment() && 'getBattery' in navigator;
+  private setupEventListeners(): void {
+    if (!this.batteryManager) return;
+
+    this.batteryManager.addEventListener('chargingchange', () => {
+      console.log('[BatteryService] Charging status changed:', this.batteryManager!.charging);
+    });
+
+    this.batteryManager.addEventListener('levelchange', () => {
+      console.log('[BatteryService] Battery level changed:', this.batteryManager!.level);
+    });
   }
 
-  /**
-   * Ensure the service is initialized before use
-   */
-  async ensureInitialized(): Promise<void> {
-    await this.initBattery();
-  }
-
-  getBatteryInfo(): Observable<BatteryInfo> {
-    return toObservable(this.batteryInfo).pipe(
-      filter(info => info.level >= 0)
-    );
-  }
-
-  readonly getBatteryInfoSignal = this.batteryInfo.asReadonly();
-
-  getChargingState(): Observable<boolean> {
-    return this.getBatteryInfo().pipe(
-      map(info => info.charging)
-    );
-  }
-
-  getBatteryLevel(): Observable<number> {
-    return this.getBatteryInfo().pipe(
-      map(info => info.level)
-    );
-  }
-
-  getTimeUntilFull(): Observable<number> {
-    return this.getBatteryInfo().pipe(
-      map(info => info.chargingTime === Infinity ? -1 : info.chargingTime)
-    );
-  }
-
-  getTimeUntilEmpty(): Observable<number> {
-    return this.getBatteryInfo().pipe(
-      map(info => info.dischargingTime === Infinity ? -1 : info.dischargingTime)
-    );
-  }
-
-  getBatteryPercentage(): number {
-    const info = this.batteryInfo();
-    return Math.round(info.level * 100);
+  // Direct access to native battery API
+  getNativeBatteryManager(): BatteryManager {
+    if (!this.batteryManager) {
+      throw new Error('Battery service not initialized. Call initialize() first.');
+    }
+    return this.batteryManager;
   }
 
   isCharging(): boolean {
-    return this.batteryInfo().charging;
+    return this.getBatteryInfo().charging;
+  }
+
+  getLevel(): number {
+    return this.getBatteryInfo().level;
   }
 
   getChargingTime(): number {
-    const time = this.batteryInfo().chargingTime;
-    return time === Infinity ? -1 : time;
+    return this.getBatteryInfo().chargingTime;
   }
 
   getDischargingTime(): number {
-    const time = this.batteryInfo().dischargingTime;
-    return time === Infinity ? -1 : time;
-  }
-
-  formatTime(seconds: number): string {
-    if (seconds <= 0 || seconds === Infinity) {
-      return 'Unknown';
-    }
-
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
-    return `${minutes}m`;
-  }
-
-  getBatteryStatus(): string {
-    const info = this.batteryInfo();
-    const percentage = this.getBatteryPercentage();
-    
-    if (info.charging) {
-      const timeToFull = this.getChargingTime();
-      return timeToFull > 0 
-        ? `Charging (${percentage}%) - ${this.formatTime(timeToFull)} until full`
-        : `Charging (${percentage}%)`;
-    } else {
-      const timeToEmpty = this.getDischargingTime();
-      return timeToEmpty > 0
-        ? `On battery (${percentage}%) - ${this.formatTime(timeToEmpty)} remaining`
-        : `On battery (${percentage}%)`;
-    }
+    return this.getBatteryInfo().dischargingTime;
   }
 }

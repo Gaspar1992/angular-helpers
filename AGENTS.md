@@ -1,6 +1,12 @@
 
 You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
 
+## Available Skills
+
+| Skill | Description | Location |
+|-------|-------------|-----------|
+| `angular-service-analyzer` | Analyzes Angular services to verify they fulfill their stated purpose and identify architectural issues | [SKILL.md](skills/angular-service-analyzer/SKILL.md) |
+
 ## TypeScript Best Practices
 
 - Use strict type checking

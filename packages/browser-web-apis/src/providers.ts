@@ -1,7 +1,6 @@
 import { makeEnvironmentProviders, EnvironmentProviders } from '@angular/core';
 import { PermissionsService } from './services/permissions.service';
 import { CameraService } from './services/camera.service';
-import { CameraPermissionHelperService } from './services/camera-permission-helper.service';
 import { GeolocationService } from './services/geolocation.service';
 import { MediaDevicesService } from './services/media-devices.service';
 import { NotificationService } from './services/notification.service';
@@ -26,7 +25,6 @@ export interface BrowserWebApisConfig {
   enableWebSocket?: boolean;
   enableWebWorker?: boolean;
   enableRegexSecurity?: boolean;
-  enableCameraPermissionHelper?: boolean;
 }
 
 export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
@@ -41,8 +39,7 @@ export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
   enableWebStorage: false,
   enableWebSocket: false,
   enableWebWorker: false,
-  enableRegexSecurity: true,
-  enableCameraPermissionHelper: true
+  enableRegexSecurity: true
 };
 
 export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): EnvironmentProviders {
@@ -56,7 +53,6 @@ export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): Enviro
   }
   
   if (mergedConfig.enableCamera) {
-    providers.push(CameraPermissionHelperService);
     providers.push(CameraService);
   }
   
@@ -107,7 +103,6 @@ export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): Enviro
 export function provideCamera(): EnvironmentProviders {
   return makeEnvironmentProviders([
     PermissionsService,
-    CameraPermissionHelperService,
     CameraService
   ]);
 }
@@ -186,7 +181,6 @@ export function provideRegexSecurity(): EnvironmentProviders {
 export function provideMediaApis(): EnvironmentProviders {
   return makeEnvironmentProviders([
     PermissionsService,
-    CameraPermissionHelperService,
     CameraService,
     MediaDevicesService
   ]);
