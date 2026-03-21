@@ -9,15 +9,42 @@ import prettierPlugin from 'eslint-plugin-prettier';
 
 export default [
   eslint.configs.recommended,
-  tseslint.configs.recommended,
-  angularEslint.configs.recommended,
   {
     files: ['**/*.ts'],
     languageOptions: {
       parser: tsparser,
       parserOptions: {
-        project: ['./tsconfig.json'],
-        createDefaultProgram: true,
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+      globals: {
+        console: 'readonly',
+        window: 'readonly',
+        document: 'readonly',
+        navigator: 'readonly',
+        localStorage: 'readonly',
+        sessionStorage: 'readonly',
+        location: 'readonly',
+        history: 'readonly',
+        fetch: 'readonly',
+        AbortController: 'readonly',
+        AbortSignal: 'readonly',
+        WebSocket: 'readonly',
+        Worker: 'readonly',
+        Blob: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly',
+        FormData: 'readonly',
+        EventSource: 'readonly',
+        Notification: 'readonly',
+        ServiceWorkerRegistration: 'readonly',
+        Cache: 'readonly',
+        CacheStorage: 'readonly',
+        performance: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
       },
     },
     plugins: {
@@ -26,6 +53,12 @@ export default [
       prettier: prettierPlugin,
     },
     rules: {
+      // ESLint core rules
+      ...eslint.configs.recommended.rules,
+      // TypeScript ESLint rules
+      ...tseslint.configs.recommended.rules,
+      // Custom rules
+      '@typescript-eslint/no-explicit-any': 'off',
       '@angular-eslint/directive-selector': [
         'error',
         {
@@ -53,7 +86,10 @@ export default [
       '@angular-eslint/template': angularTemplateEslint,
       prettier: prettierPlugin,
     },
-    rules: {},
+    rules: {
+      // Angular Template ESLint rules
+      ...angularTemplateEslint.configs.recommended.rules,
+    },
   },
   prettierConfig,
 ];

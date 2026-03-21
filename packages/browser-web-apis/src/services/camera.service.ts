@@ -1,4 +1,4 @@
-import { Injectable, signal, inject, computed } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { from, Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { 
@@ -7,7 +7,6 @@ import {
   CameraInfo,
   MediaDevicesInfo 
 } from '../interfaces/media.interface';
-import { DomSanitizer } from '@angular/platform-browser';
 import { CameraPermissionHelperService } from './camera-permission-helper.service';
 import { MediaDeviceBaseService } from './base/media-device-base.service';
 
@@ -66,15 +65,15 @@ export class CameraService extends MediaDeviceBaseService {
       
       // Provide a more descriptive error
       if (error.name === 'NotAllowedError') {
-        throw new Error('Camera permission denied by user. Please allow camera access in your browser settings and refresh the page.');
+        throw new Error('Camera permission denied by user. Please allow camera access in your browser settings and refresh the page.', { cause: error });
       } else if (error.name === 'NotFoundError') {
-        throw new Error('No camera device found. Please connect a camera and try again.');
+        throw new Error('No camera device found. Please connect a camera and try again.', { cause: error });
       } else if (error.name === 'NotReadableError') {
-        throw new Error('Camera is already in use by another application. Please close other applications using the camera and try again.');
+        throw new Error('Camera is already in use by another application. Please close other applications using the camera and try again.', { cause: error });
       } else if (error.name === 'OverconstrainedError') {
-        throw new Error('Camera constraints cannot be satisfied. Try with different camera settings.');
+        throw new Error('Camera constraints cannot be satisfied. Try with different camera settings.', { cause: error });
       } else {
-        throw new Error(`Camera error: ${error.message || 'Unknown error occurred'}`);
+        throw new Error(`Camera error: ${error.message || 'Unknown error occurred'}`, { cause: error });
       }
     }
   }
