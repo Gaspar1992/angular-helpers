@@ -1,6 +1,7 @@
 {
   "name": "angular-helpers",
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -50,6 +51,7 @@
     "@angular-eslint/template-parser": "^21.3.1",
     "@angular/cli": "^21.2.2",
     "@angular/compiler-cli": "^21.0.0",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.54.2",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
