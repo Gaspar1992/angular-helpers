@@ -99,7 +99,7 @@ export class NotificationService extends BrowserApiBaseService implements OnDest
     }
 
     try {
-      const notification = new (window as any).Notification(options.title, {
+      const notification = new (window as WindowWithNotification).Notification(options.title, {
         body: options.body,
         icon: options.icon,
         badge: options.badge,

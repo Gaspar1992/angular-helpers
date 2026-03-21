@@ -1,6 +1,8 @@
 import { Injectable, signal } from '@angular/core';
-import { from, Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
+
 import { 
   PermissionName, 
   PermissionState, 
@@ -52,7 +54,7 @@ export class PermissionsService implements BrowserPermissions {
     }
 
     try {
-      const status = await navigator.permissions.query(descriptor as any);
+      const status = await navigator.permissions.query(descriptor as PermissionDescriptor);
       const permissionStatus: PermissionStatus = {
         name: descriptor.name,
         state: status.state as PermissionState
@@ -107,7 +109,7 @@ export class PermissionsService implements BrowserPermissions {
     try {
       // revoke() no está disponible en todos los navegadores
       if ('revoke' in navigator.permissions) {
-        await (navigator.permissions as any).revoke(descriptor);
+        await (navigator.permissions.revoke as (descriptor: PermissionDescriptor) => Promise<void>)(descriptor);
         this.permissions.update(map => map.set(descriptor.name, 'prompt'));
       } else {
         console.warn('Permission revocation not supported in this browser');
@@ -143,7 +145,7 @@ export class PermissionsService implements BrowserPermissions {
       return from([this.getPermissionState(permission) || 'prompt']);
     }
 
-    return from(navigator.permissions.query({ name: permission as any })).pipe(
+    return from(navigator.permissions.query({ name: permission as PermissionName })).pipe(
       map(status => status.state as PermissionState),
       catchError(() => from(['prompt' as PermissionState]))
     );
