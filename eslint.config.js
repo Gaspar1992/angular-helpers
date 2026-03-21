@@ -58,7 +58,6 @@ export default [
       // TypeScript ESLint rules
       ...tseslint.configs.recommended.rules,
       // Custom rules
-      '@typescript-eslint/no-explicit-any': 'off',
       '@angular-eslint/directive-selector': [
         'error',
         {

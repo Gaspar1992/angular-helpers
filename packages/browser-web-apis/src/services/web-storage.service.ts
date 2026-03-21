@@ -1,4 +1,4 @@
-import { Injectable, signal, inject, OnDestroy } from '@angular/core';
+import { Injectable, signal, OnDestroy } from '@angular/core';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, fromEvent } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
@@ -208,7 +208,7 @@ export class WebStorageService extends BrowserApiBaseService implements OnDestro
 
     let totalSize = 0;
     for (let key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
         totalSize += localStorage[key].length + key.length;
       }
     }
@@ -220,7 +220,7 @@ export class WebStorageService extends BrowserApiBaseService implements OnDestro
 
     let totalSize = 0;
     for (let key in sessionStorage) {
-      if (sessionStorage.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(sessionStorage, key)) {
         totalSize += sessionStorage[key].length + key.length;
       }
     }

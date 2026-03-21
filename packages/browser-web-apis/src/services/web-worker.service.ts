@@ -1,6 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { map, catchError, takeUntil } from 'rxjs/operators';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 export interface WorkerMessage {
@@ -29,6 +28,7 @@ export class WebWorkerService extends BrowserApiBaseService {
   private workers = new Map<string, Worker>();
   private workerStatuses = new Map<string, Subject<WorkerStatus>>();
   private workerMessages = new Map<string, Subject<WorkerMessage>>();
+  private currentWorkerStatuses = new Map<string, WorkerStatus>();
   private destroy$ = new Subject<void>();
 
   constructor() {
@@ -227,7 +227,7 @@ export class WebWorkerService extends BrowserApiBaseService {
   }
 
   private getCurrentWorkerStatus(workerName: string): WorkerStatus {
-    return {
+    return this.currentWorkerStatuses.get(workerName) || {
       initialized: false,
       running: false,
       messageCount: 0
@@ -240,6 +240,11 @@ export class WebWorkerService extends BrowserApiBaseService {
       subject = new Subject<WorkerStatus>();
       this.workerStatuses.set(workerName, subject);
     }
+    
+    // Store the current status
+    this.currentWorkerStatuses.set(workerName, status);
+    
+    // Emit the new status
     subject.next(status);
   }
 
