@@ -3,17 +3,18 @@ import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, fromEvent } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import { StorageValue } from '../interfaces/common.types';
 
 export interface StorageOptions {
   prefix?: string;
-  serialize?: (value: any) => string;
-  deserialize?: (value: string) => any;
+  serialize?: (value: StorageValue) => string;
+  deserialize?: (value: string) => StorageValue;
 }
 
 export interface StorageEvent {
   key: string;
-  newValue: any;
-  oldValue: any;
+  newValue: StorageValue | null;
+  oldValue: StorageValue | null;
   storageArea: 'localStorage' | 'sessionStorage';
 }
 
@@ -43,13 +44,14 @@ export class WebStorageService extends BrowserApiBaseService implements OnDestro
     if (this.isBrowserEnvironment()) {
       fromEvent(window, 'storage').pipe(
         takeUntilDestroyed(this.destroyRef)
-      ).subscribe((event: any) => {
-        if (event.key && event.newValue !== null) {
+      ).subscribe((event: Event) => {
+        const storageEvent = event as StorageEvent;
+        if (storageEvent.key && storageEvent.newValue !== null) {
           this.storageEvents.set({
-            key: event.key,
-            newValue: event.newValue,
-            oldValue: event.oldValue,
-            storageArea: event.storageArea === localStorage ? 'localStorage' : 'sessionStorage'
+            key: storageEvent.key,
+            newValue: storageEvent.newValue,
+            oldValue: storageEvent.oldValue,
+            storageArea: storageEvent.storageArea === localStorage ? 'localStorage' : 'sessionStorage'
           });
         }
       });

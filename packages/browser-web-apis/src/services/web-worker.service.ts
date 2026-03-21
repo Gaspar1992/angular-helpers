@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
-export interface WorkerMessage {
+export interface WorkerMessage<T = unknown> {
   id: string;
   type: string;
-  data: any;
+  data: T;
   timestamp: number;
 }
 
@@ -16,10 +16,10 @@ export interface WorkerStatus {
   messageCount: number;
 }
 
-export interface WorkerTask {
+export interface WorkerTask<T = unknown> {
   id: string;
   type: string;
-  data: any;
+  data: T;
   transferable?: Transferable[];
 }
 
