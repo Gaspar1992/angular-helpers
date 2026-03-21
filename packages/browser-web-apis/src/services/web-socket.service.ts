@@ -1,4 +1,4 @@
-import { Injectable, signal, OnDestroy, inject } from '@angular/core';
+import { Injectable, signal, OnDestroy } from '@angular/core';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, Subject, interval } from 'rxjs';
 import { retry, filter } from 'rxjs/operators';
@@ -122,7 +122,7 @@ export class WebSocketService extends BrowserApiBaseService implements OnDestroy
         }
       };
 
-      ws.onerror = (error) => {
+      ws.onerror = () => {
         this.status.update(current => ({
           ...current,
           connecting: false,
