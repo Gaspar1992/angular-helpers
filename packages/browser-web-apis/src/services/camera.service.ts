@@ -40,7 +40,7 @@ export class CameraService extends MediaDeviceBaseService {
     }
 
     try {
-      // Usar el helper para verificar y solicitar permisos
+      // Use the helper to check and request permissions
       const hasPermission = await this.permissionHelper.checkAndRequestPermission();
       
       if (!hasPermission) {
@@ -55,7 +55,7 @@ export class CameraService extends MediaDeviceBaseService {
         }
       };
 
-      // Obtener el stream de la cámara usando el método base
+      // Get the camera stream using the base method
       const stream = await this.getUserMedia(streamConstraints);
       this.currentStream.set(stream);
       this.isStreaming.set(true);
@@ -64,7 +64,7 @@ export class CameraService extends MediaDeviceBaseService {
     } catch (error: any) {
       this.logError('Error starting camera:', error);
       
-      // Proporcionar un error más descriptivo
+      // Provide a more descriptive error
       if (error.name === 'NotAllowedError') {
         throw new Error('Camera permission denied by user. Please allow camera access in your browser settings and refresh the page.');
       } else if (error.name === 'NotFoundError') {
@@ -219,7 +219,7 @@ export class CameraService extends MediaDeviceBaseService {
     );
   }
 
-  // Métodos públicos para manejo de permisos
+  // Public methods for permission handling
   async requestCameraPermission(): Promise<boolean> {
     return await this.permissionHelper.checkAndRequestPermission();
   }

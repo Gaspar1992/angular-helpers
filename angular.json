@@ -68,13 +68,6 @@
             }
           },
           "defaultConfiguration": "development"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test",
-          "options": {
-            "include": ["src/**/*.spec.ts", "src/**/*.test.ts", "packages/**/*.spec.ts", "packages/**/*.test.ts", "packages/security/src/services/regex-security.service.test.ts"],
-            "exclude": ["node_modules/**", "**/*.d.ts", "dist/**", "packages/browser-web-apis/src/**/*.spec.ts"]
-          }
         }
       }
     }

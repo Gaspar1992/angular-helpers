@@ -2,30 +2,30 @@
 
 # Angular Security Helpers
 
-Paquete de seguridad para aplicaciones Angular que previene ataques comunes como ReDoS (Regular Expression Denial of Service) utilizando Web Workers para ejecución segura.
+Security package for Angular applications that prevents common attacks like ReDoS (Regular Expression Denial of Service) using Web Workers for safe execution.
 
-## 🛡️ Características
+## 🛡️ Features
 
-### **Prevención de ReDoS**
-- **Ejecución en Web Worker**: Las expresiones regulares se ejecutan en un thread separado
-- **Timeout configurable**: Previene ejecuciones infinitas
-- **Análisis de complejidad**: Detecta patrones peligrosos antes de ejecutar
-- **Modo seguro**: Solo permite patrones verificados como seguros
+### **ReDoS Prevention**
+- **Web Worker Execution**: Regular expressions are executed in a separate thread.
+- **Configurable Timeout**: Prevents infinite executions.
+- **Complexity Analysis**: Detects dangerous patterns before execution.
+- **Safe Mode**: Only allows patterns verified as safe.
 
 ### **Builder Pattern**
-- **API fluida**: Construye expresiones regulares de forma intuitiva
-- **Encadenamiento de métodos**: `.pattern().group().quantifier()`
-- **Validación en tiempo real**: Análisis de seguridad durante la construcción
+- **Fluent API**: Intuitively build regular expressions.
+- **Method Chaining**: `.pattern().group().quantifier()`
+- **Real-time Validation**: Security analysis during construction.
 
-## 📦 Instalación
+## 📦 Installation
 
 ```bash
 npm install @angular-helpers/security
 ```
 
-## 🚀 Uso Básico
+## 🚀 Basic Usage
 
-### **Configuración**
+### **Configuration**
 
 ```typescript
 import { provideSecurity } from '@angular-helpers/security';
@@ -41,7 +41,7 @@ bootstrapApplication(AppComponent, {
 });
 ```
 
-### **Inyección del Servicio**
+### **Service Injection**
 
 ```typescript
 import { RegexSecurityService } from '@angular-helpers/security';
@@ -52,9 +52,9 @@ export class MyComponent {
 }
 ```
 
-## 📖 Ejemplos de Uso
+## 📖 Usage Examples
 
-### **1. Test Básico de Expresión Regular**
+### **1. Basic Regular Expression Test**
 
 ```typescript
 async testEmail(email: string): Promise<boolean> {
@@ -73,7 +73,7 @@ async testEmail(email: string): Promise<boolean> {
 ```typescript
 import { RegexSecurityBuilder } from '@angular-helpers/security';
 
-// Construcción fluida de expresión regular
+// Fluent regular expression construction
 const emailRegex = RegexSecurityBuilder
   .builder()
   .startOfLine()
@@ -90,7 +90,7 @@ const emailRegex = RegexSecurityBuilder
   .safeMode()
   .build();
 
-// Ejecución directa
+// Direct execution
 const result = await RegexSecurityBuilder
   .builder()
   .pattern('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$')
@@ -98,7 +98,7 @@ const result = await RegexSecurityBuilder
   .execute(email, this.regexSecurity);
 ```
 
-### **3. Análisis de Seguridad**
+### **3. Security Analysis**
 
 ```typescript
 async analyzePattern(pattern: string): Promise<void> {
@@ -118,7 +118,7 @@ async analyzePattern(pattern: string): Promise<void> {
 }
 ```
 
-### **4. Validación de Formularios**
+### **4. Form Validation**
 
 ```typescript
 @Component({...})
@@ -145,13 +145,13 @@ export class FormValidationComponent {
   }
   
   async validateComplexInput(input: string): Promise<boolean> {
-    // Builder pattern para validación compleja
+    // Builder pattern for complex validation
     const result = await RegexSecurityBuilder
       .builder()
       .startOfLine()
-      .nonCapturingGroup('[a-zA-Z]') // Primer letra
-      .characterSet('a-zA-Z0-9_') // Caracteres permitidos
-      .quantifier('{2,19}') // Entre 3 y 20 caracteres total
+      .nonCapturingGroup('[a-zA-Z]') // First letter
+      .characterSet('a-zA-Z0-9_') // Allowed characters
+      .quantifier('{2,19}') // Between 3 and 20 characters total
       .endOfLine()
       .timeout(2000)
       .execute(input, this.regexSecurity);
@@ -161,16 +161,16 @@ export class FormValidationComponent {
 }
 ```
 
-## 🔧 Configuración Avanzada
+## 🔧 Advanced Configuration
 
-### **Opciones de Seguridad**
+### **Security Options**
 
 ```typescript
 interface RegexSecurityConfig {
-  timeout?: number;        // Timeout en ms (default: 5000)
-  maxComplexity?: number;  // Complejidad máxima (default: 10)
-  allowBacktracking?: boolean; // Permitir backtracking (default: false)
-  safeMode?: boolean;      // Modo seguro (default: false)
+  timeout?: number;        // Timeout in ms (default: 5000)
+  maxComplexity?: number;  // Max complexity (default: 10)
+  allowBacktracking?: boolean; // Allow backtracking (default: false)
+  safeMode?: boolean;      // Safe mode (default: false)
 }
 ```
 
@@ -178,72 +178,72 @@ interface RegexSecurityConfig {
 
 ```typescript
 interface RegexBuilderOptions {
-  global?: boolean;      // Flag 'g'
-  ignoreCase?: boolean;  // Flag 'i'
-  multiline?: boolean;   // Flag 'm'
-  dotAll?: boolean;      // Flag 's'
-  unicode?: boolean;     // Flag 'u'
-  sticky?: boolean;      // Flag 'y'
+  global?: boolean;      // 'g' flag
+  ignoreCase?: boolean;  // 'i' flag
+  multiline?: boolean;   // 'm' flag
+  dotAll?: boolean;      // 's' flag
+  unicode?: boolean;     // 'u' flag
+  sticky?: boolean;      // 'y' flag
 }
 ```
 
-## 🛡️ Características de Seguridad
+## 🛡️ Security Features
 
-### **Detección de Patrones Peligrosos**
+### **Dangerous Pattern Detection**
 
-El servicio detecta automáticamente:
+The service automatically detects:
 
-- **Cuantificadores anidados**: `**`, `++` (catastrófico backtracking)
+- **Nested quantifiers**: `**`, `++` (catastrophic backtracking)
 - **Lookaheads/lookbehinds**: `(?=)`, `(?!)`, `(?<=)`, `(?<!)`
-- **Grupos atómicos**: `(?>)`
-- **Patrones recursivos**: Anidación profunda de grupos
-- **Cuantificadores complejos**: `{n,m}` con valores altos
-- **Comodines codiciosos**: `.*`, `.+` con caracteres variables
+- **Atomic groups**: `(?>)`
+- **Recursive patterns**: Deeply nested groups
+- **Complex quantifiers**: `{n,m}` with high values
+- **Greedy wildcards**: `.*`, `.+` with variable characters
 
-### **Niveles de Riesgo**
+### **Risk Levels**
 
-- **🟢 Low**: Patrones simples y seguros
-- **🟡 Medium**: Patrones con lookahead/lookbehind
-- **🟠 High**: Patrones con cuantificadores complejos
-- **🔴 Critical**: Patrones con backtracking catastrófico
+- **🟢 Low**: Simple and safe patterns
+- **🟡 Medium**: Patterns with lookahead/lookbehind
+- **🟠 High**: Patterns with complex quantifiers
+- **🔴 Critical**: Patterns with catastrophic backtracking
 
-### **Prevención de Ataques**
+### **Attack Prevention**
 
-- **Timeout**: Detiene ejecución después del tiempo límite
-- **Web Worker**: Aísla la ejecución del thread principal
-- **Análisis previo**: Rechaza patrones peligrosos antes de ejecutar
-- **Límite de matches**: Previene bucles infinitos
+- **Timeout**: Stops execution after the time limit
+- **Web Worker**: Isolates execution from the main thread
+- **Pre-analysis**: Rejects dangerous patterns before execution
+- **Match limit**: Prevents infinite loops
 
-## 📊 Métricas y Monitoreo
+## 📊 Metrics and Monitoring
 
-### **Resultados de Ejecución**
+### **Execution Results**
 
 ```typescript
 interface RegexTestResult {
-  match: boolean;           // Si hubo match
-  matches?: RegExpMatchArray[]; // Todos los matches encontrados
-  groups?: { [key: string]: string }; // Grupos capturados
-  executionTime: number;    // Tiempo de ejecución en ms
-  timeout: boolean;         // Si hubo timeout
-  error?: string;          // Error si ocurrió
+  match: boolean;           // If there was a match
+  matches?: RegExpMatchArray[]; // All matches found
+  groups?: { [key: string]: string }; // Captured groups
+  executionTime: number;    // Execution time in ms
+  timeout: boolean;         // If there was a timeout
+  error?: string;          // Error if one occurred
 }
 ```
 
-### **Análisis de Seguridad**
+### **Security Analysis**
 
 ```typescript
 interface RegexSecurityResult {
-  safe: boolean;           // Si el patrón es seguro
-  complexity: number;      // Nivel de complejidad (0-∞)
+  safe: boolean;           // If the pattern is safe
+  complexity: number;      // Complexity level (0-∞)
   risk: 'low' | 'medium' | 'high' | 'critical';
-  warnings: string[];      // Advertencias de seguridad
-  recommendations: string[]; // Recomendaciones de mejora
+  warnings: string[];      // Security warnings
+  recommendations: string[]; // Improvement recommendations
 }
 ```
 
-## 🔄 Integración con Formularios
+## 🔄 Form Integration
 
-### **Validadores Angular**
+### **Angular Validators**
 
 ```typescript
 import { AbstractControl, ValidationErrors } from '@angular/forms';
@@ -277,7 +277,7 @@ export class SecurityValidators {
 }
 ```
 
-### **Uso en Template Forms**
+### **Usage in Template Forms**
 
 ```typescript
 @Component({...})
@@ -294,82 +294,82 @@ export class SecureFormComponent {
 }
 ```
 
-## 🚨 Mejores Prácticas
+## 🚨 Best Practices
 
-### **1. Usar Safe Mode en Producción**
+### **1. Use Safe Mode in Production**
 
 ```typescript
-// En producción, siempre usa safeMode
+// In production, always use safeMode
 const config = { safeMode: true, timeout: 3000 };
 ```
 
-### **2. Timeout Apropiado**
+### **2. Appropriate Timeout**
 
 ```typescript
-// Para validaciones de formulario: 1-3 segundos
-// Para procesamiento de texto: 5-10 segundos
-// Nunca más de 30 segundos
+// For form validations: 1-3 seconds
+// For text processing: 5-10 seconds
+// Never more than 30 seconds
 ```
 
-### **3. Análisis Previo**
+### **3. Pre-analysis**
 
 ```typescript
-// Siempre analiza patrones用户提供
+// Always analyze user-provided patterns
 const analysis = await this.regexSecurity.analyzePatternSecurity(pattern);
 if (!analysis.safe) {
-  // Considera usar un patrón alternativo más seguro
+  // Consider using a safer alternative pattern
 }
 ```
 
-### **4. Manejo de Errores**
+### **4. Error Handling**
 
 ```typescript
 try {
   const result = await this.regexSecurity.testRegex(pattern, text, config);
-  // Procesar resultado
+  // Process result
 } catch (error) {
-  // Manejar error de forma segura
+  // Handle error safely
   console.error('Regex security error:', error);
-  // Fallback a validación más simple
+  // Fallback to a simpler validation
 }
 ```
 
-## 🔍 Depuración
+## 🔍 Debugging
 
-### **Logging de Seguridad**
+### **Security Logging**
 
-El servicio incluye logging automático:
+The service includes automatic logging:
 
 ```typescript
-// Habilita logging detallado
+// Enables detailed logging
 console.log('Regex security initialized');
 console.log('Pattern analysis completed:', analysis);
 console.log('Pattern execution completed:', result);
 ```
 
-### **Monitoreo de Performance**
+### **Performance Monitoring**
 
 ```typescript
-// Monitorea tiempos de ejecución
+// Monitor execution times
 if (result.executionTime > 1000) {
   console.warn('Slow regex pattern:', pattern, result.executionTime + 'ms');
 }
 ```
 
-## 📝 Licencia
+## 📝 License
 
-MIT License - ver archivo LICENSE para detalles.
+MIT License - see the LICENSE file for details.
 
-## 🤝 Contribuciones
+## 🤝 Contributions
 
-Las contribuciones son bienvenidas. Por favor:
+Contributions are welcome. Please:
 
-1. Crea un issue para discutir cambios
-2. Haz fork del repositorio
-3. Crea una rama feature
-4. Envía un pull request
+1. Create an issue to discuss changes
+2. Fork the repository
+3. Create a feature branch
+4. Send a pull request
 
-## 📚 Recursos Adicionales
+## 📚 Additional Resources
 
 - [OWASP Regular Expression Denial of Service](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS)
 - [MDN Web Workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
@@ -377,4 +377,4 @@ Las contribuciones son bienvenidas. Por favor:
 
 ---
 
-**⚠️ Advertencia**: Este paquete ayuda a prevenir ReDoS pero no reemplaza otras prácticas de seguridad. Siempre valida y sanea las entradas de usuario.
+**⚠️ Warning**: This package helps prevent ReDoS but does not replace other security practices. Always validate and sanitize user inputs.

@@ -4,10 +4,10 @@ import { BrowserApiBaseService } from './base/browser-api-base.service';
 import { map, catchError } from 'rxjs/operators';
 
 export interface RegexSecurityConfig {
-  timeout?: number; // Timeout en milisegundos (default: 5000)
-  maxComplexity?: number; // Máxima complejidad permitida
-  allowBacktracking?: boolean; // Permitir backtracking catastrófico
-  safeMode?: boolean; // Modo seguro solo con patrones seguros
+  timeout?: number; // Timeout in milliseconds (default: 5000)
+  maxComplexity?: number; // Maximum complexity allowed
+  allowBacktracking?: boolean; // Allow catastrophic backtracking
+  safeMode?: boolean; // Safe mode with secure patterns only
 }
 
 export interface RegexTestResult {
@@ -37,8 +37,8 @@ export interface RegexBuilderOptions {
 }
 
 /**
- * Servicio de seguridad para expresiones regulares que previene ReDoS
- * utilizando Web Workers para ejecución segura con timeout
+ * Security service for regular expressions that prevents ReDoS
+ * using Web Workers for safe execution with timeout
  */
 @Injectable()
 export class RegexSecurityService extends BrowserApiBaseService {
@@ -56,14 +56,14 @@ export class RegexSecurityService extends BrowserApiBaseService {
   }
 
   /**
-   * Builder pattern para construir expresiones regulares seguras
+   * Builder pattern to construct safe regular expressions
    */
   static builder(): RegexSecurityBuilder {
     return new RegexSecurityBuilder();
   }
 
   /**
-   * Ejecuta una expresión regular de forma segura con timeout
+   * Executes a regular expression safely with a timeout
    */
   async testRegex(
     pattern: string,
@@ -74,7 +74,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
     const finalConfig = this.mergeConfig(config);
 
     try {
-      // Primero analizar seguridad del patrón
+      // First, analyze pattern security
       const securityCheck = await this.analyzePatternSecurity(pattern);
       
       if (!securityCheck.safe && !finalConfig.safeMode) {
@@ -86,7 +86,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
         };
       }
 
-      // Ejecutar en Web Worker con timeout
+      // Execute in Web Worker with timeout
       const result = await this.executeInWorker(pattern, text, finalConfig);
       
       return {
@@ -104,7 +104,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
   }
 
   /**
-   * Analiza la seguridad de un patrón de expresión regular
+   * Analyzes the security of a regular expression pattern
    */
   async analyzePatternSecurity(pattern: string): Promise<RegexSecurityResult> {
     return this.executeWithErrorHandling(async () => {
@@ -113,7 +113,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
       let complexity = 0;
       let risk: 'low' | 'medium' | 'high' | 'critical' = 'low';
 
-      // Análisis de patrones peligrosos
+      // Analysis of dangerous patterns
       const dangerousPatterns = [
         { pattern: /\*\*/, risk: 'high' as const, message: 'Nested quantifiers (catastrophic backtracking)' },
         { pattern: /\+\+/, risk: 'high' as const, message: 'Nested plus quantifiers' },
@@ -127,10 +127,10 @@ export class RegexSecurityService extends BrowserApiBaseService {
         { pattern: /(\[.*\*.*\])|(\[.*\+.*\])/, risk: 'medium' as const, message: 'Character classes with quantifiers' }
       ];
 
-      // Calcular complejidad
+      // Calculate complexity
       complexity = this.calculateComplexity(pattern);
 
-      // Evaluar patrones peligrosos
+      // Evaluate dangerous patterns
       for (const dangerous of dangerousPatterns) {
         if (dangerous.pattern.test(pattern)) {
           warnings.push(dangerous.message);
@@ -140,7 +140,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
         }
       }
 
-      // Recomendaciones basadas en el análisis
+      // Recommendations based on the analysis
       if (complexity > 10) {
         recommendations.push('Consider simplifying the pattern');
         risk = this.getRiskLevel(risk) > this.getRiskLevel('high') ? risk : 'high';
@@ -167,7 +167,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
   }
 
   /**
-   * Ejecuta la expresión regular en un Web Worker
+   * Executes the regular expression in a Web Worker
    */
   private async executeInWorker(
     pattern: string,
@@ -218,7 +218,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
   }
 
   /**
-   * Inicializa el Web Worker para expresiones regulares
+   * Initializes the Web Worker for regular expressions
    */
   private async initializeRegexWorker(): Promise<void> {
     if (!this.webWorkerService.isWorkerInitialized(this.workerName)) {
@@ -229,7 +229,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
   }
 
   /**
-   * Genera el código del Web Worker
+   * Generates the Web Worker code
    */
   private generateWorkerCode(): string {
     return `
@@ -248,7 +248,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
             while ((match = regex.exec(text)) !== null) {
               matches.push([...match]);
               
-              // Prevención de bucles infinitos
+              // Prevention of infinite loops
               if (matches.length > 1000) {
                 throw new Error('Too many matches - possible infinite loop');
               }
@@ -291,12 +291,12 @@ export class RegexSecurityService extends BrowserApiBaseService {
   }
 
   /**
-   * Calcula la complejidad de un patrón
+   * Calculates the complexity of a pattern
    */
   private calculateComplexity(pattern: string): number {
     let complexity = 0;
     
-    // Cuantificadores anidados aumentan complejidad
+    // Nested quantifiers increase complexity
     complexity += (pattern.match(/\*\*/g) || []).length * 5;
     complexity += (pattern.match(/\+\+/g) || []).length * 5;
     complexity += (pattern.match(/\?\?/g) || []).length * 3;
@@ -306,18 +306,18 @@ export class RegexSecurityService extends BrowserApiBaseService {
     complexity += (pattern.match(/\(\?\!/g) || []).length * 2;
     complexity += (pattern.match(/\(\?\</g) || []).length * 3;
     
-    // Grupos anidados
+    // Nested groups
     const openParens = (pattern.match(/\(/g) || []).length;
     complexity += openParens * 0.5;
     
-    // Longitud del patrón
+    // Pattern length
     complexity += pattern.length * 0.01;
     
     return Math.round(complexity * 100) / 100;
   }
 
   /**
-   * Obtiene nivel de riesgo numérico
+   * Gets numeric risk level
    */
   private getRiskLevel(risk: 'low' | 'medium' | 'high' | 'critical'): number {
     const levels = { 'low': 1, 'medium': 2, 'high': 3, 'critical': 4 };
@@ -325,7 +325,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
   }
 
   /**
-   * Fusiona configuración con valores por defecto
+   * Merges configuration with default values
    */
   private mergeConfig(config: RegexSecurityConfig): Required<RegexSecurityConfig> {
     return {
@@ -337,7 +337,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
   }
 
   /**
-   * Limpia recursos cuando el servicio se destruye
+   * Cleans up resources when the service is destroyed
    */
   protected override onDestroy(): void {
     if (this.webWorkerService.isWorkerInitialized(this.workerName)) {
@@ -349,7 +349,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
 }
 
 /**
- * Builder pattern para construir expresiones regulares seguras
+ * Builder pattern to construct safe regular expressions
  */
 export class RegexSecurityBuilder {
   private patternValue: string = '';
@@ -357,7 +357,7 @@ export class RegexSecurityBuilder {
   private securityConfigValue: RegexSecurityConfig = {};
 
   /**
-   * Define el patrón base
+   * Defines the base pattern
    */
   pattern(pattern: string): RegexSecurityBuilder {
     this.patternValue = pattern;
@@ -365,7 +365,7 @@ export class RegexSecurityBuilder {
   }
 
   /**
-   * Añade texto al patrón actual
+   * Appends text to the current pattern
    */
   append(text: string): RegexSecurityBuilder {
     this.patternValue += text;
@@ -373,7 +373,7 @@ export class RegexSecurityBuilder {
   }
 
   /**
-   * Añade un grupo capturante
+   * Adds a capturing group
    */
   group(content: string, name?: string): RegexSecurityBuilder {
     if (name) {
@@ -385,7 +385,7 @@ export class RegexSecurityBuilder {
   }
 
   /**
-   * Añade un grupo no capturante
+   * Adds a non-capturing group
    */
   nonCapturingGroup(content: string): RegexSecurityBuilder {
     this.patternValue += `(?:${content})`;
@@ -393,7 +393,7 @@ export class RegexSecurityBuilder {
   }
 
   /**
-   * Añade una alternativa
+   * Adds an alternative
    */
   or(alternative: string): RegexSecurityBuilder {
     this.patternValue += `|${alternative}`;
@@ -401,7 +401,7 @@ export class RegexSecurityBuilder {
   }
 
   /**
-   * Añade un cuantificador
+   * Adds a quantifier
    */
   quantifier(quantifier: '*' | '+' | '?' | '{n}' | '{n,}' | '{n,m}'): RegexSecurityBuilder {
     this.patternValue += quantifier;
@@ -409,7 +409,7 @@ export class RegexSecurityBuilder {
   }
 
   /**
-   * Añade un conjunto de caracteres
+   * Adds a character set
    */
   characterSet(chars: string, negate = false): RegexSecurityBuilder {
     this.patternValue += `[${negate ? '^' : ''}${chars}]`;
@@ -417,7 +417,7 @@ export class RegexSecurityBuilder {
   }
 
   /**
-   * Añade ancla de inicio
+   * Adds a start of line anchor
    */
   startOfLine(): RegexSecurityBuilder {
     this.patternValue += '^';
@@ -425,7 +425,7 @@ export class RegexSecurityBuilder {
   }
 
   /**
-   * Añade ancla de fin
+   * Adds an end of line anchor
    */
   endOfLine(): RegexSecurityBuilder {
     this.patternValue += '$';
@@ -433,7 +433,7 @@ export class RegexSecurityBuilder {
   }
 
   /**
-   * Configura opciones de la expresión regular
+   * Configures regular expression options
    */
   options(options: RegexBuilderOptions): RegexSecurityBuilder {
     this.optionsValue = { ...this.optionsValue, ...options };
@@ -441,7 +441,7 @@ export class RegexSecurityBuilder {
   }
 
   /**
-   * Configura opciones de seguridad
+   * Configures security options
    */
   security(config: RegexSecurityConfig): RegexSecurityBuilder {
     this.securityConfigValue = { ...this.securityConfigValue, ...config };
@@ -449,7 +449,7 @@ export class RegexSecurityBuilder {
   }
 
   /**
-   * Configura timeout
+   * Configures timeout
    */
   timeout(ms: number): RegexSecurityBuilder {
     this.securityConfigValue.timeout = ms;
@@ -457,7 +457,7 @@ export class RegexSecurityBuilder {
   }
 
   /**
-   * Activa modo seguro
+   * Activates safe mode
    */
   safeMode(): RegexSecurityBuilder {
     this.securityConfigValue.safeMode = true;
@@ -465,7 +465,7 @@ export class RegexSecurityBuilder {
   }
 
   /**
-   * Construye la expresión regular final
+   * Builds the final regular expression
    */
   build(): { pattern: string; options: RegexBuilderOptions; security: RegexSecurityConfig } {
     return {
@@ -476,7 +476,7 @@ export class RegexSecurityBuilder {
   }
 
   /**
-   * Construye y ejecuta la expresión regular
+   * Builds and executes the regular expression
    */
   async execute(text: string, service: RegexSecurityService): Promise<RegexTestResult> {
     const { pattern, security } = this.build();
