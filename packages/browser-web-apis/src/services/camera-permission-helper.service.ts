@@ -58,11 +58,12 @@ export class CameraPermissionHelperService {
       this.permissionsService.updatePermissionState('camera', 'granted');
       
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.permissionState.set('denied');
       this.permissionsService.updatePermissionState('camera', 'denied');
       
-      console.error('Camera permission request failed:', error);
+      console.error('Camera permission request failed:', errorMessage);
       
       // No lanzar error, solo registrar y devolver false
       return false;

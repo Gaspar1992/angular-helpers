@@ -51,8 +51,8 @@ export class WebShareService extends BrowserApiBaseService {
       await navigator.share(data);
       this.shareResult.set({ shared: true });
       return { shared: true };
-    } catch (error: any) {
-      const errorMessage = error.message || 'Share failed';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Share failed';
       this.logError('Error sharing:', error);
       this.shareResult.set({ shared: false, error: errorMessage });
       return { shared: false, error: errorMessage };
