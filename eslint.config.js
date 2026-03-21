@@ -9,8 +9,8 @@ import prettierPlugin from 'eslint-plugin-prettier';
 
 export default [
   eslint.configs.recommended,
-  ...tseslint.configs.recommended,
-  ...angularEslint.configs.recommended,
+  tseslint.configs.recommended,
+  angularEslint.configs.recommended,
   {
     files: ['**/*.ts'],
     languageOptions: {
