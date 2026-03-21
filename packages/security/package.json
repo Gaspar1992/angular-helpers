@@ -27,7 +27,7 @@
   "peerDependencies": {
     "@angular/common": "^21.0.0",
     "@angular/core": "^21.0.0",
-    "@angular-helpers/browser-web-apis": "^0.1.0",
+    "@angular-helpers/browser-web-apis": "workspace:*",
     "rxjs": "^7.0.0 || ^8.0.0",
     "tslib": "^2.0.0"
   },
