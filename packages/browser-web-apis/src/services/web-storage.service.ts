@@ -1,19 +1,20 @@
-import { Injectable, signal, inject, OnDestroy } from '@angular/core';
+import { Injectable, signal, OnDestroy } from '@angular/core';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, fromEvent } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import { StorageValue } from '../interfaces/common.types';
 
 export interface StorageOptions {
   prefix?: string;
-  serialize?: (value: any) => string;
-  deserialize?: (value: string) => any;
+  serialize?: (value: StorageValue) => string;
+  deserialize?: (value: string) => StorageValue;
 }
 
 export interface StorageEvent {
   key: string;
-  newValue: any;
-  oldValue: any;
+  newValue: StorageValue | null;
+  oldValue: StorageValue | null;
   storageArea: 'localStorage' | 'sessionStorage';
 }
 
@@ -43,13 +44,14 @@ export class WebStorageService extends BrowserApiBaseService implements OnDestro
     if (this.isBrowserEnvironment()) {
       fromEvent(window, 'storage').pipe(
         takeUntilDestroyed(this.destroyRef)
-      ).subscribe((event: any) => {
-        if (event.key && event.newValue !== null) {
+      ).subscribe((event: Event) => {
+        const storageEvent = event as StorageEvent;
+        if (storageEvent.key && storageEvent.newValue !== null) {
           this.storageEvents.set({
-            key: event.key,
-            newValue: event.newValue,
-            oldValue: event.oldValue,
-            storageArea: event.storageArea === localStorage ? 'localStorage' : 'sessionStorage'
+            key: storageEvent.key,
+            newValue: storageEvent.newValue,
+            oldValue: storageEvent.oldValue,
+            storageArea: storageEvent.storageArea === localStorage ? 'localStorage' : 'sessionStorage'
           });
         }
       });
@@ -61,7 +63,7 @@ export class WebStorageService extends BrowserApiBaseService implements OnDestro
   }
 
   // Local Storage Methods
-  setLocalStorage(key: string, value: any, options: StorageOptions = {}): boolean {
+  setLocalStorage<T extends StorageValue>(key: string, value: T, options: StorageOptions = {}): boolean {
     if (!this.isSupported()) return false;
 
     try {
@@ -76,7 +78,7 @@ export class WebStorageService extends BrowserApiBaseService implements OnDestro
     }
   }
 
-  getLocalStorage<T = any>(key: string, defaultValue: T | null = null, options: StorageOptions = {}): T | null {
+  getLocalStorage<T extends StorageValue>(key: string, defaultValue: T | null = null, options: StorageOptions = {}): T | null {
     if (!this.isSupported()) return defaultValue;
 
     try {
@@ -132,7 +134,7 @@ export class WebStorageService extends BrowserApiBaseService implements OnDestro
   }
 
   // Session Storage Methods
-  setSessionStorage(key: string, value: any, options: StorageOptions = {}): boolean {
+  setSessionStorage<T extends StorageValue>(key: string, value: T, options: StorageOptions = {}): boolean {
     if (!this.isSupported()) return false;
 
     try {
@@ -147,7 +149,7 @@ export class WebStorageService extends BrowserApiBaseService implements OnDestro
     }
   }
 
-  getSessionStorage<T = any>(key: string, defaultValue: T | null = null, options: StorageOptions = {}): T | null {
+  getSessionStorage<T extends StorageValue>(key: string, defaultValue: T | null = null, options: StorageOptions = {}): T | null {
     if (!this.isSupported()) return defaultValue;
 
     try {
@@ -208,7 +210,7 @@ export class WebStorageService extends BrowserApiBaseService implements OnDestro
 
     let totalSize = 0;
     for (let key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
         totalSize += localStorage[key].length + key.length;
       }
     }
@@ -220,7 +222,7 @@ export class WebStorageService extends BrowserApiBaseService implements OnDestro
 
     let totalSize = 0;
     for (let key in sessionStorage) {
-      if (sessionStorage.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(sessionStorage, key)) {
         totalSize += sessionStorage[key].length + key.length;
       }
     }
@@ -264,7 +266,7 @@ export class WebStorageService extends BrowserApiBaseService implements OnDestro
     );
   }
 
-  watchLocalStorage<T = any>(key: string, options: StorageOptions = {}): Observable<T | null> {
+  watchLocalStorage<T = unknown>(key: string, options: StorageOptions = {}): Observable<T | null> {
     return this.getStorageEvents().pipe(
       map(event => {
         if (event.key === key && event.storageArea === 'localStorage') {
@@ -275,7 +277,7 @@ export class WebStorageService extends BrowserApiBaseService implements OnDestro
     );
   }
 
-  watchSessionStorage<T = any>(key: string, options: StorageOptions = {}): Observable<T | null> {
+  watchSessionStorage<T = unknown>(key: string, options: StorageOptions = {}): Observable<T | null> {
     return this.getStorageEvents().pipe(
       map(event => {
         if (event.key === key && event.storageArea === 'sessionStorage') {
@@ -287,11 +289,11 @@ export class WebStorageService extends BrowserApiBaseService implements OnDestro
   }
 
   // Convenience methods for common patterns
-  setUserPreferences(prefs: Record<string, any>): boolean {
+  setUserPreferences(prefs: Record<string, unknown>): boolean {
     return this.setLocalStorage('userPreferences', prefs, { prefix: 'app' });
   }
 
-  getUserPreferences<T = any>(): T | null {
+  getUserPreferences<T = unknown>(): T | null {
     return this.getLocalStorage<T>('userPreferences', null, { prefix: 'app' });
   }
 

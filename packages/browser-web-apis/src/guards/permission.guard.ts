@@ -1,5 +1,4 @@
-import { inject } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
+import { CanActivate, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { PermissionsService } from '../services/permissions.service';
 import { PermissionName } from '../interfaces/permissions.interface';
 
@@ -9,7 +8,7 @@ export class PermissionGuard implements CanActivate {
     private router: Router
   ) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
+  canActivate(route: ActivatedRouteSnapshot): Promise<boolean> {
     const permission = route.data?.['permission'] as PermissionName;
     
     if (!permission) {

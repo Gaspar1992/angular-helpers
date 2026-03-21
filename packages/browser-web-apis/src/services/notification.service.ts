@@ -1,10 +1,16 @@
-import { Injectable, signal, inject, computed, OnDestroy } from '@angular/core';
-import { from, Observable, Subject } from 'rxjs';
+import { Injectable, signal, OnDestroy } from '@angular/core';
+import { from, Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BrowserSupportUtil } from '../utils/browser-support.util';
-import { PermissionsService } from './permissions.service';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+
+// Type extension for Notification API
+interface WindowWithNotification extends Window {
+  Notification: typeof Notification & {
+    permission: NotificationPermission;
+    requestPermission(): Promise<NotificationPermission>;
+  };
+}
 
 export interface NotificationOptions {
   title: string;
@@ -17,7 +23,7 @@ export interface NotificationOptions {
   requireInteraction?: boolean;
   silent?: boolean;
   tag?: string;
-  data?: any;
+  data?: unknown;
   actions?: NotificationAction[];
   vibrate?: number[];
   timestamp?: number;
@@ -52,14 +58,14 @@ export class NotificationService extends BrowserApiBaseService implements OnDest
     }
 
     if ('Notification' in window) {
-      this.permission.set((window as any).Notification.permission);
+      this.permission.set((window as WindowWithNotification).Notification.permission);
     }
   }
 
   readonly notifications$ = this.notifications.asReadonly();
   readonly permission$ = this.permission.asReadonly();
 
-  override async requestPermission(permission?: string): Promise<boolean> {
+  override async requestPermission(): Promise<boolean> {
     if (!this.isSupported() || this.isServerEnvironment()) {
       throw new Error('Notification API not supported or not available in server environment');
     }
@@ -69,7 +75,7 @@ export class NotificationService extends BrowserApiBaseService implements OnDest
     }
 
     try {
-      const permissionResult = await (window as any).Notification.requestPermission();
+      const permissionResult = await (window as WindowWithNotification).Notification.requestPermission();
       this.permission.set(permissionResult);
       return permissionResult === 'granted';
     } catch (error) {
@@ -93,7 +99,7 @@ export class NotificationService extends BrowserApiBaseService implements OnDest
     }
 
     try {
-      const notification = new (window as any).Notification(options.title, {
+      const notification = new (window as WindowWithNotification).Notification(options.title, {
         body: options.body,
         icon: options.icon,
         badge: options.badge,
@@ -123,7 +129,7 @@ export class NotificationService extends BrowserApiBaseService implements OnDest
 
   closeAllNotifications(): void {
     const notifications = this.notifications();
-    notifications.forEach((notification, id) => {
+    notifications.forEach((notification) => {
       notification.close();
     });
     this.notifications.set(new Map());

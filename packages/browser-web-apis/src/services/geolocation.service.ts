@@ -1,14 +1,12 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { from, Observable } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { 
   GeolocationPosition, 
   GeolocationOptions, 
   GeolocationError,
   GeolocationWatchOptions 
 } from '../interfaces/geolocation.interface';
-import { BrowserSupportUtil } from '../utils/browser-support.util';
-import { PermissionsService } from './permissions.service';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 @Injectable()
@@ -128,11 +126,11 @@ export class GeolocationService extends BrowserApiBaseService {
       .then(status => status.state === 'granted');
   }
 
-  observePosition(options?: GeolocationOptions): Observable<GeolocationPosition> {
+  observePosition(options?: GeolocationOptions): Observable<GeolocationPosition | null> {
     return from(this.getCurrentPosition(options)).pipe(
       catchError(error => {
         console.error('Error observing position:', error);
-        return from([null as any]);
+        return from([null]);
       })
     );
   }
@@ -207,10 +205,10 @@ export class GeolocationService extends BrowserApiBaseService {
     });
   }
 
-  private createGeolocationError(error: any): GeolocationError {
+  private createGeolocationError(error: unknown): GeolocationError {
     const geoError: GeolocationError = {
-      code: error.code || 0,
-      message: error.message || 'Unknown geolocation error',
+      code: (error as GeolocationPositionError).code || 0,
+      message: (error as GeolocationPositionError).message || 'Unknown geolocation error',
       PERMISSION_DENIED: 1,
       POSITION_UNAVAILABLE: 2,
       TIMEOUT: 3

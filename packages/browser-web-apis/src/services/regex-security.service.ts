@@ -115,25 +115,22 @@ export class RegexSecurityService extends BrowserApiBaseService {
     return this.executeWithErrorHandling(async () => {
       const warnings: string[] = [];
       const recommendations: string[] = [];
-      let complexity = 0;
       let risk: 'low' | 'medium' | 'high' | 'critical' = 'low';
 
       // Analysis of dangerous patterns
       const dangerousPatterns = [
         { pattern: /\*\*/, risk: 'high' as const, message: 'Nested quantifiers (catastrophic backtracking)' },
         { pattern: /\+\+/, risk: 'high' as const, message: 'Nested plus quantifiers' },
-        { pattern: /\(\?\=/, risk: 'medium' as const, message: 'Lookahead assertions' },
-        { pattern: /\(\?\!/, risk: 'medium' as const, message: 'Negative lookahead' },
-        { pattern: /\(\?\:/, risk: 'low' as const, message: 'Non-capturing groups' },
-        { pattern: /\(\?\</, risk: 'high' as const, message: 'Lookbehind assertions' },
-        { pattern: /\(\?\(\?\)/, risk: 'critical' as const, message: 'Recursive patterns' },
-        { pattern: /(\{(\d+,)?\d+\})/, risk: 'medium' as const, message: 'Quantified repetition' },
-        { pattern: /(\.\*)|(\.+)|(\.\?)/, risk: 'medium' as const, message: 'Greedy quantifiers with dot' },
+        { pattern: /\?\?/, risk: 'medium' as const, message: 'Nested optional quantifiers' },
+        { pattern: /\(\?=/, risk: 'medium' as const, message: 'Lookahead assertions' },
+        { pattern: /\(\?!/, risk: 'medium' as const, message: 'Negative lookahead' },
+        { pattern: /\(\?:/, risk: 'low' as const, message: 'Non-capturing groups' },
+        { pattern: /\(\?</, risk: 'high' as const, message: 'Lookbehind assertions' },
         { pattern: /(\[.*\*.*\])|(\[.*\+.*\])/, risk: 'medium' as const, message: 'Character classes with quantifiers' }
       ];
 
       // Calculate complexity
-      complexity = this.calculateComplexity(pattern);
+      const complexity = this.calculateComplexity(pattern);
 
       // Evaluate dangerous patterns
       for (const dangerous of dangerousPatterns) {
@@ -312,9 +309,9 @@ export class RegexSecurityService extends BrowserApiBaseService {
     complexity += (pattern.match(/\?\?/g) || []).length * 3;
     
     // Lookaheads/lookbehinds
-    complexity += (pattern.match(/\(\?\=/g) || []).length * 2;
-    complexity += (pattern.match(/\(\?\!/g) || []).length * 2;
-    complexity += (pattern.match(/\(\?\</g) || []).length * 3;
+    complexity += (pattern.match(/\(\?=/g) || []).length * 2;
+    complexity += (pattern.match(/\(\?!/g) || []).length * 2;
+    complexity += (pattern.match(/\(\?</g) || []).length * 3;
     
     // Nested groups
     const openParens = (pattern.match(/\(/g) || []).length;

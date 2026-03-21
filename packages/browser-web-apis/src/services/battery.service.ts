@@ -1,9 +1,14 @@
 import { Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Observable, fromEvent, merge } from 'rxjs';
+import { Observable, fromEvent } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 import { BatteryManager, BatteryInfo } from '../interfaces/battery.interface';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+
+// Type extension for Battery API
+interface NavigatorWithBattery extends Navigator {
+  getBattery?: () => Promise<BatteryManager>;
+}
 
 @Injectable()
 export class BatteryService extends BrowserApiBaseService {
@@ -32,7 +37,7 @@ export class BatteryService extends BrowserApiBaseService {
 
     if ('getBattery' in navigator) {
       try {
-        const battery = await (navigator as any).getBattery();
+        const battery = await (navigator as NavigatorWithBattery).getBattery!();
         this.battery.set(battery);
         this.updateBatteryInfo();
         this.setupEventListeners();

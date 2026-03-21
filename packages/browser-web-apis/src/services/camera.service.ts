@@ -1,4 +1,4 @@
-import { Injectable, signal, inject, computed } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { from, Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { 
@@ -7,7 +7,6 @@ import {
   CameraInfo,
   MediaDevicesInfo 
 } from '../interfaces/media.interface';
-import { DomSanitizer } from '@angular/platform-browser';
 import { CameraPermissionHelperService } from './camera-permission-helper.service';
 import { MediaDeviceBaseService } from './base/media-device-base.service';
 
@@ -61,20 +60,21 @@ export class CameraService extends MediaDeviceBaseService {
       this.isStreaming.set(true);
 
       return stream;
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.logError('Error starting camera:', error);
       
       // Provide a more descriptive error
-      if (error.name === 'NotAllowedError') {
-        throw new Error('Camera permission denied by user. Please allow camera access in your browser settings and refresh the page.');
-      } else if (error.name === 'NotFoundError') {
-        throw new Error('No camera device found. Please connect a camera and try again.');
-      } else if (error.name === 'NotReadableError') {
-        throw new Error('Camera is already in use by another application. Please close other applications using the camera and try again.');
-      } else if (error.name === 'OverconstrainedError') {
-        throw new Error('Camera constraints cannot be satisfied. Try with different camera settings.');
+      if (error instanceof Error && error.name === 'NotAllowedError') {
+        throw new Error('Camera permission denied by user. Please allow camera access in your browser settings and refresh the page.', { cause: error });
+      } else if (error instanceof Error && error.name === 'NotFoundError') {
+        throw new Error('No camera device found. Please connect a camera and try again.', { cause: error });
+      } else if (error instanceof Error && error.name === 'NotReadableError') {
+        throw new Error('Camera is already in use by another application. Please close other applications using the camera and try again.', { cause: error });
+      } else if (error instanceof Error && error.name === 'OverconstrainedError') {
+        throw new Error('Camera constraints cannot be satisfied. Try with different camera settings.', { cause: error });
       } else {
-        throw new Error(`Camera error: ${error.message || 'Unknown error occurred'}`);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        throw new Error(`Camera error: ${errorMessage}`, { cause: error });
       }
     }
   }
@@ -133,24 +133,24 @@ export class CameraService extends MediaDeviceBaseService {
       label: device.label,
       capabilities: capabilities ? {
         width: {
-          min: (capabilities.width as any)?.min || 0,
-          max: (capabilities.width as any)?.max || 0,
-          step: (capabilities.width as any)?.step || 1
+          min: capabilities.width?.min || 0,
+          max: capabilities.width?.max || 0,
+          step: 1
         },
         height: {
-          min: (capabilities.height as any)?.min || 0,
-          max: (capabilities.height as any)?.max || 0,
-          step: (capabilities.height as any)?.step || 1
+          min: capabilities.height?.min || 0,
+          max: capabilities.height?.max || 0,
+          step: 1
         },
         aspectRatio: {
-          min: (capabilities.aspectRatio as any)?.min || 0,
-          max: (capabilities.aspectRatio as any)?.max || 0,
-          step: (capabilities.aspectRatio as any)?.step || 0.1
+          min: capabilities.aspectRatio?.min || 0,
+          max: capabilities.aspectRatio?.max || 0,
+          step: 0.1
         },
         frameRate: {
-          min: (capabilities.frameRate as any)?.min || 0,
-          max: (capabilities.frameRate as any)?.max || 0,
-          step: (capabilities.frameRate as any)?.step || 1
+          min: capabilities.frameRate?.min || 0,
+          max: capabilities.frameRate?.max || 0,
+          step: 1
         },
         facingMode: capabilities.facingMode ? [(capabilities.facingMode as unknown) as string] : ['user']
       } : undefined,

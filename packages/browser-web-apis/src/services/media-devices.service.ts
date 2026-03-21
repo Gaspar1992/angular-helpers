@@ -1,7 +1,6 @@
-import { Injectable, signal, inject, computed, OnDestroy } from '@angular/core';
-import { from, Observable, Subject } from 'rxjs';
+import { Injectable, signal, OnDestroy } from '@angular/core';
+import { from, Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { 
   MediaDevice, 
   MediaDeviceKind, 
@@ -9,8 +8,13 @@ import {
   MediaDevicesInfo
 } from '../interfaces/media.interface';
 import { BrowserSupportUtil } from '../utils/browser-support.util';
-import { PermissionsService } from './permissions.service';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+
+// Type for display media constraints
+interface DisplayMediaConstraints {
+  video?: boolean | MediaTrackConstraints;
+  audio?: boolean | MediaTrackConstraints;
+}
 
 @Injectable()
 export class MediaDevicesService extends BrowserApiBaseService implements OnDestroy {
@@ -82,7 +86,7 @@ export class MediaDevicesService extends BrowserApiBaseService implements OnDest
     }
   }
 
-  async getDisplayMedia(constraints?: any): Promise<MediaStream> {
+  async getDisplayMedia(constraints?: DisplayMediaConstraints): Promise<MediaStream> {
     if (!this.isSupported()) {
       throw new Error('Media Devices API not supported');
     }
