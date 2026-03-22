@@ -5,6 +5,12 @@ import { BrowserApiBaseService } from './base/browser-api-base.service';
 export class CameraService extends BrowserApiBaseService {
   private currentStream: MediaStream | null = null;
 
+  private createError(message: string, cause: unknown): Error {
+    const error = new Error(message) as Error & { cause?: unknown };
+    error.cause = cause;
+    return error;
+  }
+
   protected override getApiName(): string {
     return 'camera';
   }
@@ -42,16 +48,16 @@ export class CameraService extends BrowserApiBaseService {
       console.error('[CameraService] Error starting camera:', error);
       
       if (error instanceof Error && error.name === 'NotAllowedError') {
-        throw new Error('Camera permission denied by user. Please allow camera access in your browser settings and refresh the page.', { cause: error });
+        throw this.createError('Camera permission denied by user. Please allow camera access in your browser settings and refresh the page.', error);
       } else if (error instanceof Error && error.name === 'NotFoundError') {
-        throw new Error('No camera device found. Please connect a camera and try again.', { cause: error });
+        throw this.createError('No camera device found. Please connect a camera and try again.', error);
       } else if (error instanceof Error && error.name === 'NotReadableError') {
-        throw new Error('Camera is already in use by another application. Please close other applications using the camera and try again.', { cause: error });
+        throw this.createError('Camera is already in use by another application. Please close other applications using the camera and try again.', error);
       } else if (error instanceof Error && error.name === 'OverconstrainedError') {
-        throw new Error('Camera constraints cannot be satisfied. Try with different camera settings.', { cause: error });
+        throw this.createError('Camera constraints cannot be satisfied. Try with different camera settings.', error);
       } else {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        throw new Error(`Camera error: ${errorMessage}`, { cause: error });
+        throw this.createError(`Camera error: ${errorMessage}`, error);
       }
     }
   }
@@ -119,7 +125,7 @@ export class CameraService extends BrowserApiBaseService {
       return devices.filter(device => device.kind === 'videoinput');
     } catch (error) {
       console.error('[CameraService] Error enumerating video devices:', error);
-      throw new Error('Failed to enumerate video devices', { cause: error });
+      throw this.createError('Failed to enumerate video devices', error);
     }
   }
 

@@ -9,6 +9,12 @@ interface DisplayMediaConstraints {
 
 @Injectable()
 export class MediaDevicesService extends BrowserApiBaseService {
+  private createError(message: string, cause: unknown): Error {
+    const error = new Error(message) as Error & { cause?: unknown };
+    error.cause = cause;
+    return error;
+  }
+
   protected override getApiName(): string {
     return 'media-devices';
   }
@@ -27,7 +33,7 @@ export class MediaDevicesService extends BrowserApiBaseService {
       return devices;
     } catch (error) {
       console.error('[MediaDevicesService] Error enumerating devices:', error);
-      throw new Error('Failed to enumerate media devices', { cause: error });
+      throw this.createError('Failed to enumerate media devices', error);
     }
   }
 
@@ -65,7 +71,7 @@ export class MediaDevicesService extends BrowserApiBaseService {
       return await navigator.mediaDevices.getDisplayMedia(finalConstraints);
     } catch (error) {
       console.error('[MediaDevicesService] Error getting display media:', error);
-      throw new Error('Failed to get display media', { cause: error });
+      throw this.createError('Failed to get display media', error);
     }
   }
 
@@ -138,7 +144,7 @@ export class MediaDevicesService extends BrowserApiBaseService {
       message = 'Unknown media error occurred';
     }
     
-    return new Error(message, { cause: error });
+    return this.createError(message, error);
   }
 
   // Direct access to native media devices API
