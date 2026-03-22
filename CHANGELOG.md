@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/Gaspar1992/angular-helpers/compare/v1.0.1...v1.0.2) (2026-03-22)
+
+
+### Bug Fixes
+
+* **ci:** publish npm packages from dist artifacts ([7a2d293](https://github.com/Gaspar1992/angular-helpers/commit/7a2d29324c5c53527677dcab732922b4129090fd))
+
 ## [1.0.1](https://github.com/Gaspar1992/angular-helpers/compare/v1.0.0...v1.0.1) (2026-03-22)
 
 
