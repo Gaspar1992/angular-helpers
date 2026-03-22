@@ -27,6 +27,12 @@ interface BatteryInfo {
 export class BatteryService extends BrowserApiBaseService {
   private batteryManager: BatteryManager | null = null;
 
+  private createError(message: string, cause: unknown): Error {
+    const error = new Error(message) as Error & { cause?: unknown };
+    error.cause = cause;
+    return error;
+  }
+
   protected override getApiName(): string {
     return 'battery';
   }
@@ -51,7 +57,7 @@ export class BatteryService extends BrowserApiBaseService {
       return batteryInfo;
     } catch (error) {
       console.error('[BatteryService] Error initializing battery API:', error);
-      throw new Error('Failed to initialize battery API', { cause: error });
+      throw this.createError('Failed to initialize battery API', error);
     }
   }
 

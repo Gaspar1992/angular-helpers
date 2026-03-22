@@ -45,6 +45,12 @@ export class RegexSecurityService extends BrowserApiBaseService {
   private webWorkerService = inject(WebWorkerService);
   private readonly workerName = 'regex-security-worker';
 
+  private createError(message: string, cause: unknown): Error {
+    const error = new Error(message) as Error & { cause?: unknown };
+    error.cause = cause;
+    return error;
+  }
+
   protected override getApiName(): string {
     return 'regex-security';
   }
@@ -150,7 +156,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
 
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
-        reject(new Error('Regex execution timeout', { cause: 'timeout' }));
+        reject(this.createError('Regex execution timeout', 'timeout'));
       }, config.timeout);
 
       const message = {
@@ -189,7 +195,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
           error: (error: unknown) => {
             clearTimeout(timeoutId);
             subscription.unsubscribe();
-            reject(new Error('Worker execution failed', { cause: error }));
+            reject(this.createError('Worker execution failed', error));
           }
         });
     });
@@ -200,7 +206,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
       await firstValueFrom(this.webWorkerService.createWorker(this.workerName, '/assets/workers/regex-security.worker.js'));
     } catch (error) {
       console.error('[RegexSecurityService] Failed to initialize worker:', error);
-      throw new Error('Failed to initialize regex security worker', { cause: error });
+      throw this.createError('Failed to initialize regex security worker', error);
     }
   }
 
@@ -221,7 +227,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
       return new RegExp(pattern, flags);
     } catch (error) {
       console.error('[RegexSecurityService] Error creating regex:', error);
-      throw new Error('Invalid regex pattern', { cause: error });
+      throw this.createError('Invalid regex pattern', error);
     }
   }
 
