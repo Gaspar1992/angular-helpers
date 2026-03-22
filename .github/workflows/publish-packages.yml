@@ -1,0 +1,62 @@
+name: Publish Packages
+
+on:
+  workflow_dispatch:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish npm workspaces
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build browser-web-apis
+        run: npm run build --workspace packages/browser-web-apis
+
+      - name: Publish browser-web-apis
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          PACKAGE_NAME=$(node -p "require('./packages/browser-web-apis/package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./packages/browser-web-apis/package.json').version")
+
+          if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version > /dev/null 2>&1; then
+            echo "${PACKAGE_NAME}@${PACKAGE_VERSION} is already published. Skipping."
+            exit 0
+          fi
+
+          npm publish --workspace packages/browser-web-apis --access public
+
+      - name: Build security
+        run: npm run build --workspace packages/security
+
+      - name: Publish security
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          PACKAGE_NAME=$(node -p "require('./packages/security/package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./packages/security/package.json').version")
+
+          if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version > /dev/null 2>&1; then
+            echo "${PACKAGE_NAME}@${PACKAGE_VERSION} is already published. Skipping."
+            exit 0
+          fi
+
+          npm publish --workspace packages/security --access public

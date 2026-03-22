@@ -21,6 +21,9 @@
     "url": "https://github.com/angular-helpers/security/issues"
   },
   "homepage": "https://github.com/angular-helpers/security#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "ng-packagr -p ng-package.json"
   },
