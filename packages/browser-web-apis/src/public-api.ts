@@ -1,5 +1,4 @@
 // Browser Web APIs Services
-export { BrowserWebApisModule } from './browser-web-apis.module';
 export { PermissionsService } from './services/permissions.service';
 export { CameraService } from './services/camera.service';
 export { GeolocationService } from './services/geolocation.service';

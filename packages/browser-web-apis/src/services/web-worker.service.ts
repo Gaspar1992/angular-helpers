@@ -48,7 +48,9 @@ export class WebWorkerService extends BrowserApiBaseService {
       if (this.workers.has(name)) {
         observer.next(this.currentWorkerStatuses.get(name)!);
         observer.complete();
-        return;
+        return () => {
+          this.terminateWorker(name);
+        };
       }
 
       try {

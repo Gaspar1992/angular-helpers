@@ -34,8 +34,7 @@ export abstract class MediaDeviceBaseService extends BrowserApiBaseService {
   /**
    * Initialize the media device service
    */
-  protected override async onInitialize(): Promise<void> {
-    await super.onInitialize();
+  protected async onInitialize(): Promise<void> {
     try {
       await this.refreshDevices();
       this.setupDeviceChangeListener();
@@ -238,8 +237,28 @@ export abstract class MediaDeviceBaseService extends BrowserApiBaseService {
   /**
    * Cleanup when service is destroyed
    */
-  protected override onDestroy(): void {
+  protected onDestroy(): void {
     this.stopAllStreams();
-    super.onDestroy();
+  }
+
+  protected createError(message: string, cause: unknown): Error {
+    return new Error(message, { cause });
+  }
+
+  protected logError(message: string, error: unknown): void {
+    console.error(`[${this.getApiName()}] ${message}`, error);
+  }
+
+  protected logInfo(message: string): void {
+    console.info(`[${this.getApiName()}] ${message}`);
+  }
+
+  private async executeWithErrorHandling<T>(operation: () => Promise<T>, errorMessage: string): Promise<T> {
+    try {
+      return await operation();
+    } catch (error) {
+      this.logError(errorMessage, error);
+      throw this.createError(errorMessage, error);
+    }
   }
 }

@@ -1,6 +1,6 @@
 import { CanActivate, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { PermissionsService } from '../services/permissions.service';
-import { PermissionName } from '../interfaces/permissions.interface';
+import { PermissionNameExt } from '../interfaces/permissions.interface';
 
 export class PermissionGuard implements CanActivate {
   constructor(
@@ -9,7 +9,7 @@ export class PermissionGuard implements CanActivate {
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot): Promise<boolean> {
-    const permission = route.data?.['permission'] as PermissionName;
+    const permission = route.data?.['permission'] as PermissionNameExt;
     
     if (!permission) {
       return Promise.resolve(true);
@@ -18,34 +18,29 @@ export class PermissionGuard implements CanActivate {
     return this.checkPermission(permission);
   }
 
-  private async checkPermission(permission: PermissionName): Promise<boolean> {
+  private async checkPermission(permission: PermissionNameExt): Promise<boolean> {
     try {
-      const hasPermission = this.permissionsService.isGranted(permission);
-      
-      if (!hasPermission) {
-        await this.permissionsService.request({ name: permission });
-        const granted = this.permissionsService.isGranted(permission);
-        
-        if (!granted) {
-          this.router.navigate(['/permission-denied'], { 
-            queryParams: { permission } 
-          });
-          return false;
-        }
+      const status = await this.permissionsService.query({ name: permission as PermissionName });
+
+      if (status.state !== 'granted') {
+        this.router.navigate(['/permission-denied'], {
+          queryParams: { permission }
+        });
+        return false;
       }
-      
+
       return true;
     } catch (error) {
       console.error('Permission guard error:', error);
-      this.router.navigate(['/permission-denied'], { 
-        queryParams: { permission } 
+      this.router.navigate(['/permission-denied'], {
+        queryParams: { permission }
       });
       return false;
     }
   }
 }
 
-export function createPermissionGuard(permission: PermissionName) {
+export function createPermissionGuard(permission: PermissionNameExt) {
   return {
     canActivate: [PermissionGuard],
     data: { permission }
