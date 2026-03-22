@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/security",
-  "version": "21.0.0",
+  "version": "21.0.1",
   "description": "Angular security helpers for preventing ReDoS and other security vulnerabilities",
   "keywords": [
     "angular",
@@ -30,7 +30,7 @@
   "peerDependencies": {
     "@angular/common": "^21.0.0",
     "@angular/core": "^21.0.0",
-    "@angular-helpers/browser-web-apis": "21.0.0",
+    "@angular-helpers/browser-web-apis": "21.0.1",
     "rxjs": "^7.0.0 || ^8.0.0"
   },
   "dependencies": {
