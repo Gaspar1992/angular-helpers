@@ -32,6 +32,18 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Bootstrap first release to 21.x
+        run: |
+          if git tag --list 'v*' | grep -q .; then
+            echo "Existing release tags detected. Skipping bootstrap."
+            exit 0
+          fi
+
+          git tag v20.0.0
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" refs/tags/v20.0.0
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
       - name: Run Release
         run: npx semantic-release
         env:
