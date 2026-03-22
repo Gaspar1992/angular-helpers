@@ -1,35 +1,35 @@
 # 🚀 Angular Helpers
 
-Suite de librerías Angular especializadas para potenciar tus aplicaciones con seguridad, acceso a APIs del navegador y utilidades avanzadas.
+A suite of Angular libraries that helps you build secure, browser-integrated applications with a clean developer experience.
 
 ---
 
-## 📦 **Packages Disponibles**
+## 📦 Available Packages
 
-### 🔐 **@angular-helpers/security**  
-*Seguridad avanzada para expresiones regulares y prevención de ataques ReDoS*
+### 🔐 `@angular-helpers/security`
+*Advanced regular expression security and ReDoS prevention*
 
-**🎯 Problema que resuelve:**
-- **ReDoS (Regular Expression Denial of Service)** - Ataques que pueden colapsar tu servidor con patrones maliciosos
-- **Validación de patrones complejos** sin comprometer el rendimiento
-- **Ejecución segura** de expresiones regulares con timeout y análisis de seguridad
+**🎯 What it solves:**
+- **ReDoS (Regular Expression Denial of Service)** attacks caused by malicious or expensive patterns.
+- Safe validation of complex regular expressions without blocking your app.
+- Controlled regex execution with timeout and security analysis.
 
-**✨ Características principales:**
-- 🛡️ **Prevención de ReDoS** - Análisis automático de patrones peligrosos
-- ⚡ **Ejecución con Web Workers** - Sin bloqueo del hilo principal
-- 🕐 **Timeout configurable** - Protección contra patrones lentos
-- 📊 **Análisis de complejidad** - Métricas de riesgo y recomendaciones
-- 🏗️ **Builder Pattern** - API fluida para construcción de patrones seguros
+**✨ Key features:**
+- 🛡️ **ReDoS prevention** with automatic risky pattern checks.
+- ⚡ **Web Worker execution** to avoid blocking the main thread.
+- 🕐 **Configurable timeout** to limit expensive regex operations.
+- 📊 **Risk analysis** with complexity metrics and recommendations.
+- 🏗️ **Builder pattern** for fluent secure-regex configuration.
 
-**💡 Casos de uso:**
+**💡 Example usage:**
 ```typescript
-// Validación segura de input de usuario
+// Safe regex validation for user input
 const result = await securityService.testRegex(userInput, text, {
   timeout: 5000,
   safeMode: true
 });
 
-// Builder pattern para patrones complejos
+// Builder pattern for complex patterns
 const pattern = RegexSecurityService.builder()
   .pattern('\\d+')
   .timeout(3000)
@@ -37,215 +37,198 @@ const pattern = RegexSecurityService.builder()
   .build();
 ```
 
-**📥 Instalación:**
+**📥 Installation:**
 ```bash
 npm install @angular-helpers/security
 ```
 
 ---
 
-### 🌐 **@angular-helpers/browser-web-apis**  
-*Acceso unificado y seguro a las APIs del navegador con soporte para permisos y gestión de errores*
+### 🌐 `@angular-helpers/browser-web-apis`
+*Unified and safe browser API access with permissions and robust error handling*
 
-**🎯 Problema que resuelve:**
-- **Fragmentación de APIs** - Cada navegador implementa las APIs de manera diferente
-- **Gestión de permisos** - Proceso complejo y repetitivo para solicitar permisos
-- **Detección de compatibilidad** - Código boilerplate para verificar soporte
-- **Manejo de errores** - Diferentes tipos de errores entre navegadores
+**🎯 What it solves:**
+- **API fragmentation** across browsers.
+- **Permission complexity** for sensitive browser features.
+- **Compatibility checks** that usually require repetitive boilerplate.
+- **Inconsistent error handling** across web APIs.
 
-**✨ Características principales:**
-- 📸 **Cámara** - Captura de fotos y video con gestión de permisos
-- 🗺️ **Geolocalización** - GPS y watch position con manejo de errores
-- 🔔 **Notificaciones** - Sistema de notificaciones del navegador
-- 📋 **Clipboard** - Copiar/pegar texto e imágenes
-- 🎥 **Media Devices** - Enumeración de cámaras y micrófonos
-- 🔐 **Gestión de permisos** - API centralizada para todos los permisos
-- 📱 **Sensores** - Orientación, movimiento y batería
-- 🌍 **Soporte universal** - Detección automática de compatibilidad
+**✨ Key features:**
+- 📸 **Camera** access and stream control.
+- 🗺️ **Geolocation** with watch support and typed errors.
+- 🔔 **Notifications** with permission-aware behavior.
+- 📋 **Clipboard** utilities.
+- 🎥 **Media Devices** enumeration and media access.
+- 🔐 **Centralized permission utilities**.
+- � **Device/browser API wrappers** with fallback checks.
 
-**💡 Casos de uso:**
-```typescript
-// Acceso a cámara con permisos automáticos
-async takePhoto() {
-  if (await this.cameraService.requestPermission()) {
-    const photo = await this.cameraService.capturePhoto();
-    console.log('Foto capturada:', photo);
-  }
-}
-
-// Geolocalización con watch
-this.geolocationService.watchPosition({
-  enableHighAccuracy: true,
-  timeout: 10000
-}).subscribe(position => {
-  console.log('Ubicación actual:', position);
-});
-```
-
-**📥 Instalación:**
+**📥 Installation:**
 ```bash
 npm install @angular-helpers/browser-web-apis
 ```
 
 ---
 
-## 🎯 **¿Por qué Angular Helpers?**
+## 🎯 Why Angular Helpers?
 
-### ⚡ **Productividad Inmediata**
-- **APIs unificadas** - No más código boilerplate para cada navegador
-- **TypeScript completo** - Tipado estricto y autocompletado
-- **Documentación integrada** - Cada método incluye ejemplos y casos de uso
-- **Testing incluido** - Suite de tests completa para cada package
+### ⚡ Immediate Productivity
+- Unified APIs for common browser capabilities.
+- Strict TypeScript support and better autocomplete.
+- Practical examples and ready-to-use patterns.
+- End-to-end browser test coverage in CI.
 
-### 🛡️ **Seguridad por Defecto**
-- **Prevención de ataques** - Protección contra ReDoS y otras vulnerabilidades
-- **Validación de permisos** - Gestión segura de APIs sensibles
-- **Contextos aislados** - Ejecución segura con Web Workers
-- **Manejo de errores** - Gestión robusta de casos límite
+### 🛡️ Security by Default
+- ReDoS prevention tools for regex-heavy flows.
+- Permission-aware wrappers for sensitive APIs.
+- Worker-based isolation for expensive operations.
+- Predictable error handling paths.
 
-### 🔄 **Actualizaciones Constantes**
-- **Angular moderno** - Compatible con las últimas versiones de Angular
-- **Navegadores actuales** - Soporte para Chrome, Firefox, Safari, Edge
-- **Mantenimiento activo** - Corrección de bugs y nuevas funcionalidades
+### 🔄 Modern Stack Alignment
+- Built for modern Angular versions and patterns.
+- Browser-focused utilities tested with Playwright.
+- Actively maintained workflows and test harnesses.
 
 ---
 
-## 🚀 **Empezar Rápido**
+## 🚀 Quick Start
 
-### **Instalación del Workspace**
+### Workspace Setup
 ```bash
-# Clonar el repositorio
+# Clone the repository
 git clone https://github.com/angular-helpers/angular-helpers
 cd angular-helpers
 
-# Instalar dependencias
+# Install dependencies
 npm install
 
-# Iniciar demo
+# Generate local SSL certificates
+npm run ssl:generate
+
+# Start demo app over HTTPS
 npm run start:https
 ```
 
-### **Uso en tu Proyecto**
+### Use in Your Project
 ```bash
-# Instalar packages deseados
+# Install the packages you need
 npm install @angular-helpers/security
 npm install @angular-helpers/browser-web-apis
-
-# Importar en tu módulo
-import { SecurityModule } from '@angular-helpers/security';
-import { BrowserWebApisModule } from '@angular-helpers/browser-web-apis';
-
-@NgModule({
-  imports: [SecurityModule, BrowserWebApisModule]
-})
-export class AppModule {}
 ```
 
----
-
-## 📊 **Comparativa con Alternativas**
-
-| Característica | Angular Helpers | Implementación Manual | Otras Librerías |
-|----------------|------------------|---------------------|------------------|
-| **ReDoS Protection** | ✅ Integrado | ❌ Manual | ⚠️ Parcial |
-| **Browser APIs** | ✅ Unificadas | ❌ Fragmentadas | ⚠️ Limitadas |
-| **TypeScript** | ✅ Completo | ⚠️ Parcial | ❌ Mínimo |
-| **Testing** | ✅ Incluido | ❌ Manual | ⚠️ Básico |
-| **Documentación** | ✅ Completa | ❌ Inexistente | ⚠️ Básica |
-| **Soporte** | ✅ Activo | ❌ Propio | ⚠️ Variable |
+For modern Angular standalone integration, check each package guide in `docs/`.
 
 ---
 
-## 🛠️ **Desarrollo**
+## 📊 Comparison
 
-### **Scripts Disponibles**
+| Feature | Angular Helpers | Manual Implementation | Other Libraries |
+|---------|------------------|------------------------|-----------------|
+| **ReDoS Protection** | ✅ Built-in | ❌ Manual | ⚠️ Partial |
+| **Browser APIs** | ✅ Unified | ❌ Fragmented | ⚠️ Limited |
+| **TypeScript** | ✅ Full support | ⚠️ Partial | ❌ Minimal |
+| **Testing** | ✅ Included | ❌ Manual | ⚠️ Basic |
+| **Documentation** | ✅ Comprehensive | ❌ Missing | ⚠️ Basic |
+| **Support** | ✅ Active | ❌ Team-owned only | ⚠️ Varies |
+
+---
+
+## 🛠️ Development
+
+### Available Scripts
 ```bash
-# Desarrollo con HTTPS (requerido para APIs del navegador)
+# Generate SSL certificates (local/CI)
+npm run ssl:generate
+
+# Local HTTPS development (required for secure browser APIs)
 npm run start:https
 
-# Build de todos los packages
+# Build all packages
 npm run build:packages
 
-# Testing completo
-npm run test:packages
+# Browser tests on Chromium
+npm run test:browser
 
-# Linting del workspace
+# Browser tests for CI (Chromium, 1 worker)
+npm run test:browser:ci
+
+# Cross-browser smoke tests (Firefox + WebKit)
+npm run test:browser:cross
+
+# Workspace linting
 npm run lint
 ```
 
-### **Estructura del Proyecto**
+### Project Structure
 ```
 angular-helpers/
 ├── packages/
-│   ├── security/           # 📦 @angular-helpers/security
+│   ├── security/          # 📦 @angular-helpers/security
 │   └── browser-web-apis/  # 📦 @angular-helpers/browser-web-apis
-├── src/                   # 🚀 Aplicación demo
-├── docs/                  # 📚 Documentación completa
-└── scripts/              # 🔧 Scripts de automatización
+├── src/                   # 🚀 Demo application
+├── docs/                  # 📚 Documentation
+└── scripts/               # 🔧 Automation scripts
 ```
 
 ---
 
-## 📈 **Roadmap**
+## 📈 Roadmap
 
-### **Próximamente** 🚧
-- **@angular-helpers/storage** - APIs de almacenamiento unificadas
-- **@angular-helpers/network** - Conectividad y estado de red
-- **@angular-helpers/performance** - Monitoreo y optimización
-- **@angular-helpers/pwa** - Service Workers y características PWA
+### Planned 🚧
+- **@angular-helpers/storage** - Unified storage helpers.
+- **@angular-helpers/network** - Connectivity and network-state tools.
+- **@angular-helpers/performance** - Performance monitoring helpers.
+- **@angular-helpers/pwa** - Service Worker and PWA capabilities.
 
-### **En Desarrollo** 🔄
-- **Mejoras de performance** - Optimización de bundle y runtime
-- **Más ejemplos** - Casos de uso reales y demos interactivas
-- **Integración CLI** - Scaffolding automático para nuevos proyectos
+### In Progress 🔄
+- Runtime and bundle-size improvements.
+- More real-world examples and demos.
+- Better CLI integration and scaffolding flows.
 
 ---
 
-## 🤝 **Contribuir**
+## 🤝 Contributing
 
-¡Nos encantaría tu contribución! 
+Contributions are welcome.
 
-### **Cómo Empezar**
+### Getting Started
 ```bash
-# Fork del repositorio
-git clone https://github.com/tu-usuario/angular-helpers
+# Fork and clone
+git clone https://github.com/your-user/angular-helpers
 cd angular-helpers
 
-# Crear rama de feature
-git checkout -b feature/nueva-funcionalidad
+# Create a feature branch
+git checkout -b feature/your-feature
 
-# Hacer cambios y commits
-git commit -m "feat: agregar nueva funcionalidad"
-
-# Push y PR
-git push origin feature/nueva-funcionalidad
+# Commit and push
+git commit -m "feat: add your feature"
+git push origin feature/your-feature
 ```
 
-### **Guías de Contribución**
-- 📖 [Guía de Desarrollo](./docs/CONTRIBUTING.md)
-- 🧪 [Guía de Testing](./docs/testing-guide.md)
-- 📦 [Guía de Packages](./docs/package-development.md)
+### Contribution Guides
+- 📖 [Development Guide](./docs/CONTRIBUTING.md)
+- 🧪 [Testing Guide](./docs/testing-guide.md)
+- 📦 [Package Development Guide](./docs/package-development.md)
 
 ---
 
-## 📄 **Licencia**
+## 📄 License
 
-MIT License - Ver [LICENSE](./LICENSE) para detalles
+MIT License — see [LICENSE](./LICENSE) for details.
 
 ---
 
-## 🔗 **Enlaces Útiles**
+## 🔗 Useful Links
 
-- **📚 Documentación Completa**: [docs.angular-helpers.dev](https://docs.angular-helpers.dev)
-- **🐛 Issues y Feature Requests**: [GitHub Issues](https://github.com/angular-helpers/angular-helpers/issues)
-- **💬 Discusiones**: [GitHub Discussions](https://github.com/angular-helpers/angular-helpers/discussions)
-- **📦 NPM Packages**: [npmjs.com/org/angular-helpers](https://www.npmjs.com/org/angular-helpers)
+- **📚 Full Documentation**: [docs.angular-helpers.dev](https://docs.angular-helpers.dev)
+- **🐛 Issues & Feature Requests**: [GitHub Issues](https://github.com/angular-helpers/angular-helpers/issues)
+- **💬 Discussions**: [GitHub Discussions](https://github.com/angular-helpers/angular-helpers/discussions)
+- **📦 NPM Organization**: [npmjs.com/org/angular-helpers](https://www.npmjs.com/org/angular-helpers)
 
 ---
 
 <div align="center">
 
-**⭐ Si Angular Helpers te ayuda, danos una estrella!**
+**⭐ If Angular Helpers helps your team, consider starring the repository.**
 
 Made with ❤️ by the Angular Helpers Team
 
