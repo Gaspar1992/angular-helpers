@@ -42,7 +42,7 @@ jobs:
             exit 0
           fi
 
-          npm publish --workspace packages/browser-web-apis --access public
+          npm publish ./dist/browser-web-apis --access public
 
       - name: Build security
         run: npm run build --workspace packages/security
@@ -59,4 +59,4 @@ jobs:
             exit 0
           fi
 
-          npm publish --workspace packages/security --access public
+          npm publish ./dist/security --access public
