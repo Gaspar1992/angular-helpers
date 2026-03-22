@@ -5,6 +5,10 @@ export { GeolocationService } from './services/geolocation.service';
 export { MediaDevicesService } from './services/media-devices.service';
 export { NotificationService } from './services/notification.service';
 export { ClipboardService } from './services/clipboard.service';
+export {
+  BrowserCapabilityService,
+  type BrowserCapabilityId
+} from './services/browser-capability.service';
 
 // Interfaces and Types
 export * from './interfaces/permissions.interface';

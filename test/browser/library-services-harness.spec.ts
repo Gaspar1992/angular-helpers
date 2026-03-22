@@ -23,6 +23,12 @@ test.describe('Library services harness', () => {
     expect(['yes', 'no']).toContain(batterySupported);
 
     await expect(page.getByTestId('web-socket-supported')).toHaveText('yes');
+
+    await expect(page.getByRole('heading', { level: 2, name: /Capability Matrix/i })).toBeVisible();
+    await expect(page.getByTestId('capability-row-geolocation')).toBeVisible();
+    await expect(page.getByTestId('capability-supported-geolocation')).toHaveText('yes');
+    await expect(page.getByTestId('capability-secure-required-geolocation')).toHaveText('yes');
+    await expect(page.getByTestId('capability-secure-required-webSocket')).toHaveText('no');
   });
 
   test('queries camera permission state', async ({ page }) => {
