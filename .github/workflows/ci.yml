@@ -32,11 +32,11 @@ jobs:
       - name: Generate SSL certificates
         run: npm run ssl:generate
 
-      - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium firefox webkit
 
       - name: Run Tests
-        run: npm run test:browser:ci
+        run: npm run test:browser:all
 
       - name: Build Packages
         run: npm run build

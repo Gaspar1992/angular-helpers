@@ -1,4 +1,4 @@
-import { makeEnvironmentProviders, EnvironmentProviders } from '@angular/core';
+import { makeEnvironmentProviders, EnvironmentProviders, Provider } from '@angular/core';
 import { PermissionsService } from './services/permissions.service';
 import { CameraService } from './services/camera.service';
 import { GeolocationService } from './services/geolocation.service';
@@ -18,7 +18,6 @@ export interface BrowserWebApisConfig {
   enableNotifications?: boolean;
   enableClipboard?: boolean;
   enableMediaDevices?: boolean;
-  enablePermissions?: boolean;
   enableBattery?: boolean;
   enableWebShare?: boolean;
   enableWebStorage?: boolean;
@@ -32,7 +31,6 @@ export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
   enableGeolocation: true,
   enableNotifications: true,
   enableClipboard: true,
-  enablePermissions: true,
   enableBattery: false,
   enableMediaDevices: true,
   enableWebShare: false,
@@ -45,55 +43,26 @@ export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
 export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): EnvironmentProviders {
   const mergedConfig = { ...defaultBrowserWebApisConfig, ...config };
   
-  const providers = [];
-  
-  // Always include PermissionsService as it's used by other services
-  if (mergedConfig.enablePermissions) {
-    providers.push(PermissionsService);
-  }
-  
-  if (mergedConfig.enableCamera) {
-    providers.push(CameraService);
-  }
-  
-  if (mergedConfig.enableGeolocation) {
-    providers.push(GeolocationService);
-  }
-  
-  if (mergedConfig.enableNotifications) {
-    providers.push(NotificationService);
-  }
-  
-  if (mergedConfig.enableClipboard) {
-    providers.push(ClipboardService);
-  }
-  
-  if (mergedConfig.enableMediaDevices) {
-    providers.push(MediaDevicesService);
-  }
-  
-  if (mergedConfig.enableBattery) {
-    providers.push(BatteryService);
-  }
-  
-  if (mergedConfig.enableWebShare) {
-    providers.push(WebShareService);
-  }
-  
-  if (mergedConfig.enableWebStorage) {
-    providers.push(WebStorageService);
-  }
-  
-  if (mergedConfig.enableWebSocket) {
-    providers.push(WebSocketService);
-  }
-  
-  if (mergedConfig.enableWebWorker) {
-    providers.push(WebWorkerService);
-  }
-  
-  if (mergedConfig.enableRegexSecurity) {
-    providers.push(RegexSecurityService);
+  const providers: Provider[] = [PermissionsService];
+
+  const conditionalProviders: Array<[boolean | undefined, Provider]> = [
+    [mergedConfig.enableCamera, CameraService],
+    [mergedConfig.enableGeolocation, GeolocationService],
+    [mergedConfig.enableNotifications, NotificationService],
+    [mergedConfig.enableClipboard, ClipboardService],
+    [mergedConfig.enableMediaDevices, MediaDevicesService],
+    [mergedConfig.enableBattery, BatteryService],
+    [mergedConfig.enableWebShare, WebShareService],
+    [mergedConfig.enableWebStorage, WebStorageService],
+    [mergedConfig.enableWebSocket, WebSocketService],
+    [mergedConfig.enableWebWorker, WebWorkerService],
+    [mergedConfig.enableRegexSecurity, RegexSecurityService]
+  ];
+
+  for (const [enabled, provider] of conditionalProviders) {
+    if (enabled) {
+      providers.push(provider);
+    }
   }
   
   return makeEnvironmentProviders(providers);
