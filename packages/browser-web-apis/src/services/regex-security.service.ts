@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { WebWorkerService, WorkerMessage } from './web-worker.service';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import { firstValueFrom } from 'rxjs';
 
 export interface RegexSecurityConfig {
   timeout?: number; // Timeout in milliseconds (default: 5000)
@@ -196,7 +197,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
 
   private async initializeRegexWorker(): Promise<void> {
     try {
-      await this.webWorkerService.createWorker(this.workerName, '/assets/workers/regex-security.worker.js');
+      await firstValueFrom(this.webWorkerService.createWorker(this.workerName, '/assets/workers/regex-security.worker.js'));
     } catch (error) {
       console.error('[RegexSecurityService] Failed to initialize worker:', error);
       throw new Error('Failed to initialize regex security worker', { cause: error });

@@ -688,9 +688,6 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
         this.workerState.set('running');
         this.workerMessageCount.set(0);
         this.workerLastMessage.set('none');
-      },
-      complete: () => {
-        URL.revokeObjectURL(workerUrl);
       }
     });
   }
