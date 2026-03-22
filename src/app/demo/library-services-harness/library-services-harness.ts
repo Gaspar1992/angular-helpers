@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, signal } from '@angular/core';
 import {
+  BrowserCapabilityService,
   BatteryService,
   CameraService,
   ClipboardService,
@@ -20,6 +21,7 @@ import {
 type HarnessPermissionState = PermissionStatus['state'] | 'unknown';
 type HarnessWorkerState = 'idle' | 'running' | 'terminated' | 'error';
 type HarnessRegexRiskState = 'low' | 'medium' | 'high' | 'critical' | 'unknown';
+type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStatuses']>;
 
 @Component({
   selector: 'app-library-services-harness',
@@ -91,6 +93,33 @@ type HarnessRegexRiskState = 'low' | 'medium' | 'high' | 'critical' | 'unknown';
         WebSocket API supported:
         <strong data-testid="web-socket-supported">{{ webSocketSupported() ? 'yes' : 'no' }}</strong>
       </p>
+
+      <section>
+        <h2>Capability Matrix</h2>
+        <table>
+          <caption>Browser capability support and secure context requirements</caption>
+          <thead>
+            <tr>
+              <th scope="col">Capability</th>
+              <th scope="col">Supported</th>
+              <th scope="col">Requires secure context</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (capability of capabilityOverview(); track capability.id) {
+              <tr [attr.data-testid]="'capability-row-' + capability.id">
+                <td>{{ capability.label }}</td>
+                <td [attr.data-testid]="'capability-supported-' + capability.id">
+                  {{ capability.supported ? 'yes' : 'no' }}
+                </td>
+                <td [attr.data-testid]="'capability-secure-required-' + capability.id">
+                  {{ capability.requiresSecureContext ? 'yes' : 'no' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
 
       <section>
         <h2>Permissions Service</h2>
@@ -362,7 +391,7 @@ type HarnessRegexRiskState = 'low' | 'medium' | 'high' | 'critical' | 'unknown';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LibraryServicesHarnessComponent implements OnDestroy {
-  private readonly permissionsService = inject(PermissionsService);
+  private readonly browserCapabilityService = inject(BrowserCapabilityService);
   private readonly geolocationService = inject(GeolocationService);
   private readonly clipboardService = inject(ClipboardService);
   private readonly notificationService = inject(NotificationService);
@@ -376,19 +405,20 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   private readonly webShareService = inject(WebShareService);
   private readonly harnessWorkerName = 'library-services-harness-worker';
 
-  readonly secureContext = signal<boolean>(typeof window !== 'undefined' ? window.isSecureContext : false);
-  readonly permissionsSupported = signal<boolean>(this.permissionsService.isSupported());
-  readonly geolocationSupported = signal<boolean>(typeof navigator !== 'undefined' && 'geolocation' in navigator);
-  readonly clipboardSupported = signal<boolean>(typeof navigator !== 'undefined' && 'clipboard' in navigator);
-  readonly notificationSupported = signal<boolean>(typeof window !== 'undefined' && 'Notification' in window);
-  readonly mediaDevicesSupported = signal<boolean>(typeof navigator !== 'undefined' && 'mediaDevices' in navigator);
-  readonly cameraSupported = signal<boolean>(typeof navigator !== 'undefined' && 'mediaDevices' in navigator);
-  readonly webWorkerSupported = signal<boolean>(typeof Worker !== 'undefined');
-  readonly regexSecuritySupported = signal<boolean>(typeof Worker !== 'undefined');
-  readonly webStorageSupported = signal<boolean>(typeof Storage !== 'undefined');
-  readonly webShareSupported = signal<boolean>(typeof navigator !== 'undefined' && 'share' in navigator);
-  readonly batterySupported = signal<boolean>(typeof navigator !== 'undefined' && 'getBattery' in navigator);
-  readonly webSocketSupported = signal<boolean>(typeof WebSocket !== 'undefined');
+  readonly capabilityOverview = signal<HarnessCapabilityOverview>(this.browserCapabilityService.getAllStatuses());
+  readonly secureContext = signal<boolean>(this.browserCapabilityService.isSecureContext());
+  readonly permissionsSupported = signal<boolean>(this.browserCapabilityService.isSupported('permissions'));
+  readonly geolocationSupported = signal<boolean>(this.browserCapabilityService.isSupported('geolocation'));
+  readonly clipboardSupported = signal<boolean>(this.browserCapabilityService.isSupported('clipboard'));
+  readonly notificationSupported = signal<boolean>(this.browserCapabilityService.isSupported('notification'));
+  readonly mediaDevicesSupported = signal<boolean>(this.browserCapabilityService.isSupported('mediaDevices'));
+  readonly cameraSupported = signal<boolean>(this.browserCapabilityService.isSupported('camera'));
+  readonly webWorkerSupported = signal<boolean>(this.browserCapabilityService.isSupported('webWorker'));
+  readonly regexSecuritySupported = signal<boolean>(this.browserCapabilityService.isSupported('regexSecurity'));
+  readonly webStorageSupported = signal<boolean>(this.browserCapabilityService.isSupported('webStorage'));
+  readonly webShareSupported = signal<boolean>(this.browserCapabilityService.isSupported('webShare'));
+  readonly batterySupported = signal<boolean>(this.browserCapabilityService.isSupported('battery'));
+  readonly webSocketSupported = signal<boolean>(this.browserCapabilityService.isSupported('webSocket'));
   readonly cameraPermissionState = signal<HarnessPermissionState>('unknown');
   readonly geolocationPermissionState = signal<HarnessPermissionState>('unknown');
   readonly notificationPermissionState = signal<HarnessPermissionState>('unknown');
@@ -427,16 +457,8 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   readonly lastAction = signal<string>('idle');
 
   async queryCameraPermission(): Promise<void> {
-    this.resetError();
     this.lastAction.set('query-camera-permission');
-
-    try {
-      const status = await this.permissionsService.query({ name: 'camera' });
-      this.cameraPermissionState.set(status.state);
-    } catch (error: unknown) {
-      this.cameraPermissionState.set('unknown');
-      this.setError(error);
-    }
+    this.cameraPermissionState.set(await this.browserCapabilityService.getPermissionState('camera'));
   }
 
   async refreshBatterySnapshot(): Promise<void> {
@@ -593,16 +615,8 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   }
 
   async queryGeolocationPermission(): Promise<void> {
-    this.resetError();
     this.lastAction.set('query-geolocation-permission');
-
-    try {
-      const status = await this.permissionsService.query({ name: 'geolocation' });
-      this.geolocationPermissionState.set(status.state);
-    } catch (error: unknown) {
-      this.geolocationPermissionState.set('unknown');
-      this.setError(error);
-    }
+    this.geolocationPermissionState.set(await this.browserCapabilityService.getPermissionState('geolocation'));
   }
 
   async requestCurrentPosition(): Promise<void> {
@@ -810,16 +824,8 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   }
 
   async queryNotificationPermission(): Promise<void> {
-    this.resetError();
     this.lastAction.set('query-notifications-permission');
-
-    try {
-      const status = await this.permissionsService.query({ name: 'notifications' });
-      this.notificationPermissionState.set(status.state);
-    } catch (error: unknown) {
-      this.notificationPermissionState.set('unknown');
-      this.setError(error);
-    }
+    this.notificationPermissionState.set(await this.browserCapabilityService.getPermissionState('notifications'));
   }
 
   async showNotification(): Promise<void> {
