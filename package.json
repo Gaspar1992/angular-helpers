@@ -14,7 +14,7 @@
     "publish:package": "npm publish --workspace",
     "clean": "npm run clean --workspaces --if-present && rm -rf packages/*/dist",
     "lint": "npm run lint --workspaces --if-present",
-    "test:browser": "playwright test --project=chromium",
+    "test:browser": "CI=1 playwright test --project=chromium --project=firefox-smoke --project=webkit-smoke --workers=1",
     "test:browser:headed": "playwright test --headed",
     "test:browser:debug": "playwright test --debug",
     "test:browser:cross": "CI=1 playwright test --project=firefox-smoke --project=webkit-smoke --workers=1",
