@@ -47,9 +47,8 @@ export class WebWorkerService extends BrowserApiBaseService {
     return new Observable<WorkerStatus>((observer) => {
       if (this.workers.has(name)) {
         observer.next(this.currentWorkerStatuses.get(name)!);
-        observer.complete();
         return () => {
-          this.terminateWorker(name);
+          // No-op: workers are managed explicitly via terminateWorker/terminateAllWorkers
         };
       }
 
@@ -67,7 +66,6 @@ export class WebWorkerService extends BrowserApiBaseService {
         this.currentWorkerStatuses.set(name, status);
         this.updateWorkerStatus(name, status);
         observer.next(status);
-        observer.complete();
 
       } catch (error) {
         console.error(`[WebWorkerService] Failed to create worker ${name}:`, error);
@@ -80,11 +78,10 @@ export class WebWorkerService extends BrowserApiBaseService {
         this.currentWorkerStatuses.set(name, status);
         this.updateWorkerStatus(name, status);
         observer.next(status);
-        observer.complete();
       }
 
       return () => {
-        this.terminateWorker(name);
+        // No-op: workers are managed explicitly via terminateWorker/terminateAllWorkers
       };
     });
   }
