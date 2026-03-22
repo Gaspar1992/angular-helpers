@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/Gaspar1992/angular-helpers/compare/v1.0.2...v1.0.3) (2026-03-22)
+
+
+### Bug Fixes
+
+* **release:** publish full dist artifacts and bump to 21.0.2 ([c3da8eb](https://github.com/Gaspar1992/angular-helpers/commit/c3da8eb6aec92f14eff970442b5b61c5a96fd3fe))
+
 ## [1.0.2](https://github.com/Gaspar1992/angular-helpers/compare/v1.0.1...v1.0.2) (2026-03-22)
 
 
