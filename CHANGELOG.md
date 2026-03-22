@@ -1,3 +1,11 @@
+## [1.0.1](https://github.com/Gaspar1992/angular-helpers/compare/v1.0.0...v1.0.1) (2026-03-22)
+
+
+### Bug Fixes
+
+* **browser-web-apis:** make error cause handling TS-compatible ([640266d](https://github.com/Gaspar1992/angular-helpers/commit/640266d4c74fb012d5667399c4c61bf76c9dbbc9))
+* **release:** bootstrap first semantic release to 21.x ([323710b](https://github.com/Gaspar1992/angular-helpers/commit/323710bc2b7548e4e52b00f5c4b13073f2dd2ebe))
+
 # 1.0.0 (2026-03-22)
 
 
