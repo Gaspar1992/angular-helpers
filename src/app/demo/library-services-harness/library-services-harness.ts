@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, signal } from '@angular/core';
 import {
   BatteryService,
-  CameraPermissionHelperService,
   CameraService,
   ClipboardService,
   GeolocationService,
@@ -13,14 +12,12 @@ import {
   WebSocketService,
   WebStorageService,
   WebWorkerService,
-  type GeolocationPosition,
-  type PermissionState,
   type RegexTestResult,
   type WorkerMessage,
   type WorkerTask
 } from '@angular-helpers/browser-web-apis';
 
-type HarnessPermissionState = PermissionState | 'unknown';
+type HarnessPermissionState = PermissionStatus['state'] | 'unknown';
 type HarnessWorkerState = 'idle' | 'running' | 'terminated' | 'error';
 type HarnessRegexRiskState = 'low' | 'medium' | 'high' | 'critical' | 'unknown';
 
@@ -354,7 +351,6 @@ type HarnessRegexRiskState = 'low' | 'medium' | 'high' | 'critical' | 'unknown';
     ClipboardService,
     NotificationService,
     MediaDevicesService,
-    CameraPermissionHelperService,
     CameraService,
     BatteryService,
     WebSocketService,
@@ -382,17 +378,17 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
 
   readonly secureContext = signal<boolean>(typeof window !== 'undefined' ? window.isSecureContext : false);
   readonly permissionsSupported = signal<boolean>(this.permissionsService.isSupported());
-  readonly geolocationSupported = signal<boolean>(this.geolocationService.isSupported());
-  readonly clipboardSupported = signal<boolean>(this.clipboardService.isSupported());
-  readonly notificationSupported = signal<boolean>(this.notificationService.isSupported());
-  readonly mediaDevicesSupported = signal<boolean>(this.mediaDevicesService.isSupported());
-  readonly cameraSupported = signal<boolean>(this.cameraService.isSupported());
-  readonly webWorkerSupported = signal<boolean>(this.webWorkerService.isSupported());
-  readonly regexSecuritySupported = signal<boolean>(this.regexSecurityService.isSupported());
-  readonly webStorageSupported = signal<boolean>(this.webStorageService.isSupported());
-  readonly webShareSupported = signal<boolean>(this.webShareService.isSupported());
-  readonly batterySupported = signal<boolean>(this.batteryService.isSupported());
-  readonly webSocketSupported = signal<boolean>(this.webSocketService.isSupported());
+  readonly geolocationSupported = signal<boolean>(typeof navigator !== 'undefined' && 'geolocation' in navigator);
+  readonly clipboardSupported = signal<boolean>(typeof navigator !== 'undefined' && 'clipboard' in navigator);
+  readonly notificationSupported = signal<boolean>(typeof window !== 'undefined' && 'Notification' in window);
+  readonly mediaDevicesSupported = signal<boolean>(typeof navigator !== 'undefined' && 'mediaDevices' in navigator);
+  readonly cameraSupported = signal<boolean>(typeof navigator !== 'undefined' && 'mediaDevices' in navigator);
+  readonly webWorkerSupported = signal<boolean>(typeof Worker !== 'undefined');
+  readonly regexSecuritySupported = signal<boolean>(typeof Worker !== 'undefined');
+  readonly webStorageSupported = signal<boolean>(typeof Storage !== 'undefined');
+  readonly webShareSupported = signal<boolean>(typeof navigator !== 'undefined' && 'share' in navigator);
+  readonly batterySupported = signal<boolean>(typeof navigator !== 'undefined' && 'getBattery' in navigator);
+  readonly webSocketSupported = signal<boolean>(typeof WebSocket !== 'undefined');
   readonly cameraPermissionState = signal<HarnessPermissionState>('unknown');
   readonly geolocationPermissionState = signal<HarnessPermissionState>('unknown');
   readonly notificationPermissionState = signal<HarnessPermissionState>('unknown');
@@ -447,7 +443,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     this.resetError();
     this.lastAction.set('refresh-battery-snapshot');
 
-    if (!this.batteryService.isSupported()) {
+    if (!this.batterySupported()) {
       this.batteryState.set('unsupported');
       this.batteryLevel.set('unknown');
       this.batteryCharging.set('unknown');
@@ -455,8 +451,8 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     }
 
     try {
-      await this.batteryService.ensureInitialized();
-      const info = this.batteryService.getBatteryInfoSignal();
+      await this.batteryService.initialize();
+      const info = this.batteryService.getBatteryInfo();
       this.batteryState.set('supported');
       this.batteryLevel.set(String(Math.round(info.level * 100)));
       this.batteryCharging.set(info.charging ? 'yes' : 'no');
@@ -482,8 +478,12 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     this.resetError();
     this.lastAction.set('send-web-socket-message');
 
-    const sent = this.webSocketService.sendTyped('harness', { message: 'ping' });
-    this.webSocketSendState.set(sent ? 'sent' : 'failed');
+    try {
+      this.webSocketService.send({ type: 'harness', data: { message: 'ping' } });
+      this.webSocketSendState.set('sent');
+    } catch {
+      this.webSocketSendState.set('failed');
+    }
   }
 
   disconnectWebSocket(): void {
@@ -496,7 +496,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     this.resetError();
     this.lastAction.set('exercise-web-storage');
 
-    if (!this.webStorageService.isSupported()) {
+    if (!this.webStorageSupported()) {
       this.storageState.set('error');
       this.storageLocalValue.set('unsupported');
       this.storageSessionValue.set('unsupported');
@@ -531,10 +531,26 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
 
       this.storageLocalValue.set(localValue.value);
       this.storageSessionValue.set(sessionValue);
-      this.storageKeyCount.set(
-        this.webStorageService.getLocalStorageKeys('harness').length +
-          this.webStorageService.getSessionStorageKeys('harness').length
-      );
+      const localStorageNative = this.webStorageService.getNativeLocalStorage();
+      const sessionStorageNative = this.webStorageService.getNativeSessionStorage();
+
+      let localCount = 0;
+      for (let i = 0; i < localStorageNative.length; i++) {
+        const key = localStorageNative.key(i);
+        if (key?.startsWith('harness:')) {
+          localCount++;
+        }
+      }
+
+      let sessionCount = 0;
+      for (let i = 0; i < sessionStorageNative.length; i++) {
+        const key = sessionStorageNative.key(i);
+        if (key?.startsWith('harness:')) {
+          sessionCount++;
+        }
+      }
+
+      this.storageKeyCount.set(localCount + sessionCount);
       this.storageState.set('success');
     } catch (error: unknown) {
       this.storageState.set('error');
@@ -553,7 +569,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
 
     try {
       const result = await this.withTimeout(
-        this.webShareService.shareText('harness share text', 'Harness Share'),
+        this.webShareService.share({ text: 'harness share text', title: 'Harness Share' }),
         3_000,
         'Web Share request timed out in harness'
       );
@@ -612,10 +628,9 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     this.lastAction.set('refresh-media-devices');
 
     try {
-      await this.mediaDevicesService.refreshDevices();
-      const mediaInfo = this.mediaDevicesService.getMediaDevicesInfo();
-      this.mediaVideoInputCount.set(mediaInfo.videoInputs.length);
-      this.mediaAudioInputCount.set(mediaInfo.audioInputs.length);
+      const devices = await this.mediaDevicesService.getDevices();
+      this.mediaVideoInputCount.set(devices.filter((device) => device.kind === 'videoinput').length);
+      this.mediaAudioInputCount.set(devices.filter((device) => device.kind === 'audioinput').length);
     } catch (error: unknown) {
       this.setError(error);
     }
@@ -653,16 +668,31 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     this.resetError();
     this.lastAction.set('create-web-worker');
 
-    if (!this.webWorkerService.isSupported()) {
+    if (!this.webWorkerSupported()) {
       this.workerState.set('error');
       this.setError(new Error('Web Worker API not supported'));
       return;
     }
 
-    this.webWorkerService.createWorkerFromCode(this.harnessWorkerName, this.getHarnessWorkerCode());
-    this.workerState.set('running');
-    this.workerMessageCount.set(0);
-    this.workerLastMessage.set('none');
+    const workerBlob = new Blob([this.getHarnessWorkerCode()], { type: 'application/javascript' });
+    const workerUrl = URL.createObjectURL(workerBlob);
+
+    this.webWorkerService.createWorker(this.harnessWorkerName, workerUrl).subscribe({
+      next: (status) => {
+        if (!status.running) {
+          this.workerState.set('error');
+          this.setError(status.error ?? 'Worker failed to initialize');
+          return;
+        }
+
+        this.workerState.set('running');
+        this.workerMessageCount.set(0);
+        this.workerLastMessage.set('none');
+      },
+      complete: () => {
+        URL.revokeObjectURL(workerUrl);
+      }
+    });
   }
 
   async sendHarnessWorkerMessage(): Promise<void> {
@@ -706,7 +736,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     this.lastAction.set('analyze-safe-regex-pattern');
 
     try {
-      const analysis = await this.regexSecurityService.analyzePatternSecurity('^[a-z]+$');
+      const analysis = await this.regexSecurityService.analyzePattern('^[a-z]+$');
       this.regexAnalysisSafe.set(analysis.safe ? 'yes' : 'no');
       this.regexAnalysisRisk.set(analysis.risk);
     } catch (error: unknown) {
@@ -802,18 +832,16 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
 
     try {
       await this.withTimeout(
-        this.notificationService.showNotification({
-          title: 'Harness notification',
+        this.notificationService.showNotification('Harness notification', {
           body: 'Playwright browser test'
         }),
         3_000,
         'Notification request timed out in harness'
       );
 
-      this.notificationCount.set(this.notificationService.getNotificationCount());
+      this.notificationCount.update((current) => current + 1);
       this.notificationShowState.set('success');
     } catch (error: unknown) {
-      this.notificationCount.set(this.notificationService.getNotificationCount());
       this.notificationShowState.set('error');
       this.setError(error);
     }
@@ -916,6 +944,5 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     this.webStorageService.removeLocalStorage('local-value', { prefix: 'harness' });
     this.webStorageService.removeSessionStorage('session-value', { prefix: 'harness' });
     this.cameraService.stopCamera();
-    this.mediaDevicesService.stopAllStreams();
   }
 }
