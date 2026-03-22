@@ -30,6 +30,9 @@
   ],
   "author": "",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "peerDependencies": {
     "@angular/core": "^21.0.0",
     "@angular/common": "^21.0.0",
