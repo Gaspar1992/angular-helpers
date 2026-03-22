@@ -25,7 +25,7 @@
     "version:packages": "npm version --workspaces",
     "dev": "concurrently \"npm run start:https\" \"npm run dev:packages\"",
     "dev:packages": "npm run build --workspaces --if-present -- --watch",
-    "ssl:generate": "cd ssl && openssl genrsa -out localhost.key 2048 && openssl req -new -x509 -key localhost.key -out localhost.crt -days 365 -config localhost.conf"
+    "ssl:generate": "mkdir -p ssl && openssl req -x509 -newkey rsa:2048 -sha256 -nodes -keyout ssl/localhost.key -out ssl/localhost.crt -days 365 -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'"
   },
   "private": true,
   "packageManager": "npm@10.9.4",
