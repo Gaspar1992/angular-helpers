@@ -29,8 +29,11 @@ jobs:
       - name: Run Linter
         run: npm run lint
 
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
       - name: Run Tests
-        run: npm test -- --run
+        run: npm run test:browser:ci
 
       - name: Build Packages
         run: npm run build
