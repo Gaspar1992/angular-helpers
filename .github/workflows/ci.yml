@@ -29,6 +29,9 @@ jobs:
       - name: Run Linter
         run: npm run lint
 
+      - name: Generate SSL certificates
+        run: npm run ssl:generate
+
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
