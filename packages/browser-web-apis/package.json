@@ -1,12 +1,7 @@
 {
   "name": "@angular-helpers/browser-web-apis",
-  "version": "21.0.1",
+  "version": "21.0.2",
   "description": "Sistema de servicios Angular para acceso formalizado a Browser Web APIs (cámara, permisos, geolocalización, etc.)",
-  "main": "dist/browser-web-apis/browser-web-apis.d.ts",
-  "types": "dist/browser-web-apis/browser-web-apis.d.ts",
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
     "build:watch": "ng-packagr -p ng-package.json --watch",
