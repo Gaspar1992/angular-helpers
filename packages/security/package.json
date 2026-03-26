@@ -25,7 +25,8 @@
     "access": "public"
   },
   "scripts": {
-    "build": "ng-packagr -p ng-package.json"
+    "build": "ng-packagr -p ng-package.json",
+    "build:prod": "ng-packagr -p ng-package.json && find ../../dist/security -name '*.map' -delete && find ../../dist/security -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +"
   },
   "peerDependencies": {
     "@angular/common": "^21.0.0",

@@ -4,6 +4,7 @@
   "description": "Sistema de servicios Angular para acceso formalizado a Browser Web APIs (cámara, permisos, geolocalización, etc.)",
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
+    "build:prod": "ng-packagr -p ng-package.json && find ../../dist/browser-web-apis -name '*.map' -delete && find ../../dist/browser-web-apis -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
     "build:watch": "ng-packagr -p ng-package.json --watch",
     "test": "vitest",
     "test:watch": "vitest --watch",

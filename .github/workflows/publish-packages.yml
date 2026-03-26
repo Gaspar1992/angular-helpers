@@ -27,8 +27,8 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Build browser-web-apis
-        run: npm run build --workspace packages/browser-web-apis
+      - name: Build browser-web-apis (production)
+        run: npm run build:prod --workspace packages/browser-web-apis
 
       - name: Publish browser-web-apis
         env:
@@ -44,8 +44,8 @@ jobs:
 
           npm publish ./dist/browser-web-apis --access public
 
-      - name: Build security
-        run: npm run build --workspace packages/security
+      - name: Build security (production)
+        run: npm run build:prod --workspace packages/security
 
       - name: Publish security
         env:
