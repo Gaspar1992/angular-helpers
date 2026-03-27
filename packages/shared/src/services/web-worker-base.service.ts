@@ -66,19 +66,19 @@ export abstract class WebWorkerBaseService extends BrowserApiBaseService {
       const worker = new Worker(scriptUrl);
       this.workers.set(name, worker);
       this.setupWorkerHandlers(name, worker);
-      
-      this.updateWorkerStatus(name, { 
-        initialized: true, 
-        running: true, 
-        messageCount: 0 
+
+      this.updateWorkerStatus(name, {
+        initialized: true,
+        running: true,
+        messageCount: 0,
       });
     } catch (error) {
       const errorMessage = `Failed to create worker: ${error}`;
-      this.updateWorkerStatus(name, { 
-        initialized: false, 
-        running: false, 
-        error: errorMessage, 
-        messageCount: 0 
+      this.updateWorkerStatus(name, {
+        initialized: false,
+        running: false,
+        error: errorMessage,
+        messageCount: 0,
       });
     }
   }
@@ -98,19 +98,19 @@ export abstract class WebWorkerBaseService extends BrowserApiBaseService {
       const worker = new Worker(URL.createObjectURL(blob));
       this.workers.set(name, worker);
       this.setupWorkerHandlers(name, worker);
-      
-      this.updateWorkerStatus(name, { 
-        initialized: true, 
-        running: true, 
-        messageCount: 0 
+
+      this.updateWorkerStatus(name, {
+        initialized: true,
+        running: true,
+        messageCount: 0,
       });
     } catch (error) {
       const errorMessage = `Failed to create worker from code: ${error}`;
-      this.updateWorkerStatus(name, { 
-        initialized: false, 
-        running: false, 
-        error: errorMessage, 
-        messageCount: 0 
+      this.updateWorkerStatus(name, {
+        initialized: false,
+        running: false,
+        error: errorMessage,
+        messageCount: 0,
       });
     }
   }
@@ -128,7 +128,7 @@ export abstract class WebWorkerBaseService extends BrowserApiBaseService {
     try {
       const message = {
         ...task,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       if (task.transferable) {
@@ -174,7 +174,7 @@ export abstract class WebWorkerBaseService extends BrowserApiBaseService {
       this.updateWorkerStatus(workerName, {
         initialized: false,
         running: false,
-        messageCount: this.getCurrentWorkerStatus(workerName).messageCount
+        messageCount: this.getCurrentWorkerStatus(workerName).messageCount,
       });
       return true;
     }
@@ -241,7 +241,7 @@ export abstract class WebWorkerBaseService extends BrowserApiBaseService {
         id: event.data.id || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         type: event.data.type || 'message',
         data: event.data.data || event.data,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       this.handleWorkerMessage(name, message);
@@ -253,7 +253,7 @@ export abstract class WebWorkerBaseService extends BrowserApiBaseService {
         initialized: true,
         running: false,
         error: errorMessage,
-        messageCount: this.getCurrentWorkerStatus(name).messageCount
+        messageCount: this.getCurrentWorkerStatus(name).messageCount,
       });
     };
 
@@ -300,7 +300,7 @@ export abstract class WebWorkerBaseService extends BrowserApiBaseService {
     return {
       initialized: false,
       running: false,
-      messageCount: 0
+      messageCount: 0,
     };
   }
 
@@ -311,7 +311,7 @@ export abstract class WebWorkerBaseService extends BrowserApiBaseService {
     const currentStatus = this.getCurrentWorkerStatus(workerName);
     this.updateWorkerStatus(workerName, {
       ...currentStatus,
-      messageCount: currentStatus.messageCount + 1
+      messageCount: currentStatus.messageCount + 1,
     });
   }
 }

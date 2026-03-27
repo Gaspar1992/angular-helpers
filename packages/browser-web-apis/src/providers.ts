@@ -37,12 +37,12 @@ export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
   enableWebStorage: false,
   enableWebSocket: false,
   enableWebWorker: false,
-  enableRegexSecurity: true
+  enableRegexSecurity: true,
 };
 
 export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): EnvironmentProviders {
   const mergedConfig = { ...defaultBrowserWebApisConfig, ...config };
-  
+
   const providers: Provider[] = [PermissionsService];
 
   const conditionalProviders: Array<[boolean | undefined, Provider]> = [
@@ -56,7 +56,7 @@ export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): Enviro
     [mergedConfig.enableWebStorage, WebStorageService],
     [mergedConfig.enableWebSocket, WebSocketService],
     [mergedConfig.enableWebWorker, WebWorkerService],
-    [mergedConfig.enableRegexSecurity, RegexSecurityService]
+    [mergedConfig.enableRegexSecurity, RegexSecurityService],
   ];
 
   for (const [enabled, provider] of conditionalProviders) {
@@ -64,110 +64,70 @@ export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): Enviro
       providers.push(provider);
     }
   }
-  
+
   return makeEnvironmentProviders(providers);
 }
 
 // Feature-specific providers for tree-shaking
 export function provideCamera(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    PermissionsService,
-    CameraService
-  ]);
+  return makeEnvironmentProviders([PermissionsService, CameraService]);
 }
 
 export function provideGeolocation(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    PermissionsService,
-    GeolocationService
-  ]);
+  return makeEnvironmentProviders([PermissionsService, GeolocationService]);
 }
 
 export function provideNotifications(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    PermissionsService,
-    NotificationService
-  ]);
+  return makeEnvironmentProviders([PermissionsService, NotificationService]);
 }
 
 export function provideClipboard(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    PermissionsService,
-    ClipboardService
-  ]);
+  return makeEnvironmentProviders([PermissionsService, ClipboardService]);
 }
 
 export function provideMediaDevices(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    PermissionsService,
-    MediaDevicesService
-  ]);
+  return makeEnvironmentProviders([PermissionsService, MediaDevicesService]);
 }
 
 export function provideBattery(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    BatteryService
-  ]);
+  return makeEnvironmentProviders([BatteryService]);
 }
 
 export function provideWebShare(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    WebShareService
-  ]);
+  return makeEnvironmentProviders([WebShareService]);
 }
 
 export function provideWebStorage(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    WebStorageService
-  ]);
+  return makeEnvironmentProviders([WebStorageService]);
 }
 
 export function provideWebSocket(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    WebSocketService
-  ]);
+  return makeEnvironmentProviders([WebSocketService]);
 }
 
 export function provideWebWorker(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    WebWorkerService
-  ]);
+  return makeEnvironmentProviders([WebWorkerService]);
 }
 
 export function providePermissions(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    PermissionsService
-  ]);
+  return makeEnvironmentProviders([PermissionsService]);
 }
 
 export function provideRegexSecurity(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    RegexSecurityService
-  ]);
+  return makeEnvironmentProviders([RegexSecurityService]);
 }
 
 // Combined providers for common use cases
 export function provideMediaApis(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    PermissionsService,
-    CameraService,
-    MediaDevicesService
-  ]);
+  return makeEnvironmentProviders([PermissionsService, CameraService, MediaDevicesService]);
 }
 
 export function provideLocationApis(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    PermissionsService,
-    GeolocationService
-  ]);
+  return makeEnvironmentProviders([PermissionsService, GeolocationService]);
 }
 
 export function provideStorageApis(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    PermissionsService,
-    ClipboardService,
-    WebStorageService
-  ]);
+  return makeEnvironmentProviders([PermissionsService, ClipboardService, WebStorageService]);
 }
 
 export function provideCommunicationApis(): EnvironmentProviders {
@@ -175,6 +135,6 @@ export function provideCommunicationApis(): EnvironmentProviders {
     PermissionsService,
     NotificationService,
     WebShareService,
-    WebSocketService
+    WebSocketService,
   ]);
 }

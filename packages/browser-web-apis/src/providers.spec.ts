@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   BrowserWebApisConfig,
   defaultBrowserWebApisConfig,
-  provideBrowserWebApis
+  provideBrowserWebApis,
 } from './providers';
 import { PermissionsService } from './services/permissions.service';
 import { CameraService } from './services/camera.service';
@@ -42,7 +42,7 @@ describe('provideBrowserWebApis', () => {
     enableWebStorage: false,
     enableWebSocket: false,
     enableWebWorker: false,
-    enableRegexSecurity: false
+    enableRegexSecurity: false,
   };
 
   it('always provides PermissionsService even when all flags are false', () => {
@@ -70,7 +70,7 @@ describe('provideBrowserWebApis', () => {
     const providers = extractProviders({
       ...allDisabledConfig,
       enableBattery: true,
-      enableWebStorage: true
+      enableWebStorage: true,
     });
 
     expect(hasProvider(providers, PermissionsService)).toBe(true);
@@ -84,9 +84,17 @@ describe('provideBrowserWebApis', () => {
     const providers = extractProviders();
 
     expect(hasProvider(providers, PermissionsService)).toBe(true);
-    expect(hasProvider(providers, CameraService)).toBe(Boolean(defaultBrowserWebApisConfig.enableCamera));
-    expect(hasProvider(providers, RegexSecurityService)).toBe(Boolean(defaultBrowserWebApisConfig.enableRegexSecurity));
-    expect(hasProvider(providers, BatteryService)).toBe(Boolean(defaultBrowserWebApisConfig.enableBattery));
-    expect(hasProvider(providers, WebStorageService)).toBe(Boolean(defaultBrowserWebApisConfig.enableWebStorage));
+    expect(hasProvider(providers, CameraService)).toBe(
+      Boolean(defaultBrowserWebApisConfig.enableCamera),
+    );
+    expect(hasProvider(providers, RegexSecurityService)).toBe(
+      Boolean(defaultBrowserWebApisConfig.enableRegexSecurity),
+    );
+    expect(hasProvider(providers, BatteryService)).toBe(
+      Boolean(defaultBrowserWebApisConfig.enableBattery),
+    );
+    expect(hasProvider(providers, WebStorageService)).toBe(
+      Boolean(defaultBrowserWebApisConfig.enableWebStorage),
+    );
   });
 });

@@ -12,11 +12,13 @@ export class ClipboardService extends BrowserApiBaseService {
       throw new Error('Clipboard API not supported in this browser');
     }
 
-    const permissionStatus = await this.permissionsService.query({ 
-      name: `clipboard-${action}` as PermissionName 
+    const permissionStatus = await this.permissionsService.query({
+      name: `clipboard-${action}` as PermissionName,
     });
     if (permissionStatus.state !== 'granted') {
-      throw new Error(`Clipboard ${action} permission required. Please grant clipboard access and try again.`);
+      throw new Error(
+        `Clipboard ${action} permission required. Please grant clipboard access and try again.`,
+      );
     }
   }
 

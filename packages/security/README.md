@@ -7,12 +7,14 @@ Security package for Angular applications that prevents common attacks like ReDo
 ## 🛡️ Features
 
 ### **ReDoS Prevention**
+
 - **Web Worker Execution**: Regular expressions are executed in a separate thread.
 - **Configurable Timeout**: Prevents infinite executions.
 - **Complexity Analysis**: Detects dangerous patterns before execution.
 - **Safe Mode**: Only allows patterns verified as safe.
 
 ### **Builder Pattern**
+
 - **Fluent API**: Intuitively build regular expressions.
 - **Method Chaining**: `.pattern().group().quantifier()`
 - **Real-time Validation**: Security analysis during construction.
@@ -35,9 +37,9 @@ bootstrapApplication(AppComponent, {
     provideSecurity({
       enableRegexSecurity: true,
       defaultTimeout: 5000,
-      safeMode: false
-    })
-  ]
+      safeMode: false,
+    }),
+  ],
 });
 ```
 
@@ -63,7 +65,7 @@ async testEmail(email: string): Promise<boolean> {
     email,
     { timeout: 3000 }
   );
-  
+
   return result.match;
 }
 ```
@@ -74,8 +76,7 @@ async testEmail(email: string): Promise<boolean> {
 import { RegexSecurityBuilder } from '@angular-helpers/security';
 
 // Fluent regular expression construction
-const emailRegex = RegexSecurityBuilder
-  .builder()
+const emailRegex = RegexSecurityBuilder.builder()
   .startOfLine()
   .characterSet('a-zA-Z0-9._%+-')
   .quantifier('+')
@@ -91,8 +92,7 @@ const emailRegex = RegexSecurityBuilder
   .build();
 
 // Direct execution
-const result = await RegexSecurityBuilder
-  .builder()
+const result = await RegexSecurityBuilder.builder()
   .pattern('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$')
   .timeout(3000)
   .execute(email, this.regexSecurity);
@@ -103,16 +103,16 @@ const result = await RegexSecurityBuilder
 ```typescript
 async analyzePattern(pattern: string): Promise<void> {
   const analysis = await this.regexSecurity.analyzePatternSecurity(pattern);
-  
+
   if (!analysis.safe) {
     console.warn('⚠️ Pattern not safe:', analysis.warnings);
     console.info('💡 Recommendations:', analysis.recommendations);
-    
+
     if (analysis.risk === 'critical') {
       throw new Error('Pattern rejected due to critical security risk');
     }
   }
-  
+
   console.log(`✅ Pattern complexity: ${analysis.complexity}`);
   console.log(`🎯 Risk level: ${analysis.risk}`);
 }
@@ -124,26 +124,26 @@ async analyzePattern(pattern: string): Promise<void> {
 @Component({...})
 export class FormValidationComponent {
   constructor(private regexSecurity: RegexSecurityService) {}
-  
+
   async validateUsername(username: string): Promise<boolean> {
     const result = await this.regexSecurity.testRegex(
       '^[a-zA-Z0-9_]{3,20}$',
       username,
       { timeout: 1000, safeMode: true }
     );
-    
+
     if (result.timeout) {
       throw new Error('Username validation timeout - possible ReDoS attack');
     }
-    
+
     if (result.error) {
       console.error('Validation error:', result.error);
       return false;
     }
-    
+
     return result.match;
   }
-  
+
   async validateComplexInput(input: string): Promise<boolean> {
     // Builder pattern for complex validation
     const result = await RegexSecurityBuilder
@@ -155,7 +155,7 @@ export class FormValidationComponent {
       .endOfLine()
       .timeout(2000)
       .execute(input, this.regexSecurity);
-    
+
     return result.match;
   }
 }
@@ -167,10 +167,10 @@ export class FormValidationComponent {
 
 ```typescript
 interface RegexSecurityConfig {
-  timeout?: number;        // Timeout in ms (default: 5000)
-  maxComplexity?: number;  // Max complexity (default: 10)
+  timeout?: number; // Timeout in ms (default: 5000)
+  maxComplexity?: number; // Max complexity (default: 10)
   allowBacktracking?: boolean; // Allow backtracking (default: false)
-  safeMode?: boolean;      // Safe mode (default: false)
+  safeMode?: boolean; // Safe mode (default: false)
 }
 ```
 
@@ -178,12 +178,12 @@ interface RegexSecurityConfig {
 
 ```typescript
 interface RegexBuilderOptions {
-  global?: boolean;      // 'g' flag
-  ignoreCase?: boolean;  // 'i' flag
-  multiline?: boolean;   // 'm' flag
-  dotAll?: boolean;      // 's' flag
-  unicode?: boolean;     // 'u' flag
-  sticky?: boolean;      // 'y' flag
+  global?: boolean; // 'g' flag
+  ignoreCase?: boolean; // 'i' flag
+  multiline?: boolean; // 'm' flag
+  dotAll?: boolean; // 's' flag
+  unicode?: boolean; // 'u' flag
+  sticky?: boolean; // 'y' flag
 }
 ```
 
@@ -220,12 +220,12 @@ The service automatically detects:
 
 ```typescript
 interface RegexTestResult {
-  match: boolean;           // If there was a match
+  match: boolean; // If there was a match
   matches?: RegExpMatchArray[]; // All matches found
   groups?: { [key: string]: string }; // Captured groups
-  executionTime: number;    // Execution time in ms
-  timeout: boolean;         // If there was a timeout
-  error?: string;          // Error if one occurred
+  executionTime: number; // Execution time in ms
+  timeout: boolean; // If there was a timeout
+  error?: string; // Error if one occurred
 }
 ```
 
@@ -233,10 +233,10 @@ interface RegexTestResult {
 
 ```typescript
 interface RegexSecurityResult {
-  safe: boolean;           // If the pattern is safe
-  complexity: number;      // Complexity level (0-∞)
+  safe: boolean; // If the pattern is safe
+  complexity: number; // Complexity level (0-∞)
   risk: 'low' | 'medium' | 'high' | 'critical';
-  warnings: string[];      // Security warnings
+  warnings: string[]; // Security warnings
   recommendations: string[]; // Improvement recommendations
 }
 ```
@@ -250,24 +250,24 @@ import { AbstractControl, ValidationErrors } from '@angular/forms';
 
 export class SecurityValidators {
   constructor(private regexSecurity: RegexSecurityService) {}
-  
+
   async securePattern(pattern: string, config?: RegexSecurityConfig) {
     return async (control: AbstractControl): Promise<ValidationErrors | null> => {
       const value = control.value;
-      
+
       if (!value) return null;
-      
+
       try {
         const result = await this.regexSecurity.testRegex(pattern, value, config);
-        
+
         if (!result.match) {
           return { securePattern: { value, reason: 'Pattern does not match' } };
         }
-        
+
         if (result.timeout) {
           return { securePattern: { value, reason: 'Pattern execution timeout' } };
         }
-        
+
         return null;
       } catch (error) {
         return { securePattern: { value, reason: error.message } };
@@ -286,7 +286,7 @@ export class SecureFormComponent {
     private regexSecurity: RegexSecurityService,
     private securityValidators: SecurityValidators
   ) {}
-  
+
   emailValidator = this.securityValidators.securePattern(
     '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',
     { timeout: 3000, safeMode: true }

@@ -17,7 +17,7 @@ export abstract class BrowserApiBaseService {
   protected permissionsService = inject(PermissionsService);
   protected destroyRef = inject(DestroyRef);
   protected platformId = inject(PLATFORM_ID);
-  
+
   /**
    * Abstract method that must be implemented by child services
    * Returns the API name for support checking
@@ -37,7 +37,7 @@ export abstract class BrowserApiBaseService {
   protected isServerEnvironment(): boolean {
     return isPlatformServer(this.platformId);
   }
-  
+
   /**
    * Request a permission
    */
@@ -45,7 +45,7 @@ export abstract class BrowserApiBaseService {
     if (this.isServerEnvironment()) {
       throw new Error(`${this.getApiName()} API not available in server environment`);
     }
-    
+
     try {
       const status = await this.permissionsService.query({ name: permission as PermissionName });
       return status.state === 'granted';
@@ -54,5 +54,4 @@ export abstract class BrowserApiBaseService {
       return false;
     }
   }
-  
 }

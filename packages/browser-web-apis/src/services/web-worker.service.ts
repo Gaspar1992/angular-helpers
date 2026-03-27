@@ -60,20 +60,19 @@ export class WebWorkerService extends BrowserApiBaseService {
         const status: WorkerStatus = {
           initialized: true,
           running: true,
-          messageCount: 0
+          messageCount: 0,
         };
 
         this.currentWorkerStatuses.set(name, status);
         this.updateWorkerStatus(name, status);
         observer.next(status);
-
       } catch (error) {
         console.error(`[WebWorkerService] Failed to create worker ${name}:`, error);
         const status: WorkerStatus = {
           initialized: false,
           running: false,
           error: error instanceof Error ? error.message : 'Unknown error',
-          messageCount: 0
+          messageCount: 0,
         };
         this.currentWorkerStatuses.set(name, status);
         this.updateWorkerStatus(name, status);
@@ -162,7 +161,7 @@ export class WebWorkerService extends BrowserApiBaseService {
         id: event.data.id || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         type: event.data.type || 'message',
         data: event.data.data,
-        timestamp: event.data.timestamp || Date.now()
+        timestamp: event.data.timestamp || Date.now(),
       };
 
       if (!this.workerMessages.has(name)) {
@@ -177,7 +176,7 @@ export class WebWorkerService extends BrowserApiBaseService {
         initialized: true,
         running: false,
         error: error instanceof Error ? error.message : 'Worker error',
-        messageCount: this.currentWorkerStatuses.get(name)?.messageCount ?? 0
+        messageCount: this.currentWorkerStatuses.get(name)?.messageCount ?? 0,
       };
       this.currentWorkerStatuses.set(name, status);
       this.updateWorkerStatus(name, status);

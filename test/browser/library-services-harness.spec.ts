@@ -4,7 +4,9 @@ test.describe('Library services harness', () => {
   test('renders secure context and support flags', async ({ page }) => {
     await page.goto('/demo/library-services');
 
-    await expect(page.getByRole('heading', { level: 1, name: /Library Services Harness/i })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: /Library Services Harness/i }),
+    ).toBeVisible();
     await expect(page.getByTestId('secure-context-value')).toHaveText('yes');
     await expect(page.getByTestId('permissions-supported')).toHaveText('yes');
     await expect(page.getByTestId('geolocation-supported')).toHaveText('yes');
@@ -16,10 +18,12 @@ test.describe('Library services harness', () => {
     await expect(page.getByTestId('regex-security-supported')).toHaveText('yes');
     await expect(page.getByTestId('web-storage-supported')).toHaveText('yes');
 
-    const webShareSupported = (await page.getByTestId('web-share-supported').textContent())?.trim() ?? '';
+    const webShareSupported =
+      (await page.getByTestId('web-share-supported').textContent())?.trim() ?? '';
     expect(['yes', 'no']).toContain(webShareSupported);
 
-    const batterySupported = (await page.getByTestId('battery-supported').textContent())?.trim() ?? '';
+    const batterySupported =
+      (await page.getByTestId('battery-supported').textContent())?.trim() ?? '';
     expect(['yes', 'no']).toContain(batterySupported);
 
     await expect(page.getByTestId('web-socket-supported')).toHaveText('yes');
@@ -45,7 +49,8 @@ test.describe('Library services harness battery and websocket services', () => {
   test('handles battery snapshot according to browser support', async ({ page }) => {
     await page.goto('/demo/library-services');
 
-    const batterySupported = (await page.getByTestId('battery-supported').textContent())?.trim() ?? 'no';
+    const batterySupported =
+      (await page.getByTestId('battery-supported').textContent())?.trim() ?? 'no';
 
     await page.getByTestId('battery-refresh').click();
 
@@ -95,7 +100,9 @@ test.describe('Library services harness storage and share services', () => {
     await expect(page.getByTestId('storage-local-value')).toHaveText('storage-local-value');
     await expect(page.getByTestId('storage-session-value')).toHaveText('storage-session-value');
     await expect
-      .poll(async () => Number((await page.getByTestId('storage-key-count').textContent())?.trim() ?? '0'))
+      .poll(async () =>
+        Number((await page.getByTestId('storage-key-count').textContent())?.trim() ?? '0'),
+      )
       .toBeGreaterThan(0);
     await expect(page.getByTestId('error-message')).toHaveText('none');
   });
@@ -103,7 +110,8 @@ test.describe('Library services harness storage and share services', () => {
   test('handles text sharing through WebShareService', async ({ page }) => {
     await page.goto('/demo/library-services');
 
-    const webShareSupported = (await page.getByTestId('web-share-supported').textContent())?.trim() ?? 'no';
+    const webShareSupported =
+      (await page.getByTestId('web-share-supported').textContent())?.trim() ?? 'no';
 
     await page.getByTestId('share-text').click();
 
@@ -146,7 +154,9 @@ test.describe('Library services harness worker and regex services', () => {
     await page.getByTestId('web-worker-send').click();
     await expect(page.getByTestId('last-action')).toHaveText('send-web-worker-message');
     await expect
-      .poll(async () => Number((await page.getByTestId('web-worker-message-count').textContent())?.trim() ?? '0'))
+      .poll(async () =>
+        Number((await page.getByTestId('web-worker-message-count').textContent())?.trim() ?? '0'),
+      )
       .toBeGreaterThan(0);
     await expect(page.getByTestId('web-worker-last-message')).toContainText('harness-task');
     await expect(page.getByTestId('error-message')).toHaveText('none');
@@ -177,10 +187,13 @@ test.describe('Library services harness worker and regex services', () => {
 
     await expect(page.getByTestId('last-action')).toHaveText('test-safe-regex-pattern');
     await expect
-      .poll(async () => (await page.getByTestId('regex-execution-state').textContent())?.trim() ?? '')
+      .poll(
+        async () => (await page.getByTestId('regex-execution-state').textContent())?.trim() ?? '',
+      )
       .toMatch(/success|error/);
 
-    const executionState = (await page.getByTestId('regex-execution-state').textContent())?.trim() ?? '';
+    const executionState =
+      (await page.getByTestId('regex-execution-state').textContent())?.trim() ?? '';
 
     if (executionState === 'success') {
       await expect(page.getByTestId('regex-match')).toHaveText('true');
@@ -205,7 +218,9 @@ test.describe('Library services harness worker and regex services', () => {
     await expect(page.getByTestId('regex-execution-state')).toHaveText('error');
     await expect(page.getByTestId('regex-match')).toHaveText('false');
     await expect(page.getByTestId('regex-timeout')).toHaveText('false');
-    await expect(page.getByTestId('regex-error')).toContainText('Pattern contains potential ReDoS vulnerabilities');
+    await expect(page.getByTestId('regex-error')).toContainText(
+      'Pattern contains potential ReDoS vulnerabilities',
+    );
     await expect(page.getByTestId('error-message')).toHaveText('none');
   });
 });
@@ -220,7 +235,9 @@ test.describe('Library services harness with media permissions', () => {
 
     await expect(page.getByTestId('last-action')).toHaveText('refresh-media-devices');
     await expect
-      .poll(async () => Number((await page.getByTestId('media-video-input-count').textContent())?.trim() ?? '0'))
+      .poll(async () =>
+        Number((await page.getByTestId('media-video-input-count').textContent())?.trim() ?? '0'),
+      )
       .toBeGreaterThan(0);
     await expect(page.getByTestId('error-message')).toHaveText('none');
   });
@@ -234,7 +251,9 @@ test.describe('Library services harness with media permissions', () => {
       .poll(async () => (await page.getByTestId('camera-state').textContent())?.trim() ?? '')
       .toBe('streaming');
     await expect
-      .poll(async () => Number((await page.getByTestId('camera-track-count').textContent())?.trim() ?? '0'))
+      .poll(async () =>
+        Number((await page.getByTestId('camera-track-count').textContent())?.trim() ?? '0'),
+      )
       .toBeGreaterThan(0);
     await expect(page.getByTestId('error-message')).toHaveText('none');
 
@@ -249,8 +268,8 @@ test.describe('Library services harness with geolocation permission', () => {
     permissions: ['geolocation', 'clipboard-read', 'clipboard-write', 'notifications'],
     geolocation: {
       latitude: 40.4168,
-      longitude: -3.7038
-    }
+      longitude: -3.7038,
+    },
   });
 
   test('returns granted permission and current position', async ({ page }) => {
@@ -284,10 +303,14 @@ test.describe('Library services harness with geolocation permission', () => {
     await page.getByTestId('notifications-show').click();
 
     await expect
-      .poll(async () => (await page.getByTestId('notifications-show-state').textContent())?.trim() ?? '')
+      .poll(
+        async () =>
+          (await page.getByTestId('notifications-show-state').textContent())?.trim() ?? '',
+      )
       .toMatch(/success|error/);
 
-    const showState = (await page.getByTestId('notifications-show-state').textContent())?.trim() ?? '';
+    const showState =
+      (await page.getByTestId('notifications-show-state').textContent())?.trim() ?? '';
 
     expect(['success', 'error']).toContain(showState);
 
@@ -301,7 +324,9 @@ test.describe('Library services harness with geolocation permission', () => {
     await expect(page.getByTestId('error-message')).not.toHaveText('none');
   });
 
-  test('camera flow reaches a terminal state without pre-granted media permission', async ({ page }) => {
+  test('camera flow reaches a terminal state without pre-granted media permission', async ({
+    page,
+  }) => {
     await page.goto('/demo/library-services');
 
     await page.getByTestId('camera-start').click();
@@ -314,7 +339,9 @@ test.describe('Library services harness with geolocation permission', () => {
 
     if (cameraState === 'streaming') {
       await expect
-        .poll(async () => Number((await page.getByTestId('camera-track-count').textContent())?.trim() ?? '0'))
+        .poll(async () =>
+          Number((await page.getByTestId('camera-track-count').textContent())?.trim() ?? '0'),
+        )
         .toBeGreaterThan(0);
 
       await page.getByTestId('camera-stop').click();

@@ -70,7 +70,7 @@ export class BatteryService extends BrowserApiBaseService {
       charging: this.batteryManager.charging,
       chargingTime: this.batteryManager.chargingTime,
       dischargingTime: this.batteryManager.dischargingTime,
-      level: this.batteryManager.level
+      level: this.batteryManager.level,
     };
   }
 

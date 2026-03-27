@@ -55,7 +55,7 @@ export class WebSocketService extends BrowserApiBaseService {
         connected: false,
         connecting: true,
         reconnecting: false,
-        reconnectAttempts: 0
+        reconnectAttempts: 0,
       });
 
       try {
@@ -69,7 +69,7 @@ export class WebSocketService extends BrowserApiBaseService {
           connecting: false,
           reconnecting: false,
           error: error instanceof Error ? error.message : 'Connection failed',
-          reconnectAttempts: 0
+          reconnectAttempts: 0,
         });
         observer.next(this.getCurrentStatus());
       }
@@ -100,7 +100,7 @@ export class WebSocketService extends BrowserApiBaseService {
       connected: false,
       connecting: false,
       reconnecting: false,
-      reconnectAttempts: 0
+      reconnectAttempts: 0,
     });
   }
 
@@ -111,7 +111,7 @@ export class WebSocketService extends BrowserApiBaseService {
 
     const messageWithTimestamp = {
       ...message,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     this.webSocket.send(JSON.stringify(messageWithTimestamp));
@@ -130,9 +130,9 @@ export class WebSocketService extends BrowserApiBaseService {
   }
 
   getMessages<T = unknown>(): Observable<WebSocketMessage<T>> {
-    return this.messageSubject.asObservable().pipe(
-      filter((msg): msg is WebSocketMessage<T> => true)
-    );
+    return this.messageSubject
+      .asObservable()
+      .pipe(filter((msg): msg is WebSocketMessage<T> => true));
   }
 
   private setupWebSocketHandlers(config: WebSocketConfig): void {
@@ -145,7 +145,7 @@ export class WebSocketService extends BrowserApiBaseService {
         connected: true,
         connecting: false,
         reconnecting: false,
-        reconnectAttempts: 0
+        reconnectAttempts: 0,
       });
 
       // Start heartbeat if configured
@@ -160,7 +160,7 @@ export class WebSocketService extends BrowserApiBaseService {
         connected: false,
         connecting: false,
         reconnecting: false,
-        reconnectAttempts: this.reconnectAttempts
+        reconnectAttempts: this.reconnectAttempts,
       });
 
       // Attempt reconnection if not a clean close and reconnect is enabled
@@ -176,7 +176,7 @@ export class WebSocketService extends BrowserApiBaseService {
         connecting: false,
         reconnecting: false,
         error: 'WebSocket connection error',
-        reconnectAttempts: this.reconnectAttempts
+        reconnectAttempts: this.reconnectAttempts,
       });
     };
 
@@ -195,7 +195,7 @@ export class WebSocketService extends BrowserApiBaseService {
       if (this.webSocket && this.webSocket.readyState === WebSocket.OPEN) {
         this.send({
           type: 'heartbeat',
-          data: config.heartbeatMessage!
+          data: config.heartbeatMessage!,
         });
       }
     }, config.heartbeatInterval);
@@ -212,7 +212,7 @@ export class WebSocketService extends BrowserApiBaseService {
       connected: false,
       connecting: false,
       reconnecting: true,
-      reconnectAttempts: this.reconnectAttempts
+      reconnectAttempts: this.reconnectAttempts,
     });
 
     this.reconnectTimer = setTimeout(() => {
@@ -232,7 +232,7 @@ export class WebSocketService extends BrowserApiBaseService {
       connected: this.webSocket?.readyState === WebSocket.OPEN,
       connecting: false,
       reconnecting: false,
-      reconnectAttempts: this.reconnectAttempts
+      reconnectAttempts: this.reconnectAttempts,
     };
   }
 

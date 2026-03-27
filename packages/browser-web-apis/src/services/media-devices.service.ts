@@ -43,7 +43,7 @@ export class MediaDevicesService extends BrowserApiBaseService {
     try {
       const defaultConstraints: MediaStreamConstraints = {
         video: true,
-        audio: true
+        audio: true,
       };
 
       const finalConstraints = constraints || defaultConstraints;
@@ -64,7 +64,7 @@ export class MediaDevicesService extends BrowserApiBaseService {
     try {
       const defaultConstraints: DisplayMediaConstraints = {
         video: true,
-        audio: false
+        audio: false,
       };
 
       const finalConstraints = constraints || defaultConstraints;
@@ -114,12 +114,12 @@ export class MediaDevicesService extends BrowserApiBaseService {
 
   private async getDevicesByKind(kind: MediaDeviceKind): Promise<MediaDeviceInfo[]> {
     const devices = await this.getDevices();
-    return devices.filter(device => device.kind === kind);
+    return devices.filter((device) => device.kind === kind);
   }
 
   private handleMediaError(error: unknown): Error {
     let message: string;
-    
+
     if (error instanceof Error) {
       switch (error.name) {
         case 'NotAllowedError':
@@ -143,7 +143,7 @@ export class MediaDevicesService extends BrowserApiBaseService {
     } else {
       message = 'Unknown media error occurred';
     }
-    
+
     return this.createError(message, error);
   }
 

@@ -5,12 +5,12 @@ import { PermissionNameExt } from '../interfaces/permissions.interface';
 export class PermissionGuard implements CanActivate {
   constructor(
     private permissionsService: PermissionsService,
-    private router: Router
+    private router: Router,
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot): Promise<boolean> {
     const permission = route.data?.['permission'] as PermissionNameExt;
-    
+
     if (!permission) {
       return Promise.resolve(true);
     }
@@ -24,7 +24,7 @@ export class PermissionGuard implements CanActivate {
 
       if (status.state !== 'granted') {
         this.router.navigate(['/permission-denied'], {
-          queryParams: { permission }
+          queryParams: { permission },
         });
         return false;
       }
@@ -33,7 +33,7 @@ export class PermissionGuard implements CanActivate {
     } catch (error) {
       console.error('Permission guard error:', error);
       this.router.navigate(['/permission-denied'], {
-        queryParams: { permission }
+        queryParams: { permission },
       });
       return false;
     }
@@ -43,6 +43,6 @@ export class PermissionGuard implements CanActivate {
 export function createPermissionGuard(permission: PermissionNameExt) {
   return {
     canActivate: [PermissionGuard],
-    data: { permission }
+    data: { permission },
   };
 }
