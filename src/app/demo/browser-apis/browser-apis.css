@@ -9,7 +9,18 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    h1 {
+      margin: 0; /* Override default h1 margin */
+    }
+  }
 }
+
 
 h1 {
   color: white;
@@ -480,10 +491,6 @@ h1 {
   width: 70px;
   height: auto;
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
-}
-
-.header h1 {
-  margin-bottom: 0; /* Override default h1 margin */
 }
 
 /* Responsive adjustment for the logo */
