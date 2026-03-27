@@ -1,13 +1,17 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NotificationService } from '@angular-helpers/browser-web-apis';
+import { PermissionsService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-browser-apis',
   imports: [FormsModule],
+  providers: [PermissionsService, NotificationService],
   templateUrl: './browser-apis.html',
   styleUrl: './browser-apis.css',
 })
 export class BrowserApisComponent {
+  private notificationService = inject(NotificationService);
   // Permisos
   permissions = signal<Record<string, string>>({});
 
@@ -49,7 +53,7 @@ export class BrowserApisComponent {
       await this.refreshDevices();
 
       // Verificar permiso de notificaciones
-      this.notificationPermission.set(Notification.permission);
+      this.notificationPermission.set(this.notificationService.permission);
     } catch (error: any) {
       this.setError('Error inicializando servicios: ' + error);
     }
@@ -110,7 +114,7 @@ export class BrowserApisComponent {
           break;
 
         case 'notifications':
-          status = await Notification.requestPermission();
+          status = await this.notificationService.requestNotificationPermission();
           this.notificationPermission.set(status);
           break;
 
@@ -284,7 +288,7 @@ export class BrowserApisComponent {
     this.clearMessages();
 
     try {
-      const permission = await Notification.requestPermission();
+      const permission = await this.notificationService.requestNotificationPermission();
       this.notificationPermission.set(permission);
       this.setSuccess(`Permiso de notificaciones: ${permission}`);
     } catch (error: any) {
@@ -299,15 +303,12 @@ export class BrowserApisComponent {
     this.clearMessages();
 
     try {
-      if (Notification.permission !== 'granted') {
-        this.setError('Permiso de notificaciones no concedido. Solicita el permiso primero.');
-        return;
-      }
-      new Notification('Demo Browser APIs', {
+      await this.notificationService.showNotification('Demo Browser APIs', {
         body: 'Esta es una notificación de prueba desde Angular',
         tag: 'demo-notification',
+        requireInteraction: true,
       });
-      this.setSuccess('Notificación mostrada');
+      this.setSuccess('Notificación mostrada — búscala en el área de notificaciones del sistema');
     } catch (error: any) {
       this.setError('Error mostrando notificación: ' + error);
     } finally {

@@ -7,13 +7,27 @@ export class NotificationService extends BrowserApiBaseService {
     return 'notifications';
   }
 
+  get permission(): NotificationPermission {
+    return Notification.permission;
+  }
+
+  isSupported(): boolean {
+    return 'Notification' in window;
+  }
+
+  async requestNotificationPermission(): Promise<NotificationPermission> {
+    if (!this.isSupported()) {
+      throw new Error('Notification API not supported in this browser');
+    }
+    return Notification.requestPermission();
+  }
+
   async showNotification(title: string, options?: NotificationOptions): Promise<Notification> {
-    if (!('Notification' in window)) {
+    if (!this.isSupported()) {
       throw new Error('Notification API not supported in this browser');
     }
 
-    const permissionStatus = await this.permissionsService.query({ name: 'notifications' });
-    if (permissionStatus.state !== 'granted') {
+    if (Notification.permission !== 'granted') {
       throw new Error(
         'Notification permission required. Please grant notification access and try again.',
       );
@@ -26,6 +40,4 @@ export class NotificationService extends BrowserApiBaseService {
       throw error;
     }
   }
-
-  // Direct access to native notification API
 }
