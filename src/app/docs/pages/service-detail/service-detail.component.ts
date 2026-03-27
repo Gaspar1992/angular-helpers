@@ -41,7 +41,7 @@ import { ServiceDoc } from '../../models/doc-meta.model';
           <section class="docs-section">
             <h2 class="docs-section-title">Notes</h2>
             <ul class="docs-note-list">
-              @for (note of service()!.notes; track note) {
+              @for (note of service()!.notes; track $index) {
                 <li>{{ note }}</li>
               }
             </ul>
@@ -61,7 +61,7 @@ import { ServiceDoc } from '../../models/doc-meta.model';
                 </tr>
               </thead>
               <tbody>
-                @for (method of service()!.methods; track method.name) {
+                @for (method of service()!.methods; track $index) {
                   <tr>
                     <td><code class="docs-code-name">{{ method.name }}</code></td>
                     <td><code class="docs-code-sig">{{ method.signature }}</code></td>

@@ -44,7 +44,7 @@ import { ServiceDoc } from '../../models/doc-meta.model';
                 </tr>
               </thead>
               <tbody>
-                @for (method of service()!.methods; track method.name) {
+                @for (method of service()!.methods; track $index) {
                   <tr>
                     <td><code class="docs-code-name">{{ method.name }}</code></td>
                     <td><code class="docs-code-sig">{{ method.signature }}</code></td>
@@ -60,7 +60,7 @@ import { ServiceDoc } from '../../models/doc-meta.model';
         @if (interfaces().length) {
           <section class="docs-section">
             <h2 class="docs-section-title">Related interfaces</h2>
-            @for (iface of interfaces(); track iface.name) {
+            @for (iface of interfaces(); track $index) {
               <div class="iface-block">
                 <h3 class="iface-name">{{ iface.name }}</h3>
                 <p class="iface-desc">{{ iface.description }}</p>
@@ -74,7 +74,7 @@ import { ServiceDoc } from '../../models/doc-meta.model';
                       </tr>
                     </thead>
                     <tbody>
-                      @for (field of iface.fields; track field.name) {
+                      @for (field of iface.fields; track $index) {
                         <tr>
                           <td><code class="docs-code-name">{{ field.name }}</code></td>
                           <td><code class="docs-code-ret">{{ field.type }}</code></td>
