@@ -32,64 +32,61 @@ hljs.registerLanguage('json', json);
   styles: [
     `
       .code-block-wrapper {
-        background: #1e1e2e;
-        border-radius: 8px;
+        background: var(--bg-elevated);
+        border-radius: var(--radius-lg);
         overflow: hidden;
-        margin: 1rem 0;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        margin: var(--sp-4) 0;
+        border: 1px solid var(--border);
       }
 
       .code-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.5rem 1rem;
-        background: rgba(255, 255, 255, 0.05);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: var(--sp-2) var(--sp-4);
+        background: rgba(255, 255, 255, 0.04);
+        border-bottom: 1px solid var(--border-subtle);
       }
 
       .lang-badge {
-        font-size: 0.75rem;
+        font-size: var(--text-xs);
         font-weight: 600;
-        color: #a0a8c0;
+        color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.07em;
       }
 
       .copy-btn {
-        font-size: 0.75rem;
+        font-size: var(--text-xs);
         padding: 0.2rem 0.6rem;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
         color: #c0c8e0;
         cursor: pointer;
-        transition: background 0.15s;
+        transition: background var(--transition), color var(--transition);
       }
 
       .copy-btn:hover {
-        background: rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.15);
+        color: var(--text-white);
       }
 
       .copy-btn:focus-visible {
-        outline: 2px solid #6b8cf2;
+        outline: 2px solid var(--accent);
         outline-offset: 2px;
       }
 
       pre {
         margin: 0;
-        padding: 1.2rem 1.4rem;
+        padding: var(--sp-5) var(--sp-6);
         overflow-x: auto;
       }
 
       code {
-        font-family:
-          'Fira Code',
-          'Cascadia Code',
-          'Consolas',
-          monospace;
-        font-size: 0.875rem;
-        line-height: 1.6;
+        font-family: var(--font-mono);
+        font-size: var(--text-base);
+        line-height: 1.65;
         background: transparent !important;
       }
     `,

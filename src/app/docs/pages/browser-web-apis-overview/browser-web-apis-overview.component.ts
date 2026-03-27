@@ -69,35 +69,35 @@ const SERVICE_GROUPS = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, CodeBlockComponent],
   template: `
-    <div class="overview">
-      <div class="page-header">
-        <div class="breadcrumb" aria-label="Breadcrumb">
+    <div class="docs-page">
+      <div class="docs-page-header">
+        <nav class="docs-breadcrumb" aria-label="Breadcrumb">
           <a routerLink="/docs">Docs</a>
           <span aria-hidden="true">›</span>
           <span>browser-web-apis</span>
-        </div>
-        <h1>browser-web-apis</h1>
-        <code class="npm-badge">&#64;angular-helpers/browser-web-apis</code>
-        <p class="page-lead">
+        </nav>
+        <h1 class="docs-page-title">browser-web-apis</h1>
+        <code class="docs-badge docs-badge--npm">&#64;angular-helpers/browser-web-apis</code>
+        <p class="docs-page-lead">
           Angular services for structured, secure, and reactive access to Browser Web APIs. All
           services are tree-shakable, lifecycle-safe, and built with signals and OnPush change
           detection.
         </p>
       </div>
 
-      <section class="section">
-        <h2>Installation</h2>
+      <section class="docs-section">
+        <h2 class="docs-section-title">Installation</h2>
         <app-code-block language="bash" [code]="'npm install @angular-helpers/browser-web-apis'" />
       </section>
 
-      <section class="section">
-        <h2>Setup</h2>
-        <p>Register the providers once in your application bootstrap:</p>
+      <section class="docs-section">
+        <h2 class="docs-section-title">Setup</h2>
+        <p class="docs-section-text">Register the providers once in your application bootstrap:</p>
         <app-code-block [code]="providerExample" />
       </section>
 
-      <section class="section">
-        <h2>Services</h2>
+      <section class="docs-section">
+        <h2 class="docs-section-title">Services</h2>
         @for (group of serviceGroups; track group.label) {
           <div class="service-group">
             <h3 class="group-label">{{ group.icon }} {{ group.label }}</h3>
@@ -119,128 +119,58 @@ const SERVICE_GROUPS = [
   `,
   styles: [
     `
-      .overview {
-        padding-bottom: 3rem;
-      }
-
-      .page-header {
-        margin-bottom: 2.5rem;
-      }
-
-      .breadcrumb {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.82rem;
-        color: #7a84a0;
-        margin-bottom: 1rem;
-      }
-
-      .breadcrumb a {
-        color: #6b8cf2;
-        text-decoration: none;
-      }
-
-      .breadcrumb a:hover {
-        text-decoration: underline;
-      }
-
-      h1 {
-        font-size: 1.9rem;
-        font-weight: 800;
-        color: #fff;
-        margin: 0 0 0.5rem;
-        letter-spacing: -0.03em;
-      }
-
-      .npm-badge {
-        display: inline-block;
-        font-size: 0.82rem;
-        color: #6b8cf2;
-        background: rgba(107, 140, 242, 0.12);
-        padding: 0.2rem 0.55rem;
-        border-radius: 4px;
-        margin-bottom: 1rem;
-        font-family: 'Fira Code', monospace;
-      }
-
-      .page-lead {
-        color: #909ab8;
-        font-size: 1rem;
-        line-height: 1.7;
-        max-width: 650px;
-        margin: 0.75rem 0 0;
-      }
-
-      .section {
-        margin-bottom: 2.5rem;
-      }
-
-      h2 {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #fff;
-        margin: 0 0 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-      }
-
-      .section p {
-        color: #909ab8;
-        margin: 0 0 1rem;
-      }
-
       .service-group {
-        margin-bottom: 1.75rem;
+        margin-bottom: var(--sp-6);
       }
 
       h3.group-label {
-        font-size: 0.88rem;
+        font-size: 0.82rem;
         font-weight: 700;
-        color: #7a84a0;
+        color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.07em;
-        margin: 0 0 0.75rem;
+        margin: 0 0 var(--sp-3);
       }
 
       .services-list {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 0.6rem;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: var(--sp-2);
       }
 
       .service-card {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
-        padding: 0.75rem 1rem;
-        background: #1a1c28;
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-radius: 8px;
+        gap: var(--sp-1);
+        padding: var(--sp-3) var(--sp-4);
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
         text-decoration: none;
-        transition: border-color 0.15s, background 0.15s;
+        transition: border-color var(--transition), background var(--transition);
       }
 
       .service-card:hover {
-        border-color: #6b8cf2;
-        background: rgba(107, 140, 242, 0.07);
+        border-color: var(--accent);
+        background: var(--accent-hover);
       }
 
       .service-card:focus-visible {
-        outline: 2px solid #6b8cf2;
+        outline: 2px solid var(--accent);
         outline-offset: 2px;
       }
 
       .svc-name {
-        font-size: 0.88rem;
+        font-size: var(--text-base);
         font-weight: 600;
         color: #c0c8e0;
-        font-family: 'Fira Code', monospace;
+        font-family: var(--font-mono);
       }
 
       .svc-desc {
-        font-size: 0.8rem;
-        color: #7a84a0;
+        font-size: var(--text-sm);
+        color: var(--text-muted);
+        line-height: 1.5;
       }
     `,
   ],

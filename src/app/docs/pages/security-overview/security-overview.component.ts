@@ -20,41 +20,40 @@ bootstrapApplication(AppComponent, {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, CodeBlockComponent],
   template: `
-    <div class="security-docs">
-      <div class="page-header">
-        <div class="breadcrumb" aria-label="Breadcrumb">
+    <div class="docs-page">
+      <div class="docs-page-header">
+        <nav class="docs-breadcrumb" aria-label="Breadcrumb">
           <a routerLink="/docs">Docs</a>
           <span aria-hidden="true">›</span>
           <span>security</span>
-        </div>
-        <h1>security</h1>
-        <code class="npm-badge">&#64;angular-helpers/security</code>
-        <p class="page-lead">
+        </nav>
+        <h1 class="docs-page-title">security</h1>
+        <code class="docs-badge docs-badge--npm">&#64;angular-helpers/security</code>
+        <p class="docs-page-lead">
           Prevents ReDoS (Regular Expression Denial of Service) attacks by executing regular
           expressions in isolated Web Workers with configurable timeouts and complexity analysis.
         </p>
       </div>
 
-      <section class="section">
-        <h2>Installation</h2>
+      <section class="docs-section">
+        <h2 class="docs-section-title">Installation</h2>
         <app-code-block language="bash" [code]="'npm install @angular-helpers/security'" />
       </section>
 
-      <section class="section">
-        <h2>Setup</h2>
+      <section class="docs-section">
+        <h2 class="docs-section-title">Setup</h2>
         <app-code-block [code]="providerExample" />
       </section>
 
-      <section class="section">
-        <h2>Services &amp; Exports</h2>
+      <section class="docs-section">
+        <h2 class="docs-section-title">Services &amp; Exports</h2>
         <div class="services-grid">
           @for (svc of services; track svc.id) {
             <div class="svc-card">
               <h3 class="svc-name">{{ svc.name }}</h3>
               <p class="svc-desc">{{ svc.description }}</p>
-
-              <div class="methods-table" role="region" [attr.aria-label]="svc.name + ' methods'">
-                <table>
+              <div class="docs-table-wrapper" role="region" [attr.aria-label]="svc.name + ' methods'">
+                <table class="docs-table">
                   <thead>
                     <tr>
                       <th scope="col">Method</th>
@@ -65,15 +64,14 @@ bootstrapApplication(AppComponent, {
                   <tbody>
                     @for (method of svc.methods; track method.name) {
                       <tr>
-                        <td><code class="method-name">{{ method.name }}</code></td>
-                        <td><code class="method-ret">{{ method.returns }}</code></td>
-                        <td class="method-desc">{{ method.description }}</td>
+                        <td><code class="docs-code-name">{{ method.name }}</code></td>
+                        <td><code class="docs-code-ret">{{ method.returns }}</code></td>
+                        <td class="docs-cell-desc">{{ method.description }}</td>
                       </tr>
                     }
                   </tbody>
                 </table>
               </div>
-
               <div class="example-label">Example</div>
               <app-code-block [code]="svc.example" />
             </div>
@@ -81,14 +79,14 @@ bootstrapApplication(AppComponent, {
         </div>
       </section>
 
-      <section class="section">
-        <h2>Interfaces</h2>
+      <section class="docs-section">
+        <h2 class="docs-section-title">Interfaces</h2>
         @for (iface of interfaces; track iface.name) {
           <div class="iface-block">
             <h3 class="iface-name">{{ iface.name }}</h3>
             <p class="iface-desc">{{ iface.description }}</p>
-            <div class="methods-table" role="region" [attr.aria-label]="iface.name + ' fields'">
-              <table>
+            <div class="docs-table-wrapper" role="region" [attr.aria-label]="iface.name + ' fields'">
+              <table class="docs-table">
                 <thead>
                   <tr>
                     <th scope="col">Field</th>
@@ -99,9 +97,9 @@ bootstrapApplication(AppComponent, {
                 <tbody>
                   @for (field of iface.fields; track field.name) {
                     <tr>
-                      <td><code class="method-name">{{ field.name }}</code></td>
-                      <td><code class="method-ret">{{ field.type }}</code></td>
-                      <td class="method-desc">{{ field.description }}</td>
+                      <td><code class="docs-code-name">{{ field.name }}</code></td>
+                      <td><code class="docs-code-ret">{{ field.type }}</code></td>
+                      <td class="docs-cell-desc">{{ field.description }}</td>
                     </tr>
                   }
                 </tbody>
@@ -111,8 +109,8 @@ bootstrapApplication(AppComponent, {
         }
       </section>
 
-      <section class="section risk-section">
-        <h2>Risk levels</h2>
+      <section class="docs-section risk-section">
+        <h2 class="docs-section-title">Risk levels</h2>
         <div class="risk-grid">
           <div class="risk-card low">
             <span class="risk-dot"></span>
@@ -148,199 +146,74 @@ bootstrapApplication(AppComponent, {
   `,
   styles: [
     `
-      .security-docs {
-        padding-bottom: 3rem;
-      }
-
-      .page-header {
-        margin-bottom: 2.5rem;
-      }
-
-      .breadcrumb {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.82rem;
-        color: #7a84a0;
-        margin-bottom: 1rem;
-      }
-
-      .breadcrumb a {
-        color: #6b8cf2;
-        text-decoration: none;
-      }
-
-      .breadcrumb a:hover {
-        text-decoration: underline;
-      }
-
-      h1 {
-        font-size: 1.9rem;
-        font-weight: 800;
-        color: #fff;
-        margin: 0 0 0.5rem;
-        letter-spacing: -0.03em;
-      }
-
-      .npm-badge {
-        display: inline-block;
-        font-size: 0.82rem;
-        color: #6b8cf2;
-        background: rgba(107, 140, 242, 0.12);
-        padding: 0.2rem 0.55rem;
-        border-radius: 4px;
-        margin-bottom: 1rem;
-        font-family: 'Fira Code', monospace;
-      }
-
-      .page-lead {
-        color: #909ab8;
-        font-size: 1rem;
-        line-height: 1.7;
-        max-width: 650px;
-        margin: 0.75rem 0 0;
-      }
-
-      .section {
-        margin-bottom: 3rem;
-      }
-
-      h2 {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #fff;
-        margin: 0 0 1.25rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-      }
-
       .services-grid {
         display: flex;
         flex-direction: column;
-        gap: 2rem;
+        gap: var(--sp-8);
       }
 
       .svc-card {
-        background: #1a1c28;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 10px;
-        padding: 1.5rem;
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: var(--sp-6);
       }
 
       h3.svc-name {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         font-weight: 700;
-        color: #fff;
-        margin: 0 0 0.5rem;
-        font-family: 'Fira Code', monospace;
+        color: var(--text-white);
+        margin: 0 0 var(--sp-2);
+        font-family: var(--font-mono);
       }
 
       .svc-desc {
-        color: #909ab8;
+        color: var(--text-secondary);
         font-size: 0.9rem;
         line-height: 1.65;
-        margin: 0 0 1.25rem;
+        margin: 0 0 var(--sp-5);
       }
 
       .example-label {
-        font-size: 0.78rem;
+        font-size: var(--text-xs);
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.07em;
-        color: #7a84a0;
-        margin: 1.25rem 0 0.4rem;
+        color: var(--text-muted);
+        margin: var(--sp-5) 0 var(--sp-2);
       }
 
-      /* Interfaces */
       .iface-block {
-        margin-bottom: 2rem;
+        margin-bottom: var(--sp-8);
       }
 
       h3.iface-name {
-        font-size: 1rem;
+        font-size: 0.95rem;
         font-weight: 700;
         color: #c0c8e0;
-        margin: 0 0 0.4rem;
-        font-family: 'Fira Code', monospace;
+        margin: 0 0 var(--sp-2);
+        font-family: var(--font-mono);
       }
 
       .iface-desc {
-        color: #7a84a0;
-        font-size: 0.87rem;
-        margin: 0 0 0.75rem;
-      }
-
-      /* Tables */
-      .methods-table {
-        overflow-x: auto;
-        border-radius: 7px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.875rem;
-      }
-
-      thead {
-        background: rgba(255, 255, 255, 0.04);
-      }
-
-      th {
-        text-align: left;
-        padding: 0.65rem 1rem;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: #7a84a0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        white-space: nowrap;
-      }
-
-      td {
-        padding: 0.7rem 1rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        vertical-align: top;
-      }
-
-      tr:last-child td {
-        border-bottom: none;
-      }
-
-      .method-name {
-        color: #6b8cf2;
-        font-family: 'Fira Code', monospace;
-        font-size: 0.85rem;
-        white-space: nowrap;
-      }
-
-      .method-ret {
-        color: #a0f0b0;
-        font-family: 'Fira Code', monospace;
-        font-size: 0.8rem;
-        white-space: nowrap;
-      }
-
-      .method-desc {
-        color: #909ab8;
-        min-width: 180px;
+        color: var(--text-muted);
+        font-size: var(--text-base);
+        margin: 0 0 var(--sp-3);
       }
 
       /* Risk grid */
       .risk-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 1rem;
+        gap: var(--sp-4);
       }
 
       .risk-card {
         display: flex;
         align-items: flex-start;
-        gap: 0.75rem;
-        padding: 1rem;
-        border-radius: 8px;
+        gap: var(--sp-3);
+        padding: var(--sp-4);
+        border-radius: var(--radius-lg);
         border: 1px solid;
       }
 
@@ -355,58 +228,31 @@ bootstrapApplication(AppComponent, {
       .risk-card strong {
         display: block;
         font-size: 0.9rem;
-        margin-bottom: 0.3rem;
+        margin-bottom: var(--sp-1);
       }
 
       .risk-card p {
-        font-size: 0.82rem;
+        font-size: var(--text-sm);
         margin: 0;
-        color: #909ab8;
+        color: var(--text-secondary);
+        line-height: 1.5;
       }
 
-      .risk-card.low {
-        background: rgba(80, 200, 120, 0.06);
-        border-color: rgba(80, 200, 120, 0.2);
-      }
-      .risk-card.low .risk-dot {
-        background: #50c878;
-      }
-      .risk-card.low strong {
-        color: #50c878;
-      }
+      .risk-card.low   { background: rgba(80,200,120,.06); border-color: rgba(80,200,120,.2); }
+      .risk-card.low   .risk-dot { background: #50c878; }
+      .risk-card.low   strong    { color: #50c878; }
 
-      .risk-card.medium {
-        background: rgba(255, 200, 0, 0.06);
-        border-color: rgba(255, 200, 0, 0.2);
-      }
-      .risk-card.medium .risk-dot {
-        background: #ffc800;
-      }
-      .risk-card.medium strong {
-        color: #ffc800;
-      }
+      .risk-card.medium { background: rgba(255,200,0,.06); border-color: rgba(255,200,0,.2); }
+      .risk-card.medium .risk-dot { background: #ffc800; }
+      .risk-card.medium strong    { color: #ffc800; }
 
-      .risk-card.high {
-        background: rgba(255, 140, 0, 0.06);
-        border-color: rgba(255, 140, 0, 0.2);
-      }
-      .risk-card.high .risk-dot {
-        background: #ff8c00;
-      }
-      .risk-card.high strong {
-        color: #ff8c00;
-      }
+      .risk-card.high  { background: rgba(255,140,0,.06); border-color: rgba(255,140,0,.2); }
+      .risk-card.high  .risk-dot { background: #ff8c00; }
+      .risk-card.high  strong    { color: #ff8c00; }
 
-      .risk-card.critical {
-        background: rgba(255, 60, 60, 0.06);
-        border-color: rgba(255, 60, 60, 0.2);
-      }
-      .risk-card.critical .risk-dot {
-        background: #ff3c3c;
-      }
-      .risk-card.critical strong {
-        color: #ff3c3c;
-      }
+      .risk-card.critical { background: rgba(255,60,60,.06); border-color: rgba(255,60,60,.2); }
+      .risk-card.critical .risk-dot { background: #ff3c3c; }
+      .risk-card.critical strong    { color: #ff3c3c; }
     `,
   ],
 })

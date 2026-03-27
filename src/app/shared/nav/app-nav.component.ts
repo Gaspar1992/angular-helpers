@@ -45,12 +45,12 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       .skip-link {
         position: absolute;
         top: -100px;
-        left: 0.5rem;
-        background: #6b8cf2;
-        color: #fff;
-        padding: 0.5rem 1rem;
-        border-radius: 0 0 4px 4px;
-        font-size: 0.875rem;
+        left: var(--sp-2);
+        background: var(--accent);
+        color: var(--text-white);
+        padding: var(--sp-2) var(--sp-4);
+        border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+        font-size: var(--text-base);
         font-weight: 600;
         z-index: 9999;
         text-decoration: none;
@@ -64,11 +64,12 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 1.5rem;
+        padding: 0 var(--sp-6);
         height: 56px;
-        background: rgba(10, 10, 20, 0.92);
-        backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(10, 10, 20, 0.94);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--border);
         position: sticky;
         top: 0;
         z-index: 100;
@@ -82,9 +83,14 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       .brand-link {
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: var(--sp-2);
         text-decoration: none;
-        color: #fff;
+        color: var(--text-white);
+        transition: opacity var(--transition);
+      }
+
+      .brand-link:hover {
+        opacity: 0.85;
       }
 
       .brand-icon {
@@ -97,7 +103,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         font-weight: 700;
         font-size: 1rem;
         letter-spacing: -0.02em;
-        color: #fff;
+        color: var(--text-white);
       }
 
       nav ul {
@@ -105,33 +111,33 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         margin: 0;
         padding: 0;
         display: flex;
-        gap: 0.25rem;
+        gap: var(--sp-1);
       }
 
       .nav-link {
         display: inline-block;
-        padding: 0.4rem 0.9rem;
-        font-size: 0.875rem;
+        padding: 0.38rem var(--sp-3);
+        font-size: var(--text-base);
         font-weight: 500;
         color: #b0b8d0;
         text-decoration: none;
-        border-radius: 6px;
-        transition: color 0.15s, background 0.15s;
+        border-radius: var(--radius-md);
+        transition: color var(--transition), background var(--transition);
       }
 
       .nav-link:hover {
-        color: #fff;
-        background: rgba(255, 255, 255, 0.07);
+        color: var(--text-white);
+        background: var(--bg-hover);
       }
 
       .nav-link:focus-visible {
-        outline: 2px solid #6b8cf2;
+        outline: 2px solid var(--accent);
         outline-offset: 2px;
       }
 
       .nav-link.active {
-        color: #fff;
-        background: rgba(107, 140, 242, 0.15);
+        color: var(--text-white);
+        background: var(--accent-dim);
       }
     `,
   ],
