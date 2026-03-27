@@ -64,8 +64,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 var(--sp-6);
-        height: 56px;
+        padding: 0 var(--sp-4);
+        height: 52px;
         background: rgba(10, 10, 20, 0.94);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
@@ -101,9 +101,14 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 
       .brand-name {
         font-weight: 700;
-        font-size: 1rem;
+        font-size: 0.9rem;
         letter-spacing: -0.02em;
         color: var(--text-white);
+      }
+
+      @media (min-width: 480px) {
+        .app-nav { padding: 0 var(--sp-6); height: 56px; }
+        .brand-name { font-size: 1rem; }
       }
 
       nav ul {

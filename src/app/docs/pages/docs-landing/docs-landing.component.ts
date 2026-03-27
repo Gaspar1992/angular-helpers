@@ -91,7 +91,7 @@ bootstrapApplication(AppComponent, &#123;
       }
 
       h1 {
-        font-size: 2rem;
+        font-size: 1.5rem;
         font-weight: 800;
         color: var(--text-white);
         margin: 0 0 var(--sp-3);
@@ -99,19 +99,35 @@ bootstrapApplication(AppComponent, &#123;
         line-height: 1.2;
       }
 
+      @media (min-width: 640px) {
+        h1 { font-size: 2rem; }
+      }
+
       .lead {
-        font-size: 1.05rem;
+        font-size: 0.95rem;
         color: var(--text-secondary);
         max-width: 600px;
         line-height: 1.7;
         margin: 0;
       }
 
+      @media (min-width: 640px) {
+        .lead { font-size: 1.05rem; }
+      }
+
       .packages-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: var(--sp-6);
-        margin-bottom: var(--sp-12);
+        grid-template-columns: 1fr;
+        gap: var(--sp-4);
+        margin-bottom: var(--sp-10);
+      }
+
+      @media (min-width: 580px) {
+        .packages-grid {
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: var(--sp-6);
+          margin-bottom: var(--sp-12);
+        }
       }
 
       .package-card {
@@ -237,7 +253,11 @@ bootstrapApplication(AppComponent, &#123;
 
       .code-snippet pre {
         margin: 0;
-        padding: var(--sp-5) var(--sp-6);
+        padding: var(--sp-4) var(--sp-5);
+      }
+
+      @media (min-width: 640px) {
+        .code-snippet pre { padding: var(--sp-5) var(--sp-6); }
       }
 
       .code-snippet code {
@@ -247,9 +267,6 @@ bootstrapApplication(AppComponent, &#123;
         line-height: 1.6;
       }
 
-      @media (max-width: 600px) {
-        h1 { font-size: 1.5rem; }
-      }
     `,
   ],
 })

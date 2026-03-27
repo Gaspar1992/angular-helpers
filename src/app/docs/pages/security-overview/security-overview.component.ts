@@ -156,7 +156,11 @@ bootstrapApplication(AppComponent, {
         background: var(--bg-surface);
         border: 1px solid var(--border);
         border-radius: var(--radius-lg);
-        padding: var(--sp-6);
+        padding: var(--sp-4);
+      }
+
+      @media (min-width: 640px) {
+        .svc-card { padding: var(--sp-6); }
       }
 
       h3.svc-name {
@@ -204,8 +208,21 @@ bootstrapApplication(AppComponent, {
       /* Risk grid */
       .risk-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: var(--sp-4);
+        grid-template-columns: 1fr;
+        gap: var(--sp-3);
+      }
+
+      @media (min-width: 480px) {
+        .risk-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: var(--sp-4);
+        }
+      }
+
+      @media (min-width: 768px) {
+        .risk-grid {
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
       }
 
       .risk-card {

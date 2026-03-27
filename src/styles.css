@@ -107,7 +107,7 @@ body {
 }
 
 .docs-page-title {
-  font-size: 1.9rem;
+  font-size: 1.45rem;
   font-weight: 800;
   color: var(--text-white);
   margin: 0 0 var(--sp-2);
@@ -115,12 +115,24 @@ body {
   line-height: 1.2;
 }
 
+@media (min-width: 640px) {
+  .docs-page-title {
+    font-size: 1.9rem;
+  }
+}
+
 .docs-page-lead {
   color: var(--text-secondary);
-  font-size: 1rem;
+  font-size: 0.92rem;
   line-height: 1.7;
   max-width: 650px;
   margin: var(--sp-3) 0 0;
+}
+
+@media (min-width: 640px) {
+  .docs-page-lead {
+    font-size: 1rem;
+  }
 }
 
 /* Inline code badges */
@@ -151,12 +163,18 @@ body {
 }
 
 .docs-section-title {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-white);
   margin: 0 0 var(--sp-4);
   padding-bottom: var(--sp-2);
   border-bottom: 1px solid var(--border);
+}
+
+@media (min-width: 640px) {
+  .docs-section-title {
+    font-size: 1.2rem;
+  }
 }
 
 /* Inline info text under a section title */
@@ -208,7 +226,7 @@ body {
   border: 1px solid rgba(255, 200, 80, 0.2);
 }
 
-/* API table */
+/* API table — always scrollable on narrow screens */
 .docs-table-wrapper {
   overflow-x: auto;
   border-radius: var(--radius-md);
@@ -227,7 +245,7 @@ body {
 
 .docs-table th {
   text-align: left;
-  padding: 0.65rem 1rem;
+  padding: 0.55rem 0.75rem;
   font-size: 0.73rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -238,9 +256,14 @@ body {
 }
 
 .docs-table td {
-  padding: 0.7rem 1rem;
+  padding: 0.6rem 0.75rem;
   border-bottom: 1px solid var(--border-subtle);
   vertical-align: top;
+}
+
+@media (min-width: 640px) {
+  .docs-table th { padding: 0.65rem 1rem; }
+  .docs-table td { padding: 0.7rem 1rem; }
 }
 
 .docs-table tr:last-child td {

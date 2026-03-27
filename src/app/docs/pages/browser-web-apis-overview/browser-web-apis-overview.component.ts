@@ -134,8 +134,14 @@ const SERVICE_GROUPS = [
 
       .services-list {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        grid-template-columns: 1fr;
         gap: var(--sp-2);
+      }
+
+      @media (min-width: 480px) {
+        .services-list {
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        }
       }
 
       .service-card {
