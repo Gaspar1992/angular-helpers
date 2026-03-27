@@ -1,0 +1,65 @@
+# Deploy to GitHub Pages
+# Builds the Angular app and deploys it to GitHub Pages.
+# Requires: Settings > Pages > Source = "GitHub Actions"
+
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build for GitHub Pages
+        run: npm run build:gh-pages
+
+      - name: Copy index.html → 404.html (SPA routing fallback)
+        run: cp dist/angular-helpers/browser/index.html dist/angular-helpers/browser/404.html
+
+      - name: Add .nojekyll (prevent Jekyll processing)
+        run: touch dist/angular-helpers/browser/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/angular-helpers/browser
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
