@@ -10,7 +10,7 @@
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
     "clean": "rm -rf dist",
-    "lint": "eslint src/**/*.ts",
+    "lint": "oxlint src",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
