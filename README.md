@@ -235,8 +235,7 @@ MIT License — see [LICENSE](./LICENSE) for details.
 
 ## 🔗 Useful Links
 
-- **📚 Full Documentation**: [docs.angular-helpers.dev](https://docs.angular-helpers.dev)
-- **🐛 Issues & Feature Requests**: [GitHub Issues](https://github.com/angular-helpers/angular-helpers/issues)
+- ** Issues & Feature Requests**: [GitHub Issues](https://github.com/angular-helpers/angular-helpers/issues)
 - **💬 Discussions**: [GitHub Discussions](https://github.com/angular-helpers/angular-helpers/discussions)
 - **📦 NPM Organization**: [npmjs.com/org/angular-helpers](https://www.npmjs.com/org/angular-helpers)
 
