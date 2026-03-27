@@ -45,7 +45,15 @@ h1 {
 
 /* Alertas */
 .alerts {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   margin-bottom: 2rem;
+  pointer-events: none;
+}
+
+.alerts .alert {
+  pointer-events: auto;
 }
 
 .alert {
@@ -456,5 +464,35 @@ h1 {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Header Logo */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap; /* For smaller screens */
+}
+
+.logo {
+  width: 70px;
+  height: auto;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.header h1 {
+  margin-bottom: 0; /* Override default h1 margin */
+}
+
+/* Responsive adjustment for the logo */
+@media (max-width: 768px) {
+  .logo {
+    width: 50px;
+  }
+
+  .header {
+    gap: 1rem;
   }
 }
