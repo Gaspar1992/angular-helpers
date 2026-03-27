@@ -111,6 +111,7 @@ export class BrowserApisComponent {
 
         case 'notifications':
           status = await Notification.requestPermission();
+          this.notificationPermission.set(status);
           break;
 
         case 'geolocation':
