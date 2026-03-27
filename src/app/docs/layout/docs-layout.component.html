@@ -1,0 +1,67 @@
+<div class="docs-shell">
+  <aside class="sidebar" [class.open]="sidebarOpen()">
+    <div class="sidebar-header">
+      <a routerLink="/docs" class="sidebar-logo" (click)="closeSidebar()">
+        Angular Helpers
+      </a>
+      <button
+        class="sidebar-close"
+        (click)="closeSidebar()"
+        aria-label="Close sidebar"
+      >
+        ✕
+      </button>
+    </div>
+
+    <nav aria-label="Documentation navigation">
+      @for (section of navSections; track section.label) {
+        <div class="nav-section">
+          <div class="nav-section-label">
+            <span class="pkg-badge">pkg</span>
+            {{ section.label }}
+          </div>
+          <ul role="list">
+            @for (item of section.items; track item.route) {
+              <li>
+                <a
+                  [routerLink]="item.route"
+                  routerLinkActive="active"
+                  [routerLinkActiveOptions]="{ exact: true }"
+                  (click)="closeSidebar()"
+                >
+                  {{ item.label }}
+                </a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </nav>
+  </aside>
+
+  @if (sidebarOpen()) {
+    <div
+      class="sidebar-backdrop"
+      (click)="closeSidebar()"
+      aria-hidden="true"
+    ></div>
+  }
+
+  <div class="docs-content">
+    <header class="docs-topbar">
+      <button
+        class="menu-toggle"
+        (click)="toggleSidebar()"
+        aria-label="Toggle sidebar"
+        aria-expanded="{{ sidebarOpen() }}"
+      >
+        ☰
+      </button>
+      <span class="topbar-title">Documentation</span>
+    </header>
+
+    <main id="main-content" tabindex="-1">
+      <router-outlet />
+    </main>
+  </div>
+</div>

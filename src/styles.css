@@ -1,1 +1,58 @@
 /* You can add global styles to this file, and also import other style files */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: #0f1117;
+  color: #e0e4f0;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Highlight.js theme — dark (catppuccin-ish) */
+.hljs {
+  color: #cdd6f4;
+  background: transparent;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-name {
+  color: #cba6f7;
+}
+.hljs-string,
+.hljs-attr {
+  color: #a6e3a1;
+}
+.hljs-number,
+.hljs-literal {
+  color: #fab387;
+}
+.hljs-comment {
+  color: #6c7086;
+  font-style: italic;
+}
+.hljs-type,
+.hljs-class {
+  color: #89dceb;
+}
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.function_ {
+  color: #89b4fa;
+}
+.hljs-variable,
+.hljs-params {
+  color: #cdd6f4;
+}
+.hljs-meta {
+  color: #f38ba8;
+}
