@@ -1,7 +1,14 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { CodeBlockComponent } from '../../shared/code-block/code-block.component';
+import { DocsPageHeaderComponent } from '../../shared/page-header/docs-page-header.component';
+import { DocsApiTableComponent } from '../../shared/api-table/docs-api-table.component';
 import { SECURITY_SERVICES, SECURITY_INTERFACES } from '../../data/security.data';
+import {
+  BreadcrumbItem,
+  ApiRow,
+  METHODS_COLUMNS_SHORT,
+  FIELDS_COLUMNS,
+} from '../../models/doc-meta.model';
 
 const PROVIDER_EXAMPLE = `import { provideSecurity } from '@angular-helpers/security';
 
@@ -18,22 +25,16 @@ bootstrapApplication(AppComponent, {
 @Component({
   selector: 'app-security-overview',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, CodeBlockComponent],
+  imports: [CodeBlockComponent, DocsPageHeaderComponent, DocsApiTableComponent],
   template: `
     <div class="docs-page">
-      <div class="docs-page-header">
-        <nav class="docs-breadcrumb" aria-label="Breadcrumb">
-          <a routerLink="/docs">Docs</a>
-          <span aria-hidden="true">›</span>
-          <span>security</span>
-        </nav>
-        <h1 class="docs-page-title">security</h1>
-        <code class="docs-badge docs-badge--npm">&#64;angular-helpers/security</code>
-        <p class="docs-page-lead">
-          Prevents ReDoS (Regular Expression Denial of Service) attacks by executing regular
-          expressions in isolated Web Workers with configurable timeouts and complexity analysis.
-        </p>
-      </div>
+      <app-docs-page-header
+        [breadcrumbs]="breadcrumbs"
+        title="security"
+        badge="@angular-helpers/security"
+        badgeVariant="npm"
+        lead="Prevents ReDoS attacks by executing regular expressions in isolated Web Workers with configurable timeouts and complexity analysis."
+      />
 
       <section class="docs-section">
         <h2 class="docs-section-title">Installation</h2>
@@ -52,26 +53,11 @@ bootstrapApplication(AppComponent, {
             <div class="svc-card">
               <h3 class="svc-name">{{ svc.name }}</h3>
               <p class="svc-desc">{{ svc.description }}</p>
-              <div class="docs-table-wrapper" role="region" [attr.aria-label]="svc.name + ' methods'">
-                <table class="docs-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Method</th>
-                      <th scope="col">Returns</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (method of svc.methods; track method.name) {
-                      <tr>
-                        <td><code class="docs-code-name">{{ method.name }}</code></td>
-                        <td><code class="docs-code-ret">{{ method.returns }}</code></td>
-                        <td class="docs-cell-desc">{{ method.description }}</td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
+              <app-docs-api-table
+                [columns]="methodsShortColumns"
+                [rows]="toRows(svc.methods)"
+                [ariaLabel]="svc.name + ' methods'"
+              />
               <div class="example-label">Example</div>
               <app-code-block [code]="svc.example" />
             </div>
@@ -81,30 +67,15 @@ bootstrapApplication(AppComponent, {
 
       <section class="docs-section">
         <h2 class="docs-section-title">Interfaces</h2>
-        @for (iface of interfaces; track iface.name) {
+        @for (iface of interfaces; track $index) {
           <div class="iface-block">
             <h3 class="iface-name">{{ iface.name }}</h3>
             <p class="iface-desc">{{ iface.description }}</p>
-            <div class="docs-table-wrapper" role="region" [attr.aria-label]="iface.name + ' fields'">
-              <table class="docs-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Field</th>
-                    <th scope="col">Type</th>
-                    <th scope="col">Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (field of iface.fields; track field.name) {
-                    <tr>
-                      <td><code class="docs-code-name">{{ field.name }}</code></td>
-                      <td><code class="docs-code-ret">{{ field.type }}</code></td>
-                      <td class="docs-cell-desc">{{ field.description }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+            <app-docs-api-table
+              [columns]="fieldsColumns"
+              [rows]="iface.fields"
+              [ariaLabel]="iface.name + ' fields'"
+            />
           </div>
         }
       </section>
@@ -274,7 +245,17 @@ bootstrapApplication(AppComponent, {
   ],
 })
 export class SecurityOverviewComponent {
+  protected readonly breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Docs', route: '/docs' },
+    { label: 'security' },
+  ];
+  protected readonly methodsShortColumns = METHODS_COLUMNS_SHORT;
+  protected readonly fieldsColumns = FIELDS_COLUMNS;
   protected readonly services = SECURITY_SERVICES;
   protected readonly interfaces = SECURITY_INTERFACES;
   protected readonly providerExample = PROVIDER_EXAMPLE;
+
+  protected toRows(methods: { name: string; signature: string; returns: string; description: string }[]): ApiRow[] {
+    return (methods as unknown) as ApiRow[];
+  }
 }

@@ -5,6 +5,38 @@ export interface MethodDoc {
   returns: string;
 }
 
+export interface BreadcrumbItem {
+  label: string;
+  route?: string;
+}
+
+export interface ApiColumn {
+  key: string;
+  header: string;
+  cellClass: string;
+}
+
+export type ApiRow = Record<string, string>;
+
+export const METHODS_COLUMNS: ApiColumn[] = [
+  { key: 'name',        header: 'Method',      cellClass: 'docs-code-name' },
+  { key: 'signature',   header: 'Signature',   cellClass: 'docs-code-sig'  },
+  { key: 'returns',     header: 'Returns',     cellClass: 'docs-code-ret'  },
+  { key: 'description', header: 'Description', cellClass: 'docs-cell-desc' },
+];
+
+export const METHODS_COLUMNS_SHORT: ApiColumn[] = [
+  { key: 'name',        header: 'Method',      cellClass: 'docs-code-name' },
+  { key: 'returns',     header: 'Returns',     cellClass: 'docs-code-ret'  },
+  { key: 'description', header: 'Description', cellClass: 'docs-cell-desc' },
+];
+
+export const FIELDS_COLUMNS: ApiColumn[] = [
+  { key: 'name',        header: 'Field',       cellClass: 'docs-code-name' },
+  { key: 'type',        header: 'Type',        cellClass: 'docs-code-ret'  },
+  { key: 'description', header: 'Description', cellClass: 'docs-cell-desc' },
+];
+
 export interface ServiceDoc {
   id: string;
   name: string;

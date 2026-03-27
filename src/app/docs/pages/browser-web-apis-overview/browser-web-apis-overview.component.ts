@@ -1,6 +1,8 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CodeBlockComponent } from '../../shared/code-block/code-block.component';
+import { DocsPageHeaderComponent } from '../../shared/page-header/docs-page-header.component';
+import { BreadcrumbItem } from '../../models/doc-meta.model';
 
 const PROVIDER_EXAMPLE = `import { provideBrowserWebApis } from '@angular-helpers/browser-web-apis';
 
@@ -67,23 +69,16 @@ const SERVICE_GROUPS = [
 @Component({
   selector: 'app-browser-web-apis-overview',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, CodeBlockComponent],
+  imports: [RouterLink, CodeBlockComponent, DocsPageHeaderComponent],
   template: `
     <div class="docs-page">
-      <div class="docs-page-header">
-        <nav class="docs-breadcrumb" aria-label="Breadcrumb">
-          <a routerLink="/docs">Docs</a>
-          <span aria-hidden="true">›</span>
-          <span>browser-web-apis</span>
-        </nav>
-        <h1 class="docs-page-title">browser-web-apis</h1>
-        <code class="docs-badge docs-badge--npm">&#64;angular-helpers/browser-web-apis</code>
-        <p class="docs-page-lead">
-          Angular services for structured, secure, and reactive access to Browser Web APIs. All
-          services are tree-shakable, lifecycle-safe, and built with signals and OnPush change
-          detection.
-        </p>
-      </div>
+      <app-docs-page-header
+        [breadcrumbs]="breadcrumbs"
+        title="browser-web-apis"
+        badge="@angular-helpers/browser-web-apis"
+        badgeVariant="npm"
+        lead="Angular services for structured, secure, and reactive access to Browser Web APIs. All services are tree-shakable, lifecycle-safe, and built with signals and OnPush change detection."
+      />
 
       <section class="docs-section">
         <h2 class="docs-section-title">Installation</h2>
@@ -182,6 +177,10 @@ const SERVICE_GROUPS = [
   ],
 })
 export class BrowserWebApisOverviewComponent {
+  protected readonly breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Docs', route: '/docs' },
+    { label: 'browser-web-apis' },
+  ];
   protected readonly providerExample = PROVIDER_EXAMPLE;
   protected readonly serviceGroups = SERVICE_GROUPS;
 }
