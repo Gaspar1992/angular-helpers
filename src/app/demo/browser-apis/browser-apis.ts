@@ -299,9 +299,12 @@ export class BrowserApisComponent {
     this.clearMessages();
 
     try {
+      if (Notification.permission !== 'granted') {
+        this.setError('Permiso de notificaciones no concedido. Solicita el permiso primero.');
+        return;
+      }
       new Notification('Demo Browser APIs', {
         body: 'Esta es una notificación de prueba desde Angular',
-        icon: '/assets/icons/icon-192x192.png',
         tag: 'demo-notification',
       });
       this.setSuccess('Notificación mostrada');
