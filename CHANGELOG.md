@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.0.3...v1.1.0) (2026-03-27)
+
+
+### Features
+
+* migrate TS linting to oxlint, keep ESLint for Angular HTML temp… ([#17](https://github.com/Gaspar1992/angular-helpers/issues/17)) ([c78db99](https://github.com/Gaspar1992/angular-helpers/commit/c78db996ebde98d099c4d77de92c47b264ded5bd))
+
 ## [1.0.3](https://github.com/Gaspar1992/angular-helpers/compare/v1.0.2...v1.0.3) (2026-03-22)
 
 ### Bug Fixes
