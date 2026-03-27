@@ -58,7 +58,7 @@ export class RegexSecurityService {
   async testRegex(
     pattern: string,
     text: string,
-    config: RegexSecurityConfig = {}
+    config: RegexSecurityConfig = {},
   ): Promise<RegexTestResult> {
     const startTime = performance.now();
     const finalConfig = this.mergeConfig(config);
@@ -66,29 +66,29 @@ export class RegexSecurityService {
     try {
       // First, analyze pattern security
       const securityCheck = await this.analyzePatternSecurity(pattern);
-      
+
       if (!securityCheck.safe && !finalConfig.safeMode) {
         return {
           match: false,
           executionTime: performance.now() - startTime,
           timeout: false,
-          error: `Pattern rejected: ${securityCheck.warnings.join(', ')}`
+          error: `Pattern rejected: ${securityCheck.warnings.join(', ')}`,
         };
       }
 
       // Execute in Web Worker with timeout
       const result = await this.executeInWorker(pattern, text, finalConfig);
-      
+
       return {
         ...result,
-        executionTime: performance.now() - startTime
+        executionTime: performance.now() - startTime,
       };
     } catch (error) {
       return {
         match: false,
         executionTime: performance.now() - startTime,
         timeout: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -104,7 +104,11 @@ export class RegexSecurityService {
 
     // Analysis of dangerous patterns
     const dangerousPatterns = [
-      { pattern: /\*\*/, risk: 'high' as const, message: 'Nested quantifiers (catastrophic backtracking)' },
+      {
+        pattern: /\*\*/,
+        risk: 'high' as const,
+        message: 'Nested quantifiers (catastrophic backtracking)',
+      },
       { pattern: /\+\+/, risk: 'high' as const, message: 'Nested plus quantifiers' },
       { pattern: /\(\?\=/, risk: 'medium' as const, message: 'Lookahead assertions' },
       { pattern: /\(\?\!/, risk: 'medium' as const, message: 'Negative lookahead' },
@@ -112,8 +116,16 @@ export class RegexSecurityService {
       { pattern: /\(\?\</, risk: 'high' as const, message: 'Lookbehind assertions' },
       { pattern: /\(\?\(\?\)/, risk: 'critical' as const, message: 'Recursive patterns' },
       { pattern: /(\{(\d+,)?\d+\})/, risk: 'medium' as const, message: 'Quantified repetition' },
-      { pattern: /(\.\*)|(\.+)|(\.\?)/, risk: 'medium' as const, message: 'Greedy quantifiers with dot' },
-      { pattern: /(\[.*\*.*\])|(\[.*\+.*\])/, risk: 'medium' as const, message: 'Character classes with quantifiers' }
+      {
+        pattern: /(\.\*)|(\.+)|(\.\?)/,
+        risk: 'medium' as const,
+        message: 'Greedy quantifiers with dot',
+      },
+      {
+        pattern: /(\[.*\*.*\])|(\[.*\+.*\])/,
+        risk: 'medium' as const,
+        message: 'Character classes with quantifiers',
+      },
     ];
 
     // Calculate complexity
@@ -150,7 +162,7 @@ export class RegexSecurityService {
       complexity,
       risk,
       warnings,
-      recommendations
+      recommendations,
     };
   }
 
@@ -160,29 +172,29 @@ export class RegexSecurityService {
   private async executeInWorker(
     pattern: string,
     text: string,
-    config: RegexSecurityConfig
+    config: RegexSecurityConfig,
   ): Promise<RegexTestResult> {
     return new Promise((resolve) => {
       const workerName = `regex-worker-${Date.now()}`;
-      
+
       try {
         // Create temporary worker
         const workerCode = this.generateWorkerCode();
         const blob = new Blob([workerCode], { type: 'application/javascript' });
         const worker = new Worker(URL.createObjectURL(blob));
-        
+
         this.workers.set(workerName, worker);
 
         const taskId = `regex_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
+
         const task = {
           id: taskId,
           type: 'regex-test',
           data: {
             pattern,
             text,
-            timeout: config.timeout || 5000
-          }
+            timeout: config.timeout || 5000,
+          },
         };
 
         // Timeout for execution
@@ -193,7 +205,7 @@ export class RegexSecurityService {
             match: false,
             executionTime: 0,
             timeout: true,
-            error: 'Execution timeout'
+            error: 'Execution timeout',
           });
         }, config.timeout || 5000);
 
@@ -201,7 +213,7 @@ export class RegexSecurityService {
           clearTimeout(timeoutId);
           worker.terminate();
           this.workers.delete(workerName);
-          
+
           if (event.data.id === taskId) {
             resolve(event.data.data as RegexTestResult);
           }
@@ -215,7 +227,7 @@ export class RegexSecurityService {
             match: false,
             executionTime: 0,
             timeout: false,
-            error: `Worker error: ${error.message || 'Unknown error'}`
+            error: `Worker error: ${error.message || 'Unknown error'}`,
           });
         };
 
@@ -225,7 +237,7 @@ export class RegexSecurityService {
           match: false,
           executionTime: 0,
           timeout: false,
-          error: `Failed to create worker: ${error instanceof Error ? error.message : 'Unknown error'}`
+          error: `Failed to create worker: ${error instanceof Error ? error.message : 'Unknown error'}`,
         });
       }
     });
@@ -298,24 +310,24 @@ export class RegexSecurityService {
    */
   private calculateComplexity(pattern: string): number {
     let complexity = 0;
-    
+
     // Nested quantifiers increase complexity
     complexity += (pattern.match(/\*\*/g) || []).length * 5;
     complexity += (pattern.match(/\+\+/g) || []).length * 5;
     complexity += (pattern.match(/\?\?/g) || []).length * 3;
-    
+
     // Lookaheads/lookbehinds
     complexity += (pattern.match(/\(\?\=/g) || []).length * 2;
     complexity += (pattern.match(/\(\?\!/g) || []).length * 2;
     complexity += (pattern.match(/\(\?\</g) || []).length * 3;
-    
+
     // Nested groups
     const openParens = (pattern.match(/\(/g) || []).length;
     complexity += openParens * 0.5;
-    
+
     // Pattern length
     complexity += pattern.length * 0.01;
-    
+
     return Math.round(complexity * 100) / 100;
   }
 
@@ -323,7 +335,7 @@ export class RegexSecurityService {
    * Gets numeric risk level
    */
   private getRiskLevel(risk: 'low' | 'medium' | 'high' | 'critical'): number {
-    const levels = { 'low': 1, 'medium': 2, 'high': 3, 'critical': 4 };
+    const levels = { low: 1, medium: 2, high: 3, critical: 4 };
     return levels[risk] || 0;
   }
 
@@ -335,7 +347,7 @@ export class RegexSecurityService {
       timeout: config.timeout || 5000,
       maxComplexity: config.maxComplexity || 10,
       allowBacktracking: config.allowBacktracking || false,
-      safeMode: config.safeMode || false
+      safeMode: config.safeMode || false,
     };
   }
 
@@ -343,7 +355,7 @@ export class RegexSecurityService {
    * Cleans up resources when the service is destroyed
    */
   ngOnDestroy(): void {
-    this.workers.forEach(worker => {
+    this.workers.forEach((worker) => {
       worker.terminate();
     });
     this.workers.clear();
@@ -473,7 +485,7 @@ export class RegexSecurityBuilder {
     return {
       pattern: this.patternValue,
       options: this.optionsValue,
-      security: this.securityConfigValue
+      security: this.securityConfigValue,
     };
   }
 

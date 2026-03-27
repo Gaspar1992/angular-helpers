@@ -1,9 +1,28 @@
+import angularEslint from '@angular-eslint/eslint-plugin';
+import tsparser from '@typescript-eslint/parser';
 import angularTemplateEslint from '@angular-eslint/eslint-plugin-template';
 import angularTemplateParser from '@angular-eslint/template-parser';
-import prettierConfig from 'eslint-config-prettier';
-import prettierPlugin from 'eslint-plugin-prettier';
 
 export default [
+  {
+    files: ['**/*.ts'],
+    languageOptions: {
+      parser: tsparser,
+    },
+    plugins: {
+      '@angular-eslint': angularEslint,
+    },
+    rules: {
+      '@angular-eslint/directive-selector': [
+        'error',
+        { type: 'attribute', prefix: 'app', style: 'camelCase' },
+      ],
+      '@angular-eslint/component-selector': [
+        'error',
+        { type: 'element', prefix: 'app', style: 'kebab-case' },
+      ],
+    },
+  },
   {
     files: ['**/*.html'],
     languageOptions: {
@@ -11,11 +30,9 @@ export default [
     },
     plugins: {
       '@angular-eslint/template': angularTemplateEslint,
-      prettier: prettierPlugin,
     },
     rules: {
       ...angularTemplateEslint.configs.recommended.rules,
     },
   },
-  prettierConfig,
 ];

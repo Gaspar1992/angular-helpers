@@ -36,7 +36,7 @@ export interface GeolocationService {
   watchPosition(
     successCallback: (position: GeolocationPosition) => void,
     errorCallback?: (error: GeolocationError) => void,
-    options?: GeolocationWatchOptions
+    options?: GeolocationWatchOptions,
   ): number;
   clearWatch(watchId: number): void;
   isSupported(): boolean;

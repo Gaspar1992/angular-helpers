@@ -16,12 +16,14 @@ Paquete de servicios Angular para acceder de forma estructurada y segura a Brows
 ## Servicios disponibles
 
 ### APIs de medios y dispositivo
+
 - `CameraService` - Acceso a camara con gestion de permisos
 - `MediaDevicesService` - Enumeracion y gestion de dispositivos multimedia
 - `GeolocationService` - Acceso a la API de geolocalizacion
 - `NotificationService` - API de notificaciones del navegador
 
 ### Web APIs
+
 - `WebWorkerService` - Gestion de Web Workers
 - `WebSocketService` - Gestion de conexiones WebSocket
 - `WebStorageService` - Helpers para LocalStorage y SessionStorage
@@ -29,10 +31,12 @@ Paquete de servicios Angular para acceder de forma estructurada y segura a Brows
 - `ClipboardService` - Acceso al portapapeles del sistema
 
 ### Seguridad
+
 - `RegexSecurityService` - Prevencion de ReDoS con validacion en workers
 - `PermissionsService` - Gestion centralizada de permisos del navegador
 
 ### Utilidades
+
 - `CameraPermissionHelperService` - Utilidades para permisos de camara
 - `BrowserApiBaseService` - Clase base compartida para servicios de Browser APIs
 - `MediaDeviceBaseService` - Clase base compartida para servicios multimedia

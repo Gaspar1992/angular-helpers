@@ -68,7 +68,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
   async testRegex(
     pattern: string,
     text: string,
-    config: RegexSecurityConfig = {}
+    config: RegexSecurityConfig = {},
   ): Promise<RegexTestResult> {
     // Verificar soporte directamente
     if (!this.isWebWorkerSupported()) {
@@ -86,16 +86,16 @@ export class RegexSecurityService extends BrowserApiBaseService {
           match: false,
           executionTime: performance.now() - startTime,
           timeout: false,
-          error: 'Pattern contains potential ReDoS vulnerabilities'
+          error: 'Pattern contains potential ReDoS vulnerabilities',
         };
       }
 
       // Execute in Web Worker with timeout
       const result = await this.executeInWorker(pattern, text, finalConfig);
-      
+
       return {
         ...result,
-        executionTime: performance.now() - startTime
+        executionTime: performance.now() - startTime,
       };
     } catch (error) {
       console.error('[RegexSecurityService] Error testing regex:', error);
@@ -103,7 +103,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
         match: false,
         executionTime: performance.now() - startTime,
         timeout: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -118,14 +118,22 @@ export class RegexSecurityService extends BrowserApiBaseService {
     }
 
     try {
-      const result = await this.executeInWorker(pattern, '', { 
-        timeout: 1000,
-        maxComplexity: 1000,
-        allowBacktracking: false,
-        safeMode: true
-      }, 'analyze');
-      
-      return ((result as RegexTestResult & { security?: RegexSecurityResult }).security) || this.getDefaultSecurityResult();
+      const result = await this.executeInWorker(
+        pattern,
+        '',
+        {
+          timeout: 1000,
+          maxComplexity: 1000,
+          allowBacktracking: false,
+          safeMode: true,
+        },
+        'analyze',
+      );
+
+      return (
+        (result as RegexTestResult & { security?: RegexSecurityResult }).security ||
+        this.getDefaultSecurityResult()
+      );
     } catch (error) {
       console.error('[RegexSecurityService] Error analyzing pattern:', error);
       return this.getDefaultSecurityResult();
@@ -141,7 +149,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
       timeout: config.timeout ?? 5000,
       maxComplexity: config.maxComplexity ?? 1000,
       allowBacktracking: config.allowBacktracking ?? false,
-      safeMode: config.safeMode ?? true
+      safeMode: config.safeMode ?? true,
     };
   }
 
@@ -149,7 +157,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
     pattern: string,
     text: string,
     config: Required<RegexSecurityConfig>,
-    action: 'test' | 'analyze' = 'test'
+    action: 'test' | 'analyze' = 'test',
   ): Promise<RegexTestResult> {
     // Initialize worker if needed
     await this.initializeRegexWorker();
@@ -165,45 +173,49 @@ export class RegexSecurityService extends BrowserApiBaseService {
         data: {
           pattern,
           text,
-          config
-        }
+          config,
+        },
       };
 
       this.webWorkerService.postMessage(this.workerName, message);
-      
+
       // Subscribe to responses
-      const subscription = this.webWorkerService.getMessages(this.workerName)
-        .subscribe({
-          next: (response: WorkerMessage) => {
-            clearTimeout(timeoutId);
-            subscription.unsubscribe();
-            
-            if (response.type === action) {
-              if (action === 'analyze') {
-                // For analysis, return a default test result with security info
-                resolve({
-                  match: false,
-                  executionTime: 0,
-                  timeout: false,
-                  security: (response.data as { security: RegexSecurityResult }).security
-                } as RegexTestResult & { security: RegexSecurityResult });
-              } else {
-                resolve(response.data as RegexTestResult);
-              }
+      const subscription = this.webWorkerService.getMessages(this.workerName).subscribe({
+        next: (response: WorkerMessage) => {
+          clearTimeout(timeoutId);
+          subscription.unsubscribe();
+
+          if (response.type === action) {
+            if (action === 'analyze') {
+              // For analysis, return a default test result with security info
+              resolve({
+                match: false,
+                executionTime: 0,
+                timeout: false,
+                security: (response.data as { security: RegexSecurityResult }).security,
+              } as RegexTestResult & { security: RegexSecurityResult });
+            } else {
+              resolve(response.data as RegexTestResult);
             }
-          },
-          error: (error: unknown) => {
-            clearTimeout(timeoutId);
-            subscription.unsubscribe();
-            reject(this.createError('Worker execution failed', error));
           }
-        });
+        },
+        error: (error: unknown) => {
+          clearTimeout(timeoutId);
+          subscription.unsubscribe();
+          reject(this.createError('Worker execution failed', error));
+        },
+      });
     });
   }
 
   private async initializeRegexWorker(): Promise<void> {
     try {
-      await firstValueFrom(this.webWorkerService.createWorker(this.workerName, '/assets/workers/regex-security.worker.js'));
+      await firstValueFrom(
+        this.webWorkerService.createWorker(
+          this.workerName,
+          '/assets/workers/regex-security.worker.js',
+        ),
+      );
     } catch (error) {
       console.error('[RegexSecurityService] Failed to initialize worker:', error);
       throw this.createError('Failed to initialize regex security worker', error);
@@ -216,7 +228,7 @@ export class RegexSecurityService extends BrowserApiBaseService {
       complexity: 0,
       risk: 'high',
       warnings: ['Unable to analyze pattern security'],
-      recommendations: ['Use simpler patterns or enable safe mode']
+      recommendations: ['Use simpler patterns or enable safe mode'],
     };
   }
 
@@ -233,14 +245,14 @@ export class RegexSecurityService extends BrowserApiBaseService {
 
   private buildFlags(options?: RegexBuilderOptions): string {
     const flags: string[] = [];
-    
+
     if (options?.global) flags.push('g');
     if (options?.ignoreCase) flags.push('i');
     if (options?.multiline) flags.push('m');
     if (options?.dotAll) flags.push('s');
     if (options?.unicode) flags.push('u');
     if (options?.sticky) flags.push('y');
-    
+
     return flags.join('');
   }
 }
@@ -290,14 +302,14 @@ export class RegexSecurityBuilder {
 
   private buildFlags(): string {
     const flags: string[] = [];
-    
+
     if (this.options.global) flags.push('g');
     if (this.options.ignoreCase) flags.push('i');
     if (this.options.multiline) flags.push('m');
     if (this.options.dotAll) flags.push('s');
     if (this.options.unicode) flags.push('u');
     if (this.options.sticky) flags.push('y');
-    
+
     return flags.join('');
   }
 }

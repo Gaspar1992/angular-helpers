@@ -10,17 +10,17 @@ export interface SecurityConfig {
 export const defaultSecurityConfig: SecurityConfig = {
   enableRegexSecurity: true,
   defaultTimeout: 5000,
-  safeMode: false
+  safeMode: false,
 };
 
 export function provideSecurity(config: SecurityConfig = {}): EnvironmentProviders {
   const mergedConfig = { ...defaultSecurityConfig, ...config };
   const providers = [];
-  
+
   if (mergedConfig.enableRegexSecurity) {
     providers.push(RegexSecurityService);
   }
-  
+
   return makeEnvironmentProviders(providers);
 }
 

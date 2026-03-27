@@ -26,7 +26,7 @@ const BROWSER_CAPABILITIES = [
   { id: 'webStorage', label: 'Web Storage', requiresSecureContext: false },
   { id: 'webShare', label: 'Web Share', requiresSecureContext: true },
   { id: 'battery', label: 'Battery API', requiresSecureContext: false },
-  { id: 'webSocket', label: 'WebSocket API', requiresSecureContext: false }
+  { id: 'webSocket', label: 'WebSocket API', requiresSecureContext: false },
 ] as const satisfies ReadonlyArray<{
   id: BrowserCapabilityId;
   label: string;
@@ -80,7 +80,7 @@ export class BrowserCapabilityService {
       label: capability.label,
       supported: this.isSupported(capability.id),
       secureContext,
-      requiresSecureContext: capability.requiresSecureContext
+      requiresSecureContext: capability.requiresSecureContext,
     }));
   }
 

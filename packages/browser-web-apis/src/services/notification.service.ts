@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
-
 @Injectable()
 export class NotificationService extends BrowserApiBaseService {
   protected override getApiName(): string {
@@ -15,7 +14,9 @@ export class NotificationService extends BrowserApiBaseService {
 
     const permissionStatus = await this.permissionsService.query({ name: 'notifications' });
     if (permissionStatus.state !== 'granted') {
-      throw new Error('Notification permission required. Please grant notification access and try again.');
+      throw new Error(
+        'Notification permission required. Please grant notification access and try again.',
+      );
     }
 
     try {

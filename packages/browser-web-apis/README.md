@@ -16,12 +16,14 @@ Angular services package for a structured and secure access layer over browser W
 ## Available Services
 
 ### Media and Device APIs
+
 - `CameraService` - Camera access with permission handling
 - `MediaDevicesService` - Media device listing and management
 - `GeolocationService` - Geolocation API access
 - `NotificationService` - Browser notifications API
 
 ### Web APIs
+
 - `WebWorkerService` - Web Worker management
 - `WebSocketService` - WebSocket connection handling
 - `WebStorageService` - LocalStorage and SessionStorage helpers
@@ -29,10 +31,12 @@ Angular services package for a structured and secure access layer over browser W
 - `ClipboardService` - System clipboard access
 
 ### Security
+
 - `RegexSecurityService` - ReDoS prevention with worker-based validation
 - `PermissionsService` - Centralized browser permissions handling
 
 ### Utilities
+
 - `CameraPermissionHelperService` - Camera permission helper utilities
 - `BrowserApiBaseService` - Shared base class for browser API services
 - `MediaDeviceBaseService` - Shared base class for media device services

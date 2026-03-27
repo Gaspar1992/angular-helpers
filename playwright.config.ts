@@ -22,7 +22,7 @@ export default defineConfig({
     ignoreHTTPSErrors: useHttps,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure'
+    video: 'retain-on-failure',
   },
   projects: [
     {
@@ -30,30 +30,30 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         launchOptions: {
-          args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream']
-        }
-      }
+          args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'],
+        },
+      },
     },
     {
       name: 'firefox-smoke',
       testMatch: '**/smoke.spec.ts',
       use: {
-        ...devices['Desktop Firefox']
-      }
+        ...devices['Desktop Firefox'],
+      },
     },
     {
       name: 'webkit-smoke',
       testMatch: '**/smoke.spec.ts',
       use: {
-        ...devices['Desktop Safari']
-      }
-    }
+        ...devices['Desktop Safari'],
+      },
+    },
   ],
   webServer: {
     command: startCommand,
     url: baseUrl,
     ignoreHTTPSErrors: useHttps,
     reuseExistingServer: !process.env['CI'],
-    timeout: 180_000
-  }
+    timeout: 180_000,
+  },
 });

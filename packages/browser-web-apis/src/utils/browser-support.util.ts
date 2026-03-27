@@ -38,10 +38,10 @@ export class BrowserSupportUtil {
       'clipboard',
       'clipboard-read',
       'clipboard-write',
-      'persistent-storage'
+      'persistent-storage',
     ];
-    
-    return features.filter(feature => !this.isSupported(feature));
+
+    return features.filter((feature) => !this.isSupported(feature));
   }
 
   static isSecureContext(): boolean {
@@ -70,14 +70,14 @@ export class BrowserSupportUtil {
     isEdge: boolean;
   } {
     const userAgent = this.getUserAgent();
-    
+
     return {
       name: this.getBrowserName(userAgent),
       version: this.getBrowserVersion(userAgent),
       isChrome: /chrome/.test(userAgent) && !/edge/.test(userAgent),
       isFirefox: /firefox/.test(userAgent),
       isSafari: /safari/.test(userAgent) && !/chrome/.test(userAgent),
-      isEdge: /edge/.test(userAgent) || /edg/.test(userAgent)
+      isEdge: /edge/.test(userAgent) || /edg/.test(userAgent),
     };
   }
 

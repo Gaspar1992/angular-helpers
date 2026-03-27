@@ -6,32 +6,32 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-browser-apis',
   imports: [CommonModule, FormsModule],
   templateUrl: './browser-apis.html',
-  styleUrl: './browser-apis.css'
+  styleUrl: './browser-apis.css',
 })
 export class BrowserApisComponent {
   // Permisos
   permissions = signal<Record<string, string>>({});
-  
+
   // Cámara
   videoStream = signal<MediaStream | null>(null);
   availableCameras = signal<MediaDeviceInfo[]>([]);
   selectedCamera = signal<string>('');
   photoUrl = signal<string>('');
-  
+
   // Geolocalización
   currentPosition = signal<GeolocationPosition | null>(null);
   watchPositionId = signal<number | null>(null);
-  
+
   // Notificaciones
   notificationPermission = signal<string>('default');
-  
+
   // Clipboard
   clipboardText = signal<string>('');
-  
+
   // Media Devices
   audioDevices = signal<MediaDeviceInfo[]>([]);
   videoDevices = signal<MediaDeviceInfo[]>([]);
-  
+
   // UI States
   loading = signal<boolean>(false);
   error = signal<string>('');
@@ -45,10 +45,10 @@ export class BrowserApisComponent {
     try {
       // Inicializar permisos
       await this.refreshPermissions();
-      
+
       // Inicializar dispositivos
       await this.refreshDevices();
-      
+
       // Verificar permiso de notificaciones
       this.notificationPermission.set(Notification.permission);
     } catch (error: any) {
@@ -59,9 +59,16 @@ export class BrowserApisComponent {
   // Permisos
   async refreshPermissions() {
     try {
-      const permNames = ['camera', 'microphone', 'geolocation', 'notifications', 'clipboard-read', 'clipboard-write'];
+      const permNames = [
+        'camera',
+        'microphone',
+        'geolocation',
+        'notifications',
+        'clipboard-read',
+        'clipboard-write',
+      ];
       const perms: Record<string, string> = {};
-      
+
       for (const perm of permNames) {
         try {
           if ('permissions' in navigator) {
@@ -74,7 +81,7 @@ export class BrowserApisComponent {
           perms[perm] = 'unsupported';
         }
       }
-      
+
       this.permissions.set(perms);
     } catch (error: any) {
       this.setError('Error obteniendo permisos: ' + error);
@@ -84,29 +91,29 @@ export class BrowserApisComponent {
   async requestPermission(permission: string) {
     this.loading.set(true);
     this.clearMessages();
-    
+
     try {
       let status: string = 'denied';
-      
+
       switch (permission) {
         case 'camera':
         case 'microphone':
           try {
             const stream = await navigator.mediaDevices.getUserMedia({
               video: permission === 'camera',
-              audio: permission === 'microphone'
+              audio: permission === 'microphone',
             });
-            stream.getTracks().forEach(track => track.stop());
+            stream.getTracks().forEach((track) => track.stop());
             status = 'granted';
           } catch (error) {
             status = 'denied';
           }
           break;
-          
+
         case 'notifications':
           status = await Notification.requestPermission();
           break;
-          
+
         case 'geolocation':
           try {
             await new Promise((resolve, reject) => {
@@ -117,11 +124,11 @@ export class BrowserApisComponent {
             status = 'denied';
           }
           break;
-          
+
         default:
           status = 'unsupported';
       }
-      
+
       this.setSuccess(`Permiso ${permission}: ${status}`);
       await this.refreshPermissions();
     } catch (error: any) {
@@ -135,13 +142,13 @@ export class BrowserApisComponent {
   async refreshDevices() {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoInputs = devices.filter(d => d.kind === 'videoinput');
-      const audioInputs = devices.filter(d => d.kind === 'audioinput');
-      
+      const videoInputs = devices.filter((d) => d.kind === 'videoinput');
+      const audioInputs = devices.filter((d) => d.kind === 'audioinput');
+
       this.availableCameras.set(videoInputs);
       this.audioDevices.set(audioInputs);
       this.videoDevices.set(videoInputs);
-      
+
       if (videoInputs.length > 0 && !this.selectedCamera()) {
         this.selectedCamera.set(videoInputs[0].deviceId);
       }
@@ -153,12 +160,12 @@ export class BrowserApisComponent {
   async startCamera() {
     this.loading.set(true);
     this.clearMessages();
-    
+
     try {
-      const constraints = this.selectedCamera() 
+      const constraints = this.selectedCamera()
         ? { video: { deviceId: { exact: this.selectedCamera() } } }
         : { video: true };
-      
+
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       this.videoStream.set(stream);
       this.setSuccess('Cámara iniciada correctamente');
@@ -172,7 +179,7 @@ export class BrowserApisComponent {
   stopCamera() {
     const stream = this.videoStream();
     if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach((track) => track.stop());
     }
     this.videoStream.set(null);
     this.photoUrl.set('');
@@ -184,24 +191,24 @@ export class BrowserApisComponent {
       this.setError('No hay cámara activa');
       return;
     }
-    
+
     this.loading.set(true);
     this.clearMessages();
-    
+
     try {
       const stream = this.videoStream()!;
       const video = document.createElement('video');
       video.srcObject = stream;
       video.play();
-      
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d')!;
       ctx.drawImage(video, 0, 0);
-      
+
       canvas.toBlob((blob) => {
         if (blob) {
           const url = URL.createObjectURL(blob);
@@ -220,17 +227,19 @@ export class BrowserApisComponent {
   async getCurrentLocation() {
     this.loading.set(true);
     this.clearMessages();
-    
+
     try {
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
-          timeout: 10000
+          timeout: 10000,
         });
       });
-      
+
       this.currentPosition.set(position);
-      this.setSuccess(`Ubicación obtenida: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
+      this.setSuccess(
+        `Ubicación obtenida: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`,
+      );
     } catch (error: any) {
       this.setError('Error obteniendo ubicación: ' + error);
     } finally {
@@ -240,7 +249,7 @@ export class BrowserApisComponent {
 
   startWatchingPosition() {
     this.clearMessages();
-    
+
     try {
       const watchId = navigator.geolocation.watchPosition(
         (position: GeolocationPosition) => {
@@ -250,9 +259,9 @@ export class BrowserApisComponent {
         (error: any) => {
           this.setError('Error en watch position: ' + error.message);
         },
-        { enableHighAccuracy: true }
+        { enableHighAccuracy: true },
       );
-      
+
       this.watchPositionId.set(watchId);
       this.setSuccess('Watch position iniciado');
     } catch (error: any) {
@@ -273,7 +282,7 @@ export class BrowserApisComponent {
   async requestNotificationPermission() {
     this.loading.set(true);
     this.clearMessages();
-    
+
     try {
       const permission = await Notification.requestPermission();
       this.notificationPermission.set(permission);
@@ -288,12 +297,12 @@ export class BrowserApisComponent {
   async showNotification() {
     this.loading.set(true);
     this.clearMessages();
-    
+
     try {
       new Notification('Demo Browser APIs', {
         body: 'Esta es una notificación de prueba desde Angular',
         icon: '/assets/icons/icon-192x192.png',
-        tag: 'demo-notification'
+        tag: 'demo-notification',
       });
       this.setSuccess('Notificación mostrada');
     } catch (error: any) {
@@ -308,7 +317,7 @@ export class BrowserApisComponent {
     const text = 'Texto de prueba desde Browser APIs Demo - ' + new Date().toISOString();
     this.loading.set(true);
     this.clearMessages();
-    
+
     try {
       if ('clipboard' in navigator && 'writeText' in navigator.clipboard) {
         await navigator.clipboard.writeText(text);
@@ -327,7 +336,7 @@ export class BrowserApisComponent {
   async pasteFromClipboard() {
     this.loading.set(true);
     this.clearMessages();
-    
+
     try {
       if ('clipboard' in navigator && 'readText' in navigator.clipboard) {
         const text = await navigator.clipboard.readText();

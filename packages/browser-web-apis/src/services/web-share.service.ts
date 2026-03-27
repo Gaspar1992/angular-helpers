@@ -26,7 +26,7 @@ export class WebShareService extends BrowserApiBaseService {
       return { shared: true };
     } catch (error: unknown) {
       console.error('[WebShareService] Error sharing:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Share failed';
       return { shared: false, error: errorMessage };
     }
@@ -38,7 +38,7 @@ export class WebShareService extends BrowserApiBaseService {
 
   canShareFiles(): boolean {
     if (!('share' in navigator)) return false;
-    
+
     // Check if the browser supports file sharing
     const testFiles = [new File([''], 'test.txt', { type: 'text/plain' })];
     return navigator.canShare?.({ files: testFiles }) ?? false;

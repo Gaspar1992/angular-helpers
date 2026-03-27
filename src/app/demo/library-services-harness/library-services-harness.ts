@@ -15,7 +15,7 @@ import {
   WebWorkerService,
   type RegexTestResult,
   type WorkerMessage,
-  type WorkerTask
+  type WorkerTask,
 } from '@angular-helpers/browser-web-apis';
 
 type HarnessPermissionState = PermissionStatus['state'] | 'unknown';
@@ -51,12 +51,16 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
 
       <p>
         Notification API supported:
-        <strong data-testid="notification-supported">{{ notificationSupported() ? 'yes' : 'no' }}</strong>
+        <strong data-testid="notification-supported">{{
+          notificationSupported() ? 'yes' : 'no'
+        }}</strong>
       </p>
 
       <p>
         MediaDevices API supported:
-        <strong data-testid="media-devices-supported">{{ mediaDevicesSupported() ? 'yes' : 'no' }}</strong>
+        <strong data-testid="media-devices-supported">{{
+          mediaDevicesSupported() ? 'yes' : 'no'
+        }}</strong>
       </p>
 
       <p>
@@ -71,7 +75,9 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
 
       <p>
         Regex Security supported:
-        <strong data-testid="regex-security-supported">{{ regexSecuritySupported() ? 'yes' : 'no' }}</strong>
+        <strong data-testid="regex-security-supported">{{
+          regexSecuritySupported() ? 'yes' : 'no'
+        }}</strong>
       </p>
 
       <p>
@@ -97,7 +103,9 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
       <section>
         <h2>Capability Matrix</h2>
         <table>
-          <caption>Browser capability support and secure context requirements</caption>
+          <caption>
+            Browser capability support and secure context requirements
+          </caption>
           <thead>
             <tr>
               <th scope="col">Capability</th>
@@ -126,7 +134,11 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
         <button data-testid="permissions-query-camera" type="button" (click)="queryCameraPermission()">
           Query camera permission
         </button>
-        <button data-testid="permissions-query-geolocation" type="button" (click)="queryGeolocationPermission()">
+        <button
+          data-testid="permissions-query-geolocation"
+          type="button"
+          (click)="queryGeolocationPermission()"
+        >
           Query geolocation permission
         </button>
 
@@ -136,13 +148,19 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
         </p>
         <p>
           Geolocation permission:
-          <strong data-testid="permissions-geolocation-state">{{ geolocationPermissionState() }}</strong>
+          <strong data-testid="permissions-geolocation-state">{{
+            geolocationPermissionState()
+          }}</strong>
         </p>
       </section>
 
       <section>
         <h2>Geolocation Service</h2>
-        <button data-testid="geolocation-request-current" type="button" (click)="requestCurrentPosition()">
+        <button
+          data-testid="geolocation-request-current"
+          type="button"
+          (click)="requestCurrentPosition()"
+        >
           Request current position
         </button>
 
@@ -157,12 +175,8 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
         <button data-testid="media-devices-refresh" type="button" (click)="refreshMediaDevices()">
           Refresh media devices
         </button>
-        <button data-testid="camera-start" type="button" (click)="startCamera()">
-          Start camera
-        </button>
-        <button data-testid="camera-stop" type="button" (click)="stopCamera()">
-          Stop camera
-        </button>
+        <button data-testid="camera-start" type="button" (click)="startCamera()">Start camera</button>
+        <button data-testid="camera-stop" type="button" (click)="stopCamera()">Stop camera</button>
 
         <p>
           Video inputs:
@@ -246,9 +260,7 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
         <button data-testid="storage-exercise" type="button" (click)="exerciseWebStorage()">
           Exercise web storage
         </button>
-        <button data-testid="share-text" type="button" (click)="shareHarnessText()">
-          Share text
-        </button>
+        <button data-testid="share-text" type="button" (click)="shareHarnessText()">Share text</button>
 
         <p>
           Storage state:
@@ -285,7 +297,11 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
         <button data-testid="battery-refresh" type="button" (click)="refreshBatterySnapshot()">
           Refresh battery snapshot
         </button>
-        <button data-testid="web-socket-connect-invalid" type="button" (click)="connectInvalidWebSocket()">
+        <button
+          data-testid="web-socket-connect-invalid"
+          type="button"
+          (click)="connectInvalidWebSocket()"
+        >
           Connect invalid WebSocket
         </button>
         <button data-testid="web-socket-send" type="button" (click)="sendWebSocketMessage()">
@@ -342,7 +358,11 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
 
       <section>
         <h2>Notification Service</h2>
-        <button data-testid="notifications-query-permission" type="button" (click)="queryNotificationPermission()">
+        <button
+          data-testid="notifications-query-permission"
+          type="button"
+          (click)="queryNotificationPermission()"
+        >
           Query notifications permission
         </button>
         <button data-testid="notifications-show" type="button" (click)="showNotification()">
@@ -351,7 +371,9 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
 
         <p>
           Notification permission:
-          <strong data-testid="notifications-permission-state">{{ notificationPermissionState() }}</strong>
+          <strong data-testid="notifications-permission-state">{{
+            notificationPermissionState()
+          }}</strong>
         </p>
         <p>
           Notification count:
@@ -386,9 +408,9 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
     WebWorkerService,
     RegexSecurityService,
     WebStorageService,
-    WebShareService
+    WebShareService,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LibraryServicesHarnessComponent implements OnDestroy {
   private readonly browserCapabilityService = inject(BrowserCapabilityService);
@@ -405,20 +427,42 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   private readonly webShareService = inject(WebShareService);
   private readonly harnessWorkerName = 'library-services-harness-worker';
 
-  readonly capabilityOverview = signal<HarnessCapabilityOverview>(this.browserCapabilityService.getAllStatuses());
+  readonly capabilityOverview = signal<HarnessCapabilityOverview>(
+    this.browserCapabilityService.getAllStatuses(),
+  );
   readonly secureContext = signal<boolean>(this.browserCapabilityService.isSecureContext());
-  readonly permissionsSupported = signal<boolean>(this.browserCapabilityService.isSupported('permissions'));
-  readonly geolocationSupported = signal<boolean>(this.browserCapabilityService.isSupported('geolocation'));
-  readonly clipboardSupported = signal<boolean>(this.browserCapabilityService.isSupported('clipboard'));
-  readonly notificationSupported = signal<boolean>(this.browserCapabilityService.isSupported('notification'));
-  readonly mediaDevicesSupported = signal<boolean>(this.browserCapabilityService.isSupported('mediaDevices'));
+  readonly permissionsSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('permissions'),
+  );
+  readonly geolocationSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('geolocation'),
+  );
+  readonly clipboardSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('clipboard'),
+  );
+  readonly notificationSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('notification'),
+  );
+  readonly mediaDevicesSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('mediaDevices'),
+  );
   readonly cameraSupported = signal<boolean>(this.browserCapabilityService.isSupported('camera'));
-  readonly webWorkerSupported = signal<boolean>(this.browserCapabilityService.isSupported('webWorker'));
-  readonly regexSecuritySupported = signal<boolean>(this.browserCapabilityService.isSupported('regexSecurity'));
-  readonly webStorageSupported = signal<boolean>(this.browserCapabilityService.isSupported('webStorage'));
-  readonly webShareSupported = signal<boolean>(this.browserCapabilityService.isSupported('webShare'));
+  readonly webWorkerSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('webWorker'),
+  );
+  readonly regexSecuritySupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('regexSecurity'),
+  );
+  readonly webStorageSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('webStorage'),
+  );
+  readonly webShareSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('webShare'),
+  );
   readonly batterySupported = signal<boolean>(this.browserCapabilityService.isSupported('battery'));
-  readonly webSocketSupported = signal<boolean>(this.browserCapabilityService.isSupported('webSocket'));
+  readonly webSocketSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('webSocket'),
+  );
   readonly cameraPermissionState = signal<HarnessPermissionState>('unknown');
   readonly geolocationPermissionState = signal<HarnessPermissionState>('unknown');
   readonly notificationPermissionState = signal<HarnessPermissionState>('unknown');
@@ -446,7 +490,9 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   readonly batteryState = signal<'idle' | 'supported' | 'unsupported' | 'error'>('idle');
   readonly batteryLevel = signal<string>('unknown');
   readonly batteryCharging = signal<'yes' | 'no' | 'unknown'>('unknown');
-  readonly webSocketState = signal<'idle' | 'connecting' | 'connected' | 'error' | 'disconnected'>('idle');
+  readonly webSocketState = signal<'idle' | 'connecting' | 'connected' | 'error' | 'disconnected'>(
+    'idle',
+  );
   readonly webSocketSendState = signal<'idle' | 'sent' | 'failed'>('idle');
   readonly webSocketError = signal<string>('none');
   readonly clipboardWriteState = signal<'idle' | 'written' | 'error'>('idle');
@@ -458,7 +504,9 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
 
   async queryCameraPermission(): Promise<void> {
     this.lastAction.set('query-camera-permission');
-    this.cameraPermissionState.set(await this.browserCapabilityService.getPermissionState('camera'));
+    this.cameraPermissionState.set(
+      await this.browserCapabilityService.getPermissionState('camera'),
+    );
   }
 
   async refreshBatterySnapshot(): Promise<void> {
@@ -534,17 +582,25 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
       const localStored = this.webStorageService.setLocalStorage(
         'local-value',
         { value: 'storage-local-value' },
-        { prefix: 'harness' }
+        { prefix: 'harness' },
       );
-      const sessionStored = this.webStorageService.setSessionStorage('session-value', 'storage-session-value', {
-        prefix: 'harness'
-      });
+      const sessionStored = this.webStorageService.setSessionStorage(
+        'session-value',
+        'storage-session-value',
+        {
+          prefix: 'harness',
+        },
+      );
 
-      const localValue = this.webStorageService.getLocalStorage<{ value: string }>('local-value', null, {
-        prefix: 'harness'
-      });
+      const localValue = this.webStorageService.getLocalStorage<{ value: string }>(
+        'local-value',
+        null,
+        {
+          prefix: 'harness',
+        },
+      );
       const sessionValue = this.webStorageService.getSessionStorage<string>('session-value', null, {
-        prefix: 'harness'
+        prefix: 'harness',
       });
 
       if (!localStored || !sessionStored || !localValue || !sessionValue) {
@@ -593,7 +649,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
       const result = await this.withTimeout(
         this.webShareService.share({ text: 'harness share text', title: 'Harness Share' }),
         3_000,
-        'Web Share request timed out in harness'
+        'Web Share request timed out in harness',
       );
 
       this.webShareResult.set(result.shared ? 'shared' : 'not-shared');
@@ -616,7 +672,9 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
 
   async queryGeolocationPermission(): Promise<void> {
     this.lastAction.set('query-geolocation-permission');
-    this.geolocationPermissionState.set(await this.browserCapabilityService.getPermissionState('geolocation'));
+    this.geolocationPermissionState.set(
+      await this.browserCapabilityService.getPermissionState('geolocation'),
+    );
   }
 
   async requestCurrentPosition(): Promise<void> {
@@ -627,7 +685,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
       const position = await this.geolocationService.getCurrentPosition({
         enableHighAccuracy: false,
         timeout: 5_000,
-        maximumAge: 0
+        maximumAge: 0,
       });
 
       this.geolocationPosition.set(this.formatPosition(position));
@@ -643,8 +701,12 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
 
     try {
       const devices = await this.mediaDevicesService.getDevices();
-      this.mediaVideoInputCount.set(devices.filter((device) => device.kind === 'videoinput').length);
-      this.mediaAudioInputCount.set(devices.filter((device) => device.kind === 'audioinput').length);
+      this.mediaVideoInputCount.set(
+        devices.filter((device) => device.kind === 'videoinput').length,
+      );
+      this.mediaAudioInputCount.set(
+        devices.filter((device) => device.kind === 'audioinput').length,
+      );
     } catch (error: unknown) {
       this.setError(error);
     }
@@ -659,7 +721,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
       const stream = await this.withTimeout(
         this.cameraService.startCamera({ video: true, audio: false }),
         5_000,
-        'Camera start timed out in harness'
+        'Camera start timed out in harness',
       );
 
       this.cameraTrackCount.set(stream.getTracks().length);
@@ -702,7 +764,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
         this.workerState.set('running');
         this.workerMessageCount.set(0);
         this.workerLastMessage.set('none');
-      }
+      },
     });
   }
 
@@ -721,7 +783,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
       const task: WorkerTask = {
         id: taskId,
         type: 'harness-task',
-        data: { message: 'ping' }
+        data: { message: 'ping' },
       };
 
       const messagePromise = this.waitForWorkerMessage(taskId, 3_000);
@@ -766,7 +828,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
       const result = await this.withTimeout(
         this.regexSecurityService.testRegex('a+', 'aaab', { timeout: 2_000 }),
         4_000,
-        'Regex safe test timed out in harness'
+        'Regex safe test timed out in harness',
       );
 
       this.applyRegexTestResult(result);
@@ -786,7 +848,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
       const result = await this.withTimeout(
         this.regexSecurityService.testRegex('a**', 'aaaa', { timeout: 2_000 }),
         4_000,
-        'Regex unsafe test timed out in harness'
+        'Regex unsafe test timed out in harness',
       );
 
       this.applyRegexTestResult(result);
@@ -825,7 +887,9 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
 
   async queryNotificationPermission(): Promise<void> {
     this.lastAction.set('query-notifications-permission');
-    this.notificationPermissionState.set(await this.browserCapabilityService.getPermissionState('notifications'));
+    this.notificationPermissionState.set(
+      await this.browserCapabilityService.getPermissionState('notifications'),
+    );
   }
 
   async showNotification(): Promise<void> {
@@ -836,10 +900,10 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     try {
       await this.withTimeout(
         this.notificationService.showNotification('Harness notification', {
-          body: 'Playwright browser test'
+          body: 'Playwright browser test',
         }),
         3_000,
-        'Notification request timed out in harness'
+        'Notification request timed out in harness',
       );
 
       this.notificationCount.update((current) => current + 1);
@@ -850,7 +914,11 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     }
   }
 
-  private withTimeout<T>(operation: Promise<T>, timeoutMs: number, timeoutMessage: string): Promise<T> {
+  private withTimeout<T>(
+    operation: Promise<T>,
+    timeoutMs: number,
+    timeoutMessage: string,
+  ): Promise<T> {
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => reject(new Error(timeoutMessage)), timeoutMs);
 
@@ -884,7 +952,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
           clearTimeout(timeoutId);
           subscription.unsubscribe();
           reject(error);
-        }
+        },
       });
 
       timeoutId = setTimeout(() => {

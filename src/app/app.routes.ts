@@ -5,5 +5,5 @@ import { LibraryServicesHarnessComponent } from './demo/library-services-harness
 export const routes: Routes = [
   { path: 'demo/library-services', component: LibraryServicesHarnessComponent },
   { path: 'demo', component: BrowserApisComponent },
-  { path: '', redirectTo: '/demo', pathMatch: 'full' }
+  { path: '', redirectTo: '/demo', pathMatch: 'full' },
 ];

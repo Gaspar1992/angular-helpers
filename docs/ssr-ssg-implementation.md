@@ -7,6 +7,7 @@ This document describes the implementation of SSR/SSG safe patterns for the brow
 ## Problem Statement
 
 Browser APIs like `window`, `navigator`, `localStorage`, etc. are not available in server environments, causing errors like:
+
 - `window is not defined`
 - `navigator is not defined`
 - `localStorage is not defined`
@@ -26,7 +27,7 @@ export class SsrSafeUtil {
   static isBrowser(): boolean {
     return typeof window !== 'undefined' && typeof document !== 'undefined';
   }
-  
+
   // Angular-based detection (preferred, requires injection context)
   static isAngularBrowser(): boolean {
     try {
@@ -82,7 +83,7 @@ Enhanced the base service to use Angular's platform detection:
 ```typescript
 export abstract class BrowserApiBaseService {
   protected platformId = inject(PLATFORM_ID);
-  
+
   protected isBrowserEnvironment(): boolean {
     return isPlatformBrowser(this.platformId);
   }
@@ -170,7 +171,7 @@ static isAngularBrowser(): boolean {
 @Injectable({ providedIn: 'root' })
 export class SsrSafeService {
   private platformId = inject(PLATFORM_ID);
-  
+
   get isBrowser(): boolean {
     return isPlatformBrowser(this.platformId);
   }
@@ -190,21 +191,25 @@ if (this.isBrowserEnvironment()) {
 ## Benefits of @angular/ssr Integration
 
 ### 1. **More Reliable Detection**
+
 - Uses Angular's internal platform detection
 - Handles edge cases better than simple `typeof window` checks
 - Consistent with Angular's own SSR handling
 
 ### 2. **Framework Integration**
+
 - Aligns with Angular's platform detection patterns
 - Works seamlessly with Angular Universal
 - Future-proof as Angular evolves
 
 ### 3. **Multiple Detection Strategies**
+
 - **Primary**: Angular's `isPlatformBrowser()` / `isPlatformServer()`
 - **Fallback**: Traditional `typeof window` checks
 - **Flexible**: Choose the right method for your context
 
 ### 4. **Type Safety**
+
 - Better TypeScript integration
 - Proper type guards
 - Reduced runtime errors
@@ -254,6 +259,7 @@ export class MyComponent {
 ## Migration from Traditional Detection
 
 ### Before
+
 ```typescript
 if (typeof window !== 'undefined') {
   // Browser code
@@ -261,6 +267,7 @@ if (typeof window !== 'undefined') {
 ```
 
 ### After (Recommended)
+
 ```typescript
 const platformId = inject(PLATFORM_ID);
 if (isPlatformBrowser(platformId)) {
@@ -269,6 +276,7 @@ if (isPlatformBrowser(platformId)) {
 ```
 
 ### After (Fallback)
+
 ```typescript
 if (SsrSafeUtil.isAngularBrowser()) {
   // Browser code
@@ -278,7 +286,7 @@ if (SsrSafeUtil.isAngularBrowser()) {
 ## Testing Results
 
 - ✅ **Build successful** with @angular/ssr integration
-- ✅ **All tests passing** 
+- ✅ **All tests passing**
 - ✅ **No TypeScript errors**
 - ✅ **Enhanced SSR/SSG compatibility**
 - ✅ **More reliable platform detection**

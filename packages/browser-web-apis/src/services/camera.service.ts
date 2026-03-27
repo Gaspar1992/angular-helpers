@@ -38,23 +38,35 @@ export class CameraService extends BrowserApiBaseService {
         video: {
           width: { ideal: 1280 },
           height: { ideal: 720 },
-          facingMode: 'user'
-        }
+          facingMode: 'user',
+        },
       };
 
       this.currentStream = await navigator.mediaDevices.getUserMedia(streamConstraints);
       return this.currentStream;
     } catch (error: unknown) {
       console.error('[CameraService] Error starting camera:', error);
-      
+
       if (error instanceof Error && error.name === 'NotAllowedError') {
-        throw this.createError('Camera permission denied by user. Please allow camera access in your browser settings and refresh the page.', error);
+        throw this.createError(
+          'Camera permission denied by user. Please allow camera access in your browser settings and refresh the page.',
+          error,
+        );
       } else if (error instanceof Error && error.name === 'NotFoundError') {
-        throw this.createError('No camera device found. Please connect a camera and try again.', error);
+        throw this.createError(
+          'No camera device found. Please connect a camera and try again.',
+          error,
+        );
       } else if (error instanceof Error && error.name === 'NotReadableError') {
-        throw this.createError('Camera is already in use by another application. Please close other applications using the camera and try again.', error);
+        throw this.createError(
+          'Camera is already in use by another application. Please close other applications using the camera and try again.',
+          error,
+        );
       } else if (error instanceof Error && error.name === 'OverconstrainedError') {
-        throw this.createError('Camera constraints cannot be satisfied. Try with different camera settings.', error);
+        throw this.createError(
+          'Camera constraints cannot be satisfied. Try with different camera settings.',
+          error,
+        );
       } else {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
         throw this.createError(`Camera error: ${errorMessage}`, error);
@@ -71,18 +83,22 @@ export class CameraService extends BrowserApiBaseService {
     }
   }
 
-  async switchCamera(deviceId: string, constraints: MediaStreamConstraints = {
+  async switchCamera(
+    deviceId: string,
+    constraints: MediaStreamConstraints = {
       video: {
         width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }
-    }): Promise<MediaStream> {
+        height: { ideal: 720 },
+      },
+    },
+  ): Promise<MediaStream> {
     this.stopCamera();
 
     const finalConstraints: MediaStreamConstraints = {
-      video: constraints.video && typeof constraints.video === 'object' 
-        ? { ...constraints.video, deviceId: { exact: deviceId } }
-        : { deviceId: { exact: deviceId } }
+      video:
+        constraints.video && typeof constraints.video === 'object'
+          ? { ...constraints.video, deviceId: { exact: deviceId } }
+          : { deviceId: { exact: deviceId } },
     };
 
     return this.startCamera(finalConstraints);
@@ -93,7 +109,7 @@ export class CameraService extends BrowserApiBaseService {
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { deviceId: { exact: deviceId } }
+        video: { deviceId: { exact: deviceId } },
       });
 
       const videoTrack = stream.getVideoTracks()[0];
@@ -119,10 +135,10 @@ export class CameraService extends BrowserApiBaseService {
 
   async getVideoInputDevices(): Promise<MediaDeviceInfo[]> {
     this.ensureCameraSupport();
-    
+
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
-      return devices.filter(device => device.kind === 'videoinput');
+      return devices.filter((device) => device.kind === 'videoinput');
     } catch (error) {
       console.error('[CameraService] Error enumerating video devices:', error);
       throw this.createError('Failed to enumerate video devices', error);

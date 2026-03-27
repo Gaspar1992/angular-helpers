@@ -7,7 +7,7 @@ export { NotificationService } from './services/notification.service';
 export { ClipboardService } from './services/clipboard.service';
 export {
   BrowserCapabilityService,
-  type BrowserCapabilityId
+  type BrowserCapabilityId,
 } from './services/browser-capability.service';
 
 // Interfaces and Types

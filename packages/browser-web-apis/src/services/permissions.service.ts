@@ -1,11 +1,8 @@
 import { Injectable } from '@angular/core';
-import { 
-  BrowserPermissions 
-} from '../interfaces/permissions.interface';
+import { BrowserPermissions } from '../interfaces/permissions.interface';
 
 @Injectable()
 export class PermissionsService implements BrowserPermissions {
-
   async query(descriptor: PermissionDescriptor): Promise<PermissionStatus> {
     if (!this.isSupported()) {
       throw new Error('Permissions API not supported');

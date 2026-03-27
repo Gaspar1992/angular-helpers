@@ -24,7 +24,7 @@ export class GeolocationService extends BrowserApiBaseService {
           console.error('[GeolocationService] Error getting position:', error);
           reject(error);
         },
-        options
+        options,
       );
     });
   }
@@ -39,7 +39,7 @@ export class GeolocationService extends BrowserApiBaseService {
           console.error('[GeolocationService] Error watching position:', error);
           observer.error(error);
         },
-        options
+        options,
       );
 
       return () => {
