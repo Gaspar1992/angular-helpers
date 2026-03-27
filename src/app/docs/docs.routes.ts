@@ -39,6 +39,14 @@ export const DOCS_ROUTES: Routes = [
         title: 'security — Angular Helpers',
       },
       {
+        path: 'security/:service',
+        loadComponent: () =>
+          import(
+            './pages/security-service-detail/security-service-detail.component'
+          ).then((m) => m.SecurityServiceDetailComponent),
+        title: 'Service — Angular Helpers',
+      },
+      {
         path: '**',
         redirectTo: '',
       },
