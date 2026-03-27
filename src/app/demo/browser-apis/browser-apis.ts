@@ -1,10 +1,9 @@
 import { Component, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-browser-apis',
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './browser-apis.html',
   styleUrl: './browser-apis.css',
 })
