@@ -46,16 +46,11 @@ export class BrowserApisComponent {
 
   async initializeServices() {
     try {
-      // Inicializar permisos
       await this.refreshPermissions();
-
-      // Inicializar dispositivos
       await this.refreshDevices();
-
-      // Verificar permiso de notificaciones
       this.notificationPermission.set(this.notificationService.permission);
     } catch (error: any) {
-      this.setError('Error inicializando servicios: ' + error);
+      this.setError('Error initializing services: ' + error);
     }
   }
 
@@ -84,10 +79,9 @@ export class BrowserApisComponent {
           perms[perm] = 'unsupported';
         }
       }
-
       this.permissions.set(perms);
     } catch (error: any) {
-      this.setError('Error obteniendo permisos: ' + error);
+      this.setError('Error fetching permissions: ' + error);
     }
   }
 
@@ -133,10 +127,10 @@ export class BrowserApisComponent {
           status = 'unsupported';
       }
 
-      this.setSuccess(`Permiso ${permission}: ${status}`);
+      this.setSuccess(`Permission ${permission}: ${status}`);
       await this.refreshPermissions();
     } catch (error: any) {
-      this.setError('Error solicitando permiso: ' + error);
+      this.setError('Error requesting permission: ' + error);
     } finally {
       this.loading.set(false);
     }
@@ -157,7 +151,7 @@ export class BrowserApisComponent {
         this.selectedCamera.set(videoInputs[0].deviceId);
       }
     } catch (error: any) {
-      this.setError('Error obteniendo dispositivos: ' + error);
+      this.setError('Error fetching devices: ' + error);
     }
   }
 
@@ -172,9 +166,9 @@ export class BrowserApisComponent {
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       this.videoStream.set(stream);
-      this.setSuccess('Cámara iniciada correctamente');
+      this.setSuccess('Camera started');
     } catch (error: any) {
-      this.setError('Error iniciando cámara: ' + error);
+      this.setError('Error starting camera: ' + error);
     } finally {
       this.loading.set(false);
     }
@@ -187,12 +181,12 @@ export class BrowserApisComponent {
     }
     this.videoStream.set(null);
     this.photoUrl.set('');
-    this.setSuccess('Cámara detenida');
+    this.setSuccess('Camera stopped');
   }
 
   async takePhoto() {
     if (!this.videoStream()) {
-      this.setError('No hay cámara activa');
+      this.setError('No active camera stream');
       return;
     }
 
@@ -217,11 +211,11 @@ export class BrowserApisComponent {
         if (blob) {
           const url = URL.createObjectURL(blob);
           this.photoUrl.set(url);
-          this.setSuccess('Foto tomada correctamente');
+          this.setSuccess('Photo captured');
         }
       });
     } catch (error: any) {
-      this.setError('Error tomando foto: ' + error);
+      this.setError('Error taking photo: ' + error);
     } finally {
       this.loading.set(false);
     }
@@ -242,10 +236,10 @@ export class BrowserApisComponent {
 
       this.currentPosition.set(position);
       this.setSuccess(
-        `Ubicación obtenida: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`,
+        `Location: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`,
       );
     } catch (error: any) {
-      this.setError('Error obteniendo ubicación: ' + error);
+      this.setError('Error getting location: ' + error);
     } finally {
       this.loading.set(false);
     }
@@ -258,18 +252,18 @@ export class BrowserApisComponent {
       const watchId = navigator.geolocation.watchPosition(
         (position: GeolocationPosition) => {
           this.currentPosition.set(position);
-          this.setSuccess('Posición actualizada');
+          this.setSuccess('Position updated');
         },
         (error: any) => {
-          this.setError('Error en watch position: ' + error.message);
+          this.setError('Watch position error: ' + error.message);
         },
         { enableHighAccuracy: true },
       );
 
       this.watchPositionId.set(watchId);
-      this.setSuccess('Watch position iniciado');
+      this.setSuccess('Watching position');
     } catch (error: any) {
-      this.setError('Error iniciando watch position: ' + error);
+      this.setError('Error starting position watch: ' + error);
     }
   }
 
@@ -278,7 +272,7 @@ export class BrowserApisComponent {
     if (watchId) {
       navigator.geolocation.clearWatch(watchId);
       this.watchPositionId.set(null);
-      this.setSuccess('Watch position detenido');
+      this.setSuccess('Position watch stopped');
     }
   }
 
@@ -290,9 +284,9 @@ export class BrowserApisComponent {
     try {
       const permission = await this.notificationService.requestNotificationPermission();
       this.notificationPermission.set(permission);
-      this.setSuccess(`Permiso de notificaciones: ${permission}`);
+      this.setSuccess(`Notification permission: ${permission}`);
     } catch (error: any) {
-      this.setError('Error solicitando permiso de notificaciones: ' + error);
+      this.setError('Error requesting notification permission: ' + error);
     } finally {
       this.loading.set(false);
     }
@@ -303,22 +297,21 @@ export class BrowserApisComponent {
     this.clearMessages();
 
     try {
-      await this.notificationService.showNotification('Demo Browser APIs', {
-        body: 'Esta es una notificación de prueba desde Angular',
+      await this.notificationService.showNotification('Angular Helpers Demo', {
+        body: 'Test notification from the Angular Helpers demo',
         tag: 'demo-notification',
         requireInteraction: true,
       });
-      this.setSuccess('Notificación mostrada — búscala en el área de notificaciones del sistema');
+      this.setSuccess('Notification sent — check your system notification area');
     } catch (error: any) {
-      this.setError('Error mostrando notificación: ' + error);
+      this.setError('Error showing notification: ' + error);
     } finally {
       this.loading.set(false);
     }
   }
 
-  // Clipboard
   async copyToClipboard() {
-    const text = 'Texto de prueba desde Browser APIs Demo - ' + new Date().toISOString();
+    const text = 'Test text from Angular Helpers Demo — ' + new Date().toISOString();
     this.loading.set(true);
     this.clearMessages();
 
@@ -326,12 +319,12 @@ export class BrowserApisComponent {
       if ('clipboard' in navigator && 'writeText' in navigator.clipboard) {
         await navigator.clipboard.writeText(text);
         this.clipboardText.set(text);
-        this.setSuccess('Texto copiado al clipboard');
+        this.setSuccess('Text copied to clipboard');
       } else {
-        this.setError('Clipboard API no soportada');
+        this.setError('Clipboard API not supported');
       }
     } catch (error: any) {
-      this.setError('Error copiando texto: ' + error);
+      this.setError('Error copying text: ' + error);
     } finally {
       this.loading.set(false);
     }
@@ -345,12 +338,12 @@ export class BrowserApisComponent {
       if ('clipboard' in navigator && 'readText' in navigator.clipboard) {
         const text = await navigator.clipboard.readText();
         this.clipboardText.set(text);
-        this.setSuccess('Texto pegado desde clipboard');
+        this.setSuccess('Text pasted from clipboard');
       } else {
-        this.setError('Clipboard API no soportada');
+        this.setError('Clipboard API not supported');
       }
     } catch (error: any) {
-      this.setError('Error pegando texto: ' + error);
+      this.setError('Error pasting text: ' + error);
     } finally {
       this.loading.set(false);
     }
