@@ -29,19 +29,47 @@ const SERVICE_GROUPS = [
     label: 'Media & Device',
     icon: '📷',
     items: [
-      { id: 'camera', name: 'CameraService', description: 'Camera stream access and photo capture' },
-      { id: 'media-devices', name: 'MediaDevicesService', description: 'Enumerate cameras, mics, speakers' },
-      { id: 'geolocation', name: 'GeolocationService', description: 'One-time and continuous location tracking' },
-      { id: 'notification', name: 'NotificationService', description: 'Browser push notifications' },
+      {
+        id: 'camera',
+        name: 'CameraService',
+        description: 'Camera stream access and photo capture',
+      },
+      {
+        id: 'media-devices',
+        name: 'MediaDevicesService',
+        description: 'Enumerate cameras, mics, speakers',
+      },
+      {
+        id: 'geolocation',
+        name: 'GeolocationService',
+        description: 'One-time and continuous location tracking',
+      },
+      {
+        id: 'notification',
+        name: 'NotificationService',
+        description: 'Browser push notifications',
+      },
     ],
   },
   {
     label: 'Web APIs',
     icon: '🌐',
     items: [
-      { id: 'web-worker', name: 'WebWorkerService', description: 'Web Worker lifecycle management' },
-      { id: 'web-socket', name: 'WebSocketService', description: 'WebSocket with reconnection + heartbeat' },
-      { id: 'web-storage', name: 'WebStorageService', description: 'localStorage/sessionStorage with reactivity' },
+      {
+        id: 'web-worker',
+        name: 'WebWorkerService',
+        description: 'Web Worker lifecycle management',
+      },
+      {
+        id: 'web-socket',
+        name: 'WebSocketService',
+        description: 'WebSocket with reconnection + heartbeat',
+      },
+      {
+        id: 'web-storage',
+        name: 'WebStorageService',
+        description: 'localStorage/sessionStorage with reactivity',
+      },
       { id: 'web-share', name: 'WebShareService', description: 'Native device share sheet' },
       { id: 'clipboard', name: 'ClipboardService', description: 'System clipboard read/write' },
       { id: 'battery', name: 'BatteryService', description: 'Battery level and charging status' },
@@ -56,7 +84,11 @@ const SERVICE_GROUPS = [
         name: 'RegexSecurityService',
         description: 'ReDoS prevention via Web Worker execution',
       },
-      { id: 'permissions', name: 'PermissionsService', description: 'Centralized permission queries' },
+      {
+        id: 'permissions',
+        name: 'PermissionsService',
+        description: 'Centralized permission queries',
+      },
       {
         id: 'browser-capability',
         name: 'BrowserCapabilityService',
@@ -98,10 +130,7 @@ const SERVICE_GROUPS = [
             <h3 class="group-label">{{ group.icon }} {{ group.label }}</h3>
             <div class="services-list">
               @for (svc of group.items; track svc.id) {
-                <a
-                  [routerLink]="'/docs/browser-web-apis/' + svc.id"
-                  class="service-card"
-                >
+                <a [routerLink]="'/docs/browser-web-apis/' + svc.id" class="service-card">
                   <span class="svc-name">{{ svc.name }}</span>
                   <span class="svc-desc">{{ svc.description }}</span>
                 </a>
@@ -148,7 +177,9 @@ const SERVICE_GROUPS = [
         border: 1px solid var(--border);
         border-radius: var(--radius-lg);
         text-decoration: none;
-        transition: border-color var(--transition), background var(--transition);
+        transition:
+          border-color var(--transition),
+          background var(--transition);
       }
 
       .service-card:hover {

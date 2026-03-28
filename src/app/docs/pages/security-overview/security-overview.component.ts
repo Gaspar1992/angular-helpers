@@ -131,7 +131,9 @@ bootstrapApplication(AppComponent, {
       }
 
       @media (min-width: 640px) {
-        .svc-card { padding: var(--sp-6); }
+        .svc-card {
+          padding: var(--sp-6);
+        }
       }
 
       h3.svc-name {
@@ -226,21 +228,49 @@ bootstrapApplication(AppComponent, {
         line-height: 1.5;
       }
 
-      .risk-card.low   { background: rgba(80,200,120,.06); border-color: rgba(80,200,120,.2); }
-      .risk-card.low   .risk-dot { background: #50c878; }
-      .risk-card.low   strong    { color: #50c878; }
+      .risk-card.low {
+        background: rgba(80, 200, 120, 0.06);
+        border-color: rgba(80, 200, 120, 0.2);
+      }
+      .risk-card.low .risk-dot {
+        background: #50c878;
+      }
+      .risk-card.low strong {
+        color: #50c878;
+      }
 
-      .risk-card.medium { background: rgba(255,200,0,.06); border-color: rgba(255,200,0,.2); }
-      .risk-card.medium .risk-dot { background: #ffc800; }
-      .risk-card.medium strong    { color: #ffc800; }
+      .risk-card.medium {
+        background: rgba(255, 200, 0, 0.06);
+        border-color: rgba(255, 200, 0, 0.2);
+      }
+      .risk-card.medium .risk-dot {
+        background: #ffc800;
+      }
+      .risk-card.medium strong {
+        color: #ffc800;
+      }
 
-      .risk-card.high  { background: rgba(255,140,0,.06); border-color: rgba(255,140,0,.2); }
-      .risk-card.high  .risk-dot { background: #ff8c00; }
-      .risk-card.high  strong    { color: #ff8c00; }
+      .risk-card.high {
+        background: rgba(255, 140, 0, 0.06);
+        border-color: rgba(255, 140, 0, 0.2);
+      }
+      .risk-card.high .risk-dot {
+        background: #ff8c00;
+      }
+      .risk-card.high strong {
+        color: #ff8c00;
+      }
 
-      .risk-card.critical { background: rgba(255,60,60,.06); border-color: rgba(255,60,60,.2); }
-      .risk-card.critical .risk-dot { background: #ff3c3c; }
-      .risk-card.critical strong    { color: #ff3c3c; }
+      .risk-card.critical {
+        background: rgba(255, 60, 60, 0.06);
+        border-color: rgba(255, 60, 60, 0.2);
+      }
+      .risk-card.critical .risk-dot {
+        background: #ff3c3c;
+      }
+      .risk-card.critical strong {
+        color: #ff3c3c;
+      }
     `,
   ],
 })
@@ -255,7 +285,9 @@ export class SecurityOverviewComponent {
   protected readonly interfaces = SECURITY_INTERFACES;
   protected readonly providerExample = PROVIDER_EXAMPLE;
 
-  protected toRows(methods: { name: string; signature: string; returns: string; description: string }[]): ApiRow[] {
-    return (methods as unknown) as ApiRow[];
+  protected toRows(
+    methods: { name: string; signature: string; returns: string; description: string }[],
+  ): ApiRow[] {
+    return methods as unknown as ApiRow[];
   }
 }

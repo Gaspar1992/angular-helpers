@@ -34,9 +34,13 @@ import { DocsBreadcrumbComponent } from '../breadcrumb/docs-breadcrumb.component
       }
     </div>
   `,
-  styles: [`
-    .title-mono { font-family: var(--font-mono); }
-  `],
+  styles: [
+    `
+      .title-mono {
+        font-family: var(--font-mono);
+      }
+    `,
+  ],
 })
 export class DocsPageHeaderComponent {
   readonly breadcrumbs = input.required<BreadcrumbItem[]>();

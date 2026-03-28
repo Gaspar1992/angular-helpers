@@ -64,7 +64,9 @@ hljs.registerLanguage('json', json);
         border-radius: var(--radius-sm);
         color: #c0c8e0;
         cursor: pointer;
-        transition: background var(--transition), color var(--transition);
+        transition:
+          background var(--transition),
+          color var(--transition);
       }
 
       .copy-btn:hover {

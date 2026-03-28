@@ -4,8 +4,5 @@
     "entryFile": "src/index.ts"
   },
   "dest": "../../dist/security",
-  "assets": [
-    "README.md",
-    "README.es.md"
-  ]
+  "assets": ["README.md", "README.es.md"]
 }
