@@ -32,16 +32,14 @@ Angular services package for a structured and secure access layer over browser W
 - `WebShareService` - Native Web Share API support
 - `ClipboardService` - System clipboard access
 
-### Security
+### Security & Capabilities
 
-- `RegexSecurityService` - ReDoS prevention with worker-based validation
 - `PermissionsService` - Centralized browser permissions handling
+- `BrowserCapabilityService` - Feature-detection for browser API availability
 
 ### Utilities
 
-- `CameraPermissionHelperService` - Camera permission helper utilities
 - `BrowserApiBaseService` - Shared base class for browser API services
-- `MediaDeviceBaseService` - Shared base class for media device services
 
 ## Installation
 
@@ -59,7 +57,7 @@ bootstrapApplication(AppComponent, {
     provideBrowserWebApis({
       enableCamera: true,
       enableGeolocation: true,
-      enableRegexSecurity: true,
+      enableNotifications: true,
     }),
   ],
 });
@@ -73,7 +71,7 @@ bootstrapApplication(AppComponent, {
 import { CameraService } from '@angular-helpers/browser-web-apis';
 
 export class PhotoComponent {
-  constructor(private cameraService: CameraService) {}
+  private cameraService = inject(CameraService);
 
   async takePhoto() {
     try {
@@ -94,28 +92,17 @@ export class PhotoComponent {
 }
 ```
 
-### RegexSecurityService (ReDoS Prevention)
+### BrowserCapabilityService
 
 ```typescript
-import { RegexSecurityService } from '@angular-helpers/browser-web-apis';
+import { BrowserCapabilityService } from '@angular-helpers/browser-web-apis';
 
-export class SecurityComponent {
-  constructor(private regexSecurity: RegexSecurityService) {}
+export class MyComponent {
+  private capability = inject(BrowserCapabilityService);
 
-  async testPattern() {
-    const pattern = '(.+)+'; // Potentially unsafe regex pattern
-    const text = 'some text to test';
-
-    try {
-      const result = await this.regexSecurity.testRegex(pattern, text, {
-        timeout: 5000,
-        safeMode: true,
-      });
-
-      console.log('Match:', result.match);
-      console.log('Execution time:', result.executionTime);
-    } catch (error) {
-      console.error('Regex test failed:', error);
+  ngOnInit() {
+    if (this.capability.isSupported('geolocation')) {
+      console.log('Geolocation is available');
     }
   }
 }
@@ -127,7 +114,7 @@ export class SecurityComponent {
 import { GeolocationService } from '@angular-helpers/browser-web-apis';
 
 export class LocationComponent {
-  constructor(private geolocation: GeolocationService) {}
+  private geolocation = inject(GeolocationService);
 
   async getCurrentLocation() {
     try {

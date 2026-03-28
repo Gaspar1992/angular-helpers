@@ -49,10 +49,10 @@ export class BrowserApisComponent {
       // Inicializar permisos
       await this.refreshPermissions();
 
-      // Inicializar dispositivos
+      // Initialize devices
       await this.refreshDevices();
 
-      // Verificar permiso de notificaciones
+      // Sync notification permission state
       this.notificationPermission.set(this.notificationService.permission);
     } catch (error: any) {
       this.setError('Error inicializando servicios: ' + error);
@@ -80,11 +80,10 @@ export class BrowserApisComponent {
           } else {
             perms[perm] = 'unsupported';
           }
-        } catch (error) {
+        } catch {
           perms[perm] = 'unsupported';
         }
       }
-
       this.permissions.set(perms);
     } catch (error: any) {
       this.setError('Error obteniendo permisos: ' + error);
@@ -108,7 +107,7 @@ export class BrowserApisComponent {
             });
             stream.getTracks().forEach((track) => track.stop());
             status = 'granted';
-          } catch (error) {
+          } catch {
             status = 'denied';
           }
           break;
@@ -124,7 +123,7 @@ export class BrowserApisComponent {
               navigator.geolocation.getCurrentPosition(resolve, reject);
             });
             status = 'granted';
-          } catch (error) {
+          } catch {
             status = 'denied';
           }
           break;
@@ -133,7 +132,7 @@ export class BrowserApisComponent {
           status = 'unsupported';
       }
 
-      this.setSuccess(`Permiso ${permission}: ${status}`);
+      this.setSuccess(`Permission ${permission}: ${status}`);
       await this.refreshPermissions();
     } catch (error: any) {
       this.setError('Error solicitando permiso: ' + error);
@@ -242,7 +241,7 @@ export class BrowserApisComponent {
 
       this.currentPosition.set(position);
       this.setSuccess(
-        `Ubicación obtenida: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`,
+        `Location: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`,
       );
     } catch (error: any) {
       this.setError('Error obteniendo ubicación: ' + error);
@@ -303,12 +302,12 @@ export class BrowserApisComponent {
     this.clearMessages();
 
     try {
-      await this.notificationService.showNotification('Demo Browser APIs', {
-        body: 'Esta es una notificación de prueba desde Angular',
+      await this.notificationService.showNotification('Angular Helpers Demo', {
+        body: 'Test notification from the Angular Helpers demo',
         tag: 'demo-notification',
         requireInteraction: true,
       });
-      this.setSuccess('Notificación mostrada — búscala en el área de notificaciones del sistema');
+      this.setSuccess('Notification sent — check your system notification area');
     } catch (error: any) {
       this.setError('Error mostrando notificación: ' + error);
     } finally {
