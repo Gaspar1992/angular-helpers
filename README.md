@@ -38,7 +38,11 @@ const result = await securityService.testRegex(userInput, text, {
 });
 
 // Builder pattern for complex patterns
-const pattern = RegexSecurityService.builder().pattern('\\d+').timeout(3000).safeMode(true).build();
+const { pattern, security } = RegexSecurityService.builder()
+  .pattern('\\d+')
+  .timeout(3000)
+  .safeMode()
+  .build();
 ```
 
 **📥 Installation:**
@@ -110,7 +114,7 @@ npm install @angular-helpers/browser-web-apis
 
 ```bash
 # Clone the repository
-git clone https://github.com/angular-helpers/angular-helpers
+git clone https://github.com/Gaspar1992/angular-helpers
 cd angular-helpers
 
 # Install dependencies
@@ -131,7 +135,7 @@ npm install @angular-helpers/security
 npm install @angular-helpers/browser-web-apis
 ```
 
-For modern Angular standalone integration, check each package guide in `docs/`.
+For modern Angular standalone integration, check each package's own README.
 
 ---
 
@@ -215,6 +219,7 @@ Contributions are welcome.
 ```bash
 # Fork and clone
 git clone https://github.com/your-user/angular-helpers
+# or fork from https://github.com/Gaspar1992/angular-helpers
 cd angular-helpers
 
 # Create a feature branch
@@ -227,9 +232,7 @@ git push origin feature/your-feature
 
 ### Contribution Guides
 
-- 📖 [Development Guide](./docs/CONTRIBUTING.md)
-- 🧪 [Testing Guide](./docs/testing-guide.md)
-- 📦 [Package Development Guide](./docs/package-development.md)
+- 📖 [SSR/SSG Implementation](./docs/ssr-ssg-implementation.md)
 
 ---
 
@@ -241,8 +244,8 @@ MIT License — see [LICENSE](./LICENSE) for details.
 
 ## 🔗 Useful Links
 
-- ** Issues & Feature Requests**: [GitHub Issues](https://github.com/angular-helpers/angular-helpers/issues)
-- **💬 Discussions**: [GitHub Discussions](https://github.com/angular-helpers/angular-helpers/discussions)
+- **🐛 Issues & Feature Requests**: [GitHub Issues](https://github.com/Gaspar1992/angular-helpers/issues)
+- **💬 Discussions**: [GitHub Discussions](https://github.com/Gaspar1992/angular-helpers/discussions)
 - **📦 NPM Organization**: [npmjs.com/org/angular-helpers](https://www.npmjs.com/org/angular-helpers)
 
 ---

@@ -17,8 +17,15 @@ export const SECURITY_SERVICES: ServiceDoc[] = [
     ],
     methods: [
       {
+        name: 'builder',
+        signature: 'static builder(): RegexSecurityBuilder',
+        description: 'Creates a new RegexSecurityBuilder instance for fluent pattern construction.',
+        returns: 'RegexSecurityBuilder',
+      },
+      {
         name: 'testRegex',
-        signature: 'testRegex(pattern: string, text: string, options?: RegexSecurityConfig): Promise<RegexTestResult>',
+        signature:
+          'testRegex(pattern: string, text: string, options?: RegexSecurityConfig): Promise<RegexTestResult>',
         description:
           'Runs a regex match in a Web Worker with configurable timeout. Returns the match result plus execution metrics.',
         returns: 'Promise<RegexTestResult>',
@@ -26,7 +33,8 @@ export const SECURITY_SERVICES: ServiceDoc[] = [
       {
         name: 'analyzePatternSecurity',
         signature: 'analyzePatternSecurity(pattern: string): Promise<RegexSecurityResult>',
-        description: 'Analyzes the given pattern for ReDoS risk without executing it. Returns risk level, complexity, and recommendations.',
+        description:
+          'Analyzes the given pattern for ReDoS risk without executing it. Returns risk level, complexity, and recommendations.',
         returns: 'Promise<RegexSecurityResult>',
       },
     ],
@@ -61,23 +69,17 @@ export class ValidationComponent {
     id: 'regex-security-builder',
     name: 'RegexSecurityBuilder',
     description:
-      'Fluent builder for constructing regular expressions with built-in security analysis. Supports method chaining for readable pattern construction.',
+      'Fluent builder for constructing regular expressions with built-in security analysis. Supports method chaining for readable pattern construction. Obtain an instance via RegexSecurityService.builder().',
     scope: 'root',
     importPath: '@angular-helpers/security',
     requiresSecureContext: false,
     browserSupport: 'All modern browsers',
     notes: [
-      'Call builder() to start a new chain.',
-      'Call build() to get the RegExp, or execute() to run it directly.',
+      'Obtain an instance via RegexSecurityService.builder() — the static builder() method is on the service.',
+      'Call build() to get { pattern, options, security }, or execute() to run it directly.',
       'safeMode() in the chain blocks execution if the pattern is unsafe.',
     ],
     methods: [
-      {
-        name: 'builder',
-        signature: 'static builder(): RegexSecurityBuilder',
-        description: 'Creates a new builder instance.',
-        returns: 'RegexSecurityBuilder',
-      },
       {
         name: 'pattern',
         signature: 'pattern(p: string): RegexSecurityBuilder',
@@ -86,7 +88,7 @@ export class ValidationComponent {
       },
       {
         name: 'characterSet',
-        signature: 'characterSet(chars: string): RegexSecurityBuilder',
+        signature: 'characterSet(chars: string, negate?: boolean): RegexSecurityBuilder',
         description: 'Appends a character class [chars].',
         returns: 'RegexSecurityBuilder',
       },
@@ -110,25 +112,28 @@ export class ValidationComponent {
       },
       {
         name: 'build',
-        signature: 'build(): RegExp',
-        description: 'Builds and returns the RegExp object.',
-        returns: 'RegExp',
+        signature:
+          'build(): { pattern: string; options: RegexBuilderOptions; security: RegexSecurityConfig }',
+        description:
+          'Returns the built pattern config object. Pass pattern and security to testRegex() to execute.',
+        returns: '{ pattern: string; options: RegexBuilderOptions; security: RegexSecurityConfig }',
       },
       {
         name: 'execute',
         signature: 'execute(text: string, service: RegexSecurityService): Promise<RegexTestResult>',
-        description: 'Executes the pattern against text using the provided service.',
+        description:
+          'Executes the pattern against text using the provided service. Shorthand for build() + testRegex().',
         returns: 'Promise<RegexTestResult>',
       },
     ],
-    example: `import { RegexSecurityBuilder, RegexSecurityService } from '@angular-helpers/security';
+    example: `import { RegexSecurityService } from '@angular-helpers/security';
 
 @Component({...})
 export class PatternComponent {
   private regexSecurity = inject(RegexSecurityService);
 
   async validateUsername(username: string): Promise<boolean> {
-    const result = await RegexSecurityBuilder.builder()
+    const result = await RegexSecurityService.builder()
       .startOfLine()
       .characterSet('a-zA-Z')
       .characterSet('a-zA-Z0-9_')
@@ -150,8 +155,16 @@ export const SECURITY_INTERFACES = [
     description: 'Options for testRegex() execution.',
     fields: [
       { name: 'timeout?', type: 'number', description: 'Timeout in ms (default: 5000)' },
-      { name: 'maxComplexity?', type: 'number', description: 'Max allowed complexity (default: 10)' },
-      { name: 'allowBacktracking?', type: 'boolean', description: 'Allow backtracking (default: false)' },
+      {
+        name: 'maxComplexity?',
+        type: 'number',
+        description: 'Max allowed complexity (default: 10)',
+      },
+      {
+        name: 'allowBacktracking?',
+        type: 'boolean',
+        description: 'Allow backtracking (default: false)',
+      },
       { name: 'safeMode?', type: 'boolean', description: 'Block unsafe patterns (default: false)' },
     ],
   },

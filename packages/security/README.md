@@ -1,6 +1,6 @@
-[English](README.en.md) | [Español](README.md)
+[Leer en Español](./README.es.md)
 
-🌐 **Documentación y Demo**: https://gaspar1992.github.io/angular-helpers/
+🌐 **Documentation & Demo**: https://gaspar1992.github.io/angular-helpers/
 
 # Angular Security Helpers
 
@@ -48,11 +48,11 @@ bootstrapApplication(AppComponent, {
 ### **Service Injection**
 
 ```typescript
-import { RegexSecurityService } from '@angular-helpers/security';
+import { RegexSecurityService, inject } from '@angular-helpers/security';
 
 @Component({...})
 export class MyComponent {
-  constructor(private regexSecurity: RegexSecurityService) {}
+  private regexSecurity = inject(RegexSecurityService);
 }
 ```
 
@@ -75,10 +75,10 @@ async testEmail(email: string): Promise<boolean> {
 ### **2. Builder Pattern**
 
 ```typescript
-import { RegexSecurityBuilder } from '@angular-helpers/security';
+import { RegexSecurityService } from '@angular-helpers/security';
 
 // Fluent regular expression construction
-const emailRegex = RegexSecurityBuilder.builder()
+const { pattern, security } = RegexSecurityService.builder()
   .startOfLine()
   .characterSet('a-zA-Z0-9._%+-')
   .quantifier('+')
@@ -94,7 +94,7 @@ const emailRegex = RegexSecurityBuilder.builder()
   .build();
 
 // Direct execution
-const result = await RegexSecurityBuilder.builder()
+const result = await RegexSecurityService.builder()
   .pattern('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$')
   .timeout(3000)
   .execute(email, this.regexSecurity);
@@ -148,7 +148,7 @@ export class FormValidationComponent {
 
   async validateComplexInput(input: string): Promise<boolean> {
     // Builder pattern for complex validation
-    const result = await RegexSecurityBuilder
+    const result = await RegexSecurityService
       .builder()
       .startOfLine()
       .nonCapturingGroup('[a-zA-Z]') // First letter
@@ -272,7 +272,7 @@ export class SecurityValidators {
 
         return null;
       } catch (error) {
-        return { securePattern: { value, reason: error.message } };
+        return { securePattern: { value, reason: (error as Error).message } };
       }
     };
   }
@@ -284,10 +284,8 @@ export class SecurityValidators {
 ```typescript
 @Component({...})
 export class SecureFormComponent {
-  constructor(
-    private regexSecurity: RegexSecurityService,
-    private securityValidators: SecurityValidators
-  ) {}
+  private regexSecurity = inject(RegexSecurityService);
+  private securityValidators = inject(SecurityValidators);
 
   emailValidator = this.securityValidators.securePattern(
     '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',

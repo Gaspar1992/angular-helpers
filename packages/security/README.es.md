@@ -1,4 +1,4 @@
-[English](README.en.md) | [Español](README.md)
+[Read in English](./README.md)
 
 🌐 **Documentación y Demo**: https://gaspar1992.github.io/angular-helpers/
 
@@ -51,7 +51,7 @@ bootstrapApplication(AppComponent, {
 import { RegexSecurityService } from '@angular-helpers/security';
 
 export class MyComponent {
-  constructor(private securityService: RegexSecurityService) {}
+  private securityService = inject(RegexSecurityService);
 
   async validateInput() {
     const pattern = '(.+)+'; // Patrón potencialmente peligroso
@@ -77,25 +77,30 @@ export class MyComponent {
 ```typescript
 import { RegexSecurityService } from '@angular-helpers/security';
 
-const pattern = RegexSecurityService.builder()
-  .pattern('\\d+')
-  .group()
+const { pattern, security } = RegexSecurityService.builder()
+  .startOfLine()
+  .characterSet('0-9')
   .quantifier('+')
+  .endOfLine()
   .timeout(3000)
-  .safeMode(true)
+  .safeMode()
   .build();
 
-const result = await pattern.test('12345');
+// Ejecutar usando el servicio
+const result = await RegexSecurityService.builder()
+  .pattern('\\d+')
+  .timeout(3000)
+  .execute('12345', this.securityService);
 ```
 
 ## 📊 Niveles de Riesgo
 
-| Nivel | Descripción | Acción |
-|-------|-------------|--------|
-| 🟢 **Bajo** | Patrones seguros | Ejecución normal |
-| 🟡 **Medio** | Posible riesgo | Advertencia + timeout |
-| 🟠 **Alto** | Riesgo significativo | Timeout estricto + safe mode recomendado |
-| 🔴 **Crítico** | Patrones peligrosos | Bloqueo por defecto |
+| Nivel          | Descripción          | Acción                                   |
+| -------------- | -------------------- | ---------------------------------------- |
+| 🟢 **Bajo**    | Patrones seguros     | Ejecución normal                         |
+| 🟡 **Medio**   | Posible riesgo       | Advertencia + timeout                    |
+| 🟠 **Alto**    | Riesgo significativo | Timeout estricto + safe mode recomendado |
+| 🔴 **Crítico** | Patrones peligrosos  | Bloqueo por defecto                      |
 
 ## 🔧 Configuración Avanzada
 
