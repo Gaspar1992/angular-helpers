@@ -218,9 +218,7 @@ test.describe('Library services harness worker and regex services', () => {
     await expect(page.getByTestId('regex-execution-state')).toHaveText('error');
     await expect(page.getByTestId('regex-match')).toHaveText('false');
     await expect(page.getByTestId('regex-timeout')).toHaveText('false');
-    await expect(page.getByTestId('regex-error')).toContainText(
-      'Pattern contains potential ReDoS vulnerabilities',
-    );
+    await expect(page.getByTestId('regex-error')).toContainText('Pattern rejected:');
     await expect(page.getByTestId('error-message')).toHaveText('none');
   });
 });

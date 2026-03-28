@@ -1,10 +1,11 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Browser APIs demo smoke', () => {
-  test('redirects root route to demo', async ({ page }) => {
+  test('renders home page at root route', async ({ page }) => {
     await page.goto('/');
 
-    await expect(page).toHaveURL(/\/demo$/);
+    await expect(page).toHaveURL('/');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Browser APIs.');
   });
 
   test('renders the demo shell and key sections', async ({ page }) => {
