@@ -80,7 +80,7 @@ export class BrowserApisComponent {
           } else {
             perms[perm] = 'unsupported';
           }
-        } catch (error) {
+        } catch {
           perms[perm] = 'unsupported';
         }
       }
@@ -107,7 +107,7 @@ export class BrowserApisComponent {
             });
             stream.getTracks().forEach((track) => track.stop());
             status = 'granted';
-          } catch (error) {
+          } catch {
             status = 'denied';
           }
           break;
@@ -123,7 +123,7 @@ export class BrowserApisComponent {
               navigator.geolocation.getCurrentPosition(resolve, reject);
             });
             status = 'granted';
-          } catch (error) {
+          } catch {
             status = 'denied';
           }
           break;
