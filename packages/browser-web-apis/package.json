@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/browser-web-apis",
-  "version": "21.0.2",
+  "version": "21.1.0",
   "description": "Sistema de servicios Angular para acceso formalizado a Browser Web APIs (cámara, permisos, geolocalización, etc.)",
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
