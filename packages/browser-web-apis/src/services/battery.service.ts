@@ -1,26 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import { BatteryInfo, BatteryManager } from '../interfaces/battery.interface';
 
-// Battery API is not standardized in TypeScript, so we need these interfaces
+// Battery API is not standardized in TypeScript, so we need this helper interface
 interface NavigatorWithBattery extends Navigator {
   getBattery?: () => Promise<BatteryManager>;
-}
-
-interface BatteryManager extends EventTarget {
-  charging: boolean;
-  chargingTime: number;
-  dischargingTime: number;
-  level: number;
-  addEventListener(type: string, listener: EventListener): void;
-  removeEventListener(type: string, listener: EventListener): void;
-}
-
-interface BatteryInfo {
-  charging: boolean;
-  chargingTime: number;
-  dischargingTime: number;
-  level: number;
 }
 
 @Injectable()

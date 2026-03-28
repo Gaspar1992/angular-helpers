@@ -1,7 +1,0 @@
-{
-  "version": 2,
-  "projects": {
-    "angular-helpers": "angular.json:angular-helpers",
-    "security": "packages/security"
-  }
-}

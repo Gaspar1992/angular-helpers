@@ -2,8 +2,6 @@
 
 A suite of Angular libraries that helps you build secure, browser-integrated applications with a clean developer experience.
 
-🌐 **Documentation & Demo**: https://gaspar1992.github.io/angular-helpers/
-
 ---
 
 ## 📦 Available Packages

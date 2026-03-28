@@ -3,5 +3,5 @@
   "printWidth": 100,
   "singleQuote": true,
   "sortPackageJson": false,
-  "ignorePatterns": []
+  "ignorePatterns": ["CHANGELOG.md"]
 }

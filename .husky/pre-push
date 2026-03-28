@@ -1,0 +1,4 @@
+[ "${CI}" = "true" ] && exit 0
+
+npx playwright install chromium
+npm run test:browser:ci
