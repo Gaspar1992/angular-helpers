@@ -1,224 +1,236 @@
-<div class="demo-page">
-  <div class="demo-container">
+<div class="browser-apis-demo">
+  <div class="container">
+    <div class="header">
+      <img src="icon.webp" alt="Angular Helpers Logo" class="logo" />
+      <h1>Browser Web APIs Demo</h1>
+    </div>
+    <p class="subtitle">Prueba interactiva de las APIs del navegador con Angular</p>
 
-    <header class="demo-header">
-      <img src="icon.webp" alt="Angular Helpers logo" class="demo-logo" />
-      <div>
-        <h1>Browser Web APIs</h1>
-        <p class="demo-subtitle">Interactive demo — try browser APIs powered by Angular services</p>
-      </div>
-    </header>
-
-    <!-- Alerts -->
-    <div class="demo-alerts" aria-live="polite">
+    <!-- Alertas -->
+    <div class="alerts">
       @if (loading()) {
-        <div class="alert alert-info" role="status">
-          <span class="spinner" aria-hidden="true"></span>
-          Loading…
-        </div>
-      }
-      @if (error()) {
-        <div class="alert alert-error" role="alert">❌ {{ error() }}</div>
-      }
-      @if (success()) {
-        <div class="alert alert-success" role="status">✅ {{ success() }}</div>
+      <div class="alert alert-info">
+        <span class="spinner"></span>
+        Cargando...
+      </div>
+      } @if (error()) {
+      <div class="alert alert-error">❌ {{ error() }}</div>
+      } @if (success()) {
+      <div class="alert alert-success">✅ {{ success() }}</div>
       }
     </div>
 
-    <!-- Permissions -->
-    <section class="demo-section" aria-labelledby="perm-title">
-      <h2 id="perm-title">🔐 Permissions</h2>
+    <!-- Permisos -->
+    <section class="section">
+      <h2>🔐 Permisos</h2>
       <div class="permissions-grid">
         @for (permission of ['camera', 'microphone', 'geolocation', 'notifications',
-          'clipboard-read', 'clipboard-write']; track permission) {
-          <div class="permission-card">
-            <h3>{{ permission }}</h3>
-            <div class="status" [class]="permissions()[permission] || 'unknown'">
-              {{ permissions()[permission] || 'unknown' }}
-            </div>
-            <button
-              (click)="requestPermission(permission)"
-              [disabled]="loading()"
-              class="btn btn-primary"
-            >
-              Request
-            </button>
+        'clipboard-read', 'clipboard-write']; track permission) {
+        <div class="permission-card">
+          <h3>{{ permission }}</h3>
+          <div class="status" [class]="permissions()[permission] || 'unknown'">
+            {{ permissions()[permission] || 'unknown' }}
           </div>
+          <button
+            (click)="requestPermission(permission)"
+            [disabled]="loading()"
+            class="btn btn-primary"
+          >
+            Solicitar
+          </button>
+        </div>
         }
       </div>
       <button (click)="refreshPermissions()" [disabled]="loading()" class="btn btn-secondary">
-        🔄 Refresh permissions
+        🔄 Actualizar Permisos
       </button>
     </section>
 
-    <!-- Camera -->
-    <section class="demo-section" aria-labelledby="cam-title">
-      <h2 id="cam-title">📸 Camera</h2>
-      <div class="control-row">
+    <!-- Cámara -->
+    <section class="section">
+      <h2>📸 Cámara</h2>
+
+      <div class="camera-controls">
         <select
           [(ngModel)]="selectedCamera"
           [disabled]="loading() || !!videoStream()"
-          class="demo-select"
-          aria-label="Select camera device"
+          class="select"
         >
           @for (camera of availableCameras(); track camera.deviceId) {
-            <option [value]="camera.deviceId">
-              {{ camera.label || 'Camera ' + camera.deviceId.substring(0, 8) }}
-            </option>
+          <option [value]="camera.deviceId">
+            {{ camera.label || 'Cámara ' + camera.deviceId.substring(0, 8) }}
+          </option>
           }
         </select>
-        <button (click)="startCamera()" [disabled]="loading() || videoStream()" class="btn btn-primary">
-          📷 Start camera
+
+        <button
+          (click)="startCamera()"
+          [disabled]="loading() || videoStream()"
+          class="btn btn-primary"
+        >
+          📷 Iniciar Cámara
         </button>
+
         <button (click)="stopCamera()" [disabled]="!videoStream()" class="btn btn-danger">
-          ⏹ Stop
+          ⏹️ Detener
         </button>
-        <button (click)="takePhoto()" [disabled]="loading() || !videoStream()" class="btn btn-success">
-          📸 Take photo
+
+        <button
+          (click)="takePhoto()"
+          [disabled]="loading() || !videoStream()"
+          class="btn btn-success"
+        >
+          📸 Tomar Foto
         </button>
       </div>
+
       <div class="media-container">
         @if (videoStream()) {
-          <video [srcObject]="videoStream()" autoplay muted class="video-preview"></video>
-        }
-        @if (photoUrl()) {
-          <div class="photo-container">
-            <img [src]="photoUrl()" alt="Captured photo" class="photo-preview" />
-            <button (click)="photoUrl.set('')" class="btn btn-small btn-danger" aria-label="Remove photo">×</button>
-          </div>
+        <video [srcObject]="videoStream()" autoplay muted class="video-preview"></video>
+        } @if (photoUrl()) {
+        <div class="photo-container">
+          <img [src]="photoUrl()" alt="Foto tomada" class="photo-preview" />
+          <button (click)="photoUrl.set('')" class="btn btn-small btn-danger">×</button>
+        </div>
         }
       </div>
     </section>
 
-    <!-- Geolocation -->
-    <section class="demo-section" aria-labelledby="geo-title">
-      <h2 id="geo-title">🗺️ Geolocation</h2>
-      <div class="control-row">
+    <!-- Geolocalización -->
+    <section class="section">
+      <h2>🗺️ Geolocalización</h2>
+
+      <div class="geo-controls">
         <button (click)="getCurrentLocation()" [disabled]="loading()" class="btn btn-primary">
-          📍 Get current location
+          📍 Obtener Ubicación Actual
         </button>
+
         <button
           (click)="startWatchingPosition()"
           [disabled]="loading() || watchPositionId()"
           class="btn btn-success"
         >
-          👁 Watch position
+          👁️ Iniciar Watch Position
         </button>
-        <button (click)="stopWatchingPosition()" [disabled]="!watchPositionId()" class="btn btn-danger">
-          ⏹ Stop watch
+
+        <button
+          (click)="stopWatchingPosition()"
+          [disabled]="!watchPositionId()"
+          class="btn btn-danger"
+        >
+          ⏹️ Detener Watch
         </button>
       </div>
+
       @if (currentPosition()) {
-        <div class="info-card">
-          <h3>📍 Current position</h3>
-          <div class="coords-grid">
-            <div class="coord-item">
-              <span class="coord-label">Latitude</span>
-              <span class="coord-value">{{ currentPosition()!.coords.latitude.toFixed(6) }}</span>
-            </div>
-            <div class="coord-item">
-              <span class="coord-label">Longitude</span>
-              <span class="coord-value">{{ currentPosition()!.coords.longitude.toFixed(6) }}</span>
-            </div>
-            <div class="coord-item">
-              <span class="coord-label">Accuracy</span>
-              <span class="coord-value">±{{ currentPosition()!.coords.accuracy.toFixed(0) }} m</span>
-            </div>
-            @if (currentPosition()!.coords.altitude) {
-              <div class="coord-item">
-                <span class="coord-label">Altitude</span>
-                <span class="coord-value">{{ currentPosition()!.coords.altitude!.toFixed(2) }} m</span>
-              </div>
-            }
+      <div class="position-info">
+        <h3>📍 Posición Actual</h3>
+        <div class="coords">
+          <div><strong>Latitud:</strong> {{ currentPosition().coords.latitude.toFixed(6) }}</div>
+          <div><strong>Longitud:</strong> {{ currentPosition().coords.longitude.toFixed(6) }}</div>
+          <div>
+            <strong>Precisión:</strong> ±{{ currentPosition().coords.accuracy.toFixed(0) }}m
           </div>
-          <p class="timestamp">{{ formatDate(currentPosition()!.timestamp) }}</p>
+          @if (currentPosition().coords.altitude) {
+          <div><strong>Altitud:</strong> {{ currentPosition().coords.altitude.toFixed(2) }}m</div>
+          }
         </div>
+        <div class="timestamp">
+          <strong>Timestamp:</strong> {{ formatDate(currentPosition().timestamp) }}
+        </div>
+      </div>
       }
     </section>
 
-    <!-- Notifications -->
-    <section class="demo-section" aria-labelledby="notif-title">
-      <h2 id="notif-title">🔔 Notifications</h2>
-      <div class="control-row">
-        <div class="inline-status">
-          <span class="status-label">Permission:</span>
-          <span class="status" [class]="notificationPermission()">
+    <!-- Notificaciones -->
+    <section class="section">
+      <h2>🔔 Notificaciones</h2>
+
+      <div class="notification-controls">
+        <div class="permission-status">
+          <strong>Permiso actual:</strong>
+          <span [class]="notificationPermission()" class="status">
             {{ notificationPermission() }}
           </span>
         </div>
+
         <button
           (click)="requestNotificationPermission()"
           [disabled]="loading()"
           class="btn btn-primary"
         >
-          🔐 Request permission
+          🔐 Solicitar Permiso
         </button>
+
         <button
           (click)="showNotification()"
           [disabled]="loading() || notificationPermission() !== 'granted'"
           class="btn btn-success"
         >
-          🔔 Show notification
+          🔔 Mostrar Notificación
         </button>
       </div>
     </section>
 
     <!-- Clipboard -->
-    <section class="demo-section" aria-labelledby="clip-title">
-      <h2 id="clip-title">📋 Clipboard</h2>
-      <div class="control-row">
+    <section class="section">
+      <h2>📋 Clipboard</h2>
+
+      <div class="clipboard-controls">
         <button (click)="copyToClipboard()" [disabled]="loading()" class="btn btn-primary">
-          📝 Copy text
+          📝 Copiar Texto
         </button>
+
         <button (click)="pasteFromClipboard()" [disabled]="loading()" class="btn btn-secondary">
-          📋 Paste text
+          📋 Pegar Texto
         </button>
       </div>
+
       @if (clipboardText()) {
-        <div class="info-card">
-          <h4>Clipboard content</h4>
-          <div class="mono-content">{{ clipboardText() }}</div>
-        </div>
+      <div class="clipboard-content">
+        <h4>Contenido del Clipboard:</h4>
+        <div class="text-content">{{ clipboardText() }}</div>
+      </div>
       }
     </section>
 
     <!-- Media Devices -->
-    <section class="demo-section" aria-labelledby="dev-title">
-      <h2 id="dev-title">🎥 Media Devices</h2>
+    <section class="section">
+      <h2>🎥 Media Devices</h2>
+
       <div class="devices-grid">
         <div class="device-group">
-          <h3>📹 Video inputs</h3>
+          <h3>📹 Dispositivos de Video</h3>
           <div class="device-list">
             @for (device of videoDevices(); track device.deviceId) {
-              <div class="device-item">
-                <strong>{{ device.label || 'Unnamed device' }}</strong>
-                <small>ID: {{ device.deviceId.substring(0, 8) }}…</small>
-              </div>
-            }
-            @if (videoDevices().length === 0) {
-              <div class="no-devices">No video devices found</div>
+            <div class="device-item">
+              <strong>{{ device.label || 'Dispositivo sin nombre' }}</strong>
+              <small>ID: {{ device.deviceId.substring(0, 8) }}...</small>
+            </div>
+            } @if (videoDevices().length === 0) {
+            <div class="no-devices">No se encontraron dispositivos de video</div>
             }
           </div>
         </div>
+
         <div class="device-group">
-          <h3>🎤 Audio inputs</h3>
+          <h3>🎤 Dispositivos de Audio</h3>
           <div class="device-list">
             @for (device of audioDevices(); track device.deviceId) {
-              <div class="device-item">
-                <strong>{{ device.label || 'Unnamed device' }}</strong>
-                <small>ID: {{ device.deviceId.substring(0, 8) }}…</small>
-              </div>
-            }
-            @if (audioDevices().length === 0) {
-              <div class="no-devices">No audio devices found</div>
+            <div class="device-item">
+              <strong>{{ device.label || 'Dispositivo sin nombre' }}</strong>
+              <small>ID: {{ device.deviceId.substring(0, 8) }}...</small>
+            </div>
+            } @if (audioDevices().length === 0) {
+            <div class="no-devices">No se encontraron dispositivos de audio</div>
             }
           </div>
         </div>
       </div>
+
       <button (click)="refreshDevices()" [disabled]="loading()" class="btn btn-secondary">
-        🔄 Refresh devices
+        🔄 Actualizar Dispositivos
       </button>
     </section>
-
   </div>
 </div>
