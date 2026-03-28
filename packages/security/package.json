@@ -31,7 +31,6 @@
   "peerDependencies": {
     "@angular/common": "^21.0.0",
     "@angular/core": "^21.0.0",
-    "@angular-helpers/browser-web-apis": "21.0.2",
     "rxjs": "^7.0.0 || ^8.0.0"
   },
   "dependencies": {
