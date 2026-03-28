@@ -62,17 +62,10 @@ export class BrowserApisComponent {
   // Permisos
   async refreshPermissions() {
     try {
-      const permNames = [
-        'camera',
-        'microphone',
-        'geolocation',
-        'notifications',
-        'clipboard-read',
-        'clipboard-write',
-      ];
+      const standardPerms = ['camera', 'microphone', 'geolocation', 'notifications'];
       const perms: Record<string, string> = {};
 
-      for (const perm of permNames) {
+      for (const perm of standardPerms) {
         try {
           if ('permissions' in navigator) {
             const status = await navigator.permissions.query({ name: perm as PermissionName });
@@ -84,6 +77,26 @@ export class BrowserApisComponent {
           perms[perm] = 'unsupported';
         }
       }
+
+      // clipboard-read / clipboard-write: permissions.query throws in many
+      // browser/context combinations. Fall back to checking Clipboard API availability.
+      for (const clipPerm of ['clipboard-read', 'clipboard-write'] as const) {
+        if (!('clipboard' in navigator)) {
+          perms[clipPerm] = 'unsupported';
+          continue;
+        }
+        try {
+          const status = await navigator.permissions.query({
+            name: clipPerm as PermissionName,
+          });
+          perms[clipPerm] = status.state;
+        } catch {
+          // Clipboard API exists but permissions.query doesn't support this name
+          // (e.g. Firefox). Treat as 'prompt' — user will be asked on first use.
+          perms[clipPerm] = 'prompt';
+        }
+      }
+
       this.permissions.set(perms);
     } catch (error: any) {
       this.setError('Error obteniendo permisos: ' + error);
@@ -125,6 +138,48 @@ export class BrowserApisComponent {
             status = 'granted';
           } catch {
             status = 'denied';
+          }
+          break;
+
+        case 'clipboard-read':
+          if (!('clipboard' in navigator)) {
+            status = 'unsupported';
+            break;
+          }
+          try {
+            await navigator.clipboard.readText();
+            status = 'granted';
+          } catch {
+            // readText() rejected — either denied or requires user gesture;
+            // re-check the actual permission state
+            try {
+              const s = await navigator.permissions.query({
+                name: 'clipboard-read' as PermissionName,
+              });
+              status = s.state;
+            } catch {
+              status = 'denied';
+            }
+          }
+          break;
+
+        case 'clipboard-write':
+          if (!('clipboard' in navigator)) {
+            status = 'unsupported';
+            break;
+          }
+          try {
+            await navigator.clipboard.writeText('');
+            status = 'granted';
+          } catch {
+            try {
+              const s = await navigator.permissions.query({
+                name: 'clipboard-write' as PermissionName,
+              });
+              status = s.state;
+            } catch {
+              status = 'denied';
+            }
           }
           break;
 
