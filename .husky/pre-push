@@ -1,1 +1,2 @@
+npx playwright install chromium
 npm run test:browser:ci
