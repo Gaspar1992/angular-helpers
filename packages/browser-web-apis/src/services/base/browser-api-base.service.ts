@@ -59,6 +59,10 @@ export abstract class BrowserApiBaseService {
    * Create an error with proper cause chaining
    */
   protected createError(message: string, cause?: unknown): Error {
-    return new Error(message, { cause });
+    const error = new Error(message);
+    if (cause !== undefined) {
+      (error as Error & { cause: unknown }).cause = cause;
+    }
+    return error;
   }
 }
