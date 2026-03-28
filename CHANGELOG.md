@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/Gaspar1992/angular-helpers/compare/v1.2.0...v1.2.1) (2026-03-28)
+
+
+### Bug Fixes
+
+* **smoke:** update test selectors to match English demo UI ([b8f1e83](https://github.com/Gaspar1992/angular-helpers/commit/b8f1e833e70033e506fbef0c061e8282a8325f36))
+
 ## [1.0.3](https://github.com/Gaspar1992/angular-helpers/compare/v1.0.2...v1.0.3) (2026-03-22)
 
 ### Bug Fixes
