@@ -7,7 +7,7 @@ on:
       - published
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   publish:
@@ -31,32 +31,90 @@ jobs:
         run: npm run build:prod --workspace packages/browser-web-apis
 
       - name: Publish browser-web-apis
+        id: publish_browser
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           PACKAGE_NAME=$(node -p "require('./packages/browser-web-apis/package.json').name")
           PACKAGE_VERSION=$(node -p "require('./packages/browser-web-apis/package.json').version")
+          RELEASE_TAG="${PACKAGE_NAME}@${PACKAGE_VERSION}"
 
           if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version > /dev/null 2>&1; then
-            echo "${PACKAGE_NAME}@${PACKAGE_VERSION} is already published. Skipping."
+            echo "${RELEASE_TAG} is already published. Skipping."
+            echo "published=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           npm publish ./dist/browser-web-apis --access public
+          echo "published=true" >> "$GITHUB_OUTPUT"
+          echo "release_tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "package_version=${PACKAGE_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release for browser-web-apis
+        if: steps.publish_browser.outputs.published == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          RELEASE_TAG="${{ steps.publish_browser.outputs.release_tag }}"
+          VERSION="${{ steps.publish_browser.outputs.package_version }}"
+          gh release create "${RELEASE_TAG}" \
+            --title "@angular-helpers/browser-web-apis v${VERSION}" \
+            --notes "## @angular-helpers/browser-web-apis@${VERSION}
+
+          📦 Published to npm: https://www.npmjs.com/package/@angular-helpers/browser-web-apis/v/${VERSION}
+
+          ### Install
+
+          \`\`\`bash
+          npm install @angular-helpers/browser-web-apis@${VERSION}
+          \`\`\`
+
+          See [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details." \
+            --latest=false
 
       - name: Build security (production)
         run: npm run build:prod --workspace packages/security
 
       - name: Publish security
+        id: publish_security
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           PACKAGE_NAME=$(node -p "require('./packages/security/package.json').name")
           PACKAGE_VERSION=$(node -p "require('./packages/security/package.json').version")
+          RELEASE_TAG="${PACKAGE_NAME}@${PACKAGE_VERSION}"
 
           if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version > /dev/null 2>&1; then
-            echo "${PACKAGE_NAME}@${PACKAGE_VERSION} is already published. Skipping."
+            echo "${RELEASE_TAG} is already published. Skipping."
+            echo "published=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           npm publish ./dist/security --access public
+          echo "published=true" >> "$GITHUB_OUTPUT"
+          echo "release_tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "package_version=${PACKAGE_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release for security
+        if: steps.publish_security.outputs.published == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          RELEASE_TAG="${{ steps.publish_security.outputs.release_tag }}"
+          VERSION="${{ steps.publish_security.outputs.package_version }}"
+          gh release create "${RELEASE_TAG}" \
+            --title "@angular-helpers/security v${VERSION}" \
+            --notes "## @angular-helpers/security@${VERSION}
+
+          📦 Published to npm: https://www.npmjs.com/package/@angular-helpers/security/v/${VERSION}
+
+          ### Install
+
+          \`\`\`bash
+          npm install @angular-helpers/security@${VERSION}
+          \`\`\`
+
+          See [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details." \
+            --latest=false
