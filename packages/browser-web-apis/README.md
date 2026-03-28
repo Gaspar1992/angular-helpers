@@ -2,7 +2,9 @@
 
 Angular services package for a structured and secure access layer over browser Web APIs.
 
-[Leer en espanol](./README.es.md)
+🌐 **Documentation & Demo**: https://gaspar1992.github.io/angular-helpers/
+
+[Leer en español](./README.es.md)
 
 ## Features
 

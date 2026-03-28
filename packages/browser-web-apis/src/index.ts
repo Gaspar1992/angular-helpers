@@ -16,7 +16,6 @@ export * from './services/web-share.service';
 export * from './services/web-storage.service';
 export * from './services/web-socket.service';
 export * from './services/web-worker.service';
-export * from './services/regex-security.service';
 
 // Base classes
 export * from './services/base/browser-api-base.service';

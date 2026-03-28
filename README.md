@@ -2,6 +2,8 @@
 
 A suite of Angular libraries that helps you build secure, browser-integrated applications with a clean developer experience.
 
+🌐 **Documentation & Demo**: https://gaspar1992.github.io/angular-helpers/
+
 ---
 
 ## 📦 Available Packages
@@ -9,6 +11,8 @@ A suite of Angular libraries that helps you build secure, browser-integrated app
 ### 🔐 `@angular-helpers/security`
 
 _Advanced regular expression security and ReDoS prevention_
+
+🌐 **Documentation**: https://gaspar1992.github.io/angular-helpers/docs/security
 
 **🎯 What it solves:**
 
@@ -48,6 +52,8 @@ npm install @angular-helpers/security
 ### 🌐 `@angular-helpers/browser-web-apis`
 
 _Unified and safe browser API access with permissions and robust error handling_
+
+🌐 **Documentation**: https://gaspar1992.github.io/angular-helpers/docs/browser-web-apis
 
 **🎯 What it solves:**
 

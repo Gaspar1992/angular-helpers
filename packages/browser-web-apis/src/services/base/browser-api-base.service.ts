@@ -54,4 +54,11 @@ export abstract class BrowserApiBaseService {
       return false;
     }
   }
+
+  /**
+   * Create an error with proper cause chaining
+   */
+  protected createError(message: string, cause?: unknown): Error {
+    return new Error(message, { cause });
+  }
 }

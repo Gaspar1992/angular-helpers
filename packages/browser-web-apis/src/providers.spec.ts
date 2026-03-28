@@ -16,7 +16,6 @@ import { WebShareService } from './services/web-share.service';
 import { WebStorageService } from './services/web-storage.service';
 import { WebSocketService } from './services/web-socket.service';
 import { WebWorkerService } from './services/web-worker.service';
-import { RegexSecurityService } from './services/regex-security.service';
 
 type EnvironmentProvidersLike = {
   ɵproviders: unknown[];
@@ -42,7 +41,6 @@ describe('provideBrowserWebApis', () => {
     enableWebStorage: false,
     enableWebSocket: false,
     enableWebWorker: false,
-    enableRegexSecurity: false,
   };
 
   it('always provides PermissionsService even when all flags are false', () => {
@@ -63,7 +61,6 @@ describe('provideBrowserWebApis', () => {
     expect(hasProvider(providers, WebStorageService)).toBe(false);
     expect(hasProvider(providers, WebSocketService)).toBe(false);
     expect(hasProvider(providers, WebWorkerService)).toBe(false);
-    expect(hasProvider(providers, RegexSecurityService)).toBe(false);
   });
 
   it('enables only the explicitly configured optional services', () => {
@@ -77,7 +74,6 @@ describe('provideBrowserWebApis', () => {
     expect(hasProvider(providers, BatteryService)).toBe(true);
     expect(hasProvider(providers, WebStorageService)).toBe(true);
     expect(hasProvider(providers, CameraService)).toBe(false);
-    expect(hasProvider(providers, RegexSecurityService)).toBe(false);
   });
 
   it('uses default config values when no config is provided', () => {
@@ -86,9 +82,6 @@ describe('provideBrowserWebApis', () => {
     expect(hasProvider(providers, PermissionsService)).toBe(true);
     expect(hasProvider(providers, CameraService)).toBe(
       Boolean(defaultBrowserWebApisConfig.enableCamera),
-    );
-    expect(hasProvider(providers, RegexSecurityService)).toBe(
-      Boolean(defaultBrowserWebApisConfig.enableRegexSecurity),
     );
     expect(hasProvider(providers, BatteryService)).toBe(
       Boolean(defaultBrowserWebApisConfig.enableBattery),

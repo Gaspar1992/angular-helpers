@@ -90,11 +90,13 @@ export abstract class MediaDeviceBaseService extends BrowserApiBaseService {
 
       const stream = await navigator.mediaDevices.getUserMedia(finalConstraints);
 
-      // Store the stream
+      // Store the stream immutably
       const streamId = this.generateStreamId();
-      const currentStreams = this.activeStreams();
-      currentStreams.set(streamId, stream);
-      this.activeStreams.set(currentStreams);
+      this.activeStreams.update((streams) => {
+        const newStreams = new Map(streams);
+        newStreams.set(streamId, stream);
+        return newStreams;
+      });
 
       return stream;
     }, 'Failed to get user media');
@@ -113,11 +115,13 @@ export abstract class MediaDeviceBaseService extends BrowserApiBaseService {
       const finalConstraints = constraints || defaultConstraints;
       const stream = await navigator.mediaDevices.getDisplayMedia(finalConstraints);
 
-      // Store the stream
+      // Store the stream immutably
       const streamId = this.generateStreamId();
-      const currentStreams = this.activeStreams();
-      currentStreams.set(streamId, stream);
-      this.activeStreams.set(currentStreams);
+      this.activeStreams.update((streams) => {
+        const newStreams = new Map(streams);
+        newStreams.set(streamId, stream);
+        return newStreams;
+      });
 
       return stream;
     }, 'Failed to get display media');
@@ -132,8 +136,11 @@ export abstract class MediaDeviceBaseService extends BrowserApiBaseService {
 
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
-      streams.delete(streamId);
-      this.activeStreams.set(streams);
+      this.activeStreams.update((current) => {
+        const newStreams = new Map(current);
+        newStreams.delete(streamId);
+        return newStreams;
+      });
     }
   }
 
@@ -181,15 +188,17 @@ export abstract class MediaDeviceBaseService extends BrowserApiBaseService {
   private setupDeviceChangeListener(): void {
     if (!navigator.mediaDevices) return;
 
-    navigator.mediaDevices.addEventListener('devicechange', () => {
+    const handler = () => {
       this.refreshDevices().catch((error) => {
         this.logError('Error handling device change:', error);
       });
-    });
+    };
+
+    navigator.mediaDevices.addEventListener('devicechange', handler);
 
     // Auto-cleanup when service is destroyed
     this.destroyRef.onDestroy(() => {
-      // Remove event listener if needed
+      navigator.mediaDevices.removeEventListener('devicechange', handler);
       this.logInfo('Device change listener cleaned up');
     });
   }
@@ -239,10 +248,6 @@ export abstract class MediaDeviceBaseService extends BrowserApiBaseService {
    */
   protected onDestroy(): void {
     this.stopAllStreams();
-  }
-
-  protected createError(message: string, cause: unknown): Error {
-    return new Error(message, { cause });
   }
 
   protected logError(message: string, error: unknown): void {

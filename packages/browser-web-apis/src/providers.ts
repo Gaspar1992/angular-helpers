@@ -10,7 +10,6 @@ import { WebShareService } from './services/web-share.service';
 import { WebStorageService } from './services/web-storage.service';
 import { WebSocketService } from './services/web-socket.service';
 import { WebWorkerService } from './services/web-worker.service';
-import { RegexSecurityService } from './services/regex-security.service';
 
 export interface BrowserWebApisConfig {
   enableCamera?: boolean;
@@ -23,7 +22,6 @@ export interface BrowserWebApisConfig {
   enableWebStorage?: boolean;
   enableWebSocket?: boolean;
   enableWebWorker?: boolean;
-  enableRegexSecurity?: boolean;
 }
 
 export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
@@ -37,7 +35,6 @@ export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
   enableWebStorage: false,
   enableWebSocket: false,
   enableWebWorker: false,
-  enableRegexSecurity: true,
 };
 
 export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): EnvironmentProviders {
@@ -56,7 +53,6 @@ export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): Enviro
     [mergedConfig.enableWebStorage, WebStorageService],
     [mergedConfig.enableWebSocket, WebSocketService],
     [mergedConfig.enableWebWorker, WebWorkerService],
-    [mergedConfig.enableRegexSecurity, RegexSecurityService],
   ];
 
   for (const [enabled, provider] of conditionalProviders) {
@@ -111,10 +107,6 @@ export function provideWebWorker(): EnvironmentProviders {
 
 export function providePermissions(): EnvironmentProviders {
   return makeEnvironmentProviders([PermissionsService]);
-}
-
-export function provideRegexSecurity(): EnvironmentProviders {
-  return makeEnvironmentProviders([RegexSecurityService]);
 }
 
 // Combined providers for common use cases
