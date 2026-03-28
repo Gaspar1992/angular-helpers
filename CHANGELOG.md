@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/Gaspar1992/angular-helpers/compare/v1.2.2...v1.2.3) (2026-03-28)
+
+
+### Bug Fixes
+
+* **demo:** clipboard permissions — use Clipboard API fallback and add request cases ([80901ce](https://github.com/Gaspar1992/angular-helpers/commit/80901cee13d7e2b09071129eed548c5d835e5f83))
+
 ## [1.2.1](https://github.com/Gaspar1992/angular-helpers/compare/v1.2.0...v1.2.1) (2026-03-28)
 
 
