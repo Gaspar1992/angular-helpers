@@ -1,1 +1,352 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* ─── Design Tokens ─────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --bg-base: #0f1117;
+  --bg-surface: #1a1c28;
+  --bg-sidebar: #13151f;
+  --bg-elevated: #1e1e2e;
+  --bg-hover: rgba(255, 255, 255, 0.04);
+
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.07);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+
+  /* Text */
+  --text-primary: #e0e4f0;
+  --text-secondary: #909ab8;
+  --text-muted: #7a84a0;
+  --text-white: #ffffff;
+  --text-code: #cdd6f4;
+  --text-success: #a0f0b0;
+  --text-warning: #f0c060;
+
+  /* Accent */
+  --accent: #6b8cf2;
+  --accent-dim: rgba(107, 140, 242, 0.12);
+  --accent-border: rgba(107, 140, 242, 0.2);
+  --accent-hover: rgba(107, 140, 242, 0.08);
+
+  /* Spacing — 4 px base */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.25rem;
+  --sp-6: 1.5rem;
+  --sp-8: 2rem;
+  --sp-10: 2.5rem;
+  --sp-12: 3rem;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 7px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+
+  /* Typography */
+  --font-base: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  --text-base: 0.875rem;
+  --text-sm: 0.8rem;
+  --text-xs: 0.72rem;
+
+  /* Transitions */
+  --transition: 0.15s ease;
+}
+
+/* ─── Base reset ─────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Shared doc page utilities ──────────────────────── */
+
+/* Page wrapper */
+.docs-page {
+  padding-bottom: var(--sp-12);
+}
+
+/* Breadcrumb */
+.docs-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-bottom: var(--sp-4);
+  flex-wrap: wrap;
+}
+
+.docs-breadcrumb a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.docs-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* Page header block */
+.docs-page-header {
+  margin-bottom: var(--sp-10);
+}
+
+.docs-page-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text-white);
+  margin: 0 0 var(--sp-2);
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+@media (min-width: 640px) {
+  .docs-page-title {
+    font-size: 1.9rem;
+  }
+}
+
+.docs-page-lead {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.7;
+  max-width: 650px;
+  margin: var(--sp-3) 0 0;
+}
+
+@media (min-width: 640px) {
+  .docs-page-lead {
+    font-size: 1rem;
+  }
+}
+
+/* Inline code badges */
+.docs-badge {
+  display: inline-block;
+  font-size: var(--text-sm);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--sp-4);
+  font-family: var(--font-mono);
+}
+
+.docs-badge--npm {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.docs-badge--import {
+  color: var(--text-success);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.7rem;
+}
+
+/* Section */
+.docs-section {
+  margin-bottom: var(--sp-10);
+}
+
+.docs-section-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-white);
+  margin: 0 0 var(--sp-4);
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--border);
+}
+
+@media (min-width: 640px) {
+  .docs-section-title {
+    font-size: 1.2rem;
+  }
+}
+
+/* Inline info text under a section title */
+.docs-section-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0 0 var(--sp-4);
+}
+
+/* Support text (browser compat) */
+.docs-support-text {
+  color: #b0b8d0;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Notes list */
+.docs-note-list {
+  padding-left: var(--sp-6);
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+/* Meta chips */
+.docs-meta-chips {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.docs-chip {
+  font-size: 0.73rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+}
+
+.docs-chip--scope {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+}
+
+.docs-chip--secure {
+  background: rgba(255, 200, 80, 0.1);
+  color: var(--text-warning);
+  border: 1px solid rgba(255, 200, 80, 0.2);
+}
+
+/* API table — always scrollable on narrow screens */
+.docs-table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.docs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-base);
+}
+
+.docs-table thead {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.docs-table th {
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.73rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.docs-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: top;
+}
+
+@media (min-width: 640px) {
+  .docs-table th {
+    padding: 0.65rem 1rem;
+  }
+  .docs-table td {
+    padding: 0.7rem 1rem;
+  }
+}
+
+.docs-table tr:last-child td {
+  border-bottom: none;
+}
+
+.docs-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Typed code cells used inside .docs-table */
+.docs-code-name {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.docs-code-sig {
+  color: #a0a8c0;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.docs-code-ret {
+  color: var(--text-success);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.docs-cell-desc {
+  color: var(--text-secondary);
+  min-width: 180px;
+}
+
+/* ─── Highlight.js — Catppuccin Mocha ────────────────── */
+.hljs {
+  color: #cdd6f4;
+  background: transparent;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-name {
+  color: #cba6f7;
+}
+.hljs-string,
+.hljs-attr {
+  color: #a6e3a1;
+}
+.hljs-number,
+.hljs-literal {
+  color: #fab387;
+}
+.hljs-comment {
+  color: #6c7086;
+  font-style: italic;
+}
+.hljs-type,
+.hljs-class {
+  color: #89dceb;
+}
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.function_ {
+  color: #89b4fa;
+}
+.hljs-variable,
+.hljs-params {
+  color: #cdd6f4;
+}
+.hljs-meta {
+  color: #f38ba8;
+}
+.hljs-operator {
+  color: #89dceb;
+}
+.hljs-punctuation {
+  color: #6c7086;
+}

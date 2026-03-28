@@ -5,12 +5,6 @@ import { BrowserApiBaseService } from './base/browser-api-base.service';
 export class CameraService extends BrowserApiBaseService {
   private currentStream: MediaStream | null = null;
 
-  private createError(message: string, cause: unknown): Error {
-    const error = new Error(message) as Error & { cause?: unknown };
-    error.cause = cause;
-    return error;
-  }
-
   protected override getApiName(): string {
     return 'camera';
   }

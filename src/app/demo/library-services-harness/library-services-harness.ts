@@ -8,15 +8,14 @@ import {
   MediaDevicesService,
   NotificationService,
   PermissionsService,
-  RegexSecurityService,
   WebShareService,
   WebSocketService,
   WebStorageService,
   WebWorkerService,
-  type RegexTestResult,
   type WorkerMessage,
   type WorkerTask,
 } from '@angular-helpers/browser-web-apis';
+import { RegexSecurityService, type RegexTestResult } from '@angular-helpers/security';
 
 type HarnessPermissionState = PermissionStatus['state'] | 'unknown';
 type HarnessWorkerState = 'idle' | 'running' | 'terminated' | 'error';
@@ -809,7 +808,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     this.lastAction.set('analyze-safe-regex-pattern');
 
     try {
-      const analysis = await this.regexSecurityService.analyzePattern('^[a-z]+$');
+      const analysis = await this.regexSecurityService.analyzePatternSecurity('^[a-z]+$');
       this.regexAnalysisSafe.set(analysis.safe ? 'yes' : 'no');
       this.regexAnalysisRisk.set(analysis.risk);
     } catch (error: unknown) {

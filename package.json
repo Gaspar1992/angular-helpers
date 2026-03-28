@@ -8,6 +8,8 @@
     "start:https": "ng serve --ssl",
     "start:test": "ng serve --configuration development --host 127.0.0.1 --port 4200 --ssl=false",
     "build": "ng build",
+    "build:gh-pages": "ng build --base-href /angular-helpers/",
+    "build:gh-pages-root": "ng build --base-href /",
     "build:packages": "npm run build --workspaces --if-present",
     "build:packages:prod": "npm run build:prod --workspaces --if-present",
     "build:package": "npm run build --workspace",
@@ -30,9 +32,15 @@
     "version:packages": "npm version --workspaces",
     "dev": "concurrently \"npm run start:https\" \"npm run dev:packages\"",
     "dev:packages": "npm run build --workspaces --if-present -- --watch",
-    "ssl:generate": "mkdir -p ssl && openssl req -x509 -newkey rsa:2048 -sha256 -nodes -keyout ssl/localhost.key -out ssl/localhost.crt -days 365 -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'"
+    "ssl:generate": "mkdir -p ssl && openssl req -x509 -newkey rsa:2048 -sha256 -nodes -keyout ssl/localhost.key -out ssl/localhost.crt -days 365 -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'",
+    "prepare": "husky"
   },
   "private": true,
+  "lint-staged": {
+    "*.{ts,js,json,css,html,md}": "oxfmt",
+    "*.{ts,js}": "oxlint",
+    "*.{ts,html}": "eslint"
+  },
   "packageManager": "npm@10.9.4",
   "workspaces": [
     "packages/*"
@@ -45,6 +53,7 @@
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
     "@angular/ssr": "^21.2.2",
+    "highlight.js": "^11.11.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -70,6 +79,8 @@
     "concurrently": "^9.1.0",
     "eslint": "^10.1.0",
     "eslint-plugin-oxlint": "^1.57.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "ng-packagr": "^21.0.0",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",

@@ -9,15 +9,42 @@ export {
   BrowserCapabilityService,
   type BrowserCapabilityId,
 } from './services/browser-capability.service';
+export { BatteryService } from './services/battery.service';
+export { WebShareService } from './services/web-share.service';
+export {
+  WebStorageService,
+  type StorageOptions,
+  type StorageEvent,
+} from './services/web-storage.service';
+export {
+  WebSocketService,
+  type WebSocketConfig,
+  type WebSocketMessage,
+  type WebSocketStatus,
+} from './services/web-socket.service';
+export {
+  WebWorkerService,
+  type WorkerMessage,
+  type WorkerStatus,
+  type WorkerTask,
+} from './services/web-worker.service';
+
+// Base classes
+export { BrowserApiBaseService } from './services/base/browser-api-base.service';
 
 // Interfaces and Types
 export * from './interfaces/permissions.interface';
 export * from './interfaces/media.interface';
 export * from './interfaces/geolocation.interface';
+export * from './interfaces/battery.interface';
+export * from './interfaces/common.types';
 
 // Utils and Guards
 export * from './utils/browser-support.util';
 export * from './guards/permission.guard';
+
+// Providers
+export * from './providers';
 
 // Version
 export const version = '0.1.0';

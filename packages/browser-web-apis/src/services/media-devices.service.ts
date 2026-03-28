@@ -9,12 +9,6 @@ interface DisplayMediaConstraints {
 
 @Injectable()
 export class MediaDevicesService extends BrowserApiBaseService {
-  private createError(message: string, cause: unknown): Error {
-    const error = new Error(message) as Error & { cause?: unknown };
-    error.cause = cause;
-    return error;
-  }
-
   protected override getApiName(): string {
     return 'media-devices';
   }

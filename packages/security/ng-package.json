@@ -3,5 +3,6 @@
   "lib": {
     "entryFile": "src/index.ts"
   },
-  "dest": "../../dist/security"
+  "dest": "../../dist/security",
+  "assets": ["README.md", "README.es.md"]
 }

@@ -3,5 +3,6 @@
   "dest": "../../dist/browser-web-apis",
   "lib": {
     "entryFile": "src/public-api.ts"
-  }
+  },
+  "assets": ["README.md", "README.es.md"]
 }

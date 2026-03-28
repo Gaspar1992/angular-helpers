@@ -1,9 +1,25 @@
 import { Routes } from '@angular/router';
-import { BrowserApisComponent } from './demo/browser-apis/browser-apis';
-import { LibraryServicesHarnessComponent } from './demo/library-services-harness/library-services-harness';
 
 export const routes: Routes = [
-  { path: 'demo/library-services', component: LibraryServicesHarnessComponent },
-  { path: 'demo', component: BrowserApisComponent },
-  { path: '', redirectTo: '/demo', pathMatch: 'full' },
+  {
+    path: '',
+    loadComponent: () => import('./home/home.component').then((m) => m.HomeComponent),
+    title: 'Angular Helpers',
+  },
+  {
+    path: 'demo/library-services',
+    loadComponent: () =>
+      import('./demo/library-services-harness/library-services-harness').then(
+        (m) => m.LibraryServicesHarnessComponent,
+      ),
+  },
+  {
+    path: 'demo',
+    loadComponent: () =>
+      import('./demo/browser-apis/browser-apis').then((m) => m.BrowserApisComponent),
+  },
+  {
+    path: 'docs',
+    loadChildren: () => import('./docs/docs.routes').then((m) => m.DOCS_ROUTES),
+  },
 ];
