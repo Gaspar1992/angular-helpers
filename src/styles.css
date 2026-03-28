@@ -262,8 +262,12 @@ body {
 }
 
 @media (min-width: 640px) {
-  .docs-table th { padding: 0.65rem 1rem; }
-  .docs-table td { padding: 0.7rem 1rem; }
+  .docs-table th {
+    padding: 0.65rem 1rem;
+  }
+  .docs-table td {
+    padding: 0.7rem 1rem;
+  }
 }
 
 .docs-table tr:last-child td {
@@ -302,14 +306,47 @@ body {
 }
 
 /* ─── Highlight.js — Catppuccin Mocha ────────────────── */
-.hljs { color: #cdd6f4; background: transparent; }
-.hljs-keyword, .hljs-selector-tag, .hljs-built_in, .hljs-name { color: #cba6f7; }
-.hljs-string, .hljs-attr { color: #a6e3a1; }
-.hljs-number, .hljs-literal { color: #fab387; }
-.hljs-comment { color: #6c7086; font-style: italic; }
-.hljs-type, .hljs-class { color: #89dceb; }
-.hljs-title, .hljs-title.class_, .hljs-title.function_ { color: #89b4fa; }
-.hljs-variable, .hljs-params { color: #cdd6f4; }
-.hljs-meta { color: #f38ba8; }
-.hljs-operator { color: #89dceb; }
-.hljs-punctuation { color: #6c7086; }
+.hljs {
+  color: #cdd6f4;
+  background: transparent;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-name {
+  color: #cba6f7;
+}
+.hljs-string,
+.hljs-attr {
+  color: #a6e3a1;
+}
+.hljs-number,
+.hljs-literal {
+  color: #fab387;
+}
+.hljs-comment {
+  color: #6c7086;
+  font-style: italic;
+}
+.hljs-type,
+.hljs-class {
+  color: #89dceb;
+}
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.function_ {
+  color: #89b4fa;
+}
+.hljs-variable,
+.hljs-params {
+  color: #cdd6f4;
+}
+.hljs-meta {
+  color: #f38ba8;
+}
+.hljs-operator {
+  color: #89dceb;
+}
+.hljs-punctuation {
+  color: #6c7086;
+}

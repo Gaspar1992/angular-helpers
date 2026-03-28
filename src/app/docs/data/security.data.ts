@@ -18,7 +18,8 @@ export const SECURITY_SERVICES: ServiceDoc[] = [
     methods: [
       {
         name: 'testRegex',
-        signature: 'testRegex(pattern: string, text: string, options?: RegexSecurityConfig): Promise<RegexTestResult>',
+        signature:
+          'testRegex(pattern: string, text: string, options?: RegexSecurityConfig): Promise<RegexTestResult>',
         description:
           'Runs a regex match in a Web Worker with configurable timeout. Returns the match result plus execution metrics.',
         returns: 'Promise<RegexTestResult>',
@@ -26,7 +27,8 @@ export const SECURITY_SERVICES: ServiceDoc[] = [
       {
         name: 'analyzePatternSecurity',
         signature: 'analyzePatternSecurity(pattern: string): Promise<RegexSecurityResult>',
-        description: 'Analyzes the given pattern for ReDoS risk without executing it. Returns risk level, complexity, and recommendations.',
+        description:
+          'Analyzes the given pattern for ReDoS risk without executing it. Returns risk level, complexity, and recommendations.',
         returns: 'Promise<RegexSecurityResult>',
       },
     ],
@@ -150,8 +152,16 @@ export const SECURITY_INTERFACES = [
     description: 'Options for testRegex() execution.',
     fields: [
       { name: 'timeout?', type: 'number', description: 'Timeout in ms (default: 5000)' },
-      { name: 'maxComplexity?', type: 'number', description: 'Max allowed complexity (default: 10)' },
-      { name: 'allowBacktracking?', type: 'boolean', description: 'Allow backtracking (default: false)' },
+      {
+        name: 'maxComplexity?',
+        type: 'number',
+        description: 'Max allowed complexity (default: 10)',
+      },
+      {
+        name: 'allowBacktracking?',
+        type: 'boolean',
+        description: 'Allow backtracking (default: false)',
+      },
       { name: 'safeMode?', type: 'boolean', description: 'Block unsafe patterns (default: false)' },
     ],
   },

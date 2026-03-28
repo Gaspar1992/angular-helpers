@@ -9,17 +9,15 @@ export const DOCS_ROUTES: Routes = [
       {
         path: '',
         loadComponent: () =>
-          import('./pages/docs-landing/docs-landing.component').then(
-            (m) => m.DocsLandingComponent,
-          ),
+          import('./pages/docs-landing/docs-landing.component').then((m) => m.DocsLandingComponent),
         title: 'Documentation — Angular Helpers',
       },
       {
         path: 'browser-web-apis',
         loadComponent: () =>
-          import(
-            './pages/browser-web-apis-overview/browser-web-apis-overview.component'
-          ).then((m) => m.BrowserWebApisOverviewComponent),
+          import('./pages/browser-web-apis-overview/browser-web-apis-overview.component').then(
+            (m) => m.BrowserWebApisOverviewComponent,
+          ),
         title: 'browser-web-apis — Angular Helpers',
       },
       {
@@ -41,9 +39,9 @@ export const DOCS_ROUTES: Routes = [
       {
         path: 'security/:service',
         loadComponent: () =>
-          import(
-            './pages/security-service-detail/security-service-detail.component'
-          ).then((m) => m.SecurityServiceDetailComponent),
+          import('./pages/security-service-detail/security-service-detail.component').then(
+            (m) => m.SecurityServiceDetailComponent,
+          ),
         title: 'Service — Angular Helpers',
       },
       {

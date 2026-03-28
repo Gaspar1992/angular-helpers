@@ -107,8 +107,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       }
 
       @media (min-width: 480px) {
-        .app-nav { padding: 0 var(--sp-6); height: 56px; }
-        .brand-name { font-size: 1rem; }
+        .app-nav {
+          padding: 0 var(--sp-6);
+          height: 56px;
+        }
+        .brand-name {
+          font-size: 1rem;
+        }
       }
 
       nav ul {
@@ -127,7 +132,9 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         color: #b0b8d0;
         text-decoration: none;
         border-radius: var(--radius-md);
-        transition: color var(--transition), background var(--transition);
+        transition:
+          color var(--transition),
+          background var(--transition);
       }
 
       .nav-link:hover {

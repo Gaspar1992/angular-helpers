@@ -109,7 +109,9 @@
   font-size: var(--text-base);
   color: #b0b8d0;
   text-decoration: none;
-  transition: color var(--transition), background var(--transition);
+  transition:
+    color var(--transition),
+    background var(--transition);
   border-left: 2px solid transparent;
 }
 

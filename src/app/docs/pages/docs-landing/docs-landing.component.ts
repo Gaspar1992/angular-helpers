@@ -25,8 +25,8 @@ import { RouterLink } from '@angular/router';
             </div>
           </div>
           <p>
-            13 strongly typed Angular services for Camera, Geolocation, Storage, WebSocket, Web
-            Workers, and more — all with built-in browser support detection and reactive APIs.
+            13 strongly typed Angular services for Camera, Geolocation, Storage, WebSocket, Web Workers,
+            and more — all with built-in browser support detection and reactive APIs.
           </p>
           <div class="pkg-meta">
             <span class="badge">13 services</span>
@@ -48,8 +48,8 @@ import { RouterLink } from '@angular/router';
             </div>
           </div>
           <p>
-            ReDoS prevention via Web Worker-isolated regex execution. Includes a fluent builder API
-            and complexity analysis for safe regular expression usage in Angular apps.
+            ReDoS prevention via Web Worker-isolated regex execution. Includes a fluent builder API and
+            complexity analysis for safe regular expression usage in Angular apps.
           </p>
           <div class="pkg-meta">
             <span class="badge">ReDoS Prevention</span>
@@ -68,14 +68,14 @@ import { RouterLink } from '@angular/router';
         <p>Register all providers at bootstrap:</p>
         <div class="code-snippet">
           <pre><code>import &#123; provideBrowserWebApis &#125; from '&#64;angular-helpers/browser-web-apis';
-import &#123; provideSecurity &#125; from '&#64;angular-helpers/security';
+    import &#123; provideSecurity &#125; from '&#64;angular-helpers/security';
 
-bootstrapApplication(AppComponent, &#123;
-  providers: [
-    provideBrowserWebApis(&#123; enableCamera: true, enableGeolocation: true &#125;),
-    provideSecurity(&#123; enableRegexSecurity: true &#125;),
-  ],
-&#125;);</code></pre>
+    bootstrapApplication(AppComponent, &#123;
+      providers: [
+        provideBrowserWebApis(&#123; enableCamera: true, enableGeolocation: true &#125;),
+        provideSecurity(&#123; enableRegexSecurity: true &#125;),
+      ],
+    &#125;);</code></pre>
         </div>
       </section>
     </div>
@@ -100,7 +100,9 @@ bootstrapApplication(AppComponent, &#123;
       }
 
       @media (min-width: 640px) {
-        h1 { font-size: 2rem; }
+        h1 {
+          font-size: 2rem;
+        }
       }
 
       .lead {
@@ -112,7 +114,9 @@ bootstrapApplication(AppComponent, &#123;
       }
 
       @media (min-width: 640px) {
-        .lead { font-size: 1.05rem; }
+        .lead {
+          font-size: 1.05rem;
+        }
       }
 
       .packages-grid {
@@ -257,7 +261,9 @@ bootstrapApplication(AppComponent, &#123;
       }
 
       @media (min-width: 640px) {
-        .code-snippet pre { padding: var(--sp-5) var(--sp-6); }
+        .code-snippet pre {
+          padding: var(--sp-5) var(--sp-6);
+        }
       }
 
       .code-snippet code {
@@ -266,7 +272,6 @@ bootstrapApplication(AppComponent, &#123;
         color: var(--text-code);
         line-height: 1.6;
       }
-
     `,
   ],
 })

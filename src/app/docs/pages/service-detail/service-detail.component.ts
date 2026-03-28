@@ -6,12 +6,7 @@ import { CodeBlockComponent } from '../../shared/code-block/code-block.component
 import { DocsPageHeaderComponent } from '../../shared/page-header/docs-page-header.component';
 import { DocsApiTableComponent } from '../../shared/api-table/docs-api-table.component';
 import { BROWSER_WEB_APIS_SERVICES } from '../../data/browser-web-apis.data';
-import {
-  ServiceDoc,
-  BreadcrumbItem,
-  ApiRow,
-  METHODS_COLUMNS,
-} from '../../models/doc-meta.model';
+import { ServiceDoc, BreadcrumbItem, ApiRow, METHODS_COLUMNS } from '../../models/doc-meta.model';
 
 @Component({
   selector: 'app-service-detail',
@@ -64,16 +59,26 @@ import {
     } @else {
       <div class="not-found">
         <h1 class="docs-page-title">Service not found</h1>
-        <p class="docs-page-lead" style="max-width:none">The requested service does not exist in this package.</p>
+        <p class="docs-page-lead" style="max-width: none">
+          The requested service does not exist in this package.
+        </p>
         <a routerLink="/docs/browser-web-apis">← Back to browser-web-apis</a>
       </div>
     }
   `,
   styles: [
     `
-      .not-found { padding-top: var(--sp-8); }
-      .not-found a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
-      .not-found a:hover { text-decoration: underline; }
+      .not-found {
+        padding-top: var(--sp-8);
+      }
+      .not-found a {
+        color: var(--accent);
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+      .not-found a:hover {
+        text-decoration: underline;
+      }
     `,
   ],
 })
@@ -102,7 +107,7 @@ export class ServiceDetailComponent {
     return s ? `import { ${s.name} } from '${s.importPath}'` : '';
   });
 
-  protected methodRows = computed<ApiRow[]>(() =>
-    ((this.service()?.methods ?? []) as unknown) as ApiRow[],
+  protected methodRows = computed<ApiRow[]>(
+    () => (this.service()?.methods ?? []) as unknown as ApiRow[],
   );
 }

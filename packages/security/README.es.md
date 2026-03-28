@@ -90,12 +90,12 @@ const result = await pattern.test('12345');
 
 ## 📊 Niveles de Riesgo
 
-| Nivel | Descripción | Acción |
-|-------|-------------|--------|
-| 🟢 **Bajo** | Patrones seguros | Ejecución normal |
-| 🟡 **Medio** | Posible riesgo | Advertencia + timeout |
-| 🟠 **Alto** | Riesgo significativo | Timeout estricto + safe mode recomendado |
-| 🔴 **Crítico** | Patrones peligrosos | Bloqueo por defecto |
+| Nivel          | Descripción          | Acción                                   |
+| -------------- | -------------------- | ---------------------------------------- |
+| 🟢 **Bajo**    | Patrones seguros     | Ejecución normal                         |
+| 🟡 **Medio**   | Posible riesgo       | Advertencia + timeout                    |
+| 🟠 **Alto**    | Riesgo significativo | Timeout estricto + safe mode recomendado |
+| 🔴 **Crítico** | Patrones peligrosos  | Bloqueo por defecto                      |
 
 ## 🔧 Configuración Avanzada
 

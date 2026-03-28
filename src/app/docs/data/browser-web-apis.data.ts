@@ -10,7 +10,10 @@ export const BROWSER_WEB_APIS_SERVICES: ServiceDoc[] = [
     importPath: '@angular-helpers/browser-web-apis',
     requiresSecureContext: false,
     browserSupport: 'Chrome ✓ · Firefox ✓ · Safari ✗ · Edge ✓',
-    notes: ['Call initialize() before any other method.', 'Battery API is not available in Safari.'],
+    notes: [
+      'Call initialize() before any other method.',
+      'Battery API is not available in Safari.',
+    ],
     methods: [
       {
         name: 'initialize',
@@ -21,7 +24,8 @@ export const BROWSER_WEB_APIS_SERVICES: ServiceDoc[] = [
       {
         name: 'getBatteryInfo',
         signature: 'getBatteryInfo(): BatteryInfo',
-        description: 'Returns current battery state (level, charging, chargingTime, dischargingTime).',
+        description:
+          'Returns current battery state (level, charging, chargingTime, dischargingTime).',
         returns: 'BatteryInfo',
       },
       {
@@ -79,7 +83,8 @@ export class BatteryComponent {
       },
       {
         name: 'getUnsupportedCapabilities',
-        signature: 'getUnsupportedCapabilities(capabilities: BrowserCapabilityId[]): BrowserCapabilityId[]',
+        signature:
+          'getUnsupportedCapabilities(capabilities: BrowserCapabilityId[]): BrowserCapabilityId[]',
         description: 'Returns the subset of the given capabilities that are NOT supported.',
         returns: 'BrowserCapabilityId[]',
       },
@@ -114,7 +119,8 @@ export class MyComponent {
       {
         name: 'startCamera',
         signature: 'startCamera(constraints?: MediaStreamConstraints): Promise<MediaStream>',
-        description: 'Starts camera capture with optional constraints. Returns the active MediaStream.',
+        description:
+          'Starts camera capture with optional constraints. Returns the active MediaStream.',
         returns: 'Promise<MediaStream>',
       },
       {
@@ -206,7 +212,10 @@ export class ClipboardComponent {
     importPath: '@angular-helpers/browser-web-apis',
     requiresSecureContext: true,
     browserSupport: 'Chrome ✓ · Firefox ✓ · Safari ✓ · Edge ✓',
-    notes: ['Requires geolocation permission.', 'Use watchPosition() Observable — it auto-unsubscribes via DestroyRef.'],
+    notes: [
+      'Requires geolocation permission.',
+      'Use watchPosition() Observable — it auto-unsubscribes via DestroyRef.',
+    ],
     methods: [
       {
         name: 'getCurrentPosition',
@@ -217,7 +226,8 @@ export class ClipboardComponent {
       {
         name: 'watchPosition',
         signature: 'watchPosition(options?: PositionOptions): Observable<GeolocationPosition>',
-        description: 'Returns an Observable that continuously emits position updates. Unsubscribe to stop watching.',
+        description:
+          'Returns an Observable that continuously emits position updates. Unsubscribe to stop watching.',
         returns: 'Observable<GeolocationPosition>',
       },
       {
@@ -276,7 +286,8 @@ export class MapComponent {
       {
         name: 'watchDeviceChanges',
         signature: 'watchDeviceChanges(): Observable<MediaDeviceInfo[]>',
-        description: 'Returns an Observable that emits whenever devices are connected or disconnected.',
+        description:
+          'Returns an Observable that emits whenever devices are connected or disconnected.',
         returns: 'Observable<MediaDeviceInfo[]>',
       },
     ],
@@ -301,12 +312,16 @@ export class DeviceSelectorComponent {
     importPath: '@angular-helpers/browser-web-apis',
     requiresSecureContext: true,
     browserSupport: 'Chrome ✓ · Firefox ✓ · Safari partial · Edge ✓',
-    notes: ['Safari has limited support for the Notifications API.', 'User must explicitly grant permission.'],
+    notes: [
+      'Safari has limited support for the Notifications API.',
+      'User must explicitly grant permission.',
+    ],
     methods: [
       {
         name: 'permission',
         signature: 'get permission(): NotificationPermission',
-        description: 'Returns the current notification permission state: "default", "granted", or "denied".',
+        description:
+          'Returns the current notification permission state: "default", "granted", or "denied".',
         returns: 'NotificationPermission',
       },
       {
@@ -323,7 +338,8 @@ export class DeviceSelectorComponent {
       },
       {
         name: 'showNotification',
-        signature: 'showNotification(title: string, options?: NotificationOptions): Promise<Notification>',
+        signature:
+          'showNotification(title: string, options?: NotificationOptions): Promise<Notification>',
         description: 'Displays a browser notification. Permission must be granted first.',
         returns: 'Promise<Notification>',
       },
@@ -391,8 +407,10 @@ export class PermissionCheckComponent {
     methods: [
       {
         name: 'testRegex',
-        signature: 'testRegex(pattern: string, text: string, options?: RegexSecurityConfig): Promise<RegexTestResult>',
-        description: 'Executes a regex in a Web Worker with timeout protection. Returns match result and execution metadata.',
+        signature:
+          'testRegex(pattern: string, text: string, options?: RegexSecurityConfig): Promise<RegexTestResult>',
+        description:
+          'Executes a regex in a Web Worker with timeout protection. Returns match result and execution metadata.',
         returns: 'Promise<RegexTestResult>',
       },
       {
@@ -529,7 +547,10 @@ export class ChatComponent {
     importPath: '@angular-helpers/browser-web-apis',
     requiresSecureContext: false,
     browserSupport: 'All modern browsers',
-    notes: ['Storage events only fire across tabs, not within the same tab.', 'Values are auto-serialized with JSON.stringify.'],
+    notes: [
+      'Storage events only fire across tabs, not within the same tab.',
+      'Values are auto-serialized with JSON.stringify.',
+    ],
     methods: [
       {
         name: 'setLocalStorage',
@@ -539,7 +560,8 @@ export class ChatComponent {
       },
       {
         name: 'getLocalStorage',
-        signature: 'getLocalStorage<T>(key: string, defaultValue?: T | null, options?: StorageOptions): T | null',
+        signature:
+          'getLocalStorage<T>(key: string, defaultValue?: T | null, options?: StorageOptions): T | null',
         description: 'Retrieves a value from localStorage.',
         returns: 'T | null',
       },
@@ -551,7 +573,8 @@ export class ChatComponent {
       },
       {
         name: 'watchLocalStorage',
-        signature: 'watchLocalStorage<T>(key: string, options?: StorageOptions): Observable<T | null>',
+        signature:
+          'watchLocalStorage<T>(key: string, options?: StorageOptions): Observable<T | null>',
         description: 'Watches a localStorage key for changes across tabs.',
         returns: 'Observable<T | null>',
       },
@@ -563,7 +586,8 @@ export class ChatComponent {
       },
       {
         name: 'getSessionStorage',
-        signature: 'getSessionStorage<T>(key: string, defaultValue?: T | null, options?: StorageOptions): T | null',
+        signature:
+          'getSessionStorage<T>(key: string, defaultValue?: T | null, options?: StorageOptions): T | null',
         description: 'Retrieves a value from sessionStorage.',
         returns: 'T | null',
       },
