@@ -97,6 +97,22 @@ export * from './interfaces/geolocation.interface';
 export * from './interfaces/battery.interface';
 export * from './interfaces/common.types';
 
+// Signal Fn primitives
+export { injectPageVisibility, type PageVisibilityRef } from './fns/inject-page-visibility';
+export { injectResizeObserver, type ResizeRef } from './fns/inject-resize-observer';
+export {
+  injectIntersectionObserver,
+  type IntersectionRef,
+} from './fns/inject-intersection-observer';
+export {
+  injectNetworkInformation,
+  type NetworkInformationRef,
+} from './fns/inject-network-information';
+export {
+  injectScreenOrientation,
+  type ScreenOrientationRef,
+} from './fns/inject-screen-orientation';
+
 // Utils and Guards
 export * from './utils/browser-support.util';
 export * from './guards/permission.guard';

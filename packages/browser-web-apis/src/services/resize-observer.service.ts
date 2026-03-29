@@ -1,6 +1,8 @@
-import { Injectable, inject, DestroyRef, PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
+
+import { resizeObserverEntriesStream, resizeObserverStream } from '../utils/resize-observer.utils';
 
 export interface ResizeObserverOptions {
   box?: ResizeObserverBoxOptions;
@@ -15,7 +17,6 @@ export interface ElementSize {
 
 @Injectable()
 export class ResizeObserverService {
-  private readonly destroyRef = inject(DestroyRef);
   private readonly platformId = inject(PLATFORM_ID);
 
   isSupported(): boolean {
@@ -26,57 +27,16 @@ export class ResizeObserverService {
     element: Element,
     options: ResizeObserverOptions = {},
   ): Observable<ResizeObserverEntry[]> {
-    return new Observable<ResizeObserverEntry[]>((observer) => {
-      if (!this.isSupported()) {
-        observer.error(new Error('ResizeObserver API not supported'));
-        return undefined;
-      }
-
-      const ro = new ResizeObserver((entries) => {
-        observer.next(entries);
-      });
-
-      ro.observe(element, options);
-
-      const cleanup = () => ro.disconnect();
-      this.destroyRef.onDestroy(cleanup);
-
-      return () => {
-        ro.unobserve(element);
-        ro.disconnect();
-      };
-    });
+    if (!this.isSupported()) {
+      return new Observable((o) => o.error(new Error('ResizeObserver API not supported')));
+    }
+    return resizeObserverEntriesStream(element, options);
   }
 
   observeSize(element: Element, options: ResizeObserverOptions = {}): Observable<ElementSize> {
-    return new Observable<ElementSize>((observer) => {
-      if (!this.isSupported()) {
-        observer.error(new Error('ResizeObserver API not supported'));
-        return undefined;
-      }
-
-      const ro = new ResizeObserver((entries) => {
-        const entry = entries[entries.length - 1];
-        const contentRect = entry.contentRect;
-        const borderBoxSize = entry.borderBoxSize?.[0];
-
-        observer.next({
-          width: contentRect.width,
-          height: contentRect.height,
-          inlineSize: borderBoxSize?.inlineSize ?? contentRect.width,
-          blockSize: borderBoxSize?.blockSize ?? contentRect.height,
-        });
-      });
-
-      ro.observe(element, options);
-
-      const cleanup = () => ro.disconnect();
-      this.destroyRef.onDestroy(cleanup);
-
-      return () => {
-        ro.unobserve(element);
-        ro.disconnect();
-      };
-    });
+    if (!this.isSupported()) {
+      return new Observable((o) => o.error(new Error('ResizeObserver API not supported')));
+    }
+    return resizeObserverStream(element, options);
   }
 }

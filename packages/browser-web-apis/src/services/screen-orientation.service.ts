@@ -1,6 +1,8 @@
-import { Injectable, inject, DestroyRef, PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
+
+import { getOrientationSnapshot, screenOrientationStream } from '../utils/screen-orientation.utils';
 
 export type OrientationType =
   | 'portrait-primary'
@@ -29,7 +31,6 @@ export interface OrientationInfo {
 
 @Injectable()
 export class ScreenOrientationService {
-  private readonly destroyRef = inject(DestroyRef);
   private readonly platformId = inject(PLATFORM_ID);
 
   isSupported(): boolean {
@@ -37,13 +38,9 @@ export class ScreenOrientationService {
   }
 
   getSnapshot(): OrientationInfo {
-    if (!this.isSupported()) {
-      return { type: 'portrait-primary', angle: 0 };
-    }
-    return {
-      type: screen.orientation.type as OrientationType,
-      angle: screen.orientation.angle,
-    };
+    return isPlatformBrowser(this.platformId)
+      ? getOrientationSnapshot()
+      : { type: 'portrait-primary', angle: 0 };
   }
 
   get isPortrait(): boolean {
@@ -55,22 +52,7 @@ export class ScreenOrientationService {
   }
 
   watch(): Observable<OrientationInfo> {
-    return new Observable<OrientationInfo>((observer) => {
-      if (!this.isSupported()) {
-        observer.next({ type: 'portrait-primary', angle: 0 });
-        observer.complete();
-        return undefined;
-      }
-
-      const handler = () => observer.next(this.getSnapshot());
-      screen.orientation.addEventListener('change', handler);
-      observer.next(this.getSnapshot());
-
-      const cleanup = () => screen.orientation.removeEventListener('change', handler);
-      this.destroyRef.onDestroy(cleanup);
-
-      return cleanup;
-    });
+    return screenOrientationStream();
   }
 
   async lock(orientation: OrientationLockType): Promise<void> {

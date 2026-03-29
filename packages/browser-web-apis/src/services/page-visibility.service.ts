@@ -1,12 +1,13 @@
-import { Injectable, inject, DestroyRef, PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
+
+import { pageVisibilityStream } from '../utils/page-visibility.utils';
 
 export type VisibilityState = 'visible' | 'hidden' | 'prerender';
 
 @Injectable()
 export class PageVisibilityService {
-  private readonly destroyRef = inject(DestroyRef);
   private readonly platformId = inject(PLATFORM_ID);
 
   isSupported(): boolean {
@@ -24,40 +25,10 @@ export class PageVisibilityService {
   }
 
   watch(): Observable<VisibilityState> {
-    return new Observable<VisibilityState>((observer) => {
-      if (!this.isSupported()) {
-        observer.next('visible');
-        observer.complete();
-        return undefined;
-      }
-
-      const handler = () => observer.next(document.visibilityState as VisibilityState);
-      document.addEventListener('visibilitychange', handler);
-      observer.next(document.visibilityState as VisibilityState);
-
-      const cleanup = () => document.removeEventListener('visibilitychange', handler);
-      this.destroyRef.onDestroy(cleanup);
-
-      return cleanup;
-    });
+    return pageVisibilityStream();
   }
 
   watchVisibility(): Observable<boolean> {
-    return new Observable<boolean>((observer) => {
-      if (!this.isSupported()) {
-        observer.next(false);
-        observer.complete();
-        return undefined;
-      }
-
-      const handler = () => observer.next(!document.hidden);
-      document.addEventListener('visibilitychange', handler);
-      observer.next(!document.hidden);
-
-      const cleanup = () => document.removeEventListener('visibilitychange', handler);
-      this.destroyRef.onDestroy(cleanup);
-
-      return cleanup;
-    });
+    return pageVisibilityStream().pipe(map((s) => s === 'visible'));
   }
 }
