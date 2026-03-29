@@ -758,8 +758,12 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   readonly speechSynthesisSupported = signal<boolean>(
     this.browserCapabilityService.isSupported('speechSynthesis'),
   );
-  readonly pageVisibilityState = signal<string>('unknown');
-  readonly pageVisible = signal<boolean>(true);
+  readonly pageVisibilityState = signal<string>(
+    typeof document !== 'undefined' ? document.visibilityState : 'visible',
+  );
+  readonly pageVisible = signal<boolean>(
+    typeof document !== 'undefined' ? document.visibilityState === 'visible' : true,
+  );
   readonly onlineStatus = signal<boolean>(navigator.onLine);
   readonly intersectionIsIntersecting = signal<boolean>(false);
   readonly intersectionObserving = signal<boolean>(false);
@@ -1364,8 +1368,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
       return;
     }
 
-    const voices = this.speechSynthesisService.getVoices();
-    this.speechVoiceCount.set(voices.length);
+    this.speechSynthesisService.watchVoices().subscribe((v) => this.speechVoiceCount.set(v.length));
   }
 
   openFileSystem(): void {

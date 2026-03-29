@@ -12,8 +12,10 @@ test.describe('Browser APIs demo smoke', () => {
     await page.goto('/demo');
 
     await expect(page.getByRole('heading', { level: 1, name: /Browser Web APIs/i })).toBeVisible();
-    await expect(page.getByRole('heading', { level: 2, name: /Permissions/i })).toBeVisible();
-    await expect(page.getByRole('heading', { level: 2, name: /Geolocation/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Refresh permissions/i })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: /Page Visibility/i })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 2, name: /Network Information/i }),
+    ).toBeVisible();
+    await expect(page.getByRole('button', { name: /Observers/i })).toBeVisible();
   });
 });
