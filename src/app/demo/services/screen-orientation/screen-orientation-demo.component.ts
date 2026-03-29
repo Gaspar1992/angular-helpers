@@ -84,6 +84,47 @@ import {
           </div>
         }
       </div>
+
+      @if (apiMode() === 'Signal Fn') {
+        <div class="code-example">
+          <p class="svc-hint">Reactive orientation with lock/unlock methods:</p>
+          <pre
+            class="code-block"
+          ><code>import {{ '{' }} injectScreenOrientation {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+
+    readonly orientation = injectScreenOrientation();
+
+    // Read signals:
+    // orientation.type() - 'portrait-primary', 'landscape', etc.
+    // orientation.isPortrait(), orientation.isLandscape()
+    // orientation.angle() - rotation in degrees
+
+    // Lock to landscape:
+    // await orientation.lock('landscape')</code></pre>
+          <p class="svc-hint">
+            <strong>When to use:</strong> Responsive layouts, games, fullscreen video.
+          </p>
+        </div>
+      } @else {
+        <div class="code-example">
+          <p class="svc-hint">Manual stream with snapshot:</p>
+          <pre
+            class="code-block"
+          ><code>import {{ '{' }} ScreenOrientationService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+
+    readonly svc = inject(ScreenOrientationService);
+
+    ngOnInit() {{ '{' }}
+      const current = this.svc.getSnapshot();
+      this.svc.watch().subscribe(o =&gt; {{ '{' }}
+        // o.type, o.angle
+      {{ '}' }});
+    {{ '}' }}</code></pre>
+          <p class="svc-hint">
+            <strong>When to use:</strong> Complex rotation logic, orientation history.
+          </p>
+        </div>
+      }
     </section>
   `,
 })

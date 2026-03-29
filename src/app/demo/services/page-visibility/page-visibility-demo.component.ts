@@ -75,6 +75,43 @@ import {
           </div>
         }
       </div>
+
+      @if (apiMode() === 'Signal Fn') {
+        <div class="code-example">
+          <p class="svc-hint">Zero-boilerplate reactive state - auto-cleanup on destroy:</p>
+          <pre
+            class="code-block"
+          ><code>import {{ '{' }} injectPageVisibility {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+
+    readonly visibility = injectPageVisibility();
+
+    // Direct signal access in template:
+    // visibility.isVisible() or visibility.isHidden()
+    // visibility.state() for raw value ('visible' | 'hidden')</code></pre>
+          <p class="svc-hint">
+            <strong>When to use:</strong> Simple reactive read-only state, templates, computed signals.
+          </p>
+        </div>
+      } @else {
+        <div class="code-example">
+          <p class="svc-hint">Manual subscription with explicit cleanup:</p>
+          <pre
+            class="code-block"
+          ><code>import {{ '{' }} PageVisibilityService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+
+    readonly svc = inject(PageVisibilityService);
+
+    ngOnInit() {{ '{' }}
+      this.svc.watch().subscribe(state =&gt; {{ '{' }}
+        // handle visibility change
+      {{ '}' }});
+    {{ '}' }}</code></pre>
+          <p class="svc-hint">
+            <strong>When to use:</strong> Complex async flows, combining with other streams, explicit
+            control.
+          </p>
+        </div>
+      }
     </section>
   `,
 })

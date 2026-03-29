@@ -116,6 +116,46 @@ import {
           }
         }
       </div>
+
+      @if (apiMode() === 'Signal Fn') {
+        <div class="code-example">
+          <p class="svc-hint">Reactive connection state with computed signals:</p>
+          <pre
+            class="code-block"
+          ><code>import {{ '{' }} injectNetworkInformation {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+
+    readonly net = injectNetworkInformation();
+
+    // Access signals directly:
+    // net.online(), net.effectiveType(), net.downlink()
+    // net.rtt(), net.saveData(), net.type()</code></pre>
+          <p class="svc-hint">
+            <strong>When to use:</strong> Adaptive UI, conditional asset loading, offline handling.
+          </p>
+        </div>
+      } @else {
+        <div class="code-example">
+          <p class="svc-hint">Manual stream with snapshot + watch:</p>
+          <pre
+            class="code-block"
+          ><code>import {{ '{' }} NetworkInformationService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+
+    readonly svc = inject(NetworkInformationService);
+
+    ngOnInit() {{ '{' }}
+      // Get current state
+      const current = this.svc.getSnapshot();
+      // Subscribe to changes
+      this.svc.watch().subscribe(info =&gt; {{ '{' }}
+        // handle network change
+      {{ '}' }});
+    {{ '}' }}</code></pre>
+          <p class="svc-hint">
+            <strong>When to use:</strong> Complex stream operations, buffering, combining with other
+            sources.
+          </p>
+        </div>
+      }
     </section>
   `,
 })

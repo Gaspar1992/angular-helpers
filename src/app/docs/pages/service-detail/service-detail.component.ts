@@ -6,6 +6,7 @@ import {
   effect,
   ChangeDetectionStrategy,
   Type,
+  untracked,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -256,7 +257,10 @@ export class ServiceDetailComponent {
   constructor() {
     effect(() => {
       this.serviceId();
-      this.apiVariant.set('service');
+      untracked(() => {
+        this.apiVariant.set('service');
+        this.activeTab.set('api');
+      });
     });
   }
 

@@ -98,6 +98,44 @@ import {
           </div>
         </div>
       }
+
+      @if (apiMode() === 'Signal Fn') {
+        <div class="code-example">
+          <p class="svc-hint">Auto-observing element with reactive size signals:</p>
+          <pre
+            class="code-block"
+          ><code>import {{ '{' }} injectResizeObserver {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+
+    readonly boxRef = viewChild&lt;ElementRef&gt;('box');
+    readonly resize = injectResizeObserver(this.boxRef);
+
+    // Direct access in template:
+    // resize.width(), resize.height()
+    // resize.inlineSize, resize.blockSize (logical pixels)</code></pre>
+          <p class="svc-hint">
+            <strong>When to use:</strong> Responsive layouts, dynamic charts, scroll containers.
+          </p>
+        </div>
+      } @else {
+        <div class="code-example">
+          <p class="svc-hint">Manual observation with explicit subscribe:</p>
+          <pre
+            class="code-block"
+          ><code>import {{ '{' }} ResizeObserverService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+
+    readonly svc = inject(ResizeObserverService);
+
+    ngOnInit() {{ '{' }}
+      const el = this.elementRef.nativeElement;
+      this.svc.observeSize(el).subscribe(size =&gt; {{ '{' }}
+        // size: {{ '{' }} width, height, inlineSize, blockSize {{ '}' }}
+      {{ '}' }});
+    {{ '}' }}</code></pre>
+          <p class="svc-hint">
+            <strong>When to use:</strong> Complex resize logic, multiple observers, RxJS operators.
+          </p>
+        </div>
+      }
     </section>
   `,
 })
