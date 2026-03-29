@@ -625,6 +625,7 @@ export class ProcessingComponent {
   {
     id: 'intersection-observer',
     name: 'IntersectionObserverService',
+    apiName: 'Intersection Observer',
     description:
       'Wraps the IntersectionObserver API with an Observable-based interface. Detects when elements enter or leave the viewport with configurable thresholds and root margins.',
     scope: 'provided',
@@ -671,10 +672,39 @@ export class LazyImageComponent {
       .subscribe(visible => this.isVisible.set(visible));
   }
 }`,
+    fnVersion: {
+      name: 'injectIntersectionObserver',
+      importPath: '@angular-helpers/browser-web-apis',
+      returnType: 'IntersectionRef',
+      description:
+        'Observes when an element enters or leaves the viewport. Returns reactive signals updated automatically — no subscriptions, no teardown code needed.',
+      fields: [
+        {
+          name: 'isIntersecting',
+          type: 'Signal<boolean>',
+          description: 'True while the element intersects the viewport at the given threshold.',
+        },
+        {
+          name: 'isVisible',
+          type: 'Signal<boolean>',
+          description: 'Alias for isIntersecting — convenient for template bindings.',
+        },
+      ],
+      example: `import { injectIntersectionObserver } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class LazyCardComponent {
+  private el = inject(ElementRef);
+  protected io = injectIntersectionObserver(this.el, { threshold: 0.25 });
+
+  // In template: @if (io.isVisible()) { ... }
+}`,
+    },
   },
   {
     id: 'resize-observer',
     name: 'ResizeObserverService',
+    apiName: 'Resize Observer',
     description:
       'Wraps the ResizeObserver API. Emits element size information whenever the observed element changes dimensions.',
     scope: 'provided',
@@ -718,10 +748,54 @@ export class ResponsiveComponent {
       .subscribe(s => this.size.set(s));
   }
 }`,
+    fnVersion: {
+      name: 'injectResizeObserver',
+      importPath: '@angular-helpers/browser-web-apis',
+      returnType: 'ResizeRef',
+      description:
+        "Reactively tracks an element's dimensions. Returns signals for width, height, and box sizes that update on every resize — no subscriptions or cleanup needed.",
+      fields: [
+        {
+          name: 'width',
+          type: 'Signal<number>',
+          description: 'Content-box width in pixels.',
+        },
+        {
+          name: 'height',
+          type: 'Signal<number>',
+          description: 'Content-box height in pixels.',
+        },
+        {
+          name: 'inlineSize',
+          type: 'Signal<number>',
+          description: 'Border-box inline size (logical width).',
+        },
+        {
+          name: 'blockSize',
+          type: 'Signal<number>',
+          description: 'Border-box block size (logical height).',
+        },
+        {
+          name: 'size',
+          type: 'Signal<ElementSize | null>',
+          description: 'Full size snapshot; null before first observation.',
+        },
+      ],
+      example: `import { injectResizeObserver } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class ResponsiveComponent {
+  private el = inject(ElementRef);
+  protected ro = injectResizeObserver(this.el);
+
+  // In template: {{ ro.width() }}px × {{ ro.height() }}px
+}`,
+    },
   },
   {
     id: 'page-visibility',
     name: 'PageVisibilityService',
+    apiName: 'Page Visibility',
     description:
       'Tracks document visibility state using the Page Visibility API. Useful for pausing background tasks when the tab is hidden.',
     scope: 'provided',
@@ -771,6 +845,45 @@ export class VideoComponent {
     });
   }
 }`,
+    fnVersion: {
+      name: 'injectPageVisibility',
+      importPath: '@angular-helpers/browser-web-apis',
+      returnType: 'PageVisibilityRef',
+      description:
+        'Tracks document visibility as reactive signals. Initialises immediately from document.visibilityState and updates whenever the user switches tabs.',
+      fields: [
+        {
+          name: 'state',
+          type: "Signal<'visible' | 'hidden' | 'prerender'>",
+          description: 'Current visibility state of the document.',
+        },
+        {
+          name: 'isVisible',
+          type: 'Signal<boolean>',
+          description: 'True while the tab is in the foreground.',
+        },
+        {
+          name: 'isHidden',
+          type: 'Signal<boolean>',
+          description: 'True while the tab is in the background.',
+        },
+      ],
+      example: `import { injectPageVisibility } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class VideoComponent {
+  protected vis = injectPageVisibility();
+
+  // In template: @if (vis.isHidden()) { pause video }
+  // Or drive an effect:
+  constructor() {
+    effect(() => {
+      if (this.vis.isHidden()) this.pauseVideo();
+      else this.resumeVideo();
+    });
+  }
+}`,
+    },
   },
   {
     id: 'broadcast-channel',
@@ -832,6 +945,7 @@ export class SyncComponent {
   {
     id: 'network-information',
     name: 'NetworkInformationService',
+    apiName: 'Network Information',
     description:
       'Provides access to the Network Information API. Reports online status, connection type, effective type, downlink speed, and round-trip time.',
     scope: 'provided',
@@ -882,6 +996,48 @@ export class OfflineBannerComponent {
     });
   }
 }`,
+    fnVersion: {
+      name: 'injectNetworkInformation',
+      importPath: '@angular-helpers/browser-web-apis',
+      returnType: 'NetworkInformationRef',
+      description:
+        'Provides network state as reactive signals. Updates automatically on online/offline events and connection changes without any subscription management.',
+      fields: [
+        {
+          name: 'online',
+          type: 'Signal<boolean>',
+          description: 'True when the browser has network connectivity.',
+        },
+        {
+          name: 'effectiveType',
+          type: "Signal<'slow-2g' | '2g' | '3g' | '4g' | undefined>",
+          description: 'Estimated connection quality (Chromium-only).',
+        },
+        {
+          name: 'downlink',
+          type: 'Signal<number | undefined>',
+          description: 'Estimated downlink bandwidth in Mbps.',
+        },
+        {
+          name: 'rtt',
+          type: 'Signal<number | undefined>',
+          description: 'Estimated round-trip time in milliseconds.',
+        },
+        {
+          name: 'snapshot',
+          type: 'Signal<NetworkInformation>',
+          description: 'Full network state snapshot signal.',
+        },
+      ],
+      example: `import { injectNetworkInformation } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class OfflineBannerComponent {
+  protected net = injectNetworkInformation();
+
+  // In template: @if (!net.online()) { <offline-banner /> }
+}`,
+    },
   },
   {
     id: 'screen-wake-lock',
@@ -946,6 +1102,7 @@ export class PresentationComponent {
   {
     id: 'screen-orientation',
     name: 'ScreenOrientationService',
+    apiName: 'Screen Orientation',
     description:
       'Reads and watches the screen orientation type and angle. Supports programmatic orientation locking for mobile applications.',
     scope: 'provided',
@@ -1005,6 +1162,57 @@ export class MobileComponent {
     await this.orientation.lock('landscape');
   }
 }`,
+    fnVersion: {
+      name: 'injectScreenOrientation',
+      importPath: '@angular-helpers/browser-web-apis',
+      returnType: 'ScreenOrientationRef',
+      description:
+        'Exposes screen orientation as reactive signals. Includes lock/unlock methods for programmatic orientation control on mobile devices.',
+      fields: [
+        {
+          name: 'type',
+          type: "Signal<'portrait-primary' | 'portrait-secondary' | 'landscape-primary' | 'landscape-secondary'>",
+          description: 'Current orientation type.',
+        },
+        {
+          name: 'angle',
+          type: 'Signal<number>',
+          description: 'Current rotation angle in degrees.',
+        },
+        {
+          name: 'isPortrait',
+          type: 'Signal<boolean>',
+          description: 'True when the device is in portrait orientation.',
+        },
+        {
+          name: 'isLandscape',
+          type: 'Signal<boolean>',
+          description: 'True when the device is in landscape orientation.',
+        },
+        {
+          name: 'lock(orientation)',
+          type: 'Promise<void>',
+          description: 'Locks the screen to the given orientation type.',
+        },
+        {
+          name: 'unlock()',
+          type: 'void',
+          description: 'Releases any previously set orientation lock.',
+        },
+      ],
+      example: `import { injectScreenOrientation } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MobileComponent {
+  protected orient = injectScreenOrientation();
+
+  // In template: {{ orient.type() }} — {{ orient.angle() }}°
+
+  async lockLandscape() {
+    await this.orient.lock('landscape');
+  }
+}`,
+    },
   },
   {
     id: 'fullscreen',

@@ -53,6 +53,9 @@
                       (click)="closeSidebar()"
                     >
                       {{ item.label }}
+                      @if (item.hasFn) {
+                        <span class="nav-fn-badge" aria-label="Signal Fn available">fn</span>
+                      }
                     </a>
                   </li>
                 }

@@ -1,4 +1,12 @@
-import { Component, inject, computed, signal, ChangeDetectionStrategy, Type } from '@angular/core';
+import {
+  Component,
+  inject,
+  computed,
+  signal,
+  effect,
+  ChangeDetectionStrategy,
+  Type,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
@@ -26,7 +34,13 @@ import { ServerSentEventsDemoComponent } from '../../../demo/services/server-sen
 import { GeolocationDemoComponent } from '../../../demo/services/geolocation/geolocation-demo.component';
 import { NotificationDemoComponent } from '../../../demo/services/notification/notification-demo.component';
 import { BROWSER_WEB_APIS_SERVICES } from '../../data/browser-web-apis.data';
-import { ServiceDoc, BreadcrumbItem, ApiRow, METHODS_COLUMNS } from '../../models/doc-meta.model';
+import {
+  ServiceDoc,
+  BreadcrumbItem,
+  ApiRow,
+  METHODS_COLUMNS,
+  FN_FIELDS_COLUMNS,
+} from '../../models/doc-meta.model';
 
 const SERVICE_DEMO_MAP: Record<string, Type<unknown>> = {
   'broadcast-channel': BroadcastChannelDemoComponent,
@@ -96,6 +110,34 @@ const CONTENT_TABS: DocTab[] = [
           </section>
         }
 
+        @if (service()!.fnVersion) {
+          <div class="api-variant-group" role="group" aria-label="API variant">
+            <button
+              class="api-variant-btn"
+              [class.api-variant-btn--active]="apiVariant() === 'service'"
+              (click)="apiVariant.set('service')"
+            >
+              Service
+            </button>
+            <button
+              class="api-variant-btn"
+              [class.api-variant-btn--active]="apiVariant() === 'fn'"
+              (click)="apiVariant.set('fn')"
+            >
+              &#9889; Signal Fn
+            </button>
+          </div>
+        }
+
+        @if (apiVariant() === 'fn' && service()!.fnVersion) {
+          <section class="docs-section fn-description">
+            <p class="docs-page-lead">{{ service()!.fnVersion!.description }}</p>
+            <code class="fn-return-type">
+              Returns: <strong>{{ service()!.fnVersion!.returnType }}</strong>
+            </code>
+          </section>
+        }
+
         <section class="docs-section">
           <app-docs-tabs
             [tabs]="contentTabs"
@@ -110,13 +152,13 @@ const CONTENT_TABS: DocTab[] = [
           >
             @if (activeTab() === 'api') {
               <app-docs-api-table
-                [columns]="methodsColumns"
+                [columns]="currentColumns()"
                 [rows]="methodRows()"
-                ariaLabel="API methods"
+                [ariaLabel]="apiVariant() === 'fn' ? 'Signal Fn fields' : 'API methods'"
               />
             }
             @if (activeTab() === 'example') {
-              <app-code-block [code]="service()!.example" />
+              <app-code-block [code]="currentExample()" />
             }
             @if (activeTab() === 'demo') {
               @if (demoComponent()) {
@@ -151,20 +193,72 @@ const CONTENT_TABS: DocTab[] = [
       .not-found a:hover {
         text-decoration: underline;
       }
+      .api-variant-group {
+        display: inline-flex;
+        border: 1px solid var(--border, #e2e8f0);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: var(--sp-4, 1rem);
+      }
+      .api-variant-btn {
+        padding: 6px 18px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        background: transparent;
+        border: none;
+        border-right: 1px solid var(--border, #e2e8f0);
+        color: var(--text-muted, #64748b);
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          color 0.15s;
+        line-height: 1.5;
+      }
+      .api-variant-btn:last-child {
+        border-right: none;
+      }
+      .api-variant-btn--active {
+        background: var(--accent, #6366f1);
+        color: #fff;
+      }
+      .api-variant-btn:not(.api-variant-btn--active):hover {
+        background: var(--surface-hover, #f1f5f9);
+        color: var(--text, #1e293b);
+      }
+      .fn-description {
+        padding-top: 0;
+      }
+      .fn-return-type {
+        display: inline-block;
+        font-size: 0.85rem;
+        color: var(--text-muted, #64748b);
+        margin-top: 6px;
+      }
+      .fn-return-type strong {
+        color: var(--accent, #6366f1);
+        font-family: var(--font-mono, monospace);
+      }
     `,
   ],
 })
 export class ServiceDetailComponent {
   private route = inject(ActivatedRoute);
 
-  protected readonly methodsColumns = METHODS_COLUMNS;
   protected readonly contentTabs = CONTENT_TABS;
   protected activeTab = signal<string>('api');
+  protected apiVariant = signal<'service' | 'fn'>('service');
 
   private serviceId = toSignal(
     this.route.paramMap.pipe(map((params) => params.get('service') ?? '')),
     { initialValue: '' },
   );
+
+  constructor() {
+    effect(() => {
+      this.serviceId();
+      this.apiVariant.set('service');
+    });
+  }
 
   protected service = computed<ServiceDoc | undefined>(() =>
     BROWSER_WEB_APIS_SERVICES.find((s) => s.id === this.serviceId()),
@@ -178,12 +272,34 @@ export class ServiceDetailComponent {
 
   protected badge = computed(() => {
     const s = this.service();
-    return s ? `import { ${s.name} } from '${s.importPath}'` : '';
+    if (!s) return '';
+    if (this.apiVariant() === 'fn' && s.fnVersion) {
+      return `import { ${s.fnVersion.name} } from '${s.fnVersion.importPath}'`;
+    }
+    return `import { ${s.name} } from '${s.importPath}'`;
   });
 
-  protected methodRows = computed<ApiRow[]>(
-    () => (this.service()?.methods ?? []) as unknown as ApiRow[],
-  );
+  protected currentColumns = computed(() => {
+    const s = this.service();
+    if (s?.fnVersion && this.apiVariant() === 'fn') return FN_FIELDS_COLUMNS;
+    return METHODS_COLUMNS;
+  });
+
+  protected methodRows = computed<ApiRow[]>(() => {
+    const s = this.service();
+    if (!s) return [];
+    if (this.apiVariant() === 'fn' && s.fnVersion) {
+      return s.fnVersion.fields as unknown as ApiRow[];
+    }
+    return s.methods as unknown as ApiRow[];
+  });
+
+  protected currentExample = computed(() => {
+    const s = this.service();
+    if (!s) return '';
+    if (this.apiVariant() === 'fn' && s.fnVersion) return s.fnVersion.example;
+    return s.example;
+  });
 
   protected demoComponent = computed<Type<unknown> | null>(
     () => SERVICE_DEMO_MAP[this.serviceId()] ?? null,

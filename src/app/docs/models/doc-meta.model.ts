@@ -37,9 +37,31 @@ export const FIELDS_COLUMNS: ApiColumn[] = [
   { key: 'description', header: 'Description', cellClass: 'docs-cell-desc' },
 ];
 
+export interface FnFieldDoc {
+  name: string;
+  type: string;
+  description: string;
+}
+
+export const FN_FIELDS_COLUMNS: ApiColumn[] = [
+  { key: 'name', header: 'Field', cellClass: 'docs-code-name' },
+  { key: 'type', header: 'Type', cellClass: 'docs-code-ret' },
+  { key: 'description', header: 'Description', cellClass: 'docs-cell-desc' },
+];
+
+export interface FnDoc {
+  name: string;
+  importPath: string;
+  returnType: string;
+  description: string;
+  fields: FnFieldDoc[];
+  example: string;
+}
+
 export interface ServiceDoc {
   id: string;
   name: string;
+  apiName?: string;
   description: string;
   scope: 'root' | 'component' | 'provided';
   importPath: string;
@@ -48,6 +70,7 @@ export interface ServiceDoc {
   browserSupport: string;
   requiresSecureContext: boolean;
   notes: string[];
+  fnVersion?: FnDoc;
 }
 
 export interface PackageDoc {
