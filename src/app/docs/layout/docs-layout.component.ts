@@ -3,40 +3,70 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 interface NavSection {
   label: string;
-  items: NavItem[];
+  overviewRoute: string;
+  servicesLabel: string;
+  serviceItems: NavItem[];
 }
 
 interface NavItem {
   label: string;
   route: string;
+  hasFn?: boolean;
 }
 
 const NAV_SECTIONS: NavSection[] = [
   {
     label: 'browser-web-apis',
-    items: [
-      { label: 'Overview', route: '/docs/browser-web-apis' },
-      { label: 'BatteryService', route: '/docs/browser-web-apis/battery' },
-      { label: 'BrowserCapabilityService', route: '/docs/browser-web-apis/browser-capability' },
-      { label: 'CameraService', route: '/docs/browser-web-apis/camera' },
-      { label: 'ClipboardService', route: '/docs/browser-web-apis/clipboard' },
-      { label: 'GeolocationService', route: '/docs/browser-web-apis/geolocation' },
-      { label: 'MediaDevicesService', route: '/docs/browser-web-apis/media-devices' },
-      { label: 'NotificationService', route: '/docs/browser-web-apis/notification' },
-      { label: 'PermissionsService', route: '/docs/browser-web-apis/permissions' },
-      { label: 'RegexSecurityService', route: '/docs/browser-web-apis/regex-security' },
-      { label: 'WebShareService', route: '/docs/browser-web-apis/web-share' },
-      { label: 'WebSocketService', route: '/docs/browser-web-apis/web-socket' },
-      { label: 'WebStorageService', route: '/docs/browser-web-apis/web-storage' },
-      { label: 'WebWorkerService', route: '/docs/browser-web-apis/web-worker' },
+    overviewRoute: '/docs/browser-web-apis',
+    servicesLabel: 'Services',
+    serviceItems: [
+      { label: 'Battery', route: '/docs/browser-web-apis/battery' },
+      { label: 'Browser Capability', route: '/docs/browser-web-apis/browser-capability' },
+      { label: 'Broadcast Channel', route: '/docs/browser-web-apis/broadcast-channel' },
+      { label: 'Camera', route: '/docs/browser-web-apis/camera' },
+      { label: 'Clipboard', route: '/docs/browser-web-apis/clipboard' },
+      { label: 'File System Access', route: '/docs/browser-web-apis/file-system-access' },
+      { label: 'Fullscreen', route: '/docs/browser-web-apis/fullscreen' },
+      { label: 'Geolocation', route: '/docs/browser-web-apis/geolocation' },
+      {
+        label: 'Intersection Observer',
+        route: '/docs/browser-web-apis/intersection-observer',
+        hasFn: true,
+      },
+      { label: 'Media Devices', route: '/docs/browser-web-apis/media-devices' },
+      { label: 'Media Recorder', route: '/docs/browser-web-apis/media-recorder' },
+      {
+        label: 'Network Information',
+        route: '/docs/browser-web-apis/network-information',
+        hasFn: true,
+      },
+      { label: 'Notifications', route: '/docs/browser-web-apis/notification' },
+      { label: 'Page Visibility', route: '/docs/browser-web-apis/page-visibility', hasFn: true },
+      { label: 'Permissions', route: '/docs/browser-web-apis/permissions' },
+      { label: 'Resize Observer', route: '/docs/browser-web-apis/resize-observer', hasFn: true },
+      {
+        label: 'Screen Orientation',
+        route: '/docs/browser-web-apis/screen-orientation',
+        hasFn: true,
+      },
+      { label: 'Screen Wake Lock', route: '/docs/browser-web-apis/screen-wake-lock' },
+      { label: 'Server-Sent Events', route: '/docs/browser-web-apis/server-sent-events' },
+      { label: 'Speech Synthesis', route: '/docs/browser-web-apis/speech-synthesis' },
+      { label: 'Vibration', route: '/docs/browser-web-apis/vibration' },
+      { label: 'Web Share', route: '/docs/browser-web-apis/web-share' },
+      { label: 'WebSocket', route: '/docs/browser-web-apis/web-socket' },
+      { label: 'Web Storage', route: '/docs/browser-web-apis/web-storage' },
+      { label: 'Web Worker', route: '/docs/browser-web-apis/web-worker' },
     ],
   },
   {
     label: 'security',
-    items: [
-      { label: 'Overview', route: '/docs/security' },
-      { label: 'RegexSecurityService', route: '/docs/security/regex-security' },
+    overviewRoute: '/docs/security',
+    servicesLabel: 'Services',
+    serviceItems: [
       { label: 'RegexSecurityBuilder', route: '/docs/security/regex-security-builder' },
+      { label: 'RegexSecurityService', route: '/docs/security/regex-security' },
+      { label: 'WebCryptoService', route: '/docs/security/web-crypto' },
     ],
   },
 ];
@@ -51,6 +81,24 @@ const NAV_SECTIONS: NavSection[] = [
 export class DocsLayoutComponent {
   protected readonly navSections = NAV_SECTIONS;
   protected sidebarOpen = signal(false);
+
+  private expandedSections = signal<Set<string>>(new Set(NAV_SECTIONS.map((s) => s.label)));
+
+  protected isSectionExpanded(label: string): boolean {
+    return this.expandedSections().has(label);
+  }
+
+  protected toggleSection(label: string): void {
+    this.expandedSections.update((set) => {
+      const next = new Set(set);
+      if (next.has(label)) {
+        next.delete(label);
+      } else {
+        next.add(label);
+      }
+      return next;
+    });
+  }
 
   protected toggleSidebar() {
     this.sidebarOpen.update((v) => !v);

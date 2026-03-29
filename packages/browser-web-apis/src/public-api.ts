@@ -29,6 +29,64 @@ export {
   type WorkerTask,
 } from './services/web-worker.service';
 
+// Tier 1 — New services
+export {
+  IntersectionObserverService,
+  type IntersectionObserverOptions,
+} from './services/intersection-observer.service';
+export {
+  ResizeObserverService,
+  type ResizeObserverOptions,
+  type ElementSize,
+} from './services/resize-observer.service';
+export { PageVisibilityService, type VisibilityState } from './services/page-visibility.service';
+export { BroadcastChannelService } from './services/broadcast-channel.service';
+export {
+  NetworkInformationService,
+  type NetworkInformation,
+  type ConnectionType,
+  type EffectiveConnectionType,
+} from './services/network-information.service';
+export {
+  ScreenWakeLockService,
+  type WakeLockType,
+  type WakeLockStatus,
+} from './services/screen-wake-lock.service';
+export {
+  ScreenOrientationService,
+  type OrientationType,
+  type OrientationLockType,
+  type OrientationInfo,
+} from './services/screen-orientation.service';
+export { FullscreenService } from './services/fullscreen.service';
+export {
+  FileSystemAccessService,
+  type FileOpenOptions,
+  type FileSaveOptions,
+} from './services/file-system-access.service';
+export {
+  MediaRecorderService,
+  type RecordingState,
+  type RecordingOptions,
+  type RecordingResult,
+} from './services/media-recorder.service';
+export {
+  ServerSentEventsService,
+  type SSEConnectionState,
+  type SSEMessage,
+  type SSEConfig,
+} from './services/server-sent-events.service';
+export {
+  VibrationService,
+  type VibrationPattern,
+  type VibrationPreset,
+} from './services/vibration.service';
+export {
+  SpeechSynthesisService,
+  type SpeechState,
+  type SpeechOptions,
+} from './services/speech-synthesis.service';
+
 // Base classes
 export { BrowserApiBaseService } from './services/base/browser-api-base.service';
 
@@ -38,6 +96,22 @@ export * from './interfaces/media.interface';
 export * from './interfaces/geolocation.interface';
 export * from './interfaces/battery.interface';
 export * from './interfaces/common.types';
+
+// Signal Fn primitives
+export { injectPageVisibility, type PageVisibilityRef } from './fns/inject-page-visibility';
+export { injectResizeObserver, type ResizeRef } from './fns/inject-resize-observer';
+export {
+  injectIntersectionObserver,
+  type IntersectionRef,
+} from './fns/inject-intersection-observer';
+export {
+  injectNetworkInformation,
+  type NetworkInformationRef,
+} from './fns/inject-network-information';
+export {
+  injectScreenOrientation,
+  type ScreenOrientationRef,
+} from './fns/inject-screen-orientation';
 
 // Utils and Guards
 export * from './utils/browser-support.util';

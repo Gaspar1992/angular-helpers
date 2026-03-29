@@ -376,3 +376,265 @@ test.describe('Library services harness without geolocation permission', () => {
     await expect(page.getByTestId('error-message')).not.toHaveText('none');
   });
 });
+
+test.describe('Library services harness - Tier 1 Observer APIs', () => {
+  test('reports support for IntersectionObserver and ResizeObserver', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    await expect(page.getByTestId('intersection-observer-supported')).toHaveText('yes');
+    await expect(page.getByTestId('resize-observer-supported')).toHaveText('yes');
+  });
+
+  test('observes element visibility with IntersectionObserverService', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    await page.getByTestId('intersection-observe').click();
+
+    await expect(page.getByTestId('last-action')).toHaveText('observe-intersection');
+    await expect
+      .poll(
+        async () =>
+          (await page.getByTestId('intersection-is-intersecting').textContent())?.trim() ?? '',
+      )
+      .toMatch(/true|false/);
+    await expect(page.getByTestId('intersection-observing')).toHaveText('yes');
+    await expect(page.getByTestId('error-message')).toHaveText('none');
+  });
+
+  test('observes element size with ResizeObserverService', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    await page.getByTestId('resize-observe').click();
+
+    await expect(page.getByTestId('last-action')).toHaveText('observe-resize');
+    await expect
+      .poll(async () =>
+        Number((await page.getByTestId('resize-width').textContent())?.trim() ?? '0'),
+      )
+      .toBeGreaterThan(0);
+    await expect
+      .poll(async () =>
+        Number((await page.getByTestId('resize-height').textContent())?.trim() ?? '0'),
+      )
+      .toBeGreaterThan(0);
+    await expect(page.getByTestId('resize-observing')).toHaveText('yes');
+    await expect(page.getByTestId('error-message')).toHaveText('none');
+  });
+});
+
+test.describe('Library services harness - Tier 1 System APIs', () => {
+  test('reports support for PageVisibility, Fullscreen, and Orientation APIs', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    await expect(page.getByTestId('page-visibility-supported')).toHaveText('yes');
+    await expect(page.getByTestId('fullscreen-supported')).toHaveText('yes');
+    await expect(page.getByTestId('screen-orientation-supported')).toHaveText(/yes|no/);
+  });
+
+  test('tracks page visibility state', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    await expect(page.getByTestId('page-visibility-state')).toHaveText('visible');
+    await expect(page.getByTestId('page-visible')).toHaveText('yes');
+
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'hidden',
+        writable: true,
+        configurable: true,
+      });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+
+    await expect(page.getByTestId('page-visibility-state')).toHaveText('visible');
+  });
+
+  test('toggles fullscreen through service', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    await page.getByTestId('fullscreen-enter').click();
+
+    await expect(page.getByTestId('last-action')).toHaveText('enter-fullscreen');
+    await expect
+      .poll(async () => (await page.getByTestId('fullscreen-state').textContent())?.trim() ?? '')
+      .toMatch(/fullscreen|windowed/);
+
+    const fullscreenState =
+      (await page.getByTestId('fullscreen-state').textContent())?.trim() ?? '';
+
+    if (fullscreenState === 'fullscreen') {
+      await page.getByTestId('fullscreen-exit').click();
+      await expect(page.getByTestId('fullscreen-state')).toHaveText('windowed');
+    }
+
+    await expect(page.getByTestId('error-message')).toHaveText('none');
+  });
+});
+
+test.describe('Library services harness - Tier 1 Network APIs', () => {
+  test('reports support for NetworkInformation and BroadcastChannel', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    await expect(page.getByTestId('network-info-supported')).toHaveText(/yes|partial/);
+    await expect(page.getByTestId('broadcast-channel-supported')).toHaveText(/yes|no/);
+    await expect(page.getByTestId('online-status')).toHaveText('yes');
+  });
+
+  test('opens and sends messages through BroadcastChannel', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    const broadcastSupported =
+      (await page.getByTestId('broadcast-channel-supported').textContent())?.trim() ?? 'no';
+
+    await page.getByTestId('broadcast-open').click();
+    await expect(page.getByTestId('last-action')).toHaveText('open-broadcast-channel');
+
+    if (broadcastSupported === 'no') {
+      await expect(page.getByTestId('broadcast-state')).toHaveText('unsupported');
+      await expect(page.getByTestId('error-message')).not.toHaveText('none');
+      return;
+    }
+
+    await expect(page.getByTestId('broadcast-state')).toHaveText('open');
+
+    await page.getByTestId('broadcast-send').click();
+    await expect(page.getByTestId('last-action')).toHaveText('send-broadcast-message');
+    await expect(page.getByTestId('broadcast-message-sent')).toHaveText('yes');
+    await expect(page.getByTestId('error-message')).toHaveText('none');
+
+    await page.getByTestId('broadcast-close').click();
+    await expect(page.getByTestId('broadcast-state')).toHaveText('closed');
+  });
+
+  test('connects to SSE endpoint and receives messages', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    await expect(page.getByTestId('server-sent-events-supported')).toHaveText('yes');
+
+    await page.getByTestId('sse-connect').click();
+    await expect(page.getByTestId('last-action')).toHaveText('connect-sse');
+    await expect
+      .poll(async () => (await page.getByTestId('sse-state').textContent())?.trim() ?? '')
+      .toMatch(/connected|error|disconnected/);
+
+    const sseState = (await page.getByTestId('sse-state').textContent())?.trim() ?? '';
+
+    if (sseState === 'connected') {
+      await expect(page.getByTestId('sse-connected')).toHaveText('yes');
+    }
+
+    await page.getByTestId('sse-disconnect').click();
+    await expect(page.getByTestId('sse-state')).toHaveText('disconnected');
+    await expect(page.getByTestId('error-message')).toHaveText('none');
+  });
+});
+
+test.describe('Library services harness - Tier 1 Hardware APIs', () => {
+  test('reports support for Vibration and SpeechSynthesis', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    const vibrationSupported =
+      (await page.getByTestId('vibration-supported').textContent())?.trim() ?? 'no';
+    const speechSupported =
+      (await page.getByTestId('speech-synthesis-supported').textContent())?.trim() ?? 'no';
+
+    expect(['yes', 'no', 'mobile-only']).toContain(vibrationSupported);
+    expect(['yes', 'no']).toContain(speechSupported);
+  });
+
+  test('triggers vibration patterns through service', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    const vibrationSupported =
+      (await page.getByTestId('vibration-supported').textContent())?.trim() ?? 'no';
+
+    await page.getByTestId('vibrate-success').click();
+    await expect(page.getByTestId('last-action')).toHaveText('vibrate-success');
+    await expect(page.getByTestId('vibration-triggered')).toHaveText(
+      vibrationSupported === 'yes' ? 'yes' : 'no',
+    );
+    await expect(page.getByTestId('error-message')).toHaveText('none');
+  });
+
+  test('lists speech synthesis voices', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    const speechSupported =
+      (await page.getByTestId('speech-synthesis-supported').textContent())?.trim() ?? 'no';
+
+    await page.getByTestId('speech-get-voices').click();
+    await expect(page.getByTestId('last-action')).toHaveText('get-speech-voices');
+
+    if (speechSupported === 'yes') {
+      await expect
+        .poll(async () => {
+          const text = (await page.getByTestId('speech-voice-count').textContent())?.trim() ?? '-1';
+          return Number(text) >= 0;
+        })
+        .toBe(true);
+    } else {
+      await expect(page.getByTestId('speech-voice-count')).toHaveText('0');
+    }
+
+    await expect(page.getByTestId('error-message')).toHaveText('none');
+  });
+});
+
+test.describe('Library services harness - Tier 1 File and Recording APIs', () => {
+  test('reports support for FileSystemAccess and MediaRecorder', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    const fileSystemSupported =
+      (await page.getByTestId('file-system-access-supported').textContent())?.trim() ?? 'no';
+    const mediaRecorderSupported =
+      (await page.getByTestId('media-recorder-supported').textContent())?.trim() ?? 'no';
+
+    expect(['yes', 'no', 'chrome-only']).toContain(fileSystemSupported);
+    expect(['yes', 'no']).toContain(mediaRecorderSupported);
+  });
+
+  test('handles file system access according to browser support', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    const fileSystemSupported =
+      (await page.getByTestId('file-system-access-supported').textContent())?.trim() ?? 'no';
+
+    await page.getByTestId('file-system-open').click();
+    await expect(page.getByTestId('last-action')).toHaveText('open-file-system');
+
+    if (fileSystemSupported === 'no' || fileSystemSupported === 'chrome-only') {
+      await expect(page.getByTestId('file-system-state')).toHaveText('unsupported');
+      return;
+    }
+
+    await expect(page.getByTestId('file-system-state')).toHaveText('supported');
+  });
+
+  test('handles media recorder lifecycle', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    const mediaRecorderSupported =
+      (await page.getByTestId('media-recorder-supported').textContent())?.trim() ?? 'no';
+
+    await page.getByTestId('recorder-start').click();
+    await expect(page.getByTestId('last-action')).toHaveText('start-recording');
+
+    if (mediaRecorderSupported === 'no') {
+      await expect(page.getByTestId('recorder-state')).toHaveText('unsupported');
+      return;
+    }
+
+    await expect
+      .poll(async () => (await page.getByTestId('recorder-state').textContent())?.trim() ?? '')
+      .toMatch(/recording|error/);
+
+    const recorderState = (await page.getByTestId('recorder-state').textContent())?.trim() ?? '';
+
+    if (recorderState === 'recording') {
+      await page.getByTestId('recorder-stop').click();
+      await expect(page.getByTestId('recorder-state')).toHaveText('inactive');
+    }
+
+    await expect(page.getByTestId('error-message')).toHaveText('none');
+  });
+});

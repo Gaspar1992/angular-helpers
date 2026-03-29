@@ -15,6 +15,13 @@ Security package for Angular applications that prevents common attacks like ReDo
 - **Complexity Analysis**: Detects dangerous patterns before execution.
 - **Safe Mode**: Only allows patterns verified as safe.
 
+### **Web Crypto API**
+
+- **Encryption/Decryption**: AES-GCM support for secure data handling
+- **Hashing**: SHA-256 and other algorithms
+- **Key Management**: Generate, import, and export cryptographic keys
+- **Secure Random**: Cryptographically secure random values
+
 ### **Builder Pattern**
 
 - **Fluent API**: Intuitively build regular expressions.
@@ -159,6 +166,51 @@ export class FormValidationComponent {
       .execute(input, this.regexSecurity);
 
     return result.match;
+  }
+}
+```
+
+### **WebCryptoService**
+
+```typescript
+import { WebCryptoService } from '@angular-helpers/security';
+
+export class SecureStorageComponent {
+  private cryptoService = inject(WebCryptoService);
+
+  async hashPassword(password: string): Promise<string> {
+    return await this.cryptoService.hash(password, 'SHA-256');
+  }
+
+  async encryptData(
+    data: string,
+  ): Promise<{ ciphertext: ArrayBuffer; iv: Uint8Array; key: CryptoKey }> {
+    const key = await this.cryptoService.generateAesKey(256);
+    const { ciphertext, iv } = await this.cryptoService.encryptAes(key, data);
+    return { ciphertext, iv, key };
+  }
+
+  async decryptData(ciphertext: ArrayBuffer, iv: Uint8Array, key: CryptoKey): Promise<string> {
+    return await this.cryptoService.decryptAes(key, ciphertext, iv);
+  }
+
+  async exportKeyForStorage(key: CryptoKey): Promise<JsonWebKey> {
+    return await this.cryptoService.exportKey(key);
+  }
+
+  async importKeyFromStorage(jwk: JsonWebKey): Promise<CryptoKey> {
+    return await this.cryptoService.importAesKey(jwk);
+  }
+
+  generateSecureToken(length: number = 32): string {
+    const bytes = this.cryptoService.generateRandomBytes(length);
+    return Array.from(bytes)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  generateUUID(): string {
+    return this.cryptoService.randomUUID();
   }
 }
 ```

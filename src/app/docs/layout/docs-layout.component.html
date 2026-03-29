@@ -12,20 +12,56 @@
             <span class="pkg-badge">pkg</span>
             {{ section.label }}
           </div>
+
           <ul role="list">
-            @for (item of section.items; track item.route) {
-              <li>
-                <a
-                  [routerLink]="item.route"
-                  routerLinkActive="active"
-                  [routerLinkActiveOptions]="{ exact: true }"
-                  (click)="closeSidebar()"
-                >
-                  {{ item.label }}
-                </a>
-              </li>
-            }
+            <li>
+              <a
+                [routerLink]="section.overviewRoute"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                (click)="closeSidebar()"
+              >
+                Overview
+              </a>
+            </li>
           </ul>
+
+          <div class="nav-group">
+            <button
+              class="nav-group-toggle"
+              type="button"
+              [attr.aria-expanded]="isSectionExpanded(section.label)"
+              [attr.aria-controls]="'services-' + section.label"
+              (click)="toggleSection(section.label)"
+            >
+              <span
+                class="nav-group-toggle-icon"
+                [class.expanded]="isSectionExpanded(section.label)"
+                >›</span
+              >
+              {{ section.servicesLabel }}
+            </button>
+
+            @if (isSectionExpanded(section.label)) {
+              <ul [id]="'services-' + section.label" class="nav-group-items" role="list">
+                @for (item of section.serviceItems; track item.route) {
+                  <li>
+                    <a
+                      [routerLink]="item.route"
+                      routerLinkActive="active"
+                      [routerLinkActiveOptions]="{ exact: true }"
+                      (click)="closeSidebar()"
+                    >
+                      {{ item.label }}
+                      @if (item.hasFn) {
+                        <span class="nav-fn-badge" aria-label="Signal Fn available">fn</span>
+                      }
+                    </a>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
         </div>
       }
     </nav>

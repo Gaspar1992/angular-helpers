@@ -10,6 +10,19 @@ import { WebShareService } from './services/web-share.service';
 import { WebStorageService } from './services/web-storage.service';
 import { WebSocketService } from './services/web-socket.service';
 import { WebWorkerService } from './services/web-worker.service';
+import { IntersectionObserverService } from './services/intersection-observer.service';
+import { ResizeObserverService } from './services/resize-observer.service';
+import { PageVisibilityService } from './services/page-visibility.service';
+import { BroadcastChannelService } from './services/broadcast-channel.service';
+import { NetworkInformationService } from './services/network-information.service';
+import { ScreenWakeLockService } from './services/screen-wake-lock.service';
+import { ScreenOrientationService } from './services/screen-orientation.service';
+import { FullscreenService } from './services/fullscreen.service';
+import { FileSystemAccessService } from './services/file-system-access.service';
+import { MediaRecorderService } from './services/media-recorder.service';
+import { ServerSentEventsService } from './services/server-sent-events.service';
+import { VibrationService } from './services/vibration.service';
+import { SpeechSynthesisService } from './services/speech-synthesis.service';
 
 export interface BrowserWebApisConfig {
   enableCamera?: boolean;
@@ -22,6 +35,19 @@ export interface BrowserWebApisConfig {
   enableWebStorage?: boolean;
   enableWebSocket?: boolean;
   enableWebWorker?: boolean;
+  enableIntersectionObserver?: boolean;
+  enableResizeObserver?: boolean;
+  enablePageVisibility?: boolean;
+  enableBroadcastChannel?: boolean;
+  enableNetworkInformation?: boolean;
+  enableScreenWakeLock?: boolean;
+  enableScreenOrientation?: boolean;
+  enableFullscreen?: boolean;
+  enableFileSystemAccess?: boolean;
+  enableMediaRecorder?: boolean;
+  enableServerSentEvents?: boolean;
+  enableVibration?: boolean;
+  enableSpeechSynthesis?: boolean;
 }
 
 export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
@@ -35,6 +61,19 @@ export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
   enableWebStorage: false,
   enableWebSocket: false,
   enableWebWorker: false,
+  enableIntersectionObserver: false,
+  enableResizeObserver: false,
+  enablePageVisibility: false,
+  enableBroadcastChannel: false,
+  enableNetworkInformation: false,
+  enableScreenWakeLock: false,
+  enableScreenOrientation: false,
+  enableFullscreen: false,
+  enableFileSystemAccess: false,
+  enableMediaRecorder: false,
+  enableServerSentEvents: false,
+  enableVibration: false,
+  enableSpeechSynthesis: false,
 };
 
 export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): EnvironmentProviders {
@@ -53,6 +92,19 @@ export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): Enviro
     [mergedConfig.enableWebStorage, WebStorageService],
     [mergedConfig.enableWebSocket, WebSocketService],
     [mergedConfig.enableWebWorker, WebWorkerService],
+    [mergedConfig.enableIntersectionObserver, IntersectionObserverService],
+    [mergedConfig.enableResizeObserver, ResizeObserverService],
+    [mergedConfig.enablePageVisibility, PageVisibilityService],
+    [mergedConfig.enableBroadcastChannel, BroadcastChannelService],
+    [mergedConfig.enableNetworkInformation, NetworkInformationService],
+    [mergedConfig.enableScreenWakeLock, ScreenWakeLockService],
+    [mergedConfig.enableScreenOrientation, ScreenOrientationService],
+    [mergedConfig.enableFullscreen, FullscreenService],
+    [mergedConfig.enableFileSystemAccess, FileSystemAccessService],
+    [mergedConfig.enableMediaRecorder, MediaRecorderService],
+    [mergedConfig.enableServerSentEvents, ServerSentEventsService],
+    [mergedConfig.enableVibration, VibrationService],
+    [mergedConfig.enableSpeechSynthesis, SpeechSynthesisService],
   ];
 
   for (const [enabled, provider] of conditionalProviders) {
@@ -129,4 +181,56 @@ export function provideCommunicationApis(): EnvironmentProviders {
     WebShareService,
     WebSocketService,
   ]);
+}
+
+export function provideIntersectionObserver(): EnvironmentProviders {
+  return makeEnvironmentProviders([IntersectionObserverService]);
+}
+
+export function provideResizeObserver(): EnvironmentProviders {
+  return makeEnvironmentProviders([ResizeObserverService]);
+}
+
+export function providePageVisibility(): EnvironmentProviders {
+  return makeEnvironmentProviders([PageVisibilityService]);
+}
+
+export function provideBroadcastChannel(): EnvironmentProviders {
+  return makeEnvironmentProviders([BroadcastChannelService]);
+}
+
+export function provideNetworkInformation(): EnvironmentProviders {
+  return makeEnvironmentProviders([NetworkInformationService]);
+}
+
+export function provideScreenWakeLock(): EnvironmentProviders {
+  return makeEnvironmentProviders([PermissionsService, ScreenWakeLockService]);
+}
+
+export function provideScreenOrientation(): EnvironmentProviders {
+  return makeEnvironmentProviders([ScreenOrientationService]);
+}
+
+export function provideFullscreen(): EnvironmentProviders {
+  return makeEnvironmentProviders([FullscreenService]);
+}
+
+export function provideFileSystemAccess(): EnvironmentProviders {
+  return makeEnvironmentProviders([PermissionsService, FileSystemAccessService]);
+}
+
+export function provideMediaRecorder(): EnvironmentProviders {
+  return makeEnvironmentProviders([PermissionsService, MediaRecorderService]);
+}
+
+export function provideServerSentEvents(): EnvironmentProviders {
+  return makeEnvironmentProviders([ServerSentEventsService]);
+}
+
+export function provideVibration(): EnvironmentProviders {
+  return makeEnvironmentProviders([VibrationService]);
+}
+
+export function provideSpeechSynthesis(): EnvironmentProviders {
+  return makeEnvironmentProviders([SpeechSynthesisService]);
 }
