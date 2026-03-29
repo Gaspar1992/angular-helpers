@@ -30,7 +30,7 @@ export interface NetworkInformation {
   online: boolean;
 }
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class NetworkInformationService {
   private readonly platformId = inject(PLATFORM_ID);
 

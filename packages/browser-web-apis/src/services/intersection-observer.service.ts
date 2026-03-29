@@ -13,7 +13,7 @@ export interface IntersectionObserverOptions {
   threshold?: number | number[];
 }
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class IntersectionObserverService {
   private readonly platformId = inject(PLATFORM_ID);
 

@@ -15,7 +15,7 @@ export interface ElementSize {
   blockSize: number;
 }
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class ResizeObserverService {
   private readonly platformId = inject(PLATFORM_ID);
 
