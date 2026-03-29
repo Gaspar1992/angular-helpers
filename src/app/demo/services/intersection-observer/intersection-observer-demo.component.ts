@@ -9,7 +9,11 @@ import {
   ElementRef,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { IntersectionObserverService } from '@angular-helpers/browser-web-apis';
+import {
+  IntersectionObserverService,
+  injectIntersectionObserver,
+  type IntersectionRef,
+} from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-intersection-observer-demo',
@@ -27,19 +31,39 @@ import { IntersectionObserverService } from '@angular-helpers/browser-web-apis';
           } @else {
             <span class="badge badge-no">unsupported</span>
           }
+          <span class="badge badge-info">{{ apiMode() }}</span>
         </div>
       </div>
+
       <p class="svc-desc">
         Fires when an element enters or exits the viewport. Scroll down to trigger it.
       </p>
+
       <div class="svc-controls">
-        <button class="btn btn-primary" (click)="attach()" [disabled]="observing() || !supported">
-          {{ observing() ? 'Observing…' : 'Attach observer' }}
-        </button>
-        <span class="badge" [class]="isIntersecting() ? 'badge-ok' : 'badge-no'">
-          {{ isIntersecting() ? 'In viewport' : 'Out of viewport' }}
-        </span>
+        <div class="segmented" role="group" aria-label="API mode">
+          <button class="btn" [class.active]="apiMode() === 'Service'" (click)="setMode('Service')">
+            Service (RxJS)
+          </button>
+          <button class="btn" [class.active]="apiMode() === 'Signal Fn'" (click)="setMode('Signal Fn')">
+            Signal Fn
+          </button>
+        </div>
+        @if (apiMode() === 'Service') {
+          <button class="btn btn-primary" (click)="attach()" [disabled]="observing() || !supported">
+            {{ observing() ? 'Observing…' : 'Attach observer' }}
+          </button>
+        }
+        @if (apiMode() === 'Signal Fn') {
+          <span class="badge" [class]="fnRef.isIntersecting() ? 'badge-ok' : 'badge-no'">
+            {{ fnRef.isIntersecting() ? 'In viewport' : 'Out of viewport' }}
+          </span>
+        } @else {
+          <span class="badge" [class]="isIntersecting() ? 'badge-ok' : 'badge-no'">
+            {{ isIntersecting() ? 'In viewport' : 'Out of viewport' }}
+          </span>
+        }
       </div>
+
       <div class="intersect-scroll-area" #intersectScroll aria-label="Scrollable area with target">
         <p class="svc-hint">↓ Scroll inside this box to trigger</p>
         <div class="intersect-spacer"></div>
@@ -47,18 +71,74 @@ import { IntersectionObserverService } from '@angular-helpers/browser-web-apis';
           Target element
         </div>
       </div>
+
+      @if (apiMode() === 'Signal Fn') {
+        <div class="code-example">
+          <p class="svc-hint">Reactive viewport detection with auto-cleanup:</p>
+          <pre
+            class="code-block"
+          ><code>import {{ '{' }} injectIntersectionObserver {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+
+    readonly targetRef = viewChild&lt;ElementRef&gt;('target');
+    readonly inView = injectIntersectionObserver(this.targetRef);
+
+    // Use in template with: inView.isIntersecting()
+    // or: inView.isVisible() for visibility tracking</code></pre>
+          <p class="svc-hint">
+            <strong>When to use:</strong> Lazy loading, infinite scroll, analytics tracking.
+          </p>
+        </div>
+      } @else {
+        <div class="code-example">
+          <p class="svc-hint">Manual visibility observation with RxJS:</p>
+          <pre
+            class="code-block"
+          ><code>import {{ '{' }} IntersectionObserverService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+
+    readonly svc = inject(IntersectionObserverService);
+
+    ngOnInit() {{ '{' }}
+      this.svc.observeVisibility(element, {{ '{' }} threshold: 0.5 {{ '}' }})
+        .subscribe(isVisible =&gt; {{ '{' }}
+          // handle visibility change
+        {{ '}' }});
+    {{ '}' }}</code></pre>
+          <p class="svc-hint">
+            <strong>When to use:</strong> Complex thresholds, multiple observers, combineLatest.
+          </p>
+        </div>
+      }
     </section>
   `,
 })
 export class IntersectionObserverDemoComponent implements OnDestroy {
   private readonly svc = inject(IntersectionObserverService);
   private readonly subs: Subscription[] = [];
+  readonly fnRef: IntersectionRef;
 
   readonly supported = this.svc.isSupported();
   readonly intersectBoxRef = viewChild<ElementRef>('intersectBox');
   readonly intersectScrollRef = viewChild<ElementRef>('intersectScroll');
   readonly isIntersecting = signal(false);
   readonly observing = signal(false);
+  readonly apiMode = signal<'Service' | 'Signal Fn'>('Service');
+
+  constructor() {
+    const el = this.intersectBoxRef();
+    const root = this.intersectScrollRef();
+    if (el && root) {
+      this.fnRef = injectIntersectionObserver(el, { root: root.nativeElement, threshold: 0.1 });
+    } else {
+      this.fnRef = {
+        isIntersecting: signal(false).asReadonly(),
+        isVisible: signal(false).asReadonly(),
+      };
+    }
+  }
+
+  setMode(mode: 'Service' | 'Signal Fn'): void {
+    this.apiMode.set(mode);
+  }
 
   attach(): void {
     const el = this.intersectBoxRef()?.nativeElement as Element | undefined;

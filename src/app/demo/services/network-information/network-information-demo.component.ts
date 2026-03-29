@@ -9,6 +9,8 @@ import {
 import { Subscription } from 'rxjs';
 import {
   NetworkInformationService,
+  injectNetworkInformation,
+  type NetworkInformationRef,
   type NetworkInformation,
 } from '@angular-helpers/browser-web-apis';
 
@@ -28,58 +30,159 @@ import {
           } @else {
             <span class="badge badge-warn">partial</span>
           }
-          <span class="badge badge-ok">online: {{ networkInfo().online ? 'yes' : 'no' }}</span>
+          <span class="badge badge-info">{{ apiMode() }}</span>
         </div>
       </div>
+
       <p class="svc-desc">Live connection quality. Turn off Wi-Fi to see the online flag update.</p>
+
+      <div class="svc-controls">
+        <div class="segmented" role="group" aria-label="API mode">
+          <button class="btn" [class.active]="apiMode() === 'Service'" (click)="setMode('Service')">
+            Service (RxJS)
+          </button>
+          <button class="btn" [class.active]="apiMode() === 'Signal Fn'" (click)="setMode('Signal Fn')">
+            Signal Fn
+          </button>
+        </div>
+        <span class="badge badge-ok"
+          >online:
+          {{ apiMode() === 'Service' ? networkInfo().online : fnRef.online() ? 'yes' : 'no' }}</span
+        >
+      </div>
+
       <div class="svc-result">
-        @if (networkInfo().type) {
-          <div class="kv-row">
-            <span class="kv-key">Type</span>
-            <span class="kv-val mono">{{ networkInfo().type }}</span>
-          </div>
-        }
-        @if (networkInfo().effectiveType) {
-          <div class="kv-row">
-            <span class="kv-key">Effective</span>
-            <span class="kv-val mono">{{ networkInfo().effectiveType }}</span>
-          </div>
-        }
-        @if (networkInfo().downlink !== undefined) {
-          <div class="kv-row">
-            <span class="kv-key">Downlink</span>
-            <span class="kv-val mono">{{ networkInfo().downlink }} Mbps</span>
-          </div>
-        }
-        @if (networkInfo().rtt !== undefined) {
-          <div class="kv-row">
-            <span class="kv-key">RTT</span>
-            <span class="kv-val mono">{{ networkInfo().rtt }} ms</span>
-          </div>
-        }
-        @if (!networkInfo().type && !networkInfo().effectiveType) {
-          <p class="svc-hint">Connection details not available in this browser.</p>
+        @if (apiMode() === 'Service') {
+          @if (networkInfo().type) {
+            <div class="kv-row">
+              <span class="kv-key">Type</span>
+              <span class="kv-val mono">{{ networkInfo().type }}</span>
+            </div>
+          }
+          @if (networkInfo().effectiveType) {
+            <div class="kv-row">
+              <span class="kv-key">Effective</span>
+              <span class="kv-val mono">{{ networkInfo().effectiveType }}</span>
+            </div>
+          }
+          @if (networkInfo().downlink !== undefined) {
+            <div class="kv-row">
+              <span class="kv-key">Downlink</span>
+              <span class="kv-val mono">{{ networkInfo().downlink }} Mbps</span>
+            </div>
+          }
+          @if (networkInfo().rtt !== undefined) {
+            <div class="kv-row">
+              <span class="kv-key">RTT</span>
+              <span class="kv-val mono">{{ networkInfo().rtt }} ms</span>
+            </div>
+          }
+          @if (!networkInfo().type && !networkInfo().effectiveType) {
+            <p class="svc-hint">Connection details not available in this browser.</p>
+          }
+        } @else {
+          @if (fnRef.type()) {
+            <div class="kv-row">
+              <span class="kv-key">type</span>
+              <span class="kv-val mono">{{ fnRef.type() }}</span>
+            </div>
+          }
+          @if (fnRef.effectiveType()) {
+            <div class="kv-row">
+              <span class="kv-key">effectiveType</span>
+              <span class="kv-val mono">{{ fnRef.effectiveType() }}</span>
+            </div>
+          }
+          @if (fnRef.downlink() !== undefined) {
+            <div class="kv-row">
+              <span class="kv-key">downlink</span>
+              <span class="kv-val mono">{{ fnRef.downlink() }} Mbps</span>
+            </div>
+          }
+          @if (fnRef.rtt() !== undefined) {
+            <div class="kv-row">
+              <span class="kv-key">rtt</span>
+              <span class="kv-val mono">{{ fnRef.rtt() }} ms</span>
+            </div>
+          }
+          @if (fnRef.saveData() !== undefined) {
+            <div class="kv-row">
+              <span class="kv-key">saveData</span>
+              <span class="kv-val mono">{{ fnRef.saveData() ? 'yes' : 'no' }}</span>
+            </div>
+          }
+          @if (!fnRef.type() && !fnRef.effectiveType()) {
+            <p class="svc-hint">Connection details not available in this browser.</p>
+          }
         }
       </div>
+
+      @if (apiMode() === 'Signal Fn') {
+        <div class="code-example">
+          <p class="svc-hint">Reactive connection state with computed signals:</p>
+          <pre
+            class="code-block"
+          ><code>import {{ '{' }} injectNetworkInformation {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+
+    readonly net = injectNetworkInformation();
+
+    // Access signals directly:
+    // net.online(), net.effectiveType(), net.downlink()
+    // net.rtt(), net.saveData(), net.type()</code></pre>
+          <p class="svc-hint">
+            <strong>When to use:</strong> Adaptive UI, conditional asset loading, offline handling.
+          </p>
+        </div>
+      } @else {
+        <div class="code-example">
+          <p class="svc-hint">Manual stream with snapshot + watch:</p>
+          <pre
+            class="code-block"
+          ><code>import {{ '{' }} NetworkInformationService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+
+    readonly svc = inject(NetworkInformationService);
+
+    ngOnInit() {{ '{' }}
+      // Get current state
+      const current = this.svc.getSnapshot();
+      // Subscribe to changes
+      this.svc.watch().subscribe(info =&gt; {{ '{' }}
+        // handle network change
+      {{ '}' }});
+    {{ '}' }}</code></pre>
+          <p class="svc-hint">
+            <strong>When to use:</strong> Complex stream operations, buffering, combining with other
+            sources.
+          </p>
+        </div>
+      }
     </section>
   `,
 })
 export class NetworkInformationDemoComponent implements OnDestroy {
   private readonly svc = inject(NetworkInformationService);
   private readonly subs: Subscription[] = [];
+  readonly fnRef: NetworkInformationRef;
 
   readonly supported = this.svc.isSupported();
+  readonly apiMode = signal<'Service' | 'Signal Fn'>('Service');
   readonly networkInfo = signal<NetworkInformation>({
     online: typeof navigator !== 'undefined' ? navigator.onLine : true,
   });
 
   constructor() {
+    this.fnRef = injectNetworkInformation();
+
     if (typeof navigator !== 'undefined') {
       this.networkInfo.set(this.svc.getSnapshot());
     }
     if (this.supported) {
       this.subs.push(this.svc.watch().subscribe((n) => this.networkInfo.set(n)));
     }
+  }
+
+  setMode(mode: 'Service' | 'Signal Fn'): void {
+    this.apiMode.set(mode);
   }
 
   ngOnDestroy(): void {
