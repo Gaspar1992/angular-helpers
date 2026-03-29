@@ -1,3 +1,17 @@
+# [1.4.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.3.0...v1.4.0) (2026-03-29)
+
+
+### Bug Fixes
+
+* add providedIn: 'root' to 5 refactored services + fix release CI ([7dee263](https://github.com/Gaspar1992/angular-helpers/commit/7dee263b44f954e26914b84ab06bb7947319e6a9))
+* **docs:** reset both toggle and tabs when navigating between services ([536397a](https://github.com/Gaspar1992/angular-helpers/commit/536397aee31d78b3a72a08480b81f3ae28e81d87))
+* **services:** remove providedIn: 'root' from 5 refactored services ([b6177b8](https://github.com/Gaspar1992/angular-helpers/commit/b6177b81a3ce6870b3fe037d502df840bb11bda7))
+
+
+### Features
+
+* **demo:** add Signal Fn toggle to 5 service demos ([05d7c70](https://github.com/Gaspar1992/angular-helpers/commit/05d7c707da2c5e40d11958309dbf8c293b613d24))
+
 ## [1.2.3](https://github.com/Gaspar1992/angular-helpers/compare/v1.2.2...v1.2.3) (2026-03-28)
 
 
