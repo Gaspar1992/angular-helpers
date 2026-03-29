@@ -6,7 +6,7 @@ import { pageVisibilityStream } from '../utils/page-visibility.utils';
 
 export type VisibilityState = 'visible' | 'hidden' | 'prerender';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class PageVisibilityService {
   private readonly platformId = inject(PLATFORM_ID);
 

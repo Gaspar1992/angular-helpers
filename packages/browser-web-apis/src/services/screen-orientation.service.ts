@@ -29,7 +29,7 @@ export interface OrientationInfo {
   angle: number;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class ScreenOrientationService {
   private readonly platformId = inject(PLATFORM_ID);
 
