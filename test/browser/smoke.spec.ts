@@ -16,6 +16,6 @@ test.describe('Browser APIs demo smoke', () => {
     await expect(
       page.getByRole('heading', { level: 2, name: /Network Information/i }),
     ).toBeVisible();
-    await expect(page.getByRole('button', { name: /Observers/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /Observers/i })).toBeVisible();
   });
 });

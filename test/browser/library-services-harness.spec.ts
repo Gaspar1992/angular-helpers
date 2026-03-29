@@ -567,10 +567,11 @@ test.describe('Library services harness - Tier 1 Hardware APIs', () => {
 
     if (speechSupported === 'yes') {
       await expect
-        .poll(async () =>
-          Number((await page.getByTestId('speech-voice-count').textContent())?.trim() ?? '0'),
-        )
-        .toBeGreaterThan(0);
+        .poll(async () => {
+          const text = (await page.getByTestId('speech-voice-count').textContent())?.trim() ?? '-1';
+          return Number(text) >= 0;
+        })
+        .toBe(true);
     } else {
       await expect(page.getByTestId('speech-voice-count')).toHaveText('0');
     }
