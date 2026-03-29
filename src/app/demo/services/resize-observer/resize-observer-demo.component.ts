@@ -10,7 +10,12 @@ import {
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DecimalPipe } from '@angular/common';
-import { ResizeObserverService, type ElementSize } from '@angular-helpers/browser-web-apis';
+import {
+  ResizeObserverService,
+  injectResizeObserver,
+  type ResizeRef,
+  type ElementSize,
+} from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-resize-observer-demo',
@@ -29,26 +34,67 @@ import { ResizeObserverService, type ElementSize } from '@angular-helpers/browse
           } @else {
             <span class="badge badge-no">unsupported</span>
           }
+          <span class="badge badge-info">{{ apiMode() }}</span>
         </div>
       </div>
+
       <p class="svc-desc">Observes element size changes. Drag the handle to resize the box below.</p>
+
       <div class="svc-controls">
-        <button class="btn btn-primary" (click)="attach()" [disabled]="observing() || !supported">
-          {{ observing() ? 'Observing…' : 'Attach observer' }}
-        </button>
+        <div class="segmented" role="group" aria-label="API mode">
+          <button class="btn" [class.active]="apiMode() === 'Service'" (click)="setMode('Service')">
+            Service (RxJS)
+          </button>
+          <button class="btn" [class.active]="apiMode() === 'Signal Fn'" (click)="setMode('Signal Fn')">
+            Signal Fn
+          </button>
+        </div>
+        @if (apiMode() === 'Service') {
+          <button class="btn btn-primary" (click)="attach()" [disabled]="observing() || !supported">
+            {{ observing() ? 'Observing…' : 'Attach observer' }}
+          </button>
+        }
       </div>
-      <div class="resize-demo-box" #resizeBox aria-label="Resizable demo box">
+
+      <div
+        class="resize-demo-box"
+        #resizeBox
+        aria-label="Resizable demo box"
+        [class.observing-fn]="apiMode() === 'Signal Fn'"
+      >
         <span class="resize-demo-label">Resize me →</span>
       </div>
-      @if (elementSize()) {
+
+      @if (apiMode() === 'Service' && elementSize(); as size) {
         <div class="svc-result">
           <div class="kv-row">
             <span class="kv-key">Width</span>
-            <span class="kv-val mono">{{ elementSize()!.width | number: '1.0-0' }} px</span>
+            <span class="kv-val mono">{{ size.width | number: '1.0-0' }} px</span>
           </div>
           <div class="kv-row">
             <span class="kv-key">Height</span>
-            <span class="kv-val mono">{{ elementSize()!.height | number: '1.0-0' }} px</span>
+            <span class="kv-val mono">{{ size.height | number: '1.0-0' }} px</span>
+          </div>
+        </div>
+      }
+
+      @if (apiMode() === 'Signal Fn') {
+        <div class="svc-result">
+          <div class="kv-row">
+            <span class="kv-key">width</span>
+            <span class="kv-val mono">{{ fnRef.width() | number: '1.0-0' }} px</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">height</span>
+            <span class="kv-val mono">{{ fnRef.height() | number: '1.0-0' }} px</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">inlineSize</span>
+            <span class="kv-val mono">{{ fnRef.inlineSize() | number: '1.0-0' }}</span>
+          </div>
+          <div class="kv-row">
+            <span class="kv-key">blockSize</span>
+            <span class="kv-val mono">{{ fnRef.blockSize() | number: '1.0-0' }}</span>
           </div>
         </div>
       }
@@ -58,11 +104,32 @@ import { ResizeObserverService, type ElementSize } from '@angular-helpers/browse
 export class ResizeObserverDemoComponent implements OnDestroy {
   private readonly svc = inject(ResizeObserverService);
   private readonly subs: Subscription[] = [];
+  readonly fnRef: ResizeRef;
 
   readonly supported = this.svc.isSupported();
   readonly resizeBoxRef = viewChild<ElementRef>('resizeBox');
   readonly elementSize = signal<ElementSize | null>(null);
   readonly observing = signal(false);
+  readonly apiMode = signal<'Service' | 'Signal Fn'>('Service');
+
+  constructor() {
+    const el = this.resizeBoxRef();
+    if (el) {
+      this.fnRef = injectResizeObserver(el);
+    } else {
+      this.fnRef = {
+        size: signal(null).asReadonly(),
+        width: signal(0).asReadonly(),
+        height: signal(0).asReadonly(),
+        inlineSize: signal(0).asReadonly(),
+        blockSize: signal(0).asReadonly(),
+      };
+    }
+  }
+
+  setMode(mode: 'Service' | 'Signal Fn'): void {
+    this.apiMode.set(mode);
+  }
 
   attach(): void {
     const el = this.resizeBoxRef()?.nativeElement as Element | undefined;
