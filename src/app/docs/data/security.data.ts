@@ -147,6 +147,96 @@ export class PatternComponent {
   }
 }`,
   },
+  {
+    id: 'web-crypto',
+    name: 'WebCryptoService',
+    description:
+      'Provides cryptographic operations using the Web Crypto API (SubtleCrypto). Supports hashing, AES-GCM encryption/decryption, key generation, key import/export, and secure random generation.',
+    scope: 'provided',
+    importPath: '@angular-helpers/security',
+    requiresSecureContext: true,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Requires a secure context (HTTPS).',
+      'All crypto operations are async and return Promises.',
+      'Keys are exportable as JWK for persistence or transfer.',
+    ],
+    methods: [
+      {
+        name: 'hash',
+        signature: 'hash(data: string | ArrayBuffer, algorithm?: HashAlgorithm): Promise<string>',
+        description:
+          'Hashes the given data using the specified algorithm (default: SHA-256). Returns a hex string.',
+        returns: 'Promise<string>',
+      },
+      {
+        name: 'generateAesKey',
+        signature: 'generateAesKey(length?: AesKeyLength): Promise<CryptoKey>',
+        description: 'Generates a new AES-GCM key of the given bit length (default: 256).',
+        returns: 'Promise<CryptoKey>',
+      },
+      {
+        name: 'encryptAes',
+        signature:
+          'encryptAes(key: CryptoKey, data: string | ArrayBuffer): Promise<AesEncryptResult>',
+        description: 'Encrypts data with AES-GCM. Returns ciphertext and the generated IV.',
+        returns: 'Promise<{ ciphertext: ArrayBuffer; iv: Uint8Array }>',
+      },
+      {
+        name: 'decryptAes',
+        signature:
+          'decryptAes(key: CryptoKey, ciphertext: ArrayBuffer, iv: Uint8Array): Promise<string>',
+        description: 'Decrypts AES-GCM ciphertext and returns the plaintext string.',
+        returns: 'Promise<string>',
+      },
+      {
+        name: 'exportKey',
+        signature: 'exportKey(key: CryptoKey): Promise<JsonWebKey>',
+        description: 'Exports a CryptoKey as a JWK object for storage or transfer.',
+        returns: 'Promise<JsonWebKey>',
+      },
+      {
+        name: 'importAesKey',
+        signature: 'importAesKey(jwk: JsonWebKey): Promise<CryptoKey>',
+        description: 'Imports an AES-GCM key from a JWK object.',
+        returns: 'Promise<CryptoKey>',
+      },
+      {
+        name: 'generateRandomBytes',
+        signature: 'generateRandomBytes(length: number): Uint8Array',
+        description: 'Returns a Uint8Array of cryptographically secure random bytes.',
+        returns: 'Uint8Array',
+      },
+      {
+        name: 'randomUUID',
+        signature: 'randomUUID(): string',
+        description: 'Generates a cryptographically secure UUID v4 string.',
+        returns: 'string',
+      },
+    ],
+    example: `import { WebCryptoService } from '@angular-helpers/security';
+
+@Component({ providers: [WebCryptoService] })
+export class CryptoComponent {
+  private crypto = inject(WebCryptoService);
+
+  async hashPassword(password: string): Promise<string> {
+    return this.crypto.hash(password, 'SHA-256');
+  }
+
+  async encryptMessage(message: string): Promise<{ ciphertext: ArrayBuffer; iv: Uint8Array; key: JsonWebKey }> {
+    const key = await this.crypto.generateAesKey();
+    const { ciphertext, iv } = await this.crypto.encryptAes(key, message);
+    const exportedKey = await this.crypto.exportKey(key);
+    return { ciphertext, iv, key: exportedKey };
+  }
+
+  async decryptMessage(ciphertext: ArrayBuffer, iv: Uint8Array, jwk: JsonWebKey): Promise<string> {
+    const key = await this.crypto.importAesKey(jwk);
+    return this.crypto.decryptAes(key, ciphertext, iv);
+  }
+}`,
+  },
 ];
 
 export const SECURITY_INTERFACES = [

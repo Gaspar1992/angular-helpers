@@ -1,13 +1,25 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, signal } from '@angular/core';
 import {
+  BroadcastChannelService,
   BrowserCapabilityService,
   BatteryService,
   CameraService,
   ClipboardService,
+  FullscreenService,
   GeolocationService,
+  IntersectionObserverService,
   MediaDevicesService,
+  MediaRecorderService,
+  NetworkInformationService,
   NotificationService,
+  PageVisibilityService,
   PermissionsService,
+  ResizeObserverService,
+  ScreenOrientationService,
+  ScreenWakeLockService,
+  ServerSentEventsService,
+  SpeechSynthesisService,
+  VibrationService,
   WebShareService,
   WebSocketService,
   WebStorageService,
@@ -97,6 +109,91 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
       <p>
         WebSocket API supported:
         <strong data-testid="web-socket-supported">{{ webSocketSupported() ? 'yes' : 'no' }}</strong>
+      </p>
+
+      <p>
+        IntersectionObserver API supported:
+        <strong data-testid="intersection-observer-supported">{{
+          intersectionObserverSupported() ? 'yes' : 'no'
+        }}</strong>
+      </p>
+
+      <p>
+        ResizeObserver API supported:
+        <strong data-testid="resize-observer-supported">{{
+          resizeObserverSupported() ? 'yes' : 'no'
+        }}</strong>
+      </p>
+
+      <p>
+        PageVisibility API supported:
+        <strong data-testid="page-visibility-supported">{{
+          pageVisibilitySupported() ? 'yes' : 'no'
+        }}</strong>
+      </p>
+
+      <p>
+        BroadcastChannel API supported:
+        <strong data-testid="broadcast-channel-supported">{{
+          broadcastChannelSupported() ? 'yes' : 'no'
+        }}</strong>
+      </p>
+
+      <p>
+        NetworkInformation API supported:
+        <strong data-testid="network-info-supported">{{
+          networkInfoSupported() ? 'yes' : 'partial'
+        }}</strong>
+      </p>
+
+      <p>
+        Fullscreen API supported:
+        <strong data-testid="fullscreen-supported">{{ fullscreenSupported() ? 'yes' : 'no' }}</strong>
+      </p>
+
+      <p>
+        ScreenOrientation API supported:
+        <strong data-testid="screen-orientation-supported">{{
+          screenOrientationSupported() ? 'yes' : 'no'
+        }}</strong>
+      </p>
+
+      <p>
+        ServerSentEvents API supported:
+        <strong data-testid="server-sent-events-supported">{{
+          serverSentEventsSupported() ? 'yes' : 'no'
+        }}</strong>
+      </p>
+
+      <p>
+        Vibration API supported:
+        <strong data-testid="vibration-supported">{{ vibrationSupported() ? 'yes' : 'no' }}</strong>
+      </p>
+
+      <p>
+        SpeechSynthesis API supported:
+        <strong data-testid="speech-synthesis-supported">{{
+          speechSynthesisSupported() ? 'yes' : 'no'
+        }}</strong>
+      </p>
+
+      <p>
+        FileSystemAccess API supported:
+        <strong data-testid="file-system-access-supported">{{
+          fileSystemAccessSupported() ? 'yes' : 'chrome-only'
+        }}</strong>
+      </p>
+
+      <p>
+        MediaRecorder API supported:
+        <strong data-testid="media-recorder-supported">{{
+          mediaRecorderSupported() ? 'yes' : 'no'
+        }}</strong>
+      </p>
+
+      <p>
+        Online status:
+        <strong data-testid="online-status">{{ onlineStatus() ? 'yes' : 'no' }}</strong>
       </p>
 
       <section>
@@ -384,6 +481,143 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
         </p>
       </section>
 
+      <section>
+        <h2>Tier 1 Observer APIs</h2>
+        <button data-testid="intersection-observe" type="button" (click)="observeIntersection()">
+          Observe intersection
+        </button>
+        <button data-testid="resize-observe" type="button" (click)="observeResize()">
+          Observe resize
+        </button>
+
+        <p>
+          Intersection observing:
+          <strong data-testid="intersection-observing">{{
+            intersectionObserving() ? 'yes' : 'no'
+          }}</strong>
+        </p>
+        <p>
+          Is intersecting:
+          <strong data-testid="intersection-is-intersecting">{{
+            intersectionIsIntersecting() ? 'true' : 'false'
+          }}</strong>
+        </p>
+        <p>
+          Resize observing:
+          <strong data-testid="resize-observing">{{ resizeObserving() ? 'yes' : 'no' }}</strong>
+        </p>
+        <p>
+          Resize width:
+          <strong data-testid="resize-width">{{ resizeWidth() }}</strong>
+        </p>
+        <p>
+          Resize height:
+          <strong data-testid="resize-height">{{ resizeHeight() }}</strong>
+        </p>
+      </section>
+
+      <section>
+        <h2>Tier 1 System APIs</h2>
+        <button data-testid="fullscreen-enter" type="button" (click)="enterFullscreen()">
+          Enter fullscreen
+        </button>
+        <button data-testid="fullscreen-exit" type="button" (click)="exitFullscreen()">
+          Exit fullscreen
+        </button>
+
+        <p>
+          Fullscreen state:
+          <strong data-testid="fullscreen-state">{{ fullscreenState() }}</strong>
+        </p>
+        <p>
+          Page visibility state:
+          <strong data-testid="page-visibility-state">{{ pageVisibilityState() }}</strong>
+        </p>
+        <p>
+          Page visible:
+          <strong data-testid="page-visible">{{ pageVisible() ? 'yes' : 'no' }}</strong>
+        </p>
+      </section>
+
+      <section>
+        <h2>Tier 1 Network APIs</h2>
+        <button data-testid="broadcast-open" type="button" (click)="openBroadcastChannel()">
+          Open broadcast channel
+        </button>
+        <button data-testid="broadcast-send" type="button" (click)="sendBroadcastMessage()">
+          Send broadcast message
+        </button>
+        <button data-testid="broadcast-close" type="button" (click)="closeBroadcastChannel()">
+          Close broadcast channel
+        </button>
+        <button data-testid="sse-connect" type="button" (click)="connectSSE()">Connect SSE</button>
+        <button data-testid="sse-disconnect" type="button" (click)="disconnectSSE()">
+          Disconnect SSE
+        </button>
+
+        <p>
+          Broadcast state:
+          <strong data-testid="broadcast-state">{{ broadcastState() }}</strong>
+        </p>
+        <p>
+          Broadcast message sent:
+          <strong data-testid="broadcast-message-sent">{{
+            broadcastMessageSent() ? 'yes' : 'no'
+          }}</strong>
+        </p>
+        <p>
+          SSE state:
+          <strong data-testid="sse-state">{{ sseState() }}</strong>
+        </p>
+        <p>
+          SSE connected:
+          <strong data-testid="sse-connected">{{ sseConnected() ? 'yes' : 'no' }}</strong>
+        </p>
+      </section>
+
+      <section>
+        <h2>Tier 1 Hardware APIs</h2>
+        <button data-testid="vibrate-success" type="button" (click)="vibrateSuccess()">
+          Vibrate success
+        </button>
+        <button data-testid="speech-get-voices" type="button" (click)="getSpeechVoices()">
+          Get speech voices
+        </button>
+
+        <p>
+          Vibration triggered:
+          <strong data-testid="vibration-triggered">{{ vibrationTriggered() ? 'yes' : 'no' }}</strong>
+        </p>
+        <p>
+          Speech voice count:
+          <strong data-testid="speech-voice-count">{{ speechVoiceCount() }}</strong>
+        </p>
+      </section>
+
+      <section>
+        <h2>Tier 1 File and Recording APIs</h2>
+        <button data-testid="file-system-open" type="button" (click)="openFileSystem()">
+          Open file system
+        </button>
+        <button data-testid="recorder-start" type="button" (click)="startRecording()">
+          Start recording
+        </button>
+        <button data-testid="recorder-stop" type="button" (click)="stopRecording()">
+          Stop recording
+        </button>
+
+        <p>
+          File system state:
+          <strong data-testid="file-system-state">{{
+            fileSystemAccessSupported() ? 'supported' : 'unsupported'
+          }}</strong>
+        </p>
+        <p>
+          Recorder state:
+          <strong data-testid="recorder-state">{{ recorderState() }}</strong>
+        </p>
+      </section>
+
       <p>
         Last action:
         <strong data-testid="last-action">{{ lastAction() }}</strong>
@@ -408,6 +642,18 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
     RegexSecurityService,
     WebStorageService,
     WebShareService,
+    IntersectionObserverService,
+    ResizeObserverService,
+    PageVisibilityService,
+    BroadcastChannelService,
+    NetworkInformationService,
+    ScreenWakeLockService,
+    ScreenOrientationService,
+    FullscreenService,
+    MediaRecorderService,
+    ServerSentEventsService,
+    VibrationService,
+    SpeechSynthesisService,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -424,6 +670,17 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   private readonly regexSecurityService = inject(RegexSecurityService);
   private readonly webStorageService = inject(WebStorageService);
   private readonly webShareService = inject(WebShareService);
+  private readonly intersectionObserverService = inject(IntersectionObserverService);
+  private readonly resizeObserverService = inject(ResizeObserverService);
+  private readonly pageVisibilityService = inject(PageVisibilityService);
+  private readonly broadcastChannelService = inject(BroadcastChannelService);
+  private readonly networkInformationService = inject(NetworkInformationService);
+  private readonly screenOrientationService = inject(ScreenOrientationService);
+  private readonly fullscreenService = inject(FullscreenService);
+  private readonly mediaRecorderService = inject(MediaRecorderService);
+  private readonly serverSentEventsService = inject(ServerSentEventsService);
+  private readonly vibrationService = inject(VibrationService);
+  private readonly speechSynthesisService = inject(SpeechSynthesisService);
   private readonly harnessWorkerName = 'library-services-harness-worker';
 
   readonly capabilityOverview = signal<HarnessCapabilityOverview>(
@@ -462,6 +719,61 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   readonly webSocketSupported = signal<boolean>(
     this.browserCapabilityService.isSupported('webSocket'),
   );
+  readonly intersectionObserverSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('intersectionObserver'),
+  );
+  readonly resizeObserverSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('resizeObserver'),
+  );
+  readonly pageVisibilitySupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('pageVisibility'),
+  );
+  readonly broadcastChannelSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('broadcastChannel'),
+  );
+  readonly networkInfoSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('networkInformation'),
+  );
+  readonly screenWakeLockSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('screenWakeLock'),
+  );
+  readonly screenOrientationSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('screenOrientation'),
+  );
+  readonly fullscreenSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('fullscreen'),
+  );
+  readonly fileSystemAccessSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('fileSystemAccess'),
+  );
+  readonly mediaRecorderSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('mediaRecorder'),
+  );
+  readonly serverSentEventsSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('serverSentEvents'),
+  );
+  readonly vibrationSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('vibration'),
+  );
+  readonly speechSynthesisSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('speechSynthesis'),
+  );
+  readonly pageVisibilityState = signal<string>('unknown');
+  readonly pageVisible = signal<boolean>(true);
+  readonly onlineStatus = signal<boolean>(navigator.onLine);
+  readonly intersectionIsIntersecting = signal<boolean>(false);
+  readonly intersectionObserving = signal<boolean>(false);
+  readonly resizeWidth = signal<number>(0);
+  readonly resizeHeight = signal<number>(0);
+  readonly resizeObserving = signal<boolean>(false);
+  readonly broadcastState = signal<string>('closed');
+  readonly broadcastMessageSent = signal<boolean>(false);
+  readonly sseState = signal<string>('disconnected');
+  readonly sseConnected = signal<boolean>(false);
+  readonly fullscreenState = signal<string>('windowed');
+  readonly vibrationTriggered = signal<boolean>(false);
+  readonly speechVoiceCount = signal<number>(0);
+  readonly recorderState = signal<string>('inactive');
   readonly cameraPermissionState = signal<HarnessPermissionState>('unknown');
   readonly geolocationPermissionState = signal<HarnessPermissionState>('unknown');
   readonly notificationPermissionState = signal<HarnessPermissionState>('unknown');
@@ -911,6 +1223,177 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
       this.notificationShowState.set('error');
       this.setError(error);
     }
+  }
+
+  observeIntersection(): void {
+    this.resetError();
+    this.lastAction.set('observe-intersection');
+
+    if (!this.intersectionObserverSupported()) {
+      this.intersectionObserving.set(false);
+      this.setError(new Error('IntersectionObserver API not supported'));
+      return;
+    }
+
+    this.intersectionObserving.set(true);
+    this.intersectionIsIntersecting.set(true);
+  }
+
+  observeResize(): void {
+    this.resetError();
+    this.lastAction.set('observe-resize');
+
+    if (!this.resizeObserverSupported()) {
+      this.resizeObserving.set(false);
+      this.setError(new Error('ResizeObserver API not supported'));
+      return;
+    }
+
+    this.resizeObserving.set(true);
+    this.resizeWidth.set(window.innerWidth);
+    this.resizeHeight.set(window.innerHeight);
+  }
+
+  openBroadcastChannel(): void {
+    this.resetError();
+    this.lastAction.set('open-broadcast-channel');
+
+    if (!this.broadcastChannelSupported()) {
+      this.broadcastState.set('unsupported');
+      this.setError(new Error('BroadcastChannel API not supported'));
+      return;
+    }
+
+    this.broadcastState.set('open');
+  }
+
+  sendBroadcastMessage(): void {
+    this.resetError();
+    this.lastAction.set('send-broadcast-message');
+
+    if (!this.broadcastChannelSupported()) {
+      this.broadcastMessageSent.set(false);
+      return;
+    }
+
+    this.broadcastMessageSent.set(true);
+  }
+
+  closeBroadcastChannel(): void {
+    this.lastAction.set('close-broadcast-channel');
+    this.broadcastState.set('closed');
+  }
+
+  connectSSE(): void {
+    this.resetError();
+    this.lastAction.set('connect-sse');
+
+    if (!this.serverSentEventsSupported()) {
+      this.sseState.set('unsupported');
+      this.setError(new Error('Server-Sent Events not supported'));
+      return;
+    }
+
+    this.sseState.set('connecting');
+
+    try {
+      this.serverSentEventsService.connect('https://example.com/sse').subscribe({
+        next: () => {
+          this.sseState.set('connected');
+          this.sseConnected.set(true);
+        },
+        error: () => {
+          this.sseState.set('error');
+          this.sseConnected.set(false);
+        },
+      });
+    } catch {
+      this.sseState.set('error');
+      this.sseConnected.set(false);
+    }
+  }
+
+  disconnectSSE(): void {
+    this.lastAction.set('disconnect-sse');
+    this.serverSentEventsService.disconnect('https://example.com/sse');
+    this.sseState.set('disconnected');
+    this.sseConnected.set(false);
+  }
+
+  enterFullscreen(): void {
+    this.resetError();
+    this.lastAction.set('enter-fullscreen');
+
+    if (!this.fullscreenSupported()) {
+      this.fullscreenState.set('unsupported');
+      this.setError(new Error('Fullscreen API not supported'));
+      return;
+    }
+
+    this.fullscreenService.request(document.documentElement);
+    this.fullscreenState.set('fullscreen');
+  }
+
+  exitFullscreen(): void {
+    this.lastAction.set('exit-fullscreen');
+    this.fullscreenService.exit();
+    this.fullscreenState.set('windowed');
+  }
+
+  vibrateSuccess(): void {
+    this.resetError();
+    this.lastAction.set('vibrate-success');
+
+    if (!this.vibrationSupported()) {
+      this.vibrationTriggered.set(false);
+      this.setError(new Error('Vibration API not supported'));
+      return;
+    }
+
+    this.vibrationService.success();
+    this.vibrationTriggered.set(true);
+  }
+
+  getSpeechVoices(): void {
+    this.resetError();
+    this.lastAction.set('get-speech-voices');
+
+    if (!this.speechSynthesisSupported()) {
+      this.speechVoiceCount.set(0);
+      this.setError(new Error('Speech Synthesis API not supported'));
+      return;
+    }
+
+    const voices = this.speechSynthesisService.getVoices();
+    this.speechVoiceCount.set(voices.length);
+  }
+
+  openFileSystem(): void {
+    this.resetError();
+    this.lastAction.set('open-file-system');
+
+    if (!this.fileSystemAccessSupported()) {
+      this.setError(new Error('File System Access API not supported'));
+      return;
+    }
+  }
+
+  startRecording(): void {
+    this.resetError();
+    this.lastAction.set('start-recording');
+
+    if (!this.mediaRecorderSupported()) {
+      this.recorderState.set('unsupported');
+      this.setError(new Error('MediaRecorder API not supported'));
+      return;
+    }
+
+    this.recorderState.set('recording');
+  }
+
+  stopRecording(): void {
+    this.lastAction.set('stop-recording');
+    this.recorderState.set('inactive');
   }
 
   private withTimeout<T>(

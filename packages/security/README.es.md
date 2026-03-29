@@ -15,6 +15,13 @@ Paquete de seguridad para aplicaciones Angular que previene ataques comunes como
 - **Análisis de Complejidad**: Detecta patrones peligrosos antes de la ejecución.
 - **Modo Seguro**: Solo permite patrones verificados como seguros.
 
+### **Web Crypto API**
+
+- **Cifrado/Descifrado**: Soporte AES-GCM para manejo seguro de datos
+- **Hashing**: SHA-256 y otros algoritmos
+- **Gestión de Claves**: Generar, importar y exportar claves criptográficas
+- **Aleatorio Seguro**: Valores aleatorios criptográficamente seguros
+
 ### **Patrón Builder**
 
 - **API Fluida**: Construye expresiones regulares de forma intuitiva.
@@ -91,6 +98,51 @@ const result = await RegexSecurityService.builder()
   .pattern('\\d+')
   .timeout(3000)
   .execute('12345', this.securityService);
+```
+
+### **WebCryptoService**
+
+```typescript
+import { WebCryptoService } from '@angular-helpers/security';
+
+export class SecureStorageComponent {
+  private cryptoService = inject(WebCryptoService);
+
+  async hashPassword(password: string): Promise<string> {
+    return await this.cryptoService.hash(password, 'SHA-256');
+  }
+
+  async encryptData(
+    data: string,
+  ): Promise<{ ciphertext: ArrayBuffer; iv: Uint8Array; key: CryptoKey }> {
+    const key = await this.cryptoService.generateAesKey(256);
+    const { ciphertext, iv } = await this.cryptoService.encryptAes(key, data);
+    return { ciphertext, iv, key };
+  }
+
+  async decryptData(ciphertext: ArrayBuffer, iv: Uint8Array, key: CryptoKey): Promise<string> {
+    return await this.cryptoService.decryptAes(key, ciphertext, iv);
+  }
+
+  async exportKeyForStorage(key: CryptoKey): Promise<JsonWebKey> {
+    return await this.cryptoService.exportKey(key);
+  }
+
+  async importKeyFromStorage(jwk: JsonWebKey): Promise<CryptoKey> {
+    return await this.cryptoService.importAesKey(jwk);
+  }
+
+  generateSecureToken(length: number = 32): string {
+    const bytes = this.cryptoService.generateRandomBytes(length);
+    return Array.from(bytes)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  generateUUID(): string {
+    return this.cryptoService.randomUUID();
+  }
+}
 ```
 
 ## 📊 Niveles de Riesgo

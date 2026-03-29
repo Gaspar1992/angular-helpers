@@ -132,6 +132,61 @@
   font-weight: 500;
 }
 
+/* ── Collapsible services group ────── */
+.nav-group {
+  padding: 0 0 var(--sp-2);
+}
+
+.nav-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+  padding: 0.38rem var(--sp-5) 0.38rem 1.1rem;
+  background: none;
+  border: none;
+  color: #b0b8d0;
+  font-size: var(--text-base);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: color var(--transition);
+}
+
+.nav-group-toggle:hover {
+  color: var(--text-primary);
+}
+
+.nav-group-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.nav-group-toggle-icon {
+  display: inline-block;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--text-muted);
+  transition: transform 0.18s ease;
+  transform: rotate(0deg);
+  width: 0.85rem;
+  flex-shrink: 0;
+}
+
+.nav-group-toggle-icon.expanded {
+  transform: rotate(90deg);
+}
+
+.nav-group-items {
+  list-style: none;
+  margin: 0;
+  padding: var(--sp-1) 0 0;
+}
+
+.nav-group-items a {
+  padding-left: 2.4rem;
+}
+
 /* ── Backdrop — visible on mobile when sidebar is open ── */
 .sidebar-backdrop {
   display: none;

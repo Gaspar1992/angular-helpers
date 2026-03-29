@@ -12,7 +12,20 @@ export type BrowserCapabilityId =
   | 'webStorage'
   | 'webShare'
   | 'battery'
-  | 'webSocket';
+  | 'webSocket'
+  | 'intersectionObserver'
+  | 'resizeObserver'
+  | 'pageVisibility'
+  | 'broadcastChannel'
+  | 'networkInformation'
+  | 'screenWakeLock'
+  | 'screenOrientation'
+  | 'fullscreen'
+  | 'fileSystemAccess'
+  | 'mediaRecorder'
+  | 'serverSentEvents'
+  | 'vibration'
+  | 'speechSynthesis';
 
 const BROWSER_CAPABILITIES = [
   { id: 'permissions', label: 'Permissions API', requiresSecureContext: false },
@@ -27,6 +40,19 @@ const BROWSER_CAPABILITIES = [
   { id: 'webShare', label: 'Web Share', requiresSecureContext: true },
   { id: 'battery', label: 'Battery API', requiresSecureContext: false },
   { id: 'webSocket', label: 'WebSocket API', requiresSecureContext: false },
+  { id: 'intersectionObserver', label: 'Intersection Observer', requiresSecureContext: false },
+  { id: 'resizeObserver', label: 'Resize Observer', requiresSecureContext: false },
+  { id: 'pageVisibility', label: 'Page Visibility API', requiresSecureContext: false },
+  { id: 'broadcastChannel', label: 'Broadcast Channel API', requiresSecureContext: false },
+  { id: 'networkInformation', label: 'Network Information API', requiresSecureContext: false },
+  { id: 'screenWakeLock', label: 'Screen Wake Lock API', requiresSecureContext: true },
+  { id: 'screenOrientation', label: 'Screen Orientation API', requiresSecureContext: false },
+  { id: 'fullscreen', label: 'Fullscreen API', requiresSecureContext: false },
+  { id: 'fileSystemAccess', label: 'File System Access API', requiresSecureContext: true },
+  { id: 'mediaRecorder', label: 'MediaRecorder API', requiresSecureContext: true },
+  { id: 'serverSentEvents', label: 'Server-Sent Events', requiresSecureContext: false },
+  { id: 'vibration', label: 'Vibration API', requiresSecureContext: false },
+  { id: 'speechSynthesis', label: 'Speech Synthesis API', requiresSecureContext: false },
 ] as const satisfies ReadonlyArray<{
   id: BrowserCapabilityId;
   label: string;
@@ -67,6 +93,38 @@ export class BrowserCapabilityService {
         return typeof navigator !== 'undefined' && 'getBattery' in navigator;
       case 'webSocket':
         return typeof WebSocket !== 'undefined';
+      case 'intersectionObserver':
+        return typeof IntersectionObserver !== 'undefined';
+      case 'resizeObserver':
+        return typeof ResizeObserver !== 'undefined';
+      case 'pageVisibility':
+        return typeof document !== 'undefined' && 'hidden' in document;
+      case 'broadcastChannel':
+        return typeof BroadcastChannel !== 'undefined';
+      case 'networkInformation':
+        return (
+          typeof navigator !== 'undefined' &&
+          ('connection' in navigator || 'mozConnection' in navigator)
+        );
+      case 'screenWakeLock':
+        return typeof navigator !== 'undefined' && 'wakeLock' in navigator;
+      case 'screenOrientation':
+        return typeof screen !== 'undefined' && 'orientation' in screen;
+      case 'fullscreen':
+        return (
+          typeof document !== 'undefined' &&
+          ('fullscreenEnabled' in document || 'webkitFullscreenEnabled' in document)
+        );
+      case 'fileSystemAccess':
+        return typeof window !== 'undefined' && 'showOpenFilePicker' in window;
+      case 'mediaRecorder':
+        return typeof MediaRecorder !== 'undefined';
+      case 'serverSentEvents':
+        return typeof EventSource !== 'undefined';
+      case 'vibration':
+        return typeof navigator !== 'undefined' && 'vibrate' in navigator;
+      case 'speechSynthesis':
+        return typeof window !== 'undefined' && 'speechSynthesis' in window;
       default:
         return false;
     }
