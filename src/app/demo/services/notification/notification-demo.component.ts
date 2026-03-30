@@ -5,13 +5,13 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { NotificationService } from '@angular-helpers/browser-web-apis';
+import { NotificationService, PermissionsService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-notification-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  providers: [NotificationService],
+  providers: [PermissionsService, NotificationService],
   styleUrl: '../demo.styles.css',
   template: `
     <section class="svc-card" aria-labelledby="notif-title">

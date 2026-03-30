@@ -6,13 +6,13 @@ import {
   signal,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { FileSystemAccessService } from '@angular-helpers/browser-web-apis';
+import { FileSystemAccessService, PermissionsService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-file-system-access-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  providers: [FileSystemAccessService],
+  providers: [PermissionsService, FileSystemAccessService],
   imports: [DecimalPipe],
   styleUrl: '../demo.styles.css',
   template: `
