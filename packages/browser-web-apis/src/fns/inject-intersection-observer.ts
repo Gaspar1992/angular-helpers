@@ -1,19 +1,23 @@
 import {
   computed,
   DestroyRef,
+  effect,
   ElementRef,
   inject,
+  isSignal,
   PLATFORM_ID,
   signal,
   type Signal,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { type Subscription } from 'rxjs';
 
 import { type IntersectionObserverOptions } from '../services/intersection-observer.service';
 import {
   intersectionObserverStream,
   isIntersectionObserverSupported,
 } from '../utils/intersection-observer.utils';
+import { type ElementInput } from '../interfaces/common.types';
 
 export interface IntersectionRef {
   readonly isIntersecting: Signal<boolean>;
@@ -21,7 +25,7 @@ export interface IntersectionRef {
 }
 
 export function injectIntersectionObserver(
-  elementOrRef: Element | ElementRef<Element>,
+  elementOrRef: ElementInput,
   options?: IntersectionObserverOptions,
 ): IntersectionRef {
   const destroyRef = inject(DestroyRef);
@@ -30,9 +34,22 @@ export function injectIntersectionObserver(
   const isIntersecting = signal<boolean>(false);
 
   if (isPlatformBrowser(platformId) && isIntersectionObserverSupported()) {
-    const el = elementOrRef instanceof ElementRef ? elementOrRef.nativeElement : elementOrRef;
-    const sub = intersectionObserverStream(el, options).subscribe((v) => isIntersecting.set(v));
-    destroyRef.onDestroy(() => sub.unsubscribe());
+    if (isSignal(elementOrRef)) {
+      let sub: Subscription | undefined;
+      effect((onCleanup) => {
+        sub?.unsubscribe();
+        const raw = elementOrRef();
+        if (raw) {
+          const el = raw instanceof ElementRef ? raw.nativeElement : raw;
+          sub = intersectionObserverStream(el, options).subscribe((v) => isIntersecting.set(v));
+        }
+        onCleanup(() => sub?.unsubscribe());
+      });
+    } else {
+      const el = elementOrRef instanceof ElementRef ? elementOrRef.nativeElement : elementOrRef;
+      const sub = intersectionObserverStream(el, options).subscribe((v) => isIntersecting.set(v));
+      destroyRef.onDestroy(() => sub.unsubscribe());
+    }
   }
 
   return {

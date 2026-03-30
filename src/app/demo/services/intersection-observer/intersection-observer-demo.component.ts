@@ -7,16 +7,11 @@ import {
   signal,
   viewChild,
   ElementRef,
-  effect,
-  untracked,
-  Injector,
-  runInInjectionContext,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import {
   IntersectionObserverService,
   injectIntersectionObserver,
-  type IntersectionRef,
 } from '@angular-helpers/browser-web-apis';
 
 @Component({
@@ -58,8 +53,8 @@ import {
           </button>
         }
         @if (apiMode() === 'Signal Fn') {
-          <span class="badge" [class]="fnRef().isIntersecting() ? 'badge-ok' : 'badge-no'">
-            {{ fnRef().isIntersecting() ? 'In viewport' : 'Out of viewport' }}
+          <span class="badge" [class]="fnRef.isIntersecting() ? 'badge-ok' : 'badge-no'">
+            {{ fnRef.isIntersecting() ? 'In viewport' : 'Out of viewport' }}
           </span>
         } @else {
           <span class="badge" [class]="isIntersecting() ? 'badge-ok' : 'badge-no'">
@@ -117,7 +112,6 @@ import {
 })
 export class IntersectionObserverDemoComponent implements OnDestroy {
   private readonly svc = inject(IntersectionObserverService);
-  private readonly injector = inject(Injector);
   private readonly subs: Subscription[] = [];
 
   readonly supported = this.svc.isSupported();
@@ -126,26 +120,7 @@ export class IntersectionObserverDemoComponent implements OnDestroy {
   readonly isIntersecting = signal(false);
   readonly observing = signal(false);
   readonly apiMode = signal<'Service' | 'Signal Fn'>('Service');
-  readonly fnRef = signal<IntersectionRef>({
-    isIntersecting: signal(false).asReadonly(),
-    isVisible: signal(false).asReadonly(),
-  });
-
-  constructor() {
-    effect(() => {
-      const el = this.intersectBoxRef();
-      const root = this.intersectScrollRef();
-      if (el && root) {
-        untracked(() =>
-          this.fnRef.set(
-            runInInjectionContext(this.injector, () =>
-              injectIntersectionObserver(el, { root: root.nativeElement, threshold: 0.1 }),
-            ),
-          ),
-        );
-      }
-    });
-  }
+  readonly fnRef = injectIntersectionObserver(this.intersectBoxRef, { threshold: 0.1 });
 
   setMode(mode: 'Service' | 'Signal Fn'): void {
     this.apiMode.set(mode);
