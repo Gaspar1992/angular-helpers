@@ -29,6 +29,8 @@ Angular services package for a structured and secure access layer over browser W
 
 - `IntersectionObserverService` - Detect when elements enter/exit viewport
 - `ResizeObserverService` - Watch for element size changes
+- `MutationObserverService` - Watch for DOM mutations
+- `PerformanceObserverService` - Monitor performance entries (LCP, CLS, etc.)
 
 ### System APIs
 
@@ -39,6 +41,9 @@ Angular services package for a structured and secure access layer over browser W
 - `FullscreenService` - Toggle fullscreen mode for elements
 - `VibrationService` - Trigger haptic feedback patterns
 - `SpeechSynthesisService` - Text-to-speech with voice selection
+- `IdleDetectorService` - Detect user idle state and screen lock
+- `GamepadService` - Game controller input polling
+- `WebAudioService` - Audio context, oscillators, and analysers
 
 ### Network APIs
 
@@ -57,6 +62,22 @@ Angular services package for a structured and secure access layer over browser W
 ### Web APIs
 
 - `WebWorkerService` - Web Worker management
+
+### Device APIs
+
+- `WebBluetoothService` - Bluetooth Low Energy device communication
+- `WebUsbService` - USB device I/O from the browser
+- `WebNfcService` - NFC tag reading and writing
+
+### Detection APIs
+
+- `EyeDropperService` - Screen color picker
+- `BarcodeDetectorService` - QR code and barcode scanning
+
+### Commerce & Identity APIs
+
+- `PaymentRequestService` - Native payment flows
+- `CredentialManagementService` - Passwords, passkeys (WebAuthn)
 
 ### Security & Capabilities
 
@@ -608,6 +629,70 @@ export class MyComponent {
   // orientation.isLandscape() → boolean
   // orientation.lock('landscape') → Promise<void>
   // orientation.unlock()
+}
+```
+
+### injectMutationObserver
+
+Accepts the same `ElementInput` type — works with `viewChild` signals.
+
+```typescript
+import { injectMutationObserver } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly targetRef = viewChild<ElementRef>('target');
+  readonly mo = injectMutationObserver(this.targetRef, { childList: true });
+
+  // mo.mutations()      → MutationRecord[]
+  // mo.mutationCount()  → number
+}
+```
+
+### injectPerformanceObserver
+
+```typescript
+import { injectPerformanceObserver } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly perf = injectPerformanceObserver({ type: 'navigation', buffered: true });
+
+  // perf.entries()      → PerformanceEntryList
+  // perf.entryCount()   → number
+  // perf.latestEntry()  → PerformanceEntry | undefined
+}
+```
+
+### injectIdleDetector
+
+```typescript
+import { injectIdleDetector } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly idle = injectIdleDetector({ threshold: 120_000 });
+
+  // idle.userState()      → 'active' | 'idle'
+  // idle.screenState()    → 'locked' | 'unlocked'
+  // idle.isUserIdle()     → boolean
+  // idle.isScreenLocked() → boolean
+}
+```
+
+### injectGamepad
+
+```typescript
+import { injectGamepad } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly gp = injectGamepad(0);
+
+  // gp.connected() → boolean
+  // gp.buttons()   → ReadonlyArray<{ pressed: boolean; value: number }>
+  // gp.axes()      → readonly number[]
+  // gp.state()     → GamepadState | null
 }
 ```
 

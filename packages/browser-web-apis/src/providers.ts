@@ -23,6 +23,18 @@ import { MediaRecorderService } from './services/media-recorder.service';
 import { ServerSentEventsService } from './services/server-sent-events.service';
 import { VibrationService } from './services/vibration.service';
 import { SpeechSynthesisService } from './services/speech-synthesis.service';
+import { MutationObserverService } from './services/mutation-observer.service';
+import { PerformanceObserverService } from './services/performance-observer.service';
+import { IdleDetectorService } from './services/idle-detector.service';
+import { EyeDropperService } from './services/eye-dropper.service';
+import { BarcodeDetectorService } from './services/barcode-detector.service';
+import { WebAudioService } from './services/web-audio.service';
+import { GamepadService } from './services/gamepad.service';
+import { WebBluetoothService } from './services/web-bluetooth.service';
+import { WebUsbService } from './services/web-usb.service';
+import { WebNfcService } from './services/web-nfc.service';
+import { PaymentRequestService } from './services/payment-request.service';
+import { CredentialManagementService } from './services/credential-management.service';
 
 export interface BrowserWebApisConfig {
   enableCamera?: boolean;
@@ -48,6 +60,18 @@ export interface BrowserWebApisConfig {
   enableServerSentEvents?: boolean;
   enableVibration?: boolean;
   enableSpeechSynthesis?: boolean;
+  enableMutationObserver?: boolean;
+  enablePerformanceObserver?: boolean;
+  enableIdleDetector?: boolean;
+  enableEyeDropper?: boolean;
+  enableBarcodeDetector?: boolean;
+  enableWebAudio?: boolean;
+  enableGamepad?: boolean;
+  enableWebBluetooth?: boolean;
+  enableWebUsb?: boolean;
+  enableWebNfc?: boolean;
+  enablePaymentRequest?: boolean;
+  enableCredentialManagement?: boolean;
 }
 
 export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
@@ -74,6 +98,18 @@ export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
   enableServerSentEvents: false,
   enableVibration: false,
   enableSpeechSynthesis: false,
+  enableMutationObserver: false,
+  enablePerformanceObserver: false,
+  enableIdleDetector: false,
+  enableEyeDropper: false,
+  enableBarcodeDetector: false,
+  enableWebAudio: false,
+  enableGamepad: false,
+  enableWebBluetooth: false,
+  enableWebUsb: false,
+  enableWebNfc: false,
+  enablePaymentRequest: false,
+  enableCredentialManagement: false,
 };
 
 export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): EnvironmentProviders {
@@ -105,6 +141,18 @@ export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): Enviro
     [mergedConfig.enableServerSentEvents, ServerSentEventsService],
     [mergedConfig.enableVibration, VibrationService],
     [mergedConfig.enableSpeechSynthesis, SpeechSynthesisService],
+    [mergedConfig.enableMutationObserver, MutationObserverService],
+    [mergedConfig.enablePerformanceObserver, PerformanceObserverService],
+    [mergedConfig.enableIdleDetector, IdleDetectorService],
+    [mergedConfig.enableEyeDropper, EyeDropperService],
+    [mergedConfig.enableBarcodeDetector, BarcodeDetectorService],
+    [mergedConfig.enableWebAudio, WebAudioService],
+    [mergedConfig.enableGamepad, GamepadService],
+    [mergedConfig.enableWebBluetooth, WebBluetoothService],
+    [mergedConfig.enableWebUsb, WebUsbService],
+    [mergedConfig.enableWebNfc, WebNfcService],
+    [mergedConfig.enablePaymentRequest, PaymentRequestService],
+    [mergedConfig.enableCredentialManagement, CredentialManagementService],
   ];
 
   for (const [enabled, provider] of conditionalProviders) {
@@ -233,4 +281,52 @@ export function provideVibration(): EnvironmentProviders {
 
 export function provideSpeechSynthesis(): EnvironmentProviders {
   return makeEnvironmentProviders([SpeechSynthesisService]);
+}
+
+export function provideMutationObserver(): EnvironmentProviders {
+  return makeEnvironmentProviders([MutationObserverService]);
+}
+
+export function providePerformanceObserver(): EnvironmentProviders {
+  return makeEnvironmentProviders([PerformanceObserverService]);
+}
+
+export function provideIdleDetector(): EnvironmentProviders {
+  return makeEnvironmentProviders([PermissionsService, IdleDetectorService]);
+}
+
+export function provideEyeDropper(): EnvironmentProviders {
+  return makeEnvironmentProviders([EyeDropperService]);
+}
+
+export function provideBarcodeDetector(): EnvironmentProviders {
+  return makeEnvironmentProviders([BarcodeDetectorService]);
+}
+
+export function provideWebAudio(): EnvironmentProviders {
+  return makeEnvironmentProviders([WebAudioService]);
+}
+
+export function provideGamepad(): EnvironmentProviders {
+  return makeEnvironmentProviders([GamepadService]);
+}
+
+export function provideWebBluetooth(): EnvironmentProviders {
+  return makeEnvironmentProviders([WebBluetoothService]);
+}
+
+export function provideWebUsb(): EnvironmentProviders {
+  return makeEnvironmentProviders([WebUsbService]);
+}
+
+export function provideWebNfc(): EnvironmentProviders {
+  return makeEnvironmentProviders([WebNfcService]);
+}
+
+export function providePaymentRequest(): EnvironmentProviders {
+  return makeEnvironmentProviders([PaymentRequestService]);
+}
+
+export function provideCredentialManagement(): EnvironmentProviders {
+  return makeEnvironmentProviders([CredentialManagementService]);
 }

@@ -1598,4 +1598,860 @@ export class VoiceComponent {
   }
 }`,
   },
+  // --- Tier 2 services ---
+  {
+    id: 'mutation-observer',
+    name: 'MutationObserverService',
+    apiName: 'Mutation Observer',
+    description:
+      'Wraps the MutationObserver API with an Observable-based interface. Detects DOM mutations such as child additions, attribute changes, and text content modifications.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Automatically disconnects when the subscription is closed.',
+      'Use with subtree: true to observe deep DOM changes.',
+    ],
+    methods: [
+      {
+        name: 'observe',
+        signature:
+          'observe(target: Node, options?: MutationObserverOptions): Observable<MutationRecord[]>',
+        description: 'Observes a DOM node and emits arrays of MutationRecord on each mutation.',
+        returns: 'Observable<MutationRecord[]>',
+      },
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether MutationObserver is available in the current browser.',
+        returns: 'boolean',
+      },
+    ],
+    example: `import { MutationObserverService } from '@angular-helpers/browser-web-apis';
+
+@Component({ providers: [MutationObserverService] })
+export class DomWatcherComponent {
+  private mo = inject(MutationObserverService);
+  private el = inject(ElementRef);
+
+  ngAfterViewInit() {
+    this.mo.observe(this.el.nativeElement, { childList: true, subtree: true })
+      .subscribe(mutations => console.log('DOM changed:', mutations));
+  }
+}`,
+    fnVersion: {
+      name: 'injectMutationObserver',
+      importPath: '@angular-helpers/browser-web-apis',
+      returnType: 'MutationRef',
+      description:
+        'Reactively tracks DOM mutations on an element. Returns signals updated automatically on each mutation batch — no subscriptions or teardown needed.',
+      fields: [
+        {
+          name: 'mutations',
+          type: 'Signal<MutationRecord[]>',
+          description: 'The latest batch of MutationRecords.',
+        },
+        {
+          name: 'mutationCount',
+          type: 'Signal<number>',
+          description: 'Number of records in the latest mutation batch.',
+        },
+      ],
+      example: `import { injectMutationObserver } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class DomWatcherComponent {
+  private el = inject(ElementRef);
+  protected mo = injectMutationObserver(this.el, { childList: true });
+
+  // In template: {{ mo.mutationCount() }} mutations detected
+}`,
+    },
+  },
+  {
+    id: 'performance-observer',
+    name: 'PerformanceObserverService',
+    apiName: 'Performance Observer',
+    description:
+      'Wraps the PerformanceObserver API for monitoring performance entries such as LCP, FID, CLS, navigation timing, and resource loading metrics.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Use buffered: true to receive entries logged before the observer was created.',
+      'Entry types vary by browser — use getSupportedEntryTypes() to check.',
+    ],
+    methods: [
+      {
+        name: 'observe',
+        signature: 'observe(config: PerformanceObserverConfig): Observable<PerformanceEntryList>',
+        description: 'Observes performance entries matching the config and emits batches.',
+        returns: 'Observable<PerformanceEntryList>',
+      },
+      {
+        name: 'observeByType',
+        signature:
+          'observeByType(type: PerformanceEntryType, buffered?: boolean): Observable<PerformanceEntryList>',
+        description: 'Convenience method to observe a single entry type.',
+        returns: 'Observable<PerformanceEntryList>',
+      },
+      {
+        name: 'getSupportedEntryTypes',
+        signature: 'getSupportedEntryTypes(): PerformanceEntryType[]',
+        description: 'Returns the list of supported performance entry types.',
+        returns: 'PerformanceEntryType[]',
+      },
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether PerformanceObserver is available.',
+        returns: 'boolean',
+      },
+    ],
+    example: `import { PerformanceObserverService } from '@angular-helpers/browser-web-apis';
+
+@Component({ providers: [PerformanceObserverService] })
+export class MetricsComponent {
+  private perf = inject(PerformanceObserverService);
+
+  ngOnInit() {
+    this.perf.observeByType('largest-contentful-paint')
+      .subscribe(entries => console.log('LCP:', entries));
+  }
+}`,
+    fnVersion: {
+      name: 'injectPerformanceObserver',
+      importPath: '@angular-helpers/browser-web-apis',
+      returnType: 'PerformanceObserverRef',
+      description:
+        'Tracks performance entries as reactive signals. Automatically updates when new entries are observed.',
+      fields: [
+        {
+          name: 'entries',
+          type: 'Signal<PerformanceEntryList>',
+          description: 'The latest batch of performance entries.',
+        },
+        {
+          name: 'entryCount',
+          type: 'Signal<number>',
+          description: 'Number of entries in the latest batch.',
+        },
+        {
+          name: 'latestEntry',
+          type: 'Signal<PerformanceEntry | undefined>',
+          description: 'The most recent performance entry.',
+        },
+      ],
+      example: `import { injectPerformanceObserver } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MetricsComponent {
+  protected perf = injectPerformanceObserver({ type: 'navigation', buffered: true });
+
+  // In template: {{ perf.entryCount() }} entries observed
+}`,
+    },
+  },
+  {
+    id: 'idle-detector',
+    name: 'IdleDetectorService',
+    apiName: 'Idle Detection',
+    description:
+      'Detects user idle state and screen lock status using the Idle Detection API. Useful for auto-logout, presence indicators, or pausing resource-intensive tasks.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Firefox ✗ · Safari ✗ · Edge ✓',
+    notes: [
+      'Requires "idle-detection" permission — call requestPermission() first.',
+      'Default idle threshold is 60 seconds.',
+      'Chrome-only as of 2024.',
+    ],
+    methods: [
+      {
+        name: 'watch',
+        signature: 'watch(options?: IdleDetectorOptions): Observable<IdleState>',
+        description: 'Starts monitoring idle state. Emits user and screen state changes.',
+        returns: 'Observable<IdleState>',
+      },
+      {
+        name: 'requestPermission',
+        signature: 'requestPermission(): Promise<PermissionState>',
+        description: 'Requests the idle-detection permission.',
+        returns: 'Promise<PermissionState>',
+      },
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether the Idle Detection API is available.',
+        returns: 'boolean',
+      },
+    ],
+    example: `import { IdleDetectorService } from '@angular-helpers/browser-web-apis';
+
+@Component({ providers: [IdleDetectorService] })
+export class PresenceComponent {
+  private idle = inject(IdleDetectorService);
+
+  async start() {
+    await this.idle.requestPermission();
+    this.idle.watch({ threshold: 120_000 }).subscribe(state => {
+      console.log('User:', state.user, 'Screen:', state.screen);
+    });
+  }
+}`,
+    fnVersion: {
+      name: 'injectIdleDetector',
+      importPath: '@angular-helpers/browser-web-apis',
+      returnType: 'IdleDetectorRef',
+      description:
+        'Exposes user idle and screen lock state as reactive signals. Automatically starts monitoring and cleans up on destroy.',
+      fields: [
+        {
+          name: 'userState',
+          type: "Signal<'active' | 'idle'>",
+          description: 'Current user activity state.',
+        },
+        {
+          name: 'screenState',
+          type: "Signal<'locked' | 'unlocked'>",
+          description: 'Current screen lock state.',
+        },
+        {
+          name: 'isUserIdle',
+          type: 'Signal<boolean>',
+          description: 'True when the user is idle.',
+        },
+        {
+          name: 'isScreenLocked',
+          type: 'Signal<boolean>',
+          description: 'True when the screen is locked.',
+        },
+      ],
+      example: `import { injectIdleDetector } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class PresenceComponent {
+  protected idle = injectIdleDetector({ threshold: 120_000 });
+
+  // In template: @if (idle.isUserIdle()) { <idle-indicator /> }
+}`,
+    },
+  },
+  {
+    id: 'eye-dropper',
+    name: 'EyeDropperService',
+    apiName: 'EyeDropper',
+    description:
+      'Provides access to the EyeDropper API for picking colors from anywhere on the screen. Opens a system color picker that returns the selected color in sRGB hex format.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Firefox ✗ · Safari ✗ · Edge ✓',
+    notes: ['Must be triggered by a user gesture.', 'Only available in Chromium-based browsers.'],
+    methods: [
+      {
+        name: 'open',
+        signature: 'open(signal?: AbortSignal): Promise<ColorSelectionResult>',
+        description: 'Opens the eyedropper tool. Returns the selected color as { sRGBHex }.',
+        returns: 'Promise<ColorSelectionResult>',
+      },
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether the EyeDropper API is available.',
+        returns: 'boolean',
+      },
+    ],
+    example: `import { EyeDropperService } from '@angular-helpers/browser-web-apis';
+
+@Component({ providers: [EyeDropperService] })
+export class ColorPickerComponent {
+  private eyeDropper = inject(EyeDropperService);
+  selectedColor = signal('');
+
+  async pickColor() {
+    if (!this.eyeDropper.isSupported()) return;
+    const result = await this.eyeDropper.open();
+    this.selectedColor.set(result.sRGBHex);
+  }
+}`,
+  },
+  {
+    id: 'barcode-detector',
+    name: 'BarcodeDetectorService',
+    apiName: 'Barcode Detection',
+    description:
+      'Wraps the Barcode Detection API (Shape Detection API) for scanning barcodes and QR codes from images, video frames, or canvas elements.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Firefox ✗ · Safari ✗ · Edge ✓',
+    notes: [
+      'Only available in Chromium-based browsers.',
+      'Supports multiple barcode formats: QR, EAN, UPC, Code 128, etc.',
+      'Use getSupportedFormats() to check availability.',
+    ],
+    methods: [
+      {
+        name: 'detect',
+        signature:
+          'detect(image: ImageBitmapSource, formats?: BarcodeFormat[]): Promise<DetectedBarcode[]>',
+        description: 'Detects barcodes in the given image source.',
+        returns: 'Promise<DetectedBarcode[]>',
+      },
+      {
+        name: 'getSupportedFormats',
+        signature: 'getSupportedFormats(): Promise<BarcodeFormat[]>',
+        description: 'Returns the barcode formats supported by the browser.',
+        returns: 'Promise<BarcodeFormat[]>',
+      },
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether the BarcodeDetector API is available.',
+        returns: 'boolean',
+      },
+    ],
+    example: `import { BarcodeDetectorService } from '@angular-helpers/browser-web-apis';
+
+@Component({ providers: [BarcodeDetectorService] })
+export class ScannerComponent {
+  private barcode = inject(BarcodeDetectorService);
+
+  async scanFromVideo(video: HTMLVideoElement) {
+    if (!this.barcode.isSupported()) return;
+    const results = await this.barcode.detect(video, ['qr_code']);
+    results.forEach(r => console.log('Found:', r.rawValue));
+  }
+}`,
+  },
+  {
+    id: 'web-audio',
+    name: 'WebAudioService',
+    apiName: 'Web Audio',
+    description:
+      'Manages Web Audio API contexts, nodes, and audio processing. Supports oscillators, gain control, analysers for visualization, audio decoding, and playback.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'AudioContext is created lazily on first getContext() call.',
+      'Context is auto-closed on component destroy.',
+      'Call resume() after a user gesture if the context starts suspended.',
+    ],
+    methods: [
+      {
+        name: 'getContext',
+        signature: 'getContext(): AudioContext',
+        description: 'Returns the AudioContext, creating it if needed.',
+        returns: 'AudioContext',
+      },
+      {
+        name: 'resume',
+        signature: 'resume(): Promise<void>',
+        description: 'Resumes a suspended AudioContext (required after user gesture).',
+        returns: 'Promise<void>',
+      },
+      {
+        name: 'close',
+        signature: 'close(): Promise<void>',
+        description: 'Closes the AudioContext and releases resources.',
+        returns: 'Promise<void>',
+      },
+      {
+        name: 'createOscillator',
+        signature: 'createOscillator(type?: OscillatorType, frequency?: number): OscillatorNode',
+        description: 'Creates an oscillator node with the given type and frequency.',
+        returns: 'OscillatorNode',
+      },
+      {
+        name: 'createAnalyser',
+        signature: 'createAnalyser(fftSize?: number): AnalyserNode',
+        description: 'Creates an analyser node for audio visualization.',
+        returns: 'AnalyserNode',
+      },
+      {
+        name: 'watchAnalyser',
+        signature:
+          'watchAnalyser(analyser: AnalyserNode, intervalMs?: number): Observable<AudioAnalyserData>',
+        description: 'Emits frequency and time-domain data from an analyser at the given interval.',
+        returns: 'Observable<AudioAnalyserData>',
+      },
+      {
+        name: 'decodeAudioData',
+        signature: 'decodeAudioData(arrayBuffer: ArrayBuffer): Promise<AudioBuffer>',
+        description: 'Decodes audio data from an ArrayBuffer.',
+        returns: 'Promise<AudioBuffer>',
+      },
+      {
+        name: 'playBuffer',
+        signature: 'playBuffer(buffer: AudioBuffer, loop?: boolean): AudioBufferSourceNode',
+        description: 'Plays an AudioBuffer through the default output.',
+        returns: 'AudioBufferSourceNode',
+      },
+    ],
+    example: `import { WebAudioService } from '@angular-helpers/browser-web-apis';
+
+@Component({ providers: [WebAudioService] })
+export class ToneComponent {
+  private audio = inject(WebAudioService);
+
+  async playTone() {
+    await this.audio.resume();
+    const osc = this.audio.createOscillator('sine', 440);
+    const gain = this.audio.createGain(0.5);
+    osc.connect(gain).connect(this.audio.getContext().destination);
+    osc.start();
+    setTimeout(() => osc.stop(), 500);
+  }
+}`,
+  },
+  {
+    id: 'gamepad',
+    name: 'GamepadService',
+    apiName: 'Gamepad',
+    description:
+      'Provides access to the Gamepad API for reading game controller input. Supports connection events, polling for button/axis state, and listing connected gamepads.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Firefox ✓ · Safari ✓ · Edge ✓',
+    notes: [
+      'Gamepad data requires active polling — the browser does not push updates.',
+      'Use poll() with requestAnimationFrame timing (16ms) for real-time input.',
+      'A user gesture (button press) is required before gamepads are reported.',
+    ],
+    methods: [
+      {
+        name: 'poll',
+        signature: 'poll(index: number, intervalMs?: number): Observable<GamepadState>',
+        description: 'Polls a gamepad at the given interval and emits its state.',
+        returns: 'Observable<GamepadState>',
+      },
+      {
+        name: 'watchConnections',
+        signature:
+          "watchConnections(): Observable<{ gamepad: GamepadState; type: 'connected' | 'disconnected' }>",
+        description: 'Emits events when gamepads are connected or disconnected.',
+        returns: 'Observable<{ gamepad: GamepadState; type: string }>',
+      },
+      {
+        name: 'getConnectedGamepads',
+        signature: 'getConnectedGamepads(): GamepadState[]',
+        description: 'Returns a snapshot of all currently connected gamepads.',
+        returns: 'GamepadState[]',
+      },
+      {
+        name: 'getSnapshot',
+        signature: 'getSnapshot(index: number): GamepadState | null',
+        description: 'Returns the current state of a gamepad by index.',
+        returns: 'GamepadState | null',
+      },
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether the Gamepad API is available.',
+        returns: 'boolean',
+      },
+    ],
+    example: `import { GamepadService } from '@angular-helpers/browser-web-apis';
+
+@Component({ providers: [GamepadService] })
+export class GameInputComponent {
+  private gamepad = inject(GamepadService);
+
+  startPolling() {
+    this.gamepad.poll(0).subscribe(state => {
+      console.log('Buttons:', state.buttons);
+      console.log('Axes:', state.axes);
+    });
+  }
+}`,
+    fnVersion: {
+      name: 'injectGamepad',
+      importPath: '@angular-helpers/browser-web-apis',
+      returnType: 'GamepadRef',
+      description:
+        'Polls a gamepad and exposes its state as reactive signals. Automatically starts polling and cleans up on destroy.',
+      fields: [
+        {
+          name: 'state',
+          type: 'Signal<GamepadState | null>',
+          description: 'Full gamepad state snapshot; null if not connected.',
+        },
+        {
+          name: 'connected',
+          type: 'Signal<boolean>',
+          description: 'True when the gamepad is connected.',
+        },
+        {
+          name: 'buttons',
+          type: 'Signal<ReadonlyArray<{ pressed: boolean; value: number }>>',
+          description: 'Current button states.',
+        },
+        {
+          name: 'axes',
+          type: 'Signal<readonly number[]>',
+          description: 'Current axis values (-1 to 1).',
+        },
+      ],
+      example: `import { injectGamepad } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class GameInputComponent {
+  protected gp = injectGamepad(0);
+
+  // In template: @if (gp.connected()) { Axes: {{ gp.axes() }} }
+}`,
+    },
+  },
+  {
+    id: 'web-bluetooth',
+    name: 'WebBluetoothService',
+    apiName: 'Web Bluetooth',
+    description:
+      'Provides access to the Web Bluetooth API for connecting to Bluetooth Low Energy (BLE) devices. Supports device discovery, GATT service/characteristic read/write, and notifications.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Firefox ✗ · Safari ✗ · Edge ✓',
+    notes: [
+      'Only available in Chromium-based browsers.',
+      'Requires HTTPS and a user gesture to trigger device discovery.',
+      'Use requestDevice() to initiate Bluetooth pairing.',
+    ],
+    methods: [
+      {
+        name: 'requestDevice',
+        signature:
+          'requestDevice(options?: BluetoothRequestDeviceOptions): Promise<BluetoothDeviceRef>',
+        description: 'Opens the Bluetooth device picker dialog.',
+        returns: 'Promise<BluetoothDeviceRef>',
+      },
+      {
+        name: 'connect',
+        signature: 'connect(device: BluetoothDeviceRef): Promise<BluetoothRemoteGATTServer>',
+        description: 'Connects to the GATT server on the given device.',
+        returns: 'Promise<BluetoothRemoteGATTServer>',
+      },
+      {
+        name: 'disconnect',
+        signature: 'disconnect(device: BluetoothDeviceRef): void',
+        description: 'Disconnects from the device GATT server.',
+        returns: 'void',
+      },
+      {
+        name: 'readCharacteristic',
+        signature: 'readCharacteristic(server, serviceUuid, characteristicUuid): Promise<DataView>',
+        description: 'Reads a value from a BLE characteristic.',
+        returns: 'Promise<DataView>',
+      },
+      {
+        name: 'writeCharacteristic',
+        signature:
+          'writeCharacteristic(server, serviceUuid, characteristicUuid, value): Promise<void>',
+        description: 'Writes a value to a BLE characteristic.',
+        returns: 'Promise<void>',
+      },
+      {
+        name: 'watchCharacteristic',
+        signature:
+          'watchCharacteristic(server, serviceUuid, characteristicUuid): Observable<DataView>',
+        description: 'Subscribes to value notifications from a BLE characteristic.',
+        returns: 'Observable<DataView>',
+      },
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether the Web Bluetooth API is available.',
+        returns: 'boolean',
+      },
+    ],
+    example: `import { WebBluetoothService } from '@angular-helpers/browser-web-apis';
+
+@Component({ providers: [WebBluetoothService] })
+export class BleComponent {
+  private bt = inject(WebBluetoothService);
+
+  async connectToDevice() {
+    const device = await this.bt.requestDevice({
+      filters: [{ services: ['heart_rate'] }],
+    });
+    const server = await this.bt.connect(device);
+    const value = await this.bt.readCharacteristic(
+      server, 'heart_rate', 'heart_rate_measurement'
+    );
+    console.log('Heart rate:', new Uint8Array(value.buffer));
+  }
+}`,
+  },
+  {
+    id: 'web-usb',
+    name: 'WebUsbService',
+    apiName: 'WebUSB',
+    description:
+      'Provides access to the WebUSB API for communicating with USB devices from the browser. Supports device discovery, configuration, interface claiming, and data transfer.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Firefox ✗ · Safari ✗ · Edge ✓',
+    notes: [
+      'Only available in Chromium-based browsers.',
+      'Requires HTTPS and a user gesture.',
+      'Device must not be claimed by a kernel driver.',
+    ],
+    methods: [
+      {
+        name: 'requestDevice',
+        signature: 'requestDevice(filters?: UsbDeviceFilterDef[]): Promise<UsbDeviceRef>',
+        description: 'Opens the USB device picker dialog.',
+        returns: 'Promise<UsbDeviceRef>',
+      },
+      {
+        name: 'getDevices',
+        signature: 'getDevices(): Promise<UsbDeviceRef[]>',
+        description: 'Returns previously authorized USB devices.',
+        returns: 'Promise<UsbDeviceRef[]>',
+      },
+      {
+        name: 'open',
+        signature: 'open(device: UsbDeviceRef): Promise<void>',
+        description: 'Opens a USB device for communication.',
+        returns: 'Promise<void>',
+      },
+      {
+        name: 'close',
+        signature: 'close(device: UsbDeviceRef): Promise<void>',
+        description: 'Closes a USB device.',
+        returns: 'Promise<void>',
+      },
+      {
+        name: 'transferIn',
+        signature:
+          'transferIn(device: UsbDeviceRef, endpointNumber: number, length: number): Promise<UsbTransferResult>',
+        description: 'Reads data from a USB endpoint.',
+        returns: 'Promise<UsbTransferResult>',
+      },
+      {
+        name: 'transferOut',
+        signature:
+          'transferOut(device: UsbDeviceRef, endpointNumber: number, data: BufferSource): Promise<UsbTransferResult>',
+        description: 'Writes data to a USB endpoint.',
+        returns: 'Promise<UsbTransferResult>',
+      },
+      {
+        name: 'watchConnection',
+        signature:
+          "watchConnection(): Observable<{ device: UsbDeviceRef; type: 'connect' | 'disconnect' }>",
+        description: 'Emits events when USB devices are connected or disconnected.',
+        returns: 'Observable<{ device: UsbDeviceRef; type: string }>',
+      },
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether the WebUSB API is available.',
+        returns: 'boolean',
+      },
+    ],
+    example: `import { WebUsbService } from '@angular-helpers/browser-web-apis';
+
+@Component({ providers: [WebUsbService] })
+export class UsbComponent {
+  private usb = inject(WebUsbService);
+
+  async connectDevice() {
+    const device = await this.usb.requestDevice([{ vendorId: 0x1234 }]);
+    await this.usb.open(device);
+    console.log('Connected to:', device.productName);
+  }
+}`,
+  },
+  {
+    id: 'web-nfc',
+    name: 'WebNfcService',
+    apiName: 'Web NFC',
+    description:
+      'Provides access to the Web NFC API for reading and writing NFC tags. Supports NDEF message scanning and writing.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome Android ✓ · Firefox ✗ · Safari ✗ · Edge ✗',
+    notes: [
+      'Only available on Android Chrome.',
+      'Requires HTTPS.',
+      'Physical NFC hardware is required.',
+    ],
+    methods: [
+      {
+        name: 'scan',
+        signature: 'scan(): Observable<NdefReadingEvent>',
+        description: 'Starts scanning for NFC tags and emits NDEF reading events.',
+        returns: 'Observable<NdefReadingEvent>',
+      },
+      {
+        name: 'write',
+        signature:
+          'write(message: NdefMessage | string, options?: NdefWriteOptions): Promise<void>',
+        description: 'Writes an NDEF message to an NFC tag.',
+        returns: 'Promise<void>',
+      },
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether the Web NFC API is available.',
+        returns: 'boolean',
+      },
+    ],
+    example: `import { WebNfcService } from '@angular-helpers/browser-web-apis';
+
+@Component({ providers: [WebNfcService] })
+export class NfcComponent {
+  private nfc = inject(WebNfcService);
+
+  startScanning() {
+    this.nfc.scan().subscribe(event => {
+      console.log('Tag:', event.serialNumber);
+      console.log('Message:', event.message);
+    });
+  }
+
+  async writeTag(text: string) {
+    await this.nfc.write(text);
+  }
+}`,
+  },
+  {
+    id: 'payment-request',
+    name: 'PaymentRequestService',
+    apiName: 'Payment Request',
+    description:
+      'Wraps the Payment Request API for initiating native payment flows. Supports payment method validation, payment sheet display, and result handling.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Firefox ✓ · Safari ✓ · Edge ✓',
+    notes: [
+      'Requires HTTPS.',
+      'Use canMakePayment() to check if the user has a valid payment method.',
+      'show() must be called from a user gesture.',
+    ],
+    methods: [
+      {
+        name: 'canMakePayment',
+        signature:
+          'canMakePayment(methods: PaymentMethodConfig[], details: PaymentDetailsInit): Promise<boolean>',
+        description: 'Checks whether the user can make a payment with the given methods.',
+        returns: 'Promise<boolean>',
+      },
+      {
+        name: 'show',
+        signature:
+          'show(methods: PaymentMethodConfig[], details: PaymentDetailsInit, options?: PaymentOptionsConfig): Promise<PaymentResult>',
+        description: 'Shows the payment sheet and returns the result on completion.',
+        returns: 'Promise<PaymentResult>',
+      },
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether the Payment Request API is available.',
+        returns: 'boolean',
+      },
+    ],
+    example: `import { PaymentRequestService } from '@angular-helpers/browser-web-apis';
+
+@Component({ providers: [PaymentRequestService] })
+export class CheckoutComponent {
+  private payment = inject(PaymentRequestService);
+
+  async pay() {
+    const methods = [{ supportedMethods: 'https://google.com/pay' }];
+    const details = {
+      total: { label: 'Total', amount: { currency: 'USD', value: '9.99' } },
+    };
+    const result = await this.payment.show(methods, details);
+    console.log('Payment:', result.methodName);
+  }
+}`,
+  },
+  {
+    id: 'credential-management',
+    name: 'CredentialManagementService',
+    apiName: 'Credential Management',
+    description:
+      'Wraps the Credential Management API for managing user credentials. Supports password credentials, public key credentials (WebAuthn/passkeys), and silent sign-in prevention.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Firefox ✓ · Safari partial · Edge ✓',
+    notes: [
+      'Requires HTTPS.',
+      'PublicKeyCredential (WebAuthn) support varies by browser.',
+      'Use isConditionalMediationAvailable() to check passkey autofill support.',
+    ],
+    methods: [
+      {
+        name: 'get',
+        signature: 'get(options?: CredentialRequestOptions): Promise<Credential | null>',
+        description: 'Retrieves a stored credential matching the given options.',
+        returns: 'Promise<Credential | null>',
+      },
+      {
+        name: 'store',
+        signature: 'store(credential: Credential): Promise<void>',
+        description: 'Stores a credential in the browser credential store.',
+        returns: 'Promise<void>',
+      },
+      {
+        name: 'createPasswordCredential',
+        signature: 'createPasswordCredential(data: PasswordCredentialData): Promise<Credential>',
+        description: 'Creates a password credential for storage.',
+        returns: 'Promise<Credential>',
+      },
+      {
+        name: 'createPublicKeyCredential',
+        signature:
+          'createPublicKeyCredential(options: PublicKeyCredentialOptions): Promise<Credential | null>',
+        description: 'Creates a public key credential (WebAuthn registration).',
+        returns: 'Promise<Credential | null>',
+      },
+      {
+        name: 'preventSilentAccess',
+        signature: 'preventSilentAccess(): Promise<void>',
+        description: 'Prevents automatic sign-in on next visit.',
+        returns: 'Promise<void>',
+      },
+      {
+        name: 'isConditionalMediationAvailable',
+        signature: 'isConditionalMediationAvailable(): Promise<boolean>',
+        description: 'Checks if passkey autofill (conditional mediation) is supported.',
+        returns: 'Promise<boolean>',
+      },
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether the Credential Management API is available.',
+        returns: 'boolean',
+      },
+    ],
+    example: `import { CredentialManagementService } from '@angular-helpers/browser-web-apis';
+
+@Component({ providers: [CredentialManagementService] })
+export class LoginComponent {
+  private credentials = inject(CredentialManagementService);
+
+  async autoLogin() {
+    const cred = await this.credentials.get({ password: true, mediation: 'optional' });
+    if (cred) console.log('Auto-signed in as:', cred.id);
+  }
+
+  async saveCredentials(id: string, password: string) {
+    const cred = await this.credentials.createPasswordCredential({ id, password });
+    await this.credentials.store(cred);
+  }
+}`,
+  },
 ];
