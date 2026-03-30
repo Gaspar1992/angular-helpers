@@ -7,6 +7,10 @@ import {
   signal,
   viewChild,
   ElementRef,
+  effect,
+  untracked,
+  Injector,
+  runInInjectionContext,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DecimalPipe } from '@angular/common';
@@ -82,19 +86,19 @@ import {
         <div class="svc-result">
           <div class="kv-row">
             <span class="kv-key">width</span>
-            <span class="kv-val mono">{{ fnRef.width() | number: '1.0-0' }} px</span>
+            <span class="kv-val mono">{{ fnRef().width() | number: '1.0-0' }} px</span>
           </div>
           <div class="kv-row">
             <span class="kv-key">height</span>
-            <span class="kv-val mono">{{ fnRef.height() | number: '1.0-0' }} px</span>
+            <span class="kv-val mono">{{ fnRef().height() | number: '1.0-0' }} px</span>
           </div>
           <div class="kv-row">
             <span class="kv-key">inlineSize</span>
-            <span class="kv-val mono">{{ fnRef.inlineSize() | number: '1.0-0' }}</span>
+            <span class="kv-val mono">{{ fnRef().inlineSize() | number: '1.0-0' }}</span>
           </div>
           <div class="kv-row">
             <span class="kv-key">blockSize</span>
-            <span class="kv-val mono">{{ fnRef.blockSize() | number: '1.0-0' }}</span>
+            <span class="kv-val mono">{{ fnRef().blockSize() | number: '1.0-0' }}</span>
           </div>
         </div>
       }
@@ -141,28 +145,31 @@ import {
 })
 export class ResizeObserverDemoComponent implements OnDestroy {
   private readonly svc = inject(ResizeObserverService);
+  private readonly injector = inject(Injector);
   private readonly subs: Subscription[] = [];
-  readonly fnRef: ResizeRef;
 
   readonly supported = this.svc.isSupported();
   readonly resizeBoxRef = viewChild<ElementRef>('resizeBox');
   readonly elementSize = signal<ElementSize | null>(null);
   readonly observing = signal(false);
   readonly apiMode = signal<'Service' | 'Signal Fn'>('Service');
+  readonly fnRef = signal<ResizeRef>({
+    size: signal<ElementSize | null>(null).asReadonly(),
+    width: signal(0).asReadonly(),
+    height: signal(0).asReadonly(),
+    inlineSize: signal(0).asReadonly(),
+    blockSize: signal(0).asReadonly(),
+  });
 
   constructor() {
-    const el = this.resizeBoxRef();
-    if (el) {
-      this.fnRef = injectResizeObserver(el);
-    } else {
-      this.fnRef = {
-        size: signal(null).asReadonly(),
-        width: signal(0).asReadonly(),
-        height: signal(0).asReadonly(),
-        inlineSize: signal(0).asReadonly(),
-        blockSize: signal(0).asReadonly(),
-      };
-    }
+    effect(() => {
+      const el = this.resizeBoxRef();
+      if (el) {
+        untracked(() =>
+          this.fnRef.set(runInInjectionContext(this.injector, () => injectResizeObserver(el))),
+        );
+      }
+    });
   }
 
   setMode(mode: 'Service' | 'Signal Fn'): void {

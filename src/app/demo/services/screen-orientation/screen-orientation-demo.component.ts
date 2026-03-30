@@ -10,7 +10,6 @@ import { Subscription } from 'rxjs';
 import {
   ScreenOrientationService,
   injectScreenOrientation,
-  type ScreenOrientationRef,
   type OrientationInfo,
 } from '@angular-helpers/browser-web-apis';
 
@@ -131,15 +130,13 @@ import {
 export class ScreenOrientationDemoComponent implements OnDestroy {
   private readonly svc = inject(ScreenOrientationService);
   private readonly subs: Subscription[] = [];
-  readonly fnRef: ScreenOrientationRef;
 
   readonly supported = this.svc.isSupported();
   readonly apiMode = signal<'Service' | 'Signal Fn'>('Service');
   readonly orientation = signal<OrientationInfo>({ type: 'portrait-primary', angle: 0 });
+  readonly fnRef = injectScreenOrientation();
 
   constructor() {
-    this.fnRef = injectScreenOrientation();
-
     if (this.supported) {
       this.orientation.set(this.svc.getSnapshot());
       this.subs.push(this.svc.watch().subscribe((o) => this.orientation.set(o)));
