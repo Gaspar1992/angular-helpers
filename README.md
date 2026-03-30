@@ -72,7 +72,8 @@ _Unified and safe browser API access with permissions and robust error handling_
 - 📋 **Clipboard** utilities.
 - 🎥 **Media Devices** enumeration and media access.
 - 🔐 **Centralized permission utilities**.
-- � **Device/browser API wrappers** with fallback checks.
+- ✅ **Device/browser API wrappers** with fallback checks.
+- ⚡ **Signal Fn primitives** — zero-boilerplate reactive inject functions (`injectPageVisibility`, `injectResizeObserver`, `injectIntersectionObserver`, `injectNetworkInformation`, `injectScreenOrientation`) with automatic cleanup and `viewChild` signal support.
 
 **📥 Installation:**
 
