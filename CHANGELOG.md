@@ -1,3 +1,20 @@
+# [1.5.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.4.0...v1.5.0) (2026-03-31)
+
+
+### Bug Fixes
+
+* **ci:** sync package-lock.json with new worker-http workspace ([a8dfd8b](https://github.com/Gaspar1992/angular-helpers/commit/a8dfd8b5d5ce2922761fff57866b74148477c87c))
+* **demo:** add PermissionsService to demo components ([8fb23b1](https://github.com/Gaspar1992/angular-helpers/commit/8fb23b12ed40eef8221bc4f1793e30b7515bc5a6))
+* **demo:** fix Signal Fn demos not working ([6e8d4c4](https://github.com/Gaspar1992/angular-helpers/commit/6e8d4c4723d9c1aa10399a10bf79284d8bdbaf46))
+* resolve package-lock.json merge conflict with main ([55ec0ab](https://github.com/Gaspar1992/angular-helpers/commit/55ec0abdb85b03e0eadadf0f18f3e3f3bc0f8634))
+
+
+### Features
+
+* add worker-http package scaffold and SDD research docs ([13633c4](https://github.com/Gaspar1992/angular-helpers/commit/13633c4a169a8f616bc5d541401f173722bd5528))
+* **browser-web-apis:** accept Signal<ElementRef> in inject functions ([b36309b](https://github.com/Gaspar1992/angular-helpers/commit/b36309b62dbfafec1e96dcd14df5bc3f3338adbf))
+* **browser-web-apis:** add Tier 2 services ([f89cd3b](https://github.com/Gaspar1992/angular-helpers/commit/f89cd3bdb06fd8c566cb47f45ce35ef0973ea4b5))
+
 # [1.4.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.3.0...v1.4.0) (2026-03-29)
 
 
