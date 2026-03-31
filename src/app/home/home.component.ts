@@ -1,51 +1,25 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
-
-const FEATURES = [
-  {
-    icon: '⚡',
-    title: 'Signal-based',
-    desc: 'Reactive APIs built on Angular signals and OnPush. No zone.js, no surprises.',
-  },
-  {
-    icon: '🎯',
-    title: 'Strongly Typed',
-    desc: 'Strict TypeScript throughout. Every service, every callback, every return value.',
-  },
-  {
-    icon: '🛡️',
-    title: 'Off-main-thread',
-    desc: 'Regex and HTTP run in isolated Web Workers. ReDoS protection and non-blocking requests.',
-  },
-  {
-    icon: '🌳',
-    title: 'Tree-shakable',
-    desc: 'Opt-in provider model. Include only what you use. Production bundles stay lean.',
-  },
-  {
-    icon: '🔒',
-    title: 'Permission-aware',
-    desc: 'Permission checks and secure-context validation built into every browser service.',
-  },
-  {
-    icon: '♻️',
-    title: 'Lifecycle-safe',
-    desc: 'DestroyRef on every service. Workers, streams, and timers always clean up.',
-  },
-];
-
-const STATS = [
-  { value: '37', label: 'Browser API services' },
-  { value: '3', label: 'Focused packages' },
-  { value: '9', label: 'Signal primitives' },
-  { value: 'MIT', label: 'Open source' },
-];
+import { CodeWindowComponent } from '../shared/components/code-window/code-window.component';
+import { FeatureCardComponent } from '../shared/components/feature-card/feature-card.component';
+import { PackageCardComponent } from '../shared/components/package-card/package-card.component';
+import { StatsBarComponent } from '../shared/components/stats-bar/stats-bar.component';
+import { SiteFooterComponent } from '../shared/components/site-footer/site-footer.component';
+import { HOME_FEATURES, HOME_STATS, HOME_PACKAGES, HOME_CODE_EXAMPLES } from './home.config';
 
 @Component({
   selector: 'app-home',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, NgOptimizedImage],
+  imports: [
+    RouterLink,
+    NgOptimizedImage,
+    CodeWindowComponent,
+    FeatureCardComponent,
+    PackageCardComponent,
+    StatsBarComponent,
+    SiteFooterComponent,
+  ],
   styleUrl: './home.component.css',
   template: `
     <div class="home">
@@ -95,71 +69,14 @@ const STATS = [
           </div>
 
           <div class="hero-code" aria-label="Code example">
-            <div class="code-window">
-              <div class="window-chrome" aria-hidden="true">
-                <span class="dot dot-red"></span>
-                <span class="dot dot-yellow"></span>
-                <span class="dot dot-green"></span>
-                <span class="window-title">app.config.ts</span>
-              </div>
-              <pre
-                class="window-body"
-              ><code><span class="c-kw">import</span> <span class="c-brace">&#123;</span> provideBrowserWebApis <span class="c-brace">&#125;</span> <span class="c-kw">from</span>
-      <span class="c-str">'@angular-helpers/browser-web-apis'</span><span class="c-punc">;</span>
-    <span class="c-kw">import</span> <span class="c-brace">&#123;</span> provideSecurity <span class="c-brace">&#125;</span> <span class="c-kw">from</span>
-      <span class="c-str">'@angular-helpers/security'</span><span class="c-punc">;</span>
-
-    <span class="c-kw">export const</span> <span class="c-var">appConfig</span> <span class="c-punc">=</span> <span class="c-brace">&#123;</span>
-      providers<span class="c-punc">:</span> <span class="c-brace">[</span>
-        provideBrowserWebApis<span class="c-punc">(&#123;</span>
-          enableGeolocation<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
-          enableCamera<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
-          enableWebStorage<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
-          <span class="c-cmt">// ... 34 more APIs</span>
-        <span class="c-punc">&#125;),</span>
-        provideSecurity<span class="c-punc">(&#123;</span>
-          enableRegexSecurity<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
-        <span class="c-punc">&#125;),</span>
-      <span class="c-brace">]</span>
-    <span class="c-brace">&#125;;</span>
-    </code></pre>
-            </div>
-
-            <div class="code-window">
-              <div class="window-chrome" aria-hidden="true">
-                <span class="dot dot-red"></span>
-                <span class="dot dot-yellow"></span>
-                <span class="dot dot-green"></span>
-                <span class="window-title">map.component.ts</span>
-              </div>
-              <pre
-                class="window-body"
-              ><code><span class="c-kw">export class</span> <span class="c-type">MapComponent</span> <span class="c-brace">&#123;</span>
-      <span class="c-kw">private</span> geo <span class="c-punc">=</span> inject<span class="c-punc">(</span>GeolocationService<span class="c-punc">);</span>
-      position <span class="c-punc">=</span> signal<span class="c-punc">&lt;</span>GeolocationPosition <span class="c-punc">|</span> <span class="c-bool">null</span><span class="c-punc">&gt;(</span><span class="c-bool">null</span><span class="c-punc">);</span>
-
-      <span class="c-kw">async</span> <span class="c-fn">locate</span><span class="c-punc">() &#123;</span>
-        <span class="c-kw">const</span> pos <span class="c-punc">=</span> <span class="c-kw">await</span> <span class="c-kw">this</span><span class="c-punc">.</span>geo
-          <span class="c-punc">.</span>getCurrentPosition<span class="c-punc">(&#123;</span>
-            enableHighAccuracy<span class="c-punc">:</span> <span class="c-bool">true</span>
-          <span class="c-punc">&#125;);</span>
-        <span class="c-kw">this</span><span class="c-punc">.</span>position<span class="c-punc">.</span>set<span class="c-punc">(</span>pos<span class="c-punc">);</span>
-      <span class="c-punc">&#125;</span>
-    <span class="c-brace">&#125;</span>
-    </code></pre>
-            </div>
+            @for (ex of codeExamples; track ex.title) {
+              <app-code-window [title]="ex.title" [code]="ex.html" />
+            }
           </div>
         </div>
       </section>
 
-      <div class="stats-bar" role="list">
-        @for (s of stats; track s.label) {
-          <div class="stat" role="listitem">
-            <span class="stat-value">{{ s.value }}</span>
-            <span class="stat-label">{{ s.label }}</span>
-          </div>
-        }
-      </div>
+      <app-stats-bar [stats]="stats" />
 
       <section class="section" aria-labelledby="features-title">
         <div class="section-inner">
@@ -169,11 +86,7 @@ const STATS = [
           </h2>
           <div class="features-grid">
             @for (f of features; track f.title) {
-              <div class="feature-card">
-                <span class="feature-icon" aria-hidden="true">{{ f.icon }}</span>
-                <h3>{{ f.title }}</h3>
-                <p>{{ f.desc }}</p>
-              </div>
+              <app-feature-card [feature]="f" />
             }
           </div>
         </div>
@@ -185,83 +98,9 @@ const STATS = [
           <h2 id="packages-title" class="section-heading">Pick what you need.</h2>
 
           <div class="split-cards">
-            <div class="split-card">
-              <div class="split-card-header">
-                <span class="split-icon" aria-hidden="true">🌐</span>
-                <div>
-                  <h3>browser-web-apis</h3>
-                  <code class="pkg-pill">@angular-helpers/browser-web-apis</code>
-                </div>
-              </div>
-              <p>
-                37 typed Angular services covering Camera, Geolocation, Storage, WebSocket, Bluetooth,
-                NFC, Payments, Gamepad, and 29 more. Plus 9 signal-based inject() primitives.
-              </p>
-              <ul class="feature-list" aria-label="Included services">
-                <li>Geolocation · Camera · MediaDevices · MediaRecorder</li>
-                <li>WebSocket · WebWorker · ServerSentEvents · BroadcastChannel</li>
-                <li>Clipboard · Notifications · WebStorage · FileSystemAccess</li>
-                <li>Bluetooth · NFC · USB · Gamepad · Payments · +21 more</li>
-              </ul>
-              <div class="card-actions">
-                <div class="install-chip">
-                  <code>npm i @angular-helpers/browser-web-apis</code>
-                </div>
-                <a routerLink="/docs/browser-web-apis" class="card-link">Documentation →</a>
-              </div>
-            </div>
-
-            <div class="split-card">
-              <div class="split-card-header">
-                <span class="split-icon" aria-hidden="true">🛡️</span>
-                <div>
-                  <h3>security</h3>
-                  <code class="pkg-pill">@angular-helpers/security</code>
-                </div>
-              </div>
-              <p>
-                Stop ReDoS before it starts. Runs regular expressions in an isolated Web Worker with
-                timeout protection, complexity analysis, and a fluent builder API.
-              </p>
-              <ul class="feature-list" aria-label="Security features">
-                <li>Worker-isolated regex execution</li>
-                <li>Configurable timeout (default 5 000 ms)</li>
-                <li>Pattern complexity analysis</li>
-                <li>RegexSecurityBuilder fluent API</li>
-              </ul>
-              <div class="card-actions">
-                <div class="install-chip">
-                  <code>npm i @angular-helpers/security</code>
-                </div>
-                <a routerLink="/docs/security" class="card-link">Documentation →</a>
-              </div>
-            </div>
-
-            <div class="split-card">
-              <div class="split-card-header">
-                <span class="split-icon" aria-hidden="true">🚀</span>
-                <div>
-                  <h3>worker-http <span class="preview-badge">Preview</span></h3>
-                  <code class="pkg-pill">@angular-helpers/worker-http</code>
-                </div>
-              </div>
-              <p>
-                Move HTTP to a Web Worker. Off-main-thread request pipelines with configurable
-                interceptors, WebCrypto HMAC signing, and pluggable serialization.
-              </p>
-              <ul class="feature-list" aria-label="Worker HTTP features">
-                <li>Off-main-thread HTTP pipelines</li>
-                <li>Typed RPC bridge (transport layer)</li>
-                <li>WebCrypto HMAC request signing</li>
-                <li>Pluggable serializers (TOON, seroval)</li>
-              </ul>
-              <div class="card-actions">
-                <div class="install-chip">
-                  <code>npm i @angular-helpers/worker-http</code>
-                </div>
-                <span class="card-link card-link-muted">Docs coming soon</span>
-              </div>
-            </div>
+            @for (p of packages; track p.npmPackage) {
+              <app-package-card [pkg]="p" />
+            }
           </div>
         </div>
       </section>
@@ -278,29 +117,13 @@ const STATS = [
         </div>
       </section>
 
-      <footer class="site-footer">
-        <div class="footer-inner">
-          <div class="footer-brand">
-            <img ngSrc="icon.webp" alt="Angular Helpers" width="24" height="24" class="footer-icon" />
-            <span>Angular Helpers</span>
-          </div>
-          <nav class="footer-nav" aria-label="Footer navigation">
-            <a routerLink="/docs">Docs</a>
-            <a routerLink="/demo">Demo</a>
-            <a
-              href="https://github.com/Gaspar1992/angular-helpers"
-              target="_blank"
-              rel="noopener noreferrer"
-              >GitHub ↗</a
-            >
-          </nav>
-          <p class="footer-copy">MIT License · Open source</p>
-        </div>
-      </footer>
+      <app-site-footer />
     </div>
   `,
 })
 export class HomeComponent {
-  protected readonly features = FEATURES;
-  protected readonly stats = STATS;
+  protected readonly features = HOME_FEATURES;
+  protected readonly stats = HOME_STATS;
+  protected readonly packages = HOME_PACKAGES;
+  protected readonly codeExamples = HOME_CODE_EXAMPLES;
 }

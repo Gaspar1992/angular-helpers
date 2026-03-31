@@ -73,12 +73,39 @@ _Unified and safe browser API access with permissions and robust error handling_
 - 🎥 **Media Devices** enumeration and media access.
 - 🔐 **Centralized permission utilities**.
 - ✅ **Device/browser API wrappers** with fallback checks.
-- ⚡ **Signal Fn primitives** — zero-boilerplate reactive inject functions (`injectPageVisibility`, `injectResizeObserver`, `injectIntersectionObserver`, `injectNetworkInformation`, `injectScreenOrientation`) with automatic cleanup and `viewChild` signal support.
+- ⚡ **Signal Fn primitives** — 9 zero-boilerplate reactive inject functions (`injectPageVisibility`, `injectResizeObserver`, `injectIntersectionObserver`, `injectNetworkInformation`, `injectScreenOrientation`, `injectMutationObserver`, `injectPerformanceObserver`, `injectIdleDetector`, `injectGamepad`) with automatic cleanup and `viewChild` signal support.
 
 **📥 Installation:**
 
 ```bash
 npm install @angular-helpers/browser-web-apis
+```
+
+---
+
+### 🚀 `@angular-helpers/worker-http` _(Preview)_
+
+_Angular HTTP over Web Workers — off-main-thread HTTP pipelines_
+
+**🎯 What it solves:**
+
+- **Main-thread blocking** from heavy HTTP payloads and serialization.
+- **Request signing complexity** with WebCrypto HMAC.
+- **Serialization overhead** with pluggable format support.
+
+**✨ Key features:**
+
+- 🔀 **Off-main-thread HTTP** pipelines via Web Workers.
+- 🔌 **Typed RPC bridge** for structured worker communication.
+- 🔐 **WebCrypto HMAC** request signing.
+- 📦 **Pluggable serializers** (TOON, seroval, auto-detect).
+
+> ⚠️ This package is in **preview**. APIs may change before v1.0.
+
+**📥 Installation:**
+
+```bash
+npm install @angular-helpers/worker-http
 ```
 
 ---
@@ -132,6 +159,7 @@ npm run start:https
 # Install the packages you need
 npm install @angular-helpers/security
 npm install @angular-helpers/browser-web-apis
+npm install @angular-helpers/worker-http  # preview
 ```
 
 For modern Angular standalone integration, check each package's own README.
@@ -184,7 +212,8 @@ npm run lint
 angular-helpers/
 ├── packages/
 │   ├── security/          # 📦 @angular-helpers/security
-│   └── browser-web-apis/  # 📦 @angular-helpers/browser-web-apis
+│   ├── browser-web-apis/  # 📦 @angular-helpers/browser-web-apis
+│   └── worker-http/       # 📦 @angular-helpers/worker-http (preview)
 ├── src/                   # 🚀 Demo application
 ├── docs/                  # 📚 Documentation
 └── scripts/               # 🔧 Automation scripts
@@ -196,16 +225,14 @@ angular-helpers/
 
 ### Planned 🚧
 
-- **@angular-helpers/storage** - Unified storage helpers.
-- **@angular-helpers/network** - Connectivity and network-state tools.
-- **@angular-helpers/performance** - Performance monitoring helpers.
 - **@angular-helpers/pwa** - Service Worker and PWA capabilities.
+- **@angular-helpers/storage** - Unified storage helpers.
 
 ### In Progress 🔄
 
+- **@angular-helpers/worker-http** — transport, serializer, backend, interceptors, and crypto sub-entry points.
 - Runtime and bundle-size improvements.
 - More real-world examples and demos.
-- Better CLI integration and scaffolding flows.
 
 ---
 

@@ -160,7 +160,7 @@
         <p class="svc-desc">No activity yet. Run a test above.</p>
       } @else {
         <div class="msg-log" aria-live="polite">
-          @for (entry of logs(); track entry.time + entry.message) {
+          @for (entry of logs(); track entry.id) {
             <div
               class="msg-row"
               [class.msg-sent]="entry.type === 'success'"

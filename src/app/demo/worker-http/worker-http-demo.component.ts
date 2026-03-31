@@ -20,6 +20,7 @@ import type {
 } from '@angular-helpers/worker-http/crypto';
 
 interface LogEntry {
+  id: number;
   time: string;
   section: string;
   message: string;
@@ -53,6 +54,7 @@ export class WorkerHttpDemoComponent implements OnDestroy {
 
   // --- Shared log ---
   protected readonly logs = signal<LogEntry[]>([]);
+  private logCounter = 0;
 
   // ──────────────────────────────────────────────────────
   // Transport tests
@@ -65,7 +67,7 @@ export class WorkerHttpDemoComponent implements OnDestroy {
 
     if (!this.transport) {
       this.transport = createWorkerTransport({
-        workerUrl: new URL('./echo.worker', import.meta.url),
+        workerUrl: new URL('./echo.worker.ts', import.meta.url),
         maxInstances: 1,
       });
     }
@@ -91,7 +93,7 @@ export class WorkerHttpDemoComponent implements OnDestroy {
       this.transport.terminate();
     }
     this.transport = createWorkerTransport({
-      workerUrl: new URL('./echo.worker', import.meta.url),
+      workerUrl: new URL('./echo.worker.ts', import.meta.url),
       maxInstances: 4,
     });
 
@@ -226,7 +228,8 @@ export class WorkerHttpDemoComponent implements OnDestroy {
       hour12: false,
       fractionalSecondDigits: 3,
     });
-    this.logs.update((prev) => [{ time, section, message, type }, ...prev]);
+    const id = this.logCounter++;
+    this.logs.update((prev) => [{ id, time, section, message, type }, ...prev]);
   }
 
   ngOnDestroy(): void {
