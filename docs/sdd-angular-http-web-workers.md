@@ -759,191 +759,137 @@ With this API design, the DX concern from section 8 changes:
 
 ---
 
-## 11. Deep Research: Weak Points and Mitigating Libraries
+## 11. Architectural Decisions (Post-Research)
 
-> Date: 2026-03-30  
-> Status: Research complete
-
-This section examines each identified weakness in depth, catalogs existing libraries that could help, and documents new concerns discovered during research.
-
----
-
-### 11.1 Serialization Overhead — Real-World Benchmarks
-
-The concern in section 4.4 is valid but **quantifiable**. Surma (Google Chrome team) published benchmarks on `postMessage` performance ([surma.dev/things/is-postmessage-slow](https://surma.dev/things/is-postmessage-slow/)):
-
-| Payload size    | Budget (RAIL)       | Fits within budget?   | Notes                                  |
-| --------------- | ------------------- | --------------------- | -------------------------------------- |
-| ≤ 10 KiB        | 16ms (animation)    | ✅ Yes                | Safe even with JS-driven animations    |
-| ≤ 100 KiB       | 100ms (interaction) | ✅ Yes                | Safe for user-interaction response     |
-| 100 KiB – 1 MiB | 100ms               | ⚠️ Device-dependent   | Low-end mobile may exceed budget       |
-| > 1 MiB         | —                   | ❌ Needs optimization | Must use Transferable or binary format |
-
-**Key insight**: Structured clone cost scales with _object complexity_ (depth, number of keys), not just byte size. A flat array of 10,000 numbers is far cheaper than a deeply nested object of the same JSON size.
-
-**Practical implication**: Standard API responses (< 100 KiB) will have negligible overhead. The library should detect large payloads and automatically switch strategies (see 11.2).
-
-#### Libraries for enhanced serialization
-
-| Library                   | Size    | Key advantage                                               | Gap                                            |
-| ------------------------- | ------- | ----------------------------------------------------------- | ---------------------------------------------- |
-| **superjson**             | ~3 KiB  | Preserves `Date`, `Map`, `Set`, `BigInt`; `registerClass()` | No circular ref support                        |
-| **seroval**               | ~5 KiB  | Circular refs, `ReadableStream`, custom serializers         | More complex API                               |
-| **devalue** (Rich Harris) | ~1 KiB  | Circular refs, used in SvelteKit; very small                | No `registerClass()` equivalent                |
-| **codablejson**           | ~2 KiB  | 3x faster than superjson, declarative schema                | Newer, smaller community                       |
-| **FlatBuffers** (Google)  | ~15 KiB | **Zero-copy** from `ArrayBuffer`; schema-compiled           | Requires `.fbs` schema; overkill for most HTTP |
-
-**Recommendation**: Use `seroval` as default (best coverage) with `withWorkerSerialization()` escape hatch for FlatBuffers in extreme cases.
+> Date: 2026-03-31  
+> Deep research: [research/http-worker-deep-research.md](research/http-worker-deep-research.md)  
+> Product breakdown: [research/http-worker-product-breakdown.md](research/http-worker-product-breakdown.md)
 
 ---
 
-### 11.2 Transferable Objects — The Zero-Copy Escape Hatch
+### 11.1 Design Principle: Worker as a Black Box
 
-When structured clone is too slow, `postMessage` supports **transferring** ownership of specific objects at near-zero cost:
+The developer must never feel they are working with a worker. The worker is an **implementation detail** — the API surface must feel identical to Angular's `HttpClient`.
 
-```typescript
-// Transfer an ArrayBuffer — near-instant regardless of size
-worker.postMessage(buffer, [buffer]);
-// After transfer, buffer.byteLength === 0 on the sending side
+- **RxJS, Observables, DI** — all stay on the Angular (main thread) side
+- **Worker internals** (postMessage, serialization, fetch, cancellation) — completely hidden
+- **Interceptors** — the developer configures them in `app.config.ts`; a build-time tool generates the worker bundle
+
 ```
-
-**Transferable types relevant to this library**:
-
-| Type             | Use case                                               | Browser support                    |
-| ---------------- | ------------------------------------------------------ | ---------------------------------- |
-| `ArrayBuffer`    | Binary response bodies (`responseType: 'arraybuffer'`) | ✅ All modern browsers             |
-| `MessagePort`    | Dedicated communication channel per request            | ✅ All modern browsers             |
-| `ReadableStream` | Streaming large responses chunk-by-chunk               | ⚠️ See 11.3                        |
-| `ImageBitmap`    | Image processing results                               | ✅ All modern (iOS Safari partial) |
-
-**Optimization strategy for the library**:
-
-```typescript
-// Auto-detect and use transfer when beneficial
-if (response.responseType === 'arraybuffer') {
-  // Transfer the ArrayBuffer — zero copy
-  postMessage({ ...meta, body: response.body }, [response.body]);
-} else if (jsonSize > TRANSFER_THRESHOLD) {
-  // Encode to ArrayBuffer, transfer, decode on other side
-  const encoded = new TextEncoder().encode(JSON.stringify(response.body));
-  postMessage({ ...meta, body: encoded.buffer }, [encoded.buffer]);
-} else {
-  // Small payload — structured clone is fast enough
-  postMessage(serializedResponse);
-}
+What the developer sees:          What the library does internally:
+─────────────────────────         ──────────────────────────────────
+provideWorkerHttpClient(...)      → registers WorkerHttpBackend
+this.http.get<User[]>(url)        → serialize → postMessage → worker fetch → deserialize → Observable
+{ worker: 'secure' }              → routes to correct worker via HttpContext
 ```
 
 ---
 
-### 11.3 Transferable Streams — Critical Browser Gap
+### 11.2 Build-Time Transpilation for Interceptors
 
-**Transferable `ReadableStream`** would be the ideal solution for large/streaming responses: pipe the `fetch()` response body directly from the worker to the main thread, chunk by chunk, without buffering the entire response.
+Interceptors cannot be dynamically sent to workers (functions are not serializable). Instead of requiring the developer to manually write worker files, the library uses **build-time code generation** — the same approach Angular CLI uses with `ng generate web-worker`.
 
-**Browser support (as of March 2026)**:
+#### How it works
 
-| Browser           | Transferable ReadableStream | Notes                       |
-| ----------------- | --------------------------- | --------------------------- |
-| Chrome/Edge 87+   | ✅ Supported                | Since Dec 2020              |
-| Firefox 103+      | ✅ Supported                | Since Jul 2022              |
-| **Safari**        | ❌ **Not supported**        | No signal of implementation |
-| **Safari on iOS** | ❌ **Not supported**        | Same WebKit limitation      |
-| Global coverage   | **~80.86%**                 | Safari is the blocker       |
+1. Developer declares interceptors in `withWorkerConfigs()` (Angular config)
+2. A **schematic** (`ng generate @angular-helpers/worker-http-backend:worker secure`) generates the worker file
+3. An **esbuild plugin** (or Angular builder hook) reads the config at build time and bundles interceptors into the worker
 
-Source: [caniuse.com/mdn-api_readablestream_transferable](https://caniuse.com/mdn-api_readablestream_transferable)
-
-#### Polyfill: remote-web-streams
-
-[`remote-web-streams`](https://github.com/MattiasBuelens/remote-web-streams) provides a `MessageChannel`-based polyfill that enables streaming between contexts:
-
-```typescript
-import { RemoteReadableStream, RemoteWritableStream } from 'remote-web-streams';
-
-// Main thread: create stream pair
-const { writable, readablePort } = new RemoteWritableStream();
-const { readable, writablePort } = new RemoteReadableStream();
-
-// Transfer ports to worker
-worker.postMessage({ readablePort, writablePort }, [readablePort, writablePort]);
-
-// Worker: pipe fetch response through transform, results stream back
-await response.body.pipeThrough(transformStream).pipeTo(fromWritablePort(writablePort));
+```
+Developer writes:                     Build tool generates:
+─────────────────                     ─────────────────────
+withWorkerConfigs([{                  workers/secure.worker.ts
+  id: 'secure',                       ├── import { createWorkerPipeline }
+  interceptors: [hmac, validate],     ├── import { hmac, validate }
+}])                                   └── createWorkerPipeline([hmac, validate])
 ```
 
-**Trade-off**: The polyfill uses `MessageChannel` internally, so each chunk requires a `postMessage` round-trip. For high-frequency small chunks, this adds overhead vs native transferable streams. Still significantly better than buffering the entire response.
-
-**Recommendation**: Use native transferable streams when available, fall back to `remote-web-streams` for Safari. This should be transparent to the consumer.
+**Key benefit**: The developer never writes `postMessage`, never imports `createWorkerPipeline`, never touches worker code. They configure interceptors in Angular-land; the build tool does the rest.
 
 ---
 
-### 11.4 Request Cancellation — A Missing Primitive
+### 11.3 Serialization Strategy: TOON for Large Payloads
 
-**This is a newly identified weak point not covered in the original analysis.**
+Standard `postMessage` structured clone works fine for small payloads (< 100 KiB, per [Surma's benchmarks](https://surma.dev/things/is-postmessage-slow/)). For large array responses, **TOON** ([Token-Oriented Object Notation](https://github.com/toon-format/toon)) provides significant size reduction by declaring the schema once:
 
-Angular's `HttpClient` supports cancellation via Observable `unsubscribe()`, which internally calls `AbortController.abort()`. When the HTTP request runs inside a worker, cancellation becomes non-trivial:
+```
+// JSON — keys repeated per object
+[{"id":1,"name":"Alice","role":"admin"},{"id":2,"name":"Bob","role":"user"}]
 
-- **`AbortSignal` is NOT transferable** via `postMessage` ([WHATWG DOM issue #948](https://github.com/whatwg/dom/issues/948), open since 2021, no resolution)
-- The main thread cannot directly abort a `fetch()` call running inside a worker
-
-#### Cancellation strategies
-
-| Strategy                         | Mechanism                                       | Pros                               | Cons                                            |
-| -------------------------------- | ----------------------------------------------- | ---------------------------------- | ----------------------------------------------- |
-| **Cancel message**               | `postMessage({ type: 'cancel', requestId })`    | Simple, no special APIs            | Async — race window before worker processes it  |
-| **SharedArrayBuffer + Atomics**  | Shared flag checked synchronously by worker     | Synchronous cross-thread signaling | Requires COOP/COEP headers (see 11.5)           |
-| **MessagePort per request**      | Dedicated port; closing it signals cancellation | Clean lifecycle per request        | More overhead for port creation/transfer        |
-| **Worker.terminate() + respawn** | Nuclear option                                  | Guaranteed cancellation            | Kills ALL in-flight requests; expensive respawn |
-
-**Recommended approach**: Cancel message + `AbortController` inside worker:
-
-```typescript
-// Main thread (WorkerHttpBackend)
-cancel(requestId: string): void {
-  this.worker.postMessage({ type: 'cancel', requestId });
-}
-
-// Worker side
-const controllers = new Map<string, AbortController>();
-
-self.onmessage = async (event) => {
-  if (event.data.type === 'cancel') {
-    controllers.get(event.data.requestId)?.abort();
-    controllers.delete(event.data.requestId);
-    return;
-  }
-
-  const controller = new AbortController();
-  controllers.set(event.data.requestId, controller);
-
-  try {
-    const response = await fetch(event.data.url, {
-      ...event.data.options,
-      signal: controller.signal,
-    });
-    // ... process and return
-  } finally {
-    controllers.delete(event.data.requestId);
-  }
-};
+// TOON — schema once, values as rows (30–60% smaller for uniform arrays)
+[2]{id,name,role}:
+1,Alice,admin
+2,Bob,user
 ```
 
-**Limitation**: There is a race window between sending cancel and the worker processing it. For HTTP use cases this is acceptable — the fetch itself is already asynchronous.
+**Auto-detection strategy** (internal, invisible to the developer):
+
+| Payload shape                 | Serialization                    | Transfer method                         |
+| ----------------------------- | -------------------------------- | --------------------------------------- |
+| Small object (< 100 KiB)      | Structured clone (native)        | `postMessage` (copy)                    |
+| Uniform array (e.g. `User[]`) | TOON → TextEncoder → ArrayBuffer | `postMessage` with transfer (zero-copy) |
+| Complex types (`Date`, `Map`) | seroval                          | `postMessage` (copy)                    |
+| Binary data                   | None                             | `ArrayBuffer` transfer (zero-copy)      |
+
+The developer never chooses — the serializer auto-detects. Overridable via `withWorkerSerialization()`.
 
 ---
 
-### 11.5 Cross-Origin Isolation (COOP/COEP) Constraints
+### 11.4 Key Findings from Deep Research
 
-`SharedArrayBuffer` (needed for advanced cancellation and shared memory patterns) requires **cross-origin isolation**:
+Full details in [research/http-worker-deep-research.md](research/http-worker-deep-research.md). Summary:
 
-```
-Cross-Origin-Opener-Policy: same-origin
-Cross-Origin-Embedder-Policy: require-corp
-```
+| Topic                           | Finding                                                                   | Impact                                     |
+| ------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------ |
+| **postMessage overhead**        | ≤ 100 KiB within RAIL 100ms budget (Surma)                                | ✅ Not a blocker for standard APIs         |
+| **WebCrypto in workers**        | `SubtleCrypto` fully available; genuine security boundary                 | ✅✅ Strongest differentiator              |
+| **AbortSignal**                 | NOT transferable (WHATWG #948, open since 2021)                           | ⚠️ Cancel-message pattern needed           |
+| **Transferable ReadableStream** | ~80.86% coverage; Safari missing                                          | ⚠️ `remote-web-streams` polyfill available |
+| **Worker memory**               | ~2–5 MB each; not GC'd; must terminate via `DestroyRef`                   | ⚠️ Lifecycle management required           |
+| **DevTools**                    | Worker `fetch()` visible in Network tab (all browsers)                    | ✅ Debugging preserved                     |
+| **Testing**                     | Pure-fn interceptors testable without workers; MSW mocks fetch in workers | ✅ Practical                               |
+| **COOP/COEP**                   | `SharedArrayBuffer` requires cross-origin isolation headers               | ⚠️ Must be opt-in only                     |
 
-**Impact on the library**:
+---
 
-- Apps using `SharedArrayBuffer`-based optimizations must serve these headers
-- Third-party resources (images, scripts, iframes) must include `Cross-Origin-Resource-Policy: cross-origin` or fail to load
-- Many CDNs and third-party services do NOT set these headers, breaking embeds
-- **GitHub Pages, Netlify, Vercel** support custom headers; many shared hosting solutions do not
+### 11.5 Multi-Package Product Strategy
 
-**Decision**: `SharedArrayBuffer` optimizations should be **opt-in only** (`withSharedMemory()`), never required. The default cancel-message approach works without COOP/COEP.
+The full vision is too complex for one package. It breaks into **5 independent, composable packages**:
+
+| Package                      | Responsibility                                      | Dependencies                   |
+| ---------------------------- | --------------------------------------------------- | ------------------------------ |
+| **P1** `worker-transport`    | Typed RPC bridge, pool, lifecycle, cancellation     | `rxjs`                         |
+| **P2** `worker-serializer`   | TOON, seroval, auto-detect strategy                 | Optional peers                 |
+| **P3** `worker-http-backend` | Angular `HttpBackend` replacement (the "black box") | P1, P2, `@angular/common/http` |
+| **P4** `worker-interceptors` | Pre-built pure-fn interceptors (HMAC, cache, retry) | Zero deps                      |
+| **P5** `worker-crypto`       | WebCrypto primitives (HMAC, AES, hashing)           | Zero deps                      |
+
+**Delivery order**: P1 + P5 (foundation) → P2 + P4 (serialization + interceptors) → P3 (Angular integration).
+
+Full breakdown in [research/http-worker-product-breakdown.md](research/http-worker-product-breakdown.md).
+
+---
+
+## 12. Revised Feasibility Verdict
+
+| Dimension                 | §8 Assessment | Post-Research                            | Δ   |
+| ------------------------- | ------------- | ---------------------------------------- | --- |
+| **Technical feasibility** | ✅ Viable     | ✅ Confirmed with library ecosystem      | —   |
+| **Serialization**         | ⚠️ Concern    | ✅ TOON + auto-detect + Transferable     | ⬆   |
+| **Security (crypto)**     | ✅✅          | ✅✅✅ WebCrypto + genuine isolation     | ⬆   |
+| **Request cancellation**  | —             | ⚠️ Cancel-message viable                 | 🆕  |
+| **DX**                    | ⚠️ Complex    | ✅ Black box + build-time generation     | ⬆   |
+| **SSR**                   | ❌ Fallback   | ❌ Still needs fallback                  | —   |
+| **Ecosystem novelty**     | ✅            | ✅ Confirmed — nothing equivalent exists | —   |
+
+**Verdict**: Move forward. Start with **P1 (worker-transport) + P5 (worker-crypto)** as independent, high-value deliverables.
+
+---
+
+## 13. Next Steps
+
+1. **P1 POC**: `worker-transport` — typed postMessage bridge with Observable API, cancellation, and pool
+2. **P5 POC**: `worker-crypto` — HMAC signing + AES encryption helpers using WebCrypto
+3. **Benchmark**: Validate TOON vs JSON vs structured clone with real API payloads (10 KiB, 100 KiB, 1 MiB)
+4. **P3 Schematic**: Prototype the `ng generate` schematic for worker file generation
+5. **Integration test**: Full round-trip with Playwright + MSW
