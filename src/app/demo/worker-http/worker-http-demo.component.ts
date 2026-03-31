@@ -67,7 +67,8 @@ export class WorkerHttpDemoComponent implements OnDestroy {
 
     if (!this.transport) {
       this.transport = createWorkerTransport({
-        workerUrl: new URL('./echo.worker.ts', import.meta.url),
+        workerFactory: () =>
+          new Worker(new URL('./echo.worker.ts', import.meta.url), { type: 'module' }),
         maxInstances: 1,
       });
     }
@@ -93,7 +94,8 @@ export class WorkerHttpDemoComponent implements OnDestroy {
       this.transport.terminate();
     }
     this.transport = createWorkerTransport({
-      workerUrl: new URL('./echo.worker.ts', import.meta.url),
+      workerFactory: () =>
+        new Worker(new URL('./echo.worker.ts', import.meta.url), { type: 'module' }),
       maxInstances: 4,
     });
 
