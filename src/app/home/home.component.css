@@ -270,6 +270,10 @@ h1 {
 .c-brace {
   color: #cdd6f4;
 }
+.c-cmt {
+  color: #585b70;
+  font-style: italic;
+}
 
 /* ── Stats bar ────────────────────────── */
 .stats-bar {
@@ -444,6 +448,12 @@ h1 {
   }
 }
 
+@media (min-width: 1080px) {
+  .split-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .split-card {
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -555,6 +565,27 @@ h1 {
 
 .card-link:hover {
   color: #8da8f8;
+}
+
+.card-link-muted {
+  color: var(--text-muted);
+  font-style: italic;
+  cursor: default;
+}
+
+.preview-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #fab387;
+  background: rgba(250, 179, 135, 0.12);
+  border: 1px solid rgba(250, 179, 135, 0.25);
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  vertical-align: middle;
+  margin-left: var(--sp-2);
 }
 
 .card-link:focus-visible {

@@ -14,6 +14,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'demo/worker-http',
+    loadComponent: () =>
+      import('./demo/worker-http/worker-http-demo.component').then(
+        (m) => m.WorkerHttpDemoComponent,
+      ),
+    title: 'Worker HTTP — POC',
+  },
+  {
     path: 'demo',
     loadComponent: () =>
       import('./demo/browser-apis/browser-apis').then((m) => m.BrowserApisComponent),
