@@ -42,9 +42,23 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
     typeof navigator !== 'undefined' ? (navigator.hardwareConcurrency ?? 4) : 1,
   );
 
+  function createWorker(): Worker {
+    if (config.workerFactory) {
+      return config.workerFactory();
+    }
+    if (config.workerUrl) {
+      const url =
+        typeof config.workerUrl === 'string'
+          ? new URL(config.workerUrl, document.baseURI)
+          : config.workerUrl;
+      return new Worker(url, { type: 'module' });
+    }
+    throw new Error('Either workerFactory or workerUrl must be provided');
+  }
+
   function getOrCreateWorker(): Worker {
     if (workers.length < maxInstances) {
-      const worker = config.workerFactory();
+      const worker = createWorker();
       workers.push(worker);
       return worker;
     }

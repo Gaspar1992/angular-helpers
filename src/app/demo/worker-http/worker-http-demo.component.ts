@@ -19,6 +19,10 @@ import type {
   EncryptedPayload,
 } from '@angular-helpers/worker-http/crypto';
 
+// Worker URL - using pre-transpiled worker from assets
+// This works in both dev and production (including 404.html fallback)
+const ECHO_WORKER_URL = 'assets/workers/echo.worker.js';
+
 interface LogEntry {
   id: number;
   time: string;
@@ -67,8 +71,7 @@ export class WorkerHttpDemoComponent implements OnDestroy {
 
     if (!this.transport) {
       this.transport = createWorkerTransport({
-        workerFactory: () =>
-          new Worker(new URL('./echo.worker.ts', import.meta.url), { type: 'module' }),
+        workerUrl: ECHO_WORKER_URL,
         maxInstances: 1,
       });
     }
@@ -94,8 +97,7 @@ export class WorkerHttpDemoComponent implements OnDestroy {
       this.transport.terminate();
     }
     this.transport = createWorkerTransport({
-      workerFactory: () =>
-        new Worker(new URL('./echo.worker.ts', import.meta.url), { type: 'module' }),
+      workerUrl: ECHO_WORKER_URL,
       maxInstances: 4,
     });
 
@@ -185,7 +187,7 @@ export class WorkerHttpDemoComponent implements OnDestroy {
   async encryptData(): Promise<void> {
     try {
       if (!this.aesEncryptor) {
-        const keyMaterial = new TextEncoder().encode('32-byte-secret-key-for-aes-256!');
+        const keyMaterial = new TextEncoder().encode('32-byte-secret-key-for-aes-256!!');
         this.aesEncryptor = await createAesEncryptor({ keyMaterial, algorithm: 'AES-GCM' });
       }
       const plaintext = 'Sensitive payload: user_id=42&token=abc123';

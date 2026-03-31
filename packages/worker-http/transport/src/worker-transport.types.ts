@@ -5,7 +5,7 @@ import type { Observable } from 'rxjs';
  *
  * IMPORTANT: Angular CLI's esbuild bundler only detects web workers when
  * `new Worker(new URL(...))` appears directly in application source code.
- * Use `workerFactory` to ensure proper bundling.
+ * For pre-transpiled workers, use `workerUrl` instead.
  */
 export interface WorkerTransportConfig {
   /**
@@ -18,7 +18,21 @@ export interface WorkerTransportConfig {
    * workerFactory: () => new Worker(new URL('./echo.worker.ts', import.meta.url), { type: 'module' })
    * ```
    */
-  workerFactory: () => Worker;
+  workerFactory?: () => Worker;
+
+  /**
+   * URL to a pre-transpiled worker file.
+   * Use this when workers are built separately (e.g., with Vite) and distributed
+   * as static assets. Resolves against the document's base URI.
+   *
+   * @example
+   * ```typescript
+   * workerUrl: 'assets/workers/echo.worker.js'
+   * // or with full URL
+   * workerUrl: new URL('workers/echo.worker.js', import.meta.url).href
+   * ```
+   */
+  workerUrl?: string | URL;
 
   /** Maximum number of worker instances in the pool (default: 1) */
   maxInstances?: number;

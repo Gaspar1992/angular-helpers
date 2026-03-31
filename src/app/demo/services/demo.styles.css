@@ -529,7 +529,7 @@
 
 .msg-dir {
   flex-shrink: 0;
-  width: 40px;
+  width: auto;
   font-weight: 600;
   text-transform: uppercase;
 }
