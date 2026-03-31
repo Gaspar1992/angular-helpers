@@ -28,6 +28,9 @@ jobs:
       - name: Generate SSL certificates
         run: npm run ssl:generate
 
+      - name: Build worker files
+        run: npx vite build
+
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
@@ -53,6 +56,9 @@ jobs:
 
       - name: Generate SSL certificates
         run: npm run ssl:generate
+
+      - name: Build worker files
+        run: npx vite build
 
       - name: Install Playwright Firefox and WebKit
         run: npx playwright install --with-deps firefox webkit
