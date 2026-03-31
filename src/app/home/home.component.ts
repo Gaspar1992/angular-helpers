@@ -15,8 +15,8 @@ const FEATURES = [
   },
   {
     icon: '🛡️',
-    title: 'Secure by Default',
-    desc: 'Regex runs in an isolated Web Worker. ReDoS attacks stopped before they start.',
+    title: 'Off-main-thread',
+    desc: 'Regex and HTTP run in isolated Web Workers. ReDoS protection and non-blocking requests.',
   },
   {
     icon: '🌳',
@@ -36,9 +36,9 @@ const FEATURES = [
 ];
 
 const STATS = [
-  { value: '13', label: 'Browser API services' },
-  { value: '2', label: 'Focused packages' },
-  { value: '100%', label: 'Standalone Angular' },
+  { value: '37', label: 'Browser API services' },
+  { value: '3', label: 'Focused packages' },
+  { value: '9', label: 'Signal primitives' },
   { value: 'MIT', label: 'Open source' },
 ];
 
@@ -67,8 +67,9 @@ const STATS = [
             </h1>
 
             <p class="hero-sub">
-              Two Angular libraries that handle the browser for you. Typed services for 13+ Web APIs,
-              plus ReDoS-safe regex execution — signals-first, tree-shakable, lifecycle-safe.
+              Three Angular libraries that handle the browser for you. 37 typed services for Web APIs,
+              ReDoS-safe regex execution, and off-main-thread HTTP — signals-first, tree-shakable,
+              lifecycle-safe.
             </p>
 
             <div class="hero-ctas">
@@ -114,6 +115,7 @@ const STATS = [
           enableGeolocation<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
           enableCamera<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
           enableWebStorage<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
+          <span class="c-cmt">// ... 34 more APIs</span>
         <span class="c-punc">&#125;),</span>
         provideSecurity<span class="c-punc">(&#123;</span>
           enableRegexSecurity<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
@@ -179,8 +181,8 @@ const STATS = [
 
       <section class="section section-alt" aria-labelledby="packages-title">
         <div class="section-inner">
-          <p class="eyebrow">Two focused libraries</p>
-          <h2 id="packages-title" class="section-heading">Pick one. Or both.</h2>
+          <p class="eyebrow">Three focused libraries</p>
+          <h2 id="packages-title" class="section-heading">Pick what you need.</h2>
 
           <div class="split-cards">
             <div class="split-card">
@@ -192,14 +194,14 @@ const STATS = [
                 </div>
               </div>
               <p>
-                13 typed Angular services for Camera, Geolocation, Storage, WebSocket, Web Workers,
-                Clipboard, Notifications, and more. One provider call, full browser coverage.
+                37 typed Angular services covering Camera, Geolocation, Storage, WebSocket, Bluetooth,
+                NFC, Payments, Gamepad, and 29 more. Plus 9 signal-based inject() primitives.
               </p>
               <ul class="feature-list" aria-label="Included services">
-                <li>GeolocationService · CameraService</li>
-                <li>WebStorageService · WebSocketService</li>
-                <li>WebWorkerService · ClipboardService</li>
-                <li>NotificationService · BatteryService · +5 more</li>
+                <li>Geolocation · Camera · MediaDevices · MediaRecorder</li>
+                <li>WebSocket · WebWorker · ServerSentEvents · BroadcastChannel</li>
+                <li>Clipboard · Notifications · WebStorage · FileSystemAccess</li>
+                <li>Bluetooth · NFC · USB · Gamepad · Payments · +21 more</li>
               </ul>
               <div class="card-actions">
                 <div class="install-chip">
@@ -232,6 +234,32 @@ const STATS = [
                   <code>npm i @angular-helpers/security</code>
                 </div>
                 <a routerLink="/docs/security" class="card-link">Documentation →</a>
+              </div>
+            </div>
+
+            <div class="split-card">
+              <div class="split-card-header">
+                <span class="split-icon" aria-hidden="true">🚀</span>
+                <div>
+                  <h3>worker-http <span class="preview-badge">Preview</span></h3>
+                  <code class="pkg-pill">@angular-helpers/worker-http</code>
+                </div>
+              </div>
+              <p>
+                Move HTTP to a Web Worker. Off-main-thread request pipelines with configurable
+                interceptors, WebCrypto HMAC signing, and pluggable serialization.
+              </p>
+              <ul class="feature-list" aria-label="Worker HTTP features">
+                <li>Off-main-thread HTTP pipelines</li>
+                <li>Typed RPC bridge (transport layer)</li>
+                <li>WebCrypto HMAC request signing</li>
+                <li>Pluggable serializers (TOON, seroval)</li>
+              </ul>
+              <div class="card-actions">
+                <div class="install-chip">
+                  <code>npm i @angular-helpers/worker-http</code>
+                </div>
+                <span class="card-link card-link-muted">Docs coming soon</span>
               </div>
             </div>
           </div>
