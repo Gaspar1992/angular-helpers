@@ -26,8 +26,12 @@ test.describe('Worker HTTP Demo', () => {
   test('sends echo request and receives response', async ({ page }) => {
     await page.goto('/demo/worker-http');
 
+    // Wait for the page to be fully loaded and interactive
+    const sendEchoButton = page.getByRole('button', { name: /Send Echo/i });
+    await expect(sendEchoButton).toBeEnabled();
+
     // Click Send Echo button
-    await page.getByRole('button', { name: /Send Echo/i }).click();
+    await sendEchoButton.click();
 
     // Wait for the running state to appear briefly
     await expect(page.getByText(/Waiting for worker response/i)).toBeVisible();
@@ -47,8 +51,12 @@ test.describe('Worker HTTP Demo', () => {
   test('handles pool burst with multiple workers', async ({ page }) => {
     await page.goto('/demo/worker-http');
 
+    // Wait for the page to be fully loaded and interactive
+    const poolBurstButton = page.getByRole('button', { name: /Pool Burst/i });
+    await expect(poolBurstButton).toBeEnabled();
+
     // Click Pool Burst button
-    await page.getByRole('button', { name: /Pool Burst/i }).click();
+    await poolBurstButton.click();
 
     // Wait for the running state
     await expect(page.getByText(/Waiting for worker response/i)).toBeVisible();
