@@ -12,7 +12,6 @@ import { Subscription } from 'rxjs';
 import {
   IntersectionObserverService,
   injectIntersectionObserver,
-  type IntersectionRef,
 } from '@angular-helpers/browser-web-apis';
 
 @Component({
@@ -114,7 +113,6 @@ import {
 export class IntersectionObserverDemoComponent implements OnDestroy {
   private readonly svc = inject(IntersectionObserverService);
   private readonly subs: Subscription[] = [];
-  readonly fnRef: IntersectionRef;
 
   readonly supported = this.svc.isSupported();
   readonly intersectBoxRef = viewChild<ElementRef>('intersectBox');
@@ -122,19 +120,7 @@ export class IntersectionObserverDemoComponent implements OnDestroy {
   readonly isIntersecting = signal(false);
   readonly observing = signal(false);
   readonly apiMode = signal<'Service' | 'Signal Fn'>('Service');
-
-  constructor() {
-    const el = this.intersectBoxRef();
-    const root = this.intersectScrollRef();
-    if (el && root) {
-      this.fnRef = injectIntersectionObserver(el, { root: root.nativeElement, threshold: 0.1 });
-    } else {
-      this.fnRef = {
-        isIntersecting: signal(false).asReadonly(),
-        isVisible: signal(false).asReadonly(),
-      };
-    }
-  }
+  readonly fnRef = injectIntersectionObserver(this.intersectBoxRef, { threshold: 0.1 });
 
   setMode(mode: 'Service' | 'Signal Fn'): void {
     this.apiMode.set(mode);

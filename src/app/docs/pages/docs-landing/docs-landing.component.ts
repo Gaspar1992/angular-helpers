@@ -25,11 +25,11 @@ import { RouterLink } from '@angular/router';
             </div>
           </div>
           <p>
-            13 strongly typed Angular services for Camera, Geolocation, Storage, WebSocket, Web Workers,
-            and more — all with built-in browser support detection and reactive APIs.
+            37 strongly typed Angular services for Camera, Geolocation, Storage, WebSocket, Bluetooth,
+            Gamepad, NFC, and more — all with built-in browser support detection and reactive APIs.
           </p>
           <div class="pkg-meta">
-            <span class="badge">13 services</span>
+            <span class="badge">37 services</span>
             <span class="badge">Signals</span>
             <span class="badge">OnPush</span>
           </div>

@@ -10,7 +10,6 @@ import { Subscription } from 'rxjs';
 import {
   NetworkInformationService,
   injectNetworkInformation,
-  type NetworkInformationRef,
   type NetworkInformation,
 } from '@angular-helpers/browser-web-apis';
 
@@ -162,17 +161,15 @@ import {
 export class NetworkInformationDemoComponent implements OnDestroy {
   private readonly svc = inject(NetworkInformationService);
   private readonly subs: Subscription[] = [];
-  readonly fnRef: NetworkInformationRef;
 
   readonly supported = this.svc.isSupported();
   readonly apiMode = signal<'Service' | 'Signal Fn'>('Service');
   readonly networkInfo = signal<NetworkInformation>({
     online: typeof navigator !== 'undefined' ? navigator.onLine : true,
   });
+  readonly fnRef = injectNetworkInformation();
 
   constructor() {
-    this.fnRef = injectNetworkInformation();
-
     if (typeof navigator !== 'undefined') {
       this.networkInfo.set(this.svc.getSnapshot());
     }

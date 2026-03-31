@@ -7,11 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
-import {
-  PageVisibilityService,
-  injectPageVisibility,
-  type PageVisibilityRef,
-} from '@angular-helpers/browser-web-apis';
+import { PageVisibilityService, injectPageVisibility } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-page-visibility-demo',
@@ -118,16 +114,14 @@ import {
 export class PageVisibilityDemoComponent implements OnDestroy {
   private readonly svc = inject(PageVisibilityService);
   private readonly subs: Subscription[] = [];
-  readonly fnRef: PageVisibilityRef;
 
   readonly supported = this.svc.isSupported();
   readonly apiMode = signal<'Service' | 'Signal Fn'>('Service');
   readonly pageVisible = signal(true);
   readonly visibilityState = signal<string>('visible');
+  readonly fnRef = injectPageVisibility();
 
   constructor() {
-    this.fnRef = injectPageVisibility();
-
     if (this.supported) {
       this.subs.push(
         this.svc.watch().subscribe((s) => {

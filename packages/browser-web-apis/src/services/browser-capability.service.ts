@@ -25,7 +25,19 @@ export type BrowserCapabilityId =
   | 'mediaRecorder'
   | 'serverSentEvents'
   | 'vibration'
-  | 'speechSynthesis';
+  | 'speechSynthesis'
+  | 'mutationObserver'
+  | 'performanceObserver'
+  | 'idleDetector'
+  | 'eyeDropper'
+  | 'barcodeDetector'
+  | 'webAudio'
+  | 'gamepad'
+  | 'webBluetooth'
+  | 'webUsb'
+  | 'webNfc'
+  | 'paymentRequest'
+  | 'credentialManagement';
 
 const BROWSER_CAPABILITIES = [
   { id: 'permissions', label: 'Permissions API', requiresSecureContext: false },
@@ -53,6 +65,18 @@ const BROWSER_CAPABILITIES = [
   { id: 'serverSentEvents', label: 'Server-Sent Events', requiresSecureContext: false },
   { id: 'vibration', label: 'Vibration API', requiresSecureContext: false },
   { id: 'speechSynthesis', label: 'Speech Synthesis API', requiresSecureContext: false },
+  { id: 'mutationObserver', label: 'Mutation Observer', requiresSecureContext: false },
+  { id: 'performanceObserver', label: 'Performance Observer', requiresSecureContext: false },
+  { id: 'idleDetector', label: 'Idle Detection API', requiresSecureContext: true },
+  { id: 'eyeDropper', label: 'EyeDropper API', requiresSecureContext: true },
+  { id: 'barcodeDetector', label: 'Barcode Detection API', requiresSecureContext: true },
+  { id: 'webAudio', label: 'Web Audio API', requiresSecureContext: false },
+  { id: 'gamepad', label: 'Gamepad API', requiresSecureContext: true },
+  { id: 'webBluetooth', label: 'Web Bluetooth API', requiresSecureContext: true },
+  { id: 'webUsb', label: 'WebUSB API', requiresSecureContext: true },
+  { id: 'webNfc', label: 'Web NFC API', requiresSecureContext: true },
+  { id: 'paymentRequest', label: 'Payment Request API', requiresSecureContext: true },
+  { id: 'credentialManagement', label: 'Credential Management API', requiresSecureContext: true },
 ] as const satisfies ReadonlyArray<{
   id: BrowserCapabilityId;
   label: string;
@@ -125,6 +149,30 @@ export class BrowserCapabilityService {
         return typeof navigator !== 'undefined' && 'vibrate' in navigator;
       case 'speechSynthesis':
         return typeof window !== 'undefined' && 'speechSynthesis' in window;
+      case 'mutationObserver':
+        return typeof MutationObserver !== 'undefined';
+      case 'performanceObserver':
+        return typeof PerformanceObserver !== 'undefined';
+      case 'idleDetector':
+        return typeof window !== 'undefined' && 'IdleDetector' in window;
+      case 'eyeDropper':
+        return typeof window !== 'undefined' && 'EyeDropper' in window;
+      case 'barcodeDetector':
+        return typeof window !== 'undefined' && 'BarcodeDetector' in window;
+      case 'webAudio':
+        return typeof window !== 'undefined' && 'AudioContext' in window;
+      case 'gamepad':
+        return typeof navigator !== 'undefined' && 'getGamepads' in navigator;
+      case 'webBluetooth':
+        return typeof navigator !== 'undefined' && 'bluetooth' in navigator;
+      case 'webUsb':
+        return typeof navigator !== 'undefined' && 'usb' in navigator;
+      case 'webNfc':
+        return typeof window !== 'undefined' && 'NDEFReader' in window;
+      case 'paymentRequest':
+        return typeof window !== 'undefined' && 'PaymentRequest' in window;
+      case 'credentialManagement':
+        return typeof navigator !== 'undefined' && 'credentials' in navigator;
       default:
         return false;
     }

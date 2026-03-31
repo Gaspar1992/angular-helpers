@@ -29,6 +29,8 @@ Angular services package for a structured and secure access layer over browser W
 
 - `IntersectionObserverService` - Detect when elements enter/exit viewport
 - `ResizeObserverService` - Watch for element size changes
+- `MutationObserverService` - Watch for DOM mutations
+- `PerformanceObserverService` - Monitor performance entries (LCP, CLS, etc.)
 
 ### System APIs
 
@@ -39,6 +41,9 @@ Angular services package for a structured and secure access layer over browser W
 - `FullscreenService` - Toggle fullscreen mode for elements
 - `VibrationService` - Trigger haptic feedback patterns
 - `SpeechSynthesisService` - Text-to-speech with voice selection
+- `IdleDetectorService` - Detect user idle state and screen lock
+- `GamepadService` - Game controller input polling
+- `WebAudioService` - Audio context, oscillators, and analysers
 
 ### Network APIs
 
@@ -57,6 +62,22 @@ Angular services package for a structured and secure access layer over browser W
 ### Web APIs
 
 - `WebWorkerService` - Web Worker management
+
+### Device APIs
+
+- `WebBluetoothService` - Bluetooth Low Energy device communication
+- `WebUsbService` - USB device I/O from the browser
+- `WebNfcService` - NFC tag reading and writing
+
+### Detection APIs
+
+- `EyeDropperService` - Screen color picker
+- `BarcodeDetectorService` - QR code and barcode scanning
+
+### Commerce & Identity APIs
+
+- `PaymentRequestService` - Native payment flows
+- `CredentialManagementService` - Passwords, passkeys (WebAuthn)
 
 ### Security & Capabilities
 
@@ -518,6 +539,175 @@ export class WorkerComponent {
   }
 }
 ```
+
+## Signal Fn Primitives
+
+Zero-boilerplate reactive alternatives to the RxJS-based services. Each `inject*` function returns a ref object with read-only signals and handles cleanup automatically via `DestroyRef`.
+
+### injectPageVisibility
+
+```typescript
+import { injectPageVisibility } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly visibility = injectPageVisibility();
+
+  // visibility.state()     → 'visible' | 'hidden'
+  // visibility.isVisible() → boolean
+  // visibility.isHidden()  → boolean
+}
+```
+
+### injectResizeObserver
+
+Accepts `Element`, `ElementRef`, or a **`Signal<ElementRef | undefined>`** (e.g. from `viewChild`). When a signal is passed, the observer automatically starts when the element becomes available.
+
+```typescript
+import { injectResizeObserver } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly boxRef = viewChild<ElementRef>('box');
+  readonly resize = injectResizeObserver(this.boxRef);
+
+  // resize.width()      → number
+  // resize.height()     → number
+  // resize.inlineSize() → number (logical)
+  // resize.blockSize()  → number (logical)
+  // resize.size()       → ElementSize | null
+}
+```
+
+### injectIntersectionObserver
+
+Same `ElementInput` flexibility — works with `viewChild` signals out of the box.
+
+```typescript
+import { injectIntersectionObserver } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly targetRef = viewChild<ElementRef>('target');
+  readonly inView = injectIntersectionObserver(this.targetRef, { threshold: 0.25 });
+
+  // inView.isIntersecting() → boolean
+  // inView.isVisible()      → boolean
+}
+```
+
+### injectNetworkInformation
+
+```typescript
+import { injectNetworkInformation } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly net = injectNetworkInformation();
+
+  // net.online()        → boolean
+  // net.effectiveType() → '4g' | '3g' | '2g' | 'slow-2g' | undefined
+  // net.downlink()      → number | undefined (Mbps)
+  // net.rtt()           → number | undefined (ms)
+  // net.type()          → ConnectionType | undefined
+  // net.saveData()      → boolean | undefined
+}
+```
+
+### injectScreenOrientation
+
+```typescript
+import { injectScreenOrientation } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly orientation = injectScreenOrientation();
+
+  // orientation.type()        → OrientationType
+  // orientation.angle()       → number
+  // orientation.isPortrait()  → boolean
+  // orientation.isLandscape() → boolean
+  // orientation.lock('landscape') → Promise<void>
+  // orientation.unlock()
+}
+```
+
+### injectMutationObserver
+
+Accepts the same `ElementInput` type — works with `viewChild` signals.
+
+```typescript
+import { injectMutationObserver } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly targetRef = viewChild<ElementRef>('target');
+  readonly mo = injectMutationObserver(this.targetRef, { childList: true });
+
+  // mo.mutations()      → MutationRecord[]
+  // mo.mutationCount()  → number
+}
+```
+
+### injectPerformanceObserver
+
+```typescript
+import { injectPerformanceObserver } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly perf = injectPerformanceObserver({ type: 'navigation', buffered: true });
+
+  // perf.entries()      → PerformanceEntryList
+  // perf.entryCount()   → number
+  // perf.latestEntry()  → PerformanceEntry | undefined
+}
+```
+
+### injectIdleDetector
+
+```typescript
+import { injectIdleDetector } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly idle = injectIdleDetector({ threshold: 120_000 });
+
+  // idle.userState()      → 'active' | 'idle'
+  // idle.screenState()    → 'locked' | 'unlocked'
+  // idle.isUserIdle()     → boolean
+  // idle.isScreenLocked() → boolean
+}
+```
+
+### injectGamepad
+
+```typescript
+import { injectGamepad } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly gp = injectGamepad(0);
+
+  // gp.connected() → boolean
+  // gp.buttons()   → ReadonlyArray<{ pressed: boolean; value: number }>
+  // gp.axes()      → readonly number[]
+  // gp.state()     → GamepadState | null
+}
+```
+
+### ElementInput type
+
+Both `injectResizeObserver` and `injectIntersectionObserver` accept the `ElementInput` type:
+
+```typescript
+type ElementInput =
+  | Element
+  | ElementRef<Element>
+  | Signal<Element | ElementRef<Element> | undefined>;
+```
+
+This means you can pass a `viewChild` signal directly — the function will internally use an `effect` to start observing once the element is rendered, with automatic cleanup.
 
 ## Browser Support
 

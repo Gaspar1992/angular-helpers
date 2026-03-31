@@ -40,6 +40,11 @@ const SERVICE_GROUPS = [
         description: 'Enumerate cameras, mics, speakers',
       },
       {
+        id: 'media-recorder',
+        name: 'MediaRecorderService',
+        description: 'Record audio/video from MediaStream',
+      },
+      {
         id: 'geolocation',
         name: 'GeolocationService',
         description: 'One-time and continuous location tracking',
@@ -52,19 +57,112 @@ const SERVICE_GROUPS = [
     ],
   },
   {
-    label: 'Web APIs',
-    icon: '🌐',
+    label: 'Observer APIs',
+    icon: '👁',
     items: [
       {
-        id: 'web-worker',
-        name: 'WebWorkerService',
-        description: 'Web Worker lifecycle management',
+        id: 'intersection-observer',
+        name: 'IntersectionObserverService',
+        description: 'Detect when elements enter/exit viewport',
       },
+      {
+        id: 'resize-observer',
+        name: 'ResizeObserverService',
+        description: 'Watch for element size changes',
+      },
+      {
+        id: 'mutation-observer',
+        name: 'MutationObserverService',
+        description: 'Watch for DOM mutations',
+      },
+      {
+        id: 'performance-observer',
+        name: 'PerformanceObserverService',
+        description: 'Monitor LCP, CLS, navigation metrics',
+      },
+    ],
+  },
+  {
+    label: 'System APIs',
+    icon: '🖥',
+    items: [
+      {
+        id: 'page-visibility',
+        name: 'PageVisibilityService',
+        description: 'Track document visibility state',
+      },
+      {
+        id: 'screen-wake-lock',
+        name: 'ScreenWakeLockService',
+        description: 'Prevent screen from dimming or locking',
+      },
+      {
+        id: 'screen-orientation',
+        name: 'ScreenOrientationService',
+        description: 'Read and lock screen orientation',
+      },
+      {
+        id: 'fullscreen',
+        name: 'FullscreenService',
+        description: 'Toggle fullscreen mode for elements',
+      },
+      {
+        id: 'vibration',
+        name: 'VibrationService',
+        description: 'Trigger haptic feedback patterns',
+      },
+      {
+        id: 'speech-synthesis',
+        name: 'SpeechSynthesisService',
+        description: 'Text-to-speech with voice selection',
+      },
+      {
+        id: 'idle-detector',
+        name: 'IdleDetectorService',
+        description: 'Detect user idle state and screen lock',
+      },
+      {
+        id: 'gamepad',
+        name: 'GamepadService',
+        description: 'Game controller input polling',
+      },
+      {
+        id: 'web-audio',
+        name: 'WebAudioService',
+        description: 'Audio context, oscillators, analysers',
+      },
+    ],
+  },
+  {
+    label: 'Network APIs',
+    icon: '🌐',
+    items: [
       {
         id: 'web-socket',
         name: 'WebSocketService',
         description: 'WebSocket with reconnection + heartbeat',
       },
+      {
+        id: 'server-sent-events',
+        name: 'ServerSentEventsService',
+        description: 'Server-Sent Events client',
+      },
+      {
+        id: 'broadcast-channel',
+        name: 'BroadcastChannelService',
+        description: 'Inter-tab communication',
+      },
+      {
+        id: 'network-information',
+        name: 'NetworkInformationService',
+        description: 'Connection info and online status',
+      },
+    ],
+  },
+  {
+    label: 'Storage & I/O',
+    icon: '💾',
+    items: [
       {
         id: 'web-storage',
         name: 'WebStorageService',
@@ -73,17 +171,81 @@ const SERVICE_GROUPS = [
       { id: 'web-share', name: 'WebShareService', description: 'Native device share sheet' },
       { id: 'clipboard', name: 'ClipboardService', description: 'System clipboard read/write' },
       { id: 'battery', name: 'BatteryService', description: 'Battery level and charging status' },
+      {
+        id: 'file-system-access',
+        name: 'FileSystemAccessService',
+        description: 'Open/save files via native picker',
+      },
+    ],
+  },
+  {
+    label: 'Web Worker & Compute',
+    icon: '⚙',
+    items: [
+      {
+        id: 'web-worker',
+        name: 'WebWorkerService',
+        description: 'Web Worker lifecycle management',
+      },
+    ],
+  },
+  {
+    label: 'Device Connectivity',
+    icon: '�',
+    items: [
+      {
+        id: 'web-bluetooth',
+        name: 'WebBluetoothService',
+        description: 'Bluetooth Low Energy communication',
+      },
+      {
+        id: 'web-usb',
+        name: 'WebUsbService',
+        description: 'USB device I/O from the browser',
+      },
+      {
+        id: 'web-nfc',
+        name: 'WebNfcService',
+        description: 'NFC tag reading and writing',
+      },
+    ],
+  },
+  {
+    label: 'Detection APIs',
+    icon: '🔍',
+    items: [
+      {
+        id: 'eye-dropper',
+        name: 'EyeDropperService',
+        description: 'Screen color picker',
+      },
+      {
+        id: 'barcode-detector',
+        name: 'BarcodeDetectorService',
+        description: 'QR code and barcode scanning',
+      },
+    ],
+  },
+  {
+    label: 'Commerce & Identity',
+    icon: '🪪',
+    items: [
+      {
+        id: 'payment-request',
+        name: 'PaymentRequestService',
+        description: 'Native payment flows',
+      },
+      {
+        id: 'credential-management',
+        name: 'CredentialManagementService',
+        description: 'Passwords, passkeys (WebAuthn)',
+      },
     ],
   },
   {
     label: 'Security & Permissions',
     icon: '🔐',
     items: [
-      {
-        id: 'regex-security',
-        name: 'RegexSecurityService',
-        description: 'ReDoS prevention via Web Worker execution',
-      },
       {
         id: 'permissions',
         name: 'PermissionsService',

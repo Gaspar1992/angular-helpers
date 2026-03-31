@@ -87,6 +87,67 @@ export {
   type SpeechOptions,
 } from './services/speech-synthesis.service';
 
+// Tier 2 — New services
+export {
+  MutationObserverService,
+  type MutationObserverOptions,
+} from './services/mutation-observer.service';
+export {
+  PerformanceObserverService,
+  type PerformanceEntryType,
+  type PerformanceObserverConfig,
+} from './services/performance-observer.service';
+export {
+  IdleDetectorService,
+  type IdleState,
+  type UserIdleState,
+  type ScreenIdleState,
+  type IdleDetectorOptions,
+} from './services/idle-detector.service';
+export { EyeDropperService, type ColorSelectionResult } from './services/eye-dropper.service';
+export {
+  BarcodeDetectorService,
+  type BarcodeFormat,
+  type DetectedBarcode,
+} from './services/barcode-detector.service';
+export {
+  WebAudioService,
+  type AudioContextState,
+  type AudioAnalyserData,
+} from './services/web-audio.service';
+export { GamepadService, type GamepadState } from './services/gamepad.service';
+export {
+  WebBluetoothService,
+  type BluetoothRequestDeviceOptions,
+  type BluetoothDeviceRef,
+  type BluetoothDeviceInfo,
+} from './services/web-bluetooth.service';
+export {
+  WebUsbService,
+  type UsbDeviceRef,
+  type UsbDeviceFilterDef,
+  type UsbDeviceInfo,
+} from './services/web-usb.service';
+export {
+  WebNfcService,
+  type NdefMessage,
+  type NdefReadingEvent,
+  type NdefWriteOptions,
+} from './services/web-nfc.service';
+export {
+  PaymentRequestService,
+  type PaymentMethodConfig,
+  type PaymentDetailsInit,
+  type PaymentOptionsConfig,
+  type PaymentResult,
+} from './services/payment-request.service';
+export {
+  CredentialManagementService,
+  type PasswordCredentialData,
+  type PublicKeyCredentialOptions,
+  type CredentialResult,
+} from './services/credential-management.service';
+
 // Base classes
 export { BrowserApiBaseService } from './services/base/browser-api-base.service';
 
@@ -112,6 +173,13 @@ export {
   injectScreenOrientation,
   type ScreenOrientationRef,
 } from './fns/inject-screen-orientation';
+export { injectMutationObserver, type MutationRef } from './fns/inject-mutation-observer';
+export {
+  injectPerformanceObserver,
+  type PerformanceObserverRef,
+} from './fns/inject-performance-observer';
+export { injectIdleDetector, type IdleDetectorRef } from './fns/inject-idle-detector';
+export { injectGamepad, type GamepadRef } from './fns/inject-gamepad';
 
 // Utils and Guards
 export * from './utils/browser-support.util';

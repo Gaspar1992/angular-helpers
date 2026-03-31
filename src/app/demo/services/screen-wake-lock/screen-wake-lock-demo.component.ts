@@ -6,13 +6,13 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { ScreenWakeLockService } from '@angular-helpers/browser-web-apis';
+import { ScreenWakeLockService, PermissionsService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-screen-wake-lock-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  providers: [ScreenWakeLockService],
+  providers: [PermissionsService, ScreenWakeLockService],
   styleUrl: '../demo.styles.css',
   template: `
     <section class="svc-card" aria-labelledby="wl-title">

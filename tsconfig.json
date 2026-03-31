@@ -16,7 +16,14 @@
     "module": "preserve",
     "baseUrl": ".",
     "paths": {
-      "@angular-helpers/*": ["packages/*/src/index.ts"]
+      "@angular-helpers/*": ["packages/*/src/index.ts"],
+      "@angular-helpers/worker-http/transport": ["packages/worker-http/transport/src/index.ts"],
+      "@angular-helpers/worker-http/serializer": ["packages/worker-http/serializer/src/index.ts"],
+      "@angular-helpers/worker-http/backend": ["packages/worker-http/backend/src/index.ts"],
+      "@angular-helpers/worker-http/interceptors": [
+        "packages/worker-http/interceptors/src/index.ts"
+      ],
+      "@angular-helpers/worker-http/crypto": ["packages/worker-http/crypto/src/index.ts"]
     }
   },
   "angularCompilerOptions": {

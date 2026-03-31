@@ -13,7 +13,6 @@ import { DecimalPipe } from '@angular/common';
 import {
   ResizeObserverService,
   injectResizeObserver,
-  type ResizeRef,
   type ElementSize,
 } from '@angular-helpers/browser-web-apis';
 
@@ -142,28 +141,13 @@ import {
 export class ResizeObserverDemoComponent implements OnDestroy {
   private readonly svc = inject(ResizeObserverService);
   private readonly subs: Subscription[] = [];
-  readonly fnRef: ResizeRef;
 
   readonly supported = this.svc.isSupported();
   readonly resizeBoxRef = viewChild<ElementRef>('resizeBox');
   readonly elementSize = signal<ElementSize | null>(null);
   readonly observing = signal(false);
   readonly apiMode = signal<'Service' | 'Signal Fn'>('Service');
-
-  constructor() {
-    const el = this.resizeBoxRef();
-    if (el) {
-      this.fnRef = injectResizeObserver(el);
-    } else {
-      this.fnRef = {
-        size: signal(null).asReadonly(),
-        width: signal(0).asReadonly(),
-        height: signal(0).asReadonly(),
-        inlineSize: signal(0).asReadonly(),
-        blockSize: signal(0).asReadonly(),
-      };
-    }
-  }
+  readonly fnRef = injectResizeObserver(this.resizeBoxRef);
 
   setMode(mode: 'Service' | 'Signal Fn'): void {
     this.apiMode.set(mode);

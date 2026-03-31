@@ -550,6 +550,111 @@ export class WorkerComponent {
 }
 ```
 
+## Primitivas Signal Fn
+
+Alternativas reactivas sin boilerplate a los servicios basados en RxJS. Cada funcion `inject*` retorna un objeto ref con signals de solo lectura y maneja la limpieza automaticamente via `DestroyRef`.
+
+### injectPageVisibility
+
+```typescript
+import { injectPageVisibility } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly visibility = injectPageVisibility();
+
+  // visibility.state()     → 'visible' | 'hidden'
+  // visibility.isVisible() → boolean
+  // visibility.isHidden()  → boolean
+}
+```
+
+### injectResizeObserver
+
+Acepta `Element`, `ElementRef`, o un **`Signal<ElementRef | undefined>`** (ej. de `viewChild`). Cuando se pasa un signal, el observer inicia automaticamente cuando el elemento esta disponible.
+
+```typescript
+import { injectResizeObserver } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly boxRef = viewChild<ElementRef>('box');
+  readonly resize = injectResizeObserver(this.boxRef);
+
+  // resize.width()      → number
+  // resize.height()     → number
+  // resize.inlineSize() → number (logico)
+  // resize.blockSize()  → number (logico)
+  // resize.size()       → ElementSize | null
+}
+```
+
+### injectIntersectionObserver
+
+Misma flexibilidad con `ElementInput` — funciona con signals de `viewChild` directamente.
+
+```typescript
+import { injectIntersectionObserver } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly targetRef = viewChild<ElementRef>('target');
+  readonly inView = injectIntersectionObserver(this.targetRef, { threshold: 0.25 });
+
+  // inView.isIntersecting() → boolean
+  // inView.isVisible()      → boolean
+}
+```
+
+### injectNetworkInformation
+
+```typescript
+import { injectNetworkInformation } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly net = injectNetworkInformation();
+
+  // net.online()        → boolean
+  // net.effectiveType() → '4g' | '3g' | '2g' | 'slow-2g' | undefined
+  // net.downlink()      → number | undefined (Mbps)
+  // net.rtt()           → number | undefined (ms)
+  // net.type()          → ConnectionType | undefined
+  // net.saveData()      → boolean | undefined
+}
+```
+
+### injectScreenOrientation
+
+```typescript
+import { injectScreenOrientation } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly orientation = injectScreenOrientation();
+
+  // orientation.type()        → OrientationType
+  // orientation.angle()       → number
+  // orientation.isPortrait()  → boolean
+  // orientation.isLandscape() → boolean
+  // orientation.lock('landscape') → Promise<void>
+  // orientation.unlock()
+}
+```
+
+### Tipo ElementInput
+
+Tanto `injectResizeObserver` como `injectIntersectionObserver` aceptan el tipo `ElementInput`:
+
+```typescript
+type ElementInput =
+  | Element
+  | ElementRef<Element>
+  | Signal<Element | ElementRef<Element> | undefined>;
+```
+
+Esto permite pasar un signal de `viewChild` directamente — la funcion usa internamente un `effect` para comenzar a observar cuando el elemento se renderiza, con limpieza automatica.
+
 ## Soporte de navegadores
 
 Los servicios validan automaticamente el soporte del navegador y el manejo de rutas no soportadas:

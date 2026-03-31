@@ -6,13 +6,13 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { MediaRecorderService } from '@angular-helpers/browser-web-apis';
+import { MediaRecorderService, PermissionsService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-media-recorder-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  providers: [MediaRecorderService],
+  providers: [PermissionsService, MediaRecorderService],
   styleUrl: '../demo.styles.css',
   template: `
     <section class="svc-card" aria-labelledby="rec-title">

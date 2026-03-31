@@ -1,16 +1,20 @@
 import {
   computed,
   DestroyRef,
+  effect,
   ElementRef,
   inject,
+  isSignal,
   PLATFORM_ID,
   signal,
   type Signal,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { type Subscription } from 'rxjs';
 
 import { type ElementSize, type ResizeObserverOptions } from '../services/resize-observer.service';
 import { isResizeObserverSupported, resizeObserverStream } from '../utils/resize-observer.utils';
+import { type ElementInput } from '../interfaces/common.types';
 
 export interface ResizeRef {
   readonly size: Signal<ElementSize | null>;
@@ -21,7 +25,7 @@ export interface ResizeRef {
 }
 
 export function injectResizeObserver(
-  elementOrRef: Element | ElementRef<Element>,
+  elementOrRef: ElementInput,
   options?: ResizeObserverOptions,
 ): ResizeRef {
   const destroyRef = inject(DestroyRef);
@@ -30,9 +34,22 @@ export function injectResizeObserver(
   const size = signal<ElementSize | null>(null);
 
   if (isPlatformBrowser(platformId) && isResizeObserverSupported()) {
-    const el = elementOrRef instanceof ElementRef ? elementOrRef.nativeElement : elementOrRef;
-    const sub = resizeObserverStream(el, options).subscribe((s) => size.set(s));
-    destroyRef.onDestroy(() => sub.unsubscribe());
+    if (isSignal(elementOrRef)) {
+      let sub: Subscription | undefined;
+      effect((onCleanup) => {
+        sub?.unsubscribe();
+        const raw = elementOrRef();
+        if (raw) {
+          const el = raw instanceof ElementRef ? raw.nativeElement : raw;
+          sub = resizeObserverStream(el, options).subscribe((s) => size.set(s));
+        }
+        onCleanup(() => sub?.unsubscribe());
+      });
+    } else {
+      const el = elementOrRef instanceof ElementRef ? elementOrRef.nativeElement : elementOrRef;
+      const sub = resizeObserverStream(el, options).subscribe((s) => size.set(s));
+      destroyRef.onDestroy(() => sub.unsubscribe());
+    }
   }
 
   return {
