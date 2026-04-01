@@ -19,7 +19,12 @@ import type {
   EncryptedPayload,
 } from '@angular-helpers/worker-http/crypto';
 
+// Worker URL - using pre-transpiled worker from assets
+// This works in both dev and production (including 404.html fallback)
+const ECHO_WORKER_URL = 'assets/workers/echo.worker.js';
+
 interface LogEntry {
+  id: number;
   time: string;
   section: string;
   message: string;
@@ -53,6 +58,7 @@ export class WorkerHttpDemoComponent implements OnDestroy {
 
   // --- Shared log ---
   protected readonly logs = signal<LogEntry[]>([]);
+  private logCounter = 0;
 
   // ──────────────────────────────────────────────────────
   // Transport tests
@@ -65,7 +71,7 @@ export class WorkerHttpDemoComponent implements OnDestroy {
 
     if (!this.transport) {
       this.transport = createWorkerTransport({
-        workerUrl: new URL('./echo.worker', import.meta.url),
+        workerUrl: ECHO_WORKER_URL,
         maxInstances: 1,
       });
     }
@@ -91,7 +97,7 @@ export class WorkerHttpDemoComponent implements OnDestroy {
       this.transport.terminate();
     }
     this.transport = createWorkerTransport({
-      workerUrl: new URL('./echo.worker', import.meta.url),
+      workerUrl: ECHO_WORKER_URL,
       maxInstances: 4,
     });
 
@@ -181,7 +187,7 @@ export class WorkerHttpDemoComponent implements OnDestroy {
   async encryptData(): Promise<void> {
     try {
       if (!this.aesEncryptor) {
-        const keyMaterial = new TextEncoder().encode('32-byte-secret-key-for-aes-256!');
+        const keyMaterial = new TextEncoder().encode('32-byte-secret-key-for-aes-256!!');
         this.aesEncryptor = await createAesEncryptor({ keyMaterial, algorithm: 'AES-GCM' });
       }
       const plaintext = 'Sensitive payload: user_id=42&token=abc123';
@@ -226,7 +232,8 @@ export class WorkerHttpDemoComponent implements OnDestroy {
       hour12: false,
       fractionalSecondDigits: 3,
     });
-    this.logs.update((prev) => [{ time, section, message, type }, ...prev]);
+    const id = this.logCounter++;
+    this.logs.update((prev) => [{ id, time, section, message, type }, ...prev]);
   }
 
   ngOnDestroy(): void {

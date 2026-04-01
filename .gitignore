@@ -16,6 +16,9 @@ ssl/
 packages/*/dist
 dist/
 
+# Generated workers (built by Vite and copied to public)
+public/assets/workers/
+
 # Node
 /node_modules
 npm-debug.log
