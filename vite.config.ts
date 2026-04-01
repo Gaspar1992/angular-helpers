@@ -12,6 +12,7 @@ export default defineConfig({
     },
     outDir: 'public/assets/workers',
     emptyOutDir: true,
+    copyPublicDir: false,
     rollupOptions: {
       output: {
         inlineDynamicImports: true,
