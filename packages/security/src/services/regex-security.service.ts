@@ -1,7 +1,8 @@
-import { Injectable, inject, DestroyRef } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { map, catchError, timeout } from 'rxjs/operators';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Injectable, inject, OnDestroy } from '@angular/core';
+import {
+  WorkerPoolService,
+  type WorkerPoolConfig,
+} from '../../../browser-web-apis/src/services/worker-pool.service';
 
 export interface RegexSecurityConfig {
   timeout?: number; // Timeout in milliseconds (default: 5000)
@@ -39,11 +40,17 @@ export interface RegexBuilderOptions {
 /**
  * Security service for regular expressions that prevents ReDoS
  * using Web Workers for safe execution with timeout
+ * Now uses WorkerPoolService for efficient worker management
  */
 @Injectable()
-export class RegexSecurityService {
-  private destroyRef = inject(DestroyRef);
-  private workers = new Map<string, Worker>();
+export class RegexSecurityService implements OnDestroy {
+  private workerPool = inject(WorkerPoolService);
+  private readonly POOL_NAME = 'regex-security';
+  private readonly POOL_CONFIG: WorkerPoolConfig = {
+    maxWorkers: 2, // Max 2 workers for regex processing
+    taskTimeout: 5000,
+    lazy: true,
+  };
 
   /**
    * Builder pattern to construct safe regular expressions
@@ -53,7 +60,7 @@ export class RegexSecurityService {
   }
 
   /**
-   * Executes a regular expression safely with a timeout
+   * Executes a regular expression safely with a timeout using worker pool
    */
   async testRegex(
     pattern: string,
@@ -76,7 +83,7 @@ export class RegexSecurityService {
         };
       }
 
-      // Execute in Web Worker with timeout
+      // Execute in pooled Web Worker
       const result = await this.executeInWorker(pattern, text, finalConfig);
 
       return {
@@ -167,80 +174,28 @@ export class RegexSecurityService {
   }
 
   /**
-   * Executes the regular expression in a Web Worker
+   * Executes the regular expression in a pooled Web Worker
    */
   private async executeInWorker(
     pattern: string,
     text: string,
     config: RegexSecurityConfig,
   ): Promise<RegexTestResult> {
-    return new Promise((resolve) => {
-      const workerName = `regex-worker-${Date.now()}`;
+    const workerFactory = () => {
+      const workerCode = this.generateWorkerCode();
+      const blob = new Blob([workerCode], { type: 'application/javascript' });
+      return new Worker(URL.createObjectURL(blob));
+    };
 
-      try {
-        // Create temporary worker
-        const workerCode = this.generateWorkerCode();
-        const blob = new Blob([workerCode], { type: 'application/javascript' });
-        const worker = new Worker(URL.createObjectURL(blob));
-
-        this.workers.set(workerName, worker);
-
-        const taskId = `regex_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-        const task = {
-          id: taskId,
-          type: 'regex-test',
-          data: {
-            pattern,
-            text,
-            timeout: config.timeout || 5000,
-          },
-        };
-
-        // Timeout for execution
-        const timeoutId = setTimeout(() => {
-          worker.terminate();
-          this.workers.delete(workerName);
-          resolve({
-            match: false,
-            executionTime: 0,
-            timeout: true,
-            error: 'Execution timeout',
-          });
-        }, config.timeout || 5000);
-
-        worker.onmessage = (event) => {
-          clearTimeout(timeoutId);
-          worker.terminate();
-          this.workers.delete(workerName);
-
-          if (event.data.id === taskId) {
-            resolve(event.data.data as RegexTestResult);
-          }
-        };
-
-        worker.onerror = (error) => {
-          clearTimeout(timeoutId);
-          worker.terminate();
-          this.workers.delete(workerName);
-          resolve({
-            match: false,
-            executionTime: 0,
-            timeout: false,
-            error: `Worker error: ${error.message || 'Unknown error'}`,
-          });
-        };
-
-        worker.postMessage(task);
-      } catch (error) {
-        resolve({
-          match: false,
-          executionTime: 0,
-          timeout: false,
-          error: `Failed to create worker: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        });
-      }
-    });
+    return this.workerPool.execute(
+      this.POOL_NAME,
+      workerFactory,
+      {
+        type: 'regex-test',
+        payload: { pattern, text },
+      },
+      { ...this.POOL_CONFIG, taskTimeout: config.timeout },
+    );
   }
 
   /**
@@ -252,7 +207,7 @@ export class RegexSecurityService {
         const task = event.data;
         
         if (task.type === 'regex-test') {
-          const { pattern, text, timeout } = task.data;
+          const { pattern, text } = task.payload;
           const startTime = performance.now();
           
           try {
@@ -273,14 +228,13 @@ export class RegexSecurityService {
             if (matches.length > 0) {
               const firstMatch = matches[0];
               for (let i = 1; i < firstMatch.length; i++) {
-                groups[\`group\${i}\`] = firstMatch[i];
+                groups['group' + i] = firstMatch[i];
               }
             }
             
             self.postMessage({
-              id: task.id,
-              type: 'regex-result',
-              data: {
+              taskId: task.id,
+              result: {
                 match: matches.length > 0,
                 matches,
                 groups,
@@ -290,9 +244,8 @@ export class RegexSecurityService {
             });
           } catch (error) {
             self.postMessage({
-              id: task.id,
-              type: 'regex-result',
-              data: {
+              taskId: task.id,
+              result: {
                 match: false,
                 executionTime: performance.now() - startTime,
                 timeout: false,
@@ -355,10 +308,7 @@ export class RegexSecurityService {
    * Cleans up resources when the service is destroyed
    */
   ngOnDestroy(): void {
-    this.workers.forEach((worker) => {
-      worker.terminate();
-    });
-    this.workers.clear();
+    // WorkerPoolService handles cleanup of its pools
   }
 }
 

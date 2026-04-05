@@ -151,6 +151,26 @@ export {
 // Base classes
 export { BrowserApiBaseService } from './services/base/browser-api-base.service';
 
+// Logging
+export {
+  BrowserApiLogger,
+  LOG_CONFIG,
+  DEFAULT_LOG_CONFIG,
+  provideLogConfig,
+  createApiLogger,
+  type LogConfig,
+  type LogLevel,
+  type ApiLogger,
+} from './services/logging.service';
+
+// Worker Pool
+export {
+  WorkerPoolService,
+  type WorkerPoolTask,
+  type WorkerPoolTaskResult,
+  type WorkerPoolConfig,
+} from './services/worker-pool.service';
+
 // Interfaces and Types
 export * from './interfaces/permissions.interface';
 export * from './interfaces/media.interface';
