@@ -43,17 +43,4 @@ export class ClipboardService extends BrowserApiBaseService {
       throw error;
     }
   }
-
-  async writeTextSecure(text: string): Promise<void> {
-    await this.ensureClipboardPermission('write');
-
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch (error) {
-      console.error('[ClipboardService] Error writing to clipboard:', error);
-      throw error;
-    }
-  }
-
-  // Direct access to native clipboard API
 }
