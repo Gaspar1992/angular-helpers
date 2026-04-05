@@ -34,8 +34,7 @@
     "rxjs": "^7.0.0 || ^8.0.0"
   },
   "dependencies": {
-    "tslib": "^2.0.0",
-    "@angular-helpers/browser-web-apis": "^21.0.0"
+    "tslib": "^2.0.0"
   },
   "ngPackage": {
     "lib": {

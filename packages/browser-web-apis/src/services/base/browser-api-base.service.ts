@@ -2,7 +2,6 @@ import { Injectable, inject, DestroyRef, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { PermissionsService } from '../permissions.service';
 import { PermissionNameExt } from '../../public-api';
-import { createApiLogger, ApiLogger } from '../logging.service';
 
 /**
  * Base class for all Browser Web API services
@@ -11,20 +10,13 @@ import { createApiLogger, ApiLogger } from '../logging.service';
  * - Permission management
  * - Error handling
  * - Lifecycle management with destroyRef
- * - Configurable logging
+ * - Logging
  */
 @Injectable()
 export abstract class BrowserApiBaseService {
   protected permissionsService = inject(PermissionsService);
   protected destroyRef = inject(DestroyRef);
   protected platformId = inject(PLATFORM_ID);
-
-  /** Logger instance for this API */
-  protected logger: ApiLogger;
-
-  constructor() {
-    this.logger = createApiLogger(this.getApiName());
-  }
 
   /**
    * Abstract method that must be implemented by child services
