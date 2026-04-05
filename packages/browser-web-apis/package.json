@@ -13,6 +13,14 @@
     "lint": "oxlint src",
     "prepublishOnly": "npm run build"
   },
+  "homepage": "https://gaspar1992.github.io/angular-helpers/docs/browser-web-apis",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gaspar1992/angular-helpers"
+  },
+  "bugs": {
+    "url": "https://github.com/Gaspar1992/angular-helpers/issues"
+  },
   "keywords": [
     "angular",
     "typescript",
