@@ -42,13 +42,17 @@
   "peerDependencies": {
     "@angular/common": "^21.0.0",
     "@angular/core": "^21.0.0",
-    "rxjs": "^7.0.0"
+    "rxjs": "^7.0.0",
+    "seroval": "^1.0.0"
   },
   "peerDependenciesMeta": {
     "@angular/common": {
       "optional": true
     },
     "@angular/core": {
+      "optional": true
+    },
+    "seroval": {
       "optional": true
     }
   }
