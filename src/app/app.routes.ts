@@ -22,6 +22,11 @@ export const routes: Routes = [
     title: 'Worker HTTP — POC',
   },
   {
+    path: 'demo/security',
+    loadComponent: () => import('./demo/security/security').then((m) => m.SecurityComponent),
+    title: 'Security — Demo',
+  },
+  {
     path: 'demo',
     loadComponent: () =>
       import('./demo/browser-apis/browser-apis').then((m) => m.BrowserApisComponent),

@@ -1,0 +1,169 @@
+/* ── Page shell ───────────────────────────────────────────────────────────── */
+.demo-page {
+  min-height: 100vh;
+  background: var(--bg-base);
+  padding: var(--sp-6) 0 var(--sp-12);
+  font-family: var(--font-base);
+}
+
+.demo-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 var(--sp-4);
+}
+
+@media (min-width: 640px) {
+  .demo-shell {
+    padding: 0 var(--sp-6);
+  }
+}
+
+/* ── Embedded mode (inside a docs tab panel) ──────────────────────────────── */
+.demo-embedded {
+  min-height: unset;
+  background: none;
+  padding: 0;
+}
+
+.demo-embedded .demo-shell {
+  max-width: none;
+  padding: 0;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.demo-header {
+  margin-bottom: var(--sp-6);
+  padding-bottom: var(--sp-5);
+  border-bottom: 1px solid var(--border);
+}
+
+.demo-header-inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+
+.demo-header-text {
+  flex: 1;
+}
+
+.demo-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-white);
+  margin: 0 0 var(--sp-1);
+  letter-spacing: -0.03em;
+}
+
+@media (min-width: 640px) {
+  .demo-title {
+    font-size: 2rem;
+  }
+}
+
+.demo-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.demo-header-meta {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.meta-chip {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.35rem 0.7rem;
+  background: rgba(107, 140, 242, 0.1);
+  color: #93b4ff;
+  border: 1px solid rgba(107, 140, 242, 0.2);
+  border-radius: 999px;
+}
+
+/* ── Tab navigation ────────────────────────────────────────────────────────── */
+.tab-nav {
+  display: flex;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-5);
+  overflow-x: auto;
+  padding-bottom: var(--sp-1);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.tab-nav::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tab-nav::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0.65rem 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.tab-btn:hover:not(:disabled) {
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.tab-btn--active {
+  background: rgba(107, 140, 242, 0.15);
+  border-color: rgba(107, 140, 242, 0.4);
+  color: #93b4ff;
+}
+
+.tab-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* ── Tab content / Panels ─────────────────────────────────────────────────── */
+.tab-content {
+  min-height: 400px;
+}
+
+.panel {
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Demo label (form labels) ─────────────────────────────────────────────── */
+.demo-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--sp-1);
+}

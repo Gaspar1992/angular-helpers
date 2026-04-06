@@ -1,0 +1,61 @@
+<div class="demo-page" [class.demo-embedded]="embedded()">
+  <div class="demo-shell">
+    @if (!embedded()) {
+    <header class="demo-header" aria-label="Security Demo">
+      <div class="demo-header-inner">
+        <div class="demo-header-text">
+          <h1 class="demo-title">Angular Security</h1>
+          <p class="demo-subtitle">Interactive demo — 5 security services for safe applications</p>
+        </div>
+        <div class="demo-header-meta" aria-hidden="true">
+          <span class="meta-chip">Angular 20+</span>
+          <span class="meta-chip">Signals</span>
+          <span class="meta-chip">OnPush</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="tab-nav" role="tablist" aria-label="Demo sections">
+      @for (tab of tabs; track tab.id) {
+      <button
+        class="tab-btn"
+        [class.tab-btn--active]="activeTab() === tab.id"
+        (click)="setTab(tab.id)"
+        [attr.aria-selected]="activeTab() === tab.id"
+        [attr.aria-controls]="'panel-' + tab.id"
+        [id]="'tab-' + tab.id"
+        role="tab"
+        type="button"
+      >
+        <span class="tab-icon" aria-hidden="true">{{ tab.icon }}</span>
+        <span class="tab-label">{{ tab.label }}</span>
+      </button>
+      }
+    </nav>
+    }
+
+    <div class="tab-content">
+      @if (activeTab() === 'regex') {
+      <div id="panel-regex" class="panel" role="tabpanel" aria-labelledby="tab-regex">
+        <app-regex-security-demo />
+      </div>
+      } @if (activeTab() === 'crypto') {
+      <div id="panel-crypto" class="panel" role="tabpanel" aria-labelledby="tab-crypto">
+        <app-web-crypto-demo />
+      </div>
+      } @if (activeTab() === 'storage') {
+      <div id="panel-storage" class="panel" role="tabpanel" aria-labelledby="tab-storage">
+        <app-secure-storage-demo />
+      </div>
+      } @if (activeTab() === 'sanitizer') {
+      <div id="panel-sanitizer" class="panel" role="tabpanel" aria-labelledby="tab-sanitizer">
+        <app-input-sanitizer-demo />
+      </div>
+      } @if (activeTab() === 'password') {
+      <div id="panel-password" class="panel" role="tabpanel" aria-labelledby="tab-password">
+        <app-password-strength-demo />
+      </div>
+      }
+    </div>
+  </div>
+</div>
