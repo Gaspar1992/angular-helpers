@@ -31,68 +31,7 @@ const CONTENT_TABS: DocTab[] = [
     DocsTabsComponent,
   ],
   styleUrl: './worker-http-entry-detail.component.css',
-  template: `
-    @if (entry()) {
-      <div class="docs-page">
-        <app-docs-page-header
-          [breadcrumbs]="breadcrumbs()"
-          [title]="entry()!.name"
-          [titleMono]="true"
-          [badge]="badge()"
-          badgeVariant="import"
-          [lead]="entry()!.description"
-          [scope]="entry()!.scope"
-        />
-
-        <section class="docs-section">
-          <app-docs-tabs
-            [tabs]="contentTabs"
-            [activeTab]="activeTab()"
-            ariaLabel="Entry point documentation"
-            (tabChange)="activeTab.set($event)"
-          />
-          <div
-            role="tabpanel"
-            [id]="'panel-' + activeTab()"
-            [attr.aria-labelledby]="'tab-' + activeTab()"
-          >
-            @if (activeTab() === 'api') {
-              <app-docs-api-table
-                [columns]="methodsColumns"
-                [rows]="methodRows()"
-                ariaLabel="API methods"
-              />
-              @if (interfaces().length) {
-                <div class="iface-section">
-                  <h3 class="iface-section-title">Related interfaces</h3>
-                  @for (iface of interfaces(); track $index) {
-                    <div class="iface-block">
-                      <h4 class="iface-name">{{ iface.name }}</h4>
-                      <p class="iface-desc">{{ iface.description }}</p>
-                      <app-docs-api-table
-                        [columns]="fieldsColumns"
-                        [rows]="iface.fields"
-                        [ariaLabel]="iface.name + ' fields'"
-                      />
-                    </div>
-                  }
-                </div>
-              }
-            }
-            @if (activeTab() === 'example') {
-              <app-code-block [code]="entry()!.example" />
-            }
-          </div>
-        </section>
-      </div>
-    } @else {
-      <div class="not-found">
-        <h1 class="docs-page-title">Entry point not found</h1>
-        <p class="docs-page-lead">The requested entry point does not exist in this package.</p>
-        <a routerLink="/docs/worker-http">← Back to worker-http</a>
-      </div>
-    }
-  `,
+  templateUrl: './worker-http-entry-detail.component.html',
 })
 export class WorkerHttpEntryDetailComponent {
   private route = inject(ActivatedRoute);

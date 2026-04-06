@@ -1,0 +1,98 @@
+@if (service()) {
+  <div class="docs-page">
+    <app-docs-page-header
+      [breadcrumbs]="breadcrumbs()"
+      [title]="service()!.name"
+      [titleMono]="true"
+      [badge]="badge()"
+      badgeVariant="import"
+      [lead]="service()!.description"
+      [scope]="service()!.scope"
+      [requiresSecureContext]="service()!.requiresSecureContext"
+    />
+
+    <section class="docs-section">
+      <h2 class="docs-section-title">Browser support</h2>
+      <p class="docs-support-text">{{ service()!.browserSupport }}</p>
+    </section>
+
+    @if (service()!.notes.length) {
+      <section class="docs-section">
+        <h2 class="docs-section-title">Notes</h2>
+        <ul class="docs-note-list">
+          @for (note of service()!.notes; track $index) {
+            <li>{{ note }}</li>
+          }
+        </ul>
+      </section>
+    }
+
+    @if (service()!.fnVersion) {
+      <div class="api-variant-group" role="group" aria-label="API variant">
+        <button
+          class="api-variant-btn"
+          [class.api-variant-btn--active]="apiVariant() === 'service'"
+          (click)="apiVariant.set('service')"
+        >
+          Service
+        </button>
+        <button
+          class="api-variant-btn"
+          [class.api-variant-btn--active]="apiVariant() === 'fn'"
+          (click)="apiVariant.set('fn')"
+        >
+          &#9889; Signal Fn
+        </button>
+      </div>
+    }
+
+    @if (apiVariant() === 'fn' && service()!.fnVersion) {
+      <section class="docs-section fn-description">
+        <p class="docs-page-lead">{{ service()!.fnVersion!.description }}</p>
+        <code class="fn-return-type">
+          Returns: <strong>{{ service()!.fnVersion!.returnType }}</strong>
+        </code>
+      </section>
+    }
+
+    <section class="docs-section">
+      <app-docs-tabs
+        [tabs]="contentTabs"
+        [activeTab]="activeTab()"
+        ariaLabel="Service documentation"
+        (tabChange)="activeTab.set($event)"
+      />
+      <div
+        role="tabpanel"
+        [id]="'panel-' + activeTab()"
+        [attr.aria-labelledby]="'tab-' + activeTab()"
+      >
+        @if (activeTab() === 'api') {
+          <app-docs-api-table
+            [columns]="currentColumns()"
+            [rows]="methodRows()"
+            [ariaLabel]="apiVariant() === 'fn' ? 'Signal Fn fields' : 'API methods'"
+          />
+        }
+        @if (activeTab() === 'example') {
+          <app-code-block [code]="currentExample()" />
+        }
+        @if (activeTab() === 'demo') {
+          @if (demoComponent()) {
+            <ng-container *ngComponentOutlet="demoComponent()!" />
+          } @else {
+            <p class="docs-support-text">No interactive demo available for this service yet.</p>
+          }
+        }
+      </div>
+    </section>
+  </div>
+} @else {
+  <div class="not-found">
+    <h1 class="docs-page-title">Service not found</h1>
+    <p class="docs-page-lead" style="max-width: none">
+      The requested service does not exist in this package.
+    </p>
+    <a routerLink="/docs/browser-web-apis">← Back to browser-web-apis</a>
+  </div>
+}
