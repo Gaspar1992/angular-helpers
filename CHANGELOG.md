@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.9.0...v2.0.0) (2026-04-06)
+
+
+### Features
+
+* **worker-http:** initial release of @angular-helpers/worker-http package ([#36](https://github.com/Gaspar1992/angular-helpers/issues/36)) ([abc1234](https://github.com/Gaspar1992/angular-helpers/commit/abc1234))
+  - Web Worker-based HTTP client with typed RPC bridge
+  - Worker-side interceptor pipelines (logging, retry, HMAC signing, caching)
+  - Pluggable serialization (JSON, MessagePack, BSON)
+  - Security primitives (HMAC signing, content integrity, rate limiting)
+  - Full documentation and examples
+
 # [1.9.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.8.0...v1.9.0) (2026-04-06)
 
 

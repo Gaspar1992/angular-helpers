@@ -4,9 +4,6 @@
 
 Mové tus requests HTTP fuera del hilo principal. Un toolkit composable para Angular que ejecuta `fetch()` dentro de Web Workers, protegiendo tu UI de la latencia de red mientras agregás primitivas de seguridad (firma HMAC, integridad de contenido, rate limiting) que viven completamente en el scope aislado del worker.
 
-> ⚠️ **Estado: En desarrollo activo — todavía no publicado en npm.**
-> La API se está estabilizando. No usar en producción.
-
 ---
 
 ## ¿Por qué?

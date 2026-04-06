@@ -4,9 +4,6 @@
 
 Move HTTP requests off the main thread. A composable toolkit for Angular that runs `fetch()` inside Web Workers, protecting your UI from network latency while adding security primitives (HMAC signing, content integrity, rate limiting) that live entirely in the worker's isolated scope.
 
-> ⚠️ **Status: Under active development — not yet published to npm.**
-> The API is stabilizing. Do not use in production.
-
 ---
 
 ## Why?
