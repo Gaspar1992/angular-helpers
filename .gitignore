@@ -11,6 +11,7 @@ ssl/
 /tmp
 /out-tsc
 /bazel-out
+/.sdd
 
 # Packages dist folders
 packages/*/dist
