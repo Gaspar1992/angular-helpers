@@ -12,6 +12,7 @@ import { InputSanitizerService } from '@angular-helpers/security';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   styleUrl: '../demo.styles.css',
+  providers: [InputSanitizerService],
   template: `
     <section class="svc-card" aria-labelledby="sanitizer-title">
       <div class="svc-card-head">

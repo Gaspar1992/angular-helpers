@@ -12,6 +12,7 @@ import { PasswordStrengthService } from '@angular-helpers/security';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   styleUrl: '../demo.styles.css',
+  providers: [PasswordStrengthService],
   template: `
     <section class="svc-card" aria-labelledby="password-title">
       <div class="svc-card-head">

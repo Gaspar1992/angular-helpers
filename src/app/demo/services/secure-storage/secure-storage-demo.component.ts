@@ -12,6 +12,7 @@ import { SecureStorageService } from '@angular-helpers/security';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   styleUrl: '../demo.styles.css',
+  providers: [SecureStorageService],
   template: `
     <section class="svc-card" aria-labelledby="storage-title">
       <div class="svc-card-head">
