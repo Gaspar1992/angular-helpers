@@ -1,31 +1,51 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { CodeBlockComponent } from '../../shared/code-block/code-block.component';
 import { DocsPageHeaderComponent } from '../../shared/page-header/docs-page-header.component';
-import { DocsApiTableComponent } from '../../shared/api-table/docs-api-table.component';
-import { SECURITY_SERVICES, SECURITY_INTERFACES } from '../../data/security.data';
-import {
-  BreadcrumbItem,
-  ApiRow,
-  METHODS_COLUMNS_SHORT,
-  FIELDS_COLUMNS,
-} from '../../models/doc-meta.model';
+import { BreadcrumbItem } from '../../models/doc-meta.model';
 
 const PROVIDER_EXAMPLE = `import { provideSecurity } from '@angular-helpers/security';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideSecurity({
+      // Core services (enabled by default)
       enableRegexSecurity: true,
+      enableWebCrypto: true,
+
+      // Additional services (opt-in)
+      enableSecureStorage: true,
+      enableInputSanitizer: true,
+      enablePasswordStrength: true,
+
+      // Global settings
       defaultTimeout: 5000,
       safeMode: false,
     }),
   ],
 });`;
 
+const INDIVIDUAL_PROVIDERS_EXAMPLE = `import {
+  provideRegexSecurity,
+  provideWebCrypto,
+  provideSecureStorage,
+  provideInputSanitizer,
+  providePasswordStrength,
+} from '@angular-helpers/security';
+
+// Use only the services you need
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideSecureStorage({ storage: 'session', pbkdf2Iterations: 600_000 }),
+    provideInputSanitizer({ allowedTags: ['b', 'i', 'em', 'strong'] }),
+    providePasswordStrength(),
+  ],
+});`;
+
 @Component({
   selector: 'app-security-overview',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CodeBlockComponent, DocsPageHeaderComponent, DocsApiTableComponent],
+  imports: [RouterLink, CodeBlockComponent, DocsPageHeaderComponent],
   template: `
     <div class="docs-page">
       <app-docs-page-header
@@ -33,7 +53,7 @@ bootstrapApplication(AppComponent, {
         title="security"
         badge="@angular-helpers/security"
         badgeVariant="npm"
-        lead="Prevents ReDoS attacks by executing regular expressions in isolated Web Workers with configurable timeouts and complexity analysis."
+        lead="Comprehensive security toolkit for Angular applications. ReDoS-safe regex execution, WebCrypto utilities, encrypted storage, input sanitization, and password strength evaluation — all built with signals and tree-shakable providers."
       />
 
       <section class="docs-section">
@@ -42,46 +62,76 @@ bootstrapApplication(AppComponent, {
       </section>
 
       <section class="docs-section">
-        <h2 class="docs-section-title">Setup</h2>
+        <h2 class="docs-section-title">Quick Start</h2>
+        <p class="docs-section-text">Register all security providers in your application bootstrap:</p>
         <app-code-block [code]="providerExample" />
       </section>
 
       <section class="docs-section">
-        <h2 class="docs-section-title">Services &amp; Exports</h2>
-        <div class="services-grid">
-          @for (svc of services; track svc.id) {
-            <div class="svc-card">
-              <h3 class="svc-name">{{ svc.name }}</h3>
-              <p class="svc-desc">{{ svc.description }}</p>
-              <app-docs-api-table
-                [columns]="methodsShortColumns"
-                [rows]="toRows(svc.methods)"
-                [ariaLabel]="svc.name + ' methods'"
-              />
-              <div class="example-label">Example</div>
-              <app-code-block [code]="svc.example" />
-            </div>
-          }
-        </div>
+        <h2 class="docs-section-title">Individual Providers</h2>
+        <p class="docs-section-text">Use only the services you need for smaller bundle size:</p>
+        <app-code-block [code]="individualProvidersExample" />
       </section>
 
       <section class="docs-section">
-        <h2 class="docs-section-title">Interfaces</h2>
-        @for (iface of interfaces; track $index) {
-          <div class="iface-block">
-            <h3 class="iface-name">{{ iface.name }}</h3>
-            <p class="iface-desc">{{ iface.description }}</p>
-            <app-docs-api-table
-              [columns]="fieldsColumns"
-              [rows]="iface.fields"
-              [ariaLabel]="iface.name + ' fields'"
-            />
+        <h2 class="docs-section-title">Services</h2>
+        <div class="service-group">
+          <h3 class="group-label">🛡️ ReDoS Protection</h3>
+          <div class="services-list">
+            <a [routerLink]="'/docs/security/regex-security'" class="service-card">
+              <span class="svc-name">RegexSecurityService</span>
+              <span class="svc-desc">Safe regex execution in Web Workers with timeout protection</span>
+            </a>
+            <a [routerLink]="'/docs/security/regex-security-builder'" class="service-card">
+              <span class="svc-name">RegexSecurityBuilder</span>
+              <span class="svc-desc">Fluent API for building secure regular expressions</span>
+            </a>
           </div>
-        }
+        </div>
+
+        <div class="service-group">
+          <h3 class="group-label">🔐 Web Crypto</h3>
+          <div class="services-list">
+            <a [routerLink]="'/docs/security/web-crypto'" class="service-card">
+              <span class="svc-name">WebCryptoService</span>
+              <span class="svc-desc"
+                >AES-GCM encryption, HMAC signing, SHA hashing, key management</span
+              >
+            </a>
+          </div>
+        </div>
+
+        <div class="service-group">
+          <h3 class="group-label">🗄️ Storage Security</h3>
+          <div class="services-list">
+            <a [routerLink]="'/docs/security/secure-storage'" class="service-card">
+              <span class="svc-name">SecureStorageService</span>
+              <span class="svc-desc"
+                >Encrypted localStorage/sessionStorage with PBKDF2 key derivation</span
+              >
+            </a>
+          </div>
+        </div>
+
+        <div class="service-group">
+          <h3 class="group-label">✓ Input Validation</h3>
+          <div class="services-list">
+            <a [routerLink]="'/docs/security/input-sanitizer'" class="service-card">
+              <span class="svc-name">InputSanitizerService</span>
+              <span class="svc-desc"
+                >XSS prevention, URL validation, HTML escaping, safe JSON parsing</span
+              >
+            </a>
+            <a [routerLink]="'/docs/security/password-strength'" class="service-card">
+              <span class="svc-name">PasswordStrengthService</span>
+              <span class="svc-desc">Entropy-based password strength with pattern detection</span>
+            </a>
+          </div>
+        </div>
       </section>
 
       <section class="docs-section risk-section">
-        <h2 class="docs-section-title">Risk levels</h2>
+        <h2 class="docs-section-title">Risk Levels</h2>
         <div class="risk-grid">
           <div class="risk-card low">
             <span class="risk-dot"></span>
@@ -117,65 +167,66 @@ bootstrapApplication(AppComponent, {
   `,
   styles: [
     `
-      .services-grid {
-        display: flex;
-        flex-direction: column;
-        gap: var(--sp-8);
+      .service-group {
+        margin-bottom: var(--sp-6);
       }
 
-      .svc-card {
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: var(--sp-4);
+      h3.group-label {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        margin: 0 0 var(--sp-3);
       }
 
-      @media (min-width: 640px) {
-        .svc-card {
-          padding: var(--sp-6);
+      .services-list {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--sp-2);
+      }
+
+      @media (min-width: 480px) {
+        .services-list {
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         }
       }
 
-      h3.svc-name {
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: var(--text-white);
-        margin: 0 0 var(--sp-2);
-        font-family: var(--font-mono);
+      .service-card {
+        display: flex;
+        flex-direction: column;
+        gap: var(--sp-1);
+        padding: var(--sp-3) var(--sp-4);
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        text-decoration: none;
+        transition:
+          border-color var(--transition),
+          background var(--transition);
       }
 
-      .svc-desc {
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-        line-height: 1.65;
-        margin: 0 0 var(--sp-5);
+      .service-card:hover {
+        border-color: var(--accent);
+        background: var(--accent-hover);
       }
 
-      .example-label {
-        font-size: var(--text-xs);
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.07em;
-        color: var(--text-muted);
-        margin: var(--sp-5) 0 var(--sp-2);
+      .service-card:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
       }
 
-      .iface-block {
-        margin-bottom: var(--sp-8);
-      }
-
-      h3.iface-name {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #c0c8e0;
-        margin: 0 0 var(--sp-2);
-        font-family: var(--font-mono);
-      }
-
-      .iface-desc {
-        color: var(--text-muted);
+      .service-card .svc-name {
         font-size: var(--text-base);
-        margin: 0 0 var(--sp-3);
+        font-weight: 600;
+        color: #c0c8e0;
+        font-family: var(--font-mono);
+      }
+
+      .service-card .svc-desc {
+        font-size: var(--text-sm);
+        color: var(--text-muted);
+        line-height: 1.5;
       }
 
       /* Risk grid */
@@ -279,15 +330,6 @@ export class SecurityOverviewComponent {
     { label: 'Docs', route: '/docs' },
     { label: 'security' },
   ];
-  protected readonly methodsShortColumns = METHODS_COLUMNS_SHORT;
-  protected readonly fieldsColumns = FIELDS_COLUMNS;
-  protected readonly services = SECURITY_SERVICES;
-  protected readonly interfaces = SECURITY_INTERFACES;
   protected readonly providerExample = PROVIDER_EXAMPLE;
-
-  protected toRows(
-    methods: { name: string; signature: string; returns: string; description: string }[],
-  ): ApiRow[] {
-    return methods as unknown as ApiRow[];
-  }
+  protected readonly individualProvidersExample = INDIVIDUAL_PROVIDERS_EXAMPLE;
 }
