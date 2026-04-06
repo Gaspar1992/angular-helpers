@@ -45,6 +45,22 @@ export const DOCS_ROUTES: Routes = [
         title: 'Service — Angular Helpers',
       },
       {
+        path: 'worker-http',
+        loadComponent: () =>
+          import('./pages/worker-http-overview/worker-http-overview.component').then(
+            (m) => m.WorkerHttpOverviewComponent,
+          ),
+        title: 'worker-http — Angular Helpers',
+      },
+      {
+        path: 'worker-http/:entry',
+        loadComponent: () =>
+          import('./pages/worker-http-entry-detail/worker-http-entry-detail.component').then(
+            (m) => m.WorkerHttpEntryDetailComponent,
+          ),
+        title: 'Entry Point — Angular Helpers',
+      },
+      {
         path: '**',
         redirectTo: '',
       },

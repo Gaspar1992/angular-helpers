@@ -50,6 +50,8 @@ export interface RetryConfig {
   backoffMultiplier?: number;
   /** HTTP status codes that should trigger a retry (default: [408, 429, 500, 502, 503, 504]) */
   retryStatusCodes?: number[];
+  /** Whether to retry on network errors (fetch throws) (default: true) */
+  retryOnNetworkError?: boolean;
 }
 
 /**
@@ -86,4 +88,26 @@ export interface RateLimitConfig {
   maxRequests?: number;
   /** Window size in ms (default: 60000 = 1 min) */
   windowMs?: number;
+}
+
+/**
+ * Configuration for the logging interceptor.
+ */
+export interface LoggingConfig {
+  /** Custom logger function (default: console.log) */
+  logger?: (message: string, data?: unknown) => void;
+  /** Whether to include request/response headers in logs (default: false) */
+  includeHeaders?: boolean;
+}
+
+/**
+ * Configuration for the content integrity interceptor.
+ */
+export interface ContentIntegrityConfig {
+  /** Hash algorithm to use (default: 'SHA-256') */
+  algorithm?: 'SHA-256' | 'SHA-384' | 'SHA-512';
+  /** Response header containing the expected hash (default: 'X-Content-Hash') */
+  headerName?: string;
+  /** Throw if the integrity header is absent (default: false) */
+  requireHash?: boolean;
 }
