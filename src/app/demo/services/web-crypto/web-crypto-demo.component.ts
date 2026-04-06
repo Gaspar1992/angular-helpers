@@ -12,6 +12,7 @@ import { WebCryptoService } from '@angular-helpers/security';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   styleUrl: '../demo.styles.css',
+  providers: [WebCryptoService],
   template: `
     <section class="svc-card" aria-labelledby="crypto-title">
       <div class="svc-card-head">

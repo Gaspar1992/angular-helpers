@@ -120,7 +120,7 @@ jobs:
             --latest=false
 
       - name: Build worker-http (production)
-        run: npm run build:all --workspace packages/worker-http
+        run: npm run build:prod --workspace packages/worker-http
 
       - name: Publish worker-http
         id: publish_worker_http

@@ -12,6 +12,7 @@ import { RegexSecurityService } from '@angular-helpers/security';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   styleUrl: '../demo.styles.css',
+  providers: [RegexSecurityService],
   template: `
     <section class="svc-card" aria-labelledby="regex-title">
       <div class="svc-card-head">
