@@ -1,5 +1,5 @@
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, signal, ChangeDetectionStrategy, effect, inject } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/router';
 
 interface NavSection {
   label: string;
@@ -87,6 +87,18 @@ const NAV_SECTIONS: NavSection[] = [
       { label: 'RegexSecurityBuilder', route: '/docs/security/regex-security-builder' },
       { label: 'RegexSecurityService', route: '/docs/security/regex-security' },
       { label: 'WebCryptoService', route: '/docs/security/web-crypto' },
+      { label: 'SecureStorageService', route: '/docs/security/secure-storage' },
+      { label: 'InputSanitizerService', route: '/docs/security/input-sanitizer' },
+      { label: 'PasswordStrengthService', route: '/docs/security/password-strength' },
+    ],
+  },
+  {
+    label: 'worker-http',
+    overviewRoute: '/docs/worker-http',
+    servicesLabel: 'Entry Points',
+    serviceItems: [
+      { label: 'createWorkerTransport', route: '/docs/worker-http/transport' },
+      { label: 'createWorkerPipeline', route: '/docs/worker-http/interceptors' },
     ],
   },
 ];
@@ -101,8 +113,31 @@ const NAV_SECTIONS: NavSection[] = [
 export class DocsLayoutComponent {
   protected readonly navSections = NAV_SECTIONS;
   protected sidebarOpen = signal(false);
+  private readonly router = inject(Router);
 
   private expandedSections = signal<Set<string>>(new Set(NAV_SECTIONS.map((s) => s.label)));
+
+  constructor() {
+    effect(() => {
+      const _url = this.router.url;
+      // Wait for DOM update after navigation
+      queueMicrotask(() => {
+        this.scrollToActiveItem();
+      });
+    });
+  }
+
+  private scrollToActiveItem(): void {
+    const sidebar = document.querySelector('.sidebar');
+    const activeItem = sidebar?.querySelector('a.active');
+    if (sidebar && activeItem) {
+      const sidebarRect = sidebar.getBoundingClientRect();
+      const itemRect = activeItem.getBoundingClientRect();
+      const scrollTop =
+        itemRect.top - sidebarRect.top - sidebarRect.height / 2 + itemRect.height / 2;
+      sidebar.scrollBy({ top: scrollTop, behavior: 'smooth' });
+    }
+  }
 
   protected isSectionExpanded(label: string): boolean {
     return this.expandedSections().has(label);
