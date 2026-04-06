@@ -1,3 +1,10 @@
+## [1.10.1](https://github.com/Gaspar1992/angular-helpers/compare/v1.10.0...v1.10.1) (2026-04-06)
+
+
+### Bug Fixes
+
+* **docs:** update navigation menu with missing security services and worker-http section ([10c3205](https://github.com/Gaspar1992/angular-helpers/commit/10c3205d28f4cd35d06efb5119108388805f279f))
+
 # [1.9.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.8.0...v1.9.0) (2026-04-06)
 
 
