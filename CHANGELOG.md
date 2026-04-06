@@ -1,3 +1,11 @@
+# [1.12.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.11.0...v1.12.0) (2026-04-06)
+
+
+### Features
+
+* **demo:** add interactive security service demos ([c199a81](https://github.com/Gaspar1992/angular-helpers/commit/c199a81d567729f6f9cfb7c74e6cf2d6fe75c5cd))
+* **demo:** add interactive security service demos ([#40](https://github.com/Gaspar1992/angular-helpers/issues/40)) ([0b5b649](https://github.com/Gaspar1992/angular-helpers/commit/0b5b6492d1683e3d5dad60fae0c81df337227add)), closes [#39](https://github.com/Gaspar1992/angular-helpers/issues/39)
+
 # [1.11.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.10.1...v1.11.0) (2026-04-06)
 
 
