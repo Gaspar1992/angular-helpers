@@ -31,7 +31,6 @@ export class BatteryService extends BrowserApiBaseService {
       this.batteryManager = await nav.getBattery!();
 
       const batteryInfo = this.getBatteryInfo();
-      this.setupEventListeners();
 
       return batteryInfo;
     } catch (error) {
@@ -79,18 +78,6 @@ export class BatteryService extends BrowserApiBaseService {
         this.batteryManager!.removeEventListener('chargingtimechange', updateBatteryInfo);
         this.batteryManager!.removeEventListener('dischargingtimechange', updateBatteryInfo);
       };
-    });
-  }
-
-  private setupEventListeners(): void {
-    if (!this.batteryManager) return;
-
-    this.batteryManager.addEventListener('chargingchange', () => {
-      console.log('[BatteryService] Charging status changed:', this.batteryManager!.charging);
-    });
-
-    this.batteryManager.addEventListener('levelchange', () => {
-      console.log('[BatteryService] Battery level changed:', this.batteryManager!.level);
     });
   }
 
