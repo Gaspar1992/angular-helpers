@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.10.1...v1.11.0) (2026-04-06)
+
+
+### Features
+
+* **docs:** implement accordion behavior for docs menu sidebar ([09f9103](https://github.com/Gaspar1992/angular-helpers/commit/09f910362096cbe7ff93a696cff273429152826d))
+
 ## [1.10.1](https://github.com/Gaspar1992/angular-helpers/compare/v1.10.0...v1.10.1) (2026-04-06)
 
 
