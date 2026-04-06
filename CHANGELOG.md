@@ -1,3 +1,11 @@
+# [1.9.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.8.0...v1.9.0) (2026-04-06)
+
+
+### Features
+
+* **security:** add SecureStorageService, InputSanitizerService, PasswordStrengthService and HMAC to WebCryptoService ([#35](https://github.com/Gaspar1992/angular-helpers/issues/35)) ([eef427d](https://github.com/Gaspar1992/angular-helpers/commit/eef427d82dc39528cf5a6aa0c0b01707125cf9ab))
+* **security:** add SecureStorageService, InputSanitizerService, PasswordStrengthService, and HMAC to WebCryptoService ([1e96683](https://github.com/Gaspar1992/angular-helpers/commit/1e96683c30a3d07ca1873049200bc702a4a79ba9))
+
 # [1.5.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.4.0...v1.5.0) (2026-03-31)
 
 
