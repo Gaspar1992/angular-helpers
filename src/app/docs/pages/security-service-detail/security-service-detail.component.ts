@@ -7,6 +7,11 @@ import { DocsPageHeaderComponent } from '../../shared/page-header/docs-page-head
 import { DocsApiTableComponent } from '../../shared/api-table/docs-api-table.component';
 import { DocsTabsComponent, type DocTab } from '../../shared/tabs/docs-tabs.component';
 import { SECURITY_SERVICES, SECURITY_INTERFACES } from '../../data/security.data';
+import { RegexSecurityDemoComponent } from '../../../demo/services/regex-security/regex-security-demo.component';
+import { WebCryptoDemoComponent } from '../../../demo/services/web-crypto/web-crypto-demo.component';
+import { SecureStorageDemoComponent } from '../../../demo/services/secure-storage/secure-storage-demo.component';
+import { InputSanitizerDemoComponent } from '../../../demo/services/input-sanitizer/input-sanitizer-demo.component';
+import { PasswordStrengthDemoComponent } from '../../../demo/services/password-strength/password-strength-demo.component';
 import {
   ServiceDoc,
   BreadcrumbItem,
@@ -18,6 +23,7 @@ import {
 const CONTENT_TABS: DocTab[] = [
   { id: 'api', label: 'API Reference' },
   { id: 'example', label: 'Example' },
+  { id: 'demo', label: 'Demo' },
 ];
 
 @Component({
@@ -29,6 +35,11 @@ const CONTENT_TABS: DocTab[] = [
     DocsApiTableComponent,
     CodeBlockComponent,
     DocsTabsComponent,
+    RegexSecurityDemoComponent,
+    WebCryptoDemoComponent,
+    SecureStorageDemoComponent,
+    InputSanitizerDemoComponent,
+    PasswordStrengthDemoComponent,
   ],
   templateUrl: './security-service-detail.component.html',
   styles: [
@@ -81,7 +92,7 @@ export class SecurityServiceDetailComponent {
   protected readonly contentTabs = CONTENT_TABS;
   protected activeTab = signal<string>('api');
 
-  private serviceId = toSignal(this.route.paramMap.pipe(map((p) => p.get('service') ?? '')), {
+  protected serviceId = toSignal(this.route.paramMap.pipe(map((p) => p.get('service') ?? '')), {
     initialValue: '',
   });
 
