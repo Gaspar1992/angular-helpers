@@ -1,17 +1,19 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 import { pageVisibilityStream } from '../utils/page-visibility.utils';
 
 export type VisibilityState = 'visible' | 'hidden' | 'prerender';
 
 @Injectable()
-export class PageVisibilityService {
-  private readonly platformId = inject(PLATFORM_ID);
+export class PageVisibilityService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'page-visibility';
+  }
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && 'hidden' in document;
+    return this.isBrowserEnvironment() && 'hidden' in document;
   }
 
   get isHidden(): boolean {

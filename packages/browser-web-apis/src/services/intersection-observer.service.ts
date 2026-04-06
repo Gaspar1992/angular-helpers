@@ -1,6 +1,6 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 import {
   intersectionObserverEntriesStream,
@@ -14,11 +14,13 @@ export interface IntersectionObserverOptions {
 }
 
 @Injectable()
-export class IntersectionObserverService {
-  private readonly platformId = inject(PLATFORM_ID);
+export class IntersectionObserverService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'intersection-observer';
+  }
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && 'IntersectionObserver' in window;
+    return this.isBrowserEnvironment() && 'IntersectionObserver' in window;
   }
 
   observe(

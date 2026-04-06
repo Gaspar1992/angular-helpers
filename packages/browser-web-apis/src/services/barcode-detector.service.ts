@@ -1,5 +1,5 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 export type BarcodeFormat =
   | 'aztec'
@@ -38,11 +38,13 @@ function getBarcodeDetectorClass(): BarcodeDetectorConstructor | undefined {
 }
 
 @Injectable()
-export class BarcodeDetectorService {
-  private readonly platformId = inject(PLATFORM_ID);
+export class BarcodeDetectorService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'barcode-detector';
+  }
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && 'BarcodeDetector' in window;
+    return this.isBrowserEnvironment() && 'BarcodeDetector' in window;
   }
 
   async getSupportedFormats(): Promise<BarcodeFormat[]> {
