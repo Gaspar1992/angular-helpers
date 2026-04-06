@@ -1,6 +1,6 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 import {
   getNetworkSnapshot,
@@ -31,15 +31,17 @@ export interface NetworkInformation {
 }
 
 @Injectable()
-export class NetworkInformationService {
-  private readonly platformId = inject(PLATFORM_ID);
+export class NetworkInformationService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'network-information';
+  }
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && isNetworkInformationSupported();
+    return this.isBrowserEnvironment() && isNetworkInformationSupported();
   }
 
   getSnapshot(): NetworkInformation {
-    return isPlatformBrowser(this.platformId) ? getNetworkSnapshot() : { online: true };
+    return this.isBrowserEnvironment() ? getNetworkSnapshot() : { online: true };
   }
 
   watch(): Observable<NetworkInformation> {
@@ -47,6 +49,6 @@ export class NetworkInformationService {
   }
 
   get isOnline(): boolean {
-    return isPlatformBrowser(this.platformId) ? navigator.onLine : true;
+    return this.isBrowserEnvironment() ? navigator.onLine : true;
   }
 }

@@ -1,5 +1,5 @@
-import { Injectable, PLATFORM_ID, inject } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 export type VibrationPattern = number | number[];
 
@@ -11,8 +11,10 @@ export interface VibrationPreset {
 }
 
 @Injectable()
-export class VibrationService {
-  private readonly platformId = inject(PLATFORM_ID);
+export class VibrationService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'vibration';
+  }
 
   readonly presets: VibrationPreset = {
     success: [50, 30, 50],
@@ -22,7 +24,7 @@ export class VibrationService {
   };
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && 'vibrate' in navigator;
+    return this.isBrowserEnvironment() && 'vibrate' in navigator;
   }
 
   vibrate(pattern: VibrationPattern = 200): boolean {

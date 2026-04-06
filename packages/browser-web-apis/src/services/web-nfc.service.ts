@@ -1,6 +1,6 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 import {
   type NdefMessage,
@@ -17,11 +17,13 @@ function getNdefReaderClass(): NdefReaderConstructor | undefined {
 }
 
 @Injectable()
-export class WebNfcService {
-  private readonly platformId = inject(PLATFORM_ID);
+export class WebNfcService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'web-nfc';
+  }
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && 'NDEFReader' in window;
+    return this.isBrowserEnvironment() && 'NDEFReader' in window;
   }
 
   scan(): Observable<NdefReadingEvent> {

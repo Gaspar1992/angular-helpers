@@ -1,6 +1,6 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 import {
   type GamepadState,
@@ -13,11 +13,13 @@ import {
 export type { GamepadState };
 
 @Injectable()
-export class GamepadService {
-  private readonly platformId = inject(PLATFORM_ID);
+export class GamepadService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'gamepad';
+  }
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && isGamepadSupported();
+    return this.isBrowserEnvironment() && isGamepadSupported();
   }
 
   getSnapshot(index: number): GamepadState | null {

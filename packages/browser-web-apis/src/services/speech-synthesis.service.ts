@@ -1,6 +1,6 @@
-import { Injectable, inject, DestroyRef, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 export type SpeechState = 'idle' | 'speaking' | 'paused';
 
@@ -13,15 +13,16 @@ export interface SpeechOptions {
 }
 
 @Injectable()
-export class SpeechSynthesisService {
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly platformId = inject(PLATFORM_ID);
-
-  isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && 'speechSynthesis' in window;
+export class SpeechSynthesisService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'speech-synthesis';
   }
 
-  private ensureSupport(): void {
+  isSupported(): boolean {
+    return this.isBrowserEnvironment() && 'speechSynthesis' in window;
+  }
+
+  private ensureSpeechSynthesisSupported(): void {
     if (!this.isSupported()) {
       throw new Error('Speech Synthesis API not supported in this browser');
     }
@@ -65,7 +66,7 @@ export class SpeechSynthesisService {
 
   speak(text: string, options: SpeechOptions = {}): Observable<SpeechState> {
     return new Observable<SpeechState>((observer) => {
-      this.ensureSupport();
+      this.ensureSpeechSynthesisSupported();
 
       const utterance = new SpeechSynthesisUtterance(text);
 

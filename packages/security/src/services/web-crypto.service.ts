@@ -3,6 +3,8 @@ import { isPlatformBrowser } from '@angular/common';
 
 export type HashAlgorithm = 'SHA-1' | 'SHA-256' | 'SHA-384' | 'SHA-512';
 
+export type HmacAlgorithm = 'HMAC-SHA-256' | 'HMAC-SHA-384' | 'HMAC-SHA-512';
+
 export type AesKeyLength = 128 | 192 | 256;
 
 export interface AesEncryptResult {
@@ -90,9 +92,78 @@ export class WebCryptoService {
     return crypto.randomUUID();
   }
 
+  async generateHmacKey(algorithm: HmacAlgorithm = 'HMAC-SHA-256'): Promise<CryptoKey> {
+    this.ensureSecureContext();
+    return this.subtle.generateKey(
+      { name: 'HMAC', hash: { name: this.hmacHashName(algorithm) } },
+      true,
+      ['sign', 'verify'],
+    );
+  }
+
+  /**
+   * Signs data with an HMAC key. Returns a hex-encoded signature.
+   */
+  async sign(key: CryptoKey, data: string | ArrayBuffer): Promise<string> {
+    this.ensureSecureContext();
+    const buffer = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+    const signature = await this.subtle.sign('HMAC', key, buffer);
+    return this.bufferToHex(signature);
+  }
+
+  /**
+   * Verifies an HMAC signature (hex-encoded). Returns false for malformed input — never throws.
+   */
+  async verify(key: CryptoKey, data: string | ArrayBuffer, signature: string): Promise<boolean> {
+    this.ensureSecureContext();
+
+    let sigBytes: Uint8Array<ArrayBuffer>;
+    try {
+      sigBytes = this.hexToBytes(signature);
+    } catch {
+      return false;
+    }
+
+    try {
+      const buffer = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+      return await this.subtle.verify('HMAC', key, sigBytes, buffer);
+    } catch {
+      return false;
+    }
+  }
+
+  async importHmacKey(
+    jwk: JsonWebKey,
+    algorithm: HmacAlgorithm = 'HMAC-SHA-256',
+  ): Promise<CryptoKey> {
+    this.ensureSecureContext();
+    return this.subtle.importKey(
+      'jwk',
+      jwk,
+      { name: 'HMAC', hash: { name: this.hmacHashName(algorithm) } },
+      true,
+      ['sign', 'verify'],
+    );
+  }
+
   private bufferToHex(buffer: ArrayBuffer): string {
     return Array.from(new Uint8Array(buffer))
       .map((b) => b.toString(16).padStart(2, '0'))
       .join('');
+  }
+
+  private hexToBytes(hex: string): Uint8Array<ArrayBuffer> {
+    if (hex.length % 2 !== 0) throw new Error('Invalid hex string');
+    const bytes = new Uint8Array(new ArrayBuffer(hex.length / 2));
+    for (let i = 0; i < hex.length; i += 2) {
+      const byte = parseInt(hex.substring(i, i + 2), 16);
+      if (isNaN(byte)) throw new Error('Invalid hex string');
+      bytes[i / 2] = byte;
+    }
+    return bytes;
+  }
+
+  private hmacHashName(algorithm: HmacAlgorithm): string {
+    return algorithm.replace('HMAC-', '');
   }
 }

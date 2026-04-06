@@ -1,6 +1,6 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 import {
   type UsbDeviceRef,
@@ -25,11 +25,13 @@ function getUsb(): NavigatorWithExperimentalApis['usb'] {
 }
 
 @Injectable()
-export class WebUsbService {
-  private readonly platformId = inject(PLATFORM_ID);
+export class WebUsbService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'web-usb';
+  }
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && !!getUsb();
+    return this.isBrowserEnvironment() && !!getUsb();
   }
 
   async requestDevice(filters: UsbDeviceFilterDef[] = []): Promise<UsbDeviceRef> {

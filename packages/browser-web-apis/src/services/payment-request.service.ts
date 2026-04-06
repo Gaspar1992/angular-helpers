@@ -1,5 +1,5 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 export interface PaymentMethodConfig {
   supportedMethods: string;
@@ -33,11 +33,13 @@ export interface PaymentResult {
 }
 
 @Injectable()
-export class PaymentRequestService {
-  private readonly platformId = inject(PLATFORM_ID);
+export class PaymentRequestService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'payment-request';
+  }
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && 'PaymentRequest' in window;
+    return this.isBrowserEnvironment() && 'PaymentRequest' in window;
   }
 
   async canMakePayment(

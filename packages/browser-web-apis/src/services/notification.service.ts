@@ -12,7 +12,7 @@ export class NotificationService extends BrowserApiBaseService {
   }
 
   isSupported(): boolean {
-    return 'Notification' in window;
+    return this.isBrowserEnvironment() && 'Notification' in window;
   }
 
   async requestNotificationPermission(): Promise<NotificationPermission> {
@@ -36,7 +36,7 @@ export class NotificationService extends BrowserApiBaseService {
     try {
       return new Notification(title, options);
     } catch (error) {
-      console.error('[NotificationService] Error showing notification:', error);
+      this.logError('Error showing notification:', error);
       throw error;
     }
   }

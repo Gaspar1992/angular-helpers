@@ -19,8 +19,31 @@ Security package for Angular applications that prevents common attacks like ReDo
 
 - **Encryption/Decryption**: AES-GCM support for secure data handling
 - **Hashing**: SHA-256 and other algorithms
+- **HMAC Signing**: HMAC-SHA-256/384/512 for message authentication
 - **Key Management**: Generate, import, and export cryptographic keys
 - **Secure Random**: Cryptographically secure random values
+- **UUID Generation**: RFC4122 v4 UUIDs
+
+### **Secure Storage**
+
+- **Transparent Encryption**: AES-GCM encrypted localStorage/sessionStorage
+- **Ephemeral Mode**: In-memory keys for single-session security
+- **Passphrase Mode**: PBKDF2-derived keys for cross-session persistence
+- **Namespace Isolation**: Organize stored data with prefixes
+
+### **Input Sanitization**
+
+- **XSS Prevention**: Strip dangerous tags and attributes from HTML
+- **URL Validation**: Allow only http/https schemes
+- **HTML Escaping**: Safe interpolation of user content
+- **JSON Safety**: Safe parsing without eval
+
+### **Password Strength**
+
+- **Entropy-Based Scoring**: 0-4 score with labeled strength levels
+- **Pattern Detection**: Detects sequences, repetitions, keyboard walks
+- **Common Password Check**: Blocks frequently used passwords
+- **Feedback Messages**: Actionable improvement suggestions
 
 ### **Builder Pattern**
 
@@ -44,10 +67,40 @@ import { provideSecurity } from '@angular-helpers/security';
 bootstrapApplication(AppComponent, {
   providers: [
     provideSecurity({
+      // Core services (enabled by default)
       enableRegexSecurity: true,
+      enableWebCrypto: true,
+
+      // New services (opt-in, disabled by default)
+      enableSecureStorage: true,
+      enableInputSanitizer: true,
+      enablePasswordStrength: true,
+
+      // Global settings
       defaultTimeout: 5000,
       safeMode: false,
     }),
+  ],
+});
+```
+
+### **Individual Providers**
+
+```typescript
+import {
+  provideRegexSecurity,
+  provideWebCrypto,
+  provideSecureStorage,
+  provideInputSanitizer,
+  providePasswordStrength,
+} from '@angular-helpers/security';
+
+// Use only the services you need
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideSecureStorage({ storage: 'session', pbkdf2Iterations: 600_000 }),
+    provideInputSanitizer({ allowedTags: ['b', 'i', 'em', 'strong'] }),
+    providePasswordStrength(),
   ],
 });
 ```
@@ -211,6 +264,109 @@ export class SecureStorageComponent {
 
   generateUUID(): string {
     return this.cryptoService.randomUUID();
+  }
+
+  async signAndVerify(data: string): Promise<boolean> {
+    // Generate HMAC key for SHA-256
+    const key = await this.cryptoService.generateHmacKey('HMAC-SHA-256');
+
+    // Sign the data
+    const signature = await this.cryptoService.sign(key, data);
+
+    // Verify the signature
+    return await this.cryptoService.verify(key, data, signature);
+  }
+}
+```
+
+### **SecureStorageService**
+
+```typescript
+import { SecureStorageService } from '@angular-helpers/security';
+
+export class UserSettingsComponent {
+  private storage = inject(SecureStorageService);
+
+  async saveUserToken(token: string): Promise<void> {
+    // Ephemeral mode (default): data survives only this session
+    await this.storage.set('authToken', { token, createdAt: Date.now() });
+  }
+
+  async getUserToken(): Promise<{ token: string; createdAt: number } | null> {
+    return await this.storage.get<{ token: string; createdAt: number }>('authToken');
+  }
+
+  async initWithPassphrase(passphrase: string): Promise<void> {
+    // Passphrase mode: data survives page reloads
+    await this.storage.initWithPassphrase(passphrase);
+  }
+
+  async saveWithNamespace(userId: string, data: unknown): Promise<void> {
+    // Namespace isolation
+    await this.storage.set('profile', data, `user:${userId}`);
+  }
+
+  clearUserData(userId: string): void {
+    // Clear only this user's data
+    this.storage.clear(`user:${userId}`);
+  }
+}
+```
+
+### **InputSanitizerService**
+
+```typescript
+import { InputSanitizerService } from '@angular-helpers/security';
+
+export class CommentComponent {
+  private sanitizer = inject(InputSanitizerService);
+
+  sanitizeUserComment(html: string): string {
+    // Strip dangerous tags, keep safe ones (b, i, em, a, etc.)
+    return this.sanitizer.sanitizeHtml(html);
+    // Example: '<b>Hello</b><script>alert(1)</script>' → '<b>Hello</b>'
+  }
+
+  validateUserLink(url: string): string | null {
+    // Only allow http/https URLs
+    return this.sanitizer.sanitizeUrl(url);
+    // Example: 'javascript:alert(1)' → null
+    // Example: 'https://example.com' → 'https://example.com/'
+  }
+
+  escapeForDisplay(text: string): string {
+    // Safe for HTML text nodes
+    return this.sanitizer.escapeHtml(text);
+    // Example: '<b>hello</b>' → '&lt;b&gt;hello&lt;/b&gt;'
+  }
+
+  parseUserJson(json: string): unknown | null {
+    // Safe JSON parsing without eval
+    return this.sanitizer.sanitizeJson(json);
+  }
+}
+```
+
+### **PasswordStrengthService**
+
+```typescript
+import { PasswordStrengthService } from '@angular-helpers/security';
+
+export class RegistrationComponent {
+  private passwordStrength = inject(PasswordStrengthService);
+
+  checkPasswordStrength(password: string): void {
+    const result = this.passwordStrength.assess(password);
+
+    console.log(`Score: ${result.score}/4`); // 0-4
+    console.log(`Label: ${result.label}`); // 'very-weak' to 'very-strong'
+    console.log(`Entropy: ${result.entropy} bits`); // calculated entropy
+    console.log('Feedback:', result.feedback); // improvement suggestions
+
+    // Example results:
+    // 'password' → score: 0, label: 'very-weak', feedback: ['This is a commonly used password']
+    // 'P@ssw0rd!' → score: 2, label: 'fair', feedback: ['Avoid keyboard patterns']
+    // 'xK#9mZ$vLq2@rBnT7' → score: 4, label: 'very-strong', feedback: []
   }
 }
 ```

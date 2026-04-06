@@ -1,6 +1,6 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 import { resizeObserverEntriesStream, resizeObserverStream } from '../utils/resize-observer.utils';
 
@@ -16,11 +16,13 @@ export interface ElementSize {
 }
 
 @Injectable()
-export class ResizeObserverService {
-  private readonly platformId = inject(PLATFORM_ID);
+export class ResizeObserverService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'resize-observer';
+  }
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && 'ResizeObserver' in window;
+    return this.isBrowserEnvironment() && 'ResizeObserver' in window;
   }
 
   observe(

@@ -1,6 +1,6 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 export type UserIdleState = 'active' | 'idle';
 export type ScreenIdleState = 'locked' | 'unlocked';
@@ -30,11 +30,13 @@ function getIdleDetectorClass(): IdleDetectorConstructor | undefined {
 }
 
 @Injectable()
-export class IdleDetectorService {
-  private readonly platformId = inject(PLATFORM_ID);
+export class IdleDetectorService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'idle-detector';
+  }
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && 'IdleDetector' in window;
+    return this.isBrowserEnvironment() && 'IdleDetector' in window;
   }
 
   async requestPermission(): Promise<PermissionState> {

@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { BrowserApiBaseService } from './browser-api-base.service';
+import { PermissionAwareBrowserApiBaseService } from './permission-aware-browser-api-base.service';
 import { MediaDevice, MediaDeviceKind } from '../../interfaces/media.interface';
 
 /**
@@ -11,7 +11,7 @@ import { MediaDevice, MediaDeviceKind } from '../../interfaces/media.interface';
  * - Permission handling for media APIs
  */
 @Injectable()
-export abstract class MediaDeviceBaseService extends BrowserApiBaseService {
+export abstract class MediaDeviceBaseService extends PermissionAwareBrowserApiBaseService {
   protected devices = signal<MediaDevice[]>([]);
   protected activeStreams = signal<Map<string, MediaStream>>(new Map());
   protected error = signal<string>('');
@@ -248,14 +248,6 @@ export abstract class MediaDeviceBaseService extends BrowserApiBaseService {
    */
   protected onDestroy(): void {
     this.stopAllStreams();
-  }
-
-  protected logError(message: string, error: unknown): void {
-    console.error(`[${this.getApiName()}] ${message}`, error);
-  }
-
-  protected logInfo(message: string): void {
-    console.info(`[${this.getApiName()}] ${message}`);
   }
 
   private async executeWithErrorHandling<T>(

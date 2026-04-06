@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { BrowserApiBaseService } from './base/browser-api-base.service';
+import { PermissionAwareBrowserApiBaseService } from './base/permission-aware-browser-api-base.service';
 
 @Injectable()
-export class ClipboardService extends BrowserApiBaseService {
+export class ClipboardService extends PermissionAwareBrowserApiBaseService {
   protected override getApiName(): string {
     return 'clipboard';
   }

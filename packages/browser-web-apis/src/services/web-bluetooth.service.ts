@@ -1,6 +1,6 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 import {
   type BluetoothRequestDeviceOptions,
@@ -23,11 +23,13 @@ function getBluetooth(): NavigatorWithExperimentalApis['bluetooth'] {
 }
 
 @Injectable()
-export class WebBluetoothService {
-  private readonly platformId = inject(PLATFORM_ID);
+export class WebBluetoothService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'web-bluetooth';
+  }
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && !!getBluetooth();
+    return this.isBrowserEnvironment() && !!getBluetooth();
   }
 
   async requestDevice(
