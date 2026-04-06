@@ -115,11 +115,18 @@ export class DocsLayoutComponent {
   protected sidebarOpen = signal(false);
   private readonly router = inject(Router);
 
-  private expandedSections = signal<Set<string>>(new Set(NAV_SECTIONS.map((s) => s.label)));
+  private expandedSections = signal<Set<string>>(new Set());
 
   constructor() {
     effect(() => {
-      const _url = this.router.url;
+      const url = this.router.url;
+      // Auto-expand section containing active route
+      for (const section of NAV_SECTIONS) {
+        if (url.startsWith(section.overviewRoute)) {
+          this.expandedSections.set(new Set([section.label]));
+          break;
+        }
+      }
       // Wait for DOM update after navigation
       queueMicrotask(() => {
         this.scrollToActiveItem();
@@ -145,13 +152,12 @@ export class DocsLayoutComponent {
 
   protected toggleSection(label: string): void {
     this.expandedSections.update((set) => {
-      const next = new Set(set);
-      if (next.has(label)) {
-        next.delete(label);
+      // Accordion behavior: if opening, close others; if closing, just close this one
+      if (set.has(label)) {
+        return new Set(); // Close all
       } else {
-        next.add(label);
+        return new Set([label]); // Open only this one, close others
       }
-      return next;
     });
   }
 
