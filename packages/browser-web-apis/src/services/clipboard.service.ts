@@ -35,7 +35,6 @@ export class ClipboardService extends BrowserApiBaseService {
 
   async readText(): Promise<string> {
     await this.ensureClipboardPermission('read');
-
     try {
       return await navigator.clipboard.readText();
     } catch (error) {
