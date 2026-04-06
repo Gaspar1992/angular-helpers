@@ -1,6 +1,6 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 import {
   type PerformanceEntryType,
@@ -12,11 +12,13 @@ import {
 export type { PerformanceEntryType, PerformanceObserverConfig };
 
 @Injectable()
-export class PerformanceObserverService {
-  private readonly platformId = inject(PLATFORM_ID);
+export class PerformanceObserverService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'performance-observer';
+  }
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && isPerformanceObserverSupported();
+    return this.isBrowserEnvironment() && isPerformanceObserverSupported();
   }
 
   observe(config: PerformanceObserverConfig): Observable<PerformanceEntryList> {

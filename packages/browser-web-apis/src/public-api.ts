@@ -150,6 +150,8 @@ export {
 
 // Base classes
 export { BrowserApiBaseService } from './services/base/browser-api-base.service';
+export { PermissionAwareBrowserApiBaseService } from './services/base/permission-aware-browser-api-base.service';
+export { ConnectionRegistryBaseService } from './services/base/connection-registry-base.service';
 
 // Interfaces and Types
 export * from './interfaces/permissions.interface';

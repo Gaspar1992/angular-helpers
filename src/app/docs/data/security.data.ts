@@ -213,6 +213,34 @@ export class PatternComponent {
         description: 'Generates a cryptographically secure UUID v4 string.',
         returns: 'string',
       },
+      {
+        name: 'generateHmacKey',
+        signature: 'generateHmacKey(algorithm?: HmacAlgorithm): Promise<CryptoKey>',
+        description:
+          'Generates a new HMAC key for the specified algorithm (default: HMAC-SHA-256).',
+        returns: 'Promise<CryptoKey>',
+      },
+      {
+        name: 'sign',
+        signature: 'sign(key: CryptoKey, data: string | ArrayBuffer): Promise<string>',
+        description:
+          'Creates an HMAC signature of the data using the provided key. Returns a hex-encoded string.',
+        returns: 'Promise<string>',
+      },
+      {
+        name: 'verify',
+        signature:
+          'verify(key: CryptoKey, data: string | ArrayBuffer, signature: string): Promise<boolean>',
+        description:
+          'Verifies an HMAC signature against the data using the provided key. Returns false for malformed input — never throws.',
+        returns: 'Promise<boolean>',
+      },
+      {
+        name: 'importHmacKey',
+        signature: 'importHmacKey(jwk: JsonWebKey, algorithm?: HmacAlgorithm): Promise<CryptoKey>',
+        description: 'Imports an HMAC key from a JWK object.',
+        returns: 'Promise<CryptoKey>',
+      },
     ],
     example: `import { WebCryptoService } from '@angular-helpers/security';
 
@@ -234,6 +262,224 @@ export class CryptoComponent {
   async decryptMessage(ciphertext: ArrayBuffer, iv: Uint8Array, jwk: JsonWebKey): Promise<string> {
     const key = await this.crypto.importAesKey(jwk);
     return this.crypto.decryptAes(key, ciphertext, iv);
+  }
+
+  async signAndVerify(data: string): Promise<boolean> {
+    const key = await this.crypto.generateHmacKey('HMAC-SHA-256');
+    const signature = await this.crypto.sign(key, data);
+    return await this.crypto.verify(key, data, signature);
+  }
+}`,
+  },
+  {
+    id: 'secure-storage',
+    name: 'SecureStorageService',
+    description:
+      'Transparent AES-GCM encrypted storage on top of localStorage/sessionStorage. Supports ephemeral in-memory keys for single-session security or passphrase-derived keys via PBKDF2 for cross-session persistence.',
+    scope: 'provided',
+    importPath: '@angular-helpers/security',
+    requiresSecureContext: true,
+    browserSupport: 'All modern browsers with Web Crypto API',
+    notes: [
+      'Requires a secure context (HTTPS) for Web Crypto API.',
+      'Ephemeral mode (default): data is lost when the page reloads.',
+      'Use initWithPassphrase() for data that must survive page reloads.',
+      'PBKDF2 uses 600,000 iterations by default (OWASP 2023 recommendation).',
+    ],
+    methods: [
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether the service can be used in the current environment.',
+        returns: 'boolean',
+      },
+      {
+        name: 'initWithPassphrase',
+        signature: 'initWithPassphrase(passphrase: string, explicitSalt?: string): Promise<void>',
+        description:
+          'Initializes the service with a passphrase-derived key using PBKDF2. Salt is auto-persisted to storage.',
+        returns: 'Promise<void>',
+      },
+      {
+        name: 'set',
+        signature: 'set<T>(key: string, value: T, namespace?: string): Promise<void>',
+        description: 'Encrypts and stores a value. A fresh random IV is generated for every write.',
+        returns: 'Promise<void>',
+      },
+      {
+        name: 'get',
+        signature: 'get<T>(key: string, namespace?: string): Promise<T | null>',
+        description:
+          'Decrypts and returns a stored value. Returns null if key does not exist or decryption fails.',
+        returns: 'Promise<T | null>',
+      },
+      {
+        name: 'remove',
+        signature: 'remove(key: string, namespace?: string): void',
+        description: 'Removes a single entry from storage.',
+        returns: 'void',
+      },
+      {
+        name: 'clear',
+        signature: 'clear(namespace?: string): void',
+        description:
+          'Clears entries. Without namespace, clears entire storage. With namespace, clears only that namespace.',
+        returns: 'void',
+      },
+    ],
+    example: `import { SecureStorageService } from '@angular-helpers/security';
+
+@Component({...})
+export class UserSettingsComponent {
+  private storage = inject(SecureStorageService);
+
+  async saveUserToken(token: string): Promise<void> {
+    // Ephemeral mode: data survives only this session
+    await this.storage.set('authToken', { token, createdAt: Date.now() });
+  }
+
+  async getUserToken(): Promise<{ token: string; createdAt: number } | null> {
+    return await this.storage.get<{ token: string; createdAt: number }>('authToken');
+  }
+
+  async initWithPassphrase(passphrase: string): Promise<void> {
+    // Passphrase mode: data survives page reloads
+    await this.storage.initWithPassphrase(passphrase);
+  }
+
+  async saveWithNamespace(userId: string, data: unknown): Promise<void> {
+    // Namespace isolation
+    await this.storage.set('profile', data, \`user:\${userId}\`);
+  }
+
+  clearUserData(userId: string): void {
+    // Clear only this user's data
+    this.storage.clear(\`user:\${userId}\`);
+  }
+}`,
+  },
+  {
+    id: 'input-sanitizer',
+    name: 'InputSanitizerService',
+    description:
+      'Structured input sanitization to defend against XSS, URL injection, and unsafe HTML. This is defense-in-depth and does NOT replace a Content Security Policy (CSP).',
+    scope: 'provided',
+    importPath: '@angular-helpers/security',
+    requiresSecureContext: false,
+    browserSupport: 'All browsers with DOMParser support',
+    notes: [
+      'Always configure a proper CSP alongside using this service.',
+      'sanitizeHtml uses DOMParser, not innerHTML assignment, to prevent script execution.',
+      'Allowed tags and attributes are configurable via SANITIZER_CONFIG injection token.',
+    ],
+    methods: [
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether the service can be used in the current environment.',
+        returns: 'boolean',
+      },
+      {
+        name: 'sanitizeHtml',
+        signature: 'sanitizeHtml(input: string): string',
+        description:
+          'Parses and sanitizes HTML, keeping only allowed tags and attributes. Strips script tags and event handlers.',
+        returns: 'string',
+      },
+      {
+        name: 'sanitizeUrl',
+        signature: 'sanitizeUrl(input: string): string | null',
+        description:
+          'Validates URL via URL constructor. Returns normalized URL only for http/https schemes. Returns null for javascript:, data:, vbscript:, or relative URLs.',
+        returns: 'string | null',
+      },
+      {
+        name: 'escapeHtml',
+        signature: 'escapeHtml(input: string): string',
+        description:
+          'Escapes HTML special characters (&, <, >, ", \') for safe text interpolation.',
+        returns: 'string',
+      },
+      {
+        name: 'sanitizeJson',
+        signature: 'sanitizeJson(input: string): unknown | null',
+        description:
+          'Safely parses JSON without eval. Returns parsed value on success, null on any error.',
+        returns: 'unknown | null',
+      },
+    ],
+    example: `import { InputSanitizerService } from '@angular-helpers/security';
+
+@Component({...})
+export class CommentComponent {
+  private sanitizer = inject(InputSanitizerService);
+
+  sanitizeUserComment(html: string): string {
+    // Strip dangerous tags, keep safe ones (b, i, em, a, etc.)
+    return this.sanitizer.sanitizeHtml(html);
+    // Example: '<b>Hello</b><script>alert(1)</script>' → '<b>Hello</b>'
+  }
+
+  validateUserLink(url: string): string | null {
+    // Only allow http/https URLs
+    return this.sanitizer.sanitizeUrl(url);
+    // Example: 'javascript:alert(1)' → null
+    // Example: 'https://example.com' → 'https://example.com/'
+  }
+
+  escapeForDisplay(text: string): string {
+    // Safe for HTML text nodes
+    return this.sanitizer.escapeHtml(text);
+    // Example: '<b>hello</b>' → '&lt;b&gt;hello&lt;/b&gt;'
+  }
+
+  parseUserJson(json: string): unknown | null {
+    // Safe JSON parsing without eval
+    return this.sanitizer.sanitizeJson(json);
+  }
+}`,
+  },
+  {
+    id: 'password-strength',
+    name: 'PasswordStrengthService',
+    description:
+      'Entropy-based password strength evaluation. All methods are synchronous and side-effect free — safely wrappable in Angular computed(). Detects sequences, repetitions, keyboard walks, and common passwords.',
+    scope: 'provided',
+    importPath: '@angular-helpers/security',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers (pure TypeScript, no external deps)',
+    notes: [
+      'Score thresholds: <28 bits=0, <36=1, <50=2, <70=3, >=70=4',
+      'Entropy penalties applied for sequences (abc, 123), repetitions (aaa), and keyboard walks (qwerty).',
+      'Common passwords (password, 123456, qwerty, etc.) are capped at score 1.',
+    ],
+    methods: [
+      {
+        name: 'assess',
+        signature: 'assess(password: string): PasswordStrengthResult',
+        description:
+          'Evaluates password strength. Returns score (0-4), label, entropy in bits, and feedback messages. Never throws.',
+        returns: 'PasswordStrengthResult',
+      },
+    ],
+    example: `import { PasswordStrengthService } from '@angular-helpers/security';
+
+@Component({...})
+export class RegistrationComponent {
+  private passwordStrength = inject(PasswordStrengthService);
+
+  checkPasswordStrength(password: string): void {
+    const result = this.passwordStrength.assess(password);
+
+    console.log(\`Score: \${result.score}/4\`);        // 0-4
+    console.log(\`Label: \${result.label}\`);           // 'very-weak' to 'very-strong'
+    console.log(\`Entropy: \${result.entropy} bits\`);  // calculated entropy
+    console.log('Feedback:', result.feedback);       // improvement suggestions
+
+    // Example results:
+    // 'password' → score: 0, label: 'very-weak', feedback: ['This is a commonly used password']
+    // 'P@ssw0rd!' → score: 2, label: 'fair', feedback: ['Avoid keyboard patterns']
+    // 'xK#9mZ$vLq2@rBnT7' → score: 4, label: 'very-strong', feedback: []
   }
 }`,
   },
@@ -279,6 +525,56 @@ export const SECURITY_INTERFACES = [
       { name: 'risk', type: "'low' | 'medium' | 'high' | 'critical'", description: 'Risk level' },
       { name: 'warnings', type: 'string[]', description: 'Security warnings' },
       { name: 'recommendations', type: 'string[]', description: 'Improvement suggestions' },
+    ],
+  },
+  {
+    name: 'SecureStorageConfig',
+    description: 'Configuration options for SecureStorageService.',
+    fields: [
+      {
+        name: 'storage?',
+        type: "'local' | 'session'",
+        description: 'Storage target (default: local)',
+      },
+      {
+        name: 'pbkdf2Iterations?',
+        type: 'number',
+        description: 'PBKDF2 iterations (default: 600,000)',
+      },
+    ],
+  },
+  {
+    name: 'SanitizerConfig',
+    description: 'Configuration options for InputSanitizerService.',
+    fields: [
+      {
+        name: 'allowedTags?',
+        type: 'string[]',
+        description: 'HTML tags to allow (default: b, i, em, strong, a, p, br, ul, ol, li, span)',
+      },
+      {
+        name: 'allowedAttributes?',
+        type: 'Record<string, string[]>',
+        description: 'Attributes allowed per tag (default: a[href])',
+      },
+    ],
+  },
+  {
+    name: 'PasswordStrengthResult',
+    description: 'Result returned by PasswordStrengthService.assess().',
+    fields: [
+      {
+        name: 'score',
+        type: '0 | 1 | 2 | 3 | 4',
+        description: 'Strength score from 0 (very weak) to 4 (very strong)',
+      },
+      {
+        name: 'label',
+        type: "'very-weak' | 'weak' | 'fair' | 'strong' | 'very-strong'",
+        description: 'Human-readable strength label',
+      },
+      { name: 'entropy', type: 'number', description: 'Calculated entropy in bits' },
+      { name: 'feedback', type: 'string[]', description: 'Improvement suggestions' },
     ],
   },
 ];

@@ -1,6 +1,6 @@
-import { Injectable, inject, DestroyRef, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ConnectionRegistryBaseService } from './base/connection-registry-base.service';
 
 export type SSEConnectionState = 'connecting' | 'open' | 'closed';
 
@@ -17,27 +17,31 @@ export interface SSEConfig {
 }
 
 @Injectable()
-export class ServerSentEventsService {
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly platformId = inject(PLATFORM_ID);
-  private sources = new Map<string, EventSource>();
-
-  isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && 'EventSource' in window;
+export class ServerSentEventsService extends ConnectionRegistryBaseService<EventSource> {
+  protected override getApiName(): string {
+    return 'server-sent-events';
   }
 
-  private ensureSupport(): void {
+  protected override closeNativeConnection(source: EventSource): void {
+    source.close();
+  }
+
+  isSupported(): boolean {
+    return this.isBrowserEnvironment() && 'EventSource' in window;
+  }
+
+  private ensureSSESupported(): void {
     if (!this.isSupported()) {
       throw new Error('Server-Sent Events (EventSource) not supported in this environment');
     }
   }
 
   connect<T = unknown>(url: string, config: SSEConfig = {}): Observable<SSEMessage<T>> {
-    this.ensureSupport();
+    this.ensureSSESupported();
 
     return new Observable<SSEMessage<T>>((observer) => {
       const source = new EventSource(url, { withCredentials: config.withCredentials ?? false });
-      this.sources.set(url, source);
+      this.connections.set(url, source);
 
       const messageHandler = (event: MessageEvent) => {
         try {
@@ -61,7 +65,7 @@ export class ServerSentEventsService {
         if (source.readyState === EventSource.CLOSED) {
           observer.error(new Error('SSE connection closed unexpectedly'));
         } else {
-          console.warn('[ServerSentEventsService] SSE connection error, reconnecting...', event);
+          console.warn(`[${this.getApiName()}] SSE connection error, reconnecting...`, event);
         }
       };
 
@@ -85,26 +89,21 @@ export class ServerSentEventsService {
   }
 
   disconnect(url: string): void {
-    const source = this.sources.get(url);
-    if (source) {
-      source.close();
-      this.sources.delete(url);
-    }
+    this.removeConnection(url);
   }
 
   disconnectAll(): void {
-    this.sources.forEach((source) => source.close());
-    this.sources.clear();
+    this.closeAllConnections();
   }
 
   getState(url: string): SSEConnectionState {
-    const source = this.sources.get(url);
+    const source = this.connections.get(url);
     if (!source) return 'closed';
     const states: SSEConnectionState[] = ['connecting', 'open', 'closed'];
     return states[source.readyState] ?? 'closed';
   }
 
   getActiveConnections(): string[] {
-    return Array.from(this.sources.keys());
+    return this.getConnectionKeys();
   }
 }

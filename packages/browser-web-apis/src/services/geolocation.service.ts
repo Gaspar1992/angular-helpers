@@ -21,7 +21,7 @@ export class GeolocationService extends BrowserApiBaseService {
       navigator.geolocation.getCurrentPosition(
         (position) => resolve(position),
         (error) => {
-          console.error('[GeolocationService] Error getting position:', error);
+          this.logError('Error getting position:', error);
           reject(error);
         },
         options,
@@ -36,7 +36,7 @@ export class GeolocationService extends BrowserApiBaseService {
       const watchId = navigator.geolocation.watchPosition(
         (position) => observer.next(position),
         (error) => {
-          console.error('[GeolocationService] Error watching position:', error);
+          this.logError('Error watching position:', error);
           observer.error(error);
         },
         options,

@@ -1,14 +1,15 @@
-import { Injectable, inject, DestroyRef, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 @Injectable()
-export class FullscreenService {
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly platformId = inject(PLATFORM_ID);
+export class FullscreenService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'fullscreen';
+  }
 
   isSupported(): boolean {
-    if (!isPlatformBrowser(this.platformId)) return false;
+    if (!this.isBrowserEnvironment()) return false;
     return !!(
       document.fullscreenEnabled ??
       (document as Document & { webkitFullscreenEnabled?: boolean }).webkitFullscreenEnabled
@@ -16,7 +17,7 @@ export class FullscreenService {
   }
 
   get isFullscreen(): boolean {
-    if (!isPlatformBrowser(this.platformId)) return false;
+    if (!this.isBrowserEnvironment()) return false;
     return !!(
       document.fullscreenElement ??
       (document as Document & { webkitFullscreenElement?: Element }).webkitFullscreenElement
@@ -24,7 +25,7 @@ export class FullscreenService {
   }
 
   get fullscreenElement(): Element | null {
-    if (!isPlatformBrowser(this.platformId)) return null;
+    if (!this.isBrowserEnvironment()) return null;
     return (
       document.fullscreenElement ??
       (document as Document & { webkitFullscreenElement?: Element }).webkitFullscreenElement ??
@@ -45,7 +46,7 @@ export class FullscreenService {
         await el.webkitRequestFullscreen();
       }
     } catch (error) {
-      console.error('[FullscreenService] Failed to enter fullscreen:', error);
+      this.logError('Failed to enter fullscreen:', error);
       throw error;
     }
   }
@@ -60,7 +61,7 @@ export class FullscreenService {
         await doc.webkitExitFullscreen();
       }
     } catch (error) {
-      console.error('[FullscreenService] Failed to exit fullscreen:', error);
+      this.logError('Failed to exit fullscreen:', error);
       throw error;
     }
   }
@@ -75,7 +76,7 @@ export class FullscreenService {
 
   watch(): Observable<boolean> {
     return new Observable<boolean>((observer) => {
-      if (!isPlatformBrowser(this.platformId)) {
+      if (!this.isBrowserEnvironment()) {
         observer.next(false);
         observer.complete();
         return undefined;

@@ -1,6 +1,6 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 import {
   type MutationObserverOptions,
@@ -11,11 +11,13 @@ import {
 export type { MutationObserverOptions };
 
 @Injectable()
-export class MutationObserverService {
-  private readonly platformId = inject(PLATFORM_ID);
+export class MutationObserverService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'mutation-observer';
+  }
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && isMutationObserverSupported();
+    return this.isBrowserEnvironment() && isMutationObserverSupported();
   }
 
   observe(target: Node, options?: MutationObserverOptions): Observable<MutationRecord[]> {

@@ -1,6 +1,6 @@
-import { Injectable, inject, DestroyRef, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 export type AudioContextState = 'suspended' | 'running' | 'closed';
 
@@ -10,14 +10,15 @@ export interface AudioAnalyserData {
 }
 
 @Injectable()
-export class WebAudioService {
-  private readonly platformId = inject(PLATFORM_ID);
-  private readonly destroyRef = inject(DestroyRef);
+export class WebAudioService extends BrowserApiBaseService {
+  protected override getApiName(): string {
+    return 'web-audio';
+  }
 
   private context: AudioContext | null = null;
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && 'AudioContext' in window;
+    return this.isBrowserEnvironment() && 'AudioContext' in window;
   }
 
   getContext(): AudioContext {

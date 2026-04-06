@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { BrowserApiBaseService } from './base/browser-api-base.service';
+import { PermissionAwareBrowserApiBaseService } from './base/permission-aware-browser-api-base.service';
 
 @Injectable()
-export class CameraService extends BrowserApiBaseService {
+export class CameraService extends PermissionAwareBrowserApiBaseService {
   private currentStream: MediaStream | null = null;
 
   protected override getApiName(): string {
