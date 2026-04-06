@@ -1,3 +1,13 @@
+## [1.12.1](https://github.com/Gaspar1992/angular-helpers/compare/v1.12.0...v1.12.1) (2026-04-06)
+
+
+### Bug Fixes
+
+* **demo:** add security service providers and navigation ([bc1738b](https://github.com/Gaspar1992/angular-helpers/commit/bc1738b3b50b1a98f0207cd6e9d992c50fb65008))
+* security demos providers and worker-http npm publish ([#43](https://github.com/Gaspar1992/angular-helpers/issues/43)) ([901a2cd](https://github.com/Gaspar1992/angular-helpers/commit/901a2cdbb8a8ae3f380614f5a86ca7f8c9bfbeb0))
+* **worker-http:** add vite config for worker build ([c3f288c](https://github.com/Gaspar1992/angular-helpers/commit/c3f288cc9d824e8ad7a8bb70897d7e492c988ca4))
+* **worker-http:** remove unnecessary build:workers script ([11a7c81](https://github.com/Gaspar1992/angular-helpers/commit/11a7c8145beae13639a91cfce85dfba1665153e8))
+
 # [1.12.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.11.0...v1.12.0) (2026-04-06)
 
 
