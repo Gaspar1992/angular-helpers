@@ -30,6 +30,7 @@ const CONTENT_TABS: DocTab[] = [
     CodeBlockComponent,
     DocsTabsComponent,
   ],
+  styleUrl: './worker-http-entry-detail.component.css',
   template: `
     @if (entry()) {
       <div class="docs-page">
@@ -87,54 +88,11 @@ const CONTENT_TABS: DocTab[] = [
     } @else {
       <div class="not-found">
         <h1 class="docs-page-title">Entry point not found</h1>
-        <p class="docs-page-lead" style="max-width: none">
-          The requested entry point does not exist in this package.
-        </p>
+        <p class="docs-page-lead">The requested entry point does not exist in this package.</p>
         <a routerLink="/docs/worker-http">← Back to worker-http</a>
       </div>
     }
   `,
-  styles: [
-    `
-      .iface-section {
-        margin-top: var(--sp-6);
-      }
-      .iface-section-title {
-        font-size: 0.82rem;
-        font-weight: 700;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.07em;
-        margin: 0 0 var(--sp-4);
-      }
-      .iface-block {
-        margin-bottom: var(--sp-8);
-      }
-      h4.iface-name {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #c0c8e0;
-        margin: 0 0 var(--sp-2);
-        font-family: var(--font-mono);
-      }
-      .iface-desc {
-        color: var(--text-muted);
-        font-size: var(--text-base);
-        margin: 0 0 var(--sp-3);
-      }
-      .not-found {
-        padding-top: var(--sp-8);
-      }
-      .not-found a {
-        color: var(--accent);
-        text-decoration: none;
-        font-size: 0.9rem;
-      }
-      .not-found a:hover {
-        text-decoration: underline;
-      }
-    `,
-  ],
 })
 export class WorkerHttpEntryDetailComponent {
   private route = inject(ActivatedRoute);

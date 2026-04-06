@@ -35,6 +35,7 @@ createWorkerPipeline([
   selector: 'app-worker-http-overview',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CodeBlockComponent, DocsPageHeaderComponent, DocsApiTableComponent],
+  styleUrl: './worker-http-overview.component.css',
   template: `
     <div class="docs-page">
       <app-docs-page-header
@@ -106,93 +107,6 @@ createWorkerPipeline([
       </section>
     </div>
   `,
-  styles: [
-    `
-      .services-grid {
-        display: flex;
-        flex-direction: column;
-        gap: var(--sp-8);
-      }
-
-      .svc-card {
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: var(--sp-4);
-      }
-
-      @media (min-width: 640px) {
-        .svc-card {
-          padding: var(--sp-6);
-        }
-      }
-
-      h3.svc-name {
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: var(--text-white);
-        margin: 0 0 var(--sp-2);
-        font-family: var(--font-mono);
-      }
-
-      .svc-desc {
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-        line-height: 1.65;
-        margin: 0 0 var(--sp-5);
-      }
-
-      .example-label {
-        font-size: var(--text-xs);
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.07em;
-        color: var(--text-muted);
-        margin: var(--sp-5) 0 var(--sp-2);
-      }
-
-      .iface-block {
-        margin-bottom: var(--sp-8);
-      }
-
-      h3.iface-name {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #c0c8e0;
-        margin: 0 0 var(--sp-2);
-        font-family: var(--font-mono);
-      }
-
-      .iface-desc {
-        color: var(--text-muted);
-        font-size: var(--text-base);
-        margin: 0 0 var(--sp-3);
-      }
-
-      .arch-diagram {
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: var(--sp-4);
-        overflow-x: auto;
-      }
-
-      .arch-diagram pre {
-        margin: 0;
-        font-size: 0.8rem;
-        line-height: 1.5;
-      }
-
-      @media (min-width: 640px) {
-        .arch-diagram {
-          padding: var(--sp-6);
-        }
-        .arch-diagram pre {
-          font-size: 0.85rem;
-        }
-      }
-    `,
-  ],
 })
 export class WorkerHttpOverviewComponent {
   protected readonly breadcrumbs: BreadcrumbItem[] = [
