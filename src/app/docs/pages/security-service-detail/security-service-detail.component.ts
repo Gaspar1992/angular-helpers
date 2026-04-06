@@ -19,6 +19,13 @@ import {
   METHODS_COLUMNS,
   FIELDS_COLUMNS,
 } from '../../models/doc-meta.model';
+import {
+  RegexSecurityService,
+  WebCryptoService,
+  SecureStorageService,
+  InputSanitizerService,
+  PasswordStrengthService,
+} from '@angular-helpers/security';
 
 const CONTENT_TABS: DocTab[] = [
   { id: 'api', label: 'API Reference' },
@@ -40,6 +47,13 @@ const CONTENT_TABS: DocTab[] = [
     SecureStorageDemoComponent,
     InputSanitizerDemoComponent,
     PasswordStrengthDemoComponent,
+  ],
+  providers: [
+    RegexSecurityService,
+    WebCryptoService,
+    SecureStorageService,
+    InputSanitizerService,
+    PasswordStrengthService,
   ],
   templateUrl: './security-service-detail.component.html',
   styles: [

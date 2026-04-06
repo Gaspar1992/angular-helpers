@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, input, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { PageVisibilityDemoComponent } from '../services/page-visibility/page-visibility-demo.component';
 import { NetworkInformationDemoComponent } from '../services/network-information/network-information-demo.component';
 import { ResizeObserverDemoComponent } from '../services/resize-observer/resize-observer-demo.component';
@@ -24,6 +25,7 @@ export type DemoTab = 'observers' | 'media' | 'system' | 'storage' | 'realtime' 
   selector: 'app-browser-apis',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    RouterLink,
     PageVisibilityDemoComponent,
     NetworkInformationDemoComponent,
     ResizeObserverDemoComponent,

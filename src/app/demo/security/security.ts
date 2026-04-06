@@ -4,6 +4,13 @@ import { WebCryptoDemoComponent } from '../services/web-crypto/web-crypto-demo.c
 import { SecureStorageDemoComponent } from '../services/secure-storage/secure-storage-demo.component';
 import { InputSanitizerDemoComponent } from '../services/input-sanitizer/input-sanitizer-demo.component';
 import { PasswordStrengthDemoComponent } from '../services/password-strength/password-strength-demo.component';
+import {
+  RegexSecurityService,
+  WebCryptoService,
+  SecureStorageService,
+  InputSanitizerService,
+  PasswordStrengthService,
+} from '@angular-helpers/security';
 
 export type SecurityDemoTab = 'regex' | 'crypto' | 'storage' | 'sanitizer' | 'password';
 
@@ -16,6 +23,13 @@ export type SecurityDemoTab = 'regex' | 'crypto' | 'storage' | 'sanitizer' | 'pa
     SecureStorageDemoComponent,
     InputSanitizerDemoComponent,
     PasswordStrengthDemoComponent,
+  ],
+  providers: [
+    RegexSecurityService,
+    WebCryptoService,
+    SecureStorageService,
+    InputSanitizerService,
+    PasswordStrengthService,
   ],
   templateUrl: './security.html',
   styleUrl: './security.css',
