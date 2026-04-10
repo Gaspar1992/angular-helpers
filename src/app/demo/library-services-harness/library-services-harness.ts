@@ -7,12 +7,15 @@ import {
   ClipboardService,
   FullscreenService,
   GeolocationService,
+  IdleDetectorService,
   IntersectionObserverService,
   MediaDevicesService,
   MediaRecorderService,
+  MutationObserverService,
   NetworkInformationService,
   NotificationService,
   PageVisibilityService,
+  PerformanceObserverService,
   PermissionsService,
   ResizeObserverService,
   ScreenOrientationService,
@@ -483,11 +486,29 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
 
       <section>
         <h2>Tier 1 Observer APIs</h2>
+        <p>
+          MutationObserver API supported:
+          <strong data-testid="mutation-observer-supported">{{
+            mutationObserverSupported() ? 'yes' : 'no'
+          }}</strong>
+        </p>
+        <p>
+          PerformanceObserver API supported:
+          <strong data-testid="performance-observer-supported">{{
+            performanceObserverSupported() ? 'yes' : 'no'
+          }}</strong>
+        </p>
         <button data-testid="intersection-observe" type="button" (click)="observeIntersection()">
           Observe intersection
         </button>
         <button data-testid="resize-observe" type="button" (click)="observeResize()">
           Observe resize
+        </button>
+        <button data-testid="mutation-observe" type="button" (click)="observeMutations()">
+          Observe mutations
+        </button>
+        <button data-testid="performance-observe" type="button" (click)="observePerformance()">
+          Observe performance
         </button>
 
         <p>
@@ -514,15 +535,43 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
           Resize height:
           <strong data-testid="resize-height">{{ resizeHeight() }}</strong>
         </p>
+        <p>
+          Mutation state:
+          <strong data-testid="mutation-state">{{ mutationObserverState() }}</strong>
+        </p>
+        <p>
+          Mutation count:
+          <strong data-testid="mutation-count">{{ mutationCount() }}</strong>
+        </p>
+        <p>
+          Performance state:
+          <strong data-testid="performance-state">{{ performanceObserverState() }}</strong>
+        </p>
+        <p>
+          Performance entries:
+          <strong data-testid="performance-entry-count">{{ performanceEntryCount() }}</strong>
+        </p>
       </section>
 
       <section>
         <h2>Tier 1 System APIs</h2>
+        <p>
+          Screen Wake Lock supported:
+          <strong data-testid="wake-lock-supported">{{
+            screenWakeLockSupported() ? 'yes' : 'no'
+          }}</strong>
+        </p>
         <button data-testid="fullscreen-enter" type="button" (click)="enterFullscreen()">
           Enter fullscreen
         </button>
         <button data-testid="fullscreen-exit" type="button" (click)="exitFullscreen()">
           Exit fullscreen
+        </button>
+        <button data-testid="wake-lock-request" type="button" (click)="requestWakeLock()">
+          Request wake lock
+        </button>
+        <button data-testid="wake-lock-release" type="button" (click)="releaseWakeLock()">
+          Release wake lock
         </button>
 
         <p>
@@ -536,6 +585,10 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
         <p>
           Page visible:
           <strong data-testid="page-visible">{{ pageVisible() ? 'yes' : 'no' }}</strong>
+        </p>
+        <p>
+          Wake lock state:
+          <strong data-testid="wake-lock-state">{{ wakeLockState() }}</strong>
         </p>
       </section>
 
@@ -654,6 +707,9 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
     ServerSentEventsService,
     VibrationService,
     SpeechSynthesisService,
+    MutationObserverService,
+    PerformanceObserverService,
+    IdleDetectorService,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -681,6 +737,10 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   private readonly serverSentEventsService = inject(ServerSentEventsService);
   private readonly vibrationService = inject(VibrationService);
   private readonly speechSynthesisService = inject(SpeechSynthesisService);
+  private readonly mutationObserverService = inject(MutationObserverService);
+  private readonly performanceObserverService = inject(PerformanceObserverService);
+  private readonly idleDetectorService = inject(IdleDetectorService);
+  private readonly screenWakeLockService = inject(ScreenWakeLockService);
   private readonly harnessWorkerName = 'library-services-harness-worker';
 
   readonly capabilityOverview = signal<HarnessCapabilityOverview>(
@@ -758,6 +818,15 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   readonly speechSynthesisSupported = signal<boolean>(
     this.browserCapabilityService.isSupported('speechSynthesis'),
   );
+  readonly mutationObserverSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('mutationObserver'),
+  );
+  readonly performanceObserverSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('performanceObserver'),
+  );
+  readonly idleDetectorSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('idleDetector'),
+  );
   readonly pageVisibilityState = signal<string>(
     typeof document !== 'undefined' ? document.visibilityState : 'visible',
   );
@@ -814,6 +883,19 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   readonly clipboardReadValue = signal<string>('not-read');
   readonly notificationCount = signal<number>(0);
   readonly notificationShowState = signal<'idle' | 'pending' | 'success' | 'error'>('idle');
+  readonly mutationObserverState = signal<'idle' | 'observing' | 'mutation-detected' | 'error'>(
+    'idle',
+  );
+  readonly mutationCount = signal<number>(0);
+  readonly performanceObserverState = signal<'idle' | 'observing' | 'entries-received' | 'error'>(
+    'idle',
+  );
+  readonly performanceEntryCount = signal<number>(0);
+  readonly idleDetectorState = signal<'idle' | 'requesting-permission' | 'started' | 'error'>(
+    'idle',
+  );
+  readonly idleDetectorPermission = signal<HarnessPermissionState>('unknown');
+  readonly wakeLockState = signal<'idle' | 'requested' | 'active' | 'released' | 'error'>('idle');
   readonly errorMessage = signal<string>('');
   readonly lastAction = signal<string>('idle');
 
@@ -1258,6 +1340,57 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     this.resizeHeight.set(window.innerHeight);
   }
 
+  observeMutations(): void {
+    this.resetError();
+    this.lastAction.set('observe-mutations');
+
+    if (!this.mutationObserverSupported()) {
+      this.mutationObserverState.set('error');
+      this.setError(new Error('MutationObserver API not supported'));
+      return;
+    }
+
+    this.mutationObserverState.set('observing');
+
+    const target = document.body;
+    this.mutationObserverService.observe(target, { childList: true, subtree: true }).subscribe({
+      next: (records) => {
+        this.mutationCount.update((count) => count + records.length);
+        this.mutationObserverState.set('mutation-detected');
+      },
+      error: (error: unknown) => {
+        this.mutationObserverState.set('error');
+        this.setError(error);
+      },
+    });
+  }
+
+  observePerformance(): void {
+    this.resetError();
+    this.lastAction.set('observe-performance');
+
+    if (!this.performanceObserverSupported()) {
+      this.performanceObserverState.set('error');
+      this.setError(new Error('PerformanceObserver API not supported'));
+      return;
+    }
+
+    this.performanceObserverState.set('observing');
+
+    this.performanceObserverService.observeByType('mark', true).subscribe({
+      next: (entries) => {
+        this.performanceEntryCount.update((count) => count + entries.length);
+        this.performanceObserverState.set('entries-received');
+      },
+      error: (error: unknown) => {
+        this.performanceObserverState.set('error');
+        this.setError(error);
+      },
+    });
+
+    performance.mark('harness-test-mark');
+  }
+
   openBroadcastChannel(): void {
     this.resetError();
     this.lastAction.set('open-broadcast-channel');
@@ -1342,6 +1475,37 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     this.lastAction.set('exit-fullscreen');
     this.fullscreenService.exit();
     this.fullscreenState.set('windowed');
+  }
+
+  async requestWakeLock(): Promise<void> {
+    this.resetError();
+    this.lastAction.set('request-wake-lock');
+    this.wakeLockState.set('requested');
+
+    if (!this.screenWakeLockSupported()) {
+      this.wakeLockState.set('error');
+      this.setError(new Error('Screen Wake Lock API not supported'));
+      return;
+    }
+
+    try {
+      await this.screenWakeLockService.request('screen');
+      this.wakeLockState.set('active');
+    } catch (error: unknown) {
+      this.wakeLockState.set('error');
+      this.setError(error);
+    }
+  }
+
+  async releaseWakeLock(): Promise<void> {
+    this.lastAction.set('release-wake-lock');
+
+    try {
+      await this.screenWakeLockService.release();
+      this.wakeLockState.set('released');
+    } catch (error: unknown) {
+      this.setError(error);
+    }
   }
 
   vibrateSuccess(): void {

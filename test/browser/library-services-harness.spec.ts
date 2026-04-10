@@ -378,11 +378,13 @@ test.describe('Library services harness without geolocation permission', () => {
 });
 
 test.describe('Library services harness - Tier 1 Observer APIs', () => {
-  test('reports support for IntersectionObserver and ResizeObserver', async ({ page }) => {
+  test('reports support for observer APIs', async ({ page }) => {
     await page.goto('/demo/library-services');
 
     await expect(page.getByTestId('intersection-observer-supported')).toHaveText('yes');
     await expect(page.getByTestId('resize-observer-supported')).toHaveText('yes');
+    await expect(page.getByTestId('mutation-observer-supported')).toHaveText('yes');
+    await expect(page.getByTestId('performance-observer-supported')).toHaveText('yes');
   });
 
   test('observes element visibility with IntersectionObserverService', async ({ page }) => {
@@ -420,15 +422,78 @@ test.describe('Library services harness - Tier 1 Observer APIs', () => {
     await expect(page.getByTestId('resize-observing')).toHaveText('yes');
     await expect(page.getByTestId('error-message')).toHaveText('none');
   });
+
+  test('observes DOM mutations with MutationObserverService', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    await page.getByTestId('mutation-observe').click();
+
+    await expect(page.getByTestId('last-action')).toHaveText('observe-mutations');
+    await expect(page.getByTestId('mutation-state')).toHaveText('observing');
+    await expect(page.getByTestId('error-message')).toHaveText('none');
+  });
+
+  test('observes performance entries with PerformanceObserverService', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    await page.getByTestId('performance-observe').click();
+
+    await expect(page.getByTestId('last-action')).toHaveText('observe-performance');
+    await expect
+      .poll(async () => (await page.getByTestId('performance-state').textContent())?.trim() ?? '')
+      .toMatch(/observing|entries-received/);
+    await expect(page.getByTestId('error-message')).toHaveText('none');
+  });
 });
 
 test.describe('Library services harness - Tier 1 System APIs', () => {
-  test('reports support for PageVisibility, Fullscreen, and Orientation APIs', async ({ page }) => {
+  test('reports support for PageVisibility, Fullscreen, Orientation and WakeLock APIs', async ({
+    page,
+  }) => {
     await page.goto('/demo/library-services');
 
     await expect(page.getByTestId('page-visibility-supported')).toHaveText('yes');
     await expect(page.getByTestId('fullscreen-supported')).toHaveText('yes');
     await expect(page.getByTestId('screen-orientation-supported')).toHaveText(/yes|no/);
+    const wakeLockSupported = await page.getByTestId('wake-lock-supported').textContent();
+    expect(['yes', 'no']).toContain(wakeLockSupported?.trim());
+  });
+
+  test('handles wake lock lifecycle according to browser support', async ({ page }) => {
+    await page.goto('/demo/library-services');
+
+    const wakeLockSupported =
+      (await page.getByTestId('wake-lock-supported').textContent())?.trim() ?? 'no';
+
+    await page.getByTestId('wake-lock-request').click();
+    await expect(page.getByTestId('last-action')).toHaveText('request-wake-lock');
+
+    if (wakeLockSupported === 'no') {
+      await expect(page.getByTestId('wake-lock-state')).toHaveText('error');
+      await expect(page.getByTestId('error-message')).not.toHaveText('none');
+      return;
+    }
+
+    await expect
+      .poll(async () => (await page.getByTestId('wake-lock-state').textContent())?.trim() ?? '')
+      .toMatch(/requested|active|error/);
+
+    const state = (await page.getByTestId('wake-lock-state').textContent())?.trim() ?? '';
+
+    if (state === 'active') {
+      await page.getByTestId('wake-lock-release').click();
+      await expect(page.getByTestId('last-action')).toHaveText('release-wake-lock');
+      await expect(page.getByTestId('wake-lock-state')).toHaveText('released');
+      await expect(page.getByTestId('error-message')).toHaveText('none');
+      return;
+    }
+
+    if (state === 'error') {
+      await expect(page.getByTestId('error-message')).not.toHaveText('none');
+      return;
+    }
+
+    await expect(page.getByTestId('error-message')).toHaveText('none');
   });
 
   test('tracks page visibility state', async ({ page }) => {
