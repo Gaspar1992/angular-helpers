@@ -1,8 +1,9 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CodeBlockComponent } from '../../shared/code-block/code-block.component';
-import { DocsPageHeaderComponent } from '../../shared/page-header/docs-page-header.component';
-import { BreadcrumbItem } from '../../models/doc-meta.model';
+import { CodeBlockComponent } from '../../../ui/code-block/code-block.component';
+import { DocsPageHeaderComponent } from '../../../ui/page-header/docs-page-header.component';
+import { BreadcrumbItem } from '../../../docs/models/doc-meta.model';
+import { BROWSER_WEB_APIS_SERVICES } from '../../../docs/data/browser-web-apis.data';
 
 const PROVIDER_EXAMPLE = `import { provideBrowserWebApis } from '@angular-helpers/browser-web-apis';
 

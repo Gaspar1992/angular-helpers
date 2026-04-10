@@ -1,5 +1,5 @@
 import { Component, input, ChangeDetectionStrategy } from '@angular/core';
-import { BreadcrumbItem } from '../../models/doc-meta.model';
+import { BreadcrumbItem } from '../../docs/models/doc-meta.model';
 import { DocsBreadcrumbComponent } from '../breadcrumb/docs-breadcrumb.component';
 
 @Component({

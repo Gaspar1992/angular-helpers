@@ -1,5 +1,22 @@
-import { Component, signal, ChangeDetectionStrategy, effect, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/router';
+import {
+  Component,
+  signal,
+  ChangeDetectionStrategy,
+  effect,
+  inject,
+  computed,
+} from '@angular/core';
+import {
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+  Router,
+  ActivatedRoute,
+} from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { ServiceDetailConfig } from '../../features/docs/unified-service-detail/unified-service-detail.component';
 
 interface NavSection {
   label: string;
@@ -114,18 +131,38 @@ export class DocsLayoutComponent {
   protected readonly navSections = NAV_SECTIONS;
   protected sidebarOpen = signal(false);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   private expandedSections = signal<Set<string>>(new Set());
 
+  /** Resolved data from child route (when on detail page) */
+  protected resolvedData = toSignal(
+    this.route.firstChild?.data.pipe(map((d) => d['config'] as ServiceDetailConfig | undefined)) ??
+      this.route.firstChild?.firstChild?.data.pipe(
+        map((d) => d['config'] as ServiceDetailConfig | undefined),
+      ) ??
+      of(undefined),
+    { initialValue: undefined },
+  );
+
+  /** Current active section from resolved data or URL */
+  protected activeSection = computed(() => {
+    const resolved = this.resolvedData();
+    if (resolved) return resolved.section;
+
+    // Fallback to URL detection
+    const url = this.router.url;
+    if (url.startsWith('/docs/browser-web-apis')) return 'browser-web-apis';
+    if (url.startsWith('/docs/security')) return 'security';
+    if (url.startsWith('/docs/worker-http')) return 'worker-http';
+    return null;
+  });
+
   constructor() {
     effect(() => {
-      const url = this.router.url;
-      // Auto-expand section containing active route
-      for (const section of NAV_SECTIONS) {
-        if (url.startsWith(section.overviewRoute)) {
-          this.expandedSections.set(new Set([section.label]));
-          break;
-        }
+      const section = this.activeSection();
+      if (section) {
+        this.expandedSections.set(new Set([section]));
       }
       // Wait for DOM update after navigation
       queueMicrotask(() => {

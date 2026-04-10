@@ -1,13 +1,13 @@
-@if (service()) {
+@if (service) {
   <div class="docs-page">
     <app-docs-page-header
-      [breadcrumbs]="breadcrumbs()"
-      [title]="service()!.name"
+      [breadcrumbs]="breadcrumbs"
+      [title]="service!.name"
       [titleMono]="true"
-      [badge]="badge()"
+      [badge]="badge"
       badgeVariant="import"
-      [lead]="service()!.description"
-      [scope]="service()!.scope"
+      [lead]="service!.description"
+      [scope]="service!.scope"
     />
 
     <section class="docs-section">
@@ -25,13 +25,13 @@
         @if (activeTab() === 'api') {
           <app-docs-api-table
             [columns]="methodsColumns"
-            [rows]="methodRows()"
+            [rows]="methodRows"
             ariaLabel="API methods"
           />
-          @if (interfaces().length) {
+          @if (interfaces.length) {
             <div class="iface-section">
               <h3 class="iface-section-title">Related interfaces</h3>
-              @for (iface of interfaces(); track $index) {
+              @for (iface of interfaces; track $index) {
                 <div class="iface-block">
                   <h4 class="iface-name">{{ iface.name }}</h4>
                   <p class="iface-desc">{{ iface.description }}</p>
@@ -46,18 +46,18 @@
           }
         }
         @if (activeTab() === 'example') {
-          <app-code-block [code]="service()!.example" />
+          <app-code-block [code]="service!.example" />
         }
         @if (activeTab() === 'demo') {
-          @if (serviceId() === 'regex-security') {
+          @if (serviceId === 'regex-security') {
             <app-regex-security-demo />
-          } @else if (serviceId() === 'web-crypto') {
+          } @else if (serviceId === 'web-crypto') {
             <app-web-crypto-demo />
-          } @else if (serviceId() === 'secure-storage') {
+          } @else if (serviceId === 'secure-storage') {
             <app-secure-storage-demo />
-          } @else if (serviceId() === 'input-sanitizer') {
+          } @else if (serviceId === 'input-sanitizer') {
             <app-input-sanitizer-demo />
-          } @else if (serviceId() === 'password-strength') {
+          } @else if (serviceId === 'password-strength') {
             <app-password-strength-demo />
           } @else {
             <div class="feedback feedback-info">

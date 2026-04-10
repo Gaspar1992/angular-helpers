@@ -1,21 +1,12 @@
-import {
-  Component,
-  inject,
-  computed,
-  signal,
-  effect,
-  ChangeDetectionStrategy,
-  Type,
-  untracked,
-} from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, Type, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { NgComponentOutlet } from '@angular/common';
-import { CodeBlockComponent } from '../../shared/code-block/code-block.component';
-import { DocsPageHeaderComponent } from '../../shared/page-header/docs-page-header.component';
-import { DocsApiTableComponent } from '../../shared/api-table/docs-api-table.component';
-import { DocsTabsComponent, type DocTab } from '../../shared/tabs/docs-tabs.component';
+import { CodeBlockComponent } from '../../../ui/code-block/code-block.component';
+import { DocsPageHeaderComponent } from '../../../ui/page-header/docs-page-header.component';
+import { DocsApiTableComponent } from '../../../ui/api-table/docs-api-table.component';
+import { DocsTabsComponent, type DocTab } from '../../../ui/tabs/docs-tabs.component';
 import { PageVisibilityDemoComponent } from '../../../demo/services/page-visibility/page-visibility-demo.component';
 import { NetworkInformationDemoComponent } from '../../../demo/services/network-information/network-information-demo.component';
 import { ResizeObserverDemoComponent } from '../../../demo/services/resize-observer/resize-observer-demo.component';
@@ -34,14 +25,9 @@ import { BroadcastChannelDemoComponent } from '../../../demo/services/broadcast-
 import { ServerSentEventsDemoComponent } from '../../../demo/services/server-sent-events/server-sent-events-demo.component';
 import { GeolocationDemoComponent } from '../../../demo/services/geolocation/geolocation-demo.component';
 import { NotificationDemoComponent } from '../../../demo/services/notification/notification-demo.component';
-import { BROWSER_WEB_APIS_SERVICES } from '../../data/browser-web-apis.data';
-import {
-  ServiceDoc,
-  BreadcrumbItem,
-  ApiRow,
-  METHODS_COLUMNS,
-  FN_FIELDS_COLUMNS,
-} from '../../models/doc-meta.model';
+import { ApiRow, METHODS_COLUMNS, FN_FIELDS_COLUMNS } from '../../../docs/models/doc-meta.model';
+import { ServiceDetailConfig } from '../unified-service-detail/unified-service-detail.component';
+import { CONTENT_TABS_WITH_DEMO } from '../base/detail-page-base.component';
 
 const SERVICE_DEMO_MAP: Record<string, Type<unknown>> = {
   'broadcast-channel': BroadcastChannelDemoComponent,
@@ -63,12 +49,6 @@ const SERVICE_DEMO_MAP: Record<string, Type<unknown>> = {
   'speech-synthesis': SpeechSynthesisDemoComponent,
   vibration: VibrationDemoComponent,
 };
-
-const CONTENT_TABS: DocTab[] = [
-  { id: 'api', label: 'API Reference' },
-  { id: 'example', label: 'Example' },
-  { id: 'demo', label: 'Demo' },
-];
 
 @Component({
   selector: 'app-service-detail',
@@ -146,67 +126,66 @@ const CONTENT_TABS: DocTab[] = [
 export class ServiceDetailComponent {
   private route = inject(ActivatedRoute);
 
-  protected readonly contentTabs = CONTENT_TABS;
+  protected readonly contentTabs: DocTab[] = CONTENT_TABS_WITH_DEMO;
   protected activeTab = signal<string>('api');
   protected apiVariant = signal<'service' | 'fn'>('service');
 
-  private serviceId = toSignal(
-    this.route.paramMap.pipe(map((params) => params.get('service') ?? '')),
-    { initialValue: '' },
+  // Resolved data from route
+  protected resolved = toSignal(
+    this.route.data.pipe(map((d) => d['config'] as ServiceDetailConfig)),
+    { initialValue: null },
   );
 
-  constructor() {
-    effect(() => {
-      this.serviceId();
-      untracked(() => {
-        this.apiVariant.set('service');
-        this.activeTab.set('api');
-      });
-    });
+  // Expose for template
+  protected get service() {
+    return this.resolved()?.service;
   }
 
-  protected service = computed<ServiceDoc | undefined>(() =>
-    BROWSER_WEB_APIS_SERVICES.find((s) => s.id === this.serviceId()),
-  );
+  protected get serviceId() {
+    return this.route.snapshot.paramMap.get('service') ?? '';
+  }
 
-  protected breadcrumbs = computed<BreadcrumbItem[]>(() => [
-    { label: 'Docs', route: '/docs' },
-    { label: 'browser-web-apis', route: '/docs/browser-web-apis' },
-    { label: this.service()?.name ?? '' },
-  ]);
+  protected get breadcrumbs() {
+    const r = this.resolved();
+    return [
+      { label: 'Docs', route: '/docs' },
+      { label: r?.backLabel ?? '', route: r?.backRoute ?? '' },
+      { label: r?.service?.name ?? '' },
+    ];
+  }
 
-  protected badge = computed(() => {
-    const s = this.service();
-    if (!s) return '';
-    if (this.apiVariant() === 'fn' && s.fnVersion) {
-      return `import { ${s.fnVersion.name} } from '${s.fnVersion.importPath}'`;
+  protected get badge() {
+    const item = this.service;
+    if (!item) return '';
+    if (this.apiVariant() === 'fn' && item.fnVersion) {
+      return `import { ${item.fnVersion.name} } from '${item.fnVersion.importPath}'`;
     }
-    return `import { ${s.name} } from '${s.importPath}'`;
-  });
+    return `import { ${item.name} } from '${item.importPath}'`;
+  }
 
-  protected currentColumns = computed(() => {
-    const s = this.service();
+  protected currentColumns() {
+    const s = this.service;
     if (s?.fnVersion && this.apiVariant() === 'fn') return FN_FIELDS_COLUMNS;
     return METHODS_COLUMNS;
-  });
+  }
 
-  protected methodRows = computed<ApiRow[]>(() => {
-    const s = this.service();
+  protected methodRows(): ApiRow[] {
+    const s = this.service;
     if (!s) return [];
     if (this.apiVariant() === 'fn' && s.fnVersion) {
       return s.fnVersion.fields as unknown as ApiRow[];
     }
     return s.methods as unknown as ApiRow[];
-  });
+  }
 
-  protected currentExample = computed(() => {
-    const s = this.service();
+  protected currentExample() {
+    const s = this.service;
     if (!s) return '';
     if (this.apiVariant() === 'fn' && s.fnVersion) return s.fnVersion.example;
     return s.example;
-  });
+  }
 
-  protected demoComponent = computed<Type<unknown> | null>(
-    () => SERVICE_DEMO_MAP[this.serviceId()] ?? null,
-  );
+  protected get demoComponent(): Type<unknown> | null {
+    return SERVICE_DEMO_MAP[this.serviceId] ?? null;
+  }
 }

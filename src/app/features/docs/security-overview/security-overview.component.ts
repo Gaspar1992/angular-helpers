@@ -1,8 +1,9 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CodeBlockComponent } from '../../shared/code-block/code-block.component';
-import { DocsPageHeaderComponent } from '../../shared/page-header/docs-page-header.component';
-import { BreadcrumbItem } from '../../models/doc-meta.model';
+import { CodeBlockComponent } from '../../../ui/code-block/code-block.component';
+import { DocsPageHeaderComponent } from '../../../ui/page-header/docs-page-header.component';
+import { BreadcrumbItem } from '../../../docs/models/doc-meta.model';
+import { SECURITY_SERVICES } from '../../../docs/data/security.data';
 
 const PROVIDER_EXAMPLE = `import { provideSecurity } from '@angular-helpers/security';
 

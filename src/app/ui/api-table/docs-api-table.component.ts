@@ -1,5 +1,5 @@
 import { Component, input, ChangeDetectionStrategy } from '@angular/core';
-import { ApiColumn, ApiRow } from '../../models/doc-meta.model';
+import { ApiColumn, ApiRow } from '../../docs/models/doc-meta.model';
 
 @Component({
   selector: 'app-docs-api-table',

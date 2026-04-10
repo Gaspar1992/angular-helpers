@@ -1,14 +1,15 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { CodeBlockComponent } from '../../shared/code-block/code-block.component';
-import { DocsPageHeaderComponent } from '../../shared/page-header/docs-page-header.component';
-import { DocsApiTableComponent } from '../../shared/api-table/docs-api-table.component';
-import { WORKER_HTTP_ENTRIES, WORKER_HTTP_INTERFACES } from '../../data/worker-http.data';
+import { DocsApiTableComponent } from '../../../ui/api-table/docs-api-table.component';
+import { DocsPageHeaderComponent } from '../../../ui/page-header/docs-page-header.component';
+import { CodeBlockComponent } from '../../../ui/code-block/code-block.component';
+import { WORKER_HTTP_ENTRIES, WORKER_HTTP_INTERFACES } from '../../../docs/data/worker-http.data';
 import {
-  BreadcrumbItem,
+  ApiColumn,
   ApiRow,
-  METHODS_COLUMNS_SHORT,
-  FIELDS_COLUMNS,
-} from '../../models/doc-meta.model';
+  METHODS_COLUMNS,
+  FN_FIELDS_COLUMNS,
+  BreadcrumbItem,
+} from '../../../docs/models/doc-meta.model';
 
 const PROVIDER_EXAMPLE = `import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
 import { createWorkerPipeline } from '@angular-helpers/worker-http/interceptors';
@@ -43,8 +44,8 @@ export class WorkerHttpOverviewComponent {
     { label: 'Docs', route: '/docs' },
     { label: 'worker-http' },
   ];
-  protected readonly methodsShortColumns = METHODS_COLUMNS_SHORT;
-  protected readonly fieldsColumns = FIELDS_COLUMNS;
+  protected readonly methodsShortColumns = METHODS_COLUMNS;
+  protected readonly fieldsColumns = FN_FIELDS_COLUMNS;
   protected readonly entries = WORKER_HTTP_ENTRIES;
   protected readonly interfaces = WORKER_HTTP_INTERFACES;
   protected readonly providerExample = PROVIDER_EXAMPLE;

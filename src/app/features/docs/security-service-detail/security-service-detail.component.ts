@@ -1,30 +1,20 @@
-import { Component, inject, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
-import { CodeBlockComponent } from '../../shared/code-block/code-block.component';
-import { DocsPageHeaderComponent } from '../../shared/page-header/docs-page-header.component';
-import { DocsApiTableComponent } from '../../shared/api-table/docs-api-table.component';
-import { DocsTabsComponent, type DocTab } from '../../shared/tabs/docs-tabs.component';
-import { SECURITY_SERVICES, SECURITY_INTERFACES } from '../../data/security.data';
+import { CodeBlockComponent } from '../../../ui/code-block/code-block.component';
+import { DocsPageHeaderComponent } from '../../../ui/page-header/docs-page-header.component';
+import { DocsApiTableComponent } from '../../../ui/api-table/docs-api-table.component';
+import { DocsTabsComponent, type DocTab } from '../../../ui/tabs/docs-tabs.component';
+import { SECURITY_SERVICES, SECURITY_INTERFACES } from '../../../docs/data/security.data';
 import { RegexSecurityDemoComponent } from '../../../demo/services/regex-security/regex-security-demo.component';
 import { WebCryptoDemoComponent } from '../../../demo/services/web-crypto/web-crypto-demo.component';
 import { SecureStorageDemoComponent } from '../../../demo/services/secure-storage/secure-storage-demo.component';
 import { InputSanitizerDemoComponent } from '../../../demo/services/input-sanitizer/input-sanitizer-demo.component';
 import { PasswordStrengthDemoComponent } from '../../../demo/services/password-strength/password-strength-demo.component';
-import {
-  ServiceDoc,
-  BreadcrumbItem,
-  ApiRow,
-  METHODS_COLUMNS,
-  FIELDS_COLUMNS,
-} from '../../models/doc-meta.model';
-
-const CONTENT_TABS: DocTab[] = [
-  { id: 'api', label: 'API Reference' },
-  { id: 'example', label: 'Example' },
-  { id: 'demo', label: 'Demo' },
-];
+import { ApiRow, METHODS_COLUMNS, FN_FIELDS_COLUMNS } from '../../../docs/models/doc-meta.model';
+import { ServiceDetailConfig } from '../unified-service-detail/unified-service-detail.component';
+import { CONTENT_TABS_WITH_DEMO } from '../base/detail-page-base.component';
 
 @Component({
   selector: 'app-security-service-detail',
@@ -88,35 +78,40 @@ export class SecurityServiceDetailComponent {
   private route = inject(ActivatedRoute);
 
   protected readonly methodsColumns = METHODS_COLUMNS;
-  protected readonly fieldsColumns = FIELDS_COLUMNS;
-  protected readonly contentTabs = CONTENT_TABS;
+  protected readonly fieldsColumns = FN_FIELDS_COLUMNS;
+  protected readonly contentTabs: DocTab[] = CONTENT_TABS_WITH_DEMO;
   protected activeTab = signal<string>('api');
 
-  protected serviceId = toSignal(this.route.paramMap.pipe(map((p) => p.get('service') ?? '')), {
-    initialValue: '',
-  });
-
-  protected service = computed<ServiceDoc | undefined>(() =>
-    SECURITY_SERVICES.find((s) => s.id === this.serviceId()),
+  // Resolved data from route
+  protected resolved = toSignal(
+    this.route.data.pipe(map((d) => d['config'] as ServiceDetailConfig)),
+    { initialValue: null },
   );
 
-  protected breadcrumbs = computed<BreadcrumbItem[]>(() => [
-    { label: 'Docs', route: '/docs' },
-    { label: 'security', route: '/docs/security' },
-    { label: this.service()?.name ?? '' },
-  ]);
+  // Expose for template
+  protected get service() {
+    return this.resolved()?.service;
+  }
 
-  protected badge = computed(() => {
-    const s = this.service();
-    return s ? `import { ${s.name} } from '${s.importPath}'` : '';
-  });
+  protected get serviceId() {
+    return this.route.snapshot.paramMap.get('service') ?? '';
+  }
 
-  protected methodRows = computed<ApiRow[]>(
-    () => (this.service()?.methods ?? []) as unknown as ApiRow[],
-  );
+  protected get breadcrumbs() {
+    const r = this.resolved();
+    return [
+      { label: 'Docs', route: '/docs' },
+      { label: r?.backLabel ?? '', route: r?.backRoute ?? '' },
+      { label: r?.service?.name ?? '' },
+    ];
+  }
 
-  protected interfaces = computed(() => {
-    const id = this.serviceId();
-    return id === 'regex-security' ? SECURITY_INTERFACES : [];
-  });
+  protected get badge() {
+    const item = this.service;
+    return item ? `import { ${item.name} } from '${item.importPath}'` : '';
+  }
+
+  protected methodRows: ApiRow[] = (this.service?.methods ?? []) as unknown as ApiRow[];
+
+  protected interfaces = SECURITY_INTERFACES.filter(() => this.serviceId === 'regex-security');
 }

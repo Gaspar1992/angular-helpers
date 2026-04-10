@@ -1,6 +1,6 @@
 import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { BreadcrumbItem } from '../../models/doc-meta.model';
+import { BreadcrumbItem } from '../../docs/models/doc-meta.model';
 
 @Component({
   selector: 'app-docs-breadcrumb',
