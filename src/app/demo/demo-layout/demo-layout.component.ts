@@ -1,0 +1,186 @@
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+
+interface DemoTab {
+  path: string;
+  label: string;
+  icon: string;
+  description: string;
+}
+
+const DEMO_TABS: DemoTab[] = [
+  {
+    path: '/demo/browser-apis',
+    label: 'Browser APIs',
+    icon: '🌐',
+    description: 'Web APIs demos',
+  },
+  {
+    path: '/demo/security',
+    label: 'Security',
+    icon: '🔐',
+    description: 'Security services',
+  },
+  {
+    path: '/demo/worker-http',
+    label: 'Worker HTTP',
+    icon: '⚡',
+    description: 'HTTP in workers',
+  },
+  {
+    path: '/demo/library-services',
+    label: 'Library Services',
+    icon: '📦',
+    description: 'Service harness',
+  },
+];
+
+@Component({
+  selector: 'app-demo-layout',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  template: `
+    <div class="demo-layout">
+      <header class="demo-header">
+        <div class="demo-header-content">
+          <a routerLink="/" class="demo-logo">
+            <span class="demo-logo-icon">⚡</span>
+            <span class="demo-logo-text">Angular Helpers</span>
+          </a>
+          <nav class="demo-nav">
+            @for (tab of tabs; track tab.path) {
+              <a
+                [routerLink]="tab.path"
+                routerLinkActive="demo-nav-item--active"
+                class="demo-nav-item"
+                [attr.aria-label]="tab.label"
+              >
+                <span class="demo-nav-icon">{{ tab.icon }}</span>
+                <span class="demo-nav-label">{{ tab.label }}</span>
+              </a>
+            }
+          </nav>
+          <a routerLink="/docs" class="demo-docs-link"> Documentation → </a>
+        </div>
+      </header>
+
+      <main class="demo-main">
+        <router-outlet />
+      </main>
+    </div>
+  `,
+  styles: [
+    `
+      .demo-layout {
+        min-height: 100vh;
+        background: var(--bg);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .demo-header {
+        background: var(--bg-elevated);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .demo-header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: var(--sp-3) var(--sp-4);
+        display: flex;
+        align-items: center;
+        gap: var(--sp-6);
+      }
+
+      .demo-logo {
+        display: flex;
+        align-items: center;
+        gap: var(--sp-2);
+        text-decoration: none;
+        color: var(--text);
+        font-weight: 600;
+        font-size: var(--text-lg);
+      }
+
+      .demo-logo-icon {
+        font-size: 1.25em;
+      }
+
+      .demo-logo-text {
+        background: linear-gradient(135deg, var(--accent), var(--accent-light));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .demo-nav {
+        display: flex;
+        gap: var(--sp-1);
+        flex: 1;
+        justify-content: center;
+      }
+
+      .demo-nav-item {
+        display: flex;
+        align-items: center;
+        gap: var(--sp-2);
+        padding: var(--sp-2) var(--sp-4);
+        border-radius: var(--radius-lg);
+        text-decoration: none;
+        color: var(--text-muted);
+        font-size: var(--text-sm);
+        font-weight: 500;
+        transition: all var(--transition);
+      }
+
+      .demo-nav-item:hover {
+        background: var(--surface-hover);
+        color: var(--text);
+      }
+
+      .demo-nav-item--active {
+        background: var(--accent);
+        color: white;
+      }
+
+      .demo-nav-icon {
+        font-size: 1.1em;
+      }
+
+      .demo-nav-label {
+        display: none;
+      }
+
+      @media (min-width: 640px) {
+        .demo-nav-label {
+          display: inline;
+        }
+      }
+
+      .demo-docs-link {
+        color: var(--accent);
+        text-decoration: none;
+        font-size: var(--text-sm);
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      .demo-docs-link:hover {
+        text-decoration: underline;
+      }
+
+      .demo-main {
+        flex: 1;
+        padding: var(--sp-6) var(--sp-4);
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+      }
+    `,
+  ],
+})
+export class DemoLayoutComponent {
+  protected readonly tabs = DEMO_TABS;
+}
