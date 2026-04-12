@@ -15,17 +15,23 @@
     </p>
 
     <div class="harness-meta">
-      <span class="harness-meta-item" data-testid="secure-context-value">
+      <span class="harness-meta-item">
         <span class="harness-meta-label">Secure Context</span>
-        <span class="harness-meta-value" [class.success]="secureContext()">{{
-          secureContext() ? 'yes' : 'no'
-        }}</span>
+        <span
+          class="harness-meta-value"
+          data-testid="secure-context-value"
+          [class.success]="secureContext()"
+          >{{ secureContext() ? 'yes' : 'no' }}</span
+        >
       </span>
-      <span class="harness-meta-item" data-testid="online-status">
+      <span class="harness-meta-item">
         <span class="harness-meta-label">Online</span>
-        <span class="harness-meta-value" [class.success]="onlineStatus()">{{
-          onlineStatus() ? 'yes' : 'no'
-        }}</span>
+        <span
+          class="harness-meta-value"
+          data-testid="online-status"
+          [class.success]="onlineStatus()"
+          >{{ onlineStatus() ? 'yes' : 'no' }}</span
+        >
       </span>
     </div>
   </header>
@@ -34,131 +40,175 @@
   <section class="harness-section">
     <h2 class="harness-section-title">API Support Status</h2>
     <div class="harness-status-grid">
-      <div class="harness-status-card" data-testid="permissions-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="permissionsSupported()">●</span>
         <span class="harness-status-name">Permissions</span>
-        <span class="harness-status-value">{{ permissionsSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="permissions-supported">{{
+          permissionsSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="geolocation-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="geolocationSupported()">●</span>
         <span class="harness-status-name">Geolocation</span>
-        <span class="harness-status-value">{{ geolocationSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="geolocation-supported">{{
+          geolocationSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="clipboard-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="clipboardSupported()">●</span>
         <span class="harness-status-name">Clipboard</span>
-        <span class="harness-status-value">{{ clipboardSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="clipboard-supported">{{
+          clipboardSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="notification-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="notificationSupported()">●</span>
         <span class="harness-status-name">Notifications</span>
-        <span class="harness-status-value">{{ notificationSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="notification-supported">{{
+          notificationSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="media-devices-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="mediaDevicesSupported()">●</span>
         <span class="harness-status-name">Media Devices</span>
-        <span class="harness-status-value">{{ mediaDevicesSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="media-devices-supported">{{
+          mediaDevicesSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="camera-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="cameraSupported()">●</span>
         <span class="harness-status-name">Camera</span>
-        <span class="harness-status-value">{{ cameraSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="camera-supported">{{
+          cameraSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="web-worker-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="webWorkerSupported()">●</span>
         <span class="harness-status-name">Web Workers</span>
-        <span class="harness-status-value">{{ webWorkerSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="web-worker-supported">{{
+          webWorkerSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="regex-security-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="regexSecuritySupported()">●</span>
         <span class="harness-status-name">Regex Security</span>
-        <span class="harness-status-value">{{ regexSecuritySupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="regex-security-supported">{{
+          regexSecuritySupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="web-storage-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="webStorageSupported()">●</span>
         <span class="harness-status-name">Web Storage</span>
-        <span class="harness-status-value">{{ webStorageSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="web-storage-supported">{{
+          webStorageSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="web-share-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="webShareSupported()">●</span>
         <span class="harness-status-name">Web Share</span>
-        <span class="harness-status-value">{{ webShareSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="web-share-supported">{{
+          webShareSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="battery-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="batterySupported()">●</span>
         <span class="harness-status-name">Battery</span>
-        <span class="harness-status-value">{{ batterySupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="battery-supported">{{
+          batterySupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="web-socket-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="webSocketSupported()">●</span>
         <span class="harness-status-name">WebSocket</span>
-        <span class="harness-status-value">{{ webSocketSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="web-socket-supported">{{
+          webSocketSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="intersection-observer-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="intersectionObserverSupported()"
           >●</span
         >
         <span class="harness-status-name">Intersection</span>
-        <span class="harness-status-value">{{
+        <span class="harness-status-value" data-testid="intersection-observer-supported">{{
           intersectionObserverSupported() ? 'yes' : 'no'
         }}</span>
       </div>
-      <div class="harness-status-card" data-testid="resize-observer-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="resizeObserverSupported()">●</span>
         <span class="harness-status-name">Resize</span>
-        <span class="harness-status-value">{{ resizeObserverSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="resize-observer-supported">{{
+          resizeObserverSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="page-visibility-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="pageVisibilitySupported()">●</span>
         <span class="harness-status-name">Page Visibility</span>
-        <span class="harness-status-value">{{ pageVisibilitySupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="page-visibility-supported">{{
+          pageVisibilitySupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="broadcast-channel-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="broadcastChannelSupported()">●</span>
         <span class="harness-status-name">Broadcast</span>
-        <span class="harness-status-value">{{ broadcastChannelSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="broadcast-channel-supported">{{
+          broadcastChannelSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="network-info-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="networkInfoSupported()">●</span>
         <span class="harness-status-name">Network Info</span>
-        <span class="harness-status-value">{{ networkInfoSupported() ? 'yes' : 'partial' }}</span>
+        <span class="harness-status-value" data-testid="network-info-supported">{{
+          networkInfoSupported() ? 'yes' : 'partial'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="fullscreen-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="fullscreenSupported()">●</span>
         <span class="harness-status-name">Fullscreen</span>
-        <span class="harness-status-value">{{ fullscreenSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="fullscreen-supported">{{
+          fullscreenSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="screen-orientation-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="screenOrientationSupported()">●</span>
         <span class="harness-status-name">Orientation</span>
-        <span class="harness-status-value">{{ screenOrientationSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="screen-orientation-supported">{{
+          screenOrientationSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="server-sent-events-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="serverSentEventsSupported()">●</span>
         <span class="harness-status-name">SSE</span>
-        <span class="harness-status-value">{{ serverSentEventsSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="server-sent-events-supported">{{
+          serverSentEventsSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="vibration-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="vibrationSupported()">●</span>
         <span class="harness-status-name">Vibration</span>
-        <span class="harness-status-value">{{ vibrationSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="vibration-supported">{{
+          vibrationSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="speech-synthesis-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="speechSynthesisSupported()">●</span>
         <span class="harness-status-name">Speech</span>
-        <span class="harness-status-value">{{ speechSynthesisSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="speech-synthesis-supported">{{
+          speechSynthesisSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
-      <div class="harness-status-card" data-testid="file-system-access-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="fileSystemAccessSupported()">●</span>
         <span class="harness-status-name">File System</span>
-        <span class="harness-status-value">{{
+        <span class="harness-status-value" data-testid="file-system-access-supported">{{
           fileSystemAccessSupported() ? 'yes' : 'chrome-only'
         }}</span>
       </div>
-      <div class="harness-status-card" data-testid="media-recorder-supported">
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="mediaRecorderSupported()">●</span>
         <span class="harness-status-name">Media Recorder</span>
-        <span class="harness-status-value">{{ mediaRecorderSupported() ? 'yes' : 'no' }}</span>
+        <span class="harness-status-value" data-testid="media-recorder-supported">{{
+          mediaRecorderSupported() ? 'yes' : 'no'
+        }}</span>
       </div>
     </div>
   </section>
