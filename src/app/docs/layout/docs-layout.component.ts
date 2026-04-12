@@ -18,7 +18,7 @@ import type { NavSection } from '../config/docs-nav.data';
     <div class="flex min-h-screen bg-base-100 text-base-content font-sans">
       <!-- Sidebar -->
       <aside
-        class="fixed top-0 bottom-0 w-64 z-50 bg-base-200 border-r border-base-300 flex flex-col overflow-y-auto max-h-screen transition-all duration-250"
+        class="fixed lg:static top-0 bottom-0 w-64 z-50 bg-base-200 border-r border-base-300 flex flex-col overflow-y-auto max-h-screen lg:max-h-none transition-all duration-250 -left-72 lg:left-0"
         [class.-left-72]="!sidebarOpen()"
         [class.left-0]="sidebarOpen()"
       >
@@ -32,7 +32,7 @@ import type { NavSection } from '../config/docs-nav.data';
             Angular Helpers
           </a>
           <button
-            class="bg-transparent border-none text-base-content/50 cursor-pointer text-base p-1 rounded hover:text-base-content transition-colors"
+            class="bg-transparent border-none text-base-content/50 cursor-pointer text-base p-1 rounded hover:text-base-content transition-colors lg:hidden"
             (click)="closeSidebar()"
             aria-label="Close sidebar"
           >
@@ -121,7 +121,7 @@ import type { NavSection } from '../config/docs-nav.data';
       }
 
       <!-- Main Content -->
-      <div class="flex-1 flex flex-col min-w-0">
+      <div class="flex-1 flex flex-col min-w-0 lg:ml-64">
         <!-- Topbar -->
         <header
           class="sticky top-0 z-30 flex items-center gap-3 px-4 py-3 bg-base-200/80 backdrop-blur border-b border-base-300 lg:px-6"
