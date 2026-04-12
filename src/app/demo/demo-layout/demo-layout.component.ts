@@ -20,197 +20,70 @@ const DEMO_TABS: DemoTab[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
   template: `
-    <div class="demo-layout">
-      <header class="demo-header">
-        <div class="demo-header-content">
-          <a routerLink="/" class="demo-logo">
-            <span class="demo-logo-icon">⚡</span>
-            <span class="demo-logo-text">Angular Helpers</span>
+    <div class="min-h-screen bg-base-100 text-base-content flex flex-col font-sans">
+      <!-- Header -->
+      <header class="sticky top-0 z-50 bg-base-200 border-b border-base-300">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3 md:gap-6">
+          <!-- Logo -->
+          <a routerLink="/" class="flex items-center gap-2 no-underline group">
+            <span class="text-2xl">⚡</span>
+            <span
+              class="font-semibold text-lg bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
+            >
+              Angular Helpers
+            </span>
           </a>
-          <nav class="demo-nav">
+
+          <!-- Desktop Nav -->
+          <nav class="hidden md:flex gap-1 flex-1 justify-center">
             @for (tab of tabs; track tab.path) {
               <a
                 [routerLink]="tab.path"
-                routerLinkActive="demo-nav-item--active"
+                routerLinkActive="bg-primary text-primary-content"
                 [routerLinkActiveOptions]="{ exact: tab.path === '/demo' }"
-                class="demo-nav-item"
+                class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-base-content/70 hover:text-base-content hover:bg-base-300/50 transition-colors no-underline"
               >
-                <span class="demo-nav-icon">{{ tab.icon }}</span>
-                <span class="demo-nav-label">{{ tab.label }}</span>
+                <span>{{ tab.icon }}</span>
+                <span>{{ tab.label }}</span>
               </a>
             }
           </nav>
-          <a routerLink="/docs" class="demo-docs-link"> Documentation → </a>
+
+          <!-- Docs Link -->
+          <a
+            routerLink="/docs"
+            class="hidden sm:block text-sm font-medium text-primary hover:underline whitespace-nowrap"
+          >
+            Documentation →
+          </a>
         </div>
+
+        <!-- Mobile Bottom Nav -->
+        <nav
+          class="fixed bottom-0 left-0 right-0 bg-base-200 border-t border-base-300 md:hidden z-50"
+        >
+          <div class="flex justify-around py-2">
+            @for (tab of tabs; track tab.path) {
+              <a
+                [routerLink]="tab.path"
+                routerLinkActive="text-primary"
+                [routerLinkActiveOptions]="{ exact: tab.path === '/demo' }"
+                class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-base-content/70 hover:text-base-content no-underline"
+              >
+                <span class="text-lg">{{ tab.icon }}</span>
+                <span class="text-xs">{{ tab.label }}</span>
+              </a>
+            }
+          </div>
+        </nav>
       </header>
 
-      <main class="demo-main">
+      <!-- Main -->
+      <main class="flex-1 p-4 sm:p-6 max-w-7xl mx-auto w-full pb-20 md:pb-6">
         <router-outlet />
       </main>
     </div>
   `,
-  styles: [
-    `
-      .demo-layout {
-        min-height: 100vh;
-        background: var(--bg);
-        display: flex;
-        flex-direction: column;
-      }
-
-      .demo-header {
-        background: var(--bg-elevated);
-        border-bottom: 1px solid var(--border-color);
-        position: sticky;
-        top: 0;
-        z-index: 100;
-      }
-
-      .demo-header-content {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: var(--sp-3) var(--sp-4);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: var(--sp-3);
-      }
-
-      @media (min-width: 768px) {
-        .demo-header-content {
-          gap: var(--sp-6);
-        }
-      }
-
-      .demo-logo {
-        display: flex;
-        align-items: center;
-        gap: var(--sp-2);
-        text-decoration: none;
-        color: var(--text);
-        font-weight: 600;
-        font-size: var(--text-lg);
-      }
-
-      .demo-logo-icon {
-        font-size: 1.25em;
-      }
-
-      .demo-logo-text {
-        background: linear-gradient(135deg, var(--accent), var(--accent-light));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      .demo-nav {
-        display: flex;
-        gap: var(--sp-1);
-        flex: 1;
-        justify-content: center;
-        overflow-x: auto;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-        padding: var(--sp-1) 0;
-        min-width: 0;
-      }
-
-      .demo-nav::-webkit-scrollbar {
-        display: none;
-      }
-
-      @media (max-width: 640px) {
-        .demo-nav {
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          background: var(--bg-elevated);
-          border-top: 1px solid var(--border-color);
-          padding: var(--sp-2) var(--sp-4);
-          justify-content: space-around;
-          z-index: 100;
-        }
-        .demo-main {
-          padding-bottom: 80px;
-        }
-      }
-
-      .demo-nav-item {
-        display: flex;
-        align-items: center;
-        gap: var(--sp-2);
-        padding: var(--sp-2) var(--sp-3);
-        border-radius: var(--radius-lg);
-        text-decoration: none;
-        color: var(--text-muted);
-        font-size: var(--text-sm);
-        font-weight: 500;
-        transition: all var(--transition);
-      }
-
-      .demo-nav-item:hover {
-        background: var(--surface-hover);
-        color: var(--text);
-      }
-
-      .demo-nav-item--active {
-        background: var(--accent);
-        color: white;
-      }
-
-      .demo-nav-icon {
-        font-size: 1.1em;
-      }
-
-      .demo-nav-label {
-        display: none;
-      }
-
-      @media (min-width: 768px) {
-        .demo-nav-label {
-          display: inline;
-        }
-      }
-
-      @media (max-width: 480px) {
-        .demo-nav-item {
-          padding: var(--sp-1);
-          flex-direction: column;
-          gap: var(--sp-1);
-          font-size: var(--text-xs);
-        }
-        .demo-nav-icon {
-          font-size: 1.3em;
-        }
-        .demo-logo-text {
-          display: none;
-        }
-        .demo-docs-link {
-          display: none;
-        }
-      }
-
-      .demo-docs-link {
-        color: var(--accent);
-        text-decoration: none;
-        font-size: var(--text-sm);
-        font-weight: 500;
-        white-space: nowrap;
-      }
-
-      .demo-docs-link:hover {
-        text-decoration: underline;
-      }
-
-      .demo-main {
-        flex: 1;
-        padding: var(--sp-6) var(--sp-4);
-        max-width: 1200px;
-        margin: 0 auto;
-        width: 100%;
-      }
-    `,
-  ],
 })
 export class DemoLayoutComponent {
   protected readonly tabs = DEMO_TABS;
