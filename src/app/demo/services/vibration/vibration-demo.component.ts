@@ -6,34 +6,48 @@ import { VibrationService } from '@angular-helpers/browser-web-apis';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   providers: [VibrationService],
-  styleUrl: '../demo.styles.css',
   template: `
-    <section class="svc-card" aria-labelledby="vib-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="vib-title">Vibration API</h2>
-        <div class="svc-badges">
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="vib-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="vib-title">
+          Vibration API
+        </h2>
+        <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-ok">supported</span>
+            <span class="badge badge-success badge-sm">supported</span>
           } @else {
-            <span class="badge badge-warn">mobile only</span>
+            <span class="badge badge-warning badge-sm">mobile only</span>
           }
         </div>
       </div>
-      <p class="svc-desc">Trigger haptic feedback patterns. Works on mobile devices.</p>
-      <div class="svc-controls">
-        <button class="btn btn-secondary" (click)="svc.success()" [disabled]="!supported">
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+        Trigger haptic feedback patterns. Works on mobile devices.
+      </p>
+      <div class="flex flex-wrap gap-2 items-center mb-4">
+        <button class="btn btn-secondary btn-sm" (click)="svc.success()" [disabled]="!supported">
           Success
         </button>
-        <button class="btn btn-secondary" (click)="svc.error()" [disabled]="!supported">Error</button>
-        <button class="btn btn-secondary" (click)="svc.notification()" [disabled]="!supported">
+        <button class="btn btn-secondary btn-sm" (click)="svc.error()" [disabled]="!supported">
+          Error
+        </button>
+        <button
+          class="btn btn-secondary btn-sm"
+          (click)="svc.notification()"
+          [disabled]="!supported"
+        >
           Notification
         </button>
-        <button class="btn btn-secondary" (click)="svc.doubleTap()" [disabled]="!supported">
+        <button class="btn btn-secondary btn-sm" (click)="svc.doubleTap()" [disabled]="!supported">
           Double tap
         </button>
       </div>
       @if (!supported) {
-        <p class="svc-hint">Vibration API is not available on this device/browser.</p>
+        <p class="text-xs text-base-content/50 italic">
+          Vibration API is not available on this device/browser.
+        </p>
       }
     </section>
   `,

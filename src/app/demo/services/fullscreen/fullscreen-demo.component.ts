@@ -14,25 +14,33 @@ import { FullscreenService } from '@angular-helpers/browser-web-apis';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   providers: [FullscreenService],
-  styleUrl: '../demo.styles.css',
   template: `
-    <section class="svc-card" aria-labelledby="fs-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="fs-title">Fullscreen API</h2>
-        <div class="svc-badges">
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="fs-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="fs-title">
+          Fullscreen API
+        </h2>
+        <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-ok">supported</span>
+            <span class="badge badge-success badge-sm">supported</span>
           } @else {
-            <span class="badge badge-no">unsupported</span>
+            <span class="badge badge-error badge-sm">unsupported</span>
           }
-          <span class="badge" [class]="isFullscreen() ? 'badge-ok' : 'badge-no'">
-            {{ isFullscreen() ? 'fullscreen' : 'windowed' }}
-          </span>
+          @if (isFullscreen()) {
+            <span class="badge badge-success badge-sm">fullscreen</span>
+          } @else {
+            <span class="badge badge-ghost badge-sm">windowed</span>
+          }
         </div>
       </div>
-      <p class="svc-desc">Request or exit fullscreen mode for the page.</p>
-      <div class="svc-controls">
-        <button class="btn btn-primary" (click)="toggle()" [disabled]="!supported">
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+        Request or exit fullscreen mode for the page.
+      </p>
+      <div class="flex flex-wrap gap-2 items-center mb-4">
+        <button class="btn btn-primary btn-sm" (click)="toggle()" [disabled]="!supported">
           {{ isFullscreen() ? '↙ Exit fullscreen' : '↗ Enter fullscreen' }}
         </button>
       </div>
