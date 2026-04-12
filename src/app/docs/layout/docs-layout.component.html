@@ -6,7 +6,7 @@
     </div>
 
     <nav aria-label="Documentation navigation">
-      @for (section of navSections; track section.label) {
+      @for (section of navSections(); track section.label) {
         <div class="nav-section">
           <div class="nav-section-label">
             <span class="pkg-badge">pkg</span>

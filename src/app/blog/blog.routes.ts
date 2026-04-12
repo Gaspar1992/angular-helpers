@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { blogPostResolver } from './services/blog-post.resolver';
 
 export const BLOG_ROUTES: Routes = [
   {
@@ -10,6 +11,7 @@ export const BLOG_ROUTES: Routes = [
     path: ':slug',
     loadComponent: () =>
       import('./feature/blog-post/blog-post.component').then((m) => m.BlogPostComponent),
+    resolve: { post: blogPostResolver },
     title: 'Article — Angular Helpers',
   },
 ];
