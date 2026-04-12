@@ -91,12 +91,13 @@ test.describe('Documentation - service detail pages', () => {
     await expect(page.getByText(/GeolocationService/i).first()).toBeVisible();
   });
 
-  test('invalid service shows error or fallback', async ({ page }) => {
+  test('invalid service redirects to section overview', async ({ page }) => {
     await page.goto('/docs/browser-web-apis/nonexistent-service');
     await page.waitForLoadState('networkidle');
 
-    // Page should show "Service not found" h1 when service doesn't exist
-    const h1 = page.getByRole('heading', { level: 1, name: /Service not found/i });
-    await expect(h1).toBeVisible();
+    // Should redirect to browser-web-apis overview page
+    await expect(page).toHaveURL(/\/docs\/browser-web-apis$/);
+    // Should show the overview page content
+    await expect(page.getByRole('heading', { name: /browser-web-apis/i })).toBeVisible();
   });
 });

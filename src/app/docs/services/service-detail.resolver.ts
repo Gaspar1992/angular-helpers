@@ -1,4 +1,5 @@
-import { ResolveFn } from '@angular/router';
+import { ResolveFn, Router } from '@angular/router';
+import { inject } from '@angular/core';
 import { Type } from '@angular/core';
 import { ServiceDoc } from '../models/doc-meta.model';
 import { BROWSER_WEB_APIS_SERVICES } from '../data/browser-web-apis.data';
@@ -90,32 +91,24 @@ function getInterfaces(section: string, itemId: string): InterfaceDoc[] | undefi
 }
 
 export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (route) => {
+  const router = inject(Router);
   const section = route.url[0]?.path as keyof typeof SECTION_DATA;
   const paramName = section === 'worker-http' ? 'entry' : 'service';
   const itemId = route.paramMap.get(paramName) ?? '';
 
-  // Safety check for invalid section
+  // Safety check for invalid section - redirect to docs
   if (!SECTION_DATA[section]) {
-    return {
-      service: {} as ServiceDoc,
-      section: 'browser-web-apis',
-      backRoute: '/docs',
-      backLabel: 'docs',
-      hasDemoTab: false,
-    };
+    await router.navigate(['/docs']);
+    return null as unknown as ServiceDetailConfig;
   }
 
   const sectionData = SECTION_DATA[section];
   const item = sectionData.dataSource.find((s) => s.id === itemId);
 
+  // If service not found, redirect to section overview
   if (!item) {
-    return {
-      service: {} as ServiceDoc,
-      section: section as ServiceDetailConfig['section'],
-      backRoute: sectionData.backRoute,
-      backLabel: sectionData.backLabel,
-      hasDemoTab: false,
-    };
+    await router.navigate([sectionData.backRoute]);
+    return null as unknown as ServiceDetailConfig;
   }
 
   // Lazy load demo component if available
