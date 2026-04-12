@@ -1,4 +1,5 @@
-import { Component, inject, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, computed, signal, ChangeDetectionStrategy, Type } from '@angular/core';
+import { NgComponentOutlet } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
@@ -14,10 +15,20 @@ import {
   METHODS_COLUMNS,
   FIELDS_COLUMNS,
 } from '../../models/doc-meta.model';
+import { TransportDemoComponent } from '../../../demo/worker-http/services/transport/transport-demo.component';
+import { HmacDemoComponent } from '../../../demo/worker-http/services/hmac/hmac-demo.component';
+import { HashingDemoComponent } from '../../../demo/worker-http/services/hashing/hashing-demo.component';
+
+const ENTRY_DEMO_MAP: Record<string, Type<unknown>> = {
+  transport: TransportDemoComponent,
+  hmac: HmacDemoComponent,
+  hashing: HashingDemoComponent,
+};
 
 const CONTENT_TABS: DocTab[] = [
   { id: 'api', label: 'API Reference' },
   { id: 'example', label: 'Example' },
+  { id: 'demo', label: 'Demo' },
 ];
 
 @Component({
@@ -25,6 +36,7 @@ const CONTENT_TABS: DocTab[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
+    NgComponentOutlet,
     DocsPageHeaderComponent,
     DocsApiTableComponent,
     CodeBlockComponent,
@@ -84,6 +96,15 @@ const CONTENT_TABS: DocTab[] = [
             }
             @if (activeTab() === 'example') {
               <app-code-block [code]="entry()!.example" />
+            }
+            @if (activeTab() === 'demo') {
+              @if (demoComponent()) {
+                <ng-container *ngComponentOutlet="demoComponent()!" />
+              } @else {
+                <p class="text-sm text-base-content/60">
+                  No interactive demo available for this entry point yet.
+                </p>
+              }
             }
           </div>
         </section>
@@ -149,4 +170,8 @@ export class WorkerHttpEntryDetailComponent {
         return [];
     }
   });
+
+  protected demoComponent = computed<Type<unknown> | null>(
+    () => ENTRY_DEMO_MAP[this.entryId()] ?? null,
+  );
 }

@@ -1,4 +1,5 @@
-import { Component, inject, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, computed, signal, ChangeDetectionStrategy, Type } from '@angular/core';
+import { NgComponentOutlet } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
@@ -19,6 +20,15 @@ import {
   METHODS_COLUMNS,
   FIELDS_COLUMNS,
 } from '../../models/doc-meta.model';
+import { RegexSecurityDemoComponent } from '../../../demo/security/services/regex-security/regex-security-demo.component';
+import { WebCryptoDemoComponent } from '../../../demo/security/services/web-crypto/web-crypto-demo.component';
+import { SecureStorageDemoComponent } from '../../../demo/security/services/secure-storage/secure-storage-demo.component';
+
+const SERVICE_DEMO_MAP: Record<string, Type<unknown>> = {
+  'regex-security': RegexSecurityDemoComponent,
+  'web-crypto': WebCryptoDemoComponent,
+  'secure-storage': SecureStorageDemoComponent,
+};
 
 const CONTENT_TABS: DocTab[] = [
   { id: 'api', label: 'API Reference' },
@@ -31,6 +41,7 @@ const CONTENT_TABS: DocTab[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
+    NgComponentOutlet,
     DocsPageHeaderComponent,
     DocsApiTableComponent,
     CodeBlockComponent,
@@ -119,4 +130,8 @@ export class SecurityServiceDetailComponent {
     const id = this.serviceId();
     return id === 'regex-security' ? SECURITY_INTERFACES : [];
   });
+
+  protected demoComponent = computed<Type<unknown> | null>(
+    () => SERVICE_DEMO_MAP[this.serviceId()] ?? null,
+  );
 }
