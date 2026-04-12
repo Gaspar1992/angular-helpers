@@ -31,7 +31,7 @@ import type { PackageInfo } from '../../../core/config/packages.data';
 
       <ul class="list-none p-0 m-0 flex flex-col gap-2" [attr.aria-label]="pkg().highlightsLabel">
         @for (item of pkg().highlights; track item) {
-          <li class="text-xs text-base-content/40 flex items-center gap-2">
+          <li class="text-xs text-base-content/70 flex items-center gap-2">
             <span class="w-1 h-1 rounded-full bg-primary shrink-0" aria-hidden="true"></span>
             {{ item }}
           </li>

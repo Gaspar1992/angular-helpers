@@ -47,7 +47,7 @@ import { BLOG_POSTS } from './config/posts.data';
                   {{ post.excerpt }}
                 </p>
                 <div class="flex items-center justify-between">
-                  <time [attr.datetime]="post.publishedAt" class="text-xs text-base-content/30">
+                  <time [attr.datetime]="post.publishedAt" class="text-xs text-base-content/60">
                     {{ post.publishedAt }}
                   </time>
                   <a

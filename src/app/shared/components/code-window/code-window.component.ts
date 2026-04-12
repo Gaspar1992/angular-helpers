@@ -14,7 +14,7 @@ import { Component, ChangeDetectionStrategy, input } from '@angular/core';
         <span class="w-2.5 h-2.5 rounded-full bg-[#ff5f57]"></span>
         <span class="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]"></span>
         <span class="w-2.5 h-2.5 rounded-full bg-[#28ca41]"></span>
-        <span class="ml-2 text-[0.72rem] text-base-content/40 font-mono">{{ title() }}</span>
+        <span class="ml-2 text-[0.72rem] text-base-content/70 font-mono">{{ title() }}</span>
       </div>
       <pre
         class="m-0 px-5 py-4 overflow-x-auto"

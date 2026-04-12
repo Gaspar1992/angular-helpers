@@ -39,7 +39,7 @@ const DEMO_TABS: DemoTab[] = [
             @for (tab of tabs; track tab.path) {
               <a
                 [routerLink]="tab.path"
-                routerLinkActive="bg-primary text-primary-content"
+                routerLinkActive="bg-primary/10 text-primary"
                 [routerLinkActiveOptions]="{ exact: tab.path === '/demo' }"
                 class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-base-content/80 hover:text-base-content hover:bg-base-300/50 transition-colors no-underline"
               >

@@ -19,29 +19,29 @@ import { NgOptimizedImage } from '@angular/common';
         <nav class="flex flex-wrap gap-5 justify-center" aria-label="Footer navigation">
           <a
             routerLink="/docs"
-            class="text-sm text-base-content/40 no-underline transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary focus-visible:rounded-sm"
+            class="text-sm text-base-content/70 no-underline transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary focus-visible:rounded-sm"
             >Docs</a
           >
           <a
             routerLink="/demo"
-            class="text-sm text-base-content/40 no-underline transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary focus-visible:rounded-sm"
+            class="text-sm text-base-content/70 no-underline transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary focus-visible:rounded-sm"
             >Demo</a
           >
           <a
             routerLink="/blog"
-            class="text-sm text-base-content/40 no-underline transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary focus-visible:rounded-sm"
+            class="text-sm text-base-content/70 no-underline transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary focus-visible:rounded-sm"
             >Blog</a
           >
           <a
             href="https://github.com/Gaspar1992/angular-helpers"
             target="_blank"
             rel="noopener noreferrer"
-            class="text-sm text-base-content/40 no-underline transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary focus-visible:rounded-sm"
+            class="text-sm text-base-content/70 no-underline transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-primary focus-visible:rounded-sm"
             >GitHub ↗</a
           >
         </nav>
 
-        <p class="text-xs text-base-content/30 m-0">MIT License · Open source</p>
+        <p class="text-xs text-base-content/60 m-0">MIT License · Open source</p>
       </div>
     </footer>
   `,

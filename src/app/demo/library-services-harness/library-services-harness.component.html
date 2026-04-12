@@ -148,6 +148,22 @@
         }}</span>
       </div>
       <div class="harness-status-card">
+        <span class="harness-status-icon" [class.supported]="mutationObserverSupported()">●</span>
+        <span class="harness-status-name">Mutation Observer</span>
+        <span class="harness-status-value" data-testid="mutation-observer-supported">{{
+          mutationObserverSupported() ? 'yes' : 'no'
+        }}</span>
+      </div>
+      <div class="harness-status-card">
+        <span class="harness-status-icon" [class.supported]="performanceObserverSupported()"
+          >●</span
+        >
+        <span class="harness-status-name">Performance Observer</span>
+        <span class="harness-status-value" data-testid="performance-observer-supported">{{
+          performanceObserverSupported() ? 'yes' : 'no'
+        }}</span>
+      </div>
+      <div class="harness-status-card">
         <span class="harness-status-icon" [class.supported]="broadcastChannelSupported()">●</span>
         <span class="harness-status-name">Broadcast</span>
         <span class="harness-status-value" data-testid="broadcast-channel-supported">{{
@@ -173,6 +189,13 @@
         <span class="harness-status-name">Orientation</span>
         <span class="harness-status-value" data-testid="screen-orientation-supported">{{
           screenOrientationSupported() ? 'yes' : 'no'
+        }}</span>
+      </div>
+      <div class="harness-status-card">
+        <span class="harness-status-icon" [class.supported]="screenWakeLockSupported()">●</span>
+        <span class="harness-status-name">Wake Lock</span>
+        <span class="harness-status-value" data-testid="wake-lock-supported">{{
+          screenWakeLockSupported() ? 'yes' : 'no'
         }}</span>
       </div>
       <div class="harness-status-card">
