@@ -1,7 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, signal } from '@angular/core';
-import { TransportDemoComponent } from './services/transport/transport-demo.component';
-import { HmacDemoComponent } from './services/hmac/hmac-demo.component';
-import { HashingDemoComponent } from './services/hashing/hashing-demo.component';
+import { CommonModule } from '@angular/common';
 import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
 import type { WorkerTransport } from '@angular-helpers/worker-http/transport';
 import {
@@ -16,8 +14,6 @@ import type {
   EncryptedPayload,
 } from '@angular-helpers/worker-http/crypto';
 
-// Worker URL - using pre-transpiled worker from assets
-// This works in both dev and production (including 404.html fallback)
 const ECHO_WORKER_URL = 'assets/workers/echo.worker.js';
 
 interface LogEntry {
@@ -31,9 +27,209 @@ interface LogEntry {
 @Component({
   selector: 'app-worker-http-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrls: ['./worker-http-demo.component.css', '../shared/demo-shared.styles.css'],
-  templateUrl: './worker-http-demo.component.html',
-  imports: [TransportDemoComponent, HmacDemoComponent, HashingDemoComponent],
+  imports: [CommonModule],
+  template: `
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      <!-- Header -->
+      <header class="mb-8 sm:mb-12">
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+          <span class="text-4xl">🚀</span>
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-base-content m-0">Worker HTTP Demo</h1>
+            <p class="text-sm sm:text-base text-base-content/60 m-0 mt-1">
+              Off-main-thread HTTP with typed RPC bridge
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <span class="badge badge-primary badge-md">Worker Transport</span>
+          <span class="badge badge-secondary badge-md">HMAC Crypto</span>
+          <span class="badge badge-accent badge-md">Content Hashing</span>
+          <span class="badge badge-info badge-md">AES Encryption</span>
+        </div>
+      </header>
+
+      <!-- Demo Cards Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Worker Transport -->
+        <div class="bg-base-200 border border-base-300 rounded-xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
+              ⚡ WorkerTransport
+            </h2>
+            <span class="badge badge-primary">Typed RPC</span>
+          </div>
+          <p class="text-sm text-base-content/60 mb-4">
+            Typed RPC bridge with request/response correlation and worker pool
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            <button
+              (click)="sendEcho()"
+              [disabled]="transportStatus() === 'running'"
+              class="btn btn-primary btn-sm"
+            >
+              @if (transportStatus() === 'running') {
+                <span class="loading loading-spinner loading-xs"></span>
+              }
+              Send Echo
+            </button>
+            <button
+              (click)="sendPoolBurst()"
+              [disabled]="transportStatus() === 'running'"
+              class="btn btn-secondary btn-sm"
+            >
+              Pool Burst (4 workers)
+            </button>
+          </div>
+
+          @if (transportResult()) {
+            <div class="p-3 bg-base-300 rounded-lg font-mono text-xs break-all">
+              <span class="text-secondary">Result ({{ transportTime() }}ms):</span>
+              <br />
+              {{ transportResult() }}
+            </div>
+          }
+        </div>
+
+        <!-- HMAC Signing -->
+        <div class="bg-base-200 border border-base-300 rounded-xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
+              ✍️ HMAC Signing
+            </h2>
+            <span class="badge badge-secondary">HMAC-SHA256</span>
+          </div>
+          <p class="text-sm text-base-content/60 mb-4">
+            Sign and verify request payloads using HMAC via native Web Crypto API
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            <button (click)="initHmacAndSign()" class="btn btn-primary btn-sm">Sign Payload</button>
+            <button
+              (click)="verifyHmac()"
+              [disabled]="!hmacSignature()"
+              class="btn btn-secondary btn-sm"
+            >
+              Verify Signature
+            </button>
+          </div>
+
+          @if (hmacSignature()) {
+            <div class="p-3 bg-base-300 rounded-lg font-mono text-xs break-all mb-2">
+              <span class="text-secondary">Signature:</span> {{ hmacSignature() }}
+            </div>
+          }
+          @if (hmacVerified() !== null) {
+            <div
+              class="p-2 rounded-lg text-sm"
+              [class.bg-success/10]="hmacVerified()"
+              [class.text-success]="hmacVerified()"
+              [class.bg-error/10]="!hmacVerified()"
+              [class.text-error]="!hmacVerified()"
+            >
+              {{ hmacVerified() ? '✅ Valid Signature' : '❌ Invalid Signature' }}
+            </div>
+          }
+        </div>
+
+        <!-- Content Hashing -->
+        <div class="bg-base-200 border border-base-300 rounded-xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
+              #️⃣ Content Hashing
+            </h2>
+            <span class="badge badge-accent">SHA-256</span>
+          </div>
+          <p class="text-sm text-base-content/60 mb-4">
+            Generate SHA-256 hashes of request bodies for integrity checks and caching
+          </p>
+
+          <button (click)="hashContent()" class="btn btn-accent btn-sm w-full sm:w-auto">
+            Hash Content
+          </button>
+
+          @if (hashResult()) {
+            <div class="mt-3 p-3 bg-base-300 rounded-lg font-mono text-xs break-all">
+              <span class="text-secondary">SHA-256:</span> {{ hashResult() }}
+            </div>
+          }
+        </div>
+
+        <!-- AES Encryption -->
+        <div class="bg-base-200 border border-base-300 rounded-xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
+              🔐 AES Encryption
+            </h2>
+            <span class="badge badge-info">AES-GCM</span>
+          </div>
+          <p class="text-sm text-base-content/60 mb-4">
+            Encrypt and decrypt sensitive payloads using AES-GCM
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            <button (click)="encryptData()" class="btn btn-info btn-sm">Encrypt</button>
+            <button
+              (click)="decryptData()"
+              [disabled]="!encryptedHex()"
+              class="btn btn-secondary btn-sm"
+            >
+              Decrypt
+            </button>
+          </div>
+
+          @if (encryptedHex()) {
+            <div class="p-3 bg-base-300 rounded-lg font-mono text-xs break-all mb-2">
+              <span class="text-secondary">Encrypted:</span> {{ encryptedHex() }}
+            </div>
+          }
+          @if (decryptedText()) {
+            <div class="p-3 bg-success/10 text-success rounded-lg font-mono text-sm break-all">
+              <span>Decrypted:</span> {{ decryptedText() }}
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Activity Log -->
+      <div class="mt-8 bg-base-200 border border-base-300 rounded-xl p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-base-content m-0">Activity Log</h2>
+          <button
+            (click)="clearLogs()"
+            class="btn btn-ghost btn-sm"
+            [disabled]="logs().length === 0"
+          >
+            Clear
+          </button>
+        </div>
+
+        @if (logs().length === 0) {
+          <p class="text-sm text-base-content/40 text-center py-8">
+            No activity yet. Try the demos above!
+          </p>
+        } @else {
+          <div class="space-y-2 max-h-64 overflow-y-auto">
+            @for (entry of logs(); track entry.id) {
+              <div
+                class="flex items-center gap-3 p-3 rounded-lg text-sm"
+                [class.bg-success/10]="entry.type === 'success'"
+                [class.border-l-4]="true"
+                [class.border-success]="entry.type === 'success'"
+                [class.border-error]="entry.type === 'error'"
+                [class.border-info]="entry.type === 'info'"
+              >
+                <span class="text-xs font-mono text-base-content/40">{{ entry.time }}</span>
+                <span class="badge badge-xs badge-primary">{{ entry.section }}</span>
+                <span class="flex-1 break-all">{{ entry.message }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  `,
 })
 export class WorkerHttpDemoComponent implements OnDestroy {
   // --- Transport state ---
