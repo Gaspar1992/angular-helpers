@@ -96,6 +96,8 @@ export const DOCS_NAV_SECTIONS: readonly NavSection[] = [
     serviceItems: [
       { label: 'createWorkerTransport', route: '/docs/worker-http/transport' },
       { label: 'createWorkerPipeline', route: '/docs/worker-http/interceptors' },
+      { label: 'Serializers', route: '/docs/worker-http/serializer' },
+      { label: 'WebCrypto Utilities', route: '/docs/worker-http/crypto' },
     ],
   },
 ];
