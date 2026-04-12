@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, ViewEncapsulation, signal } from '@angular/core';
 import { WebCryptoService } from '@angular-helpers/security';
-import { DemoCardComponent } from '../../../../ui/demo-card/demo-card.component';
+import { DemoCardComponent } from '../../../ui/demo-card/demo-card.component';
 
 @Component({
   selector: 'app-hashing-demo',

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, ViewEncapsulation, signal } from '@angular/core';
-import { DemoCardComponent } from '../../../../ui/demo-card/demo-card.component';
+import { DemoCardComponent } from '../../../ui/demo-card/demo-card.component';
 
 @Component({
   selector: 'app-transport-demo',
