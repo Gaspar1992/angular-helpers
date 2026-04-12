@@ -6,12 +6,6 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive],
   template: `
-    <a
-      href="#main-content"
-      class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-2 focus:z-[9999] focus:bg-primary focus:text-primary-content focus:px-4 focus:py-2 focus:rounded-b focus:font-semibold focus:no-underline"
-    >
-      Skip to content
-    </a>
     <header
       class="flex items-center justify-between px-4 sm:px-6 h-[52px] sm:h-[56px] bg-[rgba(10,10,20,0.94)] backdrop-blur-[14px] border-b border-base-300 sticky top-0 z-[100]"
       role="banner"
