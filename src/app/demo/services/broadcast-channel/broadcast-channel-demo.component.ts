@@ -16,30 +16,36 @@ import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
   encapsulation: ViewEncapsulation.None,
   providers: [BroadcastChannelService],
   imports: [FormsModule],
-  styleUrl: '../demo.styles.css',
   template: `
-    <section class="svc-card" aria-labelledby="bc-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="bc-title">Broadcast Channel</h2>
-        <div class="svc-badges">
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="bc-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="bc-title">
+          Broadcast Channel
+        </h2>
+        <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-ok">supported</span>
+            <span class="badge badge-success badge-sm">supported</span>
           } @else {
-            <span class="badge badge-no">unsupported</span>
+            <span class="badge badge-error badge-sm">unsupported</span>
           }
-          <span class="badge" [class]="channelOpen() ? 'badge-ok' : 'badge-no'">
-            {{ channelOpen() ? 'open' : 'closed' }}
-          </span>
+          @if (channelOpen()) {
+            <span class="badge badge-success badge-sm">open</span>
+          } @else {
+            <span class="badge badge-ghost badge-sm">closed</span>
+          }
         </div>
       </div>
-      <p class="svc-desc">
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
         Send messages between tabs on the same origin. Open this demo in a second tab and you'll see
         messages arrive.
       </p>
-      <div class="svc-controls svc-controls--col">
-        <div class="svc-controls">
+      <div class="flex flex-col gap-2 mb-4">
+        <div class="flex flex-wrap gap-2 items-center">
           <input
-            class="demo-input"
+            class="input input-bordered input-sm flex-1 min-w-[150px]"
             name="channel-name"
             [ngModel]="channelName"
             (ngModelChange)="channelName = $event"
@@ -48,17 +54,17 @@ import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
             [disabled]="channelOpen()"
           />
           <button
-            class="btn btn-primary"
+            class="btn btn-primary btn-sm"
             (click)="openChannel()"
             [disabled]="!supported || channelOpen()"
           >
             Listen
           </button>
-          <button class="btn btn-secondary" (click)="clearMessages()">Clear</button>
+          <button class="btn btn-secondary btn-sm" (click)="clearMessages()">Clear</button>
         </div>
-        <div class="svc-controls">
+        <div class="flex flex-wrap gap-2 items-center">
           <input
-            class="demo-input"
+            class="input input-bordered input-sm flex-1 min-w-[150px]"
             name="channel-message"
             [ngModel]="channelMsg"
             (ngModelChange)="channelMsg = $event"
@@ -68,7 +74,7 @@ import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
             [disabled]="!channelOpen()"
           />
           <button
-            class="btn btn-secondary"
+            class="btn btn-secondary btn-sm"
             (click)="send()"
             [disabled]="!channelOpen() || !channelMsg.trim()"
           >
@@ -77,16 +83,23 @@ import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
         </div>
       </div>
       @if (messages().length > 0) {
-        <div class="msg-log" aria-live="polite" aria-label="Channel messages">
+        <div
+          class="bg-base-300 border border-base-300 rounded-lg p-3 max-h-60 overflow-y-auto"
+          aria-live="polite"
+          aria-label="Channel messages"
+        >
           @for (m of messages(); track $index) {
             <div
-              class="msg-row"
-              [class.msg-sent]="m.dir === 'sent'"
-              [class.msg-recv]="m.dir === 'recv'"
+              class="flex items-center gap-3 py-1 border-b border-base-300 last:border-b-0 text-sm"
             >
-              <span class="msg-dir">{{ m.dir }}</span>
-              <span class="msg-text">{{ m.text }}</span>
-              <span class="msg-time">{{ m.time }}</span>
+              <span
+                class="badge badge-xs"
+                [class.badge-primary]="m.dir === 'sent'"
+                [class.badge-secondary]="m.dir === 'recv'"
+                >{{ m.dir }}</span
+              >
+              <span class="flex-1 text-base-content">{{ m.text }}</span>
+              <span class="text-xs text-base-content/50">{{ m.time }}</span>
             </div>
           }
         </div>

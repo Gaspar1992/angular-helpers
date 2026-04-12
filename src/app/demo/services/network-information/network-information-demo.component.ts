@@ -18,109 +18,165 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   providers: [NetworkInformationService],
-  styleUrl: '../demo.styles.css',
   template: `
-    <section class="svc-card" aria-labelledby="net-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="net-title">Network Information</h2>
-        <div class="svc-badges">
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="net-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="net-title">
+          Network Information
+        </h2>
+        <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-ok">supported</span>
+            <span class="badge badge-success badge-sm">supported</span>
           } @else {
-            <span class="badge badge-warn">partial</span>
+            <span class="badge badge-warning badge-sm">partial</span>
           }
-          <span class="badge badge-info">{{ apiMode() }}</span>
+          <span class="badge badge-info badge-sm">{{ apiMode() }}</span>
         </div>
       </div>
 
-      <p class="svc-desc">Live connection quality. Turn off Wi-Fi to see the online flag update.</p>
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+        Live connection quality. Turn off Wi-Fi to see the online flag update.
+      </p>
 
-      <div class="svc-controls">
-        <div class="segmented" role="group" aria-label="API mode">
-          <button class="btn" [class.active]="apiMode() === 'Service'" (click)="setMode('Service')">
+      <div class="flex flex-wrap gap-2 items-center mb-4">
+        <div class="join" role="group" aria-label="API mode">
+          <button
+            class="btn btn-sm join-item"
+            [class.btn-active]="apiMode() === 'Service'"
+            (click)="setMode('Service')"
+          >
             Service (RxJS)
           </button>
-          <button class="btn" [class.active]="apiMode() === 'Signal Fn'" (click)="setMode('Signal Fn')">
+          <button
+            class="btn btn-sm join-item"
+            [class.btn-active]="apiMode() === 'Signal Fn'"
+            (click)="setMode('Signal Fn')"
+          >
             Signal Fn
           </button>
         </div>
-        <span class="badge badge-ok"
-          >online:
-          {{ apiMode() === 'Service' ? networkInfo().online : fnRef.online() ? 'yes' : 'no' }}</span
-        >
+        <span class="badge badge-success badge-sm">
+          online:
+          {{ apiMode() === 'Service' ? networkInfo().online : fnRef.online() ? 'yes' : 'no' }}
+        </span>
       </div>
 
-      <div class="svc-result">
+      <div class="bg-base-300 border border-base-300 rounded-lg p-4">
         @if (apiMode() === 'Service') {
           @if (networkInfo().type) {
-            <div class="kv-row">
-              <span class="kv-key">Type</span>
-              <span class="kv-val mono">{{ networkInfo().type }}</span>
+            <div
+              class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
+            >
+              <span class="text-sm text-base-content/70 font-medium">Type</span>
+              <span class="text-sm text-base-content font-semibold font-mono">{{
+                networkInfo().type
+              }}</span>
             </div>
           }
           @if (networkInfo().effectiveType) {
-            <div class="kv-row">
-              <span class="kv-key">Effective</span>
-              <span class="kv-val mono">{{ networkInfo().effectiveType }}</span>
+            <div
+              class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
+            >
+              <span class="text-sm text-base-content/70 font-medium">Effective</span>
+              <span class="text-sm text-base-content font-semibold font-mono">{{
+                networkInfo().effectiveType
+              }}</span>
             </div>
           }
           @if (networkInfo().downlink !== undefined) {
-            <div class="kv-row">
-              <span class="kv-key">Downlink</span>
-              <span class="kv-val mono">{{ networkInfo().downlink }} Mbps</span>
+            <div
+              class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
+            >
+              <span class="text-sm text-base-content/70 font-medium">Downlink</span>
+              <span class="text-sm text-base-content font-semibold font-mono"
+                >{{ networkInfo().downlink }} Mbps</span
+              >
             </div>
           }
           @if (networkInfo().rtt !== undefined) {
-            <div class="kv-row">
-              <span class="kv-key">RTT</span>
-              <span class="kv-val mono">{{ networkInfo().rtt }} ms</span>
+            <div
+              class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
+            >
+              <span class="text-sm text-base-content/70 font-medium">RTT</span>
+              <span class="text-sm text-base-content font-semibold font-mono"
+                >{{ networkInfo().rtt }} ms</span
+              >
             </div>
           }
           @if (!networkInfo().type && !networkInfo().effectiveType) {
-            <p class="svc-hint">Connection details not available in this browser.</p>
+            <p class="text-xs text-base-content/50 italic">
+              Connection details not available in this browser.
+            </p>
           }
         } @else {
           @if (fnRef.type()) {
-            <div class="kv-row">
-              <span class="kv-key">type</span>
-              <span class="kv-val mono">{{ fnRef.type() }}</span>
+            <div
+              class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
+            >
+              <span class="text-sm text-base-content/70 font-medium">type</span>
+              <span class="text-sm text-base-content font-semibold font-mono">{{
+                fnRef.type()
+              }}</span>
             </div>
           }
           @if (fnRef.effectiveType()) {
-            <div class="kv-row">
-              <span class="kv-key">effectiveType</span>
-              <span class="kv-val mono">{{ fnRef.effectiveType() }}</span>
+            <div
+              class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
+            >
+              <span class="text-sm text-base-content/70 font-medium">effectiveType</span>
+              <span class="text-sm text-base-content font-semibold font-mono">{{
+                fnRef.effectiveType()
+              }}</span>
             </div>
           }
           @if (fnRef.downlink() !== undefined) {
-            <div class="kv-row">
-              <span class="kv-key">downlink</span>
-              <span class="kv-val mono">{{ fnRef.downlink() }} Mbps</span>
+            <div
+              class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
+            >
+              <span class="text-sm text-base-content/70 font-medium">downlink</span>
+              <span class="text-sm text-base-content font-semibold font-mono"
+                >{{ fnRef.downlink() }} Mbps</span
+              >
             </div>
           }
           @if (fnRef.rtt() !== undefined) {
-            <div class="kv-row">
-              <span class="kv-key">rtt</span>
-              <span class="kv-val mono">{{ fnRef.rtt() }} ms</span>
+            <div
+              class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
+            >
+              <span class="text-sm text-base-content/70 font-medium">rtt</span>
+              <span class="text-sm text-base-content font-semibold font-mono"
+                >{{ fnRef.rtt() }} ms</span
+              >
             </div>
           }
           @if (fnRef.saveData() !== undefined) {
-            <div class="kv-row">
-              <span class="kv-key">saveData</span>
-              <span class="kv-val mono">{{ fnRef.saveData() ? 'yes' : 'no' }}</span>
+            <div
+              class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
+            >
+              <span class="text-sm text-base-content/70 font-medium">saveData</span>
+              <span class="text-sm text-base-content font-semibold font-mono">{{
+                fnRef.saveData() ? 'yes' : 'no'
+              }}</span>
             </div>
           }
           @if (!fnRef.type() && !fnRef.effectiveType()) {
-            <p class="svc-hint">Connection details not available in this browser.</p>
+            <p class="text-xs text-base-content/50 italic">
+              Connection details not available in this browser.
+            </p>
           }
         }
       </div>
 
       @if (apiMode() === 'Signal Fn') {
-        <div class="code-example">
-          <p class="svc-hint">Reactive connection state with computed signals:</p>
+        <div class="mt-4">
+          <p class="text-xs text-base-content/60 mb-2">
+            Reactive connection state with computed signals:
+          </p>
           <pre
-            class="code-block"
+            class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
           ><code>import {{ '{' }} injectNetworkInformation {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
 
     readonly net = injectNetworkInformation();
@@ -128,15 +184,15 @@ import {
     // Access signals directly:
     // net.online(), net.effectiveType(), net.downlink()
     // net.rtt(), net.saveData(), net.type()</code></pre>
-          <p class="svc-hint">
+          <p class="text-xs text-base-content/60 mt-2">
             <strong>When to use:</strong> Adaptive UI, conditional asset loading, offline handling.
           </p>
         </div>
       } @else {
-        <div class="code-example">
-          <p class="svc-hint">Manual stream with snapshot + watch:</p>
+        <div class="mt-4">
+          <p class="text-xs text-base-content/60 mb-2">Manual stream with snapshot + watch:</p>
           <pre
-            class="code-block"
+            class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
           ><code>import {{ '{' }} NetworkInformationService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
 
     readonly svc = inject(NetworkInformationService);
@@ -149,7 +205,7 @@ import {
         // handle network change
       {{ '}' }});
     {{ '}' }}</code></pre>
-          <p class="svc-hint">
+          <p class="text-xs text-base-content/60 mt-2">
             <strong>When to use:</strong> Complex stream operations, buffering, combining with other
             sources.
           </p>

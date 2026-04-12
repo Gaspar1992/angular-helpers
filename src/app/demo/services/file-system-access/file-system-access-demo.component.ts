@@ -14,33 +14,41 @@ import { FileSystemAccessService, PermissionsService } from '@angular-helpers/br
   encapsulation: ViewEncapsulation.None,
   providers: [PermissionsService, FileSystemAccessService],
   imports: [DecimalPipe],
-  styleUrl: '../demo.styles.css',
   template: `
-    <section class="svc-card" aria-labelledby="fs-acc-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="fs-acc-title">File System Access</h2>
-        <div class="svc-badges">
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="fs-acc-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="fs-acc-title">
+          File System Access
+        </h2>
+        <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-ok">supported</span>
+            <span class="badge badge-success badge-sm">supported</span>
           } @else {
-            <span class="badge badge-warn">Chrome/Edge only</span>
+            <span class="badge badge-warning badge-sm">Chrome/Edge only</span>
           }
-          <span class="badge badge-secure">secure context</span>
+          <span class="badge badge-info badge-sm">secure context</span>
         </div>
       </div>
-      <p class="svc-desc">Open local files and preview their contents via the native file picker.</p>
-      <div class="svc-controls">
-        <button class="btn btn-primary" (click)="openFiles()" [disabled]="!supported">
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+        Open local files and preview their contents via the native file picker.
+      </p>
+      <div class="flex flex-wrap gap-2 items-center mb-4">
+        <button class="btn btn-primary btn-sm" (click)="openFiles()" [disabled]="!supported">
           Open files…
         </button>
       </div>
       @for (file of openedFiles(); track file.name) {
-        <div class="file-card">
-          <div class="file-card-head">
-            <span class="file-name">{{ file.name }}</span>
-            <span class="file-size">{{ file.size | number }} bytes</span>
+        <div class="bg-base-300 border border-base-300 rounded-lg p-4 mb-3">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-medium text-base-content">{{ file.name }}</span>
+            <span class="text-xs text-base-content/60">{{ file.size | number }} bytes</span>
           </div>
-          <div class="mono-block">
+          <div
+            class="bg-base-200 border border-base-300 rounded p-2 font-mono text-xs text-base-content break-all"
+          >
             {{ file.preview }}
             @if (file.preview.length >= 300) {
               …
@@ -49,7 +57,9 @@ import { FileSystemAccessService, PermissionsService } from '@angular-helpers/br
         </div>
       }
       @if (!supported) {
-        <p class="svc-hint">File System Access API is available in Chrome/Edge on desktop.</p>
+        <p class="text-xs text-base-content/50 italic">
+          File System Access API is available in Chrome/Edge on desktop.
+        </p>
       }
     </section>
   `,

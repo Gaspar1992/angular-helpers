@@ -13,33 +13,42 @@ import { ScreenWakeLockService, PermissionsService } from '@angular-helpers/brow
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   providers: [PermissionsService, ScreenWakeLockService],
-  styleUrl: '../demo.styles.css',
   template: `
-    <section class="svc-card" aria-labelledby="wl-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="wl-title">Screen Wake Lock</h2>
-        <div class="svc-badges">
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="wl-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="wl-title">
+          Screen Wake Lock
+        </h2>
+        <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-ok">supported</span>
+            <span class="badge badge-success badge-sm">supported</span>
           } @else {
-            <span class="badge badge-no">unsupported</span>
+            <span class="badge badge-error badge-sm">unsupported</span>
           }
-          <span class="badge badge-secure">secure context</span>
+          <span class="badge badge-info badge-sm">secure context</span>
         </div>
       </div>
-      <p class="svc-desc">Prevents the screen from dimming or locking.</p>
-      <div class="svc-controls">
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+        Prevents the screen from dimming or locking.
+      </p>
+      <div class="flex flex-wrap gap-2 items-center mb-4">
         <button
-          class="btn"
-          [class]="active() ? 'btn-danger' : 'btn-primary'"
+          class="btn btn-sm"
+          [class.btn-error]="active()"
+          [class.btn-primary]="!active()"
           (click)="toggle()"
           [disabled]="!supported"
         >
           {{ active() ? '🔓 Release wake lock' : '🔒 Acquire wake lock' }}
         </button>
-        <span class="badge" [class]="active() ? 'badge-ok' : 'badge-no'">
-          {{ active() ? 'active' : 'inactive' }}
-        </span>
+        @if (active()) {
+          <span class="badge badge-success badge-sm">active</span>
+        } @else {
+          <span class="badge badge-ghost badge-sm">inactive</span>
+        }
       </div>
     </section>
   `,

@@ -12,43 +12,44 @@ import { NotificationService, PermissionsService } from '@angular-helpers/browse
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   providers: [PermissionsService, NotificationService],
-  styleUrl: '../demo.styles.css',
   template: `
-    <section class="svc-card" aria-labelledby="notif-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="notif-title">Notifications</h2>
-        <div class="svc-badges">
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="notif-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="notif-title">
+          Notifications
+        </h2>
+        <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-ok">supported</span>
+            <span class="badge badge-success badge-sm">supported</span>
           } @else {
-            <span class="badge badge-no">unsupported</span>
+            <span class="badge badge-error badge-sm">unsupported</span>
           }
-          <span class="badge badge-secure">secure context</span>
-          <span
-            class="badge"
-            [class]="
-              permission() === 'granted'
-                ? 'badge-ok'
-                : permission() === 'denied'
-                  ? 'badge-no'
-                  : 'badge-warn'
-            "
-          >
-            {{ permission() }}
-          </span>
+          <span class="badge badge-info badge-sm">secure context</span>
+          @if (permission() === 'granted') {
+            <span class="badge badge-success badge-sm">{{ permission() }}</span>
+          } @else if (permission() === 'denied') {
+            <span class="badge badge-error badge-sm">{{ permission() }}</span>
+          } @else {
+            <span class="badge badge-warning badge-sm">{{ permission() }}</span>
+          }
         </div>
       </div>
-      <p class="svc-desc">Request permission and show browser notifications.</p>
-      <div class="svc-controls">
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+        Request permission and show browser notifications.
+      </p>
+      <div class="flex flex-wrap gap-2 items-center mb-4">
         <button
-          class="btn btn-secondary"
+          class="btn btn-secondary btn-sm"
           (click)="requestPermission()"
           [disabled]="!supported || permission() === 'granted'"
         >
           Request permission
         </button>
         <button
-          class="btn btn-primary"
+          class="btn btn-primary btn-sm"
           (click)="showNotification()"
           [disabled]="!supported || permission() !== 'granted'"
         >

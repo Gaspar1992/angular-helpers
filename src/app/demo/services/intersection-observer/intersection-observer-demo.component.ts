@@ -19,63 +19,94 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   providers: [IntersectionObserverService],
-  styleUrl: '../demo.styles.css',
   template: `
-    <section class="svc-card" aria-labelledby="inter-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="inter-title">Intersection Observer</h2>
-        <div class="svc-badges">
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="inter-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="inter-title">
+          Intersection Observer
+        </h2>
+        <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-ok">supported</span>
+            <span class="badge badge-success badge-sm">supported</span>
           } @else {
-            <span class="badge badge-no">unsupported</span>
+            <span class="badge badge-error badge-sm">unsupported</span>
           }
-          <span class="badge badge-info">{{ apiMode() }}</span>
+          <span class="badge badge-info badge-sm">{{ apiMode() }}</span>
         </div>
       </div>
 
-      <p class="svc-desc">
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
         Fires when an element enters or exits the viewport. Scroll down to trigger it.
       </p>
 
-      <div class="svc-controls">
-        <div class="segmented" role="group" aria-label="API mode">
-          <button class="btn" [class.active]="apiMode() === 'Service'" (click)="setMode('Service')">
+      <div class="flex flex-wrap gap-2 items-center mb-4">
+        <div class="join" role="group" aria-label="API mode">
+          <button
+            class="btn btn-sm join-item"
+            [class.btn-active]="apiMode() === 'Service'"
+            (click)="setMode('Service')"
+          >
             Service (RxJS)
           </button>
-          <button class="btn" [class.active]="apiMode() === 'Signal Fn'" (click)="setMode('Signal Fn')">
+          <button
+            class="btn btn-sm join-item"
+            [class.btn-active]="apiMode() === 'Signal Fn'"
+            (click)="setMode('Signal Fn')"
+          >
             Signal Fn
           </button>
         </div>
         @if (apiMode() === 'Service') {
-          <button class="btn btn-primary" (click)="attach()" [disabled]="observing() || !supported">
+          <button
+            class="btn btn-primary btn-sm"
+            (click)="attach()"
+            [disabled]="observing() || !supported"
+          >
             {{ observing() ? 'Observing…' : 'Attach observer' }}
           </button>
         }
         @if (apiMode() === 'Signal Fn') {
-          <span class="badge" [class]="fnRef.isIntersecting() ? 'badge-ok' : 'badge-no'">
-            {{ fnRef.isIntersecting() ? 'In viewport' : 'Out of viewport' }}
-          </span>
+          @if (fnRef.isIntersecting()) {
+            <span class="badge badge-success badge-sm">In viewport</span>
+          } @else {
+            <span class="badge badge-ghost badge-sm">Out of viewport</span>
+          }
         } @else {
-          <span class="badge" [class]="isIntersecting() ? 'badge-ok' : 'badge-no'">
-            {{ isIntersecting() ? 'In viewport' : 'Out of viewport' }}
-          </span>
+          @if (isIntersecting()) {
+            <span class="badge badge-success badge-sm">In viewport</span>
+          } @else {
+            <span class="badge badge-ghost badge-sm">Out of viewport</span>
+          }
         }
       </div>
 
-      <div class="intersect-scroll-area" #intersectScroll aria-label="Scrollable area with target">
-        <p class="svc-hint">↓ Scroll inside this box to trigger</p>
-        <div class="intersect-spacer"></div>
-        <div class="intersect-target" #intersectBox aria-label="Intersection target">
+      <div
+        class="h-48 overflow-y-auto bg-base-300 border border-base-300 rounded-lg p-4"
+        #intersectScroll
+        aria-label="Scrollable area with target"
+      >
+        <p class="text-xs text-base-content/50 mb-2">↓ Scroll inside this box to trigger</p>
+        <div class="h-32"></div>
+        <div
+          class="bg-primary/20 border-2 border-primary rounded p-4 text-center text-primary"
+          #intersectBox
+          aria-label="Intersection target"
+        >
           Target element
         </div>
+        <div class="h-32"></div>
       </div>
 
       @if (apiMode() === 'Signal Fn') {
-        <div class="code-example">
-          <p class="svc-hint">Reactive viewport detection with auto-cleanup:</p>
+        <div class="mt-4">
+          <p class="text-xs text-base-content/60 mb-2">
+            Reactive viewport detection with auto-cleanup:
+          </p>
           <pre
-            class="code-block"
+            class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
           ><code>import {{ '{' }} injectIntersectionObserver {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
 
     readonly targetRef = viewChild&lt;ElementRef&gt;('target');
@@ -83,15 +114,15 @@ import {
 
     // Use in template with: inView.isIntersecting()
     // or: inView.isVisible() for visibility tracking</code></pre>
-          <p class="svc-hint">
+          <p class="text-xs text-base-content/60 mt-2">
             <strong>When to use:</strong> Lazy loading, infinite scroll, analytics tracking.
           </p>
         </div>
       } @else {
-        <div class="code-example">
-          <p class="svc-hint">Manual visibility observation with RxJS:</p>
+        <div class="mt-4">
+          <p class="text-xs text-base-content/60 mb-2">Manual visibility observation with RxJS:</p>
           <pre
-            class="code-block"
+            class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
           ><code>import {{ '{' }} IntersectionObserverService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
 
     readonly svc = inject(IntersectionObserverService);
@@ -102,7 +133,7 @@ import {
           // handle visibility change
         {{ '}' }});
     {{ '}' }}</code></pre>
-          <p class="svc-hint">
+          <p class="text-xs text-base-content/60 mt-2">
             <strong>When to use:</strong> Complex thresholds, multiple observers, combineLatest.
           </p>
         </div>

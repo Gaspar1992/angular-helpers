@@ -16,26 +16,34 @@ import { ServerSentEventsService } from '@angular-helpers/browser-web-apis';
   encapsulation: ViewEncapsulation.None,
   providers: [ServerSentEventsService],
   imports: [FormsModule],
-  styleUrl: '../demo.styles.css',
   template: `
-    <section class="svc-card" aria-labelledby="sse-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="sse-title">Server-Sent Events</h2>
-        <div class="svc-badges">
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="sse-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="sse-title">
+          Server-Sent Events
+        </h2>
+        <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-ok">supported</span>
+            <span class="badge badge-success badge-sm">supported</span>
           } @else {
-            <span class="badge badge-no">unsupported</span>
+            <span class="badge badge-error badge-sm">unsupported</span>
           }
-          <span class="badge" [class]="connected() ? 'badge-ok' : 'badge-no'">
-            {{ connected() ? 'connected' : 'disconnected' }}
-          </span>
+          @if (connected()) {
+            <span class="badge badge-success badge-sm">connected</span>
+          } @else {
+            <span class="badge badge-ghost badge-sm">disconnected</span>
+          }
         </div>
       </div>
-      <p class="svc-desc">Connect to any SSE endpoint and stream events in real-time.</p>
-      <div class="svc-controls">
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+        Connect to any SSE endpoint and stream events in real-time.
+      </p>
+      <div class="flex flex-wrap gap-2 items-center mb-4">
         <input
-          class="demo-input"
+          class="input input-bordered input-sm flex-1 min-w-[200px]"
           name="sse-url"
           [ngModel]="url"
           (ngModelChange)="url = $event"
@@ -43,24 +51,34 @@ import { ServerSentEventsService } from '@angular-helpers/browser-web-apis';
           aria-label="SSE endpoint URL"
           [disabled]="connected()"
         />
-        <button class="btn btn-primary" (click)="connect()" [disabled]="!supported || connected()">
+        <button
+          class="btn btn-primary btn-sm"
+          (click)="connect()"
+          [disabled]="!supported || connected()"
+        >
           Connect
         </button>
-        <button class="btn btn-danger" (click)="disconnect()" [disabled]="!connected()">
+        <button class="btn btn-error btn-sm" (click)="disconnect()" [disabled]="!connected()">
           Disconnect
         </button>
       </div>
       @if (messages().length > 0) {
-        <div class="msg-log" aria-live="polite" aria-label="SSE messages">
+        <div
+          class="bg-base-300 border border-base-300 rounded-lg p-3 max-h-60 overflow-y-auto"
+          aria-live="polite"
+          aria-label="SSE messages"
+        >
           @for (m of messages(); track $index) {
-            <div class="msg-row msg-recv">
-              <span class="msg-text mono">{{ m }}</span>
+            <div
+              class="font-mono text-sm text-base-content py-1 border-b border-base-300 last:border-b-0"
+            >
+              {{ m }}
             </div>
           }
         </div>
       }
       @if (messages().length === 0 && connected()) {
-        <p class="svc-hint">Waiting for events…</p>
+        <p class="text-xs text-base-content/50 italic">Waiting for events…</p>
       }
     </section>
   `,
