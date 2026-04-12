@@ -5,10 +5,13 @@ test.describe('Documentation pages', () => {
     await page.goto('/docs');
 
     await expect(page.getByRole('heading', { level: 1, name: /Angular Helpers/i })).toBeVisible();
-    await expect(page.getByText(/browser-web-apis/i)).toBeVisible();
-    await expect(page.getByText(/security/i)).toBeVisible();
+    // Use first() to avoid strict mode violations
+    await expect(page.getByText(/browser-web-apis/i).first()).toBeVisible();
+    await expect(page.getByText(/security/i).first()).toBeVisible();
 
-    await expect(page.getByRole('link', { name: /View documentation/i })).toHaveCount(2);
+    // Count all "View documentation" links
+    const docLinks = page.getByRole('link', { name: /View documentation/i });
+    await expect(docLinks).toHaveCount(2);
   });
 
   test('docs landing page has quick start section', async ({ page }) => {
@@ -24,15 +27,18 @@ test.describe('Documentation - browser-web-apis overview', () => {
     await page.goto('/docs/browser-web-apis');
 
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    await expect(page.getByText(/services/i)).toBeVisible();
+    // Use first() to avoid strict mode violations with multiple "services" mentions
+    await expect(page.getByText(/services/i).first()).toBeVisible();
   });
 
   test('browser-web-apis overview has service navigation', async ({ page }) => {
     await page.goto('/docs/browser-web-apis');
 
+    // Look for service cards that link to specific service docs
     const serviceLinks = page.locator('a[href^="/docs/browser-web-apis/"]');
     const count = await serviceLinks.count();
-    expect(count).toBeGreaterThan(0);
+    // Should have many service links (Camera, Geolocation, etc.)
+    expect(count).toBeGreaterThan(5);
   });
 });
 
@@ -73,20 +79,23 @@ test.describe('Documentation - service detail pages', () => {
     await page.goto('/docs/browser-web-apis/camera');
 
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    await expect(page.getByText(/CameraService|camera/i)).toBeVisible();
+    // Use first() to handle multiple matches on the page
+    await expect(page.getByText(/CameraService/i).first()).toBeVisible();
   });
 
   test('geolocation service detail page renders', async ({ page }) => {
     await page.goto('/docs/browser-web-apis/geolocation');
 
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    await expect(page.getByText(/GeolocationService|geolocation/i)).toBeVisible();
+    // Use first() to handle multiple matches on the page
+    await expect(page.getByText(/GeolocationService/i).first()).toBeVisible();
   });
 
   test('invalid service shows error or fallback', async ({ page }) => {
     await page.goto('/docs/browser-web-apis/nonexistent-service');
 
-    const errorOrHeading = page.locator('h1, .error, [data-testid="error"]').first();
-    await expect(errorOrHeading).toBeVisible();
+    // Page should either show an error message or at least have an h1 heading
+    const h1 = page.getByRole('heading', { level: 1 });
+    await expect(h1).toBeVisible();
   });
 });

@@ -16,7 +16,8 @@ test.describe('Home page', () => {
   test('hero CTA buttons are present and focusable', async ({ page }) => {
     const getStarted = page.getByRole('link', { name: /get started/i });
     const liveDemo = page.getByRole('link', { name: /live demo/i });
-    const github = page.getByRole('link', { name: /github/i });
+    // Use first() since GitHub link appears in hero and footer
+    const github = page.getByRole('link', { name: /github/i }).first();
 
     await expect(getStarted).toBeVisible();
     await expect(liveDemo).toBeVisible();
@@ -37,7 +38,8 @@ test.describe('Home page', () => {
   });
 
   test('features section renders 6 cards', async ({ page }) => {
-    const featuresSection = page.getByRole('region', { name: /why angular helpers/i });
+    // The section has aria-labelledby="features-title" pointing to h2 with "Everything you need. Nothing you don't."
+    const featuresSection = page.locator('section[aria-labelledby="features-title"]');
     await expect(featuresSection).toBeVisible();
 
     const featureCards = featuresSection.getByRole('heading', { level: 3 });
@@ -45,12 +47,20 @@ test.describe('Home page', () => {
   });
 
   test('packages section renders 3 package cards', async ({ page }) => {
-    const packagesSection = page.getByRole('region', { name: /three focused libraries/i });
+    // The section has aria-labelledby="packages-title" pointing to h2 "Pick what you need."
+    const packagesSection = page.locator('section[aria-labelledby="packages-title"]');
     await expect(packagesSection).toBeVisible();
 
-    await expect(packagesSection.getByText('@angular-helpers/browser-web-apis')).toBeVisible();
-    await expect(packagesSection.getByText('@angular-helpers/security')).toBeVisible();
-    await expect(packagesSection.getByText('@angular-helpers/worker-http')).toBeVisible();
+    // Use exact match to avoid matching npm install commands
+    await expect(
+      packagesSection.getByText('@angular-helpers/browser-web-apis', { exact: true }),
+    ).toBeVisible();
+    await expect(
+      packagesSection.getByText('@angular-helpers/security', { exact: true }),
+    ).toBeVisible();
+    await expect(
+      packagesSection.getByText('@angular-helpers/worker-http', { exact: true }),
+    ).toBeVisible();
   });
 
   test('package cards have docs links', async ({ page }) => {
@@ -60,14 +70,16 @@ test.describe('Home page', () => {
   });
 
   test('CTA section is visible with action buttons', async ({ page }) => {
-    const ctaSection = page.getByRole('region', { name: /ready to start/i });
+    // The section has aria-labelledby="cta-title" pointing to h2 "Ready to start?"
+    const ctaSection = page.locator('section[aria-labelledby="cta-title"]');
     await expect(ctaSection).toBeVisible();
     await expect(ctaSection.getByRole('link', { name: /read the docs/i })).toBeVisible();
     await expect(ctaSection.getByRole('link', { name: /open demo/i })).toBeVisible();
   });
 
   test('navigation links are present', async ({ page }) => {
-    const nav = page.getByRole('navigation', { name: /main navigation/i });
+    // Main nav has aria-label="Main navigation"
+    const nav = page.getByRole('navigation', { name: /Main navigation/i });
     await expect(nav).toBeVisible();
     await expect(nav.getByRole('link', { name: /docs/i })).toBeVisible();
     await expect(nav.getByRole('link', { name: /demo/i })).toBeVisible();

@@ -5,9 +5,10 @@ test.describe('Demo section nav', () => {
   test('public demo sections are present in nav', async ({ page }) => {
     await page.goto('/demo');
 
-    await expect(page.getByRole('link', { name: /browser web apis/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /security/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /worker http/i })).toBeVisible();
+    // Demo cards are links with the section titles - use first() to avoid strict mode issues
+    await expect(page.getByRole('link', { name: /browser web apis/i }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /security/i }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /worker http/i }).first()).toBeVisible();
   });
 
   test('library-services harness is NOT in the demo nav', async ({ page }) => {
