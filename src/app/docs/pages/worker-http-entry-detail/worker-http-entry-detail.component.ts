@@ -30,8 +30,76 @@ const CONTENT_TABS: DocTab[] = [
     CodeBlockComponent,
     DocsTabsComponent,
   ],
-  styleUrl: './worker-http-entry-detail.component.css',
-  templateUrl: './worker-http-entry-detail.component.html',
+  template: `
+    @if (entry()) {
+      <div class="docs-page">
+        <app-docs-page-header
+          [breadcrumbs]="breadcrumbs()"
+          [title]="entry()!.name"
+          [titleMono]="true"
+          [badge]="badge()"
+          badgeVariant="import"
+          [lead]="entry()!.description"
+          [scope]="entry()!.scope"
+        />
+
+        <section class="mb-8">
+          <app-docs-tabs
+            [tabs]="contentTabs"
+            [activeTab]="activeTab()"
+            ariaLabel="Entry point documentation"
+            (tabChange)="activeTab.set($event)"
+          />
+          <div
+            role="tabpanel"
+            [id]="'panel-' + activeTab()"
+            [attr.aria-labelledby]="'tab-' + activeTab()"
+          >
+            @if (activeTab() === 'api') {
+              <app-docs-api-table
+                [columns]="methodsColumns"
+                [rows]="methodRows()"
+                ariaLabel="API methods"
+              />
+              @if (interfaces().length) {
+                <div class="mt-6">
+                  <h3 class="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-4">
+                    Related interfaces
+                  </h3>
+                  @for (iface of interfaces(); track $index) {
+                    <div class="mb-8">
+                      <h4 class="text-sm font-bold text-base-content/80 mb-2 font-mono">
+                        {{ iface.name }}
+                      </h4>
+                      <p class="text-sm text-base-content/60 mb-3">{{ iface.description }}</p>
+                      <app-docs-api-table
+                        [columns]="fieldsColumns"
+                        [rows]="iface.fields"
+                        [ariaLabel]="iface.name + ' fields'"
+                      />
+                    </div>
+                  }
+                </div>
+              }
+            }
+            @if (activeTab() === 'example') {
+              <app-code-block [code]="entry()!.example" />
+            }
+          </div>
+        </section>
+      </div>
+    } @else {
+      <div class="pt-8">
+        <h1 class="text-2xl font-bold text-base-content mb-2">Entry point not found</h1>
+        <p class="text-base text-base-content/70 mb-4">
+          The requested entry point does not exist in this package.
+        </p>
+        <a routerLink="/docs/worker-http" class="text-primary hover:underline text-sm"
+          >← Back to worker-http</a
+        >
+      </div>
+    }
+  `,
 })
 export class WorkerHttpEntryDetailComponent {
   private route = inject(ActivatedRoute);

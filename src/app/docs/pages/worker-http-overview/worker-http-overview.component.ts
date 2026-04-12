@@ -35,8 +35,85 @@ createWorkerPipeline([
   selector: 'app-worker-http-overview',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CodeBlockComponent, DocsPageHeaderComponent, DocsApiTableComponent],
-  styleUrl: './worker-http-overview.component.css',
-  templateUrl: './worker-http-overview.component.html',
+  template: `
+    <div class="docs-page">
+      <app-docs-page-header
+        [breadcrumbs]="breadcrumbs"
+        title="worker-http"
+        badge="@angular-helpers/worker-http"
+        badgeVariant="npm"
+        lead="Move HTTP requests off the main thread. Typed RPC bridge, worker-side interceptor pipelines, and pluggable serialization."
+      />
+
+      <section class="mb-8">
+        <h2 class="text-xl font-bold text-base-content mb-4">Installation</h2>
+        <app-code-block language="bash" [code]="'npm install @angular-helpers/worker-http'" />
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-xl font-bold text-base-content mb-4">Quick Start</h2>
+        <app-code-block [code]="providerExample" />
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-xl font-bold text-base-content mb-4">Entry Points</h2>
+        <div class="flex flex-col gap-8">
+          @for (entry of entries; track entry.id) {
+            <div class="bg-base-200 border border-base-300 rounded-xl p-4 sm:p-6">
+              <h3 class="text-base font-bold text-base-content mb-2 font-mono">{{ entry.name }}</h3>
+              <p class="text-sm text-base-content/70 mb-5 leading-relaxed">
+                {{ entry.description }}
+              </p>
+              <app-docs-api-table
+                [columns]="methodsShortColumns"
+                [rows]="toRows(entry.methods)"
+                [ariaLabel]="entry.name + ' methods'"
+              />
+              <div
+                class="text-xs font-bold uppercase tracking-wider text-base-content/50 mt-5 mb-2"
+              >
+                Example
+              </div>
+              <app-code-block [code]="entry.example" />
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-xl font-bold text-base-content mb-4">Interfaces</h2>
+        @for (iface of interfaces; track $index) {
+          <div class="mb-8">
+            <h3 class="text-sm font-bold text-base-content/80 mb-2 font-mono">{{ iface.name }}</h3>
+            <p class="text-sm text-base-content/60 mb-3">{{ iface.description }}</p>
+            <app-docs-api-table
+              [columns]="fieldsColumns"
+              [rows]="iface.fields"
+              [ariaLabel]="iface.name + ' fields'"
+            />
+          </div>
+        }
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-xl font-bold text-base-content mb-4">Architecture</h2>
+        <div class="bg-base-200 border border-base-300 rounded-xl p-4 sm:p-6 overflow-x-auto">
+          <pre
+            class="text-xs sm:text-sm font-mono text-base-content leading-relaxed"
+          ><code>Main thread                          Web Worker
+────────────────────────────         ──────────────────────────────────
+Angular HttpClient                   createWorkerPipeline([
+  └─ WorkerHttpBackend                 loggingInterceptor(),
+       └─ WorkerTransport              retryInterceptor(&#123; maxRetries: 3 &#125;),
+            └─ postMessage   ───────►  hmacSigningInterceptor(&#123; keyMaterial &#125;),
+                             ◄───────  cacheInterceptor(&#123; ttl: 60000 &#125;),
+                             transfer ])
+                             (zero-copy)
+                                     fetch() ──► API Server</code></pre>
+        </div>
+      </section>
+    </div>
+  `,
 })
 export class WorkerHttpOverviewComponent {
   protected readonly breadcrumbs: BreadcrumbItem[] = [
