@@ -23,7 +23,15 @@ export const DEMO_ROUTES: Routes = [
         path: 'security',
         loadComponent: () =>
           import('./security/security-demo.component').then((m) => m.SecurityDemoComponent),
-        providers: [provideSecurity({ enableSecureStorage: true })],
+        providers: [
+          provideSecurity({
+            enableRegexSecurity: true,
+            enableWebCrypto: true,
+            enableSecureStorage: true,
+            enableInputSanitizer: true,
+            enablePasswordStrength: true,
+          }),
+        ],
         title: 'Security — Demo',
       },
       {

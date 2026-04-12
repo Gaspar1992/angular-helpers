@@ -1,0 +1,767 @@
+<main class="harness-container">
+  <!-- Header -->
+  <header class="harness-header">
+    <h1 class="harness-title">Library Services Harness</h1>
+    <p class="harness-subtitle">
+      Interactive testing environment for browser APIs and security services
+    </p>
+
+    <div class="harness-meta">
+      <span class="harness-meta-item" data-testid="secure-context-value">
+        <span class="harness-meta-label">Secure Context</span>
+        <span class="harness-meta-value" [class.success]="secureContext()">{{
+          secureContext() ? 'yes' : 'no'
+        }}</span>
+      </span>
+      <span class="harness-meta-item" data-testid="online-status">
+        <span class="harness-meta-label">Online</span>
+        <span class="harness-meta-value" [class.success]="onlineStatus()">{{
+          onlineStatus() ? 'yes' : 'no'
+        }}</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- Status Grid -->
+  <section class="harness-section">
+    <h2 class="harness-section-title">API Support Status</h2>
+    <div class="harness-status-grid">
+      <div class="harness-status-card" data-testid="permissions-supported">
+        <span class="harness-status-icon" [class.supported]="permissionsSupported()">●</span>
+        <span class="harness-status-name">Permissions</span>
+        <span class="harness-status-value">{{ permissionsSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="geolocation-supported">
+        <span class="harness-status-icon" [class.supported]="geolocationSupported()">●</span>
+        <span class="harness-status-name">Geolocation</span>
+        <span class="harness-status-value">{{ geolocationSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="clipboard-supported">
+        <span class="harness-status-icon" [class.supported]="clipboardSupported()">●</span>
+        <span class="harness-status-name">Clipboard</span>
+        <span class="harness-status-value">{{ clipboardSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="notification-supported">
+        <span class="harness-status-icon" [class.supported]="notificationSupported()">●</span>
+        <span class="harness-status-name">Notifications</span>
+        <span class="harness-status-value">{{ notificationSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="media-devices-supported">
+        <span class="harness-status-icon" [class.supported]="mediaDevicesSupported()">●</span>
+        <span class="harness-status-name">Media Devices</span>
+        <span class="harness-status-value">{{ mediaDevicesSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="camera-supported">
+        <span class="harness-status-icon" [class.supported]="cameraSupported()">●</span>
+        <span class="harness-status-name">Camera</span>
+        <span class="harness-status-value">{{ cameraSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="web-worker-supported">
+        <span class="harness-status-icon" [class.supported]="webWorkerSupported()">●</span>
+        <span class="harness-status-name">Web Workers</span>
+        <span class="harness-status-value">{{ webWorkerSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="regex-security-supported">
+        <span class="harness-status-icon" [class.supported]="regexSecuritySupported()">●</span>
+        <span class="harness-status-name">Regex Security</span>
+        <span class="harness-status-value">{{ regexSecuritySupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="web-storage-supported">
+        <span class="harness-status-icon" [class.supported]="webStorageSupported()">●</span>
+        <span class="harness-status-name">Web Storage</span>
+        <span class="harness-status-value">{{ webStorageSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="web-share-supported">
+        <span class="harness-status-icon" [class.supported]="webShareSupported()">●</span>
+        <span class="harness-status-name">Web Share</span>
+        <span class="harness-status-value">{{ webShareSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="battery-supported">
+        <span class="harness-status-icon" [class.supported]="batterySupported()">●</span>
+        <span class="harness-status-name">Battery</span>
+        <span class="harness-status-value">{{ batterySupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="web-socket-supported">
+        <span class="harness-status-icon" [class.supported]="webSocketSupported()">●</span>
+        <span class="harness-status-name">WebSocket</span>
+        <span class="harness-status-value">{{ webSocketSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="intersection-observer-supported">
+        <span class="harness-status-icon" [class.supported]="intersectionObserverSupported()"
+          >●</span
+        >
+        <span class="harness-status-name">Intersection</span>
+        <span class="harness-status-value">{{
+          intersectionObserverSupported() ? 'yes' : 'no'
+        }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="resize-observer-supported">
+        <span class="harness-status-icon" [class.supported]="resizeObserverSupported()">●</span>
+        <span class="harness-status-name">Resize</span>
+        <span class="harness-status-value">{{ resizeObserverSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="page-visibility-supported">
+        <span class="harness-status-icon" [class.supported]="pageVisibilitySupported()">●</span>
+        <span class="harness-status-name">Page Visibility</span>
+        <span class="harness-status-value">{{ pageVisibilitySupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="broadcast-channel-supported">
+        <span class="harness-status-icon" [class.supported]="broadcastChannelSupported()">●</span>
+        <span class="harness-status-name">Broadcast</span>
+        <span class="harness-status-value">{{ broadcastChannelSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="network-info-supported">
+        <span class="harness-status-icon" [class.supported]="networkInfoSupported()">●</span>
+        <span class="harness-status-name">Network Info</span>
+        <span class="harness-status-value">{{ networkInfoSupported() ? 'yes' : 'partial' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="fullscreen-supported">
+        <span class="harness-status-icon" [class.supported]="fullscreenSupported()">●</span>
+        <span class="harness-status-name">Fullscreen</span>
+        <span class="harness-status-value">{{ fullscreenSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="screen-orientation-supported">
+        <span class="harness-status-icon" [class.supported]="screenOrientationSupported()">●</span>
+        <span class="harness-status-name">Orientation</span>
+        <span class="harness-status-value">{{ screenOrientationSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="server-sent-events-supported">
+        <span class="harness-status-icon" [class.supported]="serverSentEventsSupported()">●</span>
+        <span class="harness-status-name">SSE</span>
+        <span class="harness-status-value">{{ serverSentEventsSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="vibration-supported">
+        <span class="harness-status-icon" [class.supported]="vibrationSupported()">●</span>
+        <span class="harness-status-name">Vibration</span>
+        <span class="harness-status-value">{{ vibrationSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="speech-synthesis-supported">
+        <span class="harness-status-icon" [class.supported]="speechSynthesisSupported()">●</span>
+        <span class="harness-status-name">Speech</span>
+        <span class="harness-status-value">{{ speechSynthesisSupported() ? 'yes' : 'no' }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="file-system-access-supported">
+        <span class="harness-status-icon" [class.supported]="fileSystemAccessSupported()">●</span>
+        <span class="harness-status-name">File System</span>
+        <span class="harness-status-value">{{
+          fileSystemAccessSupported() ? 'yes' : 'chrome-only'
+        }}</span>
+      </div>
+      <div class="harness-status-card" data-testid="media-recorder-supported">
+        <span class="harness-status-icon" [class.supported]="mediaRecorderSupported()">●</span>
+        <span class="harness-status-name">Media Recorder</span>
+        <span class="harness-status-value">{{ mediaRecorderSupported() ? 'yes' : 'no' }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Capability Matrix -->
+  <section class="harness-section">
+    <h2 class="harness-section-title">Capability Matrix</h2>
+    <div class="harness-table-wrapper">
+      <table class="harness-table">
+        <thead>
+          <tr>
+            <th scope="col">Capability</th>
+            <th scope="col">Supported</th>
+            <th scope="col">Secure Context</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (capability of capabilityOverview(); track capability.id) {
+            <tr [attr.data-testid]="'capability-row-' + capability.id">
+              <td class="harness-table-capability">{{ capability.label }}</td>
+              <td [attr.data-testid]="'capability-supported-' + capability.id">
+                <span
+                  class="harness-badge"
+                  [class.success]="capability.supported"
+                  [class.error]="!capability.supported"
+                >
+                  {{ capability.supported ? 'yes' : 'no' }}
+                </span>
+              </td>
+              <td [attr.data-testid]="'capability-secure-required-' + capability.id">
+                <span class="harness-badge" [class.warning]="capability.requiresSecureContext">
+                  {{ capability.requiresSecureContext ? 'yes' : 'no' }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Test Cards Grid -->
+  <div class="harness-cards-grid">
+    <!-- Permissions Service -->
+    <section class="harness-card">
+      <h3 class="harness-card-title">Permissions Service</h3>
+      <div class="harness-card-actions">
+        <button
+          data-testid="permissions-query-camera"
+          type="button"
+          (click)="queryCameraPermission()"
+        >
+          Query Camera
+        </button>
+        <button
+          data-testid="permissions-query-geolocation"
+          type="button"
+          (click)="queryGeolocationPermission()"
+        >
+          Query Geolocation
+        </button>
+      </div>
+      <div class="harness-card-results">
+        <div class="harness-result">
+          <span class="harness-result-label">Camera:</span>
+          <span class="harness-result-value" data-testid="permissions-camera-state">{{
+            cameraPermissionState()
+          }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Geolocation:</span>
+          <span class="harness-result-value" data-testid="permissions-geolocation-state">{{
+            geolocationPermissionState()
+          }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Geolocation Service -->
+    <section class="harness-card">
+      <h3 class="harness-card-title">Geolocation Service</h3>
+      <div class="harness-card-actions">
+        <button
+          data-testid="geolocation-request-current"
+          type="button"
+          (click)="requestCurrentPosition()"
+        >
+          Request Position
+        </button>
+      </div>
+      <div class="harness-card-results">
+        <div class="harness-result">
+          <span class="harness-result-label">Position:</span>
+          <span class="harness-result-value" data-testid="geolocation-position">{{
+            geolocationPosition()
+          }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Media & Camera -->
+    <section class="harness-card">
+      <h3 class="harness-card-title">Media & Camera Services</h3>
+      <div class="harness-card-actions">
+        <button data-testid="media-devices-refresh" type="button" (click)="refreshMediaDevices()">
+          Refresh Devices
+        </button>
+        <button data-testid="camera-start" type="button" (click)="startCamera()">
+          Start Camera
+        </button>
+        <button data-testid="camera-stop" type="button" (click)="stopCamera()">Stop Camera</button>
+      </div>
+      <div class="harness-card-results">
+        <div class="harness-result-row">
+          <span class="harness-result-label">Video Inputs:</span>
+          <span class="harness-result-value" data-testid="media-video-input-count">{{
+            mediaVideoInputCount()
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Audio Inputs:</span>
+          <span class="harness-result-value" data-testid="media-audio-input-count">{{
+            mediaAudioInputCount()
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">State:</span>
+          <span class="harness-result-value" data-testid="camera-state">{{ cameraState() }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Tracks:</span>
+          <span class="harness-result-value" data-testid="camera-track-count">{{
+            cameraTrackCount()
+          }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Web Worker & Regex -->
+    <section class="harness-card harness-card--wide">
+      <h3 class="harness-card-title">Web Worker & Regex Security Services</h3>
+      <div class="harness-card-actions harness-card-actions--wrap">
+        <button data-testid="web-worker-create" type="button" (click)="createHarnessWorker()">
+          Create Worker
+        </button>
+        <button data-testid="web-worker-send" type="button" (click)="sendHarnessWorkerMessage()">
+          Send Message
+        </button>
+        <button data-testid="web-worker-terminate" type="button" (click)="terminateHarnessWorker()">
+          Terminate
+        </button>
+        <button data-testid="regex-analyze-safe" type="button" (click)="analyzeRegexSafePattern()">
+          Analyze Safe
+        </button>
+        <button data-testid="regex-test-safe" type="button" (click)="testSafeRegexPattern()">
+          Test Safe
+        </button>
+        <button data-testid="regex-test-unsafe" type="button" (click)="testUnsafeRegexPattern()">
+          Test Unsafe
+        </button>
+      </div>
+      <div class="harness-card-results harness-card-results--grid">
+        <div class="harness-result">
+          <span class="harness-result-label">Worker State:</span>
+          <span class="harness-result-value" data-testid="web-worker-state">{{
+            workerState()
+          }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Messages:</span>
+          <span class="harness-result-value" data-testid="web-worker-message-count">{{
+            workerMessageCount()
+          }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Last Message:</span>
+          <span class="harness-result-value" data-testid="web-worker-last-message">{{
+            workerLastMessage()
+          }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Regex Safe:</span>
+          <span class="harness-result-value" data-testid="regex-analysis-safe">{{
+            regexAnalysisSafe()
+          }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Risk Level:</span>
+          <span
+            class="harness-result-value harness-result-value--risk"
+            [attr.data-risk]="regexAnalysisRisk()"
+            data-testid="regex-analysis-risk"
+            >{{ regexAnalysisRisk() }}</span
+          >
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Execution:</span>
+          <span class="harness-result-value" data-testid="regex-execution-state">{{
+            regexExecutionState()
+          }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Match:</span>
+          <span class="harness-result-value" data-testid="regex-match">{{ regexMatch() }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Timeout:</span>
+          <span class="harness-result-value" data-testid="regex-timeout">{{ regexTimeout() }}</span>
+        </div>
+        <div class="harness-result harness-result--full">
+          <span class="harness-result-label">Error:</span>
+          <span class="harness-result-value" data-testid="regex-error">{{ regexError() }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Storage & Share -->
+    <section class="harness-card">
+      <h3 class="harness-card-title">Storage & Share Services</h3>
+      <div class="harness-card-actions">
+        <button data-testid="storage-exercise" type="button" (click)="exerciseWebStorage()">
+          Test Storage
+        </button>
+        <button data-testid="share-text" type="button" (click)="shareHarnessText()">
+          Share Text
+        </button>
+      </div>
+      <div class="harness-card-results">
+        <div class="harness-result-row">
+          <span class="harness-result-label">Storage State:</span>
+          <span class="harness-result-value" data-testid="storage-state">{{ storageState() }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Local Value:</span>
+          <span class="harness-result-value" data-testid="storage-local-value">{{
+            storageLocalValue()
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Session Value:</span>
+          <span class="harness-result-value" data-testid="storage-session-value">{{
+            storageSessionValue()
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Keys:</span>
+          <span class="harness-result-value" data-testid="storage-key-count">{{
+            storageKeyCount()
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Share State:</span>
+          <span class="harness-result-value" data-testid="web-share-state">{{
+            webShareState()
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Share Result:</span>
+          <span class="harness-result-value" data-testid="web-share-result">{{
+            webShareResult()
+          }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Battery & WebSocket -->
+    <section class="harness-card harness-card--wide">
+      <h3 class="harness-card-title">Battery & WebSocket Services</h3>
+      <div class="harness-card-actions harness-card-actions--wrap">
+        <button data-testid="battery-refresh" type="button" (click)="refreshBatterySnapshot()">
+          Refresh Battery
+        </button>
+        <button
+          data-testid="web-socket-connect-invalid"
+          type="button"
+          (click)="connectInvalidWebSocket()"
+        >
+          Connect Invalid WS
+        </button>
+        <button data-testid="web-socket-send" type="button" (click)="sendWebSocketMessage()">
+          Send Message
+        </button>
+        <button data-testid="web-socket-disconnect" type="button" (click)="disconnectWebSocket()">
+          Disconnect
+        </button>
+      </div>
+      <div class="harness-card-results harness-card-results--grid">
+        <div class="harness-result">
+          <span class="harness-result-label">Battery State:</span>
+          <span class="harness-result-value" data-testid="battery-state">{{ batteryState() }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Level:</span>
+          <span class="harness-result-value" data-testid="battery-level">{{ batteryLevel() }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Charging:</span>
+          <span class="harness-result-value" data-testid="battery-charging">{{
+            batteryCharging()
+          }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">WS State:</span>
+          <span class="harness-result-value" data-testid="web-socket-state">{{
+            webSocketState()
+          }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">WS Send:</span>
+          <span class="harness-result-value" data-testid="web-socket-send-state">{{
+            webSocketSendState()
+          }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">WS Error:</span>
+          <span class="harness-result-value" data-testid="web-socket-error">{{
+            webSocketError()
+          }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Clipboard -->
+    <section class="harness-card">
+      <h3 class="harness-card-title">Clipboard Service</h3>
+      <div class="harness-card-actions">
+        <button data-testid="clipboard-write" type="button" (click)="writeClipboardText()">
+          Write Text
+        </button>
+        <button data-testid="clipboard-read" type="button" (click)="readClipboardText()">
+          Read Text
+        </button>
+      </div>
+      <div class="harness-card-results">
+        <div class="harness-result-row">
+          <span class="harness-result-label">Write State:</span>
+          <span class="harness-result-value" data-testid="clipboard-write-state">{{
+            clipboardWriteState()
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Read Value:</span>
+          <span class="harness-result-value" data-testid="clipboard-read-value">{{
+            clipboardReadValue()
+          }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notifications -->
+    <section class="harness-card">
+      <h3 class="harness-card-title">Notification Service</h3>
+      <div class="harness-card-actions">
+        <button
+          data-testid="notifications-query-permission"
+          type="button"
+          (click)="queryNotificationPermission()"
+        >
+          Query Permission
+        </button>
+        <button data-testid="notifications-show" type="button" (click)="showNotification()">
+          Show Notification
+        </button>
+      </div>
+      <div class="harness-card-results">
+        <div class="harness-result-row">
+          <span class="harness-result-label">Permission:</span>
+          <span class="harness-result-value" data-testid="notifications-permission-state">{{
+            notificationPermissionState()
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Count:</span>
+          <span class="harness-result-value" data-testid="notifications-count">{{
+            notificationCount()
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Show State:</span>
+          <span class="harness-result-value" data-testid="notifications-show-state">{{
+            notificationShowState()
+          }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Observer APIs -->
+    <section class="harness-card harness-card--wide">
+      <h3 class="harness-card-title">Observer APIs</h3>
+      <div class="harness-card-actions harness-card-actions--wrap">
+        <button data-testid="intersection-observe" type="button" (click)="observeIntersection()">
+          Intersection
+        </button>
+        <button data-testid="resize-observe" type="button" (click)="observeResize()">Resize</button>
+        <button data-testid="mutation-observe" type="button" (click)="observeMutations()">
+          Mutation
+        </button>
+        <button data-testid="performance-observe" type="button" (click)="observePerformance()">
+          Performance
+        </button>
+      </div>
+      <div class="harness-card-results harness-card-results--grid">
+        <div class="harness-result">
+          <span class="harness-result-label">Intersection:</span>
+          <span class="harness-result-value" data-testid="intersection-observing">{{
+            intersectionObserving() ? 'yes' : 'no'
+          }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Is Intersecting:</span>
+          <span class="harness-result-value" data-testid="intersection-is-intersecting">{{
+            intersectionIsIntersecting() ? 'true' : 'false'
+          }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Resize:</span>
+          <span class="harness-result-value" data-testid="resize-observing">{{
+            resizeObserving() ? 'yes' : 'no'
+          }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Size:</span>
+          <span class="harness-result-value" data-testid="resize-dimensions"
+            >{{ resizeWidth() }}x{{ resizeHeight() }}</span
+          >
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Mutation:</span>
+          <span class="harness-result-value" data-testid="mutation-state">{{
+            mutationObserverState()
+          }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Mutations:</span>
+          <span class="harness-result-value" data-testid="mutation-count">{{
+            mutationCount()
+          }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Performance:</span>
+          <span class="harness-result-value" data-testid="performance-state">{{
+            performanceObserverState()
+          }}</span>
+        </div>
+        <div class="harness-result">
+          <span class="harness-result-label">Entries:</span>
+          <span class="harness-result-value" data-testid="performance-entry-count">{{
+            performanceEntryCount()
+          }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- System APIs -->
+    <section class="harness-card">
+      <h3 class="harness-card-title">System APIs</h3>
+      <div class="harness-card-actions harness-card-actions--wrap">
+        <button data-testid="fullscreen-enter" type="button" (click)="enterFullscreen()">
+          Enter Fullscreen
+        </button>
+        <button data-testid="fullscreen-exit" type="button" (click)="exitFullscreen()">
+          Exit Fullscreen
+        </button>
+        <button data-testid="wake-lock-request" type="button" (click)="requestWakeLock()">
+          Request Wake Lock
+        </button>
+        <button data-testid="wake-lock-release" type="button" (click)="releaseWakeLock()">
+          Release Wake Lock
+        </button>
+      </div>
+      <div class="harness-card-results">
+        <div class="harness-result-row">
+          <span class="harness-result-label">Fullscreen:</span>
+          <span class="harness-result-value" data-testid="fullscreen-state">{{
+            fullscreenState()
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Visibility:</span>
+          <span class="harness-result-value" data-testid="page-visibility-state">{{
+            pageVisibilityState()
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Visible:</span>
+          <span class="harness-result-value" data-testid="page-visible">{{
+            pageVisible() ? 'yes' : 'no'
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Wake Lock:</span>
+          <span class="harness-result-value" data-testid="wake-lock-state">{{
+            wakeLockState()
+          }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Network APIs -->
+    <section class="harness-card">
+      <h3 class="harness-card-title">Network APIs</h3>
+      <div class="harness-card-actions harness-card-actions--wrap">
+        <button data-testid="broadcast-open" type="button" (click)="openBroadcastChannel()">
+          Open Channel
+        </button>
+        <button data-testid="broadcast-send" type="button" (click)="sendBroadcastMessage()">
+          Send Message
+        </button>
+        <button data-testid="broadcast-close" type="button" (click)="closeBroadcastChannel()">
+          Close Channel
+        </button>
+        <button data-testid="sse-connect" type="button" (click)="connectSSE()">Connect SSE</button>
+        <button data-testid="sse-disconnect" type="button" (click)="disconnectSSE()">
+          Disconnect SSE
+        </button>
+      </div>
+      <div class="harness-card-results">
+        <div class="harness-result-row">
+          <span class="harness-result-label">Broadcast:</span>
+          <span class="harness-result-value" data-testid="broadcast-state">{{
+            broadcastState()
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Message Sent:</span>
+          <span class="harness-result-value" data-testid="broadcast-message-sent">{{
+            broadcastMessageSent() ? 'yes' : 'no'
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">SSE State:</span>
+          <span class="harness-result-value" data-testid="sse-state">{{ sseState() }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">SSE Connected:</span>
+          <span class="harness-result-value" data-testid="sse-connected">{{
+            sseConnected() ? 'yes' : 'no'
+          }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hardware APIs -->
+    <section class="harness-card">
+      <h3 class="harness-card-title">Hardware APIs</h3>
+      <div class="harness-card-actions">
+        <button data-testid="vibrate-success" type="button" (click)="vibrateSuccess()">
+          Vibrate
+        </button>
+        <button data-testid="speech-get-voices" type="button" (click)="getSpeechVoices()">
+          Get Voices
+        </button>
+      </div>
+      <div class="harness-card-results">
+        <div class="harness-result-row">
+          <span class="harness-result-label">Vibration:</span>
+          <span class="harness-result-value" data-testid="vibration-triggered">{{
+            vibrationTriggered() ? 'yes' : 'no'
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Voices:</span>
+          <span class="harness-result-value" data-testid="speech-voice-count">{{
+            speechVoiceCount()
+          }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- File & Recording -->
+    <section class="harness-card">
+      <h3 class="harness-card-title">File & Recording APIs</h3>
+      <div class="harness-card-actions">
+        <button data-testid="file-system-open" type="button" (click)="openFileSystem()">
+          Open File System
+        </button>
+        <button data-testid="recorder-start" type="button" (click)="startRecording()">
+          Start Recording
+        </button>
+        <button data-testid="recorder-stop" type="button" (click)="stopRecording()">
+          Stop Recording
+        </button>
+      </div>
+      <div class="harness-card-results">
+        <div class="harness-result-row">
+          <span class="harness-result-label">File System:</span>
+          <span class="harness-result-value" data-testid="file-system-state">{{
+            fileSystemAccessSupported() ? 'supported' : 'unsupported'
+          }}</span>
+        </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Recorder:</span>
+          <span class="harness-result-value" data-testid="recorder-state">{{
+            recorderState()
+          }}</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer Status -->
+  <footer class="harness-footer">
+    <div class="harness-footer-item">
+      <span class="harness-footer-label">Last Action:</span>
+      <span class="harness-footer-value" data-testid="last-action">{{ lastAction() }}</span>
+    </div>
+    <div class="harness-footer-item" [class.has-error]="errorMessage()">
+      <span class="harness-footer-label">Error:</span>
+      <span class="harness-footer-value" data-testid="error-message">{{
+        errorMessage() || 'none'
+      }}</span>
+    </div>
+  </footer>
+</main>

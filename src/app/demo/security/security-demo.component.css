@@ -1,0 +1,104 @@
+/* Security Demo - Component-specific styles */
+/* Shared styles are imported via ../shared/demo-shared.styles.css */
+
+/* Log section specific styles */
+.log-section {
+  margin-top: var(--sp-6);
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-3);
+}
+
+.log-header h3 {
+  font-size: var(--text-base);
+  font-weight: 600;
+  margin: 0;
+}
+
+.log-entries {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.log-entry {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--bg);
+  border-radius: var(--radius);
+  font-size: var(--text-sm);
+}
+
+.log-entry.success {
+  border-left: 3px solid #50c878;
+}
+
+.log-entry.error {
+  border-left: 3px solid #ff5050;
+}
+
+.log-entry.info {
+  border-left: 3px solid var(--accent);
+}
+
+.log-time {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+}
+
+.log-section-badge {
+  background: var(--surface-hover);
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--radius);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+.log-message {
+  flex: 1;
+  color: var(--text);
+}
+
+.log-empty {
+  text-align: center;
+  padding: var(--sp-6);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Password strength specific */
+.password-score {
+  font-size: var(--text-base);
+  margin-bottom: var(--sp-2);
+}
+
+.password-entropy {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--sp-2);
+}
+
+.password-feedback {
+  margin: var(--sp-2) 0 0;
+  padding-left: var(--sp-4);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.password-feedback li {
+  margin-bottom: var(--sp-1);
+}
+
+/* Time indicator in regex result */
+.demo-result .time {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  margin-left: var(--sp-2);
+}

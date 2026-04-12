@@ -1,6 +1,32 @@
-/* You can add global styles to this file, and also import other style files */
+/* ─── Tailwind v4 + DaisyUI v5 ───────────────────────── */
+@import 'tailwindcss';
 
-/* ─── Design Tokens ─────────────────────────────────── */
+@plugin "daisyui" {
+  themes: angular-helpers --prefersdark;
+}
+
+/* ─── Custom Theme: angular-helpers ─────────────────── */
+[data-theme='angular-helpers'] {
+  color-scheme: dark;
+  --color-primary: oklch(69% 0.18 254);
+  --color-primary-content: oklch(98% 0.01 254);
+  --color-secondary: oklch(72% 0.16 292);
+  --color-secondary-content: oklch(98% 0.01 292);
+  --color-accent: oklch(69% 0.18 254);
+  --color-accent-content: oklch(98% 0.01 254);
+  --color-neutral: oklch(22% 0.03 256);
+  --color-neutral-content: oklch(88% 0.02 256);
+  --color-base-100: oklch(13% 0.02 256);
+  --color-base-200: oklch(17% 0.03 256);
+  --color-base-300: oklch(15% 0.02 256);
+  --color-base-content: oklch(88% 0.02 256);
+  --color-info: oklch(69% 0.18 254);
+  --color-success: oklch(80% 0.15 150);
+  --color-warning: oklch(80% 0.15 70);
+  --color-error: oklch(65% 0.2 20);
+}
+
+/* ─── Design Tokens (legacy bridge — remove per section as migrated) ─── */
 :root {
   /* Backgrounds */
   --bg-base: #0f1117;

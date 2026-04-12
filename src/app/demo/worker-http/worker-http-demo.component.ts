@@ -1,10 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  signal,
-  ViewEncapsulation,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, signal } from '@angular/core';
+import { TransportDemoComponent } from './services/transport/transport-demo.component';
+import { HmacDemoComponent } from './services/hmac/hmac-demo.component';
+import { HashingDemoComponent } from './services/hashing/hashing-demo.component';
 import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
 import type { WorkerTransport } from '@angular-helpers/worker-http/transport';
 import {
@@ -34,9 +31,9 @@ interface LogEntry {
 @Component({
   selector: 'app-worker-http-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  styleUrl: '../services/demo.styles.css',
+  styleUrls: ['./worker-http-demo.component.css', '../shared/demo-shared.styles.css'],
   templateUrl: './worker-http-demo.component.html',
+  imports: [TransportDemoComponent, HmacDemoComponent, HashingDemoComponent],
 })
 export class WorkerHttpDemoComponent implements OnDestroy {
   // --- Transport state ---

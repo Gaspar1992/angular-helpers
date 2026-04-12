@@ -1,10 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  signal,
-  ViewEncapsulation,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, signal } from '@angular/core';
+import { RegexSecurityDemoComponent } from './services/regex-security/regex-security-demo.component';
+import { WebCryptoDemoComponent } from './services/web-crypto/web-crypto-demo.component';
+import { SecureStorageDemoComponent } from './services/secure-storage/secure-storage-demo.component';
 import { RegexSecurityService } from '@angular-helpers/security';
 import { WebCryptoService } from '@angular-helpers/security';
 import { SecureStorageService } from '@angular-helpers/security';
@@ -22,9 +19,9 @@ interface LogEntry {
 @Component({
   selector: 'app-security-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  styleUrl: '../services/demo.styles.css',
+  styleUrls: ['./security-demo.component.css', '../shared/demo-shared.styles.css'],
   templateUrl: './security-demo.component.html',
+  imports: [RegexSecurityDemoComponent, WebCryptoDemoComponent, SecureStorageDemoComponent],
 })
 export class SecurityDemoComponent implements OnDestroy {
   // --- Regex Security state ---

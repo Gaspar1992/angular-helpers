@@ -46,10 +46,9 @@ export type DemoTab = 'observers' | 'media' | 'system' | 'storage' | 'realtime' 
     NotificationDemoComponent,
   ],
   templateUrl: './browser-apis.html',
-  styleUrl: './browser-apis.css',
+  styleUrls: ['./browser-apis.css', '../shared/demo-shared.styles.css'],
 })
-export class BrowserApisComponent implements OnInit {
-  readonly initialTab = input<DemoTab>('observers');
+export class BrowserApisComponent {
   readonly embedded = input<boolean>(false);
 
   activeTab = signal<DemoTab>('observers');
@@ -62,10 +61,6 @@ export class BrowserApisComponent implements OnInit {
     { id: 'realtime', icon: '📡', label: 'Realtime' },
     { id: 'location', icon: '📍', label: 'Location' },
   ];
-
-  ngOnInit(): void {
-    this.activeTab.set(this.initialTab());
-  }
 
   setTab(tab: DemoTab): void {
     this.activeTab.set(tab);

@@ -30,6 +30,32 @@ const DEMO_COMPONENTS: Record<string, () => Promise<Type<unknown>>> = {
     import('../../demo/services/notification/notification-demo.component').then(
       (m) => m.NotificationDemoComponent,
     ),
+  // Security Services
+  'regex-security': () =>
+    import('../../demo/security/services/regex-security/regex-security-demo.component').then(
+      (m) => m.RegexSecurityDemoComponent,
+    ),
+  'web-crypto': () =>
+    import('../../demo/security/services/web-crypto/web-crypto-demo.component').then(
+      (m) => m.WebCryptoDemoComponent,
+    ),
+  'secure-storage': () =>
+    import('../../demo/security/services/secure-storage/secure-storage-demo.component').then(
+      (m) => m.SecureStorageDemoComponent,
+    ),
+  // Worker HTTP
+  transport: () =>
+    import('../../demo/worker-http/services/transport/transport-demo.component').then(
+      (m) => m.TransportDemoComponent,
+    ),
+  hmac: () =>
+    import('../../demo/worker-http/services/hmac/hmac-demo.component').then(
+      (m) => m.HmacDemoComponent,
+    ),
+  hashing: () =>
+    import('../../demo/worker-http/services/hashing/hashing-demo.component').then(
+      (m) => m.HashingDemoComponent,
+    ),
 };
 
 const SECTION_DATA = {
@@ -49,7 +75,7 @@ const SECTION_DATA = {
     dataSource: WORKER_HTTP_ENTRIES,
     backRoute: '/docs/worker-http',
     backLabel: 'worker-http',
-    hasDemoTab: false,
+    hasDemoTab: true,
   },
 };
 
