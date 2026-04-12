@@ -16,6 +16,7 @@ import { RegexSecurityService } from '@angular-helpers/security';
           Pattern:
           <input
             type="text"
+            name="regex-pattern"
             [value]="regexPattern()"
             (input)="regexPattern.set($any($event).target.value)"
             class="demo-input"
@@ -25,6 +26,7 @@ import { RegexSecurityService } from '@angular-helpers/security';
           Test input:
           <input
             type="text"
+            name="regex-test-input"
             [value]="regexInput()"
             (input)="regexInput.set($any($event).target.value)"
             class="demo-input"

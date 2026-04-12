@@ -16,6 +16,7 @@ import { SecureStorageService } from '@angular-helpers/security';
           Key:
           <input
             type="text"
+            name="storage-key"
             [value]="storageKey()"
             (input)="storageKey.set($any($event).target.value)"
             class="demo-input"
@@ -25,6 +26,7 @@ import { SecureStorageService } from '@angular-helpers/security';
           Value (JSON):
           <input
             type="text"
+            name="storage-value"
             [value]="storageValue()"
             (input)="storageValue.set($any($event).target.value)"
             class="demo-input"

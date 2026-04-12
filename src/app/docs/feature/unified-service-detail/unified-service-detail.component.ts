@@ -83,7 +83,7 @@ export interface ServiceDetailConfig {
 
         @switch (activeTab()) {
           @case ('api') {
-            <div class="tab-content">
+            <div class="usd-tab-content">
               <app-code-block language="ts" filename="example.ts" [code]="importExample()" />
 
               <h3 class="section-title">API Reference</h3>
@@ -108,13 +108,13 @@ export interface ServiceDetailConfig {
             </div>
           }
           @case ('example') {
-            <div class="tab-content">
+            <div class="usd-tab-content">
               <app-code-block language="ts" filename="usage.example.ts" [code]="s.example" />
             </div>
           }
           @case ('demo') {
             @if (config().demoComponent; as demo) {
-              <div class="tab-content demo-container">
+              <div class="usd-tab-content demo-container">
                 <ng-container *ngComponentOutlet="demo" />
               </div>
             }
@@ -179,7 +179,7 @@ export interface ServiceDetailConfig {
         color: white;
       }
 
-      .tab-content {
+      .usd-tab-content {
         margin-top: var(--sp-6);
       }
 

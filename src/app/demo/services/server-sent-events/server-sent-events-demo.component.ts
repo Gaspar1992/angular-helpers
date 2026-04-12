@@ -36,6 +36,7 @@ import { ServerSentEventsService } from '@angular-helpers/browser-web-apis';
       <div class="svc-controls">
         <input
           class="demo-input"
+          name="sse-url"
           [ngModel]="url"
           (ngModelChange)="url = $event"
           placeholder="https://example.com/events"

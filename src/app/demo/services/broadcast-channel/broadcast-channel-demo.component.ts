@@ -40,6 +40,7 @@ import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
         <div class="svc-controls">
           <input
             class="demo-input"
+            name="channel-name"
             [ngModel]="channelName"
             (ngModelChange)="channelName = $event"
             placeholder="Channel name"
@@ -58,6 +59,7 @@ import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
         <div class="svc-controls">
           <input
             class="demo-input"
+            name="channel-message"
             [ngModel]="channelMsg"
             (ngModelChange)="channelMsg = $event"
             placeholder="Message to broadcast"

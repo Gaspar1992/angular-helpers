@@ -24,6 +24,11 @@
   --color-success: oklch(80% 0.15 150);
   --color-warning: oklch(80% 0.15 70);
   --color-error: oklch(65% 0.2 20);
+  /* DaisyUI v5 structural tokens */
+  --radius-selector: 0.5rem;
+  --radius-field: 0.35rem;
+  --radius-box: 0.75rem;
+  --depth: 0;
 }
 
 /* ─── Design Tokens (legacy bridge — remove per section as migrated) ─── */
