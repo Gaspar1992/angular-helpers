@@ -87,9 +87,20 @@ hljs.registerLanguage('json', json);
 
       code {
         font-family: var(--font-mono);
-        font-size: var(--text-base);
+        font-size: var(--text-sm);
         line-height: 1.65;
         background: transparent !important;
+        white-space: pre-wrap;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+      }
+
+      @media (min-width: 640px) {
+        code {
+          font-size: var(--text-base);
+          white-space: pre;
+          word-break: normal;
+        }
       }
     `,
   ],

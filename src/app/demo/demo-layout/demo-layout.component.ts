@@ -72,6 +72,7 @@ const DEMO_TABS: DemoTab[] = [
         padding: var(--sp-3) var(--sp-4);
         display: flex;
         align-items: center;
+        justify-content: space-between;
         gap: var(--sp-3);
       }
 
@@ -110,10 +111,28 @@ const DEMO_TABS: DemoTab[] = [
         scrollbar-width: none;
         -ms-overflow-style: none;
         padding: var(--sp-1) 0;
+        min-width: 0;
       }
 
       .demo-nav::-webkit-scrollbar {
         display: none;
+      }
+
+      @media (max-width: 640px) {
+        .demo-nav {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: var(--bg-elevated);
+          border-top: 1px solid var(--border);
+          padding: var(--sp-2) var(--sp-4);
+          justify-content: space-around;
+          z-index: 100;
+        }
+        .demo-main {
+          padding-bottom: 80px;
+        }
       }
 
       .demo-nav-item {
@@ -155,13 +174,19 @@ const DEMO_TABS: DemoTab[] = [
 
       @media (max-width: 480px) {
         .demo-nav-item {
-          padding: var(--sp-2);
+          padding: var(--sp-1);
+          flex-direction: column;
+          gap: var(--sp-1);
+          font-size: var(--text-xs);
+        }
+        .demo-nav-icon {
+          font-size: 1.3em;
         }
         .demo-logo-text {
           display: none;
         }
         .demo-docs-link {
-          font-size: var(--text-xs);
+          display: none;
         }
       }
 

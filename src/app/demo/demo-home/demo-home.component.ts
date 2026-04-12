@@ -20,10 +20,10 @@ import { PUBLIC_DEMO_SECTIONS } from '../config/demo.config';
         <p class="text-base text-base-content/60 leading-relaxed max-w-[520px] mx-auto m-0 mb-6">
           Live, interactive demonstrations built with signals, OnPush, and modern Angular patterns.
         </p>
-        <div class="flex gap-2 justify-center flex-wrap">
-          <span class="badge badge-error badge-sm">Angular 20+</span>
-          <span class="badge badge-secondary badge-sm">Signals</span>
-          <span class="badge badge-success badge-sm">OnPush</span>
+        <div class="flex gap-3 justify-center flex-wrap">
+          <span class="badge badge-primary badge-md font-semibold">Angular 20+</span>
+          <span class="badge badge-secondary badge-md font-semibold">Signals</span>
+          <span class="badge badge-accent badge-md font-semibold">OnPush</span>
         </div>
       </header>
 
