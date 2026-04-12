@@ -331,6 +331,36 @@ body {
   min-width: 180px;
 }
 
+/* ─── Code-window syntax tokens (injected via innerHTML) ── */
+.c-kw {
+  color: #cba6f7;
+}
+.c-str {
+  color: #a6e3a1;
+}
+.c-bool {
+  color: #fab387;
+}
+.c-type {
+  color: #89dceb;
+}
+.c-fn {
+  color: #89b4fa;
+}
+.c-var {
+  color: #cdd6f4;
+}
+.c-punc {
+  color: #6c7086;
+}
+.c-brace {
+  color: #cdd6f4;
+}
+.c-cmt {
+  color: #585b70;
+  font-style: italic;
+}
+
 /* ─── Highlight.js — Catppuccin Mocha ────────────────── */
 .hljs {
   color: #cdd6f4;

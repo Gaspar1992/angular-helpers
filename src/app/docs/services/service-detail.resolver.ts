@@ -7,7 +7,7 @@ import { WORKER_HTTP_ENTRIES, WORKER_HTTP_INTERFACES } from '../data/worker-http
 import {
   ServiceDetailConfig,
   InterfaceDoc,
-} from '../../features/docs/unified-service-detail/unified-service-detail.component';
+} from '../feature/unified-service-detail/unified-service-detail.component';
 
 // Demo components map - lazy loaded
 const DEMO_COMPONENTS: Record<string, () => Promise<Type<unknown>>> = {

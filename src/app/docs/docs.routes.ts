@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { serviceDetailResolver } from './resolvers/service-detail.resolver';
-import { overviewResolver } from './resolvers/overview.resolver';
+import { serviceDetailResolver } from './services/service-detail.resolver';
+import { overviewResolver } from './services/overview.resolver';
 
 export const DOCS_ROUTES: Routes = [
   {
@@ -17,7 +17,7 @@ export const DOCS_ROUTES: Routes = [
       {
         path: 'browser-web-apis',
         loadComponent: () =>
-          import('../features/docs/unified-overview/unified-overview.component').then(
+          import('./feature/unified-overview/unified-overview.component').then(
             (m) => m.UnifiedOverviewComponent,
           ),
         resolve: { config: overviewResolver },
@@ -26,7 +26,7 @@ export const DOCS_ROUTES: Routes = [
       {
         path: 'browser-web-apis/:service',
         loadComponent: () =>
-          import('../features/docs/unified-service-detail/unified-service-detail.component').then(
+          import('./feature/unified-service-detail/unified-service-detail.component').then(
             (m) => m.UnifiedServiceDetailComponent,
           ),
         resolve: { config: serviceDetailResolver },
@@ -35,7 +35,7 @@ export const DOCS_ROUTES: Routes = [
       {
         path: 'security',
         loadComponent: () =>
-          import('../features/docs/unified-overview/unified-overview.component').then(
+          import('./feature/unified-overview/unified-overview.component').then(
             (m) => m.UnifiedOverviewComponent,
           ),
         resolve: { config: overviewResolver },
@@ -44,7 +44,7 @@ export const DOCS_ROUTES: Routes = [
       {
         path: 'security/:service',
         loadComponent: () =>
-          import('../features/docs/unified-service-detail/unified-service-detail.component').then(
+          import('./feature/unified-service-detail/unified-service-detail.component').then(
             (m) => m.UnifiedServiceDetailComponent,
           ),
         resolve: { config: serviceDetailResolver },
@@ -53,7 +53,7 @@ export const DOCS_ROUTES: Routes = [
       {
         path: 'worker-http',
         loadComponent: () =>
-          import('../features/docs/unified-overview/unified-overview.component').then(
+          import('./feature/unified-overview/unified-overview.component').then(
             (m) => m.UnifiedOverviewComponent,
           ),
         resolve: { config: overviewResolver },
@@ -62,7 +62,7 @@ export const DOCS_ROUTES: Routes = [
       {
         path: 'worker-http/:entry',
         loadComponent: () =>
-          import('../features/docs/unified-service-detail/unified-service-detail.component').then(
+          import('./feature/unified-service-detail/unified-service-detail.component').then(
             (m) => m.UnifiedServiceDetailComponent,
           ),
         resolve: { config: serviceDetailResolver },

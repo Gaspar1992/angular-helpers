@@ -15,6 +15,10 @@ export const routes: Routes = [
     loadChildren: () => import('./docs/docs.routes').then((m) => m.DOCS_ROUTES),
   },
   {
+    path: 'blog',
+    loadChildren: () => import('./blog/blog.routes').then((m) => m.BLOG_ROUTES),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

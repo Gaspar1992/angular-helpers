@@ -1,5 +1,5 @@
 import { ResolveFn } from '@angular/router';
-import { OverviewConfig } from '../../features/docs/unified-overview/unified-overview.component';
+import { OverviewConfig } from '../feature/unified-overview/unified-overview.component';
 import { BROWSER_WEB_APIS_SERVICES } from '../data/browser-web-apis.data';
 import { SECURITY_SERVICES } from '../data/security.data';
 import { WORKER_HTTP_ENTRIES } from '../data/worker-http.data';
