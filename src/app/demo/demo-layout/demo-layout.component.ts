@@ -60,7 +60,7 @@ const DEMO_TABS: DemoTab[] = [
 
       .demo-header {
         background: var(--bg-elevated);
-        border-bottom: 1px solid var(--border);
+        border-bottom: 1px solid var(--border-color);
         position: sticky;
         top: 0;
         z-index: 100;
@@ -125,7 +125,7 @@ const DEMO_TABS: DemoTab[] = [
           left: 0;
           right: 0;
           background: var(--bg-elevated);
-          border-top: 1px solid var(--border);
+          border-top: 1px solid var(--border-color);
           padding: var(--sp-2) var(--sp-4);
           justify-content: space-around;
           z-index: 100;

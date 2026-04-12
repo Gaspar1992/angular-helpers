@@ -40,7 +40,8 @@
   --bg-elevated: #1e1e2e;
   --bg-hover: rgba(255, 255, 255, 0.04);
 
-  /* Borders - renamed to avoid DaisyUI collision (DaisyUI uses --border as numeric) */
+  /* Borders - DaisyUI uses --border as numeric width, we use --border-color for color */
+  --border: 1px;
   --border-color: rgba(255, 255, 255, 0.07);
   --border-subtle: rgba(255, 255, 255, 0.05);
 
