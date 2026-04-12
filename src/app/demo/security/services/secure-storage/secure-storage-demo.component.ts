@@ -5,45 +5,57 @@ import { SecureStorageService } from '@angular-helpers/security';
   selector: 'app-secure-storage-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  styleUrl: '../../../shared/demo-shared.styles.css',
   providers: [SecureStorageService],
   template: `
-    <div class="demo-section">
-      <h3>🗄️ SecureStorageService</h3>
-      <p>Encrypted localStorage/sessionStorage with AES-GCM</p>
+    <section class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5">
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0 flex items-center gap-2">
+          🗄️ SecureStorageService
+        </h2>
+        <span class="badge badge-accent badge-sm">AES-GCM</span>
+      </div>
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+        Encrypted localStorage/sessionStorage with AES-GCM
+      </p>
 
-      <div class="demo-controls">
-        <label>
-          Key:
+      <div class="space-y-3">
+        <div class="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             name="storage-key"
             [value]="storageKey()"
             (input)="storageKey.set($any($event).target.value)"
-            class="demo-input"
+            placeholder="Key"
+            class="input input-bordered input-sm flex-1 font-mono"
           />
-        </label>
-        <label>
-          Value (JSON):
           <input
             type="text"
             name="storage-value"
             [value]="storageValue()"
             (input)="storageValue.set($any($event).target.value)"
-            class="demo-input"
+            placeholder="Value (JSON)"
+            class="input input-bordered input-sm flex-1 font-mono"
           />
-        </label>
-        <div class="demo-buttons">
-          <button (click)="saveData()" class="btn btn-primary">Save</button>
-          <button (click)="loadData()" class="btn btn-secondary">Load</button>
-          <button (click)="clearData()" class="btn btn-danger">Clear</button>
         </div>
-      </div>
+        <div class="flex flex-wrap gap-2">
+          <button (click)="saveData()" class="btn btn-primary btn-sm">Save</button>
+          <button (click)="loadData()" class="btn btn-secondary btn-sm">Load</button>
+          <button (click)="clearData()" class="btn btn-error btn-sm">Clear</button>
+        </div>
 
-      @if (storageResult()) {
-        <div class="demo-result">{{ storageResult() }}</div>
-      }
-    </div>
+        @if (storageResult()) {
+          <div
+            class="p-3 rounded-lg text-sm"
+            [class.bg-success/10]="storageResult().startsWith('✅')"
+            [class.text-success]="storageResult().startsWith('✅')"
+            [class.bg-error/10]="storageResult().startsWith('❌')"
+            [class.text-error]="storageResult().startsWith('❌')"
+          >
+            {{ storageResult() }}
+          </div>
+        }
+      </div>
+    </section>
   `,
 })
 export class SecureStorageDemoComponent {

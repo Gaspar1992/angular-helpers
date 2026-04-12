@@ -1,40 +1,53 @@
 import { Component, ChangeDetectionStrategy, ViewEncapsulation, signal } from '@angular/core';
 import { WebCryptoService } from '@angular-helpers/security';
-import { DemoCardComponent } from '../../../ui/demo-card/demo-card.component';
 
 @Component({
   selector: 'app-web-crypto-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [DemoCardComponent],
   providers: [WebCryptoService],
-  styleUrl: '../../../shared/demo-shared.styles.css',
   template: `
-    <div class="demo-grid">
-      <app-demo-card
-        title="SHA-256 Hash"
-        description="Generate cryptographic hash of input data"
-        badge="Crypto"
-        badgeVariant="success"
-      >
-        <button (click)="hashData()" class="btn btn-primary">Generate Hash</button>
-        @if (hashResult()) {
-          <div class="demo-output">{{ hashResult() }}</div>
-        }
-      </app-demo-card>
+    <section class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5">
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0 flex items-center gap-2">
+          🔐 WebCryptoService
+        </h2>
+        <span class="badge badge-secondary badge-sm">Native Crypto</span>
+      </div>
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+        Hashing, HMAC, and AES encryption using native Web Crypto API
+      </p>
 
-      <app-demo-card
-        title="HMAC Signature"
-        description="Sign data with HMAC using secret key"
-        badge="Crypto"
-        badgeVariant="success"
-      >
-        <button (click)="generateHmac()" class="btn btn-primary">Sign Data</button>
-        @if (hmacSignature()) {
-          <div class="demo-output">{{ hmacSignature() }}</div>
-        }
-      </app-demo-card>
-    </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="bg-base-300 border border-base-300 rounded-lg p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <h3 class="font-semibold text-base-content m-0">SHA-256 Hash</h3>
+            <span class="badge badge-success badge-xs">Crypto</span>
+          </div>
+          <p class="text-xs text-base-content/60 mb-3">Generate cryptographic hash</p>
+          <button (click)="hashData()" class="btn btn-primary btn-sm">Generate Hash</button>
+          @if (hashResult()) {
+            <div class="mt-3 p-2 bg-base-200 rounded font-mono text-xs break-all text-base-content">
+              {{ hashResult() }}
+            </div>
+          }
+        </div>
+
+        <div class="bg-base-300 border border-base-300 rounded-lg p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <h3 class="font-semibold text-base-content m-0">HMAC Signature</h3>
+            <span class="badge badge-success badge-xs">Crypto</span>
+          </div>
+          <p class="text-xs text-base-content/60 mb-3">Sign data with HMAC</p>
+          <button (click)="generateHmac()" class="btn btn-secondary btn-sm">Sign Data</button>
+          @if (hmacSignature()) {
+            <div class="mt-3 p-2 bg-base-200 rounded font-mono text-xs break-all text-base-content">
+              {{ hmacSignature() }}
+            </div>
+          }
+        </div>
+      </div>
+    </section>
   `,
 })
 export class WebCryptoDemoComponent {

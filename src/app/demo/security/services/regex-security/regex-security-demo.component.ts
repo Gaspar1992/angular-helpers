@@ -5,49 +5,61 @@ import { RegexSecurityService } from '@angular-helpers/security';
   selector: 'app-regex-security-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  styleUrl: '../../../shared/demo-shared.styles.css',
   providers: [RegexSecurityService],
   template: `
-    <div class="demo-section">
-      <h3>🔒 RegexSecurityService</h3>
-      <p>Safe regex execution in Web Workers with ReDoS protection</p>
+    <section class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5">
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0 flex items-center gap-2">
+          🔒 RegexSecurityService
+        </h2>
+        <span class="badge badge-primary badge-sm">ReDoS Protection</span>
+      </div>
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+        Safe regex execution in Web Workers with ReDoS protection
+      </p>
 
-      <div class="demo-controls">
-        <label>
-          Pattern:
+      <div class="space-y-3">
+        <div class="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             name="regex-pattern"
             [value]="regexPattern()"
             (input)="regexPattern.set($any($event).target.value)"
-            class="demo-input"
+            placeholder="Pattern"
+            class="input input-bordered input-sm flex-1 font-mono text-xs"
           />
-        </label>
-        <label>
-          Test input:
           <input
             type="text"
             name="regex-test-input"
             [value]="regexInput()"
             (input)="regexInput.set($any($event).target.value)"
-            class="demo-input"
+            placeholder="Test input"
+            class="input input-bordered input-sm flex-1"
           />
-        </label>
-        <div class="demo-buttons">
-          <button (click)="testRegex()" class="btn btn-primary">Test Regex</button>
-          <button (click)="analyzePattern()" class="btn btn-secondary">Analyze Pattern</button>
         </div>
-      </div>
+        <div class="flex flex-wrap gap-2">
+          <button (click)="testRegex()" class="btn btn-primary btn-sm">Test Regex</button>
+          <button (click)="analyzePattern()" class="btn btn-secondary btn-sm">
+            Analyze Pattern
+          </button>
+        </div>
 
-      @if (regexResult()) {
-        <div class="demo-result" [class.error]="regexStatus() === 'error'">
-          {{ regexResult() }}
-          @if (regexTime()) {
-            <span class="time">({{ regexTime() }}ms)</span>
-          }
-        </div>
-      }
-    </div>
+        @if (regexResult()) {
+          <div
+            class="p-3 rounded-lg font-mono text-sm break-all"
+            [class.bg-success/10]="regexStatus() === 'success'"
+            [class.text-success]="regexStatus() === 'success'"
+            [class.bg-error/10]="regexStatus() === 'error'"
+            [class.text-error]="regexStatus() === 'error'"
+          >
+            {{ regexResult() }}
+            @if (regexTime()) {
+              <span class="text-xs opacity-60 ml-2">({{ regexTime() }}ms)</span>
+            }
+          </div>
+        }
+      </div>
+    </section>
   `,
 })
 export class RegexSecurityDemoComponent {
