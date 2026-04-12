@@ -494,6 +494,12 @@
             webShareResult()
           }}</span>
         </div>
+        <div class="harness-result-row">
+          <span class="harness-result-label">Share Error:</span>
+          <span class="harness-result-value" data-testid="web-share-error">{{
+            webShareError()
+          }}</span>
+        </div>
       </div>
     </section>
 
@@ -657,6 +663,10 @@
           <span class="harness-result-value" data-testid="resize-dimensions"
             >{{ resizeWidth() }}x{{ resizeHeight() }}</span
           >
+        </div>
+        <div class="harness-result" style="display: none">
+          <span data-testid="resize-width">{{ resizeWidth() }}</span>
+          <span data-testid="resize-height">{{ resizeHeight() }}</span>
         </div>
         <div class="harness-result">
           <span class="harness-result-label">Mutation:</span>

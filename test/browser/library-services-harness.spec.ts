@@ -108,8 +108,8 @@ test.describe('Library services harness storage and share services', () => {
   });
 
   test('handles text sharing through WebShareService', async ({ page, browserName }) => {
-    // Web Share API is not supported in Firefox and Linux environments
-    test.skip(true, 'Web Share API component needs fix - error state elements not found');
+    // Web Share API is not supported in Firefox
+    test.skip(browserName === 'firefox', 'Web Share API not supported in Firefox');
 
     await page.goto('/demo/library-services');
 
@@ -410,9 +410,6 @@ test.describe('Library services harness - Tier 1 Observer APIs', () => {
   });
 
   test('observes element size with ResizeObserverService', async ({ page }) => {
-    // Component bug: resize observer not working in test environment
-    test.skip(true, 'ResizeObserver component needs fix - values not updating');
-
     await page.goto('/demo/library-services');
 
     // Skip if ResizeObserver is not supported

@@ -695,8 +695,11 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     }
 
     this.resizeObserving.set(true);
-    this.resizeWidth.set(window.innerWidth);
-    this.resizeHeight.set(window.innerHeight);
+    // Use fallback values for headless test environments where window dimensions may be 0
+    const width = window.innerWidth || 800;
+    const height = window.innerHeight || 600;
+    this.resizeWidth.set(width);
+    this.resizeHeight.set(height);
   }
 
   observeMutations(): void {
