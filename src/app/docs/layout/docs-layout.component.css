@@ -15,14 +15,14 @@
   width: 264px;
   z-index: 50;
   background: var(--bg-sidebar);
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   max-height: 100vh;
   transition: left 0.25s ease;
   scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+  scrollbar-color: var(--border-color) transparent;
 }
 
 .sidebar.open {
@@ -34,7 +34,7 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--sp-5) var(--sp-5) var(--sp-4);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .sidebar-logo {
@@ -211,7 +211,7 @@
   gap: var(--sp-4);
   padding: var(--sp-3) var(--sp-5);
   background: var(--bg-sidebar);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 30;

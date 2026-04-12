@@ -31,7 +31,7 @@
 /* Sections */
 .demo-section {
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-xl);
   padding: var(--sp-6);
   margin-bottom: var(--sp-6);
@@ -76,7 +76,7 @@
 
 .demo-input {
   background: var(--bg);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius);
   padding: var(--sp-2) var(--sp-3);
   color: var(--text);
@@ -141,7 +141,7 @@
 .btn-secondary {
   background: rgba(255, 255, 255, 0.08);
   color: var(--text-primary);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -163,7 +163,7 @@
 /* Results */
 .demo-result {
   background: var(--bg);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius);
   padding: var(--sp-3);
   margin-top: var(--sp-3);
@@ -185,7 +185,7 @@
 
 .demo-output {
   background: var(--bg);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius);
   padding: var(--sp-3);
   margin-top: var(--sp-3);
@@ -206,7 +206,7 @@
 /* Service Card (used by worker-http) */
 .svc-card {
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-xl);
   padding: var(--sp-6);
   margin-bottom: var(--sp-6);
@@ -242,7 +242,7 @@
 
 .svc-result {
   background: var(--bg);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius);
   padding: var(--sp-3);
   margin-top: var(--sp-3);
@@ -334,7 +334,7 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--sp-2) 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .kv-row:last-child {
@@ -400,7 +400,7 @@
 .btn-secondary {
   background: rgba(255, 255, 255, 0.08);
   color: var(--text);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover:not(:disabled) {

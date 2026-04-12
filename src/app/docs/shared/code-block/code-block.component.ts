@@ -22,7 +22,11 @@ hljs.registerLanguage('json', json);
     <div class="code-block-wrapper">
       <div class="code-header">
         <span class="lang-badge">{{ language() }}</span>
-        <button class="copy-btn" (click)="copy()" [attr.aria-label]="'Copy ' + language() + ' code'">
+        <button
+          class="copy-btn"
+          (click)="copy()"
+          [attr.aria-label]="'Copy ' + language() + ' code'"
+        >
           {{ copied ? 'Copied!' : 'Copy' }}
         </button>
       </div>
@@ -36,7 +40,7 @@ hljs.registerLanguage('json', json);
         border-radius: var(--radius-lg);
         overflow: hidden;
         margin: var(--sp-4) 0;
-        border: 1px solid var(--border);
+        border: 1px solid var(--border-color);
       }
 
       .code-header {
@@ -60,7 +64,7 @@ hljs.registerLanguage('json', json);
         font-size: var(--text-xs);
         padding: 0.2rem 0.6rem;
         background: rgba(255, 255, 255, 0.08);
-        border: 1px solid var(--border);
+        border: 1px solid var(--border-color);
         border-radius: var(--radius-sm);
         color: #c0c8e0;
         cursor: pointer;

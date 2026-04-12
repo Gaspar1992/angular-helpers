@@ -95,7 +95,7 @@ export interface OverviewConfig {
         flex-direction: column;
         padding: var(--sp-4);
         background: var(--bg-elevated);
-        border: 1px solid var(--border);
+        border: 1px solid var(--border-color);
         border-radius: var(--radius-lg);
         text-decoration: none;
         color: var(--text);

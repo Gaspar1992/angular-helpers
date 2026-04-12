@@ -336,7 +336,7 @@ const SERVICE_GROUPS = [
         gap: var(--sp-1);
         padding: var(--sp-3) var(--sp-4);
         background: var(--bg-surface);
-        border: 1px solid var(--border);
+        border: 1px solid var(--border-color);
         border-radius: var(--radius-lg);
         text-decoration: none;
         transition:

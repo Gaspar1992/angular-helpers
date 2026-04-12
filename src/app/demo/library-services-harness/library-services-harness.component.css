@@ -10,7 +10,7 @@
 .harness-header {
   margin-bottom: var(--sp-8);
   padding-bottom: var(--sp-6);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .harness-title {
@@ -51,7 +51,7 @@
   padding: 0.15rem 0.5rem;
   background: var(--bg-surface);
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
 
   &.success {
     color: var(--text-success);
@@ -71,7 +71,7 @@
   color: var(--text-white);
   margin: 0 0 var(--sp-4);
   padding-bottom: var(--sp-2);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-color);
 }
 
 /* Status Grid */
@@ -88,7 +88,7 @@
   gap: var(--sp-1);
   padding: var(--sp-3);
   background: var(--bg-surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   text-align: center;
   transition: var(--transition);
@@ -125,7 +125,7 @@
 .harness-table-wrapper {
   overflow-x: auto;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
 }
 
 .harness-table {
@@ -142,7 +142,7 @@
     letter-spacing: 0.05em;
     color: var(--text-muted);
     background: var(--bg-elevated);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-color);
     white-space: nowrap;
   }
 
@@ -175,7 +175,7 @@
   border-radius: var(--radius-sm);
   background: var(--bg-elevated);
   color: var(--text-muted);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
 
   &.success {
     color: var(--text-success);
@@ -210,7 +210,7 @@
   gap: var(--sp-4);
   padding: var(--sp-4);
   background: var(--bg-surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   transition: var(--transition);
 
@@ -254,7 +254,7 @@
   font-weight: 500;
   color: var(--text-primary);
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: var(--transition);
@@ -349,7 +349,7 @@
   gap: var(--sp-3);
   padding: var(--sp-4);
   background: var(--bg-surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   margin-top: var(--sp-6);
 }
