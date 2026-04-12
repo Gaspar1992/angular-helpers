@@ -10,54 +10,82 @@ import {
   selector: 'app-geolocation-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  styleUrl: '../demo.styles.css',
   template: `
-    <section class="svc-card" aria-labelledby="geo-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="geo-title">Geolocation</h2>
-        <div class="svc-badges">
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="geo-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="geo-title">
+          Geolocation
+        </h2>
+        <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-ok">supported</span>
+            <span class="badge badge-success badge-sm">supported</span>
           } @else {
-            <span class="badge badge-no">unsupported</span>
+            <span class="badge badge-error badge-sm">unsupported</span>
           }
-          <span class="badge badge-secure">secure context</span>
+          <span class="badge badge-info badge-sm">secure context</span>
         </div>
       </div>
-      <div class="svc-controls">
-        <button class="btn btn-primary" (click)="getLocation()" [disabled]="loading()">
+      <div class="flex flex-wrap gap-2 items-center mb-4">
+        <button class="btn btn-primary btn-sm" (click)="getLocation()" [disabled]="loading()">
           Get location
         </button>
-        <button class="btn btn-secondary" (click)="watchLocation()" [disabled]="watchId() !== null">
+        <button
+          class="btn btn-secondary btn-sm"
+          (click)="watchLocation()"
+          [disabled]="watchId() !== null"
+        >
           Watch
         </button>
-        <button class="btn btn-danger" (click)="stopWatch()" [disabled]="watchId() === null">
+        <button class="btn btn-error btn-sm" (click)="stopWatch()" [disabled]="watchId() === null">
           Stop watch
         </button>
       </div>
       @if (position(); as pos) {
-        <div class="svc-result">
-          <div class="kv-row">
-            <span class="kv-key">Latitude</span>
-            <span class="kv-val mono">{{ pos.coords.latitude.toFixed(6) }}</span>
+        <div class="bg-base-300 border border-base-300 rounded-lg p-4">
+          <div
+            class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
+          >
+            <span class="text-sm text-base-content/70 font-medium">Latitude</span>
+            <span class="text-sm text-base-content font-semibold font-mono">{{
+              pos.coords.latitude.toFixed(6)
+            }}</span>
           </div>
-          <div class="kv-row">
-            <span class="kv-key">Longitude</span>
-            <span class="kv-val mono">{{ pos.coords.longitude.toFixed(6) }}</span>
+          <div
+            class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
+          >
+            <span class="text-sm text-base-content/70 font-medium">Longitude</span>
+            <span class="text-sm text-base-content font-semibold font-mono">{{
+              pos.coords.longitude.toFixed(6)
+            }}</span>
           </div>
-          <div class="kv-row">
-            <span class="kv-key">Accuracy</span>
-            <span class="kv-val mono">±{{ pos.coords.accuracy.toFixed(0) }} m</span>
+          <div
+            class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
+          >
+            <span class="text-sm text-base-content/70 font-medium">Accuracy</span>
+            <span class="text-sm text-base-content font-semibold font-mono"
+              >±{{ pos.coords.accuracy.toFixed(0) }} m</span
+            >
           </div>
           @if (pos.coords.altitude) {
-            <div class="kv-row">
-              <span class="kv-key">Altitude</span>
-              <span class="kv-val mono">{{ pos.coords.altitude.toFixed(2) }} m</span>
+            <div
+              class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
+            >
+              <span class="text-sm text-base-content/70 font-medium">Altitude</span>
+              <span class="text-sm text-base-content font-semibold font-mono"
+                >{{ pos.coords.altitude.toFixed(2) }} m</span
+              >
             </div>
           }
-          <div class="kv-row">
-            <span class="kv-key">Timestamp</span>
-            <span class="kv-val mono">{{ formatDate(pos.timestamp) }}</span>
+          <div
+            class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
+          >
+            <span class="text-sm text-base-content/70 font-medium">Timestamp</span>
+            <span class="text-sm text-base-content font-semibold font-mono">{{
+              formatDate(pos.timestamp)
+            }}</span>
           </div>
         </div>
       }

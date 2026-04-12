@@ -12,25 +12,27 @@ import { FormsModule } from '@angular/forms';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   imports: [FormsModule],
-  styleUrl: '../demo.styles.css',
   template: `
-    <section class="svc-card" aria-labelledby="cam-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="cam-title">Camera</h2>
-        <div class="svc-badges">
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="cam-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="cam-title">Camera</h2>
+        <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-ok">supported</span>
+            <span class="badge badge-success badge-sm">supported</span>
           } @else {
-            <span class="badge badge-no">unsupported</span>
+            <span class="badge badge-error badge-sm">unsupported</span>
           }
-          <span class="badge badge-secure">secure context</span>
+          <span class="badge badge-info badge-sm">secure context</span>
         </div>
       </div>
-      <div class="svc-controls">
+      <div class="flex flex-wrap gap-2 items-center mb-4">
         <select
           [ngModel]="selectedCamera"
           (ngModelChange)="selectedCamera = $event"
-          class="demo-select"
+          class="select select-bordered select-sm"
           [disabled]="loading() || !!videoStream()"
           aria-label="Select camera"
         >
@@ -41,17 +43,23 @@ import { FormsModule } from '@angular/forms';
             <option value="">No cameras detected</option>
           }
         </select>
-        <button class="btn btn-primary" (click)="start()" [disabled]="loading() || !!videoStream()">
+        <button
+          class="btn btn-primary btn-sm"
+          (click)="start()"
+          [disabled]="loading() || !!videoStream()"
+        >
           Start
         </button>
-        <button class="btn btn-danger" (click)="stop()" [disabled]="!videoStream()">Stop</button>
-        <button class="btn btn-secondary" (click)="takePhoto()" [disabled]="!videoStream()">
+        <button class="btn btn-error btn-sm" (click)="stop()" [disabled]="!videoStream()">
+          Stop
+        </button>
+        <button class="btn btn-secondary btn-sm" (click)="takePhoto()" [disabled]="!videoStream()">
           Snapshot
         </button>
       </div>
       @if (videoStream()) {
         <video
-          class="media-preview"
+          class="max-w-full h-auto rounded-lg border border-base-300 mt-3"
           [srcObject]="videoStream()"
           autoplay
           muted
@@ -60,9 +68,17 @@ import { FormsModule } from '@angular/forms';
         ></video>
       }
       @if (photoUrl()) {
-        <div class="photo-wrap">
-          <img [src]="photoUrl()" alt="Captured snapshot" class="media-preview" />
-          <button class="btn-icon-close" (click)="photoUrl.set('')" aria-label="Dismiss photo">
+        <div class="relative inline-block mt-3">
+          <img
+            [src]="photoUrl()"
+            alt="Captured snapshot"
+            class="max-w-full h-auto rounded-lg border border-base-300"
+          />
+          <button
+            class="absolute top-2 right-2 w-8 h-8 rounded-full bg-error/80 text-white flex items-center justify-center hover:bg-error transition-colors"
+            (click)="photoUrl.set('')"
+            aria-label="Dismiss photo"
+          >
             ✕
           </button>
         </div>

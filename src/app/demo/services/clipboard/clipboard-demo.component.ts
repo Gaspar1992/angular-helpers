@@ -4,27 +4,42 @@ import { Component, ViewEncapsulation, ChangeDetectionStrategy, signal } from '@
   selector: 'app-clipboard-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  styleUrl: '../demo.styles.css',
   template: `
-    <section class="svc-card" aria-labelledby="clip-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="clip-title">Clipboard API</h2>
-        <div class="svc-badges">
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="clip-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="clip-title">
+          Clipboard API
+        </h2>
+        <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-ok">supported</span>
+            <span class="badge badge-success badge-sm">supported</span>
           } @else {
-            <span class="badge badge-no">unsupported</span>
+            <span class="badge badge-error badge-sm">unsupported</span>
           }
-          <span class="badge badge-secure">secure context</span>
+          <span class="badge badge-info badge-sm">secure context</span>
         </div>
       </div>
-      <p class="svc-desc">Async read/write to the system clipboard.</p>
-      <div class="svc-controls">
-        <button class="btn btn-primary" (click)="copy()" [disabled]="!supported">Copy timestamp</button>
-        <button class="btn btn-secondary" (click)="paste()" [disabled]="!supported">Paste</button>
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+        Async read/write to the system clipboard.
+      </p>
+      <div class="flex flex-wrap gap-2 items-center mb-4">
+        <button class="btn btn-primary btn-sm" (click)="copy()" [disabled]="!supported">
+          Copy timestamp
+        </button>
+        <button class="btn btn-secondary btn-sm" (click)="paste()" [disabled]="!supported">
+          Paste
+        </button>
       </div>
       @if (clipboardText()) {
-        <div class="mono-block" aria-live="polite">{{ clipboardText() }}</div>
+        <div
+          class="bg-base-300 border border-base-300 rounded-lg p-3 font-mono text-sm text-base-content break-all"
+          aria-live="polite"
+        >
+          {{ clipboardText() }}
+        </div>
       }
     </section>
   `,
