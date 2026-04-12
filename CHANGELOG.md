@@ -1,3 +1,46 @@
+# [1.13.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.12.1...v1.13.0) (2026-04-12)
+
+
+### Bug Fixes
+
+* add --border variable for DaisyUI compatibility ([2e779ef](https://github.com/Gaspar1992/angular-helpers/commit/2e779ef1b8050e418bd7350069727c72796281de))
+* add missing worker-http entry points to docs navigation ([d0a445d](https://github.com/Gaspar1992/angular-helpers/commit/d0a445d8cf428421334e970a7476a9c49dc3a16e))
+* **components:** fix WebShare and ResizeObserver components for tests ([7d895f1](https://github.com/Gaspar1992/angular-helpers/commit/7d895f1975a1224d2f7dbd7f7bbe7854ecd372e5))
+* CSS nesting, DI providers, DaisyUI collisions, responsive demo layout ([8ac8706](https://github.com/Gaspar1992/angular-helpers/commit/8ac8706ecfa4571701bf509771b8cd2f4f719656))
+* **css:** use postcss.config.json — Angular only reads JSON format ([b6f7ae0](https://github.com/Gaspar1992/angular-helpers/commit/b6f7ae0db856bf5b5f113cef2c1c8a153fb925a5))
+* **docs:** adjust layout spacing and improve invalid service test ([3796b6a](https://github.com/Gaspar1992/angular-helpers/commit/3796b6ab0913ac7791d141213c71e4f695a40e00))
+* **intersection-observer:** increase scroll area height for better visibility ([f118e6c](https://github.com/Gaspar1992/angular-helpers/commit/f118e6c65126477205359c93443482b09141bc1f))
+* migrate worker-http service demos to Tailwind/DaisyUI ([ed34321](https://github.com/Gaspar1992/angular-helpers/commit/ed343218da02fecd2cd22d949f68a4351c6c984f))
+* **nav:** remove skip-to-content link from app-nav component ([b98684b](https://github.com/Gaspar1992/angular-helpers/commit/b98684b39649847ab7686fe7cb10276efc2e13a4))
+* rename --border to --border-color to avoid DaisyUI collision ([ff410c7](https://github.com/Gaspar1992/angular-helpers/commit/ff410c780b23b81757b490bf3710aed28dd246a6))
+* **routing:** redirect to overview when service not found ([ed7cd61](https://github.com/Gaspar1992/angular-helpers/commit/ed7cd61f7b0159fad5d131dd1d8b71d94ece33b2))
+* show docs sidebar permanently on desktop (lg) ([1d92d57](https://github.com/Gaspar1992/angular-helpers/commit/1d92d5741cdef53f7396e544c70701d15dc456e3))
+* **tests:** fix service navigation test selector ([50feb6d](https://github.com/Gaspar1992/angular-helpers/commit/50feb6d4743050101e693200853943e4e5e70c62))
+* **tests:** move data-testid to value elements to fix selector issues ([296f452](https://github.com/Gaspar1992/angular-helpers/commit/296f452edaa2c558acda01090b5d869b111e9546))
+* **tests:** resolve color-contrast issues, add missing data-testid, skip problematic tests ([49f7fe9](https://github.com/Gaspar1992/angular-helpers/commit/49f7fe9f73affbd91f43badb8257061b85005e6d))
+* **tests:** resolve selector issues and strict mode violations in Playwright tests ([cf8284c](https://github.com/Gaspar1992/angular-helpers/commit/cf8284c05ce9d585e6f7bd237646da4bd8e97087))
+* **tests:** update Playwright tests to match redesigned UI ([c091efc](https://github.com/Gaspar1992/angular-helpers/commit/c091efcc2e7780eea02311034f573dc683dbf984))
+* **ui:** 4 issues — .tab-content DaisyUI collision, radius tokens, input names ([d717772](https://github.com/Gaspar1992/angular-helpers/commit/d7177721aaea744066e95ad9ef85b94c4f0cc0e4))
+* unify demo headers to Tailwind/DaisyUI colors ([50e8c7b](https://github.com/Gaspar1992/angular-helpers/commit/50e8c7bd4c9d14f1d1c7f99ffe5133b830170332))
+* visual improvements - badges, buttons, code blocks, mobile layout ([26df7cd](https://github.com/Gaspar1992/angular-helpers/commit/26df7cd80e4fa7bdc97532dc112aeaaaa469d331))
+
+
+### Features
+
+* add Demo tabs to security and worker-http docs ([34ac443](https://github.com/Gaspar1992/angular-helpers/commit/34ac4436754b5448a2da2291ce5c1153af04ce26))
+* **arch:** md-blog resolver, docs-layout decoupled, demo-home migrated ([c4386fc](https://github.com/Gaspar1992/angular-helpers/commit/c4386fcc95426ef3224ffe13b1476bebef65fd7d))
+* **demo:** add professional navigation and unify docs components ([c8eaa44](https://github.com/Gaspar1992/angular-helpers/commit/c8eaa4499f6d6c6468ddcc9f926e2ace2e87867e))
+* improve meta tags with Twitter Cards, Open Graph, SEO tags ([a937b25](https://github.com/Gaspar1992/angular-helpers/commit/a937b25ef9f53f0487b942fffd8a92dec22867a9))
+* migrate all browser-web-apis demos to Tailwind/DaisyUI ([303c448](https://github.com/Gaspar1992/angular-helpers/commit/303c4488ce1d590cccead369b005a1866546c238))
+* migrate browser-web-apis demos to Tailwind/DaisyUI ([cc0c305](https://github.com/Gaspar1992/angular-helpers/commit/cc0c305b934f9b0fa9a416f97d598f98a93e47ab))
+* migrate docs pages to Tailwind/DaisyUI ([9e5618a](https://github.com/Gaspar1992/angular-helpers/commit/9e5618a2202b06e769bf92743350b143e27c7211))
+* migrate docs-layout to Tailwind/DaisyUI ([05d1351](https://github.com/Gaspar1992/angular-helpers/commit/05d13510a0c0a138db10b1ad124bf8c3ebd43355))
+* migrate remaining browser-web-apis demos to Tailwind/DaisyUI ([e745fc2](https://github.com/Gaspar1992/angular-helpers/commit/e745fc29b7fa85c535a0308d70a04e69aff5206d))
+* migrate security and worker-http demos to Tailwind/DaisyUI, update linter ([fa5b54e](https://github.com/Gaspar1992/angular-helpers/commit/fa5b54eacee7e06b9d9dfdb46bde20f5579c6af8))
+* migrate security service demos to Tailwind/DaisyUI ([d3d4778](https://github.com/Gaspar1992/angular-helpers/commit/d3d4778bcaa505c6616ff6f42da18cfb8c938a06))
+* **web:** phase 0+1 — tailwind v4, daisy v5, core/, home restructure ([d9764cc](https://github.com/Gaspar1992/angular-helpers/commit/d9764cc202965f89403b107086e3c0fd0d1189aa))
+* **web:** phases 2-6 — shared cleanup, docs restructure, demo, blog, web tests ([44758e8](https://github.com/Gaspar1992/angular-helpers/commit/44758e8db76534007884435311422c97146d7440))
+
 ## [1.12.1](https://github.com/Gaspar1992/angular-helpers/compare/v1.12.0...v1.12.1) (2026-04-06)
 
 
