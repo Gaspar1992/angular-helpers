@@ -15,11 +15,7 @@ test.describe('Browser APIs demo smoke', () => {
       page.getByRole('heading', { level: 1, name: /Explore Angular Helpers/i }),
     ).toBeVisible();
     await expect(page.getByRole('heading', { level: 2, name: /Browser Web APIs/i })).toBeVisible();
-    await expect(
-      page.getByRole('heading', { level: 2, name: /Security Utilities/i }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole('heading', { level: 2, name: /Worker \/ HTTP Utilities/i }),
-    ).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: /Security/i })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: /Worker HTTP/i })).toBeVisible();
   });
 });
