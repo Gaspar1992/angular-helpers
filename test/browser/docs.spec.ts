@@ -93,9 +93,10 @@ test.describe('Documentation - service detail pages', () => {
 
   test('invalid service shows error or fallback', async ({ page }) => {
     await page.goto('/docs/browser-web-apis/nonexistent-service');
+    await page.waitForLoadState('networkidle');
 
-    // Page should either show an error message or at least have an h1 heading
-    const h1 = page.getByRole('heading', { level: 1 });
+    // Page should show "Service not found" h1 when service doesn't exist
+    const h1 = page.getByRole('heading', { level: 1, name: /Service not found/i });
     await expect(h1).toBeVisible();
   });
 });

@@ -121,10 +121,10 @@ import type { NavSection } from '../config/docs-nav.data';
       }
 
       <!-- Main Content -->
-      <div class="flex-1 flex flex-col min-w-0 lg:ml-64">
+      <div class="flex-1 flex flex-col min-w-0">
         <!-- Topbar -->
         <header
-          class="sticky top-0 z-30 flex items-center gap-3 px-4 py-3 bg-base-200/80 backdrop-blur border-b border-base-300 lg:px-6"
+          class="sticky top-0 z-30 flex items-center gap-3 px-5 py-4 bg-base-200/80 backdrop-blur border-b border-base-300 lg:px-6"
         >
           <button
             class="btn btn-ghost btn-square btn-sm lg:hidden"
