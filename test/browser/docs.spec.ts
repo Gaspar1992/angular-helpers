@@ -33,11 +33,14 @@ test.describe('Documentation - browser-web-apis overview', () => {
 
   test('browser-web-apis overview has service navigation', async ({ page }) => {
     await page.goto('/docs/browser-web-apis');
+    await page.waitForLoadState('networkidle');
 
-    // Look for service cards that link to specific service docs
-    const serviceLinks = page.locator('a[href^="/docs/browser-web-apis/"]');
-    const count = await serviceLinks.count();
-    // Should have many service links (Camera, Geolocation, etc.)
+    // Wait for service cards to be visible
+    const serviceCards = page.locator('.service-card');
+    await expect(serviceCards.first()).toBeVisible();
+
+    // Count service cards - should have many (Camera, Geolocation, etc.)
+    const count = await serviceCards.count();
     expect(count).toBeGreaterThan(5);
   });
 });
