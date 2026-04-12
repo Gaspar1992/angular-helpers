@@ -6,6 +6,7 @@ import { RegexSecurityService } from '@angular-helpers/security';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   styleUrl: '../../../shared/demo-shared.styles.css',
+  providers: [RegexSecurityService],
   template: `
     <div class="demo-section">
       <h3>🔒 RegexSecurityService</h3>

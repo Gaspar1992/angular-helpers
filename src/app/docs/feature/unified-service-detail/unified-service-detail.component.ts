@@ -160,7 +160,7 @@ export interface ServiceDetailConfig {
       .toggle-btn {
         padding: var(--sp-2) var(--sp-3);
         border: none;
-        border-radius: var(--radius);
+        border-radius: var(--radius-field, 0.35rem);
         background: transparent;
         color: var(--text-muted);
         font-size: var(--text-sm);

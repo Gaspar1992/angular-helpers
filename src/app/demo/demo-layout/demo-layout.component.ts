@@ -72,7 +72,13 @@ const DEMO_TABS: DemoTab[] = [
         padding: var(--sp-3) var(--sp-4);
         display: flex;
         align-items: center;
-        gap: var(--sp-6);
+        gap: var(--sp-3);
+      }
+
+      @media (min-width: 768px) {
+        .demo-header-content {
+          gap: var(--sp-6);
+        }
       }
 
       .demo-logo {
@@ -100,6 +106,14 @@ const DEMO_TABS: DemoTab[] = [
         gap: var(--sp-1);
         flex: 1;
         justify-content: center;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding: var(--sp-1) 0;
+      }
+
+      .demo-nav::-webkit-scrollbar {
+        display: none;
       }
 
       .demo-nav-item {
@@ -133,9 +147,21 @@ const DEMO_TABS: DemoTab[] = [
         display: none;
       }
 
-      @media (min-width: 640px) {
+      @media (min-width: 768px) {
         .demo-nav-label {
           display: inline;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .demo-nav-item {
+          padding: var(--sp-2);
+        }
+        .demo-logo-text {
+          display: none;
+        }
+        .demo-docs-link {
+          font-size: var(--text-xs);
         }
       }
 

@@ -6,6 +6,7 @@ import { SecureStorageService } from '@angular-helpers/security';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   styleUrl: '../../../shared/demo-shared.styles.css',
+  providers: [SecureStorageService],
   template: `
     <div class="demo-section">
       <h3>🗄️ SecureStorageService</h3>
