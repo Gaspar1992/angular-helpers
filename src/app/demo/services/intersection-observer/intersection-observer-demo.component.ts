@@ -89,7 +89,7 @@ import {
         aria-label="Scrollable area with target"
       >
         <p class="text-xs text-base-content/80 mb-2">↓ Scroll inside this box to trigger</p>
-        <div class="h-32"></div>
+        <div class="h-48"></div>
         <div
           class="bg-primary/20 border-2 border-primary rounded p-4 text-center text-primary"
           #intersectBox
@@ -97,7 +97,7 @@ import {
         >
           Target element
         </div>
-        <div class="h-32"></div>
+        <div class="h-48"></div>
       </div>
 
       @if (apiMode() === 'Signal Fn') {
