@@ -38,7 +38,7 @@ import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
           }
         </div>
       </div>
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Send messages between tabs on the same origin. Open this demo in a second tab and you'll see
         messages arrive.
       </p>
@@ -99,7 +99,7 @@ import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
                 >{{ m.dir }}</span
               >
               <span class="flex-1 text-base-content">{{ m.text }}</span>
-              <span class="text-xs text-base-content/50">{{ m.time }}</span>
+              <span class="text-xs text-base-content/80">{{ m.time }}</span>
             </div>
           }
         </div>

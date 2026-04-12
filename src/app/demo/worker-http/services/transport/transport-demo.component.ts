@@ -12,7 +12,7 @@ import { Component, ChangeDetectionStrategy, ViewEncapsulation, signal } from '@
         </h2>
         <span class="badge badge-primary badge-sm">Typed RPC</span>
       </div>
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Typed RPC bridge with request/response correlation and worker pool
       </p>
 

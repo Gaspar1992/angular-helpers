@@ -14,7 +14,7 @@ import { SecureStorageService } from '@angular-helpers/security';
         </h2>
         <span class="badge badge-accent badge-sm">AES-GCM</span>
       </div>
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Encrypted localStorage/sessionStorage with AES-GCM
       </p>
 

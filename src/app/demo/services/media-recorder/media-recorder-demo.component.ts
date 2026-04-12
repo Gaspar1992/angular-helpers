@@ -31,7 +31,7 @@ import { MediaRecorderService, PermissionsService } from '@angular-helpers/brows
           <span class="badge badge-info badge-sm">secure context</span>
         </div>
       </div>
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Record audio from the microphone. Requires microphone permission.
       </p>
       <div class="flex flex-wrap gap-2 items-center mb-4">
@@ -61,7 +61,7 @@ import { MediaRecorderService, PermissionsService } from '@angular-helpers/brows
       </div>
       @if (recordedUrl()) {
         <div class="bg-base-300 border border-base-300 rounded-lg p-4">
-          <p class="text-xs text-base-content/60 mb-2">Recording: {{ recordedDuration() }}s</p>
+          <p class="text-xs text-base-content/80 mb-2">Recording: {{ recordedDuration() }}s</p>
           <audio [src]="recordedUrl()" controls class="w-full" aria-label="Recorded audio"></audio>
         </div>
       }

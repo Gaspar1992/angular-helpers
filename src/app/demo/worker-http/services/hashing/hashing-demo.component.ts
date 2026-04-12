@@ -14,7 +14,7 @@ import { WebCryptoService } from '@angular-helpers/security';
         </h2>
         <span class="badge badge-accent badge-sm">SHA-256</span>
       </div>
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Generate SHA-256 hashes of request bodies for integrity checks and caching
       </p>
 

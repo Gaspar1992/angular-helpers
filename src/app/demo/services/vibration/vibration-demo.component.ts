@@ -23,7 +23,7 @@ import { VibrationService } from '@angular-helpers/browser-web-apis';
           }
         </div>
       </div>
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Trigger haptic feedback patterns. Works on mobile devices.
       </p>
       <div class="flex flex-wrap gap-2 items-center mb-4">
@@ -45,7 +45,7 @@ import { VibrationService } from '@angular-helpers/browser-web-apis';
         </button>
       </div>
       @if (!supported) {
-        <p class="text-xs text-base-content/50 italic">
+        <p class="text-xs text-base-content/80 italic">
           Vibration API is not available on this device/browser.
         </p>
       }

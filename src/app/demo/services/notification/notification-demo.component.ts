@@ -37,7 +37,7 @@ import { NotificationService, PermissionsService } from '@angular-helpers/browse
           }
         </div>
       </div>
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Request permission and show browser notifications.
       </p>
       <div class="flex flex-wrap gap-2 items-center mb-4">

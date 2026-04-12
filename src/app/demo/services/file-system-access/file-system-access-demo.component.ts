@@ -32,7 +32,7 @@ import { FileSystemAccessService, PermissionsService } from '@angular-helpers/br
           <span class="badge badge-info badge-sm">secure context</span>
         </div>
       </div>
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Open local files and preview their contents via the native file picker.
       </p>
       <div class="flex flex-wrap gap-2 items-center mb-4">
@@ -44,7 +44,7 @@ import { FileSystemAccessService, PermissionsService } from '@angular-helpers/br
         <div class="bg-base-300 border border-base-300 rounded-lg p-4 mb-3">
           <div class="flex items-center justify-between mb-2">
             <span class="text-sm font-medium text-base-content">{{ file.name }}</span>
-            <span class="text-xs text-base-content/60">{{ file.size | number }} bytes</span>
+            <span class="text-xs text-base-content/80">{{ file.size | number }} bytes</span>
           </div>
           <div
             class="bg-base-200 border border-base-300 rounded p-2 font-mono text-xs text-base-content break-all"
@@ -57,7 +57,7 @@ import { FileSystemAccessService, PermissionsService } from '@angular-helpers/br
         </div>
       }
       @if (!supported) {
-        <p class="text-xs text-base-content/50 italic">
+        <p class="text-xs text-base-content/80 italic">
           File System Access API is available in Chrome/Edge on desktop.
         </p>
       }

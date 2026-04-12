@@ -37,7 +37,7 @@ import {
         </div>
       </div>
 
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Reads the current screen orientation and angle. Rotate your device to see changes.
       </p>
 
@@ -65,7 +65,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">Type</span>
+            <span class="text-sm text-base-content/80 font-medium">Type</span>
             <span class="text-sm text-base-content font-semibold font-mono">{{
               orientation().type
             }}</span>
@@ -73,7 +73,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">Angle</span>
+            <span class="text-sm text-base-content/80 font-medium">Angle</span>
             <span class="text-sm text-base-content font-semibold font-mono"
               >{{ orientation().angle }}°</span
             >
@@ -82,7 +82,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">type</span>
+            <span class="text-sm text-base-content/80 font-medium">type</span>
             <span class="text-sm text-base-content font-semibold font-mono">{{
               fnRef.type()
             }}</span>
@@ -90,7 +90,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">angle</span>
+            <span class="text-sm text-base-content/80 font-medium">angle</span>
             <span class="text-sm text-base-content font-semibold font-mono"
               >{{ fnRef.angle() }}°</span
             >
@@ -98,7 +98,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">isPortrait</span>
+            <span class="text-sm text-base-content/80 font-medium">isPortrait</span>
             <span class="text-sm text-base-content font-semibold font-mono">{{
               fnRef.isPortrait() ? 'yes' : 'no'
             }}</span>
@@ -106,7 +106,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">isLandscape</span>
+            <span class="text-sm text-base-content/80 font-medium">isLandscape</span>
             <span class="text-sm text-base-content font-semibold font-mono">{{
               fnRef.isLandscape() ? 'yes' : 'no'
             }}</span>
@@ -114,7 +114,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">orientation</span>
+            <span class="text-sm text-base-content/80 font-medium">orientation</span>
             <span class="text-sm text-base-content font-semibold font-mono"
               >{{ fnRef.orientation().type }} / {{ fnRef.orientation().angle }}°</span
             >
@@ -124,7 +124,7 @@ import {
 
       @if (apiMode() === 'Signal Fn') {
         <div class="mt-4">
-          <p class="text-xs text-base-content/60 mb-2">
+          <p class="text-xs text-base-content/80 mb-2">
             Reactive orientation with lock/unlock methods:
           </p>
           <pre
@@ -140,13 +140,13 @@ import {
 
     // Lock to landscape:
     // await orientation.lock('landscape')</code></pre>
-          <p class="text-xs text-base-content/60 mt-2">
+          <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Responsive layouts, games, fullscreen video.
           </p>
         </div>
       } @else {
         <div class="mt-4">
-          <p class="text-xs text-base-content/60 mb-2">Manual stream with snapshot:</p>
+          <p class="text-xs text-base-content/80 mb-2">Manual stream with snapshot:</p>
           <pre
             class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
           ><code>import {{ '{' }} ScreenOrientationService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
@@ -159,7 +159,7 @@ import {
         // o.type, o.angle
       {{ '}' }});
     {{ '}' }}</code></pre>
-          <p class="text-xs text-base-content/60 mt-2">
+          <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Complex rotation logic, orientation history.
           </p>
         </div>

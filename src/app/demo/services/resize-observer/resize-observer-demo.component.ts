@@ -41,7 +41,7 @@ import {
         </div>
       </div>
 
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Observes element size changes. Drag the handle to resize the box below.
       </p>
 
@@ -80,7 +80,7 @@ import {
         [class.ring-2]="apiMode() === 'Signal Fn'"
         [class.ring-primary]="apiMode() === 'Signal Fn'"
       >
-        <span class="text-sm text-base-content/60 select-none">Resize me →</span>
+        <span class="text-sm text-base-content/80 select-none">Resize me →</span>
       </div>
 
       @if (apiMode() === 'Service' && elementSize(); as size) {
@@ -88,7 +88,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">Width</span>
+            <span class="text-sm text-base-content/80 font-medium">Width</span>
             <span class="text-sm text-base-content font-semibold font-mono"
               >{{ size.width | number: '1.0-0' }} px</span
             >
@@ -96,7 +96,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">Height</span>
+            <span class="text-sm text-base-content/80 font-medium">Height</span>
             <span class="text-sm text-base-content font-semibold font-mono"
               >{{ size.height | number: '1.0-0' }} px</span
             >
@@ -109,7 +109,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">width</span>
+            <span class="text-sm text-base-content/80 font-medium">width</span>
             <span class="text-sm text-base-content font-semibold font-mono"
               >{{ fnRef.width() | number: '1.0-0' }} px</span
             >
@@ -117,7 +117,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">height</span>
+            <span class="text-sm text-base-content/80 font-medium">height</span>
             <span class="text-sm text-base-content font-semibold font-mono"
               >{{ fnRef.height() | number: '1.0-0' }} px</span
             >
@@ -125,7 +125,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">inlineSize</span>
+            <span class="text-sm text-base-content/80 font-medium">inlineSize</span>
             <span class="text-sm text-base-content font-semibold font-mono">{{
               fnRef.inlineSize() | number: '1.0-0'
             }}</span>
@@ -133,7 +133,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">blockSize</span>
+            <span class="text-sm text-base-content/80 font-medium">blockSize</span>
             <span class="text-sm text-base-content font-semibold font-mono">{{
               fnRef.blockSize() | number: '1.0-0'
             }}</span>
@@ -143,7 +143,7 @@ import {
 
       @if (apiMode() === 'Signal Fn') {
         <div class="mt-4">
-          <p class="text-xs text-base-content/60 mb-2">
+          <p class="text-xs text-base-content/80 mb-2">
             Auto-observing element with reactive size signals:
           </p>
           <pre
@@ -156,13 +156,13 @@ import {
     // Direct access in template:
     // resize.width(), resize.height()
     // resize.inlineSize, resize.blockSize (logical pixels)</code></pre>
-          <p class="text-xs text-base-content/60 mt-2">
+          <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Responsive layouts, dynamic charts, scroll containers.
           </p>
         </div>
       } @else {
         <div class="mt-4">
-          <p class="text-xs text-base-content/60 mb-2">
+          <p class="text-xs text-base-content/80 mb-2">
             Manual observation with explicit subscribe:
           </p>
           <pre
@@ -177,7 +177,7 @@ import {
         // size: {{ '{' }} width, height, inlineSize, blockSize {{ '}' }}
       {{ '}' }});
     {{ '}' }}</code></pre>
-          <p class="text-xs text-base-content/60 mt-2">
+          <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Complex resize logic, multiple observers, RxJS operators.
           </p>
         </div>

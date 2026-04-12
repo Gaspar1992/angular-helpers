@@ -33,7 +33,7 @@ import { PageVisibilityService, injectPageVisibility } from '@angular-helpers/br
         </div>
       </div>
 
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Tracks whether this tab is visible or hidden. Switch to another tab and watch the state
         change.
       </p>
@@ -62,7 +62,7 @@ import { PageVisibilityService, injectPageVisibility } from '@angular-helpers/br
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">State</span>
+            <span class="text-sm text-base-content/80 font-medium">State</span>
             <span class="text-sm text-base-content font-semibold">
               @if (visibilityState() === 'visible') {
                 <span class="badge badge-success badge-sm">{{ visibilityState() }}</span>
@@ -74,7 +74,7 @@ import { PageVisibilityService, injectPageVisibility } from '@angular-helpers/br
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">Visible</span>
+            <span class="text-sm text-base-content/80 font-medium">Visible</span>
             <span class="text-sm text-base-content font-semibold">{{
               pageVisible() ? 'yes' : 'no'
             }}</span>
@@ -83,7 +83,7 @@ import { PageVisibilityService, injectPageVisibility } from '@angular-helpers/br
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">State</span>
+            <span class="text-sm text-base-content/80 font-medium">State</span>
             <span class="text-sm text-base-content font-semibold">
               @if (fnRef.state() === 'visible') {
                 <span class="badge badge-success badge-sm">{{ fnRef.state() }}</span>
@@ -95,7 +95,7 @@ import { PageVisibilityService, injectPageVisibility } from '@angular-helpers/br
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">isVisible</span>
+            <span class="text-sm text-base-content/80 font-medium">isVisible</span>
             <span class="text-sm text-base-content font-semibold">{{
               fnRef.isVisible() ? 'yes' : 'no'
             }}</span>
@@ -103,7 +103,7 @@ import { PageVisibilityService, injectPageVisibility } from '@angular-helpers/br
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">isHidden</span>
+            <span class="text-sm text-base-content/80 font-medium">isHidden</span>
             <span class="text-sm text-base-content font-semibold">{{
               fnRef.isHidden() ? 'yes' : 'no'
             }}</span>
@@ -113,7 +113,7 @@ import { PageVisibilityService, injectPageVisibility } from '@angular-helpers/br
 
       @if (apiMode() === 'Signal Fn') {
         <div class="mt-4">
-          <p class="text-xs text-base-content/60 mb-2">
+          <p class="text-xs text-base-content/80 mb-2">
             Zero-boilerplate reactive state - auto-cleanup on destroy:
           </p>
           <pre
@@ -125,14 +125,14 @@ import { PageVisibilityService, injectPageVisibility } from '@angular-helpers/br
     // Direct signal access in template:
     // visibility.isVisible() or visibility.isHidden()
     // visibility.state() for raw value ('visible' | 'hidden')</code></pre>
-          <p class="text-xs text-base-content/60 mt-2">
+          <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Simple reactive read-only state, templates, computed
             signals.
           </p>
         </div>
       } @else {
         <div class="mt-4">
-          <p class="text-xs text-base-content/60 mb-2">
+          <p class="text-xs text-base-content/80 mb-2">
             Manual subscription with explicit cleanup:
           </p>
           <pre
@@ -146,7 +146,7 @@ import { PageVisibilityService, injectPageVisibility } from '@angular-helpers/br
         // handle visibility change
       {{ '}' }});
     {{ '}' }}</code></pre>
-          <p class="text-xs text-base-content/60 mt-2">
+          <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Complex async flows, combining with other streams,
             explicit control.
           </p>

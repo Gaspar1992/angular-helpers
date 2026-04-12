@@ -22,7 +22,7 @@ const BADGE_CLASSES: Record<DemoCardVariant, string> = {
         <div class="flex-1 min-w-0">
           <h3 class="text-base font-semibold text-base-content m-0 mb-2">{{ title() }}</h3>
           @if (description()) {
-            <p class="text-sm text-base-content/60 m-0 leading-snug">{{ description() }}</p>
+            <p class="text-sm text-base-content/80 m-0 leading-snug">{{ description() }}</p>
           }
         </div>
         @if (badge()) {

@@ -17,7 +17,7 @@ import { PUBLIC_DEMO_SECTIONS } from '../config/demo.config';
         >
           Explore Angular Helpers
         </h1>
-        <p class="text-base text-base-content/60 leading-relaxed max-w-[520px] mx-auto m-0 mb-6">
+        <p class="text-base text-base-content/80 leading-relaxed max-w-[520px] mx-auto m-0 mb-6">
           Live, interactive demonstrations built with signals, OnPush, and modern Angular patterns.
         </p>
         <div class="flex gap-3 justify-center flex-wrap">
@@ -42,13 +42,15 @@ import { PUBLIC_DEMO_SECTIONS } from '../config/demo.config';
               </code>
             </div>
 
-            <p class="text-sm text-base-content/60 leading-relaxed m-0 flex-1">
+            <p class="text-sm text-base-content/80 leading-relaxed m-0 flex-1">
               {{ section.description }}
             </p>
 
             <span class="text-xs font-semibold text-primary flex items-center gap-1 mt-auto">
               Open demo
-              <span class="transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
+              <span class="transition-transform group-hover:translate-x-1" aria-hidden="true"
+                >→</span
+              >
             </span>
           </a>
         }

@@ -31,7 +31,7 @@ import { ScreenWakeLockService, PermissionsService } from '@angular-helpers/brow
           <span class="badge badge-info badge-sm">secure context</span>
         </div>
       </div>
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Prevents the screen from dimming or locking.
       </p>
       <div class="flex flex-wrap gap-2 items-center mb-4">

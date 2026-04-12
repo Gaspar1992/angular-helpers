@@ -14,7 +14,7 @@ import { WebCryptoService } from '@angular-helpers/security';
         </h2>
         <span class="badge badge-secondary badge-sm">HMAC-SHA256</span>
       </div>
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Sign and verify request payloads using HMAC-SHA256 via native Web Crypto API
       </p>
 

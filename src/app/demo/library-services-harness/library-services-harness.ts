@@ -944,8 +944,6 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
 
   private waitForWorkerMessage(taskId: string, timeoutMs: number): Promise<WorkerMessage> {
     return new Promise((resolve, reject) => {
-      let timeoutId: ReturnType<typeof setTimeout>;
-
       const subscription = this.webWorkerService.getMessages(this.harnessWorkerName).subscribe({
         next: (message) => {
           if (message.id !== taskId) {
@@ -963,7 +961,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
         },
       });
 
-      timeoutId = setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         subscription.unsubscribe();
         reject(new Error('Worker response timed out in harness'));
       }, timeoutMs);

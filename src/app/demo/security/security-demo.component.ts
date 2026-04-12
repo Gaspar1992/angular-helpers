@@ -29,7 +29,7 @@ interface LogEntry {
           <span class="text-4xl">🛡️</span>
           <div>
             <h1 class="text-2xl sm:text-3xl font-bold text-base-content m-0">Security Demo</h1>
-            <p class="text-sm sm:text-base text-base-content/60 m-0 mt-1">
+            <p class="text-sm sm:text-base text-base-content/80 m-0 mt-1">
               Interactive demos for @angular-helpers/security
             </p>
           </div>
@@ -53,7 +53,7 @@ interface LogEntry {
             </h2>
             <span class="badge badge-primary">ReDoS Protection</span>
           </div>
-          <p class="text-sm text-base-content/60 mb-4">Safe regex execution in Web Workers</p>
+          <p class="text-sm text-base-content/80 mb-4">Safe regex execution in Web Workers</p>
 
           <div class="space-y-3">
             <div class="flex flex-col sm:flex-row gap-2">
@@ -108,7 +108,7 @@ interface LogEntry {
             </h2>
             <span class="badge badge-secondary">Native Crypto</span>
           </div>
-          <p class="text-sm text-base-content/60 mb-4">Hashing, HMAC, and AES encryption</p>
+          <p class="text-sm text-base-content/80 mb-4">Hashing, HMAC, and AES encryption</p>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button (click)="hashData()" class="btn btn-primary btn-sm">
@@ -147,7 +147,7 @@ interface LogEntry {
             </h2>
             <span class="badge badge-accent">AES-GCM</span>
           </div>
-          <p class="text-sm text-base-content/60 mb-4">Encrypted localStorage/sessionStorage</p>
+          <p class="text-sm text-base-content/80 mb-4">Encrypted localStorage/sessionStorage</p>
 
           <div class="space-y-3">
             <div class="flex flex-col sm:flex-row gap-2">
@@ -192,7 +192,7 @@ interface LogEntry {
             </h2>
             <span class="badge badge-info">XSS Protection</span>
           </div>
-          <p class="text-sm text-base-content/60 mb-4">HTML sanitization and URL validation</p>
+          <p class="text-sm text-base-content/80 mb-4">HTML sanitization and URL validation</p>
 
           <div class="space-y-3">
             <input
@@ -241,7 +241,7 @@ interface LogEntry {
             </h2>
             <span class="badge badge-success">Entropy Analysis</span>
           </div>
-          <p class="text-sm text-base-content/60 mb-4">
+          <p class="text-sm text-base-content/80 mb-4">
             Password strength assessment with entropy calculation
           </p>
 

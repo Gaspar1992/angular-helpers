@@ -36,7 +36,7 @@ interface LogEntry {
           <span class="text-4xl">🚀</span>
           <div>
             <h1 class="text-2xl sm:text-3xl font-bold text-base-content m-0">Worker HTTP Demo</h1>
-            <p class="text-sm sm:text-base text-base-content/60 m-0 mt-1">
+            <p class="text-sm sm:text-base text-base-content/80 m-0 mt-1">
               Off-main-thread HTTP with typed RPC bridge
             </p>
           </div>
@@ -59,7 +59,7 @@ interface LogEntry {
             </h2>
             <span class="badge badge-primary">Typed RPC</span>
           </div>
-          <p class="text-sm text-base-content/60 mb-4">
+          <p class="text-sm text-base-content/80 mb-4">
             Typed RPC bridge with request/response correlation and worker pool
           </p>
 
@@ -100,7 +100,7 @@ interface LogEntry {
             </h2>
             <span class="badge badge-secondary">HMAC-SHA256</span>
           </div>
-          <p class="text-sm text-base-content/60 mb-4">
+          <p class="text-sm text-base-content/80 mb-4">
             Sign and verify request payloads using HMAC via native Web Crypto API
           </p>
 
@@ -141,7 +141,7 @@ interface LogEntry {
             </h2>
             <span class="badge badge-accent">SHA-256</span>
           </div>
-          <p class="text-sm text-base-content/60 mb-4">
+          <p class="text-sm text-base-content/80 mb-4">
             Generate SHA-256 hashes of request bodies for integrity checks and caching
           </p>
 
@@ -164,7 +164,7 @@ interface LogEntry {
             </h2>
             <span class="badge badge-info">AES-GCM</span>
           </div>
-          <p class="text-sm text-base-content/60 mb-4">
+          <p class="text-sm text-base-content/80 mb-4">
             Encrypt and decrypt sensitive payloads using AES-GCM
           </p>
 

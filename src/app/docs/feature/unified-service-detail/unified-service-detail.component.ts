@@ -49,7 +49,11 @@ export interface ServiceDetailConfig {
   template: `
     <div class="unified-service-detail">
       @if (service(); as s) {
-        <app-docs-page-header [breadcrumbs]="breadcrumbs()" [title]="s.name" [lead]="s.description" />
+        <app-docs-page-header
+          [breadcrumbs]="breadcrumbs()"
+          [title]="s.name"
+          [lead]="s.description"
+        />
 
         @if (s.fnVersion) {
           <div class="api-variant-toggle">

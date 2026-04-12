@@ -11,7 +11,9 @@ import type { PackageInfo } from '../../../core/config/packages.data';
       class="flex flex-col gap-5 bg-base-200 border border-base-300 rounded-xl p-6 h-full transition-colors duration-150 hover:border-primary/35"
     >
       <div class="flex items-start gap-4">
-        <span class="text-4xl leading-none shrink-0 mt-0.5" aria-hidden="true">{{ pkg().icon }}</span>
+        <span class="text-4xl leading-none shrink-0 mt-0.5" aria-hidden="true">{{
+          pkg().icon
+        }}</span>
         <div>
           <h3 class="text-lg font-bold text-base-content m-0 mb-1 flex items-center gap-2">
             {{ pkg().name }}
@@ -38,7 +40,9 @@ import type { PackageInfo } from '../../../core/config/packages.data';
 
       <div class="flex flex-col gap-3 mt-auto">
         <div class="bg-base-100 border border-base-300 rounded-lg px-3 py-2 overflow-x-auto">
-          <code class="font-mono text-xs text-success whitespace-nowrap">{{ pkg().installCmd }}</code>
+          <code class="font-mono text-xs text-success whitespace-nowrap">{{
+            pkg().installCmd
+          }}</code>
         </div>
         @if (pkg().docsLink) {
           <a

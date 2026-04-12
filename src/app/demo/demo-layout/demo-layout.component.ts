@@ -41,7 +41,7 @@ const DEMO_TABS: DemoTab[] = [
                 [routerLink]="tab.path"
                 routerLinkActive="bg-primary text-primary-content"
                 [routerLinkActiveOptions]="{ exact: tab.path === '/demo' }"
-                class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-base-content/70 hover:text-base-content hover:bg-base-300/50 transition-colors no-underline"
+                class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-base-content/80 hover:text-base-content hover:bg-base-300/50 transition-colors no-underline"
               >
                 <span>{{ tab.icon }}</span>
                 <span>{{ tab.label }}</span>
@@ -68,7 +68,7 @@ const DEMO_TABS: DemoTab[] = [
                 [routerLink]="tab.path"
                 routerLinkActive="text-primary"
                 [routerLinkActiveOptions]="{ exact: tab.path === '/demo' }"
-                class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-base-content/70 hover:text-base-content no-underline"
+                class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-base-content/80 hover:text-base-content no-underline"
               >
                 <span class="text-lg">{{ tab.icon }}</span>
                 <span class="text-xs">{{ tab.label }}</span>

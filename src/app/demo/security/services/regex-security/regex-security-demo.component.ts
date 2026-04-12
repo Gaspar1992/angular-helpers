@@ -14,7 +14,7 @@ import { RegexSecurityService } from '@angular-helpers/security';
         </h2>
         <span class="badge badge-primary badge-sm">ReDoS Protection</span>
       </div>
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Safe regex execution in Web Workers with ReDoS protection
       </p>
 

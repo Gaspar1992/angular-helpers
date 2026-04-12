@@ -48,7 +48,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">Latitude</span>
+            <span class="text-sm text-base-content/80 font-medium">Latitude</span>
             <span class="text-sm text-base-content font-semibold font-mono">{{
               pos.coords.latitude.toFixed(6)
             }}</span>
@@ -56,7 +56,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">Longitude</span>
+            <span class="text-sm text-base-content/80 font-medium">Longitude</span>
             <span class="text-sm text-base-content font-semibold font-mono">{{
               pos.coords.longitude.toFixed(6)
             }}</span>
@@ -64,7 +64,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">Accuracy</span>
+            <span class="text-sm text-base-content/80 font-medium">Accuracy</span>
             <span class="text-sm text-base-content font-semibold font-mono"
               >±{{ pos.coords.accuracy.toFixed(0) }} m</span
             >
@@ -73,7 +73,7 @@ import {
             <div
               class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
             >
-              <span class="text-sm text-base-content/70 font-medium">Altitude</span>
+              <span class="text-sm text-base-content/80 font-medium">Altitude</span>
               <span class="text-sm text-base-content font-semibold font-mono"
                 >{{ pos.coords.altitude.toFixed(2) }} m</span
               >
@@ -82,7 +82,7 @@ import {
           <div
             class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
           >
-            <span class="text-sm text-base-content/70 font-medium">Timestamp</span>
+            <span class="text-sm text-base-content/80 font-medium">Timestamp</span>
             <span class="text-sm text-base-content font-semibold font-mono">{{
               formatDate(pos.timestamp)
             }}</span>

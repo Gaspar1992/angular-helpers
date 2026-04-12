@@ -38,7 +38,7 @@ import { ServerSentEventsService } from '@angular-helpers/browser-web-apis';
           }
         </div>
       </div>
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Connect to any SSE endpoint and stream events in real-time.
       </p>
       <div class="flex flex-wrap gap-2 items-center mb-4">
@@ -78,7 +78,7 @@ import { ServerSentEventsService } from '@angular-helpers/browser-web-apis';
         </div>
       }
       @if (messages().length === 0 && connected()) {
-        <p class="text-xs text-base-content/50 italic">Waiting for events…</p>
+        <p class="text-xs text-base-content/80 italic">Waiting for events…</p>
       }
     </section>
   `,

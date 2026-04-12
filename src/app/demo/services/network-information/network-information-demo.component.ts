@@ -37,7 +37,7 @@ import {
         </div>
       </div>
 
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Live connection quality. Turn off Wi-Fi to see the online flag update.
       </p>
 
@@ -70,7 +70,7 @@ import {
             <div
               class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
             >
-              <span class="text-sm text-base-content/70 font-medium">Type</span>
+              <span class="text-sm text-base-content/80 font-medium">Type</span>
               <span class="text-sm text-base-content font-semibold font-mono">{{
                 networkInfo().type
               }}</span>
@@ -80,7 +80,7 @@ import {
             <div
               class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
             >
-              <span class="text-sm text-base-content/70 font-medium">Effective</span>
+              <span class="text-sm text-base-content/80 font-medium">Effective</span>
               <span class="text-sm text-base-content font-semibold font-mono">{{
                 networkInfo().effectiveType
               }}</span>
@@ -90,7 +90,7 @@ import {
             <div
               class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
             >
-              <span class="text-sm text-base-content/70 font-medium">Downlink</span>
+              <span class="text-sm text-base-content/80 font-medium">Downlink</span>
               <span class="text-sm text-base-content font-semibold font-mono"
                 >{{ networkInfo().downlink }} Mbps</span
               >
@@ -100,14 +100,14 @@ import {
             <div
               class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
             >
-              <span class="text-sm text-base-content/70 font-medium">RTT</span>
+              <span class="text-sm text-base-content/80 font-medium">RTT</span>
               <span class="text-sm text-base-content font-semibold font-mono"
                 >{{ networkInfo().rtt }} ms</span
               >
             </div>
           }
           @if (!networkInfo().type && !networkInfo().effectiveType) {
-            <p class="text-xs text-base-content/50 italic">
+            <p class="text-xs text-base-content/80 italic">
               Connection details not available in this browser.
             </p>
           }
@@ -116,7 +116,7 @@ import {
             <div
               class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
             >
-              <span class="text-sm text-base-content/70 font-medium">type</span>
+              <span class="text-sm text-base-content/80 font-medium">type</span>
               <span class="text-sm text-base-content font-semibold font-mono">{{
                 fnRef.type()
               }}</span>
@@ -126,7 +126,7 @@ import {
             <div
               class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
             >
-              <span class="text-sm text-base-content/70 font-medium">effectiveType</span>
+              <span class="text-sm text-base-content/80 font-medium">effectiveType</span>
               <span class="text-sm text-base-content font-semibold font-mono">{{
                 fnRef.effectiveType()
               }}</span>
@@ -136,7 +136,7 @@ import {
             <div
               class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
             >
-              <span class="text-sm text-base-content/70 font-medium">downlink</span>
+              <span class="text-sm text-base-content/80 font-medium">downlink</span>
               <span class="text-sm text-base-content font-semibold font-mono"
                 >{{ fnRef.downlink() }} Mbps</span
               >
@@ -146,7 +146,7 @@ import {
             <div
               class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
             >
-              <span class="text-sm text-base-content/70 font-medium">rtt</span>
+              <span class="text-sm text-base-content/80 font-medium">rtt</span>
               <span class="text-sm text-base-content font-semibold font-mono"
                 >{{ fnRef.rtt() }} ms</span
               >
@@ -156,14 +156,14 @@ import {
             <div
               class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
             >
-              <span class="text-sm text-base-content/70 font-medium">saveData</span>
+              <span class="text-sm text-base-content/80 font-medium">saveData</span>
               <span class="text-sm text-base-content font-semibold font-mono">{{
                 fnRef.saveData() ? 'yes' : 'no'
               }}</span>
             </div>
           }
           @if (!fnRef.type() && !fnRef.effectiveType()) {
-            <p class="text-xs text-base-content/50 italic">
+            <p class="text-xs text-base-content/80 italic">
               Connection details not available in this browser.
             </p>
           }
@@ -172,7 +172,7 @@ import {
 
       @if (apiMode() === 'Signal Fn') {
         <div class="mt-4">
-          <p class="text-xs text-base-content/60 mb-2">
+          <p class="text-xs text-base-content/80 mb-2">
             Reactive connection state with computed signals:
           </p>
           <pre
@@ -184,13 +184,13 @@ import {
     // Access signals directly:
     // net.online(), net.effectiveType(), net.downlink()
     // net.rtt(), net.saveData(), net.type()</code></pre>
-          <p class="text-xs text-base-content/60 mt-2">
+          <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Adaptive UI, conditional asset loading, offline handling.
           </p>
         </div>
       } @else {
         <div class="mt-4">
-          <p class="text-xs text-base-content/60 mb-2">Manual stream with snapshot + watch:</p>
+          <p class="text-xs text-base-content/80 mb-2">Manual stream with snapshot + watch:</p>
           <pre
             class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
           ><code>import {{ '{' }} NetworkInformationService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
@@ -205,7 +205,7 @@ import {
         // handle network change
       {{ '}' }});
     {{ '}' }}</code></pre>
-          <p class="text-xs text-base-content/60 mt-2">
+          <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Complex stream operations, buffering, combining with other
             sources.
           </p>

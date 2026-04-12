@@ -38,7 +38,7 @@ import {
         </div>
       </div>
 
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Fires when an element enters or exits the viewport. Scroll down to trigger it.
       </p>
 
@@ -88,7 +88,7 @@ import {
         #intersectScroll
         aria-label="Scrollable area with target"
       >
-        <p class="text-xs text-base-content/50 mb-2">↓ Scroll inside this box to trigger</p>
+        <p class="text-xs text-base-content/80 mb-2">↓ Scroll inside this box to trigger</p>
         <div class="h-32"></div>
         <div
           class="bg-primary/20 border-2 border-primary rounded p-4 text-center text-primary"
@@ -102,7 +102,7 @@ import {
 
       @if (apiMode() === 'Signal Fn') {
         <div class="mt-4">
-          <p class="text-xs text-base-content/60 mb-2">
+          <p class="text-xs text-base-content/80 mb-2">
             Reactive viewport detection with auto-cleanup:
           </p>
           <pre
@@ -114,13 +114,13 @@ import {
 
     // Use in template with: inView.isIntersecting()
     // or: inView.isVisible() for visibility tracking</code></pre>
-          <p class="text-xs text-base-content/60 mt-2">
+          <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Lazy loading, infinite scroll, analytics tracking.
           </p>
         </div>
       } @else {
         <div class="mt-4">
-          <p class="text-xs text-base-content/60 mb-2">Manual visibility observation with RxJS:</p>
+          <p class="text-xs text-base-content/80 mb-2">Manual visibility observation with RxJS:</p>
           <pre
             class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
           ><code>import {{ '{' }} IntersectionObserverService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
@@ -133,7 +133,7 @@ import {
           // handle visibility change
         {{ '}' }});
     {{ '}' }}</code></pre>
-          <p class="text-xs text-base-content/60 mt-2">
+          <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Complex thresholds, multiple observers, combineLatest.
           </p>
         </div>

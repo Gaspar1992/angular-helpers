@@ -27,12 +27,12 @@ import {
           }
         </div>
       </div>
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Enumerate connected audio/video input devices.
       </p>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="bg-base-300 border border-base-300 rounded-lg p-4">
-          <h3 class="text-xs font-bold text-base-content/60 uppercase tracking-wider mb-3">
+          <h3 class="text-xs font-bold text-base-content/80 uppercase tracking-wider mb-3">
             Video inputs ({{ cameras().length }})
           </h3>
           @for (d of cameras(); track d.deviceId) {
@@ -42,17 +42,17 @@ import {
               <span class="text-sm text-base-content font-medium">{{
                 d.label || 'Unnamed device'
               }}</span>
-              <span class="text-xs text-base-content/50 font-mono"
+              <span class="text-xs text-base-content/80 font-mono"
                 >{{ d.deviceId.substring(0, 8) }}…</span
               >
             </div>
           }
           @if (cameras().length === 0) {
-            <p class="text-sm text-base-content/50 italic">None detected</p>
+            <p class="text-sm text-base-content/80 italic">None detected</p>
           }
         </div>
         <div class="bg-base-300 border border-base-300 rounded-lg p-4">
-          <h3 class="text-xs font-bold text-base-content/60 uppercase tracking-wider mb-3">
+          <h3 class="text-xs font-bold text-base-content/80 uppercase tracking-wider mb-3">
             Audio inputs ({{ audioDevices().length }})
           </h3>
           @for (d of audioDevices(); track d.deviceId) {
@@ -62,13 +62,13 @@ import {
               <span class="text-sm text-base-content font-medium">{{
                 d.label || 'Unnamed device'
               }}</span>
-              <span class="text-xs text-base-content/50 font-mono"
+              <span class="text-xs text-base-content/80 font-mono"
                 >{{ d.deviceId.substring(0, 8) }}…</span
               >
             </div>
           }
           @if (audioDevices().length === 0) {
-            <p class="text-sm text-base-content/50 italic">None detected</p>
+            <p class="text-sm text-base-content/80 italic">None detected</p>
           }
         </div>
       </div>

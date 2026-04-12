@@ -36,7 +36,7 @@ import { FullscreenService } from '@angular-helpers/browser-web-apis';
           }
         </div>
       </div>
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Request or exit fullscreen mode for the page.
       </p>
       <div class="flex flex-wrap gap-2 items-center mb-4">

@@ -14,7 +14,7 @@ import { WebCryptoService } from '@angular-helpers/security';
         </h2>
         <span class="badge badge-secondary badge-sm">Native Crypto</span>
       </div>
-      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
         Hashing, HMAC, and AES encryption using native Web Crypto API
       </p>
 
@@ -24,7 +24,7 @@ import { WebCryptoService } from '@angular-helpers/security';
             <h3 class="font-semibold text-base-content m-0">SHA-256 Hash</h3>
             <span class="badge badge-success badge-xs">Crypto</span>
           </div>
-          <p class="text-xs text-base-content/60 mb-3">Generate cryptographic hash</p>
+          <p class="text-xs text-base-content/80 mb-3">Generate cryptographic hash</p>
           <button (click)="hashData()" class="btn btn-primary btn-sm">Generate Hash</button>
           @if (hashResult()) {
             <div class="mt-3 p-2 bg-base-200 rounded font-mono text-xs break-all text-base-content">
@@ -38,7 +38,7 @@ import { WebCryptoService } from '@angular-helpers/security';
             <h3 class="font-semibold text-base-content m-0">HMAC Signature</h3>
             <span class="badge badge-success badge-xs">Crypto</span>
           </div>
-          <p class="text-xs text-base-content/60 mb-3">Sign data with HMAC</p>
+          <p class="text-xs text-base-content/80 mb-3">Sign data with HMAC</p>
           <button (click)="generateHmac()" class="btn btn-secondary btn-sm">Sign Data</button>
           @if (hmacSignature()) {
             <div class="mt-3 p-2 bg-base-200 rounded font-mono text-xs break-all text-base-content">
