@@ -319,7 +319,7 @@ export class RegexSecurityService {
     // Lookaheads/lookbehinds
     complexity += (pattern.match(/\(\?\=/g) || []).length * 2;
     complexity += (pattern.match(/\(\?\!/g) || []).length * 2;
-    complexity += (pattern.match(/\(\?\</g) || []).length * 3;
+    complexity += (pattern.match(/\(\?</g) || []).length * 3;
 
     // Nested groups
     const openParens = (pattern.match(/\(/g) || []).length;

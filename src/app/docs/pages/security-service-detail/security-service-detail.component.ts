@@ -1,4 +1,5 @@
-import { Component, inject, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, computed, signal, ChangeDetectionStrategy, Type } from '@angular/core';
+import { NgComponentOutlet } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
@@ -7,11 +8,6 @@ import { DocsPageHeaderComponent } from '../../shared/page-header/docs-page-head
 import { DocsApiTableComponent } from '../../shared/api-table/docs-api-table.component';
 import { DocsTabsComponent, type DocTab } from '../../shared/tabs/docs-tabs.component';
 import { SECURITY_SERVICES, SECURITY_INTERFACES } from '../../data/security.data';
-import { RegexSecurityDemoComponent } from '../../../demo/services/regex-security/regex-security-demo.component';
-import { WebCryptoDemoComponent } from '../../../demo/services/web-crypto/web-crypto-demo.component';
-import { SecureStorageDemoComponent } from '../../../demo/services/secure-storage/secure-storage-demo.component';
-import { InputSanitizerDemoComponent } from '../../../demo/services/input-sanitizer/input-sanitizer-demo.component';
-import { PasswordStrengthDemoComponent } from '../../../demo/services/password-strength/password-strength-demo.component';
 import {
   ServiceDoc,
   BreadcrumbItem,
@@ -19,6 +15,15 @@ import {
   METHODS_COLUMNS,
   FIELDS_COLUMNS,
 } from '../../models/doc-meta.model';
+import { RegexSecurityDemoComponent } from '../../../demo/security/services/regex-security/regex-security-demo.component';
+import { WebCryptoDemoComponent } from '../../../demo/security/services/web-crypto/web-crypto-demo.component';
+import { SecureStorageDemoComponent } from '../../../demo/security/services/secure-storage/secure-storage-demo.component';
+
+const SERVICE_DEMO_MAP: Record<string, Type<unknown>> = {
+  'regex-security': RegexSecurityDemoComponent,
+  'web-crypto': WebCryptoDemoComponent,
+  'secure-storage': SecureStorageDemoComponent,
+};
 
 const CONTENT_TABS: DocTab[] = [
   { id: 'api', label: 'API Reference' },
@@ -31,15 +36,11 @@ const CONTENT_TABS: DocTab[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
+    NgComponentOutlet,
     DocsPageHeaderComponent,
     DocsApiTableComponent,
     CodeBlockComponent,
     DocsTabsComponent,
-    RegexSecurityDemoComponent,
-    WebCryptoDemoComponent,
-    SecureStorageDemoComponent,
-    InputSanitizerDemoComponent,
-    PasswordStrengthDemoComponent,
   ],
   templateUrl: './security-service-detail.component.html',
   styles: [
@@ -119,4 +120,8 @@ export class SecurityServiceDetailComponent {
     const id = this.serviceId();
     return id === 'regex-security' ? SECURITY_INTERFACES : [];
   });
+
+  protected demoComponent = computed<Type<unknown> | null>(
+    () => SERVICE_DEMO_MAP[this.serviceId()] ?? null,
+  );
 }

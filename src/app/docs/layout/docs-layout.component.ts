@@ -1,127 +1,167 @@
 import { Component, signal, ChangeDetectionStrategy, effect, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/router';
-
-interface NavSection {
-  label: string;
-  overviewRoute: string;
-  servicesLabel: string;
-  serviceItems: NavItem[];
-}
-
-interface NavItem {
-  label: string;
-  route: string;
-  hasFn?: boolean;
-}
-
-const NAV_SECTIONS: NavSection[] = [
-  {
-    label: 'browser-web-apis',
-    overviewRoute: '/docs/browser-web-apis',
-    servicesLabel: 'Services',
-    serviceItems: [
-      { label: 'Barcode Detector', route: '/docs/browser-web-apis/barcode-detector' },
-      { label: 'Battery', route: '/docs/browser-web-apis/battery' },
-      { label: 'Browser Capability', route: '/docs/browser-web-apis/browser-capability' },
-      { label: 'Broadcast Channel', route: '/docs/browser-web-apis/broadcast-channel' },
-      { label: 'Camera', route: '/docs/browser-web-apis/camera' },
-      { label: 'Clipboard', route: '/docs/browser-web-apis/clipboard' },
-      { label: 'Credential Management', route: '/docs/browser-web-apis/credential-management' },
-      { label: 'EyeDropper', route: '/docs/browser-web-apis/eye-dropper' },
-      { label: 'File System Access', route: '/docs/browser-web-apis/file-system-access' },
-      { label: 'Fullscreen', route: '/docs/browser-web-apis/fullscreen' },
-      { label: 'Gamepad', route: '/docs/browser-web-apis/gamepad', hasFn: true },
-      { label: 'Geolocation', route: '/docs/browser-web-apis/geolocation' },
-      { label: 'Idle Detector', route: '/docs/browser-web-apis/idle-detector', hasFn: true },
-      {
-        label: 'Intersection Observer',
-        route: '/docs/browser-web-apis/intersection-observer',
-        hasFn: true,
-      },
-      { label: 'Media Devices', route: '/docs/browser-web-apis/media-devices' },
-      { label: 'Media Recorder', route: '/docs/browser-web-apis/media-recorder' },
-      {
-        label: 'Mutation Observer',
-        route: '/docs/browser-web-apis/mutation-observer',
-        hasFn: true,
-      },
-      {
-        label: 'Network Information',
-        route: '/docs/browser-web-apis/network-information',
-        hasFn: true,
-      },
-      { label: 'Notifications', route: '/docs/browser-web-apis/notification' },
-      { label: 'Page Visibility', route: '/docs/browser-web-apis/page-visibility', hasFn: true },
-      { label: 'Payment Request', route: '/docs/browser-web-apis/payment-request' },
-      {
-        label: 'Performance Observer',
-        route: '/docs/browser-web-apis/performance-observer',
-        hasFn: true,
-      },
-      { label: 'Permissions', route: '/docs/browser-web-apis/permissions' },
-      { label: 'Resize Observer', route: '/docs/browser-web-apis/resize-observer', hasFn: true },
-      {
-        label: 'Screen Orientation',
-        route: '/docs/browser-web-apis/screen-orientation',
-        hasFn: true,
-      },
-      { label: 'Screen Wake Lock', route: '/docs/browser-web-apis/screen-wake-lock' },
-      { label: 'Server-Sent Events', route: '/docs/browser-web-apis/server-sent-events' },
-      { label: 'Speech Synthesis', route: '/docs/browser-web-apis/speech-synthesis' },
-      { label: 'Vibration', route: '/docs/browser-web-apis/vibration' },
-      { label: 'Web Audio', route: '/docs/browser-web-apis/web-audio' },
-      { label: 'Web Bluetooth', route: '/docs/browser-web-apis/web-bluetooth' },
-      { label: 'Web NFC', route: '/docs/browser-web-apis/web-nfc' },
-      { label: 'Web Share', route: '/docs/browser-web-apis/web-share' },
-      { label: 'Web USB', route: '/docs/browser-web-apis/web-usb' },
-      { label: 'WebSocket', route: '/docs/browser-web-apis/web-socket' },
-      { label: 'Web Storage', route: '/docs/browser-web-apis/web-storage' },
-      { label: 'Web Worker', route: '/docs/browser-web-apis/web-worker' },
-    ],
-  },
-  {
-    label: 'security',
-    overviewRoute: '/docs/security',
-    servicesLabel: 'Services',
-    serviceItems: [
-      { label: 'RegexSecurityBuilder', route: '/docs/security/regex-security-builder' },
-      { label: 'RegexSecurityService', route: '/docs/security/regex-security' },
-      { label: 'WebCryptoService', route: '/docs/security/web-crypto' },
-      { label: 'SecureStorageService', route: '/docs/security/secure-storage' },
-      { label: 'InputSanitizerService', route: '/docs/security/input-sanitizer' },
-      { label: 'PasswordStrengthService', route: '/docs/security/password-strength' },
-    ],
-  },
-  {
-    label: 'worker-http',
-    overviewRoute: '/docs/worker-http',
-    servicesLabel: 'Entry Points',
-    serviceItems: [
-      { label: 'createWorkerTransport', route: '/docs/worker-http/transport' },
-      { label: 'createWorkerPipeline', route: '/docs/worker-http/interceptors' },
-    ],
-  },
-];
+import {
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+  Router,
+  ActivatedRoute,
+} from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
+import type { NavSection } from '../config/docs-nav.data';
 
 @Component({
   selector: 'app-docs-layout',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
-  templateUrl: './docs-layout.component.html',
-  styleUrl: './docs-layout.component.css',
+  template: `
+    <div class="flex min-h-screen bg-base-100 text-base-content font-sans">
+      <!-- Sidebar -->
+      <aside
+        class="fixed lg:static top-0 bottom-0 w-64 z-50 bg-base-200 border-r border-base-300 flex flex-col overflow-y-auto max-h-screen lg:max-h-none transition-all duration-250 -left-72 lg:left-0"
+        [class.-left-72]="!sidebarOpen()"
+        [class.left-0]="sidebarOpen()"
+      >
+        <!-- Header -->
+        <div class="flex items-center justify-between px-5 py-4 border-b border-base-300">
+          <a
+            routerLink="/docs"
+            class="font-bold text-sm text-base-content no-underline tracking-tight hover:text-primary transition-colors"
+            (click)="closeSidebar()"
+          >
+            Angular Helpers
+          </a>
+          <button
+            class="bg-transparent border-none text-base-content/50 cursor-pointer text-base p-1 rounded hover:text-base-content transition-colors lg:hidden"
+            (click)="closeSidebar()"
+            aria-label="Close sidebar"
+          >
+            ✕
+          </button>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 py-2" aria-label="Documentation navigation">
+          @for (section of navSections(); track section.label) {
+            <div class="border-t border-base-300 first:border-t-0">
+              <!-- Section Label -->
+              <div
+                class="flex items-center gap-2 px-5 py-2 text-xs font-bold uppercase tracking-wider text-base-content/50"
+              >
+                <span class="badge badge-xs badge-primary">pkg</span>
+                {{ section.label }}
+              </div>
+
+              <!-- Overview Link -->
+              <ul class="list-none p-0 m-0">
+                <li>
+                  <a
+                    [routerLink]="section.overviewRoute"
+                    routerLinkActive="bg-base-300 text-primary font-medium"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    class="block px-5 py-2 text-sm text-base-content/70 hover:text-base-content hover:bg-base-300/50 transition-colors no-underline"
+                    (click)="closeSidebar()"
+                  >
+                    Overview
+                  </a>
+                </li>
+              </ul>
+
+              <!-- Services Group -->
+              <div class="mt-1">
+                <button
+                  class="w-full flex items-center gap-2 px-5 py-2 text-sm font-medium text-base-content/70 hover:text-base-content hover:bg-base-300/30 transition-colors bg-transparent border-none cursor-pointer"
+                  type="button"
+                  [attr.aria-expanded]="isSectionExpanded(section.label)"
+                  (click)="toggleSection(section.label)"
+                >
+                  <span
+                    class="text-base transition-transform duration-200"
+                    [class.rotate-90]="isSectionExpanded(section.label)"
+                    >›</span
+                  >
+                  {{ section.servicesLabel }}
+                </button>
+
+                @if (isSectionExpanded(section.label)) {
+                  <ul class="list-none p-0 m-0" role="list">
+                    @for (item of section.serviceItems; track item.route) {
+                      <li>
+                        <a
+                          [routerLink]="item.route"
+                          routerLinkActive="bg-base-300 text-primary font-medium"
+                          [routerLinkActiveOptions]="{ exact: true }"
+                          class="flex items-center gap-2 px-5 py-1.5 pl-8 text-sm text-base-content/70 hover:text-base-content hover:bg-base-300/50 transition-colors no-underline"
+                          (click)="closeSidebar()"
+                        >
+                          {{ item.label }}
+                          @if (item.hasFn) {
+                            <span class="badge badge-xs badge-info" aria-label="Signal Fn available"
+                              >fn</span
+                            >
+                          }
+                        </a>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+            </div>
+          }
+        </nav>
+      </aside>
+
+      <!-- Backdrop -->
+      @if (sidebarOpen()) {
+        <div
+          class="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          (click)="closeSidebar()"
+          aria-hidden="true"
+        ></div>
+      }
+
+      <!-- Main Content -->
+      <div class="flex-1 flex flex-col min-w-0">
+        <!-- Topbar -->
+        <header
+          class="sticky top-0 z-30 flex items-center gap-3 px-5 py-4 bg-base-200/80 backdrop-blur border-b border-base-300 lg:px-6"
+        >
+          <button
+            class="btn btn-ghost btn-square btn-sm lg:hidden"
+            (click)="toggleSidebar()"
+            aria-label="Toggle sidebar"
+            [attr.aria-expanded]="sidebarOpen()"
+          >
+            <span class="text-lg">☰</span>
+          </button>
+          <span class="text-sm font-semibold text-base-content">Documentation</span>
+        </header>
+
+        <!-- Page Content -->
+        <main id="main-content" class="flex-1 p-4 lg:p-6" tabindex="-1">
+          <router-outlet />
+        </main>
+      </div>
+    </div>
+  `,
 })
 export class DocsLayoutComponent {
-  protected readonly navSections = NAV_SECTIONS;
-  protected sidebarOpen = signal(false);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
+  readonly navSections = toSignal(
+    this.route.data.pipe(map((d) => (d['navSections'] as NavSection[]) ?? [])),
+    { initialValue: [] as NavSection[] },
+  );
+
+  protected sidebarOpen = signal(false);
   private expandedSections = signal<Set<string>>(new Set());
 
   constructor() {
     effect(() => {
       const url = this.router.url;
       // Auto-expand section containing active route
-      for (const section of NAV_SECTIONS) {
+      for (const section of this.navSections()) {
         if (url.startsWith(section.overviewRoute)) {
           this.expandedSections.set(new Set([section.label]));
           break;

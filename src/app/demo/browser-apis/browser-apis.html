@@ -1,16 +1,18 @@
 <div class="demo-page" [class.demo-embedded]="embedded()">
   <div class="demo-shell">
     @if (!embedded()) {
-    <header class="demo-header" aria-label="Browser APIs Demo">
-      <div class="demo-header-inner">
-        <div class="demo-header-text">
-          <h1 class="demo-title">Browser Web APIs</h1>
-          <p class="demo-subtitle">Interactive demo — 18 Web APIs powered by Angular signals</p>
+    <header class="mb-6 pb-5 border-b border-base-300" aria-label="Browser APIs Demo">
+      <div class="flex flex-col sm:flex-row items-start justify-between gap-4 flex-wrap">
+        <div class="flex-1">
+          <h1 class="text-2xl sm:text-3xl font-bold text-base-content mb-2">Browser Web APIs</h1>
+          <p class="text-base sm:text-lg text-base-content/80">
+            Interactive demo — 18 Web APIs powered by Angular signals
+          </p>
         </div>
-        <div class="demo-header-meta" aria-hidden="true">
-          <span class="meta-chip">Angular 20+</span>
-          <span class="meta-chip">Signals</span>
-          <span class="meta-chip">OnPush</span>
+        <div class="flex gap-2 flex-wrap" aria-hidden="true">
+          <span class="badge badge-primary badge-sm">Angular 20+</span>
+          <span class="badge badge-secondary badge-sm">Signals</span>
+          <span class="badge badge-accent badge-sm">OnPush</span>
         </div>
         <div class="demo-nav-links">
           <a routerLink="/demo/security" class="demo-nav-link">Security Demos →</a>
@@ -37,7 +39,7 @@
     </nav>
     }
 
-    <div class="tab-content">
+    <div class="demo-tab-content">
       @if (activeTab() === 'observers') {
       <div id="panel-observers" class="panel" role="tabpanel" aria-labelledby="tab-observers">
         <app-page-visibility-demo />

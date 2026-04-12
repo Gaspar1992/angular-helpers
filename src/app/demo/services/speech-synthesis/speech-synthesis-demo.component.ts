@@ -16,35 +16,43 @@ import { SpeechSynthesisService } from '@angular-helpers/browser-web-apis';
   encapsulation: ViewEncapsulation.None,
   providers: [SpeechSynthesisService],
   imports: [FormsModule],
-  styleUrl: '../demo.styles.css',
   template: `
-    <section class="svc-card" aria-labelledby="speech-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="speech-title">Speech Synthesis</h2>
-        <div class="svc-badges">
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="speech-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="speech-title">
+          Speech Synthesis
+        </h2>
+        <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-ok">supported</span>
+            <span class="badge badge-success badge-sm">supported</span>
           } @else {
-            <span class="badge badge-no">unsupported</span>
+            <span class="badge badge-error badge-sm">unsupported</span>
           }
-          <span class="badge" [class]="speechState() === 'speaking' ? 'badge-recording' : 'badge-no'">
-            {{ speechState() }}
-          </span>
+          @if (speechState() === 'speaking') {
+            <span class="badge badge-error badge-sm animate-pulse">{{ speechState() }}</span>
+          } @else {
+            <span class="badge badge-ghost badge-sm">{{ speechState() }}</span>
+          }
         </div>
       </div>
-      <p class="svc-desc">Text-to-speech via the Web Speech API.</p>
-      <div class="svc-controls svc-controls--col">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
+        Text-to-speech via the Web Speech API.
+      </p>
+      <div class="flex flex-col gap-2 mb-4">
         <textarea
-          class="demo-textarea"
+          class="textarea textarea-bordered w-full"
           [ngModel]="text"
           (ngModelChange)="text = $event"
           rows="2"
           aria-label="Text to speak"
           placeholder="Enter text to speak…"
         ></textarea>
-        <div class="svc-controls">
+        <div class="flex flex-wrap gap-2 items-center">
           <select
-            class="demo-select"
+            class="select select-bordered select-sm"
             [disabled]="voices().length === 0"
             [ngModel]="selectedVoiceIdx"
             (ngModelChange)="selectedVoiceIdx = $event"
@@ -58,13 +66,17 @@ import { SpeechSynthesisService } from '@angular-helpers/browser-web-apis';
             }
           </select>
           <button
-            class="btn btn-primary"
+            class="btn btn-primary btn-sm"
             (click)="speak()"
             [disabled]="!supported || speechState() === 'speaking'"
           >
             Speak
           </button>
-          <button class="btn btn-secondary" (click)="stop()" [disabled]="speechState() === 'idle'">
+          <button
+            class="btn btn-secondary btn-sm"
+            (click)="stop()"
+            [disabled]="speechState() === 'idle'"
+          >
             Stop
           </button>
         </div>

@@ -9,7 +9,7 @@ function arrayBufferToHex(buffer: ArrayBuffer): string {
 }
 
 function defaultPayloadBuilder(req: SerializableRequest): string {
-  const body = req.body != null ? JSON.stringify(req.body) : '';
+  const body = req.body !== null && req.body !== undefined ? JSON.stringify(req.body) : '';
   return `${req.method}:${req.url}:${body}`;
 }
 

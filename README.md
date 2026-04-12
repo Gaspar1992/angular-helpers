@@ -268,7 +268,18 @@ MIT License — see [LICENSE](./LICENSE) for details.
 
 ---
 
-## 🔗 Useful Links
+## � Blog
+
+Articles about library design decisions, Angular patterns, and the evolution of Angular Helpers.
+They live as Markdown files in [`public/content/blog/`](./public/content/blog/) and are rendered on the [web](https://gaspar1992.github.io/angular-helpers/blog).
+
+| Date       | Article                                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-12 | [Redesigning the web & our vision as a library ecosystem](./public/content/blog/web-redesign-and-library-vision.md) |
+
+---
+
+## �🔗 Useful Links
 
 - **🐛 Issues & Feature Requests**: [GitHub Issues](https://github.com/Gaspar1992/angular-helpers/issues)
 - **💬 Discussions**: [GitHub Discussions](https://github.com/Gaspar1992/angular-helpers/discussions)

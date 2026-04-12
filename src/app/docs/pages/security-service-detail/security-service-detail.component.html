@@ -49,20 +49,10 @@
           <app-code-block [code]="service()!.example" />
         }
         @if (activeTab() === 'demo') {
-          @if (serviceId() === 'regex-security') {
-            <app-regex-security-demo />
-          } @else if (serviceId() === 'web-crypto') {
-            <app-web-crypto-demo />
-          } @else if (serviceId() === 'secure-storage') {
-            <app-secure-storage-demo />
-          } @else if (serviceId() === 'input-sanitizer') {
-            <app-input-sanitizer-demo />
-          } @else if (serviceId() === 'password-strength') {
-            <app-password-strength-demo />
+          @if (demoComponent()) {
+            <ng-container *ngComponentOutlet="demoComponent()!" />
           } @else {
-            <div class="feedback feedback-info">
-              Interactive demo not available for this service.
-            </div>
+            <p class="docs-support-text">No interactive demo available for this service yet.</p>
           }
         }
       </div>

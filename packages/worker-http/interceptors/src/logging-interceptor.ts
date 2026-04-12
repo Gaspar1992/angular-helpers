@@ -50,7 +50,7 @@ export function loggingInterceptor(config?: LoggingConfig): WorkerInterceptorFn 
     } catch (error) {
       const elapsedMs = Date.now() - startMs;
       const status = (error as { status?: number }).status;
-      const label = status != null ? String(status) : 'NETWORK_ERROR';
+      const label = status !== null && status !== undefined ? String(status) : 'NETWORK_ERROR';
 
       safeLog(`[worker] ✕ ${label} ${req.url} (${elapsedMs}ms)`, error);
 

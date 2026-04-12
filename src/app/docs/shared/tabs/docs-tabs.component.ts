@@ -30,7 +30,7 @@ export interface DocTab {
     `
       .docs-tab-bar {
         display: flex;
-        border-bottom: 2px solid var(--border);
+        border-bottom: 2px solid var(--border-color);
         margin-bottom: var(--sp-5);
       }
 

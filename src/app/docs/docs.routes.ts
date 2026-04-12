@@ -1,10 +1,14 @@
 import { Routes } from '@angular/router';
+import { serviceDetailResolver } from './services/service-detail.resolver';
+import { overviewResolver } from './services/overview.resolver';
+import { DOCS_NAV_SECTIONS } from './config/docs-nav.data';
 
 export const DOCS_ROUTES: Routes = [
   {
     path: '',
     loadComponent: () =>
       import('./layout/docs-layout.component').then((m) => m.DocsLayoutComponent),
+    data: { navSections: DOCS_NAV_SECTIONS },
     children: [
       {
         path: '',
@@ -15,49 +19,55 @@ export const DOCS_ROUTES: Routes = [
       {
         path: 'browser-web-apis',
         loadComponent: () =>
-          import('./pages/browser-web-apis-overview/browser-web-apis-overview.component').then(
-            (m) => m.BrowserWebApisOverviewComponent,
+          import('./feature/unified-overview/unified-overview.component').then(
+            (m) => m.UnifiedOverviewComponent,
           ),
+        resolve: { config: overviewResolver },
         title: 'browser-web-apis — Angular Helpers',
       },
       {
         path: 'browser-web-apis/:service',
         loadComponent: () =>
-          import('./pages/service-detail/service-detail.component').then(
-            (m) => m.ServiceDetailComponent,
+          import('./feature/unified-service-detail/unified-service-detail.component').then(
+            (m) => m.UnifiedServiceDetailComponent,
           ),
+        resolve: { config: serviceDetailResolver },
         title: 'Service — Angular Helpers',
       },
       {
         path: 'security',
         loadComponent: () =>
-          import('./pages/security-overview/security-overview.component').then(
-            (m) => m.SecurityOverviewComponent,
+          import('./feature/unified-overview/unified-overview.component').then(
+            (m) => m.UnifiedOverviewComponent,
           ),
+        resolve: { config: overviewResolver },
         title: 'security — Angular Helpers',
       },
       {
         path: 'security/:service',
         loadComponent: () =>
-          import('./pages/security-service-detail/security-service-detail.component').then(
-            (m) => m.SecurityServiceDetailComponent,
+          import('./feature/unified-service-detail/unified-service-detail.component').then(
+            (m) => m.UnifiedServiceDetailComponent,
           ),
+        resolve: { config: serviceDetailResolver },
         title: 'Service — Angular Helpers',
       },
       {
         path: 'worker-http',
         loadComponent: () =>
-          import('./pages/worker-http-overview/worker-http-overview.component').then(
-            (m) => m.WorkerHttpOverviewComponent,
+          import('./feature/unified-overview/unified-overview.component').then(
+            (m) => m.UnifiedOverviewComponent,
           ),
+        resolve: { config: overviewResolver },
         title: 'worker-http — Angular Helpers',
       },
       {
         path: 'worker-http/:entry',
         loadComponent: () =>
-          import('./pages/worker-http-entry-detail/worker-http-entry-detail.component').then(
-            (m) => m.WorkerHttpEntryDetailComponent,
+          import('./feature/unified-service-detail/unified-service-detail.component').then(
+            (m) => m.UnifiedServiceDetailComponent,
           ),
+        resolve: { config: serviceDetailResolver },
         title: 'Entry Point — Angular Helpers',
       },
       {

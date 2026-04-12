@@ -23,7 +23,8 @@ import { PasswordStrengthService } from '@angular-helpers/security';
         </div>
       </div>
       <p class="svc-desc">
-        Assess password strength with entropy-based scoring, pattern detection, and actionable feedback.
+        Assess password strength with entropy-based scoring, pattern detection, and actionable
+        feedback.
       </p>
 
       <div class="svc-controls svc-controls--col">

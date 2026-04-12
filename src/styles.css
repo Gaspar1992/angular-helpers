@@ -1,6 +1,37 @@
-/* You can add global styles to this file, and also import other style files */
+/* ─── Tailwind v4 + DaisyUI v5 ───────────────────────── */
+@import 'tailwindcss';
 
-/* ─── Design Tokens ─────────────────────────────────── */
+@plugin "daisyui" {
+  themes: angular-helpers --prefersdark;
+}
+
+/* ─── Custom Theme: angular-helpers ─────────────────── */
+[data-theme='angular-helpers'] {
+  color-scheme: dark;
+  --color-primary: oklch(69% 0.18 254);
+  --color-primary-content: oklch(98% 0.01 254);
+  --color-secondary: oklch(72% 0.16 292);
+  --color-secondary-content: oklch(98% 0.01 292);
+  --color-accent: oklch(69% 0.18 254);
+  --color-accent-content: oklch(98% 0.01 254);
+  --color-neutral: oklch(22% 0.03 256);
+  --color-neutral-content: oklch(88% 0.02 256);
+  --color-base-100: oklch(13% 0.02 256);
+  --color-base-200: oklch(17% 0.03 256);
+  --color-base-300: oklch(15% 0.02 256);
+  --color-base-content: oklch(88% 0.02 256);
+  --color-info: oklch(69% 0.18 254);
+  --color-success: oklch(80% 0.15 150);
+  --color-warning: oklch(80% 0.15 70);
+  --color-error: oklch(65% 0.2 20);
+  /* DaisyUI v5 structural tokens */
+  --radius-selector: 0.5rem;
+  --radius-field: 0.35rem;
+  --radius-box: 0.75rem;
+  --depth: 0;
+}
+
+/* ─── Design Tokens (legacy bridge — remove per section as migrated) ─── */
 :root {
   /* Backgrounds */
   --bg-base: #0f1117;
@@ -9,8 +40,9 @@
   --bg-elevated: #1e1e2e;
   --bg-hover: rgba(255, 255, 255, 0.04);
 
-  /* Borders */
-  --border: rgba(255, 255, 255, 0.07);
+  /* Borders - DaisyUI uses --border as numeric width, we use --border-color for color */
+  --border: 1px;
+  --border-color: rgba(255, 255, 255, 0.07);
   --border-subtle: rgba(255, 255, 255, 0.05);
 
   /* Text */
@@ -153,7 +185,7 @@ body {
 .docs-badge--import {
   color: var(--text-success);
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   padding: 0.3rem 0.7rem;
 }
 
@@ -168,7 +200,7 @@ body {
   color: var(--text-white);
   margin: 0 0 var(--sp-4);
   padding-bottom: var(--sp-2);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-color);
 }
 
 @media (min-width: 640px) {
@@ -230,7 +262,7 @@ body {
 .docs-table-wrapper {
   overflow-x: auto;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
 }
 
 .docs-table {
@@ -251,7 +283,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-muted);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-color);
   white-space: nowrap;
 }
 
@@ -303,6 +335,36 @@ body {
 .docs-cell-desc {
   color: var(--text-secondary);
   min-width: 180px;
+}
+
+/* ─── Code-window syntax tokens (injected via innerHTML) ── */
+.c-kw {
+  color: #cba6f7;
+}
+.c-str {
+  color: #a6e3a1;
+}
+.c-bool {
+  color: #fab387;
+}
+.c-type {
+  color: #89dceb;
+}
+.c-fn {
+  color: #89b4fa;
+}
+.c-var {
+  color: #cdd6f4;
+}
+.c-punc {
+  color: #6c7086;
+}
+.c-brace {
+  color: #cdd6f4;
+}
+.c-cmt {
+  color: #585b70;
+  font-style: italic;
 }
 
 /* ─── Highlight.js — Catppuccin Mocha ────────────────── */

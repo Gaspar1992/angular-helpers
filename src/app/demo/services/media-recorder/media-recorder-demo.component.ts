@@ -13,49 +13,56 @@ import { MediaRecorderService, PermissionsService } from '@angular-helpers/brows
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   providers: [PermissionsService, MediaRecorderService],
-  styleUrl: '../demo.styles.css',
   template: `
-    <section class="svc-card" aria-labelledby="rec-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="rec-title">Media Recorder</h2>
-        <div class="svc-badges">
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="rec-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="rec-title">
+          Media Recorder
+        </h2>
+        <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-ok">supported</span>
+            <span class="badge badge-success badge-sm">supported</span>
           } @else {
-            <span class="badge badge-no">unsupported</span>
+            <span class="badge badge-error badge-sm">unsupported</span>
           }
-          <span class="badge badge-secure">secure context</span>
+          <span class="badge badge-info badge-sm">secure context</span>
         </div>
       </div>
-      <p class="svc-desc">Record audio from the microphone. Requires microphone permission.</p>
-      <div class="svc-controls">
+      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
+        Record audio from the microphone. Requires microphone permission.
+      </p>
+      <div class="flex flex-wrap gap-2 items-center mb-4">
         <button
-          class="btn btn-danger"
+          class="btn btn-error btn-sm"
           (click)="startRecording()"
           [disabled]="!supported || recordingState() === 'recording'"
         >
-          <span class="rec-dot" aria-hidden="true"></span> Record
+          <span
+            class="w-2 h-2 rounded-full bg-white animate-pulse inline-block mr-1"
+            aria-hidden="true"
+          ></span>
+          Record
         </button>
         <button
-          class="btn btn-secondary"
+          class="btn btn-secondary btn-sm"
           (click)="stopRecording()"
           [disabled]="recordingState() !== 'recording'"
         >
           Stop
         </button>
-        <span class="badge" [class]="recordingState() === 'recording' ? 'badge-recording' : 'badge-no'">
-          {{ recordingState() }}
-        </span>
+        @if (recordingState() === 'recording') {
+          <span class="badge badge-error badge-sm animate-pulse">recording</span>
+        } @else {
+          <span class="badge badge-ghost badge-sm">inactive</span>
+        }
       </div>
       @if (recordedUrl()) {
-        <div class="svc-result">
-          <p class="svc-hint">Recording: {{ recordedDuration() }}s</p>
-          <audio
-            [src]="recordedUrl()"
-            controls
-            class="audio-player"
-            aria-label="Recorded audio"
-          ></audio>
+        <div class="bg-base-300 border border-base-300 rounded-lg p-4">
+          <p class="text-xs text-base-content/80 mb-2">Recording: {{ recordedDuration() }}s</p>
+          <audio [src]="recordedUrl()" controls class="w-full" aria-label="Recorded audio"></audio>
         </div>
       }
     </section>

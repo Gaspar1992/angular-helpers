@@ -7,12 +7,15 @@ import {
   ClipboardService,
   FullscreenService,
   GeolocationService,
+  IdleDetectorService,
   IntersectionObserverService,
   MediaDevicesService,
   MediaRecorderService,
+  MutationObserverService,
   NetworkInformationService,
   NotificationService,
   PageVisibilityService,
+  PerformanceObserverService,
   PermissionsService,
   ResizeObserverService,
   ScreenOrientationService,
@@ -36,599 +39,8 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
 
 @Component({
   selector: 'app-library-services-harness',
-  template: `
-    <main class="harness-shell">
-      <h1>Library Services Harness</h1>
-
-      <p>
-        Secure context:
-        <strong data-testid="secure-context-value">{{ secureContext() ? 'yes' : 'no' }}</strong>
-      </p>
-
-      <p>
-        Permissions API supported:
-        <strong data-testid="permissions-supported">{{ permissionsSupported() ? 'yes' : 'no' }}</strong>
-      </p>
-
-      <p>
-        Geolocation API supported:
-        <strong data-testid="geolocation-supported">{{ geolocationSupported() ? 'yes' : 'no' }}</strong>
-      </p>
-
-      <p>
-        Clipboard API supported:
-        <strong data-testid="clipboard-supported">{{ clipboardSupported() ? 'yes' : 'no' }}</strong>
-      </p>
-
-      <p>
-        Notification API supported:
-        <strong data-testid="notification-supported">{{
-          notificationSupported() ? 'yes' : 'no'
-        }}</strong>
-      </p>
-
-      <p>
-        MediaDevices API supported:
-        <strong data-testid="media-devices-supported">{{
-          mediaDevicesSupported() ? 'yes' : 'no'
-        }}</strong>
-      </p>
-
-      <p>
-        Camera API supported:
-        <strong data-testid="camera-supported">{{ cameraSupported() ? 'yes' : 'no' }}</strong>
-      </p>
-
-      <p>
-        Web Worker API supported:
-        <strong data-testid="web-worker-supported">{{ webWorkerSupported() ? 'yes' : 'no' }}</strong>
-      </p>
-
-      <p>
-        Regex Security supported:
-        <strong data-testid="regex-security-supported">{{
-          regexSecuritySupported() ? 'yes' : 'no'
-        }}</strong>
-      </p>
-
-      <p>
-        Web Storage supported:
-        <strong data-testid="web-storage-supported">{{ webStorageSupported() ? 'yes' : 'no' }}</strong>
-      </p>
-
-      <p>
-        Web Share supported:
-        <strong data-testid="web-share-supported">{{ webShareSupported() ? 'yes' : 'no' }}</strong>
-      </p>
-
-      <p>
-        Battery API supported:
-        <strong data-testid="battery-supported">{{ batterySupported() ? 'yes' : 'no' }}</strong>
-      </p>
-
-      <p>
-        WebSocket API supported:
-        <strong data-testid="web-socket-supported">{{ webSocketSupported() ? 'yes' : 'no' }}</strong>
-      </p>
-
-      <p>
-        IntersectionObserver API supported:
-        <strong data-testid="intersection-observer-supported">{{
-          intersectionObserverSupported() ? 'yes' : 'no'
-        }}</strong>
-      </p>
-
-      <p>
-        ResizeObserver API supported:
-        <strong data-testid="resize-observer-supported">{{
-          resizeObserverSupported() ? 'yes' : 'no'
-        }}</strong>
-      </p>
-
-      <p>
-        PageVisibility API supported:
-        <strong data-testid="page-visibility-supported">{{
-          pageVisibilitySupported() ? 'yes' : 'no'
-        }}</strong>
-      </p>
-
-      <p>
-        BroadcastChannel API supported:
-        <strong data-testid="broadcast-channel-supported">{{
-          broadcastChannelSupported() ? 'yes' : 'no'
-        }}</strong>
-      </p>
-
-      <p>
-        NetworkInformation API supported:
-        <strong data-testid="network-info-supported">{{
-          networkInfoSupported() ? 'yes' : 'partial'
-        }}</strong>
-      </p>
-
-      <p>
-        Fullscreen API supported:
-        <strong data-testid="fullscreen-supported">{{ fullscreenSupported() ? 'yes' : 'no' }}</strong>
-      </p>
-
-      <p>
-        ScreenOrientation API supported:
-        <strong data-testid="screen-orientation-supported">{{
-          screenOrientationSupported() ? 'yes' : 'no'
-        }}</strong>
-      </p>
-
-      <p>
-        ServerSentEvents API supported:
-        <strong data-testid="server-sent-events-supported">{{
-          serverSentEventsSupported() ? 'yes' : 'no'
-        }}</strong>
-      </p>
-
-      <p>
-        Vibration API supported:
-        <strong data-testid="vibration-supported">{{ vibrationSupported() ? 'yes' : 'no' }}</strong>
-      </p>
-
-      <p>
-        SpeechSynthesis API supported:
-        <strong data-testid="speech-synthesis-supported">{{
-          speechSynthesisSupported() ? 'yes' : 'no'
-        }}</strong>
-      </p>
-
-      <p>
-        FileSystemAccess API supported:
-        <strong data-testid="file-system-access-supported">{{
-          fileSystemAccessSupported() ? 'yes' : 'chrome-only'
-        }}</strong>
-      </p>
-
-      <p>
-        MediaRecorder API supported:
-        <strong data-testid="media-recorder-supported">{{
-          mediaRecorderSupported() ? 'yes' : 'no'
-        }}</strong>
-      </p>
-
-      <p>
-        Online status:
-        <strong data-testid="online-status">{{ onlineStatus() ? 'yes' : 'no' }}</strong>
-      </p>
-
-      <section>
-        <h2>Capability Matrix</h2>
-        <table>
-          <caption>
-            Browser capability support and secure context requirements
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col">Capability</th>
-              <th scope="col">Supported</th>
-              <th scope="col">Requires secure context</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (capability of capabilityOverview(); track capability.id) {
-              <tr [attr.data-testid]="'capability-row-' + capability.id">
-                <td>{{ capability.label }}</td>
-                <td [attr.data-testid]="'capability-supported-' + capability.id">
-                  {{ capability.supported ? 'yes' : 'no' }}
-                </td>
-                <td [attr.data-testid]="'capability-secure-required-' + capability.id">
-                  {{ capability.requiresSecureContext ? 'yes' : 'no' }}
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </section>
-
-      <section>
-        <h2>Permissions Service</h2>
-        <button data-testid="permissions-query-camera" type="button" (click)="queryCameraPermission()">
-          Query camera permission
-        </button>
-        <button
-          data-testid="permissions-query-geolocation"
-          type="button"
-          (click)="queryGeolocationPermission()"
-        >
-          Query geolocation permission
-        </button>
-
-        <p>
-          Camera permission:
-          <strong data-testid="permissions-camera-state">{{ cameraPermissionState() }}</strong>
-        </p>
-        <p>
-          Geolocation permission:
-          <strong data-testid="permissions-geolocation-state">{{
-            geolocationPermissionState()
-          }}</strong>
-        </p>
-      </section>
-
-      <section>
-        <h2>Geolocation Service</h2>
-        <button
-          data-testid="geolocation-request-current"
-          type="button"
-          (click)="requestCurrentPosition()"
-        >
-          Request current position
-        </button>
-
-        <p>
-          Last position:
-          <strong data-testid="geolocation-position">{{ geolocationPosition() }}</strong>
-        </p>
-      </section>
-
-      <section>
-        <h2>Media & Camera Services</h2>
-        <button data-testid="media-devices-refresh" type="button" (click)="refreshMediaDevices()">
-          Refresh media devices
-        </button>
-        <button data-testid="camera-start" type="button" (click)="startCamera()">Start camera</button>
-        <button data-testid="camera-stop" type="button" (click)="stopCamera()">Stop camera</button>
-
-        <p>
-          Video inputs:
-          <strong data-testid="media-video-input-count">{{ mediaVideoInputCount() }}</strong>
-        </p>
-        <p>
-          Audio inputs:
-          <strong data-testid="media-audio-input-count">{{ mediaAudioInputCount() }}</strong>
-        </p>
-        <p>
-          Camera state:
-          <strong data-testid="camera-state">{{ cameraState() }}</strong>
-        </p>
-        <p>
-          Camera track count:
-          <strong data-testid="camera-track-count">{{ cameraTrackCount() }}</strong>
-        </p>
-      </section>
-
-      <section>
-        <h2>Web Worker & Regex Services</h2>
-        <button data-testid="web-worker-create" type="button" (click)="createHarnessWorker()">
-          Create harness worker
-        </button>
-        <button data-testid="web-worker-send" type="button" (click)="sendHarnessWorkerMessage()">
-          Send worker message
-        </button>
-        <button data-testid="web-worker-terminate" type="button" (click)="terminateHarnessWorker()">
-          Terminate harness worker
-        </button>
-        <button data-testid="regex-analyze-safe" type="button" (click)="analyzeRegexSafePattern()">
-          Analyze safe regex pattern
-        </button>
-        <button data-testid="regex-test-safe" type="button" (click)="testSafeRegexPattern()">
-          Test safe regex execution
-        </button>
-        <button data-testid="regex-test-unsafe" type="button" (click)="testUnsafeRegexPattern()">
-          Test unsafe regex execution
-        </button>
-
-        <p>
-          Worker state:
-          <strong data-testid="web-worker-state">{{ workerState() }}</strong>
-        </p>
-        <p>
-          Worker message count:
-          <strong data-testid="web-worker-message-count">{{ workerMessageCount() }}</strong>
-        </p>
-        <p>
-          Worker last message:
-          <strong data-testid="web-worker-last-message">{{ workerLastMessage() }}</strong>
-        </p>
-        <p>
-          Regex safe:
-          <strong data-testid="regex-analysis-safe">{{ regexAnalysisSafe() }}</strong>
-        </p>
-        <p>
-          Regex risk:
-          <strong data-testid="regex-analysis-risk">{{ regexAnalysisRisk() }}</strong>
-        </p>
-        <p>
-          Regex execution state:
-          <strong data-testid="regex-execution-state">{{ regexExecutionState() }}</strong>
-        </p>
-        <p>
-          Regex match:
-          <strong data-testid="regex-match">{{ regexMatch() }}</strong>
-        </p>
-        <p>
-          Regex timeout:
-          <strong data-testid="regex-timeout">{{ regexTimeout() }}</strong>
-        </p>
-        <p>
-          Regex error:
-          <strong data-testid="regex-error">{{ regexError() }}</strong>
-        </p>
-      </section>
-
-      <section>
-        <h2>Storage & Share Services</h2>
-        <button data-testid="storage-exercise" type="button" (click)="exerciseWebStorage()">
-          Exercise web storage
-        </button>
-        <button data-testid="share-text" type="button" (click)="shareHarnessText()">Share text</button>
-
-        <p>
-          Storage state:
-          <strong data-testid="storage-state">{{ storageState() }}</strong>
-        </p>
-        <p>
-          Local storage value:
-          <strong data-testid="storage-local-value">{{ storageLocalValue() }}</strong>
-        </p>
-        <p>
-          Session storage value:
-          <strong data-testid="storage-session-value">{{ storageSessionValue() }}</strong>
-        </p>
-        <p>
-          Storage keys count:
-          <strong data-testid="storage-key-count">{{ storageKeyCount() }}</strong>
-        </p>
-        <p>
-          Share state:
-          <strong data-testid="web-share-state">{{ webShareState() }}</strong>
-        </p>
-        <p>
-          Share result:
-          <strong data-testid="web-share-result">{{ webShareResult() }}</strong>
-        </p>
-        <p>
-          Share error:
-          <strong data-testid="web-share-error">{{ webShareError() }}</strong>
-        </p>
-      </section>
-
-      <section>
-        <h2>Battery & WebSocket Services</h2>
-        <button data-testid="battery-refresh" type="button" (click)="refreshBatterySnapshot()">
-          Refresh battery snapshot
-        </button>
-        <button
-          data-testid="web-socket-connect-invalid"
-          type="button"
-          (click)="connectInvalidWebSocket()"
-        >
-          Connect invalid WebSocket
-        </button>
-        <button data-testid="web-socket-send" type="button" (click)="sendWebSocketMessage()">
-          Send WebSocket message
-        </button>
-        <button data-testid="web-socket-disconnect" type="button" (click)="disconnectWebSocket()">
-          Disconnect WebSocket
-        </button>
-
-        <p>
-          Battery state:
-          <strong data-testid="battery-state">{{ batteryState() }}</strong>
-        </p>
-        <p>
-          Battery level:
-          <strong data-testid="battery-level">{{ batteryLevel() }}</strong>
-        </p>
-        <p>
-          Battery charging:
-          <strong data-testid="battery-charging">{{ batteryCharging() }}</strong>
-        </p>
-        <p>
-          WebSocket state:
-          <strong data-testid="web-socket-state">{{ webSocketState() }}</strong>
-        </p>
-        <p>
-          WebSocket send state:
-          <strong data-testid="web-socket-send-state">{{ webSocketSendState() }}</strong>
-        </p>
-        <p>
-          WebSocket error:
-          <strong data-testid="web-socket-error">{{ webSocketError() }}</strong>
-        </p>
-      </section>
-
-      <section>
-        <h2>Clipboard Service</h2>
-        <button data-testid="clipboard-write" type="button" (click)="writeClipboardText()">
-          Write clipboard text
-        </button>
-        <button data-testid="clipboard-read" type="button" (click)="readClipboardText()">
-          Read clipboard text
-        </button>
-
-        <p>
-          Write state:
-          <strong data-testid="clipboard-write-state">{{ clipboardWriteState() }}</strong>
-        </p>
-        <p>
-          Last read value:
-          <strong data-testid="clipboard-read-value">{{ clipboardReadValue() }}</strong>
-        </p>
-      </section>
-
-      <section>
-        <h2>Notification Service</h2>
-        <button
-          data-testid="notifications-query-permission"
-          type="button"
-          (click)="queryNotificationPermission()"
-        >
-          Query notifications permission
-        </button>
-        <button data-testid="notifications-show" type="button" (click)="showNotification()">
-          Show notification
-        </button>
-
-        <p>
-          Notification permission:
-          <strong data-testid="notifications-permission-state">{{
-            notificationPermissionState()
-          }}</strong>
-        </p>
-        <p>
-          Notification count:
-          <strong data-testid="notifications-count">{{ notificationCount() }}</strong>
-        </p>
-        <p>
-          Notification show state:
-          <strong data-testid="notifications-show-state">{{ notificationShowState() }}</strong>
-        </p>
-      </section>
-
-      <section>
-        <h2>Tier 1 Observer APIs</h2>
-        <button data-testid="intersection-observe" type="button" (click)="observeIntersection()">
-          Observe intersection
-        </button>
-        <button data-testid="resize-observe" type="button" (click)="observeResize()">
-          Observe resize
-        </button>
-
-        <p>
-          Intersection observing:
-          <strong data-testid="intersection-observing">{{
-            intersectionObserving() ? 'yes' : 'no'
-          }}</strong>
-        </p>
-        <p>
-          Is intersecting:
-          <strong data-testid="intersection-is-intersecting">{{
-            intersectionIsIntersecting() ? 'true' : 'false'
-          }}</strong>
-        </p>
-        <p>
-          Resize observing:
-          <strong data-testid="resize-observing">{{ resizeObserving() ? 'yes' : 'no' }}</strong>
-        </p>
-        <p>
-          Resize width:
-          <strong data-testid="resize-width">{{ resizeWidth() }}</strong>
-        </p>
-        <p>
-          Resize height:
-          <strong data-testid="resize-height">{{ resizeHeight() }}</strong>
-        </p>
-      </section>
-
-      <section>
-        <h2>Tier 1 System APIs</h2>
-        <button data-testid="fullscreen-enter" type="button" (click)="enterFullscreen()">
-          Enter fullscreen
-        </button>
-        <button data-testid="fullscreen-exit" type="button" (click)="exitFullscreen()">
-          Exit fullscreen
-        </button>
-
-        <p>
-          Fullscreen state:
-          <strong data-testid="fullscreen-state">{{ fullscreenState() }}</strong>
-        </p>
-        <p>
-          Page visibility state:
-          <strong data-testid="page-visibility-state">{{ pageVisibilityState() }}</strong>
-        </p>
-        <p>
-          Page visible:
-          <strong data-testid="page-visible">{{ pageVisible() ? 'yes' : 'no' }}</strong>
-        </p>
-      </section>
-
-      <section>
-        <h2>Tier 1 Network APIs</h2>
-        <button data-testid="broadcast-open" type="button" (click)="openBroadcastChannel()">
-          Open broadcast channel
-        </button>
-        <button data-testid="broadcast-send" type="button" (click)="sendBroadcastMessage()">
-          Send broadcast message
-        </button>
-        <button data-testid="broadcast-close" type="button" (click)="closeBroadcastChannel()">
-          Close broadcast channel
-        </button>
-        <button data-testid="sse-connect" type="button" (click)="connectSSE()">Connect SSE</button>
-        <button data-testid="sse-disconnect" type="button" (click)="disconnectSSE()">
-          Disconnect SSE
-        </button>
-
-        <p>
-          Broadcast state:
-          <strong data-testid="broadcast-state">{{ broadcastState() }}</strong>
-        </p>
-        <p>
-          Broadcast message sent:
-          <strong data-testid="broadcast-message-sent">{{
-            broadcastMessageSent() ? 'yes' : 'no'
-          }}</strong>
-        </p>
-        <p>
-          SSE state:
-          <strong data-testid="sse-state">{{ sseState() }}</strong>
-        </p>
-        <p>
-          SSE connected:
-          <strong data-testid="sse-connected">{{ sseConnected() ? 'yes' : 'no' }}</strong>
-        </p>
-      </section>
-
-      <section>
-        <h2>Tier 1 Hardware APIs</h2>
-        <button data-testid="vibrate-success" type="button" (click)="vibrateSuccess()">
-          Vibrate success
-        </button>
-        <button data-testid="speech-get-voices" type="button" (click)="getSpeechVoices()">
-          Get speech voices
-        </button>
-
-        <p>
-          Vibration triggered:
-          <strong data-testid="vibration-triggered">{{ vibrationTriggered() ? 'yes' : 'no' }}</strong>
-        </p>
-        <p>
-          Speech voice count:
-          <strong data-testid="speech-voice-count">{{ speechVoiceCount() }}</strong>
-        </p>
-      </section>
-
-      <section>
-        <h2>Tier 1 File and Recording APIs</h2>
-        <button data-testid="file-system-open" type="button" (click)="openFileSystem()">
-          Open file system
-        </button>
-        <button data-testid="recorder-start" type="button" (click)="startRecording()">
-          Start recording
-        </button>
-        <button data-testid="recorder-stop" type="button" (click)="stopRecording()">
-          Stop recording
-        </button>
-
-        <p>
-          File system state:
-          <strong data-testid="file-system-state">{{
-            fileSystemAccessSupported() ? 'supported' : 'unsupported'
-          }}</strong>
-        </p>
-        <p>
-          Recorder state:
-          <strong data-testid="recorder-state">{{ recorderState() }}</strong>
-        </p>
-      </section>
-
-      <p>
-        Last action:
-        <strong data-testid="last-action">{{ lastAction() }}</strong>
-      </p>
-
-      <p>
-        Error:
-        <strong data-testid="error-message">{{ errorMessage() || 'none' }}</strong>
-      </p>
-    </main>
-  `,
+  templateUrl: './library-services-harness.component.html',
+  styleUrl: './library-services-harness.component.css',
   providers: [
     PermissionsService,
     GeolocationService,
@@ -654,6 +66,9 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
     ServerSentEventsService,
     VibrationService,
     SpeechSynthesisService,
+    MutationObserverService,
+    PerformanceObserverService,
+    IdleDetectorService,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -681,6 +96,10 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   private readonly serverSentEventsService = inject(ServerSentEventsService);
   private readonly vibrationService = inject(VibrationService);
   private readonly speechSynthesisService = inject(SpeechSynthesisService);
+  private readonly mutationObserverService = inject(MutationObserverService);
+  private readonly performanceObserverService = inject(PerformanceObserverService);
+  private readonly idleDetectorService = inject(IdleDetectorService);
+  private readonly screenWakeLockService = inject(ScreenWakeLockService);
   private readonly harnessWorkerName = 'library-services-harness-worker';
 
   readonly capabilityOverview = signal<HarnessCapabilityOverview>(
@@ -758,6 +177,15 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   readonly speechSynthesisSupported = signal<boolean>(
     this.browserCapabilityService.isSupported('speechSynthesis'),
   );
+  readonly mutationObserverSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('mutationObserver'),
+  );
+  readonly performanceObserverSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('performanceObserver'),
+  );
+  readonly idleDetectorSupported = signal<boolean>(
+    this.browserCapabilityService.isSupported('idleDetector'),
+  );
   readonly pageVisibilityState = signal<string>(
     typeof document !== 'undefined' ? document.visibilityState : 'visible',
   );
@@ -814,6 +242,19 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   readonly clipboardReadValue = signal<string>('not-read');
   readonly notificationCount = signal<number>(0);
   readonly notificationShowState = signal<'idle' | 'pending' | 'success' | 'error'>('idle');
+  readonly mutationObserverState = signal<'idle' | 'observing' | 'mutation-detected' | 'error'>(
+    'idle',
+  );
+  readonly mutationCount = signal<number>(0);
+  readonly performanceObserverState = signal<'idle' | 'observing' | 'entries-received' | 'error'>(
+    'idle',
+  );
+  readonly performanceEntryCount = signal<number>(0);
+  readonly idleDetectorState = signal<'idle' | 'requesting-permission' | 'started' | 'error'>(
+    'idle',
+  );
+  readonly idleDetectorPermission = signal<HarnessPermissionState>('unknown');
+  readonly wakeLockState = signal<'idle' | 'requested' | 'active' | 'released' | 'error'>('idle');
   readonly errorMessage = signal<string>('');
   readonly lastAction = signal<string>('idle');
 
@@ -1254,8 +695,62 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     }
 
     this.resizeObserving.set(true);
-    this.resizeWidth.set(window.innerWidth);
-    this.resizeHeight.set(window.innerHeight);
+    // Use fallback values for headless test environments where window dimensions may be 0
+    const width = window.innerWidth || 800;
+    const height = window.innerHeight || 600;
+    this.resizeWidth.set(width);
+    this.resizeHeight.set(height);
+  }
+
+  observeMutations(): void {
+    this.resetError();
+    this.lastAction.set('observe-mutations');
+
+    if (!this.mutationObserverSupported()) {
+      this.mutationObserverState.set('error');
+      this.setError(new Error('MutationObserver API not supported'));
+      return;
+    }
+
+    this.mutationObserverState.set('observing');
+
+    const target = document.body;
+    this.mutationObserverService.observe(target, { childList: true, subtree: true }).subscribe({
+      next: (records) => {
+        this.mutationCount.update((count) => count + records.length);
+        this.mutationObserverState.set('mutation-detected');
+      },
+      error: (error: unknown) => {
+        this.mutationObserverState.set('error');
+        this.setError(error);
+      },
+    });
+  }
+
+  observePerformance(): void {
+    this.resetError();
+    this.lastAction.set('observe-performance');
+
+    if (!this.performanceObserverSupported()) {
+      this.performanceObserverState.set('error');
+      this.setError(new Error('PerformanceObserver API not supported'));
+      return;
+    }
+
+    this.performanceObserverState.set('observing');
+
+    this.performanceObserverService.observeByType('mark', true).subscribe({
+      next: (entries) => {
+        this.performanceEntryCount.update((count) => count + entries.length);
+        this.performanceObserverState.set('entries-received');
+      },
+      error: (error: unknown) => {
+        this.performanceObserverState.set('error');
+        this.setError(error);
+      },
+    });
+
+    performance.mark('harness-test-mark');
   }
 
   openBroadcastChannel(): void {
@@ -1344,6 +839,37 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     this.fullscreenState.set('windowed');
   }
 
+  async requestWakeLock(): Promise<void> {
+    this.resetError();
+    this.lastAction.set('request-wake-lock');
+    this.wakeLockState.set('requested');
+
+    if (!this.screenWakeLockSupported()) {
+      this.wakeLockState.set('error');
+      this.setError(new Error('Screen Wake Lock API not supported'));
+      return;
+    }
+
+    try {
+      await this.screenWakeLockService.request('screen');
+      this.wakeLockState.set('active');
+    } catch (error: unknown) {
+      this.wakeLockState.set('error');
+      this.setError(error);
+    }
+  }
+
+  async releaseWakeLock(): Promise<void> {
+    this.lastAction.set('release-wake-lock');
+
+    try {
+      await this.screenWakeLockService.release();
+      this.wakeLockState.set('released');
+    } catch (error: unknown) {
+      this.setError(error);
+    }
+  }
+
   vibrateSuccess(): void {
     this.resetError();
     this.lastAction.set('vibrate-success');
@@ -1421,8 +947,6 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
 
   private waitForWorkerMessage(taskId: string, timeoutMs: number): Promise<WorkerMessage> {
     return new Promise((resolve, reject) => {
-      let timeoutId: ReturnType<typeof setTimeout>;
-
       const subscription = this.webWorkerService.getMessages(this.harnessWorkerName).subscribe({
         next: (message) => {
           if (message.id !== taskId) {
@@ -1440,7 +964,7 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
         },
       });
 
-      timeoutId = setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         subscription.unsubscribe();
         reject(new Error('Worker response timed out in harness'));
       }, timeoutMs);

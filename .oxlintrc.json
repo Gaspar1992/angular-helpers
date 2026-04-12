@@ -1,8 +1,15 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["typescript"],
+  "plugins": ["typescript", "unicorn", "import"],
   "env": {
-    "browser": true
+    "browser": true,
+    "es2024": true
   },
-  "rules": {}
+  "rules": {
+    "eqeqeq": "error",
+    "no-debugger": "error",
+    "no-console": "warn",
+    "no-unused-vars": "off",
+    "prefer-const": "error"
+  }
 }

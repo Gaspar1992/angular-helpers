@@ -23,7 +23,8 @@ import { InputSanitizerService } from '@angular-helpers/security';
         </div>
       </div>
       <p class="svc-desc">
-        Sanitize user input to prevent XSS attacks: strip dangerous HTML, validate URLs, escape content.
+        Sanitize user input to prevent XSS attacks: strip dangerous HTML, validate URLs, escape
+        content.
       </p>
 
       <div class="svc-controls svc-controls--col">

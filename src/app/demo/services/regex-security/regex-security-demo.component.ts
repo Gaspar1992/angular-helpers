@@ -22,7 +22,9 @@ import { RegexSecurityService } from '@angular-helpers/security';
           <span class="badge badge-secure">web worker</span>
         </div>
       </div>
-      <p class="svc-desc">Test regular expressions safely with ReDoS protection using Web Workers.</p>
+      <p class="svc-desc">
+        Test regular expressions safely with ReDoS protection using Web Workers.
+      </p>
 
       <div class="svc-controls svc-controls--col">
         <label for="regex-pattern" class="demo-label">Pattern</label>
@@ -45,7 +47,11 @@ import { RegexSecurityService } from '@angular-helpers/security';
       </div>
 
       <div class="svc-controls">
-        <button class="btn btn-primary" (click)="testRegex()" [disabled]="regexStatus() === 'running'">
+        <button
+          class="btn btn-primary"
+          (click)="testRegex()"
+          [disabled]="regexStatus() === 'running'"
+        >
           @if (regexStatus() === 'running') {
             <span class="spinner"></span>
           }
