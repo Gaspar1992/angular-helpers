@@ -1,29 +1,34 @@
 import { Component, ChangeDetectionStrategy, ViewEncapsulation, signal } from '@angular/core';
 import { WebCryptoService } from '@angular-helpers/security';
-import { DemoCardComponent } from '../../../ui/demo-card/demo-card.component';
 
 @Component({
   selector: 'app-hashing-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [DemoCardComponent],
   providers: [WebCryptoService],
-  styleUrl: '../../../shared/demo-shared.styles.css',
   template: `
-    <app-demo-card
-      title="Content Hashing"
-      description="Generate SHA-256 hashes of request bodies for integrity checks and caching."
-      badge="WebCrypto"
-      badgeVariant="success"
-    >
-      <div class="demo-buttons">
-        <button (click)="hashContent()" class="btn btn-primary">Hash Content</button>
-        <button (click)="compareHashes()" class="btn btn-secondary">Compare Hashes</button>
+    <section class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5">
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0 flex items-center gap-2">
+          #️⃣ Content Hashing
+        </h2>
+        <span class="badge badge-accent badge-sm">SHA-256</span>
       </div>
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+        Generate SHA-256 hashes of request bodies for integrity checks and caching
+      </p>
+
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button (click)="hashContent()" class="btn btn-accent btn-sm">Hash Content</button>
+        <button (click)="compareHashes()" class="btn btn-secondary btn-sm">Compare Hashes</button>
+      </div>
+
       @if (hashResult()) {
-        <div class="demo-output">{{ hashResult() }}</div>
+        <div class="p-3 bg-base-300 rounded-lg font-mono text-xs break-all text-base-content">
+          {{ hashResult() }}
+        </div>
       }
-    </app-demo-card>
+    </section>
   `,
 })
 export class HashingDemoComponent {

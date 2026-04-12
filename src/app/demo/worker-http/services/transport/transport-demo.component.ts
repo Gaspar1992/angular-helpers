@@ -1,27 +1,34 @@
 import { Component, ChangeDetectionStrategy, ViewEncapsulation, signal } from '@angular/core';
-import { DemoCardComponent } from '../../../ui/demo-card/demo-card.component';
 
 @Component({
   selector: 'app-transport-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [DemoCardComponent],
-  styleUrl: '../../../shared/demo-shared.styles.css',
   template: `
-    <app-demo-card
-      title="Worker Transport"
-      description="Typed RPC bridge with request/response correlation, cancellation on unsubscribe, and worker pool."
-      badge="Transport"
-      badgeVariant="default"
-    >
-      <div class="demo-buttons">
-        <button (click)="sendEcho()" class="btn btn-primary">Send Echo</button>
-        <button (click)="poolBurst()" class="btn btn-secondary">Pool Burst (8 req / 4 workers)</button>
+    <section class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5">
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0 flex items-center gap-2">
+          ⚡ WorkerTransport
+        </h2>
+        <span class="badge badge-primary badge-sm">Typed RPC</span>
       </div>
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+        Typed RPC bridge with request/response correlation and worker pool
+      </p>
+
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button (click)="sendEcho()" class="btn btn-primary btn-sm">Send Echo</button>
+        <button (click)="poolBurst()" class="btn btn-secondary btn-sm">
+          Pool Burst (4 workers)
+        </button>
+      </div>
+
       @if (transportResult()) {
-        <div class="demo-output">{{ transportResult() }}</div>
+        <div class="p-3 bg-base-300 rounded-lg font-mono text-xs break-all text-base-content">
+          {{ transportResult() }}
+        </div>
       }
-    </app-demo-card>
+    </section>
   `,
 })
 export class TransportDemoComponent {

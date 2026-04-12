@@ -1,29 +1,36 @@
 import { Component, ChangeDetectionStrategy, ViewEncapsulation, signal } from '@angular/core';
 import { WebCryptoService } from '@angular-helpers/security';
-import { DemoCardComponent } from '../../../ui/demo-card/demo-card.component';
 
 @Component({
   selector: 'app-hmac-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [DemoCardComponent],
   providers: [WebCryptoService],
-  styleUrl: '../../../shared/demo-shared.styles.css',
   template: `
-    <app-demo-card
-      title="HMAC Signing"
-      description="Sign and verify request payloads using HMAC-SHA256 via the native Web Crypto API."
-      badge="WebCrypto"
-      badgeVariant="success"
-    >
-      <div class="demo-buttons">
-        <button (click)="signPayload()" class="btn btn-primary">Sign Payload</button>
-        <button (click)="verifySignature()" class="btn btn-secondary">Verify Signature</button>
+    <section class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5">
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0 flex items-center gap-2">
+          ✍️ HMAC Signing
+        </h2>
+        <span class="badge badge-secondary badge-sm">HMAC-SHA256</span>
       </div>
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
+        Sign and verify request payloads using HMAC-SHA256 via native Web Crypto API
+      </p>
+
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button (click)="signPayload()" class="btn btn-primary btn-sm">Sign Payload</button>
+        <button (click)="verifySignature()" class="btn btn-secondary btn-sm">
+          Verify Signature
+        </button>
+      </div>
+
       @if (signatureResult()) {
-        <div class="demo-output">{{ signatureResult() }}</div>
+        <div class="p-3 bg-base-300 rounded-lg font-mono text-xs break-all text-base-content">
+          {{ signatureResult() }}
+        </div>
       }
-    </app-demo-card>
+    </section>
   `,
 })
 export class HmacDemoComponent {
