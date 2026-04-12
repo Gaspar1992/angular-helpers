@@ -42,7 +42,8 @@ export const blogPostResolver: ResolveFn<BlogPostData | null> = (route: Activate
 
   const http = inject(HttpClient);
 
-  return http.get(`/content/blog/${slug}.md`, { responseType: 'text' }).pipe(
+  // Use relative path to work with subdirectory deployments (GitHub Pages)
+  return http.get(`content/blog/${slug}.md`, { responseType: 'text' }).pipe(
     map((raw) => {
       const { meta, body } = parseFrontmatter(raw);
       const html = marked.parse(body, { async: false }) as string;
