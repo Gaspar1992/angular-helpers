@@ -16,15 +16,16 @@ export class BatteryService extends BrowserApiBaseService {
     return 'battery';
   }
 
-  private ensureBatterySupport(): void {
+  protected override ensureSupported(): void {
+    super.ensureSupported();
     const nav = navigator as NavigatorWithBattery;
     if (!('getBattery' in nav)) {
-      throw new Error('Battery API not supported in this browser');
+      throw new Error('Battery Status API not supported in this browser');
     }
   }
 
   async initialize(): Promise<BatteryInfo> {
-    this.ensureBatterySupport();
+    this.ensureSupported();
 
     try {
       const nav = navigator as NavigatorWithBattery;
@@ -34,7 +35,7 @@ export class BatteryService extends BrowserApiBaseService {
 
       return batteryInfo;
     } catch (error) {
-      console.error('[BatteryService] Error initializing battery API:', error);
+      this.logError('Error initializing battery API:', error);
       throw this.createError('Failed to initialize battery API', error);
     }
   }

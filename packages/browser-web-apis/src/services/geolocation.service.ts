@@ -11,7 +11,7 @@ export class GeolocationService extends BrowserApiBaseService {
   protected override ensureSupported(): void {
     super.ensureSupported();
     if (!('geolocation' in navigator)) {
-      throw new Error('Geolocation API not supported in this browser');
+      throw new Error('Geolocation API not supported — a secure context (HTTPS) is required');
     }
   }
 

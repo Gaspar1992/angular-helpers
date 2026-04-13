@@ -7,25 +7,27 @@ export class NotificationService extends BrowserApiBaseService {
     return 'notifications';
   }
 
+  protected override ensureSupported(): void {
+    super.ensureSupported();
+    if (!('Notification' in window)) {
+      throw new Error('Notifications API not supported in this browser');
+    }
+  }
+
   get permission(): NotificationPermission {
+    if (!this.isBrowserEnvironment() || !('Notification' in window)) {
+      return 'default';
+    }
     return Notification.permission;
   }
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && 'Notification' in window;
-  }
-
   async requestNotificationPermission(): Promise<NotificationPermission> {
-    if (!this.isSupported()) {
-      throw new Error('Notification API not supported in this browser');
-    }
+    this.ensureSupported();
     return Notification.requestPermission();
   }
 
   async showNotification(title: string, options?: NotificationOptions): Promise<Notification> {
-    if (!this.isSupported()) {
-      throw new Error('Notification API not supported in this browser');
-    }
+    this.ensureSupported();
 
     if (Notification.permission !== 'granted') {
       throw new Error(
