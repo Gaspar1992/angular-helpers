@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { BrowserApiBaseService } from './base/browser-api-base.service';
-
+import { BrowserApiBaseService } from '@angular-helpers/browser-web-apis';
 import {
   type NdefMessage,
   type NdefReadingEvent,
   type NdefWriteOptions,
   type NdefReaderConstructor,
   type NdefReaderInstance,
-} from '../interfaces/experimental-apis.types';
+} from './experimental-apis.types';
 
 export type { NdefMessage, NdefReadingEvent, NdefWriteOptions };
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { BrowserApiBaseService } from './base/browser-api-base.service';
+import { BrowserApiBaseService } from '@angular-helpers/browser-web-apis';
 
 export type UserIdleState = 'active' | 'idle';
 export type ScreenIdleState = 'locked' | 'unlocked';

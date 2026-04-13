@@ -131,6 +131,65 @@ import type { BlogPostData } from '../../services/blog-post.resolver';
         color: oklch(88% 0.02 256 / 0.55);
         font-style: italic;
       }
+
+      /* Highlight.js syntax highlighting - Atom One Dark theme adaptation */
+      :host ::ng-deep .hljs {
+        color: oklch(88% 0.02 256 / 0.9);
+        background: transparent;
+      }
+      :host ::ng-deep .hljs-comment,
+      :host ::ng-deep .hljs-quote {
+        color: oklch(60% 0.05 256 / 0.7);
+        font-style: italic;
+      }
+      :host ::ng-deep .hljs-keyword,
+      :host ::ng-deep .hljs-selector-tag,
+      :host ::ng-deep .hljs-type {
+        color: oklch(65% 0.25 285);
+      }
+      :host ::ng-deep .hljs-string,
+      :host ::ng-deep .hljs-regexp,
+      :host ::ng-deep .hljs-addition,
+      :host ::ng-deep .hljs-attribute,
+      :host ::ng-deep .hljs-meta-string {
+        color: oklch(75% 0.2 145);
+      }
+      :host ::ng-deep .hljs-number,
+      :host ::ng-deep .hljs-literal,
+      :host ::ng-deep .hljs-built_in,
+      :host ::ng-deep .hljs-bullet {
+        color: oklch(70% 0.15 50);
+      }
+      :host ::ng-deep .hljs-variable,
+      :host ::ng-deep .hljs-template-variable,
+      :host ::ng-deep .hljs-tag .hljs-attr {
+        color: oklch(75% 0.15 95);
+      }
+      :host ::ng-deep .hljs-function,
+      :host ::ng-deep .hljs-title,
+      :host ::ng-deep .hljs-section {
+        color: oklch(70% 0.15 265);
+      }
+      :host ::ng-deep .hljs-class,
+      :host ::ng-deep .hljs-title.class_ {
+        color: oklch(75% 0.2 95);
+      }
+      :host ::ng-deep .hljs-params {
+        color: oklch(88% 0.02 256 / 0.8);
+      }
+      :host ::ng-deep .hljs-punctuation,
+      :host ::ng-deep .hljs-tag {
+        color: oklch(70% 0.1 256);
+      }
+      :host ::ng-deep .hljs-operator,
+      :host ::ng-deep .hljs-property {
+        color: oklch(75% 0.18 310);
+      }
+      :host ::ng-deep .hljs-deletion,
+      :host ::ng-deep .hljs-name,
+      :host ::ng-deep .hljs-tag .hljs-name {
+        color: oklch(65% 0.2 25);
+      }
     `,
   ],
 })

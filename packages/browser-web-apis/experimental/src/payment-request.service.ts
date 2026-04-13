@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BrowserApiBaseService } from './base/browser-api-base.service';
+import { BrowserApiBaseService } from '@angular-helpers/browser-web-apis';
 
 export interface PaymentMethodConfig {
   supportedMethods: string;

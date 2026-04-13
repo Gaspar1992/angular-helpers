@@ -4,7 +4,20 @@ import { ResolveFn, ActivatedRouteSnapshot } from '@angular/router';
 import { of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { marked } from 'marked';
+import hljs from 'highlight.js';
 import type { BlogPost } from '../models/blog-post.model';
+
+// Configure marked to use highlight.js for syntax highlighting
+const renderer = new marked.Renderer();
+renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
+  const language = lang || 'plaintext';
+  const highlighted = hljs.getLanguage(language)
+    ? hljs.highlight(text, { language }).value
+    : hljs.highlightAuto(text).value;
+  return `<pre><code class="hljs language-${language}">${highlighted}</code></pre>`;
+};
+
+marked.setOptions({ renderer });
 
 export interface BlogPostData {
   meta: BlogPost;

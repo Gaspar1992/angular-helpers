@@ -1789,7 +1789,7 @@ export class MetricsComponent {
         returns: 'boolean',
       },
     ],
-    example: `import { IdleDetectorService } from '@angular-helpers/browser-web-apis';
+    example: `import { IdleDetectorService } from '@angular-helpers/browser-web-apis/experimental';
 
 @Component({ providers: [IdleDetectorService] })
 export class PresenceComponent {
@@ -1804,7 +1804,7 @@ export class PresenceComponent {
 }`,
     fnVersion: {
       name: 'injectIdleDetector',
-      importPath: '@angular-helpers/browser-web-apis',
+      importPath: '@angular-helpers/browser-web-apis/experimental',
       returnType: 'IdleDetectorRef',
       description:
         'Exposes user idle and screen lock state as reactive signals. Automatically starts monitoring and cleans up on destroy.',
@@ -1830,7 +1830,7 @@ export class PresenceComponent {
           description: 'True when the screen is locked.',
         },
       ],
-      example: `import { injectIdleDetector } from '@angular-helpers/browser-web-apis';
+      example: `import { injectIdleDetector } from '@angular-helpers/browser-web-apis/experimental';
 
 @Component({...})
 export class PresenceComponent {
@@ -1847,7 +1847,7 @@ export class PresenceComponent {
     description:
       'Provides access to the EyeDropper API for picking colors from anywhere on the screen. Opens a system color picker that returns the selected color in sRGB hex format.',
     scope: 'provided',
-    importPath: '@angular-helpers/browser-web-apis',
+    importPath: '@angular-helpers/browser-web-apis/experimental',
     requiresSecureContext: true,
     browserSupport: 'Chrome ✓ · Firefox ✗ · Safari ✗ · Edge ✓',
     notes: ['Must be triggered by a user gesture.', 'Only available in Chromium-based browsers.'],
@@ -1865,7 +1865,7 @@ export class PresenceComponent {
         returns: 'boolean',
       },
     ],
-    example: `import { EyeDropperService } from '@angular-helpers/browser-web-apis';
+    example: `import { EyeDropperService } from '@angular-helpers/browser-web-apis/experimental';
 
 @Component({ providers: [EyeDropperService] })
 export class ColorPickerComponent {
@@ -1886,7 +1886,7 @@ export class ColorPickerComponent {
     description:
       'Wraps the Barcode Detection API (Shape Detection API) for scanning barcodes and QR codes from images, video frames, or canvas elements.',
     scope: 'provided',
-    importPath: '@angular-helpers/browser-web-apis',
+    importPath: '@angular-helpers/browser-web-apis/experimental',
     requiresSecureContext: true,
     browserSupport: 'Chrome ✓ · Firefox ✗ · Safari ✗ · Edge ✓',
     notes: [
@@ -1915,7 +1915,7 @@ export class ColorPickerComponent {
         returns: 'boolean',
       },
     ],
-    example: `import { BarcodeDetectorService } from '@angular-helpers/browser-web-apis';
+    example: `import { BarcodeDetectorService } from '@angular-helpers/browser-web-apis/experimental';
 
 @Component({ providers: [BarcodeDetectorService] })
 export class ScannerComponent {
@@ -2116,7 +2116,7 @@ export class GameInputComponent {
     description:
       'Provides access to the Web Bluetooth API for connecting to Bluetooth Low Energy (BLE) devices. Supports device discovery, GATT service/characteristic read/write, and notifications.',
     scope: 'provided',
-    importPath: '@angular-helpers/browser-web-apis',
+    importPath: '@angular-helpers/browser-web-apis/experimental',
     requiresSecureContext: true,
     browserSupport: 'Chrome ✓ · Firefox ✗ · Safari ✗ · Edge ✓',
     notes: [
@@ -2171,7 +2171,7 @@ export class GameInputComponent {
         returns: 'boolean',
       },
     ],
-    example: `import { WebBluetoothService } from '@angular-helpers/browser-web-apis';
+    example: `import { WebBluetoothService } from '@angular-helpers/browser-web-apis/experimental';
 
 @Component({ providers: [WebBluetoothService] })
 export class BleComponent {
@@ -2196,7 +2196,7 @@ export class BleComponent {
     description:
       'Provides access to the WebUSB API for communicating with USB devices from the browser. Supports device discovery, configuration, interface claiming, and data transfer.',
     scope: 'provided',
-    importPath: '@angular-helpers/browser-web-apis',
+    importPath: '@angular-helpers/browser-web-apis/experimental',
     requiresSecureContext: true,
     browserSupport: 'Chrome ✓ · Firefox ✗ · Safari ✗ · Edge ✓',
     notes: [
@@ -2257,7 +2257,7 @@ export class BleComponent {
         returns: 'boolean',
       },
     ],
-    example: `import { WebUsbService } from '@angular-helpers/browser-web-apis';
+    example: `import { WebUsbService } from '@angular-helpers/browser-web-apis/experimental';
 
 @Component({ providers: [WebUsbService] })
 export class UsbComponent {
@@ -2277,7 +2277,7 @@ export class UsbComponent {
     description:
       'Provides access to the Web NFC API for reading and writing NFC tags. Supports NDEF message scanning and writing.',
     scope: 'provided',
-    importPath: '@angular-helpers/browser-web-apis',
+    importPath: '@angular-helpers/browser-web-apis/experimental',
     requiresSecureContext: true,
     browserSupport: 'Chrome Android ✓ · Firefox ✗ · Safari ✗ · Edge ✗',
     notes: [
@@ -2306,7 +2306,7 @@ export class UsbComponent {
         returns: 'boolean',
       },
     ],
-    example: `import { WebNfcService } from '@angular-helpers/browser-web-apis';
+    example: `import { WebNfcService } from '@angular-helpers/browser-web-apis/experimental';
 
 @Component({ providers: [WebNfcService] })
 export class NfcComponent {
@@ -2331,7 +2331,7 @@ export class NfcComponent {
     description:
       'Wraps the Payment Request API for initiating native payment flows. Supports payment method validation, payment sheet display, and result handling.',
     scope: 'provided',
-    importPath: '@angular-helpers/browser-web-apis',
+    importPath: '@angular-helpers/browser-web-apis/experimental',
     requiresSecureContext: true,
     browserSupport: 'Chrome ✓ · Firefox ✓ · Safari ✓ · Edge ✓',
     notes: [
@@ -2361,7 +2361,7 @@ export class NfcComponent {
         returns: 'boolean',
       },
     ],
-    example: `import { PaymentRequestService } from '@angular-helpers/browser-web-apis';
+    example: `import { PaymentRequestService } from '@angular-helpers/browser-web-apis/experimental';
 
 @Component({ providers: [PaymentRequestService] })
 export class CheckoutComponent {
@@ -2384,7 +2384,7 @@ export class CheckoutComponent {
     description:
       'Wraps the Credential Management API for managing user credentials. Supports password credentials, public key credentials (WebAuthn/passkeys), and silent sign-in prevention.',
     scope: 'provided',
-    importPath: '@angular-helpers/browser-web-apis',
+    importPath: '@angular-helpers/browser-web-apis/experimental',
     requiresSecureContext: true,
     browserSupport: 'Chrome ✓ · Firefox ✓ · Safari partial · Edge ✓',
     notes: [
@@ -2437,7 +2437,7 @@ export class CheckoutComponent {
         returns: 'boolean',
       },
     ],
-    example: `import { CredentialManagementService } from '@angular-helpers/browser-web-apis';
+    example: `import { CredentialManagementService } from '@angular-helpers/browser-web-apis/experimental';
 
 @Component({ providers: [CredentialManagementService] })
 export class LoginComponent {

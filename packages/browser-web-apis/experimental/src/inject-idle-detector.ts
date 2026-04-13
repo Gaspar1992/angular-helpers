@@ -6,7 +6,7 @@ import {
   type UserIdleState,
   type ScreenIdleState,
   type IdleDetectorOptions,
-} from '../services/idle-detector.service';
+} from './idle-detector.service';
 
 interface IdleDetectorInstance extends EventTarget {
   readonly userState: UserIdleState;

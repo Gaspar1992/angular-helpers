@@ -68,7 +68,8 @@
               "buildTarget": "angular-helpers:build:production"
             },
             "development": {
-              "buildTarget": "angular-helpers:build:development"
+              "buildTarget": "angular-helpers:build:development",
+              "prebundle": false
             }
           },
           "defaultConfiguration": "development"

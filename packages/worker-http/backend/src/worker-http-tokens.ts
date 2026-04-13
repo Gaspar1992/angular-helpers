@@ -6,7 +6,7 @@ import type {
   WorkerFallbackStrategy,
   WorkerRoute,
 } from './worker-http-backend.types';
-import type { WorkerSerializer } from '../../serializer/src/worker-serializer.types';
+import type { WorkerSerializer } from '@angular-helpers/worker-http/serializer';
 
 /**
  * Per-request HttpContextToken that carries the target worker ID.
