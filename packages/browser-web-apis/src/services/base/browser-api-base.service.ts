@@ -69,6 +69,13 @@ export abstract class BrowserApiBaseService {
   }
 
   /**
+   * Log a warning through the injected BROWSER_API_LOGGER (default: console).
+   */
+  protected logWarn(message: string): void {
+    this.logger.warn(`[${this.getApiName()}] ${message}`);
+  }
+
+  /**
    * Log an informational message through the injected BROWSER_API_LOGGER (default: console).
    */
   protected logInfo(message: string): void {

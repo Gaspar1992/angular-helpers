@@ -83,7 +83,7 @@ export class MediaRecorderService extends BrowserApiBaseService {
 
       this.recorder.start(timeslice);
     } catch (error) {
-      console.error('[MediaRecorderService] Failed to start recording:', error);
+      this.logError('Failed to start recording:', error);
       throw this.createError('Failed to start recording', error);
     }
   }

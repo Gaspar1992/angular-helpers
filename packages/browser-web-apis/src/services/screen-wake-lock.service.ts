@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
@@ -20,7 +19,7 @@ export class ScreenWakeLockService extends BrowserApiBaseService {
   }
 
   isSupported(): boolean {
-    return isPlatformBrowser(this.platformId) && 'wakeLock' in navigator;
+    return this.isBrowserEnvironment() && 'wakeLock' in navigator;
   }
 
   get isActive(): boolean {
@@ -47,7 +46,7 @@ export class ScreenWakeLockService extends BrowserApiBaseService {
 
       return { active: true, type, released: false };
     } catch (error) {
-      console.error('[ScreenWakeLockService] Failed to acquire wake lock:', error);
+      this.logError('Failed to acquire wake lock:', error);
       throw this.createError('Failed to acquire wake lock', error);
     }
   }

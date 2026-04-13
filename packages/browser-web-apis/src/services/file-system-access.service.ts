@@ -64,7 +64,7 @@ export class FileSystemAccessService extends BrowserApiBaseService {
       if (error instanceof DOMException && error.name === 'AbortError') {
         return [];
       }
-      console.error('[FileSystemAccessService] Error opening file:', error);
+      this.logError('Error opening file:', error);
       throw error;
     }
   }
@@ -83,7 +83,7 @@ export class FileSystemAccessService extends BrowserApiBaseService {
       if (error instanceof DOMException && error.name === 'AbortError') {
         return;
       }
-      console.error('[FileSystemAccessService] Error saving file:', error);
+      this.logError('Error saving file:', error);
       throw error;
     }
   }
@@ -105,7 +105,7 @@ export class FileSystemAccessService extends BrowserApiBaseService {
       if (error instanceof DOMException && error.name === 'AbortError') {
         return null;
       }
-      console.error('[FileSystemAccessService] Error opening directory:', error);
+      this.logError('Error opening directory:', error);
       throw error;
     }
   }

@@ -12,20 +12,21 @@ export class WebShareService extends BrowserApiBaseService {
     return 'web-share';
   }
 
-  private ensureWebShareSupport(): void {
+  protected override ensureSupported(): void {
+    super.ensureSupported();
     if (!('share' in navigator)) {
       throw new Error('Web Share API not supported in this browser');
     }
   }
 
   async share(data: ShareData): Promise<ShareResult> {
-    this.ensureWebShareSupport();
+    this.ensureSupported();
 
     try {
       await navigator.share(data);
       return { shared: true };
     } catch (error: unknown) {
-      console.error('[WebShareService] Error sharing:', error);
+      this.logError('Error sharing:', error);
 
       const errorMessage = error instanceof Error ? error.message : 'Share failed';
       return { shared: false, error: errorMessage };
@@ -46,7 +47,7 @@ export class WebShareService extends BrowserApiBaseService {
 
   // Direct access to native share API
   getNativeShare(): typeof navigator.share {
-    this.ensureWebShareSupport();
+    this.ensureSupported();
     return navigator.share;
   }
 }

@@ -65,7 +65,7 @@ export class ServerSentEventsService extends ConnectionRegistryBaseService<Event
         if (source.readyState === EventSource.CLOSED) {
           observer.error(new Error('SSE connection closed unexpectedly'));
         } else {
-          console.warn(`[${this.getApiName()}] SSE connection error, reconnecting...`, event);
+          this.logWarn('SSE connection error, reconnecting...');
         }
       };
 

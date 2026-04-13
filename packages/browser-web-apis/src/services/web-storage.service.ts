@@ -12,7 +12,7 @@ export interface StorageOptions {
 }
 
 export interface StorageEvent {
-  key: string;
+  key: string | null;
   newValue: StorageValue | null;
   oldValue: StorageValue | null;
   storageArea: 'localStorage' | 'sessionStorage';
@@ -84,7 +84,7 @@ export class WebStorageService extends BrowserApiBaseService {
   }
 
   private emitStorageChange(
-    fullKey: string,
+    fullKey: string | null,
     newValue: StorageValue | null,
     oldValue: StorageValue | null,
     area: 'localStorage' | 'sessionStorage',
@@ -153,7 +153,6 @@ export class WebStorageService extends BrowserApiBaseService {
     try {
       const prefix = options?.prefix;
       if (prefix) {
-        // Only remove keys with the specified prefix
         const keysToRemove: string[] = [];
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
@@ -161,9 +160,14 @@ export class WebStorageService extends BrowserApiBaseService {
             keysToRemove.push(key);
           }
         }
-        keysToRemove.forEach((key) => localStorage.removeItem(key));
+        keysToRemove.forEach((key) => {
+          const oldRaw = localStorage.getItem(key);
+          localStorage.removeItem(key);
+          this.emitStorageChange(key, null, oldRaw, 'localStorage');
+        });
       } else {
         localStorage.clear();
+        this.emitStorageChange(null, null, null, 'localStorage');
       }
       return true;
     } catch (error) {
@@ -233,7 +237,6 @@ export class WebStorageService extends BrowserApiBaseService {
     try {
       const prefix = options?.prefix;
       if (prefix) {
-        // Only remove keys with the specified prefix
         const keysToRemove: string[] = [];
         for (let i = 0; i < sessionStorage.length; i++) {
           const key = sessionStorage.key(i);
@@ -241,9 +244,14 @@ export class WebStorageService extends BrowserApiBaseService {
             keysToRemove.push(key);
           }
         }
-        keysToRemove.forEach((key) => sessionStorage.removeItem(key));
+        keysToRemove.forEach((key) => {
+          const oldRaw = sessionStorage.getItem(key);
+          sessionStorage.removeItem(key);
+          this.emitStorageChange(key, null, oldRaw, 'sessionStorage');
+        });
       } else {
         sessionStorage.clear();
+        this.emitStorageChange(null, null, null, 'sessionStorage');
       }
       return true;
     } catch (error) {
@@ -301,7 +309,10 @@ export class WebStorageService extends BrowserApiBaseService {
   ): Observable<T | null> {
     const fullKey = this.getKey(key, options);
     return this.getStorageEvents().pipe(
-      filter((event) => event.key === fullKey && event.storageArea === 'localStorage'),
+      filter(
+        (event) =>
+          event.storageArea === 'localStorage' && (event.key === null || event.key === fullKey),
+      ),
       map((event) => event.newValue as T | null),
     );
   }
@@ -312,7 +323,10 @@ export class WebStorageService extends BrowserApiBaseService {
   ): Observable<T | null> {
     const fullKey = this.getKey(key, options);
     return this.getStorageEvents().pipe(
-      filter((event) => event.key === fullKey && event.storageArea === 'sessionStorage'),
+      filter(
+        (event) =>
+          event.storageArea === 'sessionStorage' && (event.key === null || event.key === fullKey),
+      ),
       map((event) => event.newValue as T | null),
     );
   }

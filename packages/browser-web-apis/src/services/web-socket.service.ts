@@ -39,6 +39,7 @@ export class WebSocketService extends BrowserApiBaseService {
   private reconnectAttempts = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly _cleanup = this.destroyRef.onDestroy(() => this.disconnect());
 
   protected override getApiName(): string {
     return 'websocket';
@@ -136,9 +137,13 @@ export class WebSocketService extends BrowserApiBaseService {
   }
 
   getMessages<T = unknown>(): Observable<WebSocketMessage<T>> {
+    return this.messageSubject.asObservable() as Observable<WebSocketMessage<T>>;
+  }
+
+  getMessagesByType<T = unknown>(type: string): Observable<WebSocketMessage<T>> {
     return this.messageSubject
       .asObservable()
-      .pipe(filter((msg): msg is WebSocketMessage<T> => true));
+      .pipe(filter((msg): msg is WebSocketMessage<T> => msg.type === type));
   }
 
   private setupWebSocketHandlers(config: WebSocketConfig): void {

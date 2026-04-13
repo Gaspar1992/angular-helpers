@@ -29,6 +29,7 @@ export class WebWorkerService extends BrowserApiBaseService {
   private workerStatuses = new Map<string, Subject<WorkerStatus>>();
   private workerMessages = new Map<string, Subject<WorkerMessage>>();
   private currentWorkerStatuses = new Map<string, WorkerStatus>();
+  private readonly _cleanup = this.destroyRef.onDestroy(() => this.terminateAllWorkers());
 
   protected override getApiName(): string {
     return 'webworker';
