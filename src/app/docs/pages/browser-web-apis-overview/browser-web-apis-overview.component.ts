@@ -4,23 +4,31 @@ import { CodeBlockComponent } from '../../shared/code-block/code-block.component
 import { DocsPageHeaderComponent } from '../../shared/page-header/docs-page-header.component';
 import { BreadcrumbItem } from '../../models/doc-meta.model';
 
-const PROVIDER_EXAMPLE = `import { provideBrowserWebApis } from '@angular-helpers/browser-web-apis';
+const PROVIDER_ALL_IN_ONE = `import { provideBrowserWebApis } from '@angular-helpers/browser-web-apis';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideBrowserWebApis({
       enableCamera: true,
       enableGeolocation: true,
-      enableRegexSecurity: true,
       enableWebStorage: true,
       enableWebSocket: true,
       enableWebWorker: true,
-      enableWebShare: true,
-      enableBattery: true,
-      enableMediaDevices: true,
-      enableNotifications: true,
-      enableClipboard: true,
     }),
+  ],
+});`;
+
+const PROVIDER_GRANULAR = `import {
+  provideCamera,
+  provideGeolocation,
+  provideWebStorage,
+} from '@angular-helpers/browser-web-apis';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideCamera(),       // → only CameraService + PermissionsService
+    provideGeolocation(),  // → only GeolocationService + PermissionsService
+    provideWebStorage(),   // → only WebStorageService
   ],
 });`;
 
@@ -281,8 +289,16 @@ const SERVICE_GROUPS = [
 
       <section class="docs-section">
         <h2 class="docs-section-title">Setup</h2>
-        <p class="docs-section-text">Register the providers once in your application bootstrap:</p>
-        <app-code-block [code]="providerExample" />
+        <p class="docs-section-text">
+          <strong>All-in-one</strong> — register everything you need at once via config flags:
+        </p>
+        <app-code-block [code]="providerAllInOne" />
+        <p class="docs-section-text" style="margin-top: var(--sp-4)">
+          <strong>Granular (recommended for production)</strong> — each
+          <code>provideX()</code> lives in its own module and imports only its service. Bundlers
+          tree-shake everything you don't include:
+        </p>
+        <app-code-block [code]="providerGranular" />
       </section>
 
       <section class="docs-section">
@@ -374,6 +390,7 @@ export class BrowserWebApisOverviewComponent {
     { label: 'Docs', route: '/docs' },
     { label: 'browser-web-apis' },
   ];
-  protected readonly providerExample = PROVIDER_EXAMPLE;
+  protected readonly providerAllInOne = PROVIDER_ALL_IN_ONE;
+  protected readonly providerGranular = PROVIDER_GRANULAR;
   protected readonly serviceGroups = SERVICE_GROUPS;
 }

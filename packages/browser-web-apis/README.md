@@ -8,12 +8,13 @@ Angular services package for a structured and secure access layer over browser W
 
 ## Features
 
-- Integrated security with ReDoS prevention using Web Workers
 - Unified browser API access through strongly typed services
-- Tree-shakable architecture
-- Modular provider setup to enable only what you need
-- Reactive APIs with signals and observables
-- Lifecycle-safe integration with `destroyRef`
+- **True tree-shaking** — individual `provideX()` functions import only their own service
+- All-in-one `provideBrowserWebApis()` for quick setup when bundle size is not a concern
+- Reactive APIs using signals and observables
+- Lifecycle-safe integration with `DestroyRef` (automatic cleanup)
+- Centralized logging and error handling via `BrowserApiBaseService`
+- Secure context validation and browser support detection built in
 
 ## Available Services
 
@@ -96,6 +97,8 @@ npm install @angular-helpers/browser-web-apis
 
 ## Quick Setup
 
+### All-in-one (zero bundle budget concern)
+
 ```typescript
 import { provideBrowserWebApis } from '@angular-helpers/browser-web-apis';
 
@@ -106,6 +109,62 @@ bootstrapApplication(AppComponent, {
       enableGeolocation: true,
       enableNotifications: true,
     }),
+  ],
+});
+```
+
+### Granular setup (recommended for production)
+
+Each `provideX()` lives in its own module and imports only the service it needs. Bundlers (webpack, Rollup, Vite) will tree-shake anything you don't include.
+
+```typescript
+import {
+  provideCamera,
+  provideGeolocation,
+  provideWebStorage,
+} from '@angular-helpers/browser-web-apis';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideCamera(), // → only CameraService + PermissionsService
+    provideGeolocation(), // → only GeolocationService + PermissionsService
+    provideWebStorage(), // → only WebStorageService
+  ],
+});
+```
+
+Every service has a matching `provideX()` function:
+
+| Function                        | Services included                           |
+| ------------------------------- | ------------------------------------------- |
+| `provideCamera()`               | `PermissionsService`, `CameraService`       |
+| `provideGeolocation()`          | `PermissionsService`, `GeolocationService`  |
+| `provideNotifications()`        | `PermissionsService`, `NotificationService` |
+| `provideClipboard()`            | `PermissionsService`, `ClipboardService`    |
+| `provideMediaDevices()`         | `PermissionsService`, `MediaDevicesService` |
+| `provideWebStorage()`           | `WebStorageService`                         |
+| `provideWebSocket()`            | `WebSocketService`                          |
+| `provideWebWorker()`            | `WebWorkerService`                          |
+| `provideBattery()`              | `BatteryService`                            |
+| `provideIntersectionObserver()` | `IntersectionObserverService`               |
+| `provideResizeObserver()`       | `ResizeObserverService`                     |
+| `provideMutationObserver()`     | `MutationObserverService`                   |
+| `providePerformanceObserver()`  | `PerformanceObserverService`                |
+| `providePageVisibility()`       | `PageVisibilityService`                     |
+| `provideNetworkInformation()`   | `NetworkInformationService`                 |
+| …and 22 more                    | See `src/providers/`                        |
+
+### Combo providers
+
+Convenience functions that bundle related services:
+
+```typescript
+import { provideMediaApis, provideStorageApis } from '@angular-helpers/browser-web-apis';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideMediaApis(), // Camera + MediaDevices + Permissions
+    provideStorageApis(), // Clipboard + WebStorage + Permissions
   ],
 });
 ```

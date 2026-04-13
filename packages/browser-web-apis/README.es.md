@@ -8,12 +8,13 @@ Paquete de servicios Angular para acceder de forma estructurada y segura a Brows
 
 ## Caracteristicas
 
-- Seguridad integrada con prevencion de ReDoS usando Web Workers
 - Acceso unificado a APIs del navegador mediante servicios tipados
-- Arquitectura tree-shakable
-- Configuracion modular para habilitar solo lo necesario
+- **Tree-shaking real** — cada `provideX()` vive en su propio modulo e importa solo lo que necesita
+- `provideBrowserWebApis()` para configuracion rapida cuando el tamano del bundle no es critico
 - APIs reactivas con signals y observables
-- Integracion segura con el ciclo de vida usando `destroyRef`
+- Integracion segura con el ciclo de vida via `DestroyRef` (cleanup automatico)
+- Logging y manejo de errores centralizado en `BrowserApiBaseService`
+- Validacion de contexto seguro y deteccion de soporte del navegador incorporados
 
 ## Servicios disponibles
 
@@ -29,6 +30,8 @@ Paquete de servicios Angular para acceder de forma estructurada y segura a Brows
 
 - `IntersectionObserverService` - Detectar cuando elementos entran/salen del viewport
 - `ResizeObserverService` - Observar cambios de tamano de elementos
+- `MutationObserverService` - Observar mutaciones en el DOM
+- `PerformanceObserverService` - Monitorear entradas de rendimiento (LCP, CLS, etc.)
 
 ### APIs de sistema
 
@@ -39,6 +42,9 @@ Paquete de servicios Angular para acceder de forma estructurada y segura a Brows
 - `FullscreenService` - Alternar modo pantalla completa para elementos
 - `VibrationService` - Activar patrones de retroalimentacion tactil
 - `SpeechSynthesisService` - Texto a voz con seleccion de voz
+- `IdleDetectorService` - Detectar estado idle del usuario y bloqueo de pantalla
+- `GamepadService` - Polling de entrada de controladores de juego
+- `WebAudioService` - Contexto de audio, osciladores y analizadores
 
 ### APIs de red
 
@@ -75,6 +81,8 @@ npm install @angular-helpers/browser-web-apis
 
 ## Configuracion rapida
 
+### Todo en uno (sin preocupacion por el bundle)
+
 ```typescript
 import { provideBrowserWebApis } from '@angular-helpers/browser-web-apis';
 
@@ -85,6 +93,62 @@ bootstrapApplication(AppComponent, {
       enableGeolocation: true,
       enableNotifications: true,
     }),
+  ],
+});
+```
+
+### Configuracion granular (recomendada para produccion)
+
+Cada `provideX()` vive en su propio modulo e importa solo su servicio. Los bundlers (webpack, Rollup, Vite) eliminan todo lo que no uses.
+
+```typescript
+import {
+  provideCamera,
+  provideGeolocation,
+  provideWebStorage,
+} from '@angular-helpers/browser-web-apis';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideCamera(), // → solo CameraService + PermissionsService
+    provideGeolocation(), // → solo GeolocationService + PermissionsService
+    provideWebStorage(), // → solo WebStorageService
+  ],
+});
+```
+
+Cada servicio tiene su propio `provideX()`:
+
+| Funcion                         | Servicios incluidos                         |
+| ------------------------------- | ------------------------------------------- |
+| `provideCamera()`               | `PermissionsService`, `CameraService`       |
+| `provideGeolocation()`          | `PermissionsService`, `GeolocationService`  |
+| `provideNotifications()`        | `PermissionsService`, `NotificationService` |
+| `provideClipboard()`            | `PermissionsService`, `ClipboardService`    |
+| `provideMediaDevices()`         | `PermissionsService`, `MediaDevicesService` |
+| `provideWebStorage()`           | `WebStorageService`                         |
+| `provideWebSocket()`            | `WebSocketService`                          |
+| `provideWebWorker()`            | `WebWorkerService`                          |
+| `provideBattery()`              | `BatteryService`                            |
+| `provideIntersectionObserver()` | `IntersectionObserverService`               |
+| `provideResizeObserver()`       | `ResizeObserverService`                     |
+| `provideMutationObserver()`     | `MutationObserverService`                   |
+| `providePerformanceObserver()`  | `PerformanceObserverService`                |
+| `providePageVisibility()`       | `PageVisibilityService`                     |
+| `provideNetworkInformation()`   | `NetworkInformationService`                 |
+| …y 22 mas                       | Ver `src/providers/`                        |
+
+### Providers combinados
+
+Funciones de conveniencia que agrupan servicios relacionados:
+
+```typescript
+import { provideMediaApis, provideStorageApis } from '@angular-helpers/browser-web-apis';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideMediaApis(), // Camera + MediaDevices + Permissions
+    provideStorageApis(), // Clipboard + WebStorage + Permissions
   ],
 });
 ```
