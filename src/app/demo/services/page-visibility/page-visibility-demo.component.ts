@@ -1,11 +1,13 @@
 import { Component, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { PageVisibilityService, injectPageVisibility } from '@angular-helpers/browser-web-apis';
+import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 
 @Component({
   selector: 'app-page-visibility-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [PageVisibilityService],
+  imports: [CodeBlockComponent],
   template: `
     <section
       class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
@@ -108,15 +110,15 @@ import { PageVisibilityService, injectPageVisibility } from '@angular-helpers/br
           <p class="text-xs text-base-content/80 mb-2">
             Zero-boilerplate reactive state - auto-cleanup on destroy:
           </p>
-          <pre
-            class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
-          ><code>import {{ '{' }} injectPageVisibility {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+          <app-code-block
+            code="import { injectPageVisibility } from '@angular-helpers/browser-web-apis';
 
-    readonly visibility = injectPageVisibility();
+readonly visibility = injectPageVisibility();
 
-    // Direct signal access in template:
-    // visibility.isVisible() or visibility.isHidden()
-    // visibility.state() for raw value ('visible' | 'hidden')</code></pre>
+// Direct signal access in template:
+// visibility.isVisible() or visibility.isHidden()
+// visibility.state() for raw value ('visible' | 'hidden')"
+          />
           <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Simple reactive read-only state, templates, computed
             signals.
@@ -127,17 +129,17 @@ import { PageVisibilityService, injectPageVisibility } from '@angular-helpers/br
           <p class="text-xs text-base-content/80 mb-2">
             Manual subscription with explicit cleanup:
           </p>
-          <pre
-            class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
-          ><code>import {{ '{' }} PageVisibilityService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+          <app-code-block
+            code="import { PageVisibilityService } from '@angular-helpers/browser-web-apis';
 
-    readonly svc = inject(PageVisibilityService);
+readonly svc = inject(PageVisibilityService);
 
-    ngOnInit() {{ '{' }}
-      this.svc.watch().subscribe(state =&gt; {{ '{' }}
-        // handle visibility change
-      {{ '}' }});
-    {{ '}' }}</code></pre>
+ngOnInit() {
+  this.svc.watch().subscribe(state => {
+    // handle visibility change
+  });
+}"
+          />
           <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Complex async flows, combining with other streams,
             explicit control.

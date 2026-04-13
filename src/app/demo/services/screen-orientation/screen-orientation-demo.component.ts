@@ -5,11 +5,13 @@ import {
   injectScreenOrientation,
   type OrientationInfo,
 } from '@angular-helpers/browser-web-apis';
+import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 
 @Component({
   selector: 'app-screen-orientation-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ScreenOrientationService],
+  imports: [CodeBlockComponent],
   template: `
     <section
       class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
@@ -119,19 +121,19 @@ import {
           <p class="text-xs text-base-content/80 mb-2">
             Reactive orientation with lock/unlock methods:
           </p>
-          <pre
-            class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
-          ><code>import {{ '{' }} injectScreenOrientation {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+          <app-code-block
+            code="import { injectScreenOrientation } from '@angular-helpers/browser-web-apis';
 
-    readonly orientation = injectScreenOrientation();
+readonly orientation = injectScreenOrientation();
 
-    // Read signals:
-    // orientation.type() - 'portrait-primary', 'landscape', etc.
-    // orientation.isPortrait(), orientation.isLandscape()
-    // orientation.angle() - rotation in degrees
+// Read signals:
+// orientation.type() - 'portrait-primary', 'landscape', etc.
+// orientation.isPortrait(), orientation.isLandscape()
+// orientation.angle() - rotation in degrees
 
-    // Lock to landscape:
-    // await orientation.lock('landscape')</code></pre>
+// Lock to landscape:
+// await orientation.lock('landscape')"
+          />
           <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Responsive layouts, games, fullscreen video.
           </p>
@@ -139,18 +141,18 @@ import {
       } @else {
         <div class="mt-4">
           <p class="text-xs text-base-content/80 mb-2">Manual stream with snapshot:</p>
-          <pre
-            class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
-          ><code>import {{ '{' }} ScreenOrientationService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+          <app-code-block
+            code="import { ScreenOrientationService } from '@angular-helpers/browser-web-apis';
 
-    readonly svc = inject(ScreenOrientationService);
+readonly svc = inject(ScreenOrientationService);
 
-    ngOnInit() {{ '{' }}
-      const current = this.svc.getSnapshot();
-      this.svc.watch().subscribe(o =&gt; {{ '{' }}
-        // o.type, o.angle
-      {{ '}' }});
-    {{ '}' }}</code></pre>
+ngOnInit() {
+  const current = this.svc.getSnapshot();
+  this.svc.watch().subscribe(o => {
+    // o.type, o.angle
+  });
+}"
+          />
           <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Complex rotation logic, orientation history.
           </p>

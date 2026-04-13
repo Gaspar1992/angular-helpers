@@ -14,7 +14,14 @@ renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
   const highlighted = hljs.getLanguage(language)
     ? hljs.highlight(text, { language }).value
     : hljs.highlightAuto(text).value;
-  return `<pre><code class="hljs language-${language}">${highlighted}</code></pre>`;
+  const displayLang = language === 'plaintext' ? 'text' : language;
+
+  return `<div class="code-block-wrapper">
+  <div class="code-header">
+    <span class="lang-badge">${displayLang}</span>
+  </div>
+  <pre><code class="hljs language-${language}">${highlighted}</code></pre>
+</div>`;
 };
 
 marked.setOptions({ renderer });

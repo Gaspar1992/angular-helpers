@@ -5,6 +5,7 @@ import {
   ElementRef,
   viewChild,
   ChangeDetectionStrategy,
+  effect,
 } from '@angular/core';
 import hljs from 'highlight.js/lib/core';
 import typescript from 'highlight.js/lib/languages/typescript';
@@ -115,6 +116,17 @@ export class CodeBlockComponent implements AfterViewInit {
 
   protected codeEl = viewChild.required<ElementRef<HTMLElement>>('codeEl');
   protected copied = false;
+
+  constructor() {
+    effect(() => {
+      const codeValue = this.code();
+      const el = this.codeEl();
+      if (el) {
+        el.nativeElement.textContent = codeValue;
+        hljs.highlightElement(el.nativeElement);
+      }
+    });
+  }
 
   ngAfterViewInit() {
     hljs.highlightElement(this.codeEl().nativeElement);
