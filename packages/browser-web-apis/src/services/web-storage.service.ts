@@ -31,8 +31,9 @@ export class WebStorageService extends BrowserApiBaseService {
     return 'storage';
   }
 
-  private ensureStorageSupport(): void {
-    if (!this.isBrowserEnvironment() || typeof Storage === 'undefined') {
+  protected override ensureSupported(): void {
+    super.ensureSupported();
+    if (typeof Storage === 'undefined') {
       throw new Error('Storage API not supported in this browser');
     }
   }
@@ -97,7 +98,7 @@ export class WebStorageService extends BrowserApiBaseService {
     value: T,
     options: StorageOptions = {},
   ): boolean {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const serializedValue = this.serializeValue(value, options);
@@ -118,7 +119,7 @@ export class WebStorageService extends BrowserApiBaseService {
     defaultValue: T | null = null,
     options: StorageOptions = {},
   ): T | null {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const fullKey = this.getKey(key, options);
@@ -131,7 +132,7 @@ export class WebStorageService extends BrowserApiBaseService {
   }
 
   removeLocalStorage(key: string, options: StorageOptions = {}): boolean {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const fullKey = this.getKey(key, options);
@@ -147,7 +148,7 @@ export class WebStorageService extends BrowserApiBaseService {
   }
 
   clearLocalStorage(options: StorageOptions = {}): boolean {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const prefix = options?.prefix;
@@ -177,7 +178,7 @@ export class WebStorageService extends BrowserApiBaseService {
     value: T,
     options: StorageOptions = {},
   ): boolean {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const serializedValue = this.serializeValue(value, options);
@@ -198,7 +199,7 @@ export class WebStorageService extends BrowserApiBaseService {
     defaultValue: T | null = null,
     options: StorageOptions = {},
   ): T | null {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const fullKey = this.getKey(key, options);
@@ -211,7 +212,7 @@ export class WebStorageService extends BrowserApiBaseService {
   }
 
   removeSessionStorage(key: string, options: StorageOptions = {}): boolean {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const fullKey = this.getKey(key, options);
@@ -227,7 +228,7 @@ export class WebStorageService extends BrowserApiBaseService {
   }
 
   clearSessionStorage(options: StorageOptions = {}): boolean {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const prefix = options?.prefix;
@@ -253,7 +254,7 @@ export class WebStorageService extends BrowserApiBaseService {
 
   // Utility Methods
   getLocalStorageSize(options: StorageOptions = {}): number {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     let totalSize = 0;
     const prefix = options?.prefix;
@@ -268,7 +269,7 @@ export class WebStorageService extends BrowserApiBaseService {
   }
 
   getSessionStorageSize(options: StorageOptions = {}): number {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     let totalSize = 0;
     const prefix = options?.prefix;
@@ -318,12 +319,12 @@ export class WebStorageService extends BrowserApiBaseService {
 
   // Direct access to native storage APIs
   getNativeLocalStorage(): Storage {
-    this.ensureStorageSupport();
+    this.ensureSupported();
     return localStorage;
   }
 
   getNativeSessionStorage(): Storage {
-    this.ensureStorageSupport();
+    this.ensureSupported();
     return sessionStorage;
   }
 }

@@ -44,14 +44,15 @@ export class WebSocketService extends BrowserApiBaseService {
     return 'websocket';
   }
 
-  private ensureWebSocketSupport(): void {
+  protected override ensureSupported(): void {
+    super.ensureSupported();
     if (typeof WebSocket === 'undefined') {
       throw new Error('WebSocket API not supported in this browser');
     }
   }
 
   connect(config: WebSocketConfig): Observable<WebSocketStatus> {
-    this.ensureWebSocketSupport();
+    this.ensureSupported();
 
     return new Observable<WebSocketStatus>((observer) => {
       this.disconnect(); // Disconnect existing connection if any

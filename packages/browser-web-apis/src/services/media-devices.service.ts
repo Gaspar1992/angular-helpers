@@ -13,14 +13,15 @@ export class MediaDevicesService extends BrowserApiBaseService {
     return 'media-devices';
   }
 
-  private ensureMediaDevicesSupport(): void {
-    if (!('mediaDevices' in navigator)) {
-      throw new Error('MediaDevices API not supported in this browser');
+  protected override ensureSupported(): void {
+    super.ensureSupported();
+    if (!navigator.mediaDevices) {
+      throw new Error('MediaDevices API not supported — a secure context (HTTPS) is required');
     }
   }
 
   async getDevices(): Promise<MediaDeviceInfo[]> {
-    this.ensureMediaDevicesSupport();
+    this.ensureSupported();
 
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
@@ -32,7 +33,7 @@ export class MediaDevicesService extends BrowserApiBaseService {
   }
 
   async getUserMedia(constraints?: MediaStreamConstraints): Promise<MediaStream> {
-    this.ensureMediaDevicesSupport();
+    this.ensureSupported();
 
     try {
       const defaultConstraints: MediaStreamConstraints = {
@@ -49,7 +50,7 @@ export class MediaDevicesService extends BrowserApiBaseService {
   }
 
   async getDisplayMedia(constraints?: DisplayMediaConstraints): Promise<MediaStream> {
-    this.ensureMediaDevicesSupport();
+    this.ensureSupported();
 
     if (!('getDisplayMedia' in navigator.mediaDevices)) {
       throw new Error('Display media API not supported in this browser');
@@ -70,7 +71,7 @@ export class MediaDevicesService extends BrowserApiBaseService {
   }
 
   watchDeviceChanges(): Observable<MediaDeviceInfo[]> {
-    this.ensureMediaDevicesSupport();
+    this.ensureSupported();
 
     return new Observable<MediaDeviceInfo[]>((observer) => {
       const handleDeviceChange = async () => {
@@ -143,7 +144,7 @@ export class MediaDevicesService extends BrowserApiBaseService {
 
   // Direct access to native media devices API
   getNativeMediaDevices(): MediaDevices {
-    this.ensureMediaDevicesSupport();
+    this.ensureSupported();
     return navigator.mediaDevices;
   }
 }

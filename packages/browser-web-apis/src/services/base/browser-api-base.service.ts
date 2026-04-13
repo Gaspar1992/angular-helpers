@@ -1,5 +1,6 @@
 import { Injectable, inject, DestroyRef, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
+import { BROWSER_API_LOGGER } from '../../tokens/logger.token';
 
 /**
  * Base class for all Browser Web API services.
@@ -7,7 +8,7 @@ import { isPlatformBrowser, isPlatformServer } from '@angular/common';
  * - Platform detection (browser vs server)
  * - Support assertion via Template Method
  * - Error creation with cause chaining
- * - Structured logging
+ * - Structured logging via injectable BROWSER_API_LOGGER token
  * - Lifecycle management with destroyRef
  *
  * Services that also need permission querying should extend
@@ -17,6 +18,7 @@ import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 export abstract class BrowserApiBaseService {
   protected destroyRef = inject(DestroyRef);
   protected platformId = inject(PLATFORM_ID);
+  private readonly logger = inject(BROWSER_API_LOGGER);
 
   /**
    * Abstract method that must be implemented by child services.
@@ -39,8 +41,8 @@ export abstract class BrowserApiBaseService {
   }
 
   /**
-   * Template Method: throws a standard error when the API is not available.
-   * Uses getApiName() to produce consistent error messages.
+   * Template Method: asserts the service can run in the current environment.
+   * Subclasses must call super.ensureSupported() and then add their own API check.
    */
   protected ensureSupported(): void {
     if (!this.isBrowserEnvironment()) {
@@ -60,16 +62,16 @@ export abstract class BrowserApiBaseService {
   }
 
   /**
-   * Log an error with the service name as prefix.
+   * Log an error through the injected BROWSER_API_LOGGER (default: console).
    */
   protected logError(message: string, error?: unknown): void {
-    console.error(`[${this.getApiName()}] ${message}`, error);
+    this.logger.error(`[${this.getApiName()}] ${message}`, error);
   }
 
   /**
-   * Log an informational message with the service name as prefix.
+   * Log an informational message through the injected BROWSER_API_LOGGER (default: console).
    */
   protected logInfo(message: string): void {
-    console.info(`[${this.getApiName()}] ${message}`);
+    this.logger.info(`[${this.getApiName()}] ${message}`);
   }
 }

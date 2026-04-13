@@ -9,14 +9,15 @@ export class CameraService extends BrowserApiBaseService {
     return 'camera';
   }
 
-  private ensureCameraSupport(): void {
-    if (!('mediaDevices' in navigator) || !('getUserMedia' in navigator.mediaDevices)) {
-      throw new Error('Camera API not supported in this browser');
+  protected override ensureSupported(): void {
+    super.ensureSupported();
+    if (!navigator.mediaDevices?.getUserMedia) {
+      throw new Error('Camera API not supported — a secure context (HTTPS) is required');
     }
   }
 
   async startCamera(constraints?: MediaStreamConstraints): Promise<MediaStream> {
-    this.ensureCameraSupport();
+    this.ensureSupported();
 
     if (this.currentStream) {
       this.stopCamera();
@@ -94,7 +95,7 @@ export class CameraService extends BrowserApiBaseService {
   }
 
   async getCameraCapabilities(deviceId: string): Promise<MediaTrackCapabilities | null> {
-    this.ensureCameraSupport();
+    this.ensureSupported();
 
     try {
       const activeTrack = this.currentStream
@@ -129,7 +130,7 @@ export class CameraService extends BrowserApiBaseService {
   }
 
   async getVideoInputDevices(): Promise<MediaDeviceInfo[]> {
-    this.ensureCameraSupport();
+    this.ensureSupported();
 
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
@@ -142,7 +143,7 @@ export class CameraService extends BrowserApiBaseService {
 
   // Direct access to native camera API
   getNativeMediaDevices(): MediaDevices {
-    this.ensureCameraSupport();
+    this.ensureSupported();
     return navigator.mediaDevices;
   }
 }

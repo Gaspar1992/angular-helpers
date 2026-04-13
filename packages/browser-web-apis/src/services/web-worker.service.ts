@@ -34,14 +34,15 @@ export class WebWorkerService extends BrowserApiBaseService {
     return 'webworker';
   }
 
-  private ensureWorkerSupport(): void {
+  protected override ensureSupported(): void {
+    super.ensureSupported();
     if (typeof Worker === 'undefined') {
       throw new Error('Web Workers not supported in this browser');
     }
   }
 
   createWorker(name: string, scriptUrl: string): Observable<WorkerStatus> {
-    this.ensureWorkerSupport();
+    this.ensureSupported();
 
     return new Observable<WorkerStatus>((observer) => {
       if (this.workers.has(name)) {
