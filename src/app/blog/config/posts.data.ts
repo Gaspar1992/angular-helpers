@@ -2,6 +2,15 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'browser-web-apis-robustness-improvements',
+    title:
+      'browser-web-apis: robustness deep-dive — spec compliance, leak prevention, and unified architecture',
+    publishedAt: '2026-04-13',
+    tags: ['browser-web-apis', 'bugfix', 'mdn', 'architecture', 'angular'],
+    excerpt:
+      'A deep look at what breaks silently in a Browser API wrapper library — from permission pre-checks that block native prompts to WebSocket connections that outlive their host component — and how we fixed it.',
+  },
+  {
     slug: 'browser-web-apis-v21-5-improvements',
     title: 'browser-web-apis v21.5: real tree-shaking, bug fixes, and signal consistency',
     publishedAt: '2026-04-13',
