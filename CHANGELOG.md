@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.14.0...v1.15.0) (2026-04-13)
+
+
+### Features
+
+* **worker-http:** Phase 3 — WorkerHttpBackend + Angular DI + docs/demo/blog + fix worker deploy ([cc4159c](https://github.com/Gaspar1992/angular-helpers/commit/cc4159c977de2f5cfeb5274441946992d3c3cb89))
+
 ## [0.3.0] worker-http — Phase 3: Angular HttpBackend Integration (2026-04-13)
 
 ### Features
