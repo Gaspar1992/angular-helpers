@@ -44,15 +44,14 @@ export class WebStorageService extends BrowserApiBaseService {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((event: Event) => {
           const storageEvent = event as unknown as globalThis.StorageEvent;
-          if (storageEvent.key && storageEvent.newValue !== null) {
-            this.storageEvents.set({
-              key: storageEvent.key,
-              newValue: this.deserializeValue(storageEvent.newValue),
-              oldValue: storageEvent.oldValue ? this.deserializeValue(storageEvent.oldValue) : null,
-              storageArea:
-                storageEvent.storageArea === localStorage ? 'localStorage' : 'sessionStorage',
-            });
-          }
+          const area =
+            storageEvent.storageArea === localStorage ? 'localStorage' : 'sessionStorage';
+          this.storageEvents.set({
+            key: storageEvent.key,
+            newValue: storageEvent.newValue ? this.deserializeValue(storageEvent.newValue) : null,
+            oldValue: storageEvent.oldValue ? this.deserializeValue(storageEvent.oldValue) : null,
+            storageArea: area,
+          });
         });
     }
   }
