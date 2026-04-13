@@ -9,7 +9,7 @@ import {
   WORKER_HTTP_ROUTES_TOKEN,
   WORKER_HTTP_SERIALIZER_TOKEN,
 } from './worker-http-tokens';
-import type { WorkerSerializer } from '../../serializer/src/worker-serializer.types';
+import type { WorkerSerializer } from '@angular-helpers/worker-http/serializer';
 import type {
   WorkerConfig,
   WorkerFallbackStrategy,

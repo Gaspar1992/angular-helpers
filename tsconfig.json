@@ -23,7 +23,10 @@
       "@angular-helpers/worker-http/interceptors": [
         "packages/worker-http/interceptors/src/index.ts"
       ],
-      "@angular-helpers/worker-http/crypto": ["packages/worker-http/crypto/src/index.ts"]
+      "@angular-helpers/worker-http/crypto": ["packages/worker-http/crypto/src/index.ts"],
+      "@angular-helpers/browser-web-apis/experimental": [
+        "packages/browser-web-apis/experimental/src/index.ts"
+      ]
     }
   },
   "angularCompilerOptions": {

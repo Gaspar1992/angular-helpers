@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { BrowserApiBaseService } from './base/browser-api-base.service';
+import { BrowserApiBaseService } from '@angular-helpers/browser-web-apis';
 
 export interface ColorSelectionResult {
   sRGBHex: string;
 }
 
 interface EyeDropperInstance {
-  open(options?: { signal?: AbortSignal }): Promise<ColorSelectionResult>;
+  open(): Promise<ColorSelectionResult>;
 }
 
 interface EyeDropperConstructor {
@@ -27,11 +27,12 @@ export class EyeDropperService extends BrowserApiBaseService {
     return this.isBrowserEnvironment() && 'EyeDropper' in window;
   }
 
-  async open(signal?: AbortSignal): Promise<ColorSelectionResult> {
+  async open(): Promise<ColorSelectionResult> {
     if (!this.isSupported()) {
       throw new Error('EyeDropper API not supported');
     }
-    const dropper = new (getEyeDropperClass()!)();
-    return dropper.open(signal ? { signal } : undefined);
+
+    const eyeDropper = new (getEyeDropperClass()!)();
+    return eyeDropper.open();
   }
 }

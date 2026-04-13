@@ -7,7 +7,6 @@ import {
   ClipboardService,
   FullscreenService,
   GeolocationService,
-  IdleDetectorService,
   IntersectionObserverService,
   MediaDevicesService,
   MediaRecorderService,
@@ -30,6 +29,7 @@ import {
   type WorkerMessage,
   type WorkerTask,
 } from '@angular-helpers/browser-web-apis';
+import { IdleDetectorService } from '@angular-helpers/browser-web-apis/experimental';
 import { RegexSecurityService, type RegexTestResult } from '@angular-helpers/security';
 
 type HarnessPermissionState = PermissionStatus['state'] | 'unknown';

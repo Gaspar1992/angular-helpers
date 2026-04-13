@@ -25,16 +25,8 @@ import { VibrationService } from './services/vibration.service';
 import { SpeechSynthesisService } from './services/speech-synthesis.service';
 import { MutationObserverService } from './services/mutation-observer.service';
 import { PerformanceObserverService } from './services/performance-observer.service';
-import { IdleDetectorService } from './services/idle-detector.service';
-import { EyeDropperService } from './services/eye-dropper.service';
-import { BarcodeDetectorService } from './services/barcode-detector.service';
 import { WebAudioService } from './services/web-audio.service';
 import { GamepadService } from './services/gamepad.service';
-import { WebBluetoothService } from './services/web-bluetooth.service';
-import { WebUsbService } from './services/web-usb.service';
-import { WebNfcService } from './services/web-nfc.service';
-import { PaymentRequestService } from './services/payment-request.service';
-import { CredentialManagementService } from './services/credential-management.service';
 
 export { providePermissions } from './providers/permissions';
 export { provideCamera } from './providers/camera';
@@ -45,7 +37,6 @@ export { provideMediaDevices } from './providers/media-devices';
 export { provideScreenWakeLock } from './providers/screen-wake-lock';
 export { provideFileSystemAccess } from './providers/file-system-access';
 export { provideMediaRecorder } from './providers/media-recorder';
-export { provideIdleDetector } from './providers/idle-detector';
 export { provideBattery } from './providers/battery';
 export { provideWebShare } from './providers/web-share';
 export { provideWebStorage } from './providers/web-storage';
@@ -63,15 +54,8 @@ export { provideVibration } from './providers/vibration';
 export { provideSpeechSynthesis } from './providers/speech-synthesis';
 export { provideMutationObserver } from './providers/mutation-observer';
 export { providePerformanceObserver } from './providers/performance-observer';
-export { provideEyeDropper } from './providers/eye-dropper';
-export { provideBarcodeDetector } from './providers/barcode-detector';
 export { provideWebAudio } from './providers/web-audio';
 export { provideGamepad } from './providers/gamepad';
-export { provideWebBluetooth } from './providers/web-bluetooth';
-export { provideWebUsb } from './providers/web-usb';
-export { provideWebNfc } from './providers/web-nfc';
-export { providePaymentRequest } from './providers/payment-request';
-export { provideCredentialManagement } from './providers/credential-management';
 export {
   provideMediaApis,
   provideLocationApis,
@@ -105,16 +89,8 @@ export interface BrowserWebApisConfig {
   enableSpeechSynthesis?: boolean;
   enableMutationObserver?: boolean;
   enablePerformanceObserver?: boolean;
-  enableIdleDetector?: boolean;
-  enableEyeDropper?: boolean;
-  enableBarcodeDetector?: boolean;
   enableWebAudio?: boolean;
   enableGamepad?: boolean;
-  enableWebBluetooth?: boolean;
-  enableWebUsb?: boolean;
-  enableWebNfc?: boolean;
-  enablePaymentRequest?: boolean;
-  enableCredentialManagement?: boolean;
 }
 
 export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
@@ -143,16 +119,8 @@ export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
   enableSpeechSynthesis: false,
   enableMutationObserver: false,
   enablePerformanceObserver: false,
-  enableIdleDetector: false,
-  enableEyeDropper: false,
-  enableBarcodeDetector: false,
   enableWebAudio: false,
   enableGamepad: false,
-  enableWebBluetooth: false,
-  enableWebUsb: false,
-  enableWebNfc: false,
-  enablePaymentRequest: false,
-  enableCredentialManagement: false,
 };
 
 export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): EnvironmentProviders {
@@ -186,16 +154,8 @@ export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): Enviro
     [mergedConfig.enableSpeechSynthesis, SpeechSynthesisService],
     [mergedConfig.enableMutationObserver, MutationObserverService],
     [mergedConfig.enablePerformanceObserver, PerformanceObserverService],
-    [mergedConfig.enableIdleDetector, IdleDetectorService],
-    [mergedConfig.enableEyeDropper, EyeDropperService],
-    [mergedConfig.enableBarcodeDetector, BarcodeDetectorService],
     [mergedConfig.enableWebAudio, WebAudioService],
     [mergedConfig.enableGamepad, GamepadService],
-    [mergedConfig.enableWebBluetooth, WebBluetoothService],
-    [mergedConfig.enableWebUsb, WebUsbService],
-    [mergedConfig.enableWebNfc, WebNfcService],
-    [mergedConfig.enablePaymentRequest, PaymentRequestService],
-    [mergedConfig.enableCredentialManagement, CredentialManagementService],
   ];
 
   for (const [enabled, provider] of conditionalProviders) {

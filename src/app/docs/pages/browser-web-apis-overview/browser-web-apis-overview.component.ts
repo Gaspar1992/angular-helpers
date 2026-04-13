@@ -125,11 +125,6 @@ const SERVICE_GROUPS = [
         description: 'Text-to-speech with voice selection',
       },
       {
-        id: 'idle-detector',
-        name: 'IdleDetectorService',
-        description: 'Detect user idle state and screen lock',
-      },
-      {
         id: 'gamepad',
         name: 'GamepadService',
         description: 'Game controller input polling',
@@ -198,55 +193,56 @@ const SERVICE_GROUPS = [
     ],
   },
   {
-    label: 'Device Connectivity',
-    icon: '�',
+    label: 'Experimental APIs',
+    icon: '🧪',
     items: [
       {
-        id: 'web-bluetooth',
-        name: 'WebBluetoothService',
-        description: 'Bluetooth Low Energy communication',
+        id: 'idle-detector',
+        name: 'IdleDetectorService',
+        description: 'Detect user idle state and screen lock',
+        experimental: true,
       },
-      {
-        id: 'web-usb',
-        name: 'WebUsbService',
-        description: 'USB device I/O from the browser',
-      },
-      {
-        id: 'web-nfc',
-        name: 'WebNfcService',
-        description: 'NFC tag reading and writing',
-      },
-    ],
-  },
-  {
-    label: 'Detection APIs',
-    icon: '🔍',
-    items: [
       {
         id: 'eye-dropper',
         name: 'EyeDropperService',
         description: 'Screen color picker',
+        experimental: true,
       },
       {
         id: 'barcode-detector',
         name: 'BarcodeDetectorService',
         description: 'QR code and barcode scanning',
+        experimental: true,
       },
-    ],
-  },
-  {
-    label: 'Commerce & Identity',
-    icon: '🪪',
-    items: [
+      {
+        id: 'web-bluetooth',
+        name: 'WebBluetoothService',
+        description: 'Bluetooth Low Energy communication',
+        experimental: true,
+      },
+      {
+        id: 'web-usb',
+        name: 'WebUsbService',
+        description: 'USB device I/O from the browser',
+        experimental: true,
+      },
+      {
+        id: 'web-nfc',
+        name: 'WebNfcService',
+        description: 'NFC tag reading and writing',
+        experimental: true,
+      },
       {
         id: 'payment-request',
         name: 'PaymentRequestService',
         description: 'Native payment flows',
+        experimental: true,
       },
       {
         id: 'credential-management',
         name: 'CredentialManagementService',
         description: 'Passwords, passkeys (WebAuthn)',
+        experimental: true,
       },
     ],
   },

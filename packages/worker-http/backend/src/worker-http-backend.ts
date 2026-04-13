@@ -9,8 +9,8 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
-import { createWorkerTransport } from '../../transport/src/create-worker-transport';
-import type { WorkerTransport } from '../../transport/src/worker-transport.types';
+import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
+import type { WorkerTransport } from '@angular-helpers/worker-http/transport';
 
 import {
   WORKER_HTTP_CONFIGS_TOKEN,
