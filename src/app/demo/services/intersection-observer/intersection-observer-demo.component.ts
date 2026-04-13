@@ -12,11 +12,13 @@ import {
   IntersectionObserverService,
   injectIntersectionObserver,
 } from '@angular-helpers/browser-web-apis';
+import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 
 @Component({
   selector: 'app-intersection-observer-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [IntersectionObserverService],
+  imports: [CodeBlockComponent],
   template: `
     <section
       class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
@@ -103,15 +105,15 @@ import {
           <p class="text-xs text-base-content/80 mb-2">
             Reactive viewport detection with auto-cleanup:
           </p>
-          <pre
-            class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
-          ><code>import {{ '{' }} injectIntersectionObserver {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+          <app-code-block
+            code="import { injectIntersectionObserver } from '@angular-helpers/browser-web-apis';
 
-    readonly targetRef = viewChild&lt;ElementRef&gt;('target');
-    readonly inView = injectIntersectionObserver(this.targetRef);
+readonly targetRef = viewChild&lt;ElementRef&gt;('target');
+readonly inView = injectIntersectionObserver(this.targetRef);
 
-    // Use in template with: inView.isIntersecting()
-    // or: inView.isVisible() for visibility tracking</code></pre>
+// Use in template with: inView.isIntersecting()
+// or: inView.isVisible() for visibility tracking"
+          />
           <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Lazy loading, infinite scroll, analytics tracking.
           </p>
@@ -119,18 +121,18 @@ import {
       } @else {
         <div class="mt-4">
           <p class="text-xs text-base-content/80 mb-2">Manual visibility observation with RxJS:</p>
-          <pre
-            class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
-          ><code>import {{ '{' }} IntersectionObserverService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+          <app-code-block
+            code="import { IntersectionObserverService } from '@angular-helpers/browser-web-apis';
 
-    readonly svc = inject(IntersectionObserverService);
+readonly svc = inject(IntersectionObserverService);
 
-    ngOnInit() {{ '{' }}
-      this.svc.observeVisibility(element, {{ '{' }} threshold: 0.5 {{ '}' }})
-        .subscribe(isVisible =&gt; {{ '{' }}
-          // handle visibility change
-        {{ '}' }});
-    {{ '}' }}</code></pre>
+ngOnInit() {
+  this.svc.observeVisibility(element, { threshold: 0.5 })
+    .subscribe(isVisible => {
+      // handle visibility change
+    });
+}"
+          />
           <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Complex thresholds, multiple observers, combineLatest.
           </p>

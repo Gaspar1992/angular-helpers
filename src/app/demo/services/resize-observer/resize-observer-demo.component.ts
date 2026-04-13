@@ -14,12 +14,13 @@ import {
   injectResizeObserver,
   type ElementSize,
 } from '@angular-helpers/browser-web-apis';
+import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 
 @Component({
   selector: 'app-resize-observer-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ResizeObserverService],
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, CodeBlockComponent],
   template: `
     <section
       class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
@@ -144,16 +145,16 @@ import {
           <p class="text-xs text-base-content/80 mb-2">
             Auto-observing element with reactive size signals:
           </p>
-          <pre
-            class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
-          ><code>import {{ '{' }} injectResizeObserver {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+          <app-code-block
+            code="import { injectResizeObserver } from '@angular-helpers/browser-web-apis';
 
-    readonly boxRef = viewChild&lt;ElementRef&gt;('box');
-    readonly resize = injectResizeObserver(this.boxRef);
+readonly boxRef = viewChild&lt;ElementRef&gt;('box');
+readonly resize = injectResizeObserver(this.boxRef);
 
-    // Direct access in template:
-    // resize.width(), resize.height()
-    // resize.inlineSize, resize.blockSize (logical pixels)</code></pre>
+// Direct access in template:
+// resize.width(), resize.height()
+// resize.inlineSize, resize.blockSize (logical pixels)"
+          />
           <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Responsive layouts, dynamic charts, scroll containers.
           </p>
@@ -163,18 +164,18 @@ import {
           <p class="text-xs text-base-content/80 mb-2">
             Manual observation with explicit subscribe:
           </p>
-          <pre
-            class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
-          ><code>import {{ '{' }} ResizeObserverService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+          <app-code-block
+            code="import { ResizeObserverService } from '@angular-helpers/browser-web-apis';
 
-    readonly svc = inject(ResizeObserverService);
+readonly svc = inject(ResizeObserverService);
 
-    ngOnInit() {{ '{' }}
-      const el = this.elementRef.nativeElement;
-      this.svc.observeSize(el).subscribe(size =&gt; {{ '{' }}
-        // size: {{ '{' }} width, height, inlineSize, blockSize {{ '}' }}
-      {{ '}' }});
-    {{ '}' }}</code></pre>
+ngOnInit() {
+  const el = this.elementRef.nativeElement;
+  this.svc.observeSize(el).subscribe(size => {
+    // size: { width, height, inlineSize, blockSize }
+  });
+}"
+          />
           <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Complex resize logic, multiple observers, RxJS operators.
           </p>

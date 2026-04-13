@@ -18,11 +18,16 @@ import {
 import { TransportDemoComponent } from '../../../demo/worker-http/services/transport/transport-demo.component';
 import { HmacDemoComponent } from '../../../demo/worker-http/services/hmac/hmac-demo.component';
 import { HashingDemoComponent } from '../../../demo/worker-http/services/hashing/hashing-demo.component';
+import { InterceptorsDemoComponent } from '../../../demo/worker-http/services/interceptors/interceptors-demo.component';
+import { SerializerDemoComponent } from '../../../demo/worker-http/services/serializer/serializer-demo.component';
+import { BackendDemoComponent } from '../../../demo/worker-http/services/backend/backend-demo.component';
 
 const ENTRY_DEMO_MAP: Record<string, Type<unknown>> = {
   transport: TransportDemoComponent,
-  hmac: HmacDemoComponent,
-  hashing: HashingDemoComponent,
+  interceptors: InterceptorsDemoComponent,
+  serializer: SerializerDemoComponent,
+  backend: BackendDemoComponent,
+  crypto: HmacDemoComponent,
 };
 
 const CONTENT_TABS: DocTab[] = [

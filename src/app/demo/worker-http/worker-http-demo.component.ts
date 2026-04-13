@@ -210,7 +210,7 @@ interface LogEntry {
       </div>
 
       <!-- HttpBackend Demo -->
-      <div class="bg-base-200 border border-base-300 rounded-xl p-6 col-span-full">
+      <div class="bg-base-200 border border-base-300 rounded-xl p-6 col-span-full mt-6">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
             🔀 HttpBackend

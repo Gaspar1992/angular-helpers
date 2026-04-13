@@ -5,11 +5,13 @@ import {
   injectNetworkInformation,
   type NetworkInformation,
 } from '@angular-helpers/browser-web-apis';
+import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 
 @Component({
   selector: 'app-network-information-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [NetworkInformationService],
+  imports: [CodeBlockComponent],
   template: `
     <section
       class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
@@ -167,15 +169,15 @@ import {
           <p class="text-xs text-base-content/80 mb-2">
             Reactive connection state with computed signals:
           </p>
-          <pre
-            class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
-          ><code>import {{ '{' }} injectNetworkInformation {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+          <app-code-block
+            code="import { injectNetworkInformation } from '@angular-helpers/browser-web-apis';
 
-    readonly net = injectNetworkInformation();
+readonly net = injectNetworkInformation();
 
-    // Access signals directly:
-    // net.online(), net.effectiveType(), net.downlink()
-    // net.rtt(), net.saveData(), net.type()</code></pre>
+// Access signals directly:
+// net.online(), net.effectiveType(), net.downlink()
+// net.rtt(), net.saveData(), net.type()"
+          />
           <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Adaptive UI, conditional asset loading, offline handling.
           </p>
@@ -183,20 +185,20 @@ import {
       } @else {
         <div class="mt-4">
           <p class="text-xs text-base-content/80 mb-2">Manual stream with snapshot + watch:</p>
-          <pre
-            class="bg-base-300 border border-base-300 rounded-lg p-3 overflow-x-auto font-mono text-sm text-base-content"
-          ><code>import {{ '{' }} NetworkInformationService {{ '}' }} from '{{'@angular-helpers/browser-web-apis'}}';
+          <app-code-block
+            code="import { NetworkInformationService } from '@angular-helpers/browser-web-apis';
 
-    readonly svc = inject(NetworkInformationService);
+readonly svc = inject(NetworkInformationService);
 
-    ngOnInit() {{ '{' }}
-      // Get current state
-      const current = this.svc.getSnapshot();
-      // Subscribe to changes
-      this.svc.watch().subscribe(info =&gt; {{ '{' }}
-        // handle network change
-      {{ '}' }});
-    {{ '}' }}</code></pre>
+ngOnInit() {
+  // Get current state
+  const current = this.svc.getSnapshot();
+  // Subscribe to changes
+  this.svc.watch().subscribe(info => {
+    // handle network change
+  });
+}"
+          />
           <p class="text-xs text-base-content/80 mt-2">
             <strong>When to use:</strong> Complex stream operations, buffering, combining with other
             sources.

@@ -85,13 +85,60 @@ import type { BlogPostData } from '../../services/blog-post.resolver';
         padding: 0.1em 0.35em;
         border-radius: 4px;
       }
-      :host ::ng-deep .prose-angular pre {
+      :host ::ng-deep .code-block-wrapper {
         background: oklch(17% 0.03 256);
         border: 1px solid oklch(22% 0.03 256);
         border-radius: 10px;
+        overflow: hidden;
+        margin: 1.5rem 0;
+      }
+      :host ::ng-deep .code-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background: oklch(20% 0.02 256);
+        border-bottom: 1px solid oklch(22% 0.03 256);
+      }
+      :host ::ng-deep .lang-badge {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: oklch(60% 0.05 256 / 0.8);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+      }
+      :host ::ng-deep .copy-btn {
+        font-size: 0.7rem;
+        padding: 0.15rem 0.5rem;
+        background: oklch(25% 0.02 256);
+        border: 1px solid oklch(30% 0.02 256);
+        border-radius: 4px;
+        color: oklch(70% 0.05 256);
+        cursor: pointer;
+        transition:
+          background 0.15s ease,
+          color 0.15s ease,
+          transform 0.1s ease,
+          box-shadow 0.15s ease;
+        box-shadow: 0 1px 2px oklch(10% 0.01 256 / 0.3);
+      }
+      :host ::ng-deep .copy-btn:hover {
+        background: oklch(30% 0.02 256);
+        color: oklch(85% 0.02 256);
+        box-shadow: 0 2px 4px oklch(10% 0.01 256 / 0.4);
+      }
+      :host ::ng-deep .copy-btn:active {
+        transform: translateY(1px) scale(0.98);
+        box-shadow: 0 1px 1px oklch(10% 0.01 256 / 0.3);
+        background: oklch(35% 0.02 256);
+      }
+      :host ::ng-deep .prose-angular pre {
+        margin: 0;
         padding: 1.25rem 1.5rem;
         overflow-x: auto;
-        margin: 1.5rem 0;
+        background: transparent;
+        border: none;
+        border-radius: 0;
       }
       :host ::ng-deep .prose-angular pre code {
         background: none;
