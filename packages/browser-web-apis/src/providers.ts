@@ -37,7 +37,6 @@ export { provideMediaDevices } from './providers/media-devices';
 export { provideScreenWakeLock } from './providers/screen-wake-lock';
 export { provideFileSystemAccess } from './providers/file-system-access';
 export { provideMediaRecorder } from './providers/media-recorder';
-export { provideIdleDetector } from './providers/idle-detector';
 export { provideBattery } from './providers/battery';
 export { provideWebShare } from './providers/web-share';
 export { provideWebStorage } from './providers/web-storage';
@@ -55,15 +54,8 @@ export { provideVibration } from './providers/vibration';
 export { provideSpeechSynthesis } from './providers/speech-synthesis';
 export { provideMutationObserver } from './providers/mutation-observer';
 export { providePerformanceObserver } from './providers/performance-observer';
-export { provideEyeDropper } from './providers/eye-dropper';
-export { provideBarcodeDetector } from './providers/barcode-detector';
 export { provideWebAudio } from './providers/web-audio';
 export { provideGamepad } from './providers/gamepad';
-export { provideWebBluetooth } from './providers/web-bluetooth';
-export { provideWebUsb } from './providers/web-usb';
-export { provideWebNfc } from './providers/web-nfc';
-export { providePaymentRequest } from './providers/payment-request';
-export { provideCredentialManagement } from './providers/credential-management';
 export {
   provideMediaApis,
   provideLocationApis,
