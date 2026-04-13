@@ -36,6 +36,49 @@ import { WebNfcService } from './services/web-nfc.service';
 import { PaymentRequestService } from './services/payment-request.service';
 import { CredentialManagementService } from './services/credential-management.service';
 
+export { providePermissions } from './providers/permissions';
+export { provideCamera } from './providers/camera';
+export { provideGeolocation } from './providers/geolocation';
+export { provideNotifications } from './providers/notifications';
+export { provideClipboard } from './providers/clipboard';
+export { provideMediaDevices } from './providers/media-devices';
+export { provideScreenWakeLock } from './providers/screen-wake-lock';
+export { provideFileSystemAccess } from './providers/file-system-access';
+export { provideMediaRecorder } from './providers/media-recorder';
+export { provideIdleDetector } from './providers/idle-detector';
+export { provideBattery } from './providers/battery';
+export { provideWebShare } from './providers/web-share';
+export { provideWebStorage } from './providers/web-storage';
+export { provideWebSocket } from './providers/web-socket';
+export { provideWebWorker } from './providers/web-worker';
+export { provideIntersectionObserver } from './providers/intersection-observer';
+export { provideResizeObserver } from './providers/resize-observer';
+export { providePageVisibility } from './providers/page-visibility';
+export { provideBroadcastChannel } from './providers/broadcast-channel';
+export { provideNetworkInformation } from './providers/network-information';
+export { provideScreenOrientation } from './providers/screen-orientation';
+export { provideFullscreen } from './providers/fullscreen';
+export { provideServerSentEvents } from './providers/server-sent-events';
+export { provideVibration } from './providers/vibration';
+export { provideSpeechSynthesis } from './providers/speech-synthesis';
+export { provideMutationObserver } from './providers/mutation-observer';
+export { providePerformanceObserver } from './providers/performance-observer';
+export { provideEyeDropper } from './providers/eye-dropper';
+export { provideBarcodeDetector } from './providers/barcode-detector';
+export { provideWebAudio } from './providers/web-audio';
+export { provideGamepad } from './providers/gamepad';
+export { provideWebBluetooth } from './providers/web-bluetooth';
+export { provideWebUsb } from './providers/web-usb';
+export { provideWebNfc } from './providers/web-nfc';
+export { providePaymentRequest } from './providers/payment-request';
+export { provideCredentialManagement } from './providers/credential-management';
+export {
+  provideMediaApis,
+  provideLocationApis,
+  provideStorageApis,
+  provideCommunicationApis,
+} from './providers/combos';
+
 export interface BrowserWebApisConfig {
   enableCamera?: boolean;
   enableGeolocation?: boolean;
@@ -162,171 +205,4 @@ export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): Enviro
   }
 
   return makeEnvironmentProviders(providers);
-}
-
-// Feature-specific providers for tree-shaking
-export function provideCamera(): EnvironmentProviders {
-  return makeEnvironmentProviders([PermissionsService, CameraService]);
-}
-
-export function provideGeolocation(): EnvironmentProviders {
-  return makeEnvironmentProviders([PermissionsService, GeolocationService]);
-}
-
-export function provideNotifications(): EnvironmentProviders {
-  return makeEnvironmentProviders([PermissionsService, NotificationService]);
-}
-
-export function provideClipboard(): EnvironmentProviders {
-  return makeEnvironmentProviders([PermissionsService, ClipboardService]);
-}
-
-export function provideMediaDevices(): EnvironmentProviders {
-  return makeEnvironmentProviders([PermissionsService, MediaDevicesService]);
-}
-
-export function provideBattery(): EnvironmentProviders {
-  return makeEnvironmentProviders([BatteryService]);
-}
-
-export function provideWebShare(): EnvironmentProviders {
-  return makeEnvironmentProviders([WebShareService]);
-}
-
-export function provideWebStorage(): EnvironmentProviders {
-  return makeEnvironmentProviders([WebStorageService]);
-}
-
-export function provideWebSocket(): EnvironmentProviders {
-  return makeEnvironmentProviders([WebSocketService]);
-}
-
-export function provideWebWorker(): EnvironmentProviders {
-  return makeEnvironmentProviders([WebWorkerService]);
-}
-
-export function providePermissions(): EnvironmentProviders {
-  return makeEnvironmentProviders([PermissionsService]);
-}
-
-// Combined providers for common use cases
-export function provideMediaApis(): EnvironmentProviders {
-  return makeEnvironmentProviders([PermissionsService, CameraService, MediaDevicesService]);
-}
-
-export function provideLocationApis(): EnvironmentProviders {
-  return makeEnvironmentProviders([PermissionsService, GeolocationService]);
-}
-
-export function provideStorageApis(): EnvironmentProviders {
-  return makeEnvironmentProviders([PermissionsService, ClipboardService, WebStorageService]);
-}
-
-export function provideCommunicationApis(): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    PermissionsService,
-    NotificationService,
-    WebShareService,
-    WebSocketService,
-  ]);
-}
-
-export function provideIntersectionObserver(): EnvironmentProviders {
-  return makeEnvironmentProviders([IntersectionObserverService]);
-}
-
-export function provideResizeObserver(): EnvironmentProviders {
-  return makeEnvironmentProviders([ResizeObserverService]);
-}
-
-export function providePageVisibility(): EnvironmentProviders {
-  return makeEnvironmentProviders([PageVisibilityService]);
-}
-
-export function provideBroadcastChannel(): EnvironmentProviders {
-  return makeEnvironmentProviders([BroadcastChannelService]);
-}
-
-export function provideNetworkInformation(): EnvironmentProviders {
-  return makeEnvironmentProviders([NetworkInformationService]);
-}
-
-export function provideScreenWakeLock(): EnvironmentProviders {
-  return makeEnvironmentProviders([PermissionsService, ScreenWakeLockService]);
-}
-
-export function provideScreenOrientation(): EnvironmentProviders {
-  return makeEnvironmentProviders([ScreenOrientationService]);
-}
-
-export function provideFullscreen(): EnvironmentProviders {
-  return makeEnvironmentProviders([FullscreenService]);
-}
-
-export function provideFileSystemAccess(): EnvironmentProviders {
-  return makeEnvironmentProviders([PermissionsService, FileSystemAccessService]);
-}
-
-export function provideMediaRecorder(): EnvironmentProviders {
-  return makeEnvironmentProviders([PermissionsService, MediaRecorderService]);
-}
-
-export function provideServerSentEvents(): EnvironmentProviders {
-  return makeEnvironmentProviders([ServerSentEventsService]);
-}
-
-export function provideVibration(): EnvironmentProviders {
-  return makeEnvironmentProviders([VibrationService]);
-}
-
-export function provideSpeechSynthesis(): EnvironmentProviders {
-  return makeEnvironmentProviders([SpeechSynthesisService]);
-}
-
-export function provideMutationObserver(): EnvironmentProviders {
-  return makeEnvironmentProviders([MutationObserverService]);
-}
-
-export function providePerformanceObserver(): EnvironmentProviders {
-  return makeEnvironmentProviders([PerformanceObserverService]);
-}
-
-export function provideIdleDetector(): EnvironmentProviders {
-  return makeEnvironmentProviders([PermissionsService, IdleDetectorService]);
-}
-
-export function provideEyeDropper(): EnvironmentProviders {
-  return makeEnvironmentProviders([EyeDropperService]);
-}
-
-export function provideBarcodeDetector(): EnvironmentProviders {
-  return makeEnvironmentProviders([BarcodeDetectorService]);
-}
-
-export function provideWebAudio(): EnvironmentProviders {
-  return makeEnvironmentProviders([WebAudioService]);
-}
-
-export function provideGamepad(): EnvironmentProviders {
-  return makeEnvironmentProviders([GamepadService]);
-}
-
-export function provideWebBluetooth(): EnvironmentProviders {
-  return makeEnvironmentProviders([WebBluetoothService]);
-}
-
-export function provideWebUsb(): EnvironmentProviders {
-  return makeEnvironmentProviders([WebUsbService]);
-}
-
-export function provideWebNfc(): EnvironmentProviders {
-  return makeEnvironmentProviders([WebNfcService]);
-}
-
-export function providePaymentRequest(): EnvironmentProviders {
-  return makeEnvironmentProviders([PaymentRequestService]);
-}
-
-export function provideCredentialManagement(): EnvironmentProviders {
-  return makeEnvironmentProviders([CredentialManagementService]);
 }
