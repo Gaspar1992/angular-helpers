@@ -1,11 +1,4 @@
-import {
-  Component,
-  OnDestroy,
-  ViewEncapsulation,
-  ChangeDetectionStrategy,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
@@ -13,7 +6,6 @@ import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
 @Component({
   selector: 'app-broadcast-channel-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   providers: [BroadcastChannelService],
   imports: [FormsModule],
   template: `

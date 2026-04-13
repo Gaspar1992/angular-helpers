@@ -1,18 +1,10 @@
-import {
-  Component,
-  OnDestroy,
-  ViewEncapsulation,
-  ChangeDetectionStrategy,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { PageVisibilityService, injectPageVisibility } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-page-visibility-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   providers: [PageVisibilityService],
   template: `
     <section

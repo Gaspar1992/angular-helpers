@@ -1,7 +1,6 @@
 import {
   Component,
   OnDestroy,
-  ViewEncapsulation,
   ChangeDetectionStrategy,
   inject,
   signal,
@@ -17,7 +16,6 @@ import {
 @Component({
   selector: 'app-intersection-observer-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   providers: [IntersectionObserverService],
   template: `
     <section

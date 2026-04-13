@@ -77,6 +77,48 @@ test.describe('Documentation - worker-http overview', () => {
   });
 });
 
+test.describe('Documentation - layout sidebar', () => {
+  test('sidebar renders with package navigation sections', async ({ page }) => {
+    await page.goto('/docs/browser-web-apis');
+    await page.waitForLoadState('networkidle');
+
+    const sidebar = page.locator('aside');
+    await expect(sidebar).toBeVisible();
+
+    await expect(sidebar.getByText('browser-web-apis')).toBeVisible();
+    await expect(sidebar.getByRole('link', { name: /Overview/i }).first()).toBeVisible();
+  });
+
+  test('sidebar auto-expands section for active route', async ({ page }) => {
+    await page.goto('/docs/browser-web-apis/camera');
+    await page.waitForLoadState('networkidle');
+
+    const activeLink = page.locator('aside a.text-primary').first();
+    await expect(activeLink).toBeVisible();
+  });
+
+  test('sidebar section toggle expands service list on click', async ({ page }) => {
+    await page.goto('/docs');
+    await page.waitForLoadState('networkidle');
+
+    const collapsedBtn = page.locator('aside button[aria-expanded="false"]').first();
+    await expect(collapsedBtn).toBeVisible();
+
+    await collapsedBtn.click();
+
+    const expandedBtn = page.locator('aside button[aria-expanded="true"]').first();
+    await expect(expandedBtn).toBeVisible();
+  });
+
+  test('topbar shows Documentation label', async ({ page }) => {
+    await page.goto('/docs');
+    await page.waitForLoadState('networkidle');
+
+    const topbar = page.locator('header').filter({ hasText: /Documentation/i });
+    await expect(topbar).toBeVisible();
+  });
+});
+
 test.describe('Documentation - service detail pages', () => {
   test('camera service detail page renders', async ({ page }) => {
     await page.goto('/docs/browser-web-apis/camera');

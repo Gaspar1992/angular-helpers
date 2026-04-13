@@ -1,16 +1,9 @@
-import {
-  Component,
-  OnDestroy,
-  ViewEncapsulation,
-  ChangeDetectionStrategy,
-  signal,
-} from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-camera-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   imports: [FormsModule],
   template: `
     <section

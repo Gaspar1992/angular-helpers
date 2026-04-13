@@ -1,16 +1,9 @@
-import {
-  Component,
-  ViewEncapsulation,
-  ChangeDetectionStrategy,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { NotificationService, PermissionsService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-notification-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   providers: [PermissionsService, NotificationService],
   template: `
     <section

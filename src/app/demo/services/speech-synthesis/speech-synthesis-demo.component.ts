@@ -1,11 +1,4 @@
-import {
-  Component,
-  OnDestroy,
-  ViewEncapsulation,
-  ChangeDetectionStrategy,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { SpeechSynthesisService } from '@angular-helpers/browser-web-apis';
@@ -13,7 +6,6 @@ import { SpeechSynthesisService } from '@angular-helpers/browser-web-apis';
 @Component({
   selector: 'app-speech-synthesis-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   providers: [SpeechSynthesisService],
   imports: [FormsModule],
   template: `

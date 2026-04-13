@@ -1,17 +1,9 @@
-import {
-  Component,
-  OnDestroy,
-  ViewEncapsulation,
-  ChangeDetectionStrategy,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { MediaRecorderService, PermissionsService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-media-recorder-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   providers: [PermissionsService, MediaRecorderService],
   template: `
     <section

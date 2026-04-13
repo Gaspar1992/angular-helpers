@@ -1,17 +1,9 @@
-import {
-  Component,
-  OnDestroy,
-  ViewEncapsulation,
-  ChangeDetectionStrategy,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { ScreenWakeLockService, PermissionsService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-screen-wake-lock-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   providers: [PermissionsService, ScreenWakeLockService],
   template: `
     <section

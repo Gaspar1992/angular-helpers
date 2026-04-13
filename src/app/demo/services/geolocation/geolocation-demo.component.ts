@@ -1,15 +1,8 @@
-import {
-  Component,
-  OnDestroy,
-  ViewEncapsulation,
-  ChangeDetectionStrategy,
-  signal,
-} from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, signal } from '@angular/core';
 
 @Component({
   selector: 'app-geolocation-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   template: `
     <section
       class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"

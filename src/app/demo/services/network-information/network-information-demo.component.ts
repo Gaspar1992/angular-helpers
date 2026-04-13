@@ -1,11 +1,4 @@
-import {
-  Component,
-  OnDestroy,
-  ViewEncapsulation,
-  ChangeDetectionStrategy,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import {
   NetworkInformationService,
@@ -16,7 +9,6 @@ import {
 @Component({
   selector: 'app-network-information-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   providers: [NetworkInformationService],
   template: `
     <section
