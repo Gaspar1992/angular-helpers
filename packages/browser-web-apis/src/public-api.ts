@@ -107,6 +107,9 @@ export { GamepadService, type GamepadState } from './services/gamepad.service';
 // Tokens
 export { BROWSER_API_LOGGER, type BrowserApiLogger } from './tokens/logger.token';
 
+// Tokens
+export { BROWSER_API_LOGGER, type BrowserApiLogger } from './tokens/logger.token';
+
 // Base classes
 export { BrowserApiBaseService } from './services/base/browser-api-base.service';
 export { ConnectionRegistryBaseService } from './services/base/connection-registry-base.service';

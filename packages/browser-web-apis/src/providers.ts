@@ -63,6 +63,49 @@ export {
   provideCommunicationApis,
 } from './providers/combos';
 
+export { providePermissions } from './providers/permissions';
+export { provideCamera } from './providers/camera';
+export { provideGeolocation } from './providers/geolocation';
+export { provideNotifications } from './providers/notifications';
+export { provideClipboard } from './providers/clipboard';
+export { provideMediaDevices } from './providers/media-devices';
+export { provideScreenWakeLock } from './providers/screen-wake-lock';
+export { provideFileSystemAccess } from './providers/file-system-access';
+export { provideMediaRecorder } from './providers/media-recorder';
+export { provideIdleDetector } from './providers/idle-detector';
+export { provideBattery } from './providers/battery';
+export { provideWebShare } from './providers/web-share';
+export { provideWebStorage } from './providers/web-storage';
+export { provideWebSocket } from './providers/web-socket';
+export { provideWebWorker } from './providers/web-worker';
+export { provideIntersectionObserver } from './providers/intersection-observer';
+export { provideResizeObserver } from './providers/resize-observer';
+export { providePageVisibility } from './providers/page-visibility';
+export { provideBroadcastChannel } from './providers/broadcast-channel';
+export { provideNetworkInformation } from './providers/network-information';
+export { provideScreenOrientation } from './providers/screen-orientation';
+export { provideFullscreen } from './providers/fullscreen';
+export { provideServerSentEvents } from './providers/server-sent-events';
+export { provideVibration } from './providers/vibration';
+export { provideSpeechSynthesis } from './providers/speech-synthesis';
+export { provideMutationObserver } from './providers/mutation-observer';
+export { providePerformanceObserver } from './providers/performance-observer';
+export { provideEyeDropper } from './providers/eye-dropper';
+export { provideBarcodeDetector } from './providers/barcode-detector';
+export { provideWebAudio } from './providers/web-audio';
+export { provideGamepad } from './providers/gamepad';
+export { provideWebBluetooth } from './providers/web-bluetooth';
+export { provideWebUsb } from './providers/web-usb';
+export { provideWebNfc } from './providers/web-nfc';
+export { providePaymentRequest } from './providers/payment-request';
+export { provideCredentialManagement } from './providers/credential-management';
+export {
+  provideMediaApis,
+  provideLocationApis,
+  provideStorageApis,
+  provideCommunicationApis,
+} from './providers/combos';
+
 export interface BrowserWebApisConfig {
   enableCamera?: boolean;
   enableGeolocation?: boolean;
