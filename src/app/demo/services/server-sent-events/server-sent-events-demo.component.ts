@@ -1,11 +1,4 @@
-import {
-  Component,
-  OnDestroy,
-  ViewEncapsulation,
-  ChangeDetectionStrategy,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { ServerSentEventsService } from '@angular-helpers/browser-web-apis';
@@ -13,7 +6,6 @@ import { ServerSentEventsService } from '@angular-helpers/browser-web-apis';
 @Component({
   selector: 'app-server-sent-events-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   providers: [ServerSentEventsService],
   imports: [FormsModule],
   template: `

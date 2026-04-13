@@ -1,7 +1,6 @@
 import {
   Component,
   OnDestroy,
-  ViewEncapsulation,
   ChangeDetectionStrategy,
   inject,
   signal,
@@ -19,7 +18,6 @@ import {
 @Component({
   selector: 'app-resize-observer-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   providers: [ResizeObserverService],
   imports: [DecimalPipe],
   template: `

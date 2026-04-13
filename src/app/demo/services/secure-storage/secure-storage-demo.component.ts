@@ -1,55 +1,54 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ViewEncapsulation,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { SecureStorageService } from '@angular-helpers/security';
 
 @Component({
   selector: 'app-secure-storage-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  styleUrl: '../demo.styles.css',
   providers: [SecureStorageService],
   template: `
-    <section class="svc-card" aria-labelledby="storage-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="storage-title">SecureStorage Service</h2>
-        <div class="svc-badges">
-          <span class="badge badge-ok">encrypted</span>
-          <span class="badge badge-secure">aes-gcm</span>
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="storage-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="storage-title">
+          SecureStorage Service
+        </h2>
+        <div class="flex gap-2 flex-wrap">
+          <span class="badge badge-success badge-sm">encrypted</span>
+          <span class="badge badge-info badge-sm">aes-gcm</span>
         </div>
       </div>
-      <p class="svc-desc">
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
         Transparently encrypted storage using AES-GCM. Supports ephemeral (session) and passphrase
         modes.
       </p>
 
-      <div class="svc-controls svc-controls--col">
-        <label for="storage-key" class="demo-label">Key</label>
+      <div class="flex flex-col gap-2 mb-4">
+        <label for="storage-key" class="text-sm font-medium text-base-content/70">Key</label>
         <input
           id="storage-key"
-          class="demo-input"
+          class="input input-sm input-bordered w-full"
           [value]="storageKey()"
           (input)="storageKey.set($any($event.target).value)"
           placeholder="demo-key"
         />
-
-        <label for="storage-value" class="demo-label">Value (JSON)</label>
+        <label for="storage-value" class="text-sm font-medium text-base-content/70"
+          >Value (JSON)</label
+        >
         <input
           id="storage-value"
-          class="demo-input"
+          class="input input-sm input-bordered w-full font-mono text-xs"
           [value]="storageValue()"
           (input)="storageValue.set($any($event.target).value)"
           placeholder='{"message": "Hello, World!"}'
         />
-
-        <label for="passphrase" class="demo-label">Passphrase (optional)</label>
+        <label for="passphrase" class="text-sm font-medium text-base-content/70"
+          >Passphrase (optional)</label
+        >
         <input
           id="passphrase"
-          class="demo-input"
+          class="input input-sm input-bordered w-full"
           type="password"
           [value]="passphrase()"
           (input)="passphrase.set($any($event.target).value)"
@@ -57,18 +56,22 @@ import { SecureStorageService } from '@angular-helpers/security';
         />
       </div>
 
-      <div class="svc-controls">
-        <button class="btn btn-primary" (click)="storeData()">Store</button>
-        <button class="btn btn-secondary" (click)="retrieveData()">Retrieve</button>
-        <button class="btn btn-secondary" (click)="initWithPassphrase()">Init Passphrase</button>
-        <button class="btn btn-danger" (click)="clearStorage()">Clear</button>
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button class="btn btn-primary btn-sm" (click)="storeData()">Store</button>
+        <button class="btn btn-secondary btn-sm" (click)="retrieveData()">Retrieve</button>
+        <button class="btn btn-secondary btn-sm" (click)="initWithPassphrase()">
+          Init Passphrase
+        </button>
+        <button class="btn btn-error btn-sm" (click)="clearStorage()">Clear</button>
       </div>
 
       @if (storageResult()) {
         <div
-          class="feedback"
-          [class.feedback-success]="storageResult().startsWith('✅')"
-          [class.feedback-error]="storageResult().startsWith('❌')"
+          class="p-3 rounded-lg text-sm mt-2"
+          [class.bg-success/10]="storageResult().startsWith('✅')"
+          [class.text-success]="storageResult().startsWith('✅')"
+          [class.bg-error/10]="storageResult().startsWith('❌')"
+          [class.text-error]="storageResult().startsWith('❌')"
         >
           {{ storageResult() }}
         </div>

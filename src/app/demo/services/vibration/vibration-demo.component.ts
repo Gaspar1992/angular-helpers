@@ -1,10 +1,9 @@
-import { Component, ViewEncapsulation, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { VibrationService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-vibration-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   providers: [VibrationService],
   template: `
     <section

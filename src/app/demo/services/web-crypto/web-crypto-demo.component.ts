@@ -1,60 +1,63 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ViewEncapsulation,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { WebCryptoService } from '@angular-helpers/security';
 
 @Component({
   selector: 'app-web-crypto-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  styleUrl: '../demo.styles.css',
   providers: [WebCryptoService],
   template: `
-    <section class="svc-card" aria-labelledby="crypto-title">
-      <div class="svc-card-head">
-        <h2 class="svc-card-title" id="crypto-title">WebCrypto Service</h2>
-        <div class="svc-badges">
-          <span class="badge badge-ok">aes-gcm</span>
-          <span class="badge badge-secure">sha-256</span>
+    <section
+      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
+      aria-labelledby="crypto-title"
+    >
+      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="crypto-title">
+          WebCrypto Service
+        </h2>
+        <div class="flex gap-2 flex-wrap">
+          <span class="badge badge-success badge-sm">aes-gcm</span>
+          <span class="badge badge-info badge-sm">sha-256</span>
         </div>
       </div>
-      <p class="svc-desc">
+      <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
         Cryptographic operations using the Web Crypto API: hashing, encryption, HMAC signing.
       </p>
 
-      <div class="svc-controls">
-        <button class="btn btn-primary" (click)="hashData()">Hash (SHA-256)</button>
-        <button class="btn btn-secondary" (click)="encryptAes()">Encrypt AES</button>
-        <button class="btn btn-secondary" (click)="generateHmac()">Generate HMAC</button>
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button class="btn btn-primary btn-sm" (click)="hashData()">Hash (SHA-256)</button>
+        <button class="btn btn-secondary btn-sm" (click)="encryptAes()">Encrypt AES</button>
+        <button class="btn btn-secondary btn-sm" (click)="generateHmac()">Generate HMAC</button>
       </div>
 
       @if (hashResult()) {
-        <div class="svc-result">
-          <div class="kv-row">
-            <span class="kv-key">SHA-256 Hash</span>
-            <span class="kv-val mono">{{ hashResult() }}</span>
+        <div class="bg-base-300 border border-base-300 rounded-lg p-3 mt-3">
+          <div class="flex items-center justify-between gap-3 py-2">
+            <span class="text-sm text-base-content/60 font-medium">SHA-256 Hash</span>
+            <span class="text-sm text-base-content font-semibold font-mono">{{
+              hashResult()
+            }}</span>
           </div>
         </div>
       }
 
       @if (encryptedData()) {
-        <div class="svc-result">
-          <div class="kv-row">
-            <span class="kv-key">Encrypted (AES-GCM)</span>
-            <span class="kv-val mono">{{ encryptedData() }}</span>
+        <div class="bg-base-300 border border-base-300 rounded-lg p-3 mt-3">
+          <div class="flex items-center justify-between gap-3 py-2">
+            <span class="text-sm text-base-content/60 font-medium">Encrypted (AES-GCM)</span>
+            <span class="text-sm text-base-content font-semibold font-mono">{{
+              encryptedData()
+            }}</span>
           </div>
         </div>
       }
 
       @if (hmacSignature()) {
-        <div class="svc-result">
-          <div class="kv-row">
-            <span class="kv-key">HMAC Signature</span>
-            <span class="kv-val mono">{{ hmacSignature() }}</span>
+        <div class="bg-base-300 border border-base-300 rounded-lg p-3 mt-3">
+          <div class="flex items-center justify-between gap-3 py-2">
+            <span class="text-sm text-base-content/60 font-medium">HMAC Signature</span>
+            <span class="text-sm text-base-content font-semibold font-mono">{{
+              hmacSignature()
+            }}</span>
           </div>
         </div>
       }
