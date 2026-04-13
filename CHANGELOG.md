@@ -1,3 +1,11 @@
+## [1.13.2](https://github.com/Gaspar1992/angular-helpers/compare/v1.13.1...v1.13.2) (2026-04-12)
+
+
+### Bug Fixes
+
+* **blog:** use relative path for markdown files on GitHub Pages ([8adfa08](https://github.com/Gaspar1992/angular-helpers/commit/8adfa082e9815bb8842d70a41b65dcbc786274ed))
+* **blog:** use relative path for markdown files on GitHub Pages ([#50](https://github.com/Gaspar1992/angular-helpers/issues/50)) ([f188d70](https://github.com/Gaspar1992/angular-helpers/commit/f188d7050cd4aa66033c0618af8a8039f223fc9d))
+
 # [1.13.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.12.1...v1.13.0) (2026-04-12)
 
 
