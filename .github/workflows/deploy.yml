@@ -37,6 +37,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build Web Workers
+        run: npx vite build
+
       - name: Build for GitHub Pages
         run: npm run build:gh-pages
 

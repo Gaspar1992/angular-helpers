@@ -218,6 +218,115 @@ const auto = await createAutoSerializer({ transferThreshold: 102400 });
 // Large payloads → ArrayBuffer transfer`,
   },
   {
+    id: 'backend',
+    name: 'provideWorkerHttpClient',
+    description:
+      'Angular HttpBackend replacement that routes HttpClient requests to Web Workers off the main thread. Drop-in integration with Angular DI — use WorkerHttpClient just like HttpClient.',
+    scope: 'root',
+    importPath: '@angular-helpers/worker-http/backend',
+    requiresSecureContext: false,
+    browserSupport: 'All browsers with Web Workers support. Falls back to FetchBackend in SSR.',
+    notes: [
+      'provideWorkerHttpClient() replaces provideHttpClient() — do not use both',
+      'WorkerHttpClient wraps HttpClient with an optional { worker } routing field',
+      'WORKER_TARGET HttpContextToken enables per-request worker routing',
+      'SSR-safe: falls back to FetchBackend when typeof Worker === "undefined"',
+      'withWorkerSerialization() applies to request body only; worker-side deserialization is developer responsibility',
+    ],
+    methods: [
+      {
+        name: 'provideWorkerHttpClient',
+        signature:
+          'provideWorkerHttpClient(...features: WorkerHttpFeature[]): EnvironmentProviders',
+        description:
+          'Root provider that replaces provideHttpClient(). Registers WorkerHttpBackend, WorkerHttpClient, and all feature providers.',
+        returns: 'EnvironmentProviders',
+      },
+      {
+        name: 'withWorkerConfigs',
+        signature: 'withWorkerConfigs(configs: WorkerConfig[]): WorkerHttpFeature',
+        description:
+          'Registers named worker definitions. Each WorkerConfig has id, workerUrl, and optional maxInstances for pooling.',
+        returns: 'WorkerHttpFeature<"WorkerConfigs">',
+      },
+      {
+        name: 'withWorkerRoutes',
+        signature: 'withWorkerRoutes(routes: WorkerRoute[]): WorkerHttpFeature',
+        description:
+          'URL-pattern to worker routing rules. Higher priority = evaluated first. Patterns can be RegExp or string prefix.',
+        returns: 'WorkerHttpFeature<"WorkerRoutes">',
+      },
+      {
+        name: 'withWorkerFallback',
+        signature: "withWorkerFallback(strategy: 'main-thread' | 'error'): WorkerHttpFeature",
+        description:
+          "Configures behavior when workers are unavailable (SSR, unsupported browsers). 'main-thread' uses FetchBackend; 'error' throws.",
+        returns: 'WorkerHttpFeature<"WorkerFallback">',
+      },
+      {
+        name: 'withWorkerSerialization',
+        signature: 'withWorkerSerialization(serializer: WorkerSerializer): WorkerHttpFeature',
+        description:
+          'Plugs in a custom serializer for request body crossing the worker boundary. Use with createSerovalSerializer() for complex types (Date, Map, Set).',
+        returns: 'WorkerHttpFeature<"WorkerSerialization">',
+      },
+      {
+        name: 'WorkerHttpClient.get / post / put / delete / patch',
+        signature: 'get<T>(url, options?: WorkerRequestOptions): Observable<T>',
+        description:
+          'HttpClient-compatible methods with an optional { worker: string } field for per-request worker routing.',
+        returns: 'Observable<T>',
+      },
+    ],
+    example: `// app.config.ts
+import {
+  provideWorkerHttpClient,
+  withWorkerConfigs,
+  withWorkerRoutes,
+  withWorkerFallback,
+  withWorkerSerialization,
+} from '@angular-helpers/worker-http/backend';
+import { createSerovalSerializer } from '@angular-helpers/worker-http/serializer';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideWorkerHttpClient(
+      withWorkerConfigs([
+        {
+          id: 'api',
+          workerUrl: new URL('./workers/api.worker', import.meta.url),
+          maxInstances: 2,
+        },
+        {
+          id: 'secure',
+          workerUrl: new URL('./workers/secure.worker', import.meta.url),
+        },
+      ]),
+      withWorkerRoutes([
+        { pattern: /\\/api\\/secure\\//, worker: 'secure', priority: 10 },
+        { pattern: /\\/api\\//, worker: 'api', priority: 5 },
+      ]),
+      withWorkerFallback('main-thread'), // SSR-safe
+      withWorkerSerialization(createSerovalSerializer()), // optional
+    ),
+  ],
+};
+
+// data.service.ts — use WorkerHttpClient like HttpClient
+export class DataService {
+  private http = inject(WorkerHttpClient);
+
+  getUsers() {
+    return this.http.get<User[]>('/api/users'); // auto-routed to 'api' worker
+  }
+
+  getSecureData() {
+    // explicit worker override via HttpContextToken
+    return this.http.get('/api/secure/payments', { worker: 'secure' });
+  }
+}`,
+  },
+  {
     id: 'crypto',
     name: 'WebCrypto Utilities',
     description:
@@ -418,6 +527,51 @@ export const WORKER_HTTP_INTERFACES = [
         name: 'transferThreshold?',
         type: 'number',
         description: 'Size threshold for ArrayBuffer transfer in bytes (default: 102400)',
+      },
+    ],
+  },
+  {
+    name: 'WorkerConfig',
+    description: 'Single worker definition registered via withWorkerConfigs().',
+    fields: [
+      { name: 'id', type: 'string', description: 'Unique identifier used for routing' },
+      {
+        name: 'workerUrl',
+        type: 'URL',
+        description: 'URL of the worker script (passed to new Worker(url))',
+      },
+      {
+        name: 'maxInstances?',
+        type: 'number',
+        description: 'Max worker instances in the pool (default: 1)',
+      },
+    ],
+  },
+  {
+    name: 'WorkerRoute',
+    description: 'URL-pattern to worker routing rule registered via withWorkerRoutes().',
+    fields: [
+      {
+        name: 'pattern',
+        type: 'RegExp | string',
+        description: 'URL pattern to match (RegExp test or string prefix)',
+      },
+      { name: 'worker', type: 'string', description: 'Must match a WorkerConfig.id' },
+      {
+        name: 'priority?',
+        type: 'number',
+        description: 'Higher priority = evaluated first (default: 0)',
+      },
+    ],
+  },
+  {
+    name: 'WorkerRequestOptions',
+    description: 'HttpClient request options extended with optional per-request worker routing.',
+    fields: [
+      {
+        name: 'worker?',
+        type: 'string',
+        description: 'Explicit worker id to use for this request. Overrides URL routing.',
       },
     ],
   },

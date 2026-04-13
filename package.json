@@ -8,6 +8,7 @@
     "start:https": "ng serve --ssl",
     "start:test": "ng serve --configuration development --host 127.0.0.1 --port 4200 --ssl=false",
     "build": "ng build",
+    "build:workers": "vite build",
     "build:gh-pages": "ng build --base-href /angular-helpers/",
     "build:gh-pages-root": "ng build --base-href /",
     "build:packages": "npm run build --workspaces --if-present",

@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, OnDestroy, signal } from '@angular/
 import { CommonModule } from '@angular/common';
 import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
 import type { WorkerTransport } from '@angular-helpers/worker-http/transport';
+import { matchWorkerRoute } from '@angular-helpers/worker-http/backend';
+import type { WorkerRoute, SerializableResponse } from '@angular-helpers/worker-http/backend';
 import {
   createHmacSigner,
   createContentHasher,
@@ -15,6 +17,20 @@ import type {
 } from '@angular-helpers/worker-http/crypto';
 
 const ECHO_WORKER_URL = 'assets/workers/echo.worker.js';
+const HTTP_API_WORKER_URL = 'assets/workers/http-api.worker.js';
+
+const DEMO_ROUTES: WorkerRoute[] = [
+  { pattern: /\/api\/secure\//, worker: 'secure', priority: 10 },
+  { pattern: /\/api\//, worker: 'api', priority: 5 },
+  { pattern: '/public/', worker: 'cdn', priority: 1 },
+];
+
+const ROUTING_TEST_URLS = [
+  '/api/users',
+  '/api/secure/payments',
+  '/public/images/logo.png',
+  '/other/path',
+];
 
 interface LogEntry {
   id: number;
@@ -46,6 +62,7 @@ interface LogEntry {
           <span class="badge badge-secondary badge-md">HMAC Crypto</span>
           <span class="badge badge-accent badge-md">Content Hashing</span>
           <span class="badge badge-info badge-md">AES Encryption</span>
+          <span class="badge badge-success badge-md">HttpBackend</span>
         </div>
       </header>
 
@@ -192,6 +209,90 @@ interface LogEntry {
         </div>
       </div>
 
+      <!-- HttpBackend Demo -->
+      <div class="bg-base-200 border border-base-300 rounded-xl p-6 col-span-full">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
+            🔀 HttpBackend
+          </h2>
+          <span class="badge badge-success">New in v0.3.0</span>
+        </div>
+        <p class="text-sm text-base-content/80 mb-4">
+          <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded">WorkerHttpBackend</code>
+          routes real HTTP requests off the main thread via
+          <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded"
+            >provideWorkerHttpClient()</code
+          >. The live demo calls JSONPlaceholder via the
+          <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded"
+            >http-api.worker.js</code
+          >
+          using
+          <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded"
+            >createWorkerPipeline()</code
+          >
+          with retry + cache interceptors.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Live HTTP via Worker -->
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
+              Live HTTP Call via Worker
+            </p>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <button
+                (click)="fetchViaWorker('https://jsonplaceholder.typicode.com/todos/1')"
+                [disabled]="backendStatus() === 'running'"
+                class="btn btn-success btn-sm"
+              >
+                @if (backendStatus() === 'running') {
+                  <span class="loading loading-spinner loading-xs"></span>
+                }
+                GET /todos/1
+              </button>
+              <button
+                (click)="fetchViaWorker('https://jsonplaceholder.typicode.com/users/1')"
+                [disabled]="backendStatus() === 'running'"
+                class="btn btn-ghost btn-sm"
+              >
+                GET /users/1
+              </button>
+            </div>
+            @if (backendResult()) {
+              <div class="p-3 bg-base-300 rounded-lg font-mono text-xs overflow-auto max-h-40">
+                <span class="text-success">Response ({{ backendTime() }}ms):</span>
+                <br />
+                {{ backendResult() }}
+              </div>
+            }
+          </div>
+
+          <!-- URL Routing Simulation -->
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
+              URL Routing Simulation
+            </p>
+            <p class="text-xs text-base-content/60 mb-3">
+              <code class="font-mono">matchWorkerRoute()</code> resolves which worker handles each
+              URL.
+            </p>
+            <div class="space-y-1">
+              @for (entry of routingResults(); track entry.url) {
+                <div class="flex items-center gap-2 text-xs font-mono p-2 bg-base-300 rounded">
+                  <span class="text-base-content/60 flex-1 truncate">{{ entry.url }}</span>
+                  <span class="text-xs">→</span>
+                  @if (entry.worker) {
+                    <span class="badge badge-xs badge-primary">{{ entry.worker }}</span>
+                  } @else {
+                    <span class="badge badge-xs badge-ghost">main-thread</span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Activity Log -->
       <div class="mt-8 bg-base-200 border border-base-300 rounded-xl p-6">
         <div class="flex items-center justify-between mb-4">
@@ -238,6 +339,15 @@ export class WorkerHttpDemoComponent implements OnDestroy {
   protected readonly transportTime = signal<number>(0);
   private transport: WorkerTransport<unknown, unknown> | null = null;
 
+  // --- Backend state ---
+  protected readonly backendStatus = signal<'idle' | 'running' | 'done' | 'error'>('idle');
+  protected readonly backendResult = signal<string>('');
+  protected readonly backendTime = signal<number>(0);
+  protected readonly routingResults = signal(
+    ROUTING_TEST_URLS.map((url) => ({ url, worker: matchWorkerRoute(url, DEMO_ROUTES) })),
+  );
+  private backendTransport: WorkerTransport<unknown, unknown> | null = null;
+
   // --- Crypto state ---
   protected readonly hmacSignature = signal<string>('');
   protected readonly hmacVerified = signal<boolean | null>(null);
@@ -252,6 +362,51 @@ export class WorkerHttpDemoComponent implements OnDestroy {
   // --- Shared log ---
   protected readonly logs = signal<LogEntry[]>([]);
   private logCounter = 0;
+
+  // ──────────────────────────────────────────────────────
+  // Backend (HttpBackend) tests
+  // ──────────────────────────────────────────────────────
+
+  fetchViaWorker(url: string): void {
+    this.backendStatus.set('running');
+    this.backendResult.set('');
+    const start = performance.now();
+
+    if (!this.backendTransport) {
+      this.backendTransport = createWorkerTransport({
+        workerUrl: HTTP_API_WORKER_URL,
+        maxInstances: 1,
+      });
+    }
+
+    const request = {
+      method: 'GET',
+      url,
+      headers: {},
+      params: {},
+      body: null,
+      responseType: 'json',
+      withCredentials: false,
+      context: {},
+    };
+
+    (this.backendTransport as WorkerTransport<unknown, SerializableResponse>)
+      .execute(request)
+      .subscribe({
+        next: (res) => {
+          const elapsed = Math.round(performance.now() - start);
+          this.backendTime.set(elapsed);
+          this.backendResult.set(JSON.stringify(res.body, null, 2));
+          this.backendStatus.set('done');
+          this.log('Backend', `GET ${url} → ${res.status} in ${elapsed}ms`, 'success');
+        },
+        error: (err) => {
+          this.backendStatus.set('error');
+          this.backendResult.set(String(err));
+          this.log('Backend', `Error fetching ${url}: ${err}`, 'error');
+        },
+      });
+  }
 
   // ──────────────────────────────────────────────────────
   // Transport tests
@@ -431,5 +586,6 @@ export class WorkerHttpDemoComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.transport?.terminate();
+    this.backendTransport?.terminate();
   }
 }

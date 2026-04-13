@@ -16,13 +16,13 @@ Además, los workers proveen un límite de aislamiento natural para lógica sens
 
 ## Mapa de paquetes
 
-| Entry point                                 | Descripción                                                         | Estado           |
-| ------------------------------------------- | ------------------------------------------------------------------- | ---------------- |
-| `@angular-helpers/worker-http/transport`    | Bridge RPC tipado, pool round-robin, cancelación                    | ✅ Disponible    |
-| `@angular-helpers/worker-http/serializer`   | Serialización pluggable (structured clone, seroval, auto-detect)    | ✅ Disponible    |
-| `@angular-helpers/worker-http/interceptors` | Pipeline de interceptors de funciones puras para workers            | ✅ Disponible    |
-| `@angular-helpers/worker-http/crypto`       | Primitivas WebCrypto (HMAC, AES-GCM, hashing SHA)                   | ✅ Disponible    |
-| `@angular-helpers/worker-http/backend`      | Reemplazo de `HttpBackend` de Angular — `provideWorkerHttpClient()` | 🔧 En desarrollo |
+| Entry point                                 | Descripción                                                         | Estado        |
+| ------------------------------------------- | ------------------------------------------------------------------- | ------------- |
+| `@angular-helpers/worker-http/transport`    | Bridge RPC tipado, pool round-robin, cancelación                    | ✅ Disponible |
+| `@angular-helpers/worker-http/serializer`   | Serialización pluggable (structured clone, seroval, auto-detect)    | ✅ Disponible |
+| `@angular-helpers/worker-http/interceptors` | Pipeline de interceptors de funciones puras para workers            | ✅ Disponible |
+| `@angular-helpers/worker-http/crypto`       | Primitivas WebCrypto (HMAC, AES-GCM, hashing SHA)                   | ✅ Disponible |
+| `@angular-helpers/worker-http/backend`      | Reemplazo de `HttpBackend` de Angular — `provideWorkerHttpClient()` | ✅ Disponible |
 
 ---
 
@@ -313,13 +313,9 @@ const hash = await hasher.hash('SHA-256', data); // → string hex
 
 ---
 
-### `/backend` — Reemplazo de `HttpBackend` de Angular (en desarrollo)
+### `/backend` — Reemplazo de `HttpBackend` de Angular
 
-> 🔧 **Este entry point está actualmente en desarrollo.**
-
-El objetivo es un reemplazo drop-in del `HttpBackend` de Angular que enruta requests al worker apropiado de forma transparente.
-
-**API planificada:**
+Reemplazo drop-in del `HttpBackend` de Angular que enruta requests de `HttpClient` a Web Workers de forma transparente. Usas `WorkerHttpClient` exactamente igual que `HttpClient` — el ruteo es invisible para el código de aplicación.
 
 ```typescript
 // app.config.ts
@@ -328,33 +324,74 @@ import {
   withWorkerConfigs,
   withWorkerRoutes,
   withWorkerFallback,
+  withWorkerSerialization,
 } from '@angular-helpers/worker-http/backend';
+import { createSerovalSerializer } from '@angular-helpers/worker-http/serializer';
 
-bootstrapApplication(AppComponent, {
+export const appConfig: ApplicationConfig = {
   providers: [
     provideWorkerHttpClient(
       withWorkerConfigs([
         {
+          id: 'api',
+          workerUrl: new URL('./workers/api.worker', import.meta.url),
+          maxInstances: 2, // pool round-robin
+        },
+        {
           id: 'secure',
           workerUrl: new URL('./workers/secure.worker', import.meta.url),
-          maxInstances: 2,
         },
       ]),
-      withWorkerRoutes([{ pattern: /\/api\/secure\//, worker: 'secure', priority: 10 }]),
-      withWorkerFallback('main-thread'), // fallback SSR-safe
+      withWorkerRoutes([
+        { pattern: /\/api\/secure\//, worker: 'secure', priority: 10 },
+        { pattern: /\/api\//, worker: 'api', priority: 5 },
+      ]),
+      withWorkerFallback('main-thread'), // SSR-safe
+      withWorkerSerialization(createSerovalSerializer()), // opcional: cuerpos complejos
     ),
   ],
-});
+};
 
-// data.service.ts — idéntico al uso normal de HttpClient
+// data.service.ts — WorkerHttpClient es un drop-in para HttpClient
 export class DataService {
-  private http = inject(HttpClient);
+  private http = inject(WorkerHttpClient);
 
-  getReports() {
-    return this.http.get<Report[]>('/api/secure/reports');
+  getUsers() {
+    return this.http.get<User[]>('/api/users'); // ruteado automáticamente al worker 'api'
+  }
+
+  getSecureData() {
+    // override por request vía opción { worker } o el context token WORKER_TARGET
+    return this.http.get('/api/secure/payments', { worker: 'secure' });
   }
 }
+
+// workers/api.worker.ts — corre en un hilo OS separado
+import {
+  createWorkerPipeline,
+  loggingInterceptor,
+  retryInterceptor,
+  cacheInterceptor,
+} from '@angular-helpers/worker-http/interceptors';
+
+createWorkerPipeline([
+  loggingInterceptor(),
+  retryInterceptor({ maxRetries: 3 }),
+  cacheInterceptor({ ttl: 60000 }),
+]);
 ```
+
+**Features:**
+
+- `provideWorkerHttpClient(...features)` — reemplaza `provideHttpClient()`; no uses ambos
+- `withWorkerConfigs(configs)` — registra workers nombrados con pool opcional
+- `withWorkerRoutes(routes)` — ruteo por patrón URL con ordering por prioridad
+- `withWorkerFallback(strategy)` — `'main-thread'` (SSR-safe) o `'error'`
+- `withWorkerSerialization(serializer)` — usa `createSerovalSerializer()` para cuerpos complejos (`Date`, `Map`, `Set`)
+- `WORKER_TARGET` — `HttpContextToken<string | null>` para ruteo por request vía `HttpContext`
+- `WorkerHttpClient` — wrapper de `HttpClient` con campo opcional `{ worker: string }` de ruteo
+- `WorkerHttpBackend` — la implementación de `HttpBackend` (inyectable para uso avanzado)
+- `matchWorkerRoute(url, routes)` — utilidad pura para testear reglas de ruteo
 
 ---
 
