@@ -64,7 +64,7 @@ The main thread never blocked. The network operation ran entirely on a separate 
 
 A provider function that replaces `provideHttpClient()`:
 
-```typescript
+```ts
 // app.config.ts
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -85,7 +85,7 @@ export const appConfig: ApplicationConfig = {
 
 And in your service — nothing changes:
 
-```typescript
+```ts
 export class DataService {
   private http = inject(WorkerHttpClient);
 
@@ -114,7 +114,7 @@ Each `with*` function returns a `WorkerHttpFeature<Kind>` value. The `provideWor
 
 Route matching uses `matchWorkerRoute(url, routes)` — a pure function, independently testable, no Angular involved:
 
-```typescript
+```ts
 const routes: WorkerRoute[] = [
   { pattern: /\/api\/secure\//, worker: 'secure', priority: 10 },
   { pattern: /\/api\//, worker: 'api', priority: 5 },
@@ -131,7 +131,7 @@ Routes are sorted by `priority` descending before evaluation. Patterns can be `R
 
 For cases where routing rules aren't enough, `WorkerHttpClient` accepts an explicit `worker` field:
 
-```typescript
+```ts
 this.http.get('/api/secure/payments', { worker: 'secure' });
 ```
 

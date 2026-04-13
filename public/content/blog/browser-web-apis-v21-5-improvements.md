@@ -96,7 +96,7 @@ We also added `"sideEffects": false` to `package.json`. This tells webpack, Roll
 
 ### Granular (recommended for production)
 
-```typescript
+```ts
 import {
   provideCamera,
   provideGeolocation,
@@ -114,7 +114,7 @@ bootstrapApplication(AppComponent, {
 
 ### All-in-one (zero bundle budget concern)
 
-```typescript
+```ts
 import { provideBrowserWebApis } from '@angular-helpers/browser-web-apis';
 
 bootstrapApplication(AppComponent, {
@@ -130,7 +130,7 @@ bootstrapApplication(AppComponent, {
 
 ### Combo providers
 
-```typescript
+```ts
 import { provideMediaApis, provideStorageApis } from '@angular-helpers/browser-web-apis';
 
 bootstrapApplication(AppComponent, {
