@@ -8,14 +8,15 @@ export class GeolocationService extends BrowserApiBaseService {
     return 'geolocation';
   }
 
-  private ensureGeolocationSupport(): void {
+  protected override ensureSupported(): void {
+    super.ensureSupported();
     if (!('geolocation' in navigator)) {
-      throw new Error('Geolocation API not supported in this browser');
+      throw new Error('Geolocation API not supported — a secure context (HTTPS) is required');
     }
   }
 
   getCurrentPosition(options?: PositionOptions): Promise<GeolocationPosition> {
-    this.ensureGeolocationSupport();
+    this.ensureSupported();
 
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
@@ -30,7 +31,7 @@ export class GeolocationService extends BrowserApiBaseService {
   }
 
   watchPosition(options?: PositionOptions): Observable<GeolocationPosition> {
-    this.ensureGeolocationSupport();
+    this.ensureSupported();
 
     return new Observable<GeolocationPosition>((observer) => {
       const watchId = navigator.geolocation.watchPosition(
@@ -54,7 +55,7 @@ export class GeolocationService extends BrowserApiBaseService {
 
   // Direct access to native geolocation API
   getNativeGeolocation(): Geolocation {
-    this.ensureGeolocationSupport();
+    this.ensureSupported();
     return navigator.geolocation;
   }
 }

@@ -43,10 +43,8 @@ export class FileSystemAccessService extends BrowserApiBaseService {
     return window as WindowWithFileSystem;
   }
 
-  private ensureSupport(): void {
-    if (this.isServerEnvironment()) {
-      throw new Error('File System Access API not available in server environment');
-    }
+  protected override ensureSupported(): void {
+    super.ensureSupported();
     if (!('showOpenFilePicker' in window)) {
       throw new Error('File System Access API not supported in this browser');
     }
@@ -56,7 +54,7 @@ export class FileSystemAccessService extends BrowserApiBaseService {
   }
 
   async openFile(options: FileOpenOptions = {}): Promise<File[]> {
-    this.ensureSupport();
+    this.ensureSupported();
     try {
       const handles = await this.win.showOpenFilePicker!(options);
       return Promise.all(handles.map((h) => h.getFile()));
@@ -64,13 +62,13 @@ export class FileSystemAccessService extends BrowserApiBaseService {
       if (error instanceof DOMException && error.name === 'AbortError') {
         return [];
       }
-      console.error('[FileSystemAccessService] Error opening file:', error);
+      this.logError('Error opening file:', error);
       throw error;
     }
   }
 
   async saveFile(content: string | Blob, options: FileSaveOptions = {}): Promise<void> {
-    this.ensureSupport();
+    this.ensureSupported();
     if (!this.win.showSaveFilePicker) {
       throw new Error('showSaveFilePicker not supported');
     }
@@ -83,7 +81,7 @@ export class FileSystemAccessService extends BrowserApiBaseService {
       if (error instanceof DOMException && error.name === 'AbortError') {
         return;
       }
-      console.error('[FileSystemAccessService] Error saving file:', error);
+      this.logError('Error saving file:', error);
       throw error;
     }
   }
@@ -95,7 +93,7 @@ export class FileSystemAccessService extends BrowserApiBaseService {
       startIn?: string;
     } = {},
   ): Promise<FileSystemDirectoryHandle | null> {
-    this.ensureSupport();
+    this.ensureSupported();
     if (!this.win.showDirectoryPicker) {
       throw new Error('showDirectoryPicker not supported');
     }
@@ -105,7 +103,7 @@ export class FileSystemAccessService extends BrowserApiBaseService {
       if (error instanceof DOMException && error.name === 'AbortError') {
         return null;
       }
-      console.error('[FileSystemAccessService] Error opening directory:', error);
+      this.logError('Error opening directory:', error);
       throw error;
     }
   }

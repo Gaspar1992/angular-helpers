@@ -1,30 +1,26 @@
 import { Injectable } from '@angular/core';
-import { PermissionAwareBrowserApiBaseService } from './base/permission-aware-browser-api-base.service';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 @Injectable()
-export class CameraService extends PermissionAwareBrowserApiBaseService {
+export class CameraService extends BrowserApiBaseService {
   private currentStream: MediaStream | null = null;
 
   protected override getApiName(): string {
     return 'camera';
   }
 
-  private ensureCameraSupport(): void {
-    if (!('mediaDevices' in navigator) || !('getUserMedia' in navigator.mediaDevices)) {
-      throw new Error('Camera API not supported in this browser');
+  protected override ensureSupported(): void {
+    super.ensureSupported();
+    if (!navigator.mediaDevices?.getUserMedia) {
+      throw new Error('Camera API not supported — a secure context (HTTPS) is required');
     }
   }
 
   async startCamera(constraints?: MediaStreamConstraints): Promise<MediaStream> {
-    this.ensureCameraSupport();
+    this.ensureSupported();
 
     if (this.currentStream) {
       this.stopCamera();
-    }
-
-    const permissionStatus = await this.permissionsService.query({ name: 'camera' });
-    if (permissionStatus.state !== 'granted') {
-      throw new Error('Camera permission required. Please grant camera access and try again.');
     }
 
     try {
@@ -39,7 +35,7 @@ export class CameraService extends PermissionAwareBrowserApiBaseService {
       this.currentStream = await navigator.mediaDevices.getUserMedia(streamConstraints);
       return this.currentStream;
     } catch (error: unknown) {
-      console.error('[CameraService] Error starting camera:', error);
+      this.logError('Error starting camera:', error);
 
       if (error instanceof Error && error.name === 'NotAllowedError') {
         throw this.createError(
@@ -99,22 +95,28 @@ export class CameraService extends PermissionAwareBrowserApiBaseService {
   }
 
   async getCameraCapabilities(deviceId: string): Promise<MediaTrackCapabilities | null> {
-    this.ensureCameraSupport();
+    this.ensureSupported();
 
     try {
+      const activeTrack = this.currentStream
+        ?.getVideoTracks()
+        .find((t) => t.getSettings().deviceId === deviceId);
+
+      if (activeTrack) {
+        return activeTrack.getCapabilities() ?? null;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { deviceId: { exact: deviceId } },
       });
 
       const videoTrack = stream.getVideoTracks()[0];
       const capabilities = videoTrack.getCapabilities();
-
-      // Clean up the stream
       stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
 
-      return capabilities || null;
+      return capabilities ?? null;
     } catch (error) {
-      console.error('[CameraService] Error getting camera capabilities:', error);
+      this.logError('Error getting camera capabilities:', error);
       return null;
     }
   }
@@ -128,20 +130,20 @@ export class CameraService extends PermissionAwareBrowserApiBaseService {
   }
 
   async getVideoInputDevices(): Promise<MediaDeviceInfo[]> {
-    this.ensureCameraSupport();
+    this.ensureSupported();
 
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
       return devices.filter((device) => device.kind === 'videoinput');
     } catch (error) {
-      console.error('[CameraService] Error enumerating video devices:', error);
+      this.logError('Error enumerating video devices:', error);
       throw this.createError('Failed to enumerate video devices', error);
     }
   }
 
   // Direct access to native camera API
   getNativeMediaDevices(): MediaDevices {
-    this.ensureCameraSupport();
+    this.ensureSupported();
     return navigator.mediaDevices;
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, DestroyRef } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, fromEvent } from 'rxjs';
 import { map, distinctUntilChanged, filter } from 'rxjs/operators';
@@ -12,7 +12,7 @@ export interface StorageOptions {
 }
 
 export interface StorageEvent {
-  key: string;
+  key: string | null;
   newValue: StorageValue | null;
   oldValue: StorageValue | null;
   storageArea: 'localStorage' | 'sessionStorage';
@@ -21,7 +21,6 @@ export interface StorageEvent {
 @Injectable()
 export class WebStorageService extends BrowserApiBaseService {
   private storageEvents = signal<StorageEvent | null>(null);
-  protected override destroyRef = inject(DestroyRef);
 
   constructor() {
     super();
@@ -32,8 +31,9 @@ export class WebStorageService extends BrowserApiBaseService {
     return 'storage';
   }
 
-  private ensureStorageSupport(): void {
-    if (!this.isBrowserEnvironment() || typeof Storage === 'undefined') {
+  protected override ensureSupported(): void {
+    super.ensureSupported();
+    if (typeof Storage === 'undefined') {
       throw new Error('Storage API not supported in this browser');
     }
   }
@@ -44,15 +44,14 @@ export class WebStorageService extends BrowserApiBaseService {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((event: Event) => {
           const storageEvent = event as unknown as globalThis.StorageEvent;
-          if (storageEvent.key && storageEvent.newValue !== null) {
-            this.storageEvents.set({
-              key: storageEvent.key,
-              newValue: this.deserializeValue(storageEvent.newValue),
-              oldValue: storageEvent.oldValue ? this.deserializeValue(storageEvent.oldValue) : null,
-              storageArea:
-                storageEvent.storageArea === localStorage ? 'localStorage' : 'sessionStorage',
-            });
-          }
+          const area =
+            storageEvent.storageArea === localStorage ? 'localStorage' : 'sessionStorage';
+          this.storageEvents.set({
+            key: storageEvent.key,
+            newValue: storageEvent.newValue ? this.deserializeValue(storageEvent.newValue) : null,
+            oldValue: storageEvent.oldValue ? this.deserializeValue(storageEvent.oldValue) : null,
+            storageArea: area,
+          });
         });
     }
   }
@@ -83,21 +82,33 @@ export class WebStorageService extends BrowserApiBaseService {
     return prefix ? `${prefix}:${key}` : key;
   }
 
+  private emitStorageChange(
+    fullKey: string | null,
+    newValue: StorageValue | null,
+    oldValue: StorageValue | null,
+    area: 'localStorage' | 'sessionStorage',
+  ): void {
+    this.storageEvents.set({ key: fullKey, newValue, oldValue, storageArea: area });
+  }
+
   // Local Storage Methods
   setLocalStorage<T extends StorageValue>(
     key: string,
     value: T,
     options: StorageOptions = {},
   ): boolean {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const serializedValue = this.serializeValue(value, options);
       const fullKey = this.getKey(key, options);
+      const oldRaw = localStorage.getItem(fullKey);
+      const oldValue = oldRaw !== null ? this.deserializeValue(oldRaw, options) : null;
       localStorage.setItem(fullKey, serializedValue);
+      this.emitStorageChange(fullKey, value, oldValue, 'localStorage');
       return true;
     } catch (error) {
-      console.error('[WebStorageService] Error setting localStorage:', error);
+      this.logError('Error setting localStorage:', error);
       return false;
     }
   }
@@ -107,38 +118,40 @@ export class WebStorageService extends BrowserApiBaseService {
     defaultValue: T | null = null,
     options: StorageOptions = {},
   ): T | null {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const fullKey = this.getKey(key, options);
       const value = localStorage.getItem(fullKey);
       return value !== null ? (this.deserializeValue(value, options) as T) : defaultValue;
     } catch (error) {
-      console.error('[WebStorageService] Error getting localStorage:', error);
+      this.logError('Error getting localStorage:', error);
       return defaultValue;
     }
   }
 
   removeLocalStorage(key: string, options: StorageOptions = {}): boolean {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const fullKey = this.getKey(key, options);
+      const oldRaw = localStorage.getItem(fullKey);
+      const oldValue = oldRaw !== null ? this.deserializeValue(oldRaw, options) : null;
       localStorage.removeItem(fullKey);
+      this.emitStorageChange(fullKey, null, oldValue, 'localStorage');
       return true;
     } catch (error) {
-      console.error('[WebStorageService] Error removing localStorage:', error);
+      this.logError('Error removing localStorage:', error);
       return false;
     }
   }
 
   clearLocalStorage(options: StorageOptions = {}): boolean {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const prefix = options?.prefix;
       if (prefix) {
-        // Only remove keys with the specified prefix
         const keysToRemove: string[] = [];
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
@@ -146,13 +159,18 @@ export class WebStorageService extends BrowserApiBaseService {
             keysToRemove.push(key);
           }
         }
-        keysToRemove.forEach((key) => localStorage.removeItem(key));
+        keysToRemove.forEach((key) => {
+          const oldRaw = localStorage.getItem(key);
+          localStorage.removeItem(key);
+          this.emitStorageChange(key, null, oldRaw, 'localStorage');
+        });
       } else {
         localStorage.clear();
+        this.emitStorageChange(null, null, null, 'localStorage');
       }
       return true;
     } catch (error) {
-      console.error('[WebStorageService] Error clearing localStorage:', error);
+      this.logError('Error clearing localStorage:', error);
       return false;
     }
   }
@@ -163,15 +181,18 @@ export class WebStorageService extends BrowserApiBaseService {
     value: T,
     options: StorageOptions = {},
   ): boolean {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const serializedValue = this.serializeValue(value, options);
       const fullKey = this.getKey(key, options);
+      const oldRaw = sessionStorage.getItem(fullKey);
+      const oldValue = oldRaw !== null ? this.deserializeValue(oldRaw, options) : null;
       sessionStorage.setItem(fullKey, serializedValue);
+      this.emitStorageChange(fullKey, value, oldValue, 'sessionStorage');
       return true;
     } catch (error) {
-      console.error('[WebStorageService] Error setting sessionStorage:', error);
+      this.logError('Error setting sessionStorage:', error);
       return false;
     }
   }
@@ -181,38 +202,40 @@ export class WebStorageService extends BrowserApiBaseService {
     defaultValue: T | null = null,
     options: StorageOptions = {},
   ): T | null {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const fullKey = this.getKey(key, options);
       const value = sessionStorage.getItem(fullKey);
       return value !== null ? (this.deserializeValue(value, options) as T) : defaultValue;
     } catch (error) {
-      console.error('[WebStorageService] Error getting sessionStorage:', error);
+      this.logError('Error getting sessionStorage:', error);
       return defaultValue;
     }
   }
 
   removeSessionStorage(key: string, options: StorageOptions = {}): boolean {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const fullKey = this.getKey(key, options);
+      const oldRaw = sessionStorage.getItem(fullKey);
+      const oldValue = oldRaw !== null ? this.deserializeValue(oldRaw, options) : null;
       sessionStorage.removeItem(fullKey);
+      this.emitStorageChange(fullKey, null, oldValue, 'sessionStorage');
       return true;
     } catch (error) {
-      console.error('[WebStorageService] Error removing sessionStorage:', error);
+      this.logError('Error removing sessionStorage:', error);
       return false;
     }
   }
 
   clearSessionStorage(options: StorageOptions = {}): boolean {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     try {
       const prefix = options?.prefix;
       if (prefix) {
-        // Only remove keys with the specified prefix
         const keysToRemove: string[] = [];
         for (let i = 0; i < sessionStorage.length; i++) {
           const key = sessionStorage.key(i);
@@ -220,20 +243,25 @@ export class WebStorageService extends BrowserApiBaseService {
             keysToRemove.push(key);
           }
         }
-        keysToRemove.forEach((key) => sessionStorage.removeItem(key));
+        keysToRemove.forEach((key) => {
+          const oldRaw = sessionStorage.getItem(key);
+          sessionStorage.removeItem(key);
+          this.emitStorageChange(key, null, oldRaw, 'sessionStorage');
+        });
       } else {
         sessionStorage.clear();
+        this.emitStorageChange(null, null, null, 'sessionStorage');
       }
       return true;
     } catch (error) {
-      console.error('[WebStorageService] Error clearing sessionStorage:', error);
+      this.logError('Error clearing sessionStorage:', error);
       return false;
     }
   }
 
   // Utility Methods
   getLocalStorageSize(options: StorageOptions = {}): number {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     let totalSize = 0;
     const prefix = options?.prefix;
@@ -248,7 +276,7 @@ export class WebStorageService extends BrowserApiBaseService {
   }
 
   getSessionStorageSize(options: StorageOptions = {}): number {
-    this.ensureStorageSupport();
+    this.ensureSupported();
 
     let totalSize = 0;
     const prefix = options?.prefix;
@@ -278,14 +306,13 @@ export class WebStorageService extends BrowserApiBaseService {
     key: string,
     options: StorageOptions = {},
   ): Observable<T | null> {
+    const fullKey = this.getKey(key, options);
     return this.getStorageEvents().pipe(
-      map((event) => {
-        const fullKey = this.getKey(key, options);
-        if (event.key === fullKey && event.storageArea === 'localStorage') {
-          return event.newValue as T;
-        }
-        return this.getLocalStorage<T>(key, null, options);
-      }),
+      filter(
+        (event) =>
+          event.storageArea === 'localStorage' && (event.key === null || event.key === fullKey),
+      ),
+      map((event) => event.newValue as T | null),
     );
   }
 
@@ -293,25 +320,24 @@ export class WebStorageService extends BrowserApiBaseService {
     key: string,
     options: StorageOptions = {},
   ): Observable<T | null> {
+    const fullKey = this.getKey(key, options);
     return this.getStorageEvents().pipe(
-      map((event) => {
-        const fullKey = this.getKey(key, options);
-        if (event.key === fullKey && event.storageArea === 'sessionStorage') {
-          return event.newValue as T;
-        }
-        return this.getSessionStorage<T>(key, null, options);
-      }),
+      filter(
+        (event) =>
+          event.storageArea === 'sessionStorage' && (event.key === null || event.key === fullKey),
+      ),
+      map((event) => event.newValue as T | null),
     );
   }
 
   // Direct access to native storage APIs
   getNativeLocalStorage(): Storage {
-    this.ensureStorageSupport();
+    this.ensureSupported();
     return localStorage;
   }
 
   getNativeSessionStorage(): Storage {
-    this.ensureStorageSupport();
+    this.ensureSupported();
     return sessionStorage;
   }
 }

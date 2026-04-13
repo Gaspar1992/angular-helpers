@@ -1,4 +1,4 @@
-import { Injectable, inject, DestroyRef } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
@@ -25,24 +25,25 @@ export interface WorkerTask<T = unknown> {
 
 @Injectable()
 export class WebWorkerService extends BrowserApiBaseService {
-  protected override destroyRef = inject(DestroyRef);
   private workers = new Map<string, Worker>();
   private workerStatuses = new Map<string, Subject<WorkerStatus>>();
   private workerMessages = new Map<string, Subject<WorkerMessage>>();
   private currentWorkerStatuses = new Map<string, WorkerStatus>();
+  private readonly _cleanup = this.destroyRef.onDestroy(() => this.terminateAllWorkers());
 
   protected override getApiName(): string {
     return 'webworker';
   }
 
-  private ensureWorkerSupport(): void {
+  protected override ensureSupported(): void {
+    super.ensureSupported();
     if (typeof Worker === 'undefined') {
       throw new Error('Web Workers not supported in this browser');
     }
   }
 
   createWorker(name: string, scriptUrl: string): Observable<WorkerStatus> {
-    this.ensureWorkerSupport();
+    this.ensureSupported();
 
     return new Observable<WorkerStatus>((observer) => {
       if (this.workers.has(name)) {
@@ -67,7 +68,7 @@ export class WebWorkerService extends BrowserApiBaseService {
         this.updateWorkerStatus(name, status);
         observer.next(status);
       } catch (error) {
-        console.error(`[WebWorkerService] Failed to create worker ${name}:`, error);
+        this.logError(`Failed to create worker ${name}:`, error);
         const status: WorkerStatus = {
           initialized: false,
           running: false,
@@ -105,7 +106,7 @@ export class WebWorkerService extends BrowserApiBaseService {
   postMessage(workerName: string, task: WorkerTask): void {
     const worker = this.workers.get(workerName);
     if (!worker) {
-      console.error(`[WebWorkerService] Worker ${workerName} not found`);
+      this.logError(`Worker ${workerName} not found`);
       return;
     }
 
@@ -124,7 +125,7 @@ export class WebWorkerService extends BrowserApiBaseService {
         this.updateWorkerStatus(workerName, currentStatus);
       }
     } catch (error) {
-      console.error(`[WebWorkerService] Failed to post message to worker ${workerName}:`, error);
+      this.logError(`Failed to post message to worker ${workerName}:`, error);
     }
   }
 
@@ -171,7 +172,7 @@ export class WebWorkerService extends BrowserApiBaseService {
     };
 
     worker.onerror = (error) => {
-      console.error(`[WebWorkerService] Worker ${name} error:`, error);
+      this.logError(`Worker ${name} error:`, error);
       const status: WorkerStatus = {
         initialized: true,
         running: false,
