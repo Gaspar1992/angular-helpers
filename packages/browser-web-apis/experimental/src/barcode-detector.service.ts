@@ -71,7 +71,7 @@ export class BarcodeDetectorService extends BrowserApiBaseService {
     return new Observable<DetectedBarcode[]>((subscriber) => {
       if (!this.isSupported()) {
         subscriber.error(new Error('BarcodeDetector API not supported'));
-        return;
+        return () => {};
       }
 
       const detector = new (getBarcodeDetectorClass()!)(
