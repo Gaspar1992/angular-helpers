@@ -20,6 +20,13 @@
 
 ---
 
+# [1.14.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.13.2...v1.14.0) (2026-04-13)
+
+
+### Features
+
+* **web:** Tailwind/DaisyUI overhaul, docs sidebar, demo cleanup ([#51](https://github.com/Gaspar1992/angular-helpers/issues/51)) ([7ace407](https://github.com/Gaspar1992/angular-helpers/commit/7ace4074005e10eafb7427076d7c594c949b63c8))
+
 ## [1.13.2](https://github.com/Gaspar1992/angular-helpers/compare/v1.13.1...v1.13.2) (2026-04-12)
 
 
