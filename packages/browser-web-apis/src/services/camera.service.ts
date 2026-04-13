@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { PermissionAwareBrowserApiBaseService } from './base/permission-aware-browser-api-base.service';
+import { BrowserApiBaseService } from './base/browser-api-base.service';
 
 @Injectable()
-export class CameraService extends PermissionAwareBrowserApiBaseService {
+export class CameraService extends BrowserApiBaseService {
   private currentStream: MediaStream | null = null;
 
   protected override getApiName(): string {
@@ -20,11 +20,6 @@ export class CameraService extends PermissionAwareBrowserApiBaseService {
 
     if (this.currentStream) {
       this.stopCamera();
-    }
-
-    const permissionStatus = await this.permissionsService.query({ name: 'camera' });
-    if (permissionStatus.state !== 'granted') {
-      throw new Error('Camera permission required. Please grant camera access and try again.');
     }
 
     try {
@@ -102,17 +97,23 @@ export class CameraService extends PermissionAwareBrowserApiBaseService {
     this.ensureCameraSupport();
 
     try {
+      const activeTrack = this.currentStream
+        ?.getVideoTracks()
+        .find((t) => t.getSettings().deviceId === deviceId);
+
+      if (activeTrack) {
+        return activeTrack.getCapabilities() ?? null;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { deviceId: { exact: deviceId } },
       });
 
       const videoTrack = stream.getVideoTracks()[0];
       const capabilities = videoTrack.getCapabilities();
-
-      // Clean up the stream
       stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
 
-      return capabilities || null;
+      return capabilities ?? null;
     } catch (error) {
       this.logError('Error getting camera capabilities:', error);
       return null;

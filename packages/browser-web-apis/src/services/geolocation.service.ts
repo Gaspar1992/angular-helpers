@@ -9,8 +9,8 @@ export class GeolocationService extends BrowserApiBaseService {
   }
 
   private ensureGeolocationSupport(): void {
-    if (!('geolocation' in navigator)) {
-      throw new Error('Geolocation API not supported in this browser');
+    if (!this.isBrowserEnvironment() || !('geolocation' in navigator)) {
+      throw new Error('Geolocation API not supported in this environment');
     }
   }
 

@@ -82,6 +82,15 @@ export class WebStorageService extends BrowserApiBaseService {
     return prefix ? `${prefix}:${key}` : key;
   }
 
+  private emitStorageChange(
+    fullKey: string,
+    newValue: StorageValue | null,
+    oldValue: StorageValue | null,
+    area: 'localStorage' | 'sessionStorage',
+  ): void {
+    this.storageEvents.set({ key: fullKey, newValue, oldValue, storageArea: area });
+  }
+
   // Local Storage Methods
   setLocalStorage<T extends StorageValue>(
     key: string,
@@ -93,7 +102,10 @@ export class WebStorageService extends BrowserApiBaseService {
     try {
       const serializedValue = this.serializeValue(value, options);
       const fullKey = this.getKey(key, options);
+      const oldRaw = localStorage.getItem(fullKey);
+      const oldValue = oldRaw !== null ? this.deserializeValue(oldRaw, options) : null;
       localStorage.setItem(fullKey, serializedValue);
+      this.emitStorageChange(fullKey, value, oldValue, 'localStorage');
       return true;
     } catch (error) {
       this.logError('Error setting localStorage:', error);
@@ -123,7 +135,10 @@ export class WebStorageService extends BrowserApiBaseService {
 
     try {
       const fullKey = this.getKey(key, options);
+      const oldRaw = localStorage.getItem(fullKey);
+      const oldValue = oldRaw !== null ? this.deserializeValue(oldRaw, options) : null;
       localStorage.removeItem(fullKey);
+      this.emitStorageChange(fullKey, null, oldValue, 'localStorage');
       return true;
     } catch (error) {
       this.logError('Error removing localStorage:', error);
@@ -167,7 +182,10 @@ export class WebStorageService extends BrowserApiBaseService {
     try {
       const serializedValue = this.serializeValue(value, options);
       const fullKey = this.getKey(key, options);
+      const oldRaw = sessionStorage.getItem(fullKey);
+      const oldValue = oldRaw !== null ? this.deserializeValue(oldRaw, options) : null;
       sessionStorage.setItem(fullKey, serializedValue);
+      this.emitStorageChange(fullKey, value, oldValue, 'sessionStorage');
       return true;
     } catch (error) {
       this.logError('Error setting sessionStorage:', error);
@@ -197,7 +215,10 @@ export class WebStorageService extends BrowserApiBaseService {
 
     try {
       const fullKey = this.getKey(key, options);
+      const oldRaw = sessionStorage.getItem(fullKey);
+      const oldValue = oldRaw !== null ? this.deserializeValue(oldRaw, options) : null;
       sessionStorage.removeItem(fullKey);
+      this.emitStorageChange(fullKey, null, oldValue, 'sessionStorage');
       return true;
     } catch (error) {
       this.logError('Error removing sessionStorage:', error);
@@ -277,14 +298,10 @@ export class WebStorageService extends BrowserApiBaseService {
     key: string,
     options: StorageOptions = {},
   ): Observable<T | null> {
+    const fullKey = this.getKey(key, options);
     return this.getStorageEvents().pipe(
-      map((event) => {
-        const fullKey = this.getKey(key, options);
-        if (event.key === fullKey && event.storageArea === 'localStorage') {
-          return event.newValue as T;
-        }
-        return this.getLocalStorage<T>(key, null, options);
-      }),
+      filter((event) => event.key === fullKey && event.storageArea === 'localStorage'),
+      map((event) => event.newValue as T | null),
     );
   }
 
@@ -292,14 +309,10 @@ export class WebStorageService extends BrowserApiBaseService {
     key: string,
     options: StorageOptions = {},
   ): Observable<T | null> {
+    const fullKey = this.getKey(key, options);
     return this.getStorageEvents().pipe(
-      map((event) => {
-        const fullKey = this.getKey(key, options);
-        if (event.key === fullKey && event.storageArea === 'sessionStorage') {
-          return event.newValue as T;
-        }
-        return this.getSessionStorage<T>(key, null, options);
-      }),
+      filter((event) => event.key === fullKey && event.storageArea === 'sessionStorage'),
+      map((event) => event.newValue as T | null),
     );
   }
 

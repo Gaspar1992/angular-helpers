@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
@@ -29,7 +29,12 @@ export interface WebSocketStatus {
 @Injectable()
 export class WebSocketService extends BrowserApiBaseService {
   private webSocket: WebSocket | null = null;
-  private statusSubject = new Subject<WebSocketStatus>();
+  private statusSubject = new BehaviorSubject<WebSocketStatus>({
+    connected: false,
+    connecting: false,
+    reconnecting: false,
+    reconnectAttempts: 0,
+  });
   private messageSubject = new Subject<WebSocketMessage>();
   private reconnectAttempts = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -61,7 +66,7 @@ export class WebSocketService extends BrowserApiBaseService {
       try {
         this.webSocket = new WebSocket(config.url, config.protocols);
         this.setupWebSocketHandlers(config);
-        observer.next(this.getCurrentStatus());
+        observer.next(this.statusSubject.getValue());
       } catch (error) {
         this.logError('Error creating WebSocket:', error);
         this.updateStatus({
@@ -71,7 +76,7 @@ export class WebSocketService extends BrowserApiBaseService {
           error: error instanceof Error ? error.message : 'Connection failed',
           reconnectAttempts: 0,
         });
-        observer.next(this.getCurrentStatus());
+        observer.next(this.statusSubject.getValue());
       }
 
       return () => {
@@ -222,18 +227,8 @@ export class WebSocketService extends BrowserApiBaseService {
   }
 
   private updateStatus(status: Partial<WebSocketStatus>): void {
-    const currentStatus = this.getCurrentStatus();
-    const newStatus = { ...currentStatus, ...status };
+    const newStatus = { ...this.statusSubject.getValue(), ...status };
     this.statusSubject.next(newStatus);
-  }
-
-  private getCurrentStatus(): WebSocketStatus {
-    return {
-      connected: this.webSocket?.readyState === WebSocket.OPEN,
-      connecting: false,
-      reconnecting: false,
-      reconnectAttempts: this.reconnectAttempts,
-    };
   }
 
   // Direct access to native WebSocket
