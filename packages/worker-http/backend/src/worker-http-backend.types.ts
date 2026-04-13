@@ -46,3 +46,29 @@ export interface WorkerRoute {
  * Fallback strategy when workers are unavailable (SSR, old browsers).
  */
 export type WorkerFallbackStrategy = 'main-thread' | 'error';
+
+/**
+ * Serializable HTTP request — POJO version of Angular's HttpRequest.
+ * Structured-clone safe: no classes, no functions, no prototype chains.
+ */
+export interface SerializableRequest {
+  method: string;
+  url: string;
+  headers: Record<string, string[]>;
+  params: Record<string, string[]>;
+  body: unknown;
+  responseType: 'json' | 'text' | 'blob' | 'arraybuffer';
+  withCredentials: boolean;
+  context: Record<string, unknown>;
+}
+
+/**
+ * Serializable HTTP response — POJO version of Angular's HttpResponse.
+ */
+export interface SerializableResponse {
+  status: number;
+  statusText: string;
+  headers: Record<string, string[]>;
+  body: unknown;
+  url: string;
+}

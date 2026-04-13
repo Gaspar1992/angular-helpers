@@ -10,25 +10,39 @@ import {
   FIELDS_COLUMNS,
 } from '../../models/doc-meta.model';
 
-const PROVIDER_EXAMPLE = `import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
-import { createWorkerPipeline } from '@angular-helpers/worker-http/interceptors';
+const PROVIDER_EXAMPLE = `// app.config.ts — Angular DI integration (recommended)
 import {
-  loggingInterceptor,
-  retryInterceptor,
-  hmacSigningInterceptor,
-} from '@angular-helpers/worker-http/interceptors';
+  provideWorkerHttpClient,
+  withWorkerConfigs,
+  withWorkerRoutes,
+  withWorkerFallback,
+} from '@angular-helpers/worker-http/backend';
 
-// Create transport (main thread)
-const transport = createWorkerTransport({
-  workerUrl: new URL('./workers/api.worker', import.meta.url),
-  maxInstances: 2,
-});
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideWorkerHttpClient(
+      withWorkerConfigs([
+        { id: 'api', workerUrl: new URL('./workers/api.worker', import.meta.url) },
+      ]),
+      withWorkerRoutes([{ pattern: /\\/api\\//, worker: 'api', priority: 1 }]),
+      withWorkerFallback('main-thread'), // SSR-safe
+    ),
+  ],
+};
 
-// In worker: create pipeline
+// data.service.ts — WorkerHttpClient is a drop-in for HttpClient
+export class DataService {
+  private http = inject(WorkerHttpClient);
+
+  getUsers() { return this.http.get<User[]>('/api/users'); }
+}
+
+// workers/api.worker.ts — runs on a separate OS thread
+import { createWorkerPipeline, retryInterceptor, loggingInterceptor } from '@angular-helpers/worker-http/interceptors';
+
 createWorkerPipeline([
   loggingInterceptor(),
   retryInterceptor({ maxRetries: 3 }),
-  hmacSigningInterceptor({ keyMaterial }),
 ]);`;
 
 @Component({
