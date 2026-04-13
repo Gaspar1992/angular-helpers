@@ -63,7 +63,7 @@ export class WebSocketService extends BrowserApiBaseService {
         this.setupWebSocketHandlers(config);
         observer.next(this.getCurrentStatus());
       } catch (error) {
-        console.error('[WebSocketService] Error creating WebSocket:', error);
+        this.logError('Error creating WebSocket:', error);
         this.updateStatus({
           connected: false,
           connecting: false,
@@ -139,7 +139,7 @@ export class WebSocketService extends BrowserApiBaseService {
     if (!this.webSocket) return;
 
     this.webSocket.onopen = () => {
-      console.log('[WebSocketService] Connected to:', config.url);
+      this.logInfo(`Connected to: ${config.url}`);
       this.reconnectAttempts = 0;
       this.updateStatus({
         connected: true,
@@ -155,7 +155,7 @@ export class WebSocketService extends BrowserApiBaseService {
     };
 
     this.webSocket.onclose = (event) => {
-      console.log('[WebSocketService] Connection closed:', event.code, event.reason);
+      this.logInfo(`Connection closed: ${event.code} ${event.reason}`);
       this.updateStatus({
         connected: false,
         connecting: false,
@@ -170,7 +170,7 @@ export class WebSocketService extends BrowserApiBaseService {
     };
 
     this.webSocket.onerror = (error) => {
-      console.error('[WebSocketService] WebSocket error:', error);
+      this.logError('WebSocket error:', error);
       this.updateStatus({
         connected: false,
         connecting: false,
@@ -185,7 +185,7 @@ export class WebSocketService extends BrowserApiBaseService {
         const message = JSON.parse(event.data) as WebSocketMessage;
         this.messageSubject.next(message);
       } catch (error) {
-        console.error('[WebSocketService] Error parsing message:', error);
+        this.logError('Error parsing message:', error);
       }
     };
   }
@@ -203,7 +203,7 @@ export class WebSocketService extends BrowserApiBaseService {
 
   private attemptReconnect(config: WebSocketConfig): void {
     if (this.reconnectAttempts >= (config.maxReconnectAttempts || 5)) {
-      console.log('[WebSocketService] Max reconnect attempts reached');
+      this.logInfo('Max reconnect attempts reached');
       return;
     }
 
@@ -216,7 +216,7 @@ export class WebSocketService extends BrowserApiBaseService {
     });
 
     this.reconnectTimer = setTimeout(() => {
-      console.log(`[WebSocketService] Reconnect attempt ${this.reconnectAttempts}`);
+      this.logInfo(`Reconnect attempt ${this.reconnectAttempts}`);
       this.connect(config);
     }, config.reconnectInterval || 3000);
   }

@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, DestroyRef } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, fromEvent } from 'rxjs';
 import { map, distinctUntilChanged, filter } from 'rxjs/operators';
@@ -21,7 +21,6 @@ export interface StorageEvent {
 @Injectable()
 export class WebStorageService extends BrowserApiBaseService {
   private storageEvents = signal<StorageEvent | null>(null);
-  protected override destroyRef = inject(DestroyRef);
 
   constructor() {
     super();
@@ -97,7 +96,7 @@ export class WebStorageService extends BrowserApiBaseService {
       localStorage.setItem(fullKey, serializedValue);
       return true;
     } catch (error) {
-      console.error('[WebStorageService] Error setting localStorage:', error);
+      this.logError('Error setting localStorage:', error);
       return false;
     }
   }
@@ -114,7 +113,7 @@ export class WebStorageService extends BrowserApiBaseService {
       const value = localStorage.getItem(fullKey);
       return value !== null ? (this.deserializeValue(value, options) as T) : defaultValue;
     } catch (error) {
-      console.error('[WebStorageService] Error getting localStorage:', error);
+      this.logError('Error getting localStorage:', error);
       return defaultValue;
     }
   }
@@ -127,7 +126,7 @@ export class WebStorageService extends BrowserApiBaseService {
       localStorage.removeItem(fullKey);
       return true;
     } catch (error) {
-      console.error('[WebStorageService] Error removing localStorage:', error);
+      this.logError('Error removing localStorage:', error);
       return false;
     }
   }
@@ -152,7 +151,7 @@ export class WebStorageService extends BrowserApiBaseService {
       }
       return true;
     } catch (error) {
-      console.error('[WebStorageService] Error clearing localStorage:', error);
+      this.logError('Error clearing localStorage:', error);
       return false;
     }
   }
@@ -171,7 +170,7 @@ export class WebStorageService extends BrowserApiBaseService {
       sessionStorage.setItem(fullKey, serializedValue);
       return true;
     } catch (error) {
-      console.error('[WebStorageService] Error setting sessionStorage:', error);
+      this.logError('Error setting sessionStorage:', error);
       return false;
     }
   }
@@ -188,7 +187,7 @@ export class WebStorageService extends BrowserApiBaseService {
       const value = sessionStorage.getItem(fullKey);
       return value !== null ? (this.deserializeValue(value, options) as T) : defaultValue;
     } catch (error) {
-      console.error('[WebStorageService] Error getting sessionStorage:', error);
+      this.logError('Error getting sessionStorage:', error);
       return defaultValue;
     }
   }
@@ -201,7 +200,7 @@ export class WebStorageService extends BrowserApiBaseService {
       sessionStorage.removeItem(fullKey);
       return true;
     } catch (error) {
-      console.error('[WebStorageService] Error removing sessionStorage:', error);
+      this.logError('Error removing sessionStorage:', error);
       return false;
     }
   }
@@ -226,7 +225,7 @@ export class WebStorageService extends BrowserApiBaseService {
       }
       return true;
     } catch (error) {
-      console.error('[WebStorageService] Error clearing sessionStorage:', error);
+      this.logError('Error clearing sessionStorage:', error);
       return false;
     }
   }

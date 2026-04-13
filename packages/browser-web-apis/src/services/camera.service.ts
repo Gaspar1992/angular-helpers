@@ -39,7 +39,7 @@ export class CameraService extends PermissionAwareBrowserApiBaseService {
       this.currentStream = await navigator.mediaDevices.getUserMedia(streamConstraints);
       return this.currentStream;
     } catch (error: unknown) {
-      console.error('[CameraService] Error starting camera:', error);
+      this.logError('Error starting camera:', error);
 
       if (error instanceof Error && error.name === 'NotAllowedError') {
         throw this.createError(
@@ -114,7 +114,7 @@ export class CameraService extends PermissionAwareBrowserApiBaseService {
 
       return capabilities || null;
     } catch (error) {
-      console.error('[CameraService] Error getting camera capabilities:', error);
+      this.logError('Error getting camera capabilities:', error);
       return null;
     }
   }
@@ -134,7 +134,7 @@ export class CameraService extends PermissionAwareBrowserApiBaseService {
       const devices = await navigator.mediaDevices.enumerateDevices();
       return devices.filter((device) => device.kind === 'videoinput');
     } catch (error) {
-      console.error('[CameraService] Error enumerating video devices:', error);
+      this.logError('Error enumerating video devices:', error);
       throw this.createError('Failed to enumerate video devices', error);
     }
   }

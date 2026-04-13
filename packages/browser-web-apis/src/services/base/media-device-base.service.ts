@@ -12,18 +12,21 @@ import { MediaDevice, MediaDeviceKind } from '../../interfaces/media.interface';
  */
 @Injectable()
 export abstract class MediaDeviceBaseService extends PermissionAwareBrowserApiBaseService {
-  protected devices = signal<MediaDevice[]>([]);
-  protected activeStreams = signal<Map<string, MediaStream>>(new Map());
-  protected error = signal<string>('');
+  protected readonly _devices = signal<MediaDevice[]>([]);
+  protected readonly _activeStreams = signal<Map<string, MediaStream>>(new Map());
+  protected readonly _error = signal<string>('');
 
-  readonly devices$ = this.devices.asReadonly();
-  readonly activeStreams$ = this.activeStreams.asReadonly();
-  readonly error$ = this.error.asReadonly();
+  readonly devices = this._devices.asReadonly();
+  readonly activeStreams = this._activeStreams.asReadonly();
+  readonly error = this._error.asReadonly();
 
-  // Computed properties for device filtering
-  readonly videoInputs = signal<MediaDevice[]>([]);
-  readonly audioInputs = signal<MediaDevice[]>([]);
-  readonly audioOutputs = signal<MediaDevice[]>([]);
+  private readonly _videoInputs = signal<MediaDevice[]>([]);
+  private readonly _audioInputs = signal<MediaDevice[]>([]);
+  private readonly _audioOutputs = signal<MediaDevice[]>([]);
+
+  readonly videoInputs = this._videoInputs.asReadonly();
+  readonly audioInputs = this._audioInputs.asReadonly();
+  readonly audioOutputs = this._audioOutputs.asReadonly();
 
   /**
    * Get the media constraint type for this service
@@ -41,7 +44,7 @@ export abstract class MediaDeviceBaseService extends PermissionAwareBrowserApiBa
       this.updateDeviceFilters();
     } catch (error) {
       this.logError('Error initializing media devices:', error);
-      this.error.set('Failed to initialize media devices');
+      this._error.set('Failed to initialize media devices');
     }
   }
 
@@ -51,7 +54,7 @@ export abstract class MediaDeviceBaseService extends PermissionAwareBrowserApiBa
   async refreshDevices(): Promise<void> {
     return this.executeWithErrorHandling(async () => {
       const devices = await navigator.mediaDevices.enumerateDevices();
-      this.devices.set(devices);
+      this._devices.set(devices);
       this.updateDeviceFilters();
     }, 'Failed to refresh devices');
   }
@@ -60,10 +63,10 @@ export abstract class MediaDeviceBaseService extends PermissionAwareBrowserApiBa
    * Update device filter signals
    */
   private updateDeviceFilters(): void {
-    const devices = this.devices();
-    this.videoInputs.set(devices.filter((d) => d.kind === 'videoinput'));
-    this.audioInputs.set(devices.filter((d) => d.kind === 'audioinput'));
-    this.audioOutputs.set(devices.filter((d) => d.kind === 'audiooutput'));
+    const devices = this._devices();
+    this._videoInputs.set(devices.filter((d) => d.kind === 'videoinput'));
+    this._audioInputs.set(devices.filter((d) => d.kind === 'audioinput'));
+    this._audioOutputs.set(devices.filter((d) => d.kind === 'audiooutput'));
   }
 
   /**
@@ -82,17 +85,14 @@ export abstract class MediaDeviceBaseService extends PermissionAwareBrowserApiBa
       const hasPermission = await this.requestPermission(permissionType);
 
       if (!hasPermission) {
-        const granted = await this.requestPermission(permissionType);
-        if (!granted) {
-          throw new Error(`${permissionType} permission denied`);
-        }
+        throw new Error(`${permissionType} permission denied`);
       }
 
       const stream = await navigator.mediaDevices.getUserMedia(finalConstraints);
 
       // Store the stream immutably
       const streamId = this.generateStreamId();
-      this.activeStreams.update((streams) => {
+      this._activeStreams.update((streams) => {
         const newStreams = new Map(streams);
         newStreams.set(streamId, stream);
         return newStreams;
@@ -117,7 +117,7 @@ export abstract class MediaDeviceBaseService extends PermissionAwareBrowserApiBa
 
       // Store the stream immutably
       const streamId = this.generateStreamId();
-      this.activeStreams.update((streams) => {
+      this._activeStreams.update((streams) => {
         const newStreams = new Map(streams);
         newStreams.set(streamId, stream);
         return newStreams;
@@ -131,12 +131,12 @@ export abstract class MediaDeviceBaseService extends PermissionAwareBrowserApiBa
    * Stop a specific stream
    */
   stopStream(streamId: string): void {
-    const streams = this.activeStreams();
+    const streams = this._activeStreams();
     const stream = streams.get(streamId);
 
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
-      this.activeStreams.update((current) => {
+      this._activeStreams.update((current) => {
         const newStreams = new Map(current);
         newStreams.delete(streamId);
         return newStreams;
@@ -148,7 +148,7 @@ export abstract class MediaDeviceBaseService extends PermissionAwareBrowserApiBa
    * Stop all active streams
    */
   stopAllStreams(): void {
-    const streams = this.activeStreams();
+    const streams = this._activeStreams();
     streams.forEach((stream, streamId) => {
       this.stopStream(streamId);
     });
@@ -158,28 +158,28 @@ export abstract class MediaDeviceBaseService extends PermissionAwareBrowserApiBa
    * Get devices by kind
    */
   getDevicesByKind(kind: MediaDeviceKind): MediaDevice[] {
-    return this.devices().filter((device) => device.kind === kind);
+    return this._devices().filter((device) => device.kind === kind);
   }
 
   /**
    * Get active streams count
    */
   getActiveStreamsCount(): number {
-    return this.activeStreams().size;
+    return this._activeStreams().size;
   }
 
   /**
    * Check if there are active streams
    */
   hasActiveStreams(): boolean {
-    return this.activeStreams().size > 0;
+    return this._activeStreams().size > 0;
   }
 
   /**
    * Get devices with labels (permission granted)
    */
   getLabeledDevices(): MediaDevice[] {
-    return this.devices().filter((device) => device.label.length > 0);
+    return this._devices().filter((device) => device.label.length > 0);
   }
 
   /**

@@ -26,7 +26,7 @@ export class MediaDevicesService extends BrowserApiBaseService {
       const devices = await navigator.mediaDevices.enumerateDevices();
       return devices;
     } catch (error) {
-      console.error('[MediaDevicesService] Error enumerating devices:', error);
+      this.logError('Error enumerating devices:', error);
       throw this.createError('Failed to enumerate media devices', error);
     }
   }
@@ -43,7 +43,7 @@ export class MediaDevicesService extends BrowserApiBaseService {
       const finalConstraints = constraints || defaultConstraints;
       return await navigator.mediaDevices.getUserMedia(finalConstraints);
     } catch (error) {
-      console.error('[MediaDevicesService] Error getting user media:', error);
+      this.logError('Error getting user media:', error);
       throw this.handleMediaError(error);
     }
   }
@@ -64,7 +64,7 @@ export class MediaDevicesService extends BrowserApiBaseService {
       const finalConstraints = constraints || defaultConstraints;
       return await navigator.mediaDevices.getDisplayMedia(finalConstraints);
     } catch (error) {
-      console.error('[MediaDevicesService] Error getting display media:', error);
+      this.logError('Error getting display media:', error);
       throw this.createError('Failed to get display media', error);
     }
   }
@@ -78,7 +78,7 @@ export class MediaDevicesService extends BrowserApiBaseService {
           const devices = await navigator.mediaDevices.enumerateDevices();
           observer.next(devices);
         } catch (error) {
-          console.error('[MediaDevicesService] Error handling device change:', error);
+          this.logError('Error handling device change:', error);
         }
       };
 

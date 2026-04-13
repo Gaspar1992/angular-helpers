@@ -1,4 +1,4 @@
-import { Injectable, inject, DestroyRef } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 
@@ -25,7 +25,6 @@ export interface WorkerTask<T = unknown> {
 
 @Injectable()
 export class WebWorkerService extends BrowserApiBaseService {
-  protected override destroyRef = inject(DestroyRef);
   private workers = new Map<string, Worker>();
   private workerStatuses = new Map<string, Subject<WorkerStatus>>();
   private workerMessages = new Map<string, Subject<WorkerMessage>>();
@@ -67,7 +66,7 @@ export class WebWorkerService extends BrowserApiBaseService {
         this.updateWorkerStatus(name, status);
         observer.next(status);
       } catch (error) {
-        console.error(`[WebWorkerService] Failed to create worker ${name}:`, error);
+        this.logError(`Failed to create worker ${name}:`, error);
         const status: WorkerStatus = {
           initialized: false,
           running: false,
@@ -105,7 +104,7 @@ export class WebWorkerService extends BrowserApiBaseService {
   postMessage(workerName: string, task: WorkerTask): void {
     const worker = this.workers.get(workerName);
     if (!worker) {
-      console.error(`[WebWorkerService] Worker ${workerName} not found`);
+      this.logError(`Worker ${workerName} not found`);
       return;
     }
 
@@ -124,7 +123,7 @@ export class WebWorkerService extends BrowserApiBaseService {
         this.updateWorkerStatus(workerName, currentStatus);
       }
     } catch (error) {
-      console.error(`[WebWorkerService] Failed to post message to worker ${workerName}:`, error);
+      this.logError(`Failed to post message to worker ${workerName}:`, error);
     }
   }
 
@@ -171,7 +170,7 @@ export class WebWorkerService extends BrowserApiBaseService {
     };
 
     worker.onerror = (error) => {
-      console.error(`[WebWorkerService] Worker ${name} error:`, error);
+      this.logError(`Worker ${name} error:`, error);
       const status: WorkerStatus = {
         initialized: true,
         running: false,
