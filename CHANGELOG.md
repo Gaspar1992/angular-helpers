@@ -1,3 +1,25 @@
+## [0.3.0] worker-http — Phase 3: Angular HttpBackend Integration (2026-04-13)
+
+### Features
+
+* **worker-http/backend:** `WorkerHttpBackend` — implements Angular's `HttpBackend`, routes HTTP requests to Web Workers off the main thread
+* **worker-http/backend:** `provideWorkerHttpClient()` — drop-in replacement for `provideHttpClient()` with worker infrastructure
+* **worker-http/backend:** `withWorkerConfigs()` — register named worker definitions (id, workerUrl, maxInstances)
+* **worker-http/backend:** `withWorkerRoutes()` — URL-pattern → worker routing with priority ordering
+* **worker-http/backend:** `withWorkerFallback()` — configurable SSR/unsupported-env fallback (`'main-thread'` | `'error'`)
+* **worker-http/backend:** `withWorkerSerialization()` — plug in a custom `WorkerSerializer` for complex request bodies (seroval, TOON, etc.)
+* **worker-http/backend:** `WORKER_TARGET` — `HttpContextToken` for per-request worker override
+* **worker-http/backend:** `WorkerHttpClient` — `HttpClient` wrapper with optional `{ worker }` routing option
+* **worker-http/backend:** `SerializableRequest` / `SerializableResponse` — structured-clone-safe POJO types
+* **worker-http/backend:** `matchWorkerRoute()`, `toSerializableRequest()`, `toHttpResponse()` — pure adapter utilities
+* **vitest:** `vitest.config.ts` with resolve aliases for cross-package imports; `vitest.setup.ts` for Angular JIT support
+
+### Tests
+
+* 79 unit tests passing across all packages
+
+---
+
 ## [1.13.2](https://github.com/Gaspar1992/angular-helpers/compare/v1.13.1...v1.13.2) (2026-04-12)
 
 

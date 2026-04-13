@@ -6,6 +6,7 @@ import type {
   WorkerFallbackStrategy,
   WorkerRoute,
 } from './worker-http-backend.types';
+import type { WorkerSerializer } from '../../serializer/src/worker-serializer.types';
 
 /**
  * Per-request HttpContextToken that carries the target worker ID.
@@ -46,4 +47,17 @@ export const WORKER_HTTP_ROUTES_TOKEN = new InjectionToken<WorkerRoute[]>('Worke
 export const WORKER_HTTP_FALLBACK_TOKEN = new InjectionToken<WorkerFallbackStrategy>(
   'WorkerHttpFallback',
   { factory: () => 'main-thread' as WorkerFallbackStrategy },
+);
+
+/**
+ * Optional serializer for crossing the worker boundary.
+ * Provided via `withWorkerSerialization()`. Defaults to `null` (structured clone).
+ *
+ * When set, `WorkerHttpBackend` serializes the request body before `postMessage`
+ * using this serializer. The worker-side `createWorkerPipeline()` receives the
+ * serialized form — add a worker interceptor to deserialize it if needed.
+ */
+export const WORKER_HTTP_SERIALIZER_TOKEN = new InjectionToken<WorkerSerializer | null>(
+  'WorkerHttpSerializer',
+  { factory: () => null },
 );

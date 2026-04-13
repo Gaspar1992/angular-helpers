@@ -8,13 +8,14 @@ export type {
   SerializableResponse,
 } from './worker-http-backend.types';
 
-export { WORKER_TARGET } from './worker-http-tokens';
+export { WORKER_TARGET, WORKER_HTTP_SERIALIZER_TOKEN } from './worker-http-tokens';
 
 export {
   provideWorkerHttpClient,
   withWorkerConfigs,
   withWorkerRoutes,
   withWorkerFallback,
+  withWorkerSerialization,
 } from './worker-http-providers';
 
 export { WorkerHttpBackend } from './worker-http-backend';

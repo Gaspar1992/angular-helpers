@@ -7,7 +7,9 @@ import {
   WORKER_HTTP_CONFIGS_TOKEN,
   WORKER_HTTP_FALLBACK_TOKEN,
   WORKER_HTTP_ROUTES_TOKEN,
+  WORKER_HTTP_SERIALIZER_TOKEN,
 } from './worker-http-tokens';
+import type { WorkerSerializer } from '../../serializer/src/worker-serializer.types';
 import type {
   WorkerConfig,
   WorkerFallbackStrategy,
@@ -114,5 +116,36 @@ export function withWorkerFallback(
   return {
     kind: 'WorkerFallback',
     providers: [{ provide: WORKER_HTTP_FALLBACK_TOKEN, useValue: strategy }],
+  };
+}
+
+/**
+ * Configures a custom serializer for crossing the worker boundary.
+ *
+ * By default `WorkerHttpBackend` relies on the browser's structured clone algorithm
+ * (safe for plain objects, arrays, primitives, `Date`, `ArrayBuffer`).
+ * Use `withWorkerSerialization` when your request bodies contain types that
+ * structured clone cannot handle (e.g. class instances, circular references, `Map`, `Set`).
+ *
+ * **Worker-side note:** The serialized form is what the worker receives as `req.body`.
+ * If you use `createSerovalSerializer` or similar, add a worker-side interceptor
+ * to deserialize the body before calling `fetch()`.
+ *
+ * @example
+ * ```typescript
+ * import { createSerovalSerializer } from '@angular-helpers/worker-http/serializer';
+ *
+ * provideWorkerHttpClient(
+ *   withWorkerConfigs([...]),
+ *   withWorkerSerialization(createSerovalSerializer()),
+ * )
+ * ```
+ */
+export function withWorkerSerialization(
+  serializer: WorkerSerializer,
+): WorkerHttpFeature<'WorkerSerialization'> {
+  return {
+    kind: 'WorkerSerialization',
+    providers: [{ provide: WORKER_HTTP_SERIALIZER_TOKEN, useValue: serializer }],
   };
 }

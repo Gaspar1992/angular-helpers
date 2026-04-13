@@ -1,11 +1,18 @@
 import { describe, expect, it } from 'vitest';
 
-import { withWorkerConfigs, withWorkerFallback, withWorkerRoutes } from './worker-http-providers';
+import {
+  withWorkerConfigs,
+  withWorkerFallback,
+  withWorkerRoutes,
+  withWorkerSerialization,
+} from './worker-http-providers';
 import {
   WORKER_HTTP_CONFIGS_TOKEN,
   WORKER_HTTP_FALLBACK_TOKEN,
   WORKER_HTTP_ROUTES_TOKEN,
+  WORKER_HTTP_SERIALIZER_TOKEN,
 } from './worker-http-tokens';
+import type { WorkerSerializer } from '../../serializer/src/worker-serializer.types';
 
 describe('withWorkerConfigs', () => {
   it('returns kind WorkerConfigs', () => {
@@ -63,5 +70,29 @@ describe('withWorkerFallback', () => {
     const feature = withWorkerFallback('error');
     const provider = feature.providers[0] as { provide: unknown; useValue: unknown };
     expect(provider.useValue).toBe('error');
+  });
+});
+
+describe('withWorkerSerialization', () => {
+  const mockSerializer: WorkerSerializer = {
+    serialize: (value) => ({ data: JSON.stringify(value), transferables: [], format: 'custom' }),
+    deserialize: (payload) => JSON.parse(payload.data as string),
+  };
+
+  it('returns kind WorkerSerialization', () => {
+    const feature = withWorkerSerialization(mockSerializer);
+    expect(feature.kind).toBe('WorkerSerialization');
+  });
+
+  it('provides WORKER_HTTP_SERIALIZER_TOKEN with the given serializer', () => {
+    const feature = withWorkerSerialization(mockSerializer);
+    const provider = feature.providers[0] as { provide: unknown; useValue: unknown };
+    expect(provider.provide).toBe(WORKER_HTTP_SERIALIZER_TOKEN);
+    expect(provider.useValue).toBe(mockSerializer);
+  });
+
+  it('has exactly one provider', () => {
+    const feature = withWorkerSerialization(mockSerializer);
+    expect(feature.providers).toHaveLength(1);
   });
 });

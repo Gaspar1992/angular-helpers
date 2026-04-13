@@ -16,6 +16,7 @@ import {
   WORKER_HTTP_CONFIGS_TOKEN,
   WORKER_HTTP_FALLBACK_TOKEN,
   WORKER_HTTP_ROUTES_TOKEN,
+  WORKER_HTTP_SERIALIZER_TOKEN,
   WORKER_TARGET,
 } from './worker-http-tokens';
 import type {
@@ -42,6 +43,7 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
   private readonly configs = inject(WORKER_HTTP_CONFIGS_TOKEN);
   private readonly routes = inject(WORKER_HTTP_ROUTES_TOKEN);
   private readonly fallback = inject(WORKER_HTTP_FALLBACK_TOKEN);
+  private readonly serializer = inject(WORKER_HTTP_SERIALIZER_TOKEN);
   private readonly fetchBackend = inject(FetchBackend, { optional: true });
 
   private readonly transports = new Map<
@@ -75,7 +77,13 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
     const transport = this.getOrCreateTransport(config);
     const serializable = toSerializableRequest(req);
 
-    return transport.execute(serializable).pipe(
+    const body =
+      this.serializer !== null && serializable.body !== null && serializable.body !== undefined
+        ? this.serializer.serialize(serializable.body).data
+        : serializable.body;
+    const payload = body !== serializable.body ? { ...serializable, body } : serializable;
+
+    return transport.execute(payload).pipe(
       map((res) => toHttpResponse(res as SerializableResponse, req)),
       catchError((err: unknown) =>
         throwError(
