@@ -6,9 +6,7 @@ import {
   computed,
   effect,
   untracked,
-  Type,
 } from '@angular/core';
-import { NgComponentOutlet } from '@angular/common';
 import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 import { DocsPageHeaderComponent } from '../../../docs/shared/page-header/docs-page-header.component';
 import { DocsApiTableComponent } from '../../../docs/shared/api-table/docs-api-table.component';
@@ -31,21 +29,13 @@ export interface ServiceDetailConfig {
   section: 'browser-web-apis' | 'security' | 'worker-http';
   backRoute: string;
   backLabel: string;
-  hasDemoTab: boolean;
-  demoComponent?: Type<unknown>;
   interfaces?: InterfaceDoc[];
 }
 
 @Component({
   selector: 'app-unified-service-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    NgComponentOutlet,
-    DocsPageHeaderComponent,
-    DocsApiTableComponent,
-    CodeBlockComponent,
-    DocsTabsComponent,
-  ],
+  imports: [DocsPageHeaderComponent, DocsApiTableComponent, CodeBlockComponent, DocsTabsComponent],
   template: `
     <div class="unified-service-detail">
       @if (service(); as s) {
@@ -80,7 +70,7 @@ export interface ServiceDetailConfig {
         }
 
         <app-docs-tabs
-          [tabs]="currentTabs()"
+          [tabs]="contentTabs"
           [activeTab]="activeTab()"
           (tabChange)="activeTab.set($event)"
         />
@@ -115,13 +105,6 @@ export interface ServiceDetailConfig {
             <div class="usd-tab-content">
               <app-code-block language="ts" filename="usage.example.ts" [code]="s.example" />
             </div>
-          }
-          @case ('demo') {
-            @if (config().demoComponent; as demo) {
-              <div class="usd-tab-content demo-container">
-                <ng-container *ngComponentOutlet="demo" />
-              </div>
-            }
           }
         }
       }
@@ -210,12 +193,6 @@ export interface ServiceDetailConfig {
         color: var(--text-muted);
         margin: 0 0 var(--sp-3);
       }
-
-      .demo-container {
-        padding: var(--sp-4);
-        background: var(--bg-elevated);
-        border-radius: var(--radius-lg);
-      }
     `,
   ],
 })
@@ -228,22 +205,11 @@ export class UnifiedServiceDetailComponent {
     { id: 'example', label: 'Example' },
   ];
 
-  protected readonly contentTabsWithDemo: DocTab[] = [
-    { id: 'api', label: 'API Reference' },
-    { id: 'example', label: 'Example' },
-    { id: 'demo', label: 'Demo' },
-  ];
-
   /** First tab selected by default */
   protected activeTab = signal<string>('api');
   protected apiVariant = signal<'service' | 'fn'>('service');
 
   protected service = computed(() => this.config()?.service);
-
-  protected currentTabs = computed(() => {
-    const cfg = this.config();
-    return cfg?.hasDemoTab && cfg?.demoComponent ? this.contentTabsWithDemo : this.contentTabs;
-  });
 
   protected breadcrumbs = computed(() => {
     const cfg = this.config();

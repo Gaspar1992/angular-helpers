@@ -1,5 +1,4 @@
-import { Component, inject, computed, signal, ChangeDetectionStrategy, Type } from '@angular/core';
-import { NgComponentOutlet } from '@angular/common';
+import { Component, inject, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
@@ -15,25 +14,10 @@ import {
   METHODS_COLUMNS,
   FIELDS_COLUMNS,
 } from '../../models/doc-meta.model';
-import { TransportDemoComponent } from '../../../demo/worker-http/services/transport/transport-demo.component';
-import { HmacDemoComponent } from '../../../demo/worker-http/services/hmac/hmac-demo.component';
-import { HashingDemoComponent } from '../../../demo/worker-http/services/hashing/hashing-demo.component';
-import { InterceptorsDemoComponent } from '../../../demo/worker-http/services/interceptors/interceptors-demo.component';
-import { SerializerDemoComponent } from '../../../demo/worker-http/services/serializer/serializer-demo.component';
-import { BackendDemoComponent } from '../../../demo/worker-http/services/backend/backend-demo.component';
-
-const ENTRY_DEMO_MAP: Record<string, Type<unknown>> = {
-  transport: TransportDemoComponent,
-  interceptors: InterceptorsDemoComponent,
-  serializer: SerializerDemoComponent,
-  backend: BackendDemoComponent,
-  crypto: HmacDemoComponent,
-};
 
 const CONTENT_TABS: DocTab[] = [
   { id: 'api', label: 'API Reference' },
   { id: 'example', label: 'Example' },
-  { id: 'demo', label: 'Demo' },
 ];
 
 @Component({
@@ -41,7 +25,6 @@ const CONTENT_TABS: DocTab[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
-    NgComponentOutlet,
     DocsPageHeaderComponent,
     DocsApiTableComponent,
     CodeBlockComponent,
@@ -102,15 +85,6 @@ const CONTENT_TABS: DocTab[] = [
             @if (activeTab() === 'example') {
               <app-code-block [code]="entry()!.example" />
             }
-            @if (activeTab() === 'demo') {
-              @if (demoComponent()) {
-                <ng-container *ngComponentOutlet="demoComponent()!" />
-              } @else {
-                <p class="text-sm text-base-content/60">
-                  No interactive demo available for this entry point yet.
-                </p>
-              }
-            }
           </div>
         </section>
       </div>
@@ -151,7 +125,12 @@ export class WorkerHttpEntryDetailComponent {
 
   protected badge = computed(() => {
     const e = this.entry();
-    return e ? `import { ${e.name} } from '${e.importPath}'` : '';
+    if (!e) return '';
+    // For crypto entry, show the actual named exports instead of the display name
+    if (e.id === 'crypto') {
+      return `import { createHmacSigner, createAesEncryptor, createContentHasher } from '${e.importPath}'`;
+    }
+    return `import { ${e.name} } from '${e.importPath}'`;
   });
 
   protected methodRows = computed<ApiRow[]>(
@@ -175,8 +154,4 @@ export class WorkerHttpEntryDetailComponent {
         return [];
     }
   });
-
-  protected demoComponent = computed<Type<unknown> | null>(
-    () => ENTRY_DEMO_MAP[this.entryId()] ?? null,
-  );
 }
