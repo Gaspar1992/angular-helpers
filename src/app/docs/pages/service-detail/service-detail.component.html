@@ -77,13 +77,6 @@
         @if (activeTab() === 'example') {
           <app-code-block [code]="currentExample()" />
         }
-        @if (activeTab() === 'demo') {
-          @if (demoComponent()) {
-            <ng-container *ngComponentOutlet="demoComponent()!" />
-          } @else {
-            <p class="docs-support-text">No interactive demo available for this service yet.</p>
-          }
-        }
       </div>
     </section>
   </div>
