@@ -1,3 +1,17 @@
+## [1.16.1](https://github.com/Gaspar1992/angular-helpers/compare/v1.16.0...v1.16.1) (2026-04-13)
+
+
+### Bug Fixes
+
+* code-block updates, missing demos, HttpBackend gap, and blog styling ([#61](https://github.com/Gaspar1992/angular-helpers/issues/61)) ([23ea5bc](https://github.com/Gaspar1992/angular-helpers/commit/23ea5bce46db85abdbd6c92154d0b563081706c4))
+
+## [1.15.1](https://github.com/Gaspar1992/angular-helpers/compare/v1.15.0...v1.15.1) (2026-04-13)
+
+
+### Bug Fixes
+
+* **browser-web-apis:** robustness improvements, MDN compliance and resource leak prevention ([#56](https://github.com/Gaspar1992/angular-helpers/issues/56)) ([c45ed30](https://github.com/Gaspar1992/angular-helpers/commit/c45ed306ca3c8a9468102fe9f6d1775d3d1db4f7))
+
 # [1.15.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.14.0...v1.15.0) (2026-04-13)
 
 
