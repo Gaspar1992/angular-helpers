@@ -8,7 +8,8 @@ export type WorkerHttpFeatureKind =
   | 'WorkerConfigs'
   | 'WorkerRoutes'
   | 'WorkerFallback'
-  | 'WorkerSerialization';
+  | 'WorkerSerialization'
+  | 'WorkerInterceptors';
 
 /**
  * Feature object — mirrors Angular's HttpFeature<K> shape.

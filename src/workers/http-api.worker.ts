@@ -1,14 +1,10 @@
 /// <reference lib="webworker" />
 
-import { createWorkerPipeline } from '@angular-helpers/worker-http/interceptors';
-import {
-  loggingInterceptor,
-  retryInterceptor,
-  cacheInterceptor,
-} from '@angular-helpers/worker-http/interceptors';
+import { createConfigurableWorkerPipeline } from '@angular-helpers/worker-http/interceptors';
 
-createWorkerPipeline([
-  loggingInterceptor(),
-  retryInterceptor({ maxRetries: 2, initialDelay: 500 }),
-  cacheInterceptor({ ttl: 30000, maxEntries: 50 }),
-]);
+// Pipeline composition is now driven by Angular DI via `withWorkerInterceptors([...])`.
+// Specs arrive via the `init-interceptors` handshake message before any HTTP request.
+//
+// To register custom interceptors not covered by the built-in spec catalogue,
+// call `registerInterceptor(name, factory)` BEFORE this line.
+createConfigurableWorkerPipeline();
