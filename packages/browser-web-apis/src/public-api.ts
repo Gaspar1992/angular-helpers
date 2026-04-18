@@ -31,6 +31,7 @@ export {
   type WorkerMessage,
   type WorkerStatus,
   type WorkerTask,
+  type WorkerRequestOptions,
 } from './services/web-worker.service';
 
 // Tier 1 — New services

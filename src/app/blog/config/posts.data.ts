@@ -2,6 +2,14 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'web-worker-request-response',
+    title: 'browser-web-apis v21.8: WebWorker request/response with timeout, signals for status',
+    publishedAt: '2026-04-18',
+    tags: ['browser-web-apis', 'web-worker', 'signals', 'angular'],
+    excerpt:
+      'WebWorkerService now ships request/response with id correlation and timeout, exposes status as a signal, and fixes a lifecycle leak where every worker creation registered an additional onDestroy callback.',
+  },
+  {
     slug: 'websocket-stateful-client',
     title:
       'browser-web-apis v21.6: stateful WebSocket client with signals, request/response, and a real reconnect',
