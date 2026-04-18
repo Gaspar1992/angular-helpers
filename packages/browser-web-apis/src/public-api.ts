@@ -15,6 +15,7 @@ export {
   WebStorageService,
   type StorageOptions,
   type StorageEvent,
+  type StorageNamespace,
 } from './services/web-storage.service';
 export {
   WebSocketService,
