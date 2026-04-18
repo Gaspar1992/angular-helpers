@@ -2,6 +2,15 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'signal-primitives-for-browser-apis',
+    title:
+      'browser-web-apis v21.9: signal primitives for clipboard, geolocation, battery, and wake-lock',
+    publishedAt: '2026-04-18',
+    tags: ['browser-web-apis', 'signals', 'angular'],
+    excerpt:
+      'Four new inject* primitives complete the signal-first surface for ambient browser state — drop them into a component and read state via signals, with cleanup wired to DestroyRef.',
+  },
+  {
     slug: 'web-storage-safari-private-and-unified-api',
     title: 'browser-web-apis v21.7: WebStorage that survives Safari private mode + a unified API',
     publishedAt: '2026-04-18',
