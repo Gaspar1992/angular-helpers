@@ -6,10 +6,13 @@ import { WorkerHttpClient } from './worker-http-client';
 import {
   WORKER_HTTP_CONFIGS_TOKEN,
   WORKER_HTTP_FALLBACK_TOKEN,
+  WORKER_HTTP_INTERCEPTORS_TOKEN,
   WORKER_HTTP_ROUTES_TOKEN,
   WORKER_HTTP_SERIALIZER_TOKEN,
 } from './worker-http-tokens';
+import type { WorkerInterceptorSpecsMap } from './worker-http-tokens';
 import type { WorkerSerializer } from '@angular-helpers/worker-http/serializer';
+import type { WorkerInterceptorSpec } from '@angular-helpers/worker-http/interceptors';
 import type {
   WorkerConfig,
   WorkerFallbackStrategy,
@@ -147,5 +150,50 @@ export function withWorkerSerialization(
   return {
     kind: 'WorkerSerialization',
     providers: [{ provide: WORKER_HTTP_SERIALIZER_TOKEN, useValue: serializer }],
+  };
+}
+
+/**
+ * Configures the worker-side interceptor pipeline from Angular DI.
+ *
+ * Specs are forwarded to each worker via an `init-interceptors` handshake
+ * message posted before any HTTP request. Workers must call
+ * `createConfigurableWorkerPipeline()` to receive and act on the handshake.
+ *
+ * Two shapes are accepted:
+ *  - `WorkerInterceptorSpec[]` — applied to every registered worker
+ *  - `Record<workerId, WorkerInterceptorSpec[]>` — per-worker, with the
+ *    special `'*'` key applied to all workers in addition to the
+ *    worker-specific specs
+ *
+ * @example
+ * ```typescript
+ * provideWorkerHttpClient(
+ *   withWorkerConfigs([{ id: 'api', workerUrl: ... }]),
+ *   withWorkerInterceptors([
+ *     workerLogging(),
+ *     workerRetry({ maxRetries: 3 }),
+ *     workerCache({ ttl: 30_000 }),
+ *   ]),
+ * );
+ * ```
+ *
+ * @example Per-worker specs
+ * ```typescript
+ * withWorkerInterceptors({
+ *   '*': [workerLogging()],
+ *   'secure': [workerHmacSigning({ keyMaterial })],
+ * });
+ * ```
+ */
+export function withWorkerInterceptors(
+  specs: readonly WorkerInterceptorSpec[] | WorkerInterceptorSpecsMap,
+): WorkerHttpFeature<'WorkerInterceptors'> {
+  const map: WorkerInterceptorSpecsMap = Array.isArray(specs)
+    ? { '*': [...specs] }
+    : (specs as WorkerInterceptorSpecsMap);
+  return {
+    kind: 'WorkerInterceptors',
+    providers: [{ provide: WORKER_HTTP_INTERCEPTORS_TOKEN, useValue: map }],
   };
 }

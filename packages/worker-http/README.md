@@ -325,8 +325,10 @@ import {
   withWorkerRoutes,
   withWorkerFallback,
   withWorkerSerialization,
+  withWorkerInterceptors,
 } from '@angular-helpers/worker-http/backend';
 import { createSerovalSerializer } from '@angular-helpers/worker-http/serializer';
+import { workerLogging, workerRetry, workerCache } from '@angular-helpers/worker-http/interceptors';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -348,6 +350,11 @@ export const appConfig: ApplicationConfig = {
       ]),
       withWorkerFallback('main-thread'), // SSR-safe
       withWorkerSerialization(createSerovalSerializer()), // optional: complex bodies
+      withWorkerInterceptors([
+        workerLogging(),
+        workerRetry({ maxRetries: 3 }),
+        workerCache({ ttl: 60000 }),
+      ]),
     ),
   ],
 };
@@ -367,19 +374,22 @@ export class DataService {
 }
 
 // workers/api.worker.ts — runs on a separate OS thread
-import {
-  createWorkerPipeline,
-  loggingInterceptor,
-  retryInterceptor,
-  cacheInterceptor,
-} from '@angular-helpers/worker-http/interceptors';
+import { createConfigurableWorkerPipeline } from '@angular-helpers/worker-http/interceptors';
 
-createWorkerPipeline([
-  loggingInterceptor(),
-  retryInterceptor({ maxRetries: 3 }),
-  cacheInterceptor({ ttl: 60000 }),
-]);
+// The pipeline is built at runtime from the specs configured via
+// `withWorkerInterceptors([...])` in `app.config.ts`. Custom interceptors
+// not covered by the built-in catalogue can be wired in here:
+//
+//   import { registerInterceptor } from '@angular-helpers/worker-http/interceptors';
+//   registerInterceptor('auth-token', (config) => async (req, next) => { ... });
+//
+// then referenced from the main thread with `workerCustom('auth-token', config)`.
+createConfigurableWorkerPipeline();
 ```
+
+If you prefer to keep the pipeline composition inside the worker file, use
+`createWorkerPipeline([interceptors])` instead — it stays available for full
+manual control.
 
 **Features:**
 
@@ -388,6 +398,7 @@ createWorkerPipeline([
 - `withWorkerRoutes(routes)` — URL-pattern routing with priority ordering
 - `withWorkerFallback(strategy)` — `'main-thread'` (SSR-safe) or `'error'`
 - `withWorkerSerialization(serializer)` — plug in `createSerovalSerializer()` for complex request bodies (`Date`, `Map`, `Set`)
+- `withWorkerInterceptors(specs | specsByWorker)` — configure the worker-side pipeline from Angular DI; pairs with `createConfigurableWorkerPipeline()` in the worker file
 - `WORKER_TARGET` — `HttpContextToken<string | null>` for per-request worker routing via `HttpContext`
 - `WorkerHttpClient` — `HttpClient` wrapper with optional `{ worker: string }` routing field
 - `WorkerHttpBackend` — the `HttpBackend` implementation (injectable for advanced use)
@@ -426,6 +437,48 @@ All features require a browser that supports:
 - **`Transferable` objects** — `ArrayBuffer` transfer supported in all modern browsers
 
 Server-Side Rendering (SSR) is supported via automatic fallback to the main thread.
+
+---
+
+## Benchmarks
+
+A reproducible benchmark suite ships with the demo app at
+[`/demo/worker-http-benchmark`](../../src/app/demo/worker-http-benchmark) and compares three
+transport modes across four workloads:
+
+| Mode            | What it measures                                           |
+| --------------- | ---------------------------------------------------------- |
+| `main-thread`   | Baseline — the same simulated work runs on the main thread |
+| `worker-pool-1` | Single worker — measures pure transport overhead           |
+| `worker-pool-4` | Four workers — measures the benefit of parallel dispatch   |
+
+Each scenario simulates identical "server" work (synchronous CPU burn + async delay + payload
+generation), so the only variable being compared is **where** the work runs.
+
+**Workloads**:
+
+- 100 small sequential requests — pure transport overhead
+- 1 large response (10MB) — serialization / structured clone cost
+- 50 parallel requests — pool benefit
+- 20 parallel requests + 500ms main-thread CPU burn — real-world jank case
+
+**Metrics collected**:
+
+- **Long Tasks** (`PerformanceObserver` / `longtask`) — count and total duration (Chromium-only)
+- **Dropped frames** (`requestAnimationFrame` deltas > 25 ms) — visible jank proxy, works in every browser
+- **Wall-clock total** for the scenario
+- **Success / failure** counts
+
+To run locally:
+
+```bash
+npm run build:workers
+npm start
+# open https://localhost:4200/demo/worker-http-benchmark
+```
+
+Numbers vary by hardware, browser, and current system load — always run a scenario several times
+and watch the trend, not a single value.
 
 ---
 

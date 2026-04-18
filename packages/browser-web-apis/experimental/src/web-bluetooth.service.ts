@@ -20,7 +20,7 @@ export class WebBluetoothService extends BrowserApiBaseService {
     return 'web-bluetooth';
   }
 
-  isSupported(): boolean {
+  override isSupported(): boolean {
     return this.isBrowserEnvironment() && 'bluetooth' in navigator;
   }
 

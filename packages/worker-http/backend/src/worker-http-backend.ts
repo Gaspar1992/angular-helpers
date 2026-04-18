@@ -15,10 +15,12 @@ import type { WorkerTransport } from '@angular-helpers/worker-http/transport';
 import {
   WORKER_HTTP_CONFIGS_TOKEN,
   WORKER_HTTP_FALLBACK_TOKEN,
+  WORKER_HTTP_INTERCEPTORS_TOKEN,
   WORKER_HTTP_ROUTES_TOKEN,
   WORKER_HTTP_SERIALIZER_TOKEN,
   WORKER_TARGET,
 } from './worker-http-tokens';
+import type { WorkerInterceptorSpec } from '@angular-helpers/worker-http/interceptors';
 import type {
   SerializableRequest,
   SerializableResponse,
@@ -44,6 +46,7 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
   private readonly routes = inject(WORKER_HTTP_ROUTES_TOKEN);
   private readonly fallback = inject(WORKER_HTTP_FALLBACK_TOKEN);
   private readonly serializer = inject(WORKER_HTTP_SERIALIZER_TOKEN);
+  private readonly interceptorSpecs = inject(WORKER_HTTP_INTERCEPTORS_TOKEN);
   private readonly fetchBackend = inject(FetchBackend, { optional: true });
 
   private readonly transports = new Map<
@@ -112,13 +115,24 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
     const existing = this.transports.get(config.id);
     if (existing) return existing;
 
+    const specs = this.resolveSpecsFor(config.id);
+
     const transport = createWorkerTransport<SerializableRequest, SerializableResponse>({
       workerFactory: () => new Worker(config.workerUrl, { type: 'module' }),
       maxInstances: config.maxInstances ?? 1,
+      initMessage: specs.length > 0 ? { type: 'init-interceptors', specs } : undefined,
     });
 
     this.transports.set(config.id, transport);
     return transport;
+  }
+
+  private resolveSpecsFor(workerId: string): readonly WorkerInterceptorSpec[] {
+    const wildcard = this.interceptorSpecs['*'] ?? [];
+    const specific = this.interceptorSpecs[workerId] ?? [];
+    if (wildcard.length === 0) return specific;
+    if (specific.length === 0) return wildcard;
+    return [...wildcard, ...specific];
   }
 
   private handleFallback(

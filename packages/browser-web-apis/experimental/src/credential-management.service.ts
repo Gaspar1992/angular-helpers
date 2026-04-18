@@ -33,7 +33,7 @@ export class CredentialManagementService extends BrowserApiBaseService {
     return 'credential-management';
   }
 
-  isSupported(): boolean {
+  override isSupported(): boolean {
     return this.isBrowserEnvironment() && 'credentials' in navigator;
   }
 
