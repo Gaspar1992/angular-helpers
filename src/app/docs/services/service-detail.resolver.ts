@@ -1,7 +1,5 @@
 import { ResolveFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
-import { Type } from '@angular/core';
-import { ServiceDoc } from '../models/doc-meta.model';
 import { BROWSER_WEB_APIS_SERVICES } from '../data/browser-web-apis.data';
 import { SECURITY_SERVICES, SECURITY_INTERFACES } from '../data/security.data';
 import { WORKER_HTTP_ENTRIES, WORKER_HTTP_INTERFACES } from '../data/worker-http.data';
@@ -10,73 +8,21 @@ import {
   InterfaceDoc,
 } from '../feature/unified-service-detail/unified-service-detail.component';
 
-// Demo components map - lazy loaded
-const DEMO_COMPONENTS: Record<string, () => Promise<Type<unknown>>> = {
-  // Browser Web APIs
-  'broadcast-channel': () =>
-    import('../../demo/services/broadcast-channel/broadcast-channel-demo.component').then(
-      (m) => m.BroadcastChannelDemoComponent,
-    ),
-  camera: () =>
-    import('../../demo/services/camera/camera-demo.component').then((m) => m.CameraDemoComponent),
-  clipboard: () =>
-    import('../../demo/services/clipboard/clipboard-demo.component').then(
-      (m) => m.ClipboardDemoComponent,
-    ),
-  geolocation: () =>
-    import('../../demo/services/geolocation/geolocation-demo.component').then(
-      (m) => m.GeolocationDemoComponent,
-    ),
-  notification: () =>
-    import('../../demo/services/notification/notification-demo.component').then(
-      (m) => m.NotificationDemoComponent,
-    ),
-  // Security Services
-  'regex-security': () =>
-    import('../../demo/security/services/regex-security/regex-security-demo.component').then(
-      (m) => m.RegexSecurityDemoComponent,
-    ),
-  'web-crypto': () =>
-    import('../../demo/security/services/web-crypto/web-crypto-demo.component').then(
-      (m) => m.WebCryptoDemoComponent,
-    ),
-  'secure-storage': () =>
-    import('../../demo/security/services/secure-storage/secure-storage-demo.component').then(
-      (m) => m.SecureStorageDemoComponent,
-    ),
-  // Worker HTTP
-  transport: () =>
-    import('../../demo/worker-http/services/transport/transport-demo.component').then(
-      (m) => m.TransportDemoComponent,
-    ),
-  hmac: () =>
-    import('../../demo/worker-http/services/hmac/hmac-demo.component').then(
-      (m) => m.HmacDemoComponent,
-    ),
-  hashing: () =>
-    import('../../demo/worker-http/services/hashing/hashing-demo.component').then(
-      (m) => m.HashingDemoComponent,
-    ),
-};
-
 const SECTION_DATA = {
   'browser-web-apis': {
     dataSource: BROWSER_WEB_APIS_SERVICES,
     backRoute: '/docs/browser-web-apis',
     backLabel: 'browser-web-apis',
-    hasDemoTab: true,
   },
   security: {
     dataSource: SECURITY_SERVICES,
     backRoute: '/docs/security',
     backLabel: 'security',
-    hasDemoTab: true,
   },
   'worker-http': {
     dataSource: WORKER_HTTP_ENTRIES,
     backRoute: '/docs/worker-http',
     backLabel: 'worker-http',
-    hasDemoTab: true,
   },
 };
 
@@ -111,20 +57,11 @@ export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (rout
     return null as unknown as ServiceDetailConfig;
   }
 
-  // Lazy load demo component if available
-  let demoComponent: Type<unknown> | undefined;
-  const demoLoader = DEMO_COMPONENTS[itemId];
-  if (demoLoader) {
-    demoComponent = await demoLoader();
-  }
-
   return {
     service: item,
     section: section as ServiceDetailConfig['section'],
     backRoute: sectionData.backRoute,
     backLabel: sectionData.backLabel,
-    hasDemoTab: sectionData.hasDemoTab && !!demoComponent,
-    demoComponent,
     interfaces: getInterfaces(section, itemId),
   };
 };
