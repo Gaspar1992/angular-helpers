@@ -109,6 +109,14 @@ export {
 } from './services/web-audio.service';
 export { GamepadService, type GamepadState } from './services/gamepad.service';
 
+// New web platform services
+export { WebLocksService } from './services/web-locks.service';
+export {
+  StorageManagerService,
+  type StorageQuotaEstimate,
+} from './services/storage-manager.service';
+export { CompressionService, type CompressionFormat } from './services/compression.service';
+
 // Tokens
 export { BROWSER_API_LOGGER, type BrowserApiLogger } from './tokens/logger.token';
 
