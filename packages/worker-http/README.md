@@ -429,6 +429,48 @@ Server-Side Rendering (SSR) is supported via automatic fallback to the main thre
 
 ---
 
+## Benchmarks
+
+A reproducible benchmark suite ships with the demo app at
+[`/demo/worker-http-benchmark`](../../src/app/demo/worker-http-benchmark) and compares three
+transport modes across four workloads:
+
+| Mode            | What it measures                                           |
+| --------------- | ---------------------------------------------------------- |
+| `main-thread`   | Baseline — the same simulated work runs on the main thread |
+| `worker-pool-1` | Single worker — measures pure transport overhead           |
+| `worker-pool-4` | Four workers — measures the benefit of parallel dispatch   |
+
+Each scenario simulates identical "server" work (synchronous CPU burn + async delay + payload
+generation), so the only variable being compared is **where** the work runs.
+
+**Workloads**:
+
+- 100 small sequential requests — pure transport overhead
+- 1 large response (10MB) — serialization / structured clone cost
+- 50 parallel requests — pool benefit
+- 20 parallel requests + 500ms main-thread CPU burn — real-world jank case
+
+**Metrics collected**:
+
+- **Long Tasks** (`PerformanceObserver` / `longtask`) — count and total duration (Chromium-only)
+- **Dropped frames** (`requestAnimationFrame` deltas > 25 ms) — visible jank proxy, works in every browser
+- **Wall-clock total** for the scenario
+- **Success / failure** counts
+
+To run locally:
+
+```bash
+npm run build:workers
+npm start
+# open https://localhost:4200/demo/worker-http-benchmark
+```
+
+Numbers vary by hardware, browser, and current system load — always run a scenario several times
+and watch the trend, not a single value.
+
+---
+
 ## Related documentation
 
 - [Architecture & Feasibility Study](../../docs/sdd-angular-http-web-workers.md)
