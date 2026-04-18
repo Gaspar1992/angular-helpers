@@ -1,23 +1,18 @@
-import { Injectable } from '@angular/core';
-import { Observable, Subject, BehaviorSubject } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import { BROWSER_API_LOGGER } from '../tokens/logger.token';
+import {
+  WebSocketClient,
+  type WebSocketClientConfig,
+  type WebSocketMessage,
+  type WebSocketStatusV2,
+} from '../clients/web-socket.client';
 
-export interface WebSocketConfig {
-  url: string;
-  protocols?: string | string[];
-  reconnectInterval?: number;
-  maxReconnectAttempts?: number;
-  heartbeatInterval?: number;
-  heartbeatMessage?: unknown;
-}
-
-export interface WebSocketMessage<T = unknown> {
-  type: string;
-  data: T;
-  timestamp?: number;
-}
-
+/**
+ * @deprecated Use `WebSocketStatusV2` (via `WebSocketClient.status`).
+ * Kept for backward compatibility — will be removed in v22.
+ */
 export interface WebSocketStatus {
   connected: boolean;
   connecting: boolean;
@@ -26,20 +21,41 @@ export interface WebSocketStatus {
   reconnectAttempts: number;
 }
 
+/**
+ * @deprecated Use `WebSocketClientConfig`. Kept as alias for backward compatibility.
+ */
+export type WebSocketConfig = WebSocketClientConfig & {
+  /** @deprecated Use `heartbeatMessage` directly. */
+  heartbeatMessage?: unknown;
+};
+
+export type { WebSocketClientConfig, WebSocketMessage, WebSocketStatusV2 };
+export { WebSocketClient };
+
+let legacyDeprecationLogged = false;
+
+/**
+ * Service that creates and tracks `WebSocketClient` instances.
+ *
+ * Preferred usage:
+ * ```ts
+ * const ws = inject(WebSocketService);
+ * const client = ws.createClient({ url: 'wss://...' });
+ * effect(() => console.log(client.status()));
+ * await client.request('ping', {});
+ * ```
+ *
+ * Legacy usage (`connect()` returning Observable) is preserved for one minor cycle
+ * and will be removed in v22.
+ */
 @Injectable()
 export class WebSocketService extends BrowserApiBaseService {
-  private webSocket: WebSocket | null = null;
-  private statusSubject = new BehaviorSubject<WebSocketStatus>({
-    connected: false,
-    connecting: false,
-    reconnecting: false,
-    reconnectAttempts: 0,
-  });
-  private messageSubject = new Subject<WebSocketMessage>();
-  private reconnectAttempts = 0;
-  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-  private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
-  private readonly _cleanup = this.destroyRef.onDestroy(() => this.disconnect());
+  private readonly wsLogger = inject(BROWSER_API_LOGGER);
+  private readonly clients = new Set<WebSocketClient>();
+  private readonly _cleanup = this.destroyRef.onDestroy(() => this.disposeAll());
+
+  /** Legacy single-connection holder used by deprecated `connect()`/`send()` API. */
+  private legacyClient: WebSocketClient | null = null;
 
   protected override getApiName(): string {
     return 'websocket';
@@ -52,201 +68,171 @@ export class WebSocketService extends BrowserApiBaseService {
     }
   }
 
+  /**
+   * Create a new WebSocket client. The client owns one connection and is the recommended
+   * surface for all interactions (status signal, request/response, reconnect, etc.).
+   *
+   * The returned client is automatically disposed when the host injector is destroyed.
+   */
+  createClient(config: WebSocketClientConfig): WebSocketClient {
+    this.ensureSupported();
+    const client = new WebSocketClient(config, this.wsLogger, this.destroyRef);
+    this.clients.add(client);
+    return client;
+  }
+
+  /** Dispose every client created via `createClient()` (also called automatically on destroy). */
+  disposeAll(): void {
+    for (const client of this.clients) {
+      client.close();
+    }
+    this.clients.clear();
+    if (this.legacyClient) {
+      this.legacyClient.close();
+      this.legacyClient = null;
+    }
+  }
+
+  // ---------- legacy API (deprecated) ----------
+
+  /**
+   * @deprecated Use {@link createClient} which returns a `WebSocketClient` exposing a
+   * status signal, request/response, and proper reconnect. This wrapper will be removed
+   * in v22.
+   */
   connect(config: WebSocketConfig): Observable<WebSocketStatus> {
     this.ensureSupported();
+    this.warnLegacyOnce();
 
     return new Observable<WebSocketStatus>((observer) => {
-      this.disconnect(); // Disconnect existing connection if any
+      if (this.legacyClient) {
+        this.legacyClient.close();
+      }
+      const client = new WebSocketClient(config, this.wsLogger);
+      this.legacyClient = client;
 
-      this.updateStatus({
-        connected: false,
-        connecting: true,
-        reconnecting: false,
-        reconnectAttempts: 0,
+      const sub = toObservableLike(client).subscribe({
+        next: (status) => observer.next(status),
+        error: (err) => observer.error(err),
       });
 
-      try {
-        this.webSocket = new WebSocket(config.url, config.protocols);
-        this.setupWebSocketHandlers(config);
-        observer.next(this.statusSubject.getValue());
-      } catch (error) {
-        this.logError('Error creating WebSocket:', error);
-        this.updateStatus({
-          connected: false,
-          connecting: false,
-          reconnecting: false,
-          error: error instanceof Error ? error.message : 'Connection failed',
-          reconnectAttempts: 0,
-        });
-        observer.next(this.statusSubject.getValue());
-      }
-
       return () => {
-        this.disconnect();
+        sub.unsubscribe();
+        client.close();
+        if (this.legacyClient === client) {
+          this.legacyClient = null;
+        }
       };
     });
   }
 
+  /** @deprecated Use {@link createClient} and call `client.close()`. */
   disconnect(): void {
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = null;
+    if (this.legacyClient) {
+      this.legacyClient.close();
+      this.legacyClient = null;
     }
-
-    if (this.heartbeatTimer) {
-      clearInterval(this.heartbeatTimer);
-      this.heartbeatTimer = null;
-    }
-
-    if (this.webSocket) {
-      this.webSocket.close();
-      this.webSocket = null;
-    }
-
-    this.updateStatus({
-      connected: false,
-      connecting: false,
-      reconnecting: false,
-      reconnectAttempts: 0,
-    });
   }
 
+  /** @deprecated Use the client returned by {@link createClient}. */
   send<T>(message: WebSocketMessage<T>): void {
-    if (!this.webSocket || this.webSocket.readyState !== WebSocket.OPEN) {
-      throw new Error('WebSocket is not connected');
+    if (!this.legacyClient) {
+      throw new Error('No active legacy WebSocket. Call connect() first or use createClient().');
     }
-
-    const messageWithTimestamp = {
-      ...message,
-      timestamp: Date.now(),
-    };
-
-    this.webSocket.send(JSON.stringify(messageWithTimestamp));
+    this.legacyClient.send(message);
   }
 
+  /** @deprecated Use the client returned by {@link createClient}. */
   sendRaw(data: string): void {
-    if (!this.webSocket || this.webSocket.readyState !== WebSocket.OPEN) {
-      throw new Error('WebSocket is not connected');
+    if (!this.legacyClient) {
+      throw new Error('No active legacy WebSocket. Call connect() first or use createClient().');
     }
-
-    this.webSocket.send(data);
+    this.legacyClient.sendRaw(data);
   }
 
+  /** @deprecated Use `client.status` from {@link createClient}. */
   getStatus(): Observable<WebSocketStatus> {
-    return this.statusSubject.asObservable();
-  }
-
-  getMessages<T = unknown>(): Observable<WebSocketMessage<T>> {
-    return this.messageSubject.asObservable() as Observable<WebSocketMessage<T>>;
-  }
-
-  getMessagesByType<T = unknown>(type: string): Observable<WebSocketMessage<T>> {
-    return this.messageSubject
-      .asObservable()
-      .pipe(filter((msg): msg is WebSocketMessage<T> => msg.type === type));
-  }
-
-  private setupWebSocketHandlers(config: WebSocketConfig): void {
-    if (!this.webSocket) return;
-
-    this.webSocket.onopen = () => {
-      this.logInfo(`Connected to: ${config.url}`);
-      this.reconnectAttempts = 0;
-      this.updateStatus({
-        connected: true,
-        connecting: false,
-        reconnecting: false,
-        reconnectAttempts: 0,
-      });
-
-      // Start heartbeat if configured
-      if (config.heartbeatInterval && config.heartbeatMessage) {
-        this.startHeartbeat(config);
-      }
-    };
-
-    this.webSocket.onclose = (event) => {
-      this.logInfo(`Connection closed: ${event.code} ${event.reason}`);
-      this.updateStatus({
-        connected: false,
-        connecting: false,
-        reconnecting: false,
-        reconnectAttempts: this.reconnectAttempts,
-      });
-
-      // Attempt reconnection if not a clean close and reconnect is enabled
-      if (!event.wasClean && config.reconnectInterval && config.maxReconnectAttempts) {
-        this.attemptReconnect(config);
-      }
-    };
-
-    this.webSocket.onerror = (error) => {
-      this.logError('WebSocket error:', error);
-      this.updateStatus({
-        connected: false,
-        connecting: false,
-        reconnecting: false,
-        error: 'WebSocket connection error',
-        reconnectAttempts: this.reconnectAttempts,
-      });
-    };
-
-    this.webSocket.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data) as WebSocketMessage;
-        this.messageSubject.next(message);
-      } catch (error) {
-        this.logError('Error parsing message:', error);
-      }
-    };
-  }
-
-  private startHeartbeat(config: WebSocketConfig): void {
-    this.heartbeatTimer = setInterval(() => {
-      if (this.webSocket && this.webSocket.readyState === WebSocket.OPEN) {
-        this.send({
-          type: 'heartbeat',
-          data: config.heartbeatMessage!,
+    return new Observable<WebSocketStatus>((observer) => {
+      if (!this.legacyClient) {
+        observer.next({
+          connected: false,
+          connecting: false,
+          reconnecting: false,
+          reconnectAttempts: 0,
         });
+        return () => {
+          // No-op
+        };
       }
-    }, config.heartbeatInterval);
-  }
-
-  private attemptReconnect(config: WebSocketConfig): void {
-    if (this.reconnectAttempts >= (config.maxReconnectAttempts || 5)) {
-      this.logInfo('Max reconnect attempts reached');
-      return;
-    }
-
-    this.reconnectAttempts++;
-    this.updateStatus({
-      connected: false,
-      connecting: false,
-      reconnecting: true,
-      reconnectAttempts: this.reconnectAttempts,
+      const sub = toObservableLike(this.legacyClient).subscribe((status) => observer.next(status));
+      return () => sub.unsubscribe();
     });
-
-    this.reconnectTimer = setTimeout(() => {
-      this.logInfo(`Reconnect attempt ${this.reconnectAttempts}`);
-      this.connect(config);
-    }, config.reconnectInterval || 3000);
   }
 
-  private updateStatus(status: Partial<WebSocketStatus>): void {
-    const newStatus = { ...this.statusSubject.getValue(), ...status };
-    this.statusSubject.next(newStatus);
+  /** @deprecated Use `client.messages$` from {@link createClient}. */
+  getMessages<T = unknown>(): Observable<WebSocketMessage<T>> {
+    if (!this.legacyClient) {
+      return new Observable<WebSocketMessage<T>>(() => {
+        // No-op stream until connected.
+      });
+    }
+    return this.legacyClient.messages$ as Observable<WebSocketMessage<T>>;
   }
 
-  // Direct access to native WebSocket
+  /** @deprecated Use `client.messagesByType()` from {@link createClient}. */
+  getMessagesByType<T = unknown>(type: string): Observable<WebSocketMessage<T>> {
+    if (!this.legacyClient) {
+      return new Observable<WebSocketMessage<T>>(() => {
+        // No-op stream until connected.
+      });
+    }
+    return this.legacyClient.messagesByType<T>(type);
+  }
+
+  /** @deprecated Use the client returned by {@link createClient}. */
   getNativeWebSocket(): WebSocket | null {
-    return this.webSocket;
+    return this.legacyClient?.getNativeSocket() ?? null;
   }
 
+  /** @deprecated Use `client.status()` from {@link createClient}. */
   isConnected(): boolean {
-    return this.webSocket?.readyState === WebSocket.OPEN;
+    return this.legacyClient?.status().state === 'open';
   }
 
+  /** @deprecated Use the native socket via `client.getNativeSocket()`. */
   getReadyState(): number {
-    return this.webSocket?.readyState ?? WebSocket.CLOSED;
+    return this.legacyClient?.getNativeSocket()?.readyState ?? WebSocket.CLOSED;
   }
+
+  private warnLegacyOnce(): void {
+    if (legacyDeprecationLogged) return;
+    legacyDeprecationLogged = true;
+    this.wsLogger.warn(
+      '[websocket] WebSocketService.connect() is deprecated. Use WebSocketService.createClient() ' +
+        'which returns a WebSocketClient with a status signal, request/response, and proper reconnect. ' +
+        'The legacy API will be removed in v22.',
+    );
+  }
+}
+
+/**
+ * Build a stream of legacy `WebSocketStatus` snapshots from a v2 client. Used to keep the
+ * deprecated `connect()` API behaving like before (Observable of legacy status).
+ */
+function toObservableLike(client: WebSocketClient): Observable<WebSocketStatus> {
+  return new Observable<WebSocketStatus>((observer) => {
+    const emit = () => {
+      const v2 = client.status();
+      observer.next({
+        connected: v2.state === 'open',
+        connecting: v2.state === 'connecting',
+        reconnecting: v2.state === 'reconnecting',
+        error: v2.error ?? undefined,
+        reconnectAttempts: v2.reconnectAttempts,
+      });
+    };
+    emit();
+    const id = setInterval(emit, 100);
+    return () => clearInterval(id);
+  });
 }

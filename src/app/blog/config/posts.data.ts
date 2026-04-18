@@ -2,6 +2,15 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'websocket-stateful-client',
+    title:
+      'browser-web-apis v21.6: stateful WebSocket client with signals, request/response, and a real reconnect',
+    publishedAt: '2026-04-18',
+    tags: ['browser-web-apis', 'websocket', 'signals', 'bugfix', 'angular'],
+    excerpt:
+      'We rebuilt the WebSocket service around a stateful client class. State is a signal, reconnect uses exponential backoff with jitter, request/response is built-in via id correlation, and the old reconnect dead-loop bug is gone.',
+  },
+  {
     slug: 'browser-web-apis-robustness-improvements',
     title:
       'browser-web-apis: robustness deep-dive — spec compliance, leak prevention, and unified architecture',
