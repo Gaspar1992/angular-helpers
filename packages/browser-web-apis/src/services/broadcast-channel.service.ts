@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import type { BrowserCapabilityId } from './browser-capability.service';
 import { ConnectionRegistryBaseService } from './base/connection-registry-base.service';
 
 @Injectable()
@@ -12,14 +13,12 @@ export class BroadcastChannelService extends ConnectionRegistryBaseService<Broad
     channel.close();
   }
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && 'BroadcastChannel' in window;
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'broadcastChannel';
   }
 
   private ensureBroadcastChannelSupported(): void {
-    if (!this.isSupported()) {
-      throw new Error('BroadcastChannel API not supported in this environment');
-    }
+    this.ensureSupported();
   }
 
   open<T = unknown>(name: string): Observable<T> {

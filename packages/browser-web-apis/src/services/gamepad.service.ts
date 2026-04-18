@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 import {
   type GamepadState,
-  isGamepadSupported,
   gamepadSnapshot,
   gamepadConnectionStream,
   gamepadPollStream,
@@ -18,8 +18,8 @@ export class GamepadService extends BrowserApiBaseService {
     return 'gamepad';
   }
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && isGamepadSupported();
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'gamepad';
   }
 
   getSnapshot(index: number): GamepadState | null {

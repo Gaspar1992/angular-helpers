@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 export type RecordingState = 'inactive' | 'recording' | 'paused';
 
@@ -31,8 +32,8 @@ export class MediaRecorderService extends BrowserApiBaseService {
     return 'media-recorder';
   }
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && 'MediaRecorder' in window;
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'mediaRecorder';
   }
 
   get state(): RecordingState {

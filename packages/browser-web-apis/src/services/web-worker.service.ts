@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 export interface WorkerMessage<T = unknown> {
   id: string;
@@ -35,11 +36,8 @@ export class WebWorkerService extends BrowserApiBaseService {
     return 'webworker';
   }
 
-  protected override ensureSupported(): void {
-    super.ensureSupported();
-    if (typeof Worker === 'undefined') {
-      throw new Error('Web Workers not supported in this browser');
-    }
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'webWorker';
   }
 
   createWorker(name: string, scriptUrl: string): Observable<WorkerStatus> {

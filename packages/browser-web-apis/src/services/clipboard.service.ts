@@ -1,9 +1,14 @@
 import { Injectable } from '@angular/core';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 @Injectable()
 export class ClipboardService extends BrowserApiBaseService {
   protected override getApiName(): string {
+    return 'clipboard';
+  }
+
+  protected override getCapabilityId(): BrowserCapabilityId {
     return 'clipboard';
   }
 
