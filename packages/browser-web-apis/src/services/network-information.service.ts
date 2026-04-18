@@ -1,12 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
-import {
-  getNetworkSnapshot,
-  isNetworkInformationSupported,
-  networkInformationStream,
-} from '../utils/network-information.utils';
+import { getNetworkSnapshot, networkInformationStream } from '../utils/network-information.utils';
 
 export type ConnectionType =
   | 'bluetooth'
@@ -36,8 +33,8 @@ export class NetworkInformationService extends BrowserApiBaseService {
     return 'network-information';
   }
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && isNetworkInformationSupported();
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'networkInformation';
   }
 
   getSnapshot(): NetworkInformation {

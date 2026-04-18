@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 export type AudioContextState = 'suspended' | 'running' | 'closed';
 
@@ -17,8 +18,8 @@ export class WebAudioService extends BrowserApiBaseService {
 
   private context: AudioContext | null = null;
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && 'AudioContext' in window;
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'webAudio';
   }
 
   getContext(): AudioContext {

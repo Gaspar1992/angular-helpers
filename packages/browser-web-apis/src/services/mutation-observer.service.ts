@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 import {
   type MutationObserverOptions,
-  isMutationObserverSupported,
   mutationObserverStream,
 } from '../utils/mutation-observer.utils';
 
@@ -16,8 +16,8 @@ export class MutationObserverService extends BrowserApiBaseService {
     return 'mutation-observer';
   }
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && isMutationObserverSupported();
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'mutationObserver';
   }
 
   observe(target: Node, options?: MutationObserverOptions): Observable<MutationRecord[]> {

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 export interface WebSocketConfig {
   url: string;
@@ -45,11 +46,8 @@ export class WebSocketService extends BrowserApiBaseService {
     return 'websocket';
   }
 
-  protected override ensureSupported(): void {
-    super.ensureSupported();
-    if (typeof WebSocket === 'undefined') {
-      throw new Error('WebSocket API not supported in this browser');
-    }
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'webSocket';
   }
 
   connect(config: WebSocketConfig): Observable<WebSocketStatus> {

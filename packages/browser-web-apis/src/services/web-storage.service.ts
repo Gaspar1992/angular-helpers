@@ -3,6 +3,7 @@ import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, fromEvent } from 'rxjs';
 import { map, distinctUntilChanged, filter } from 'rxjs/operators';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 import { StorageValue } from '../interfaces/common.types';
 
 export interface StorageOptions {
@@ -31,11 +32,8 @@ export class WebStorageService extends BrowserApiBaseService {
     return 'storage';
   }
 
-  protected override ensureSupported(): void {
-    super.ensureSupported();
-    if (typeof Storage === 'undefined') {
-      throw new Error('Storage API not supported in this browser');
-    }
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'webStorage';
   }
 
   private setupEventListeners(): void {
