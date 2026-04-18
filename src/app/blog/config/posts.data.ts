@@ -2,6 +2,14 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'web-storage-safari-private-and-unified-api',
+    title: 'browser-web-apis v21.7: WebStorage that survives Safari private mode + a unified API',
+    publishedAt: '2026-04-18',
+    tags: ['browser-web-apis', 'web-storage', 'safari', 'bugfix', 'angular'],
+    excerpt:
+      'Two changes: every storage access is now wrapped in try/catch (Safari private mode and sandboxed iframes degrade gracefully instead of crashing), and the public API is unified into local and session namespaces sharing one method surface.',
+  },
+  {
     slug: 'browser-web-apis-robustness-improvements',
     title:
       'browser-web-apis: robustness deep-dive — spec compliance, leak prevention, and unified architecture',

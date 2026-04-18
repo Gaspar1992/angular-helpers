@@ -1,30 +1,74 @@
-import { Injectable, signal } from '@angular/core';
-import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, fromEvent } from 'rxjs';
-import { map, distinctUntilChanged, filter } from 'rxjs/operators';
+import { inject, Injectable, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { fromEvent, Observable } from 'rxjs';
+import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
-import { StorageValue } from '../interfaces/common.types';
+import { BROWSER_API_LOGGER } from '../tokens/logger.token';
+import type { StorageValue } from '../interfaces/common.types';
+import {
+  StorageNamespaceImpl,
+  type StorageNamespace,
+  type StorageOptions,
+  type StorageEvent,
+} from '../storage/storage-namespace';
 
-export interface StorageOptions {
-  prefix?: string;
-  serialize?: (value: StorageValue) => string;
-  deserialize?: (value: string) => StorageValue;
-}
+export type { StorageOptions, StorageEvent } from '../storage/storage-namespace';
+export type { StorageNamespace } from '../storage/storage-namespace';
 
-export interface StorageEvent {
-  key: string | null;
-  newValue: StorageValue | null;
-  oldValue: StorageValue | null;
-  storageArea: 'localStorage' | 'sessionStorage';
-}
+let legacyDeprecationLogged = false;
 
+/**
+ * Web Storage service with two namespaces (`local`, `session`) sharing one method
+ * surface. SecurityError-safe (Safari private mode, sandboxed iframes return defaults
+ * instead of throwing).
+ *
+ * Preferred usage:
+ * ```ts
+ * const storage = inject(WebStorageService);
+ * storage.local.set('user', { id: 1 });
+ * const user = storage.local.get<{ id: number }>('user');
+ * storage.local.watch<{ id: number }>('user').subscribe(console.log);
+ * ```
+ *
+ * Legacy methods (`setLocalStorage`, `getLocalStorage`, etc.) remain as deprecated
+ * wrappers for one minor cycle; removal slated for v22.
+ */
 @Injectable()
 export class WebStorageService extends BrowserApiBaseService {
+  private readonly storageLogger = inject(BROWSER_API_LOGGER);
   private storageEvents = signal<StorageEvent | null>(null);
+
+  private readonly eventBus = {
+    emit: (event: StorageEvent) => this.storageEvents.set(event),
+    events$: toObservable(this.storageEvents).pipe(
+      filter((event): event is StorageEvent => event !== null),
+      distinctUntilChanged(
+        (a, b) =>
+          a.key === b.key &&
+          a.newValue === b.newValue &&
+          a.oldValue === b.oldValue &&
+          a.storageArea === b.storageArea,
+      ),
+    ),
+  };
+
+  /** Local storage namespace. */
+  readonly local: StorageNamespace = new StorageNamespaceImpl(
+    'localStorage',
+    this.eventBus,
+    this.storageLogger,
+  );
+
+  /** Session storage namespace. */
+  readonly session: StorageNamespace = new StorageNamespaceImpl(
+    'sessionStorage',
+    this.eventBus,
+    this.storageLogger,
+  );
 
   constructor() {
     super();
-    this.setupEventListeners();
+    this.setupCrossTabListener();
   }
 
   protected override getApiName(): string {
@@ -38,306 +82,155 @@ export class WebStorageService extends BrowserApiBaseService {
     }
   }
 
-  private setupEventListeners(): void {
-    if (this.isBrowserEnvironment()) {
-      fromEvent(window, 'storage')
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((event: Event) => {
-          const storageEvent = event as unknown as globalThis.StorageEvent;
-          const area =
-            storageEvent.storageArea === localStorage ? 'localStorage' : 'sessionStorage';
-          this.storageEvents.set({
-            key: storageEvent.key,
-            newValue: storageEvent.newValue ? this.deserializeValue(storageEvent.newValue) : null,
-            oldValue: storageEvent.oldValue ? this.deserializeValue(storageEvent.oldValue) : null,
-            storageArea: area,
-          });
+  /** Returns true if either local or session storage is usable. */
+  isSupported(): boolean {
+    return this.local.isSupported() || this.session.isSupported();
+  }
+
+  /** Stream of every storage mutation observed in this tab or other tabs. */
+  getStorageEvents(): Observable<StorageEvent> {
+    return this.eventBus.events$;
+  }
+
+  private setupCrossTabListener(): void {
+    if (!this.isBrowserEnvironment()) return;
+    fromEvent<globalThis.StorageEvent>(window, 'storage')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => {
+        const area: 'localStorage' | 'sessionStorage' =
+          event.storageArea === window.localStorage ? 'localStorage' : 'sessionStorage';
+        this.storageEvents.set({
+          key: event.key,
+          newValue: event.newValue ? this.safeParse(event.newValue) : null,
+          oldValue: event.oldValue ? this.safeParse(event.oldValue) : null,
+          storageArea: area,
         });
-    }
+      });
   }
 
-  private serializeValue(value: StorageValue, options?: StorageOptions): string {
-    if (options?.serialize) {
-      return options.serialize(value);
-    }
-    return JSON.stringify(value);
-  }
-
-  private deserializeValue(value: string | null, options?: StorageOptions): StorageValue | null {
-    if (value === null) return null;
-
-    if (options?.deserialize) {
-      return options.deserialize(value);
-    }
-
+  private safeParse(value: string): StorageValue {
     try {
       return JSON.parse(value);
     } catch {
-      return value as StorageValue;
+      return value;
     }
   }
 
-  private getKey(key: string, options?: StorageOptions): string {
-    const prefix = options?.prefix || '';
-    return prefix ? `${prefix}:${key}` : key;
-  }
+  // ---------- legacy API (deprecated) ----------
 
-  private emitStorageChange(
-    fullKey: string | null,
-    newValue: StorageValue | null,
-    oldValue: StorageValue | null,
-    area: 'localStorage' | 'sessionStorage',
-  ): void {
-    this.storageEvents.set({ key: fullKey, newValue, oldValue, storageArea: area });
-  }
-
-  // Local Storage Methods
+  /** @deprecated Use `storage.local.set(key, value, opts)`. Removed in v22. */
   setLocalStorage<T extends StorageValue>(
     key: string,
     value: T,
     options: StorageOptions = {},
   ): boolean {
-    this.ensureSupported();
-
-    try {
-      const serializedValue = this.serializeValue(value, options);
-      const fullKey = this.getKey(key, options);
-      const oldRaw = localStorage.getItem(fullKey);
-      const oldValue = oldRaw !== null ? this.deserializeValue(oldRaw, options) : null;
-      localStorage.setItem(fullKey, serializedValue);
-      this.emitStorageChange(fullKey, value, oldValue, 'localStorage');
-      return true;
-    } catch (error) {
-      this.logError('Error setting localStorage:', error);
-      return false;
-    }
+    this.warnLegacyOnce();
+    return this.local.set(key, value, options);
   }
 
+  /** @deprecated Use `storage.local.get(key, defaultValue, opts)`. Removed in v22. */
   getLocalStorage<T extends StorageValue>(
     key: string,
     defaultValue: T | null = null,
     options: StorageOptions = {},
   ): T | null {
-    this.ensureSupported();
-
-    try {
-      const fullKey = this.getKey(key, options);
-      const value = localStorage.getItem(fullKey);
-      return value !== null ? (this.deserializeValue(value, options) as T) : defaultValue;
-    } catch (error) {
-      this.logError('Error getting localStorage:', error);
-      return defaultValue;
-    }
+    this.warnLegacyOnce();
+    return this.local.get<T>(key, defaultValue, options);
   }
 
+  /** @deprecated Use `storage.local.remove(key, opts)`. Removed in v22. */
   removeLocalStorage(key: string, options: StorageOptions = {}): boolean {
-    this.ensureSupported();
-
-    try {
-      const fullKey = this.getKey(key, options);
-      const oldRaw = localStorage.getItem(fullKey);
-      const oldValue = oldRaw !== null ? this.deserializeValue(oldRaw, options) : null;
-      localStorage.removeItem(fullKey);
-      this.emitStorageChange(fullKey, null, oldValue, 'localStorage');
-      return true;
-    } catch (error) {
-      this.logError('Error removing localStorage:', error);
-      return false;
-    }
+    this.warnLegacyOnce();
+    return this.local.remove(key, options);
   }
 
+  /** @deprecated Use `storage.local.clear(opts)`. Removed in v22. */
   clearLocalStorage(options: StorageOptions = {}): boolean {
-    this.ensureSupported();
-
-    try {
-      const prefix = options?.prefix;
-      if (prefix) {
-        const keysToRemove: string[] = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith(`${prefix}:`)) {
-            keysToRemove.push(key);
-          }
-        }
-        keysToRemove.forEach((key) => {
-          const oldRaw = localStorage.getItem(key);
-          localStorage.removeItem(key);
-          this.emitStorageChange(key, null, oldRaw, 'localStorage');
-        });
-      } else {
-        localStorage.clear();
-        this.emitStorageChange(null, null, null, 'localStorage');
-      }
-      return true;
-    } catch (error) {
-      this.logError('Error clearing localStorage:', error);
-      return false;
-    }
+    this.warnLegacyOnce();
+    return this.local.clear(options);
   }
 
-  // Session Storage Methods
+  /** @deprecated Use `storage.session.set(key, value, opts)`. Removed in v22. */
   setSessionStorage<T extends StorageValue>(
     key: string,
     value: T,
     options: StorageOptions = {},
   ): boolean {
-    this.ensureSupported();
-
-    try {
-      const serializedValue = this.serializeValue(value, options);
-      const fullKey = this.getKey(key, options);
-      const oldRaw = sessionStorage.getItem(fullKey);
-      const oldValue = oldRaw !== null ? this.deserializeValue(oldRaw, options) : null;
-      sessionStorage.setItem(fullKey, serializedValue);
-      this.emitStorageChange(fullKey, value, oldValue, 'sessionStorage');
-      return true;
-    } catch (error) {
-      this.logError('Error setting sessionStorage:', error);
-      return false;
-    }
+    this.warnLegacyOnce();
+    return this.session.set(key, value, options);
   }
 
+  /** @deprecated Use `storage.session.get(key, defaultValue, opts)`. Removed in v22. */
   getSessionStorage<T extends StorageValue>(
     key: string,
     defaultValue: T | null = null,
     options: StorageOptions = {},
   ): T | null {
-    this.ensureSupported();
-
-    try {
-      const fullKey = this.getKey(key, options);
-      const value = sessionStorage.getItem(fullKey);
-      return value !== null ? (this.deserializeValue(value, options) as T) : defaultValue;
-    } catch (error) {
-      this.logError('Error getting sessionStorage:', error);
-      return defaultValue;
-    }
+    this.warnLegacyOnce();
+    return this.session.get<T>(key, defaultValue, options);
   }
 
+  /** @deprecated Use `storage.session.remove(key, opts)`. Removed in v22. */
   removeSessionStorage(key: string, options: StorageOptions = {}): boolean {
-    this.ensureSupported();
-
-    try {
-      const fullKey = this.getKey(key, options);
-      const oldRaw = sessionStorage.getItem(fullKey);
-      const oldValue = oldRaw !== null ? this.deserializeValue(oldRaw, options) : null;
-      sessionStorage.removeItem(fullKey);
-      this.emitStorageChange(fullKey, null, oldValue, 'sessionStorage');
-      return true;
-    } catch (error) {
-      this.logError('Error removing sessionStorage:', error);
-      return false;
-    }
+    this.warnLegacyOnce();
+    return this.session.remove(key, options);
   }
 
+  /** @deprecated Use `storage.session.clear(opts)`. Removed in v22. */
   clearSessionStorage(options: StorageOptions = {}): boolean {
-    this.ensureSupported();
-
-    try {
-      const prefix = options?.prefix;
-      if (prefix) {
-        const keysToRemove: string[] = [];
-        for (let i = 0; i < sessionStorage.length; i++) {
-          const key = sessionStorage.key(i);
-          if (key && key.startsWith(`${prefix}:`)) {
-            keysToRemove.push(key);
-          }
-        }
-        keysToRemove.forEach((key) => {
-          const oldRaw = sessionStorage.getItem(key);
-          sessionStorage.removeItem(key);
-          this.emitStorageChange(key, null, oldRaw, 'sessionStorage');
-        });
-      } else {
-        sessionStorage.clear();
-        this.emitStorageChange(null, null, null, 'sessionStorage');
-      }
-      return true;
-    } catch (error) {
-      this.logError('Error clearing sessionStorage:', error);
-      return false;
-    }
+    this.warnLegacyOnce();
+    return this.session.clear(options);
   }
 
-  // Utility Methods
+  /** @deprecated Use `storage.local.size(opts)`. Removed in v22. */
   getLocalStorageSize(options: StorageOptions = {}): number {
-    this.ensureSupported();
-
-    let totalSize = 0;
-    const prefix = options?.prefix;
-
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && (!prefix || key.startsWith(`${prefix}:`))) {
-        totalSize += (localStorage.getItem(key)?.length || 0) + key.length;
-      }
-    }
-    return totalSize;
+    this.warnLegacyOnce();
+    return this.local.size(options);
   }
 
+  /** @deprecated Use `storage.session.size(opts)`. Removed in v22. */
   getSessionStorageSize(options: StorageOptions = {}): number {
-    this.ensureSupported();
-
-    let totalSize = 0;
-    const prefix = options?.prefix;
-
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i);
-      if (key && (!prefix || key.startsWith(`${prefix}:`))) {
-        totalSize += (sessionStorage.getItem(key)?.length || 0) + key.length;
-      }
-    }
-    return totalSize;
+    this.warnLegacyOnce();
+    return this.session.size(options);
   }
 
-  getStorageEvents(): Observable<StorageEvent> {
-    return toObservable(this.storageEvents).pipe(
-      filter((event: StorageEvent | null): event is StorageEvent => event !== null),
-      distinctUntilChanged(
-        (prev, curr) =>
-          prev.key === curr.key &&
-          prev.newValue === curr.newValue &&
-          prev.oldValue === curr.oldValue,
-      ),
-    );
-  }
-
+  /** @deprecated Use `storage.local.watch<T>(key, opts)`. Removed in v22. */
   watchLocalStorage<T extends StorageValue>(
     key: string,
     options: StorageOptions = {},
   ): Observable<T | null> {
-    const fullKey = this.getKey(key, options);
-    return this.getStorageEvents().pipe(
-      filter(
-        (event) =>
-          event.storageArea === 'localStorage' && (event.key === null || event.key === fullKey),
-      ),
-      map((event) => event.newValue as T | null),
-    );
+    this.warnLegacyOnce();
+    return this.local.watch<T>(key, options);
   }
 
+  /** @deprecated Use `storage.session.watch<T>(key, opts)`. Removed in v22. */
   watchSessionStorage<T extends StorageValue>(
     key: string,
     options: StorageOptions = {},
   ): Observable<T | null> {
-    const fullKey = this.getKey(key, options);
-    return this.getStorageEvents().pipe(
-      filter(
-        (event) =>
-          event.storageArea === 'sessionStorage' && (event.key === null || event.key === fullKey),
-      ),
-      map((event) => event.newValue as T | null),
-    );
+    this.warnLegacyOnce();
+    return this.session.watch<T>(key, options);
   }
 
-  // Direct access to native storage APIs
+  /** @deprecated Use `storage.local.native()`. Removed in v22. */
   getNativeLocalStorage(): Storage {
-    this.ensureSupported();
-    return localStorage;
+    this.warnLegacyOnce();
+    return this.local.native();
   }
 
+  /** @deprecated Use `storage.session.native()`. Removed in v22. */
   getNativeSessionStorage(): Storage {
-    this.ensureSupported();
-    return sessionStorage;
+    this.warnLegacyOnce();
+    return this.session.native();
+  }
+
+  private warnLegacyOnce(): void {
+    if (legacyDeprecationLogged) return;
+    legacyDeprecationLogged = true;
+    this.storageLogger.warn(
+      '[storage] WebStorageService.{set,get,remove,clear,watch}{Local,Session}Storage are ' +
+        'deprecated. Use storage.local and storage.session namespaces. Legacy methods will be ' +
+        'removed in v22.',
+    );
   }
 }
