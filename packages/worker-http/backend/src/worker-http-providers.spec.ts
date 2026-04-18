@@ -3,16 +3,20 @@ import { describe, expect, it } from 'vitest';
 import {
   withWorkerConfigs,
   withWorkerFallback,
+  withWorkerInterceptors,
   withWorkerRoutes,
   withWorkerSerialization,
 } from './worker-http-providers';
 import {
   WORKER_HTTP_CONFIGS_TOKEN,
   WORKER_HTTP_FALLBACK_TOKEN,
+  WORKER_HTTP_INTERCEPTORS_TOKEN,
   WORKER_HTTP_ROUTES_TOKEN,
   WORKER_HTTP_SERIALIZER_TOKEN,
 } from './worker-http-tokens';
+import type { WorkerInterceptorSpecsMap } from './worker-http-tokens';
 import type { WorkerSerializer } from '../../serializer/src/worker-serializer.types';
+import type { WorkerInterceptorSpec } from '@angular-helpers/worker-http/interceptors';
 
 describe('withWorkerConfigs', () => {
   it('returns kind WorkerConfigs', () => {
@@ -94,5 +98,43 @@ describe('withWorkerSerialization', () => {
   it('has exactly one provider', () => {
     const feature = withWorkerSerialization(mockSerializer);
     expect(feature.providers).toHaveLength(1);
+  });
+});
+
+describe('withWorkerInterceptors', () => {
+  const specs: WorkerInterceptorSpec[] = [
+    { kind: 'logging' },
+    { kind: 'retry', config: { maxRetries: 3 } },
+  ];
+
+  it('returns kind WorkerInterceptors', () => {
+    const feature = withWorkerInterceptors(specs);
+    expect(feature.kind).toBe('WorkerInterceptors');
+  });
+
+  it('wraps an array as a wildcard map', () => {
+    const feature = withWorkerInterceptors(specs);
+    const provider = feature.providers[0] as {
+      provide: unknown;
+      useValue: WorkerInterceptorSpecsMap;
+    };
+    expect(provider.provide).toBe(WORKER_HTTP_INTERCEPTORS_TOKEN);
+    expect(provider.useValue).toStrictEqual({ '*': specs });
+  });
+
+  it('passes a per-worker map through unchanged', () => {
+    const map: WorkerInterceptorSpecsMap = {
+      '*': [{ kind: 'logging' }],
+      secure: [{ kind: 'retry' }],
+    };
+    const feature = withWorkerInterceptors(map);
+    const provider = feature.providers[0] as { useValue: WorkerInterceptorSpecsMap };
+    expect(provider.useValue).toBe(map);
+  });
+
+  it('handles empty arrays', () => {
+    const feature = withWorkerInterceptors([]);
+    const provider = feature.providers[0] as { useValue: WorkerInterceptorSpecsMap };
+    expect(provider.useValue).toStrictEqual({ '*': [] });
   });
 });

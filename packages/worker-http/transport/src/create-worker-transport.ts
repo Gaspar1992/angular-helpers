@@ -59,6 +59,9 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
   function getOrCreateWorker(): Worker {
     if (workers.length < maxInstances) {
       const worker = createWorker();
+      if (config.initMessage) {
+        worker.postMessage(config.initMessage);
+      }
       workers.push(worker);
       return worker;
     }

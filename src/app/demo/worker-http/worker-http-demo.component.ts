@@ -376,6 +376,16 @@ export class WorkerHttpDemoComponent implements OnDestroy {
       this.backendTransport = createWorkerTransport({
         workerUrl: HTTP_API_WORKER_URL,
         maxInstances: 1,
+        // Configure the worker pipeline from the main thread — same shape that
+        // `withWorkerInterceptors([...])` posts when used via Angular DI.
+        initMessage: {
+          type: 'init-interceptors',
+          specs: [
+            { kind: 'logging' },
+            { kind: 'retry', config: { maxRetries: 2, initialDelay: 500 } },
+            { kind: 'cache', config: { ttl: 30000, maxEntries: 50 } },
+          ],
+        },
       });
     }
 

@@ -42,6 +42,16 @@ export interface WorkerTransportConfig {
 
   /** Timeout in ms for a single request (default: 30000) */
   requestTimeout?: number;
+
+  /**
+   * Optional handshake message posted to every worker as soon as it is
+   * created, BEFORE any request. Useful to ship runtime configuration
+   * (e.g. interceptor specs) that the worker uses to build its pipeline.
+   *
+   * The shape is opaque to the transport — the worker is responsible for
+   * recognising and acting on it.
+   */
+  initMessage?: { type: string; [key: string]: unknown };
 }
 
 /**
