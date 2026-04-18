@@ -62,12 +62,12 @@ bootstrapApplication(AppComponent, {
     packageName: 'worker-http',
     npmPackage: '@angular-helpers/worker-http',
     lead: 'HTTP client for Web Workers with interceptors, retry logic, and caching.',
-    providerExample: `import { provideWorkerHttp } from '@angular-helpers/worker-http';
+    providerExample: `import { provideWorkerHttpClient } from '@angular-helpers/worker-http/backend';
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideWorkerHttp({
-      defaultTimeout: 30000,
+    provideWorkerHttpClient({
+      workerUrl: new URL('./workers/http-api.worker', import.meta.url),
     }),
   ],
 });`,
