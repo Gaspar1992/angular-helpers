@@ -22,7 +22,11 @@ export {
   type WebSocketConfig,
   type WebSocketMessage,
   type WebSocketStatus,
+  type WebSocketStatusV2,
+  type WebSocketClientConfig,
+  WebSocketClient,
 } from './services/web-socket.service';
+export { type WebSocketState, type WebSocketRequestOptions } from './clients/web-socket.client';
 export {
   WebWorkerService,
   type WorkerMessage,

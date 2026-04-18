@@ -41,6 +41,14 @@ export const DEMO_ROUTES: Routes = [
         title: 'Worker HTTP — Demo',
       },
       {
+        path: 'worker-http-benchmark',
+        loadComponent: () =>
+          import('./worker-http-benchmark/worker-http-benchmark.component').then(
+            (m) => m.WorkerHttpBenchmarkComponent,
+          ),
+        title: 'Worker HTTP — Benchmark Suite',
+      },
+      {
         path: 'library-services',
         loadComponent: () =>
           import('./library-services-harness/library-services-harness').then(

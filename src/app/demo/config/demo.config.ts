@@ -30,4 +30,12 @@ export const PUBLIC_DEMO_SECTIONS: readonly DemoSection[] = [
     icon: '🚀',
     packageName: '@angular-helpers/worker-http',
   },
+  {
+    path: '/demo/worker-http-benchmark',
+    title: 'Worker HTTP — Benchmarks',
+    description:
+      'Reproducible benchmarks comparing main-thread vs worker transports across 4 workloads.',
+    icon: '📊',
+    packageName: '@angular-helpers/worker-http',
+  },
 ];
