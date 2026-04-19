@@ -45,6 +45,9 @@ Paquete de servicios Angular para acceder de forma estructurada y segura a Brows
 - `IdleDetectorService` - Detectar estado idle del usuario y bloqueo de pantalla
 - `GamepadService` - Polling de entrada de controladores de juego
 - `WebAudioService` - Contexto de audio, osciladores y analizadores
+- `WebLocksService` - Coordinacion de locks entre pestanas
+- `StorageManagerService` - Cuotas y persistencia de almacenamiento
+- `CompressionService` - Streams de compresion gzip/deflate
 
 ### APIs de red
 
@@ -703,6 +706,88 @@ export class MyComponent {
   // orientation.isLandscape() → boolean
   // orientation.lock('landscape') → Promise<void>
   // orientation.unlock()
+}
+```
+
+### injectClipboard
+
+```typescript
+import { injectClipboard } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly cb = injectClipboard();
+
+  // cb.text()        → string | null (ultimo texto copiado)
+  // cb.error()       → string | null
+  // cb.busy()        → boolean
+  // cb.isSupported() → boolean
+
+  async copy(text: string) {
+    await this.cb.writeText(text);
+  }
+}
+```
+
+### injectGeolocation
+
+```typescript
+import { injectGeolocation } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly geo = injectGeolocation({ watch: true });
+
+  // geo.position()    → GeolocationPosition | null
+  // geo.error()       → GeolocationPositionError | null
+  // geo.watching()    → boolean
+  // geo.isSupported() → boolean
+
+  stopWatching() {
+    this.geo.stop();
+  }
+}
+```
+
+### injectBattery
+
+```typescript
+import { injectBattery } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly battery = injectBattery();
+
+  // battery.info()        → BatteryInfo | null (nivel, carga, tiempos)
+  // battery.error()       → string | null
+  // battery.isSupported() → boolean
+
+  async refresh() {
+    await this.battery.refresh();
+  }
+}
+```
+
+### injectWakeLock
+
+```typescript
+import { injectWakeLock } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly wakeLock = injectWakeLock();
+
+  // wakeLock.active()      → boolean
+  // wakeLock.error()       → string | null
+  // wakeLock.isSupported() → boolean
+
+  async toggle() {
+    if (this.wakeLock.active()) {
+      await this.wakeLock.release();
+    } else {
+      await this.wakeLock.request();
+    }
+  }
 }
 ```
 

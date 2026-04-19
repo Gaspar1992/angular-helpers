@@ -73,7 +73,10 @@ _Unified and safe browser API access with permissions and robust error handling_
 - 🎥 **Media Devices** enumeration and media access.
 - 🔐 **Centralized permission utilities**.
 - ✅ **Device/browser API wrappers** with fallback checks.
-- ⚡ **Signal Fn primitives** — 9 zero-boilerplate reactive inject functions (`injectPageVisibility`, `injectResizeObserver`, `injectIntersectionObserver`, `injectNetworkInformation`, `injectScreenOrientation`, `injectMutationObserver`, `injectPerformanceObserver`, `injectIdleDetector`, `injectGamepad`) with automatic cleanup and `viewChild` signal support.
+- ⚡ **Signal Fn primitives** — 13 zero-boilerplate reactive inject functions (`injectPageVisibility`, `injectResizeObserver`, `injectIntersectionObserver`, `injectNetworkInformation`, `injectScreenOrientation`, `injectMutationObserver`, `injectPerformanceObserver`, `injectIdleDetector`, `injectGamepad`, `injectClipboard`, `injectGeolocation`, `injectBattery`, `injectWakeLock`) with automatic cleanup and `viewChild` signal support.
+- 🔒 **Web Locks** — Cross-tab resource coordination.
+- 💾 **Storage Manager** — Storage quotas and persistence.
+- 📦 **Compression Streams** — Gzip/deflate compression.
 
 **📥 Installation:**
 

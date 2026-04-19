@@ -60,7 +60,7 @@ export const HOME_CODE_EXAMPLES: readonly CodeExample[] = [
       enableGeolocation<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
       enableCamera<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
       enableWebStorage<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
-      <span class="c-cmt">// ... 34 more APIs</span>
+      <span class="c-cmt">// ... 37 more APIs</span>
     <span class="c-punc">}),</span>
     provideSecurity<span class="c-punc">({</span>
       enableRegexSecurity<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
