@@ -4,6 +4,7 @@ import { Observable, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 import { BROWSER_API_LOGGER } from '../tokens/logger.token';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 export interface WorkerMessage<T = unknown> {
   id: string;
@@ -71,6 +72,10 @@ export class WebWorkerService extends BrowserApiBaseService {
 
   protected override getApiName(): string {
     return 'webworker';
+  }
+
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'webWorker';
   }
 
   /**

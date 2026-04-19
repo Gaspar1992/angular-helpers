@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 @Injectable()
 export class CameraService extends BrowserApiBaseService {
@@ -9,10 +10,14 @@ export class CameraService extends BrowserApiBaseService {
     return 'camera';
   }
 
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'camera';
+  }
+
   protected override ensureSupported(): void {
     super.ensureSupported();
     if (!navigator.mediaDevices?.getUserMedia) {
-      throw new Error('Camera API not supported — a secure context (HTTPS) is required');
+      throw new Error('Camera API not supported — getUserMedia missing or HTTPS required');
     }
   }
 

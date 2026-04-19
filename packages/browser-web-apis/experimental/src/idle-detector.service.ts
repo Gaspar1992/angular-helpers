@@ -35,7 +35,7 @@ export class IdleDetectorService extends BrowserApiBaseService {
     return 'idle-detector';
   }
 
-  isSupported(): boolean {
+  override isSupported(): boolean {
     return this.isBrowserEnvironment() && 'IdleDetector' in window;
   }
 

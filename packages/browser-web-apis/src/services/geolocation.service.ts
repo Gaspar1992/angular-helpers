@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 @Injectable()
 export class GeolocationService extends BrowserApiBaseService {
@@ -8,11 +9,8 @@ export class GeolocationService extends BrowserApiBaseService {
     return 'geolocation';
   }
 
-  protected override ensureSupported(): void {
-    super.ensureSupported();
-    if (!('geolocation' in navigator)) {
-      throw new Error('Geolocation API not supported — a secure context (HTTPS) is required');
-    }
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'geolocation';
   }
 
   getCurrentPosition(options?: PositionOptions): Promise<GeolocationPosition> {

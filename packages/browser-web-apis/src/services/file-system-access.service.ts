@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 export interface FileOpenOptions {
   multiple?: boolean;
@@ -35,8 +36,13 @@ export class FileSystemAccessService extends BrowserApiBaseService {
     return 'file-system-access';
   }
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && 'showOpenFilePicker' in window && window.isSecureContext;
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'fileSystemAccess';
+  }
+
+  /** Override to also assert secure context (required by the spec). */
+  override isSupported(): boolean {
+    return super.isSupported() && typeof window !== 'undefined' && window.isSecureContext;
   }
 
   private get win(): WindowWithFileSystem {
@@ -45,9 +51,6 @@ export class FileSystemAccessService extends BrowserApiBaseService {
 
   protected override ensureSupported(): void {
     super.ensureSupported();
-    if (!('showOpenFilePicker' in window)) {
-      throw new Error('File System Access API not supported in this browser');
-    }
     if (!window.isSecureContext) {
       throw new Error('File System Access API requires a secure context (HTTPS)');
     }

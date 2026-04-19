@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 export type VibrationPattern = number | number[];
 
@@ -23,8 +24,8 @@ export class VibrationService extends BrowserApiBaseService {
     doubleTap: [50, 100, 50],
   };
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && 'vibrate' in navigator;
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'vibration';
   }
 
   vibrate(pattern: VibrationPattern = 200): boolean {

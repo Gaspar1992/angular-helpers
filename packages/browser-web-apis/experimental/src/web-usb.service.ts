@@ -19,7 +19,7 @@ export class WebUsbService extends BrowserApiBaseService {
     return 'web-usb';
   }
 
-  isSupported(): boolean {
+  override isSupported(): boolean {
     return this.isBrowserEnvironment() && 'usb' in navigator;
   }
 

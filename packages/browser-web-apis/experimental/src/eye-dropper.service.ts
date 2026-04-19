@@ -23,7 +23,7 @@ export class EyeDropperService extends BrowserApiBaseService {
     return 'eye-dropper';
   }
 
-  isSupported(): boolean {
+  override isSupported(): boolean {
     return this.isBrowserEnvironment() && 'EyeDropper' in window;
   }
 
