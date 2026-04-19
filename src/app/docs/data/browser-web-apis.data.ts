@@ -1207,6 +1207,44 @@ export class PresentationComponent {
     await this.wakeLock.release();
   }
 }`,
+    fnVersion: {
+      name: 'injectWakeLock',
+      importPath: '@angular-helpers/browser-web-apis',
+      returnType: 'WakeLockRef',
+      description:
+        'Provides reactive screen wake lock control via signals. Tracks active state, errors, and API support with automatic cleanup on component destroy.',
+      fields: [
+        {
+          name: 'active',
+          type: 'Signal<boolean>',
+          description: 'True when wake lock is currently held.',
+        },
+        {
+          name: 'error',
+          type: 'Signal<string | null>',
+          description: 'Last error from wake lock operations.',
+        },
+        {
+          name: 'isSupported',
+          type: 'Signal<boolean>',
+          description: 'True when Screen Wake Lock API is available.',
+        },
+      ],
+      example: `import { injectWakeLock } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class PresentationComponent {
+  protected wakeLock = injectWakeLock();
+
+  async toggle() {
+    if (this.wakeLock.active()) {
+      await this.wakeLock.release();
+    } else {
+      await this.wakeLock.request();
+    }
+  }
+}`,
+    },
   },
   {
     id: 'screen-orientation',

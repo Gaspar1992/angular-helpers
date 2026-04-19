@@ -1,4 +1,4 @@
-import { PACKAGES, TOTAL_SERVICE_COUNT } from '../../core/config/packages.data';
+import { PACKAGES, TOTAL_SERVICE_COUNT, INJECT_FN_COUNT } from '../../core/config/packages.data';
 import type { Feature } from '../models/feature.model';
 import type { Stat } from '../models/stat.model';
 import type { CodeExample } from '../models/code-example.model';
@@ -39,7 +39,7 @@ export const HOME_FEATURES: readonly Feature[] = [
 export const HOME_STATS: readonly Stat[] = [
   { value: String(TOTAL_SERVICE_COUNT), label: 'Browser API services' },
   { value: String(PACKAGES.length), label: 'Focused packages' },
-  { value: '9', label: 'Signal primitives' },
+  { value: String(INJECT_FN_COUNT), label: 'Signal primitives' },
   { value: 'MIT', label: 'Open source' },
 ];
 
@@ -60,7 +60,7 @@ export const HOME_CODE_EXAMPLES: readonly CodeExample[] = [
       enableGeolocation<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
       enableCamera<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
       enableWebStorage<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
-      <span class="c-cmt">// ... 37 more APIs</span>
+      <span class="c-cmt">// ... 34 more APIs</span>
     <span class="c-punc">}),</span>
     provideSecurity<span class="c-punc">({</span>
       enableRegexSecurity<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
