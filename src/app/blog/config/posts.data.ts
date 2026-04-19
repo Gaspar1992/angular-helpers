@@ -2,6 +2,15 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'log-levels-and-experimental-policy',
+    title:
+      'browser-web-apis v21.11: log levels, experimental policy, and composition-first providers',
+    publishedAt: '2026-04-19',
+    tags: ['browser-web-apis', 'logging', 'dx', 'angular'],
+    excerpt:
+      'Global log level control, one-time warnings for experimental APIs, and a composition-first provideBrowserWebApis({ services: [...] }) that replaces the flag-bag config.',
+  },
+  {
     slug: 'three-new-web-apis-locks-storage-compression',
     title: 'browser-web-apis v21.10: Web Locks, Storage Manager, Compression Streams',
     publishedAt: '2026-04-18',
