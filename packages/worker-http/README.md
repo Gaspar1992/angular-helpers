@@ -406,6 +406,61 @@ manual control.
 
 ---
 
+## SSR + hydration
+
+Worker HTTP integrates transparently with Angular SSR. The two problems SSR
+creates for worker-based HTTP are handled out of the box:
+
+**1. Workers do not exist on the server.**
+During SSR, `typeof Worker === 'undefined'`. `WorkerHttpBackend` detects this
+and falls back to `FetchBackend` automatically (controlled by
+`withWorkerFallback()`). The request is fulfilled on the server thread
+exactly like a plain `HttpClient.get()` would do.
+
+**2. Avoiding a re-fetch after hydration.**
+Add `provideClientHydration()` from `@angular/platform-browser` at the app
+root (standard Angular SSR setup). That enables Angular's HTTP transfer
+cache by default. The transfer cache interceptor sits in the `HttpClient`
+pipeline — **before** `WorkerHttpBackend`:
+
+- On the server: `WorkerHttpBackend` falls back to fetch → returns a
+  response → the interceptor captures it into `TransferState`.
+- On the browser: a matching request hits the interceptor first → it replays
+  the cached response synchronously, **without ever reaching
+  `WorkerHttpBackend`**. No worker is booted for hydrated requests.
+
+```ts
+// app.config.server.ts (or your SSR bootstrap)
+export const serverConfig: ApplicationConfig = {
+  providers: [
+    provideServerRendering(),
+    provideWorkerHttpClient(
+      withWorkerConfigs([
+        { id: 'api', workerUrl: new URL('./workers/api.worker', import.meta.url) },
+      ]),
+    ),
+  ],
+};
+
+// app.config.ts (browser bootstrap)
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideClientHydration(), // ← enables HTTP transfer cache automatically
+    provideWorkerHttpClient(
+      withWorkerConfigs([
+        { id: 'api', workerUrl: new URL('./workers/api.worker', import.meta.url) },
+      ]),
+    ),
+  ],
+};
+```
+
+To customise which headers are captured or to cache `POST` requests, pass
+`withHttpTransferCacheOptions(...)` to `provideClientHydration()` — both are
+re-exported from `@angular/platform-browser`.
+
+---
+
 ## Design principles
 
 - **Zero main-thread cost** — `fetch()` runs entirely in the worker; the main thread only handles the `postMessage` handoff
