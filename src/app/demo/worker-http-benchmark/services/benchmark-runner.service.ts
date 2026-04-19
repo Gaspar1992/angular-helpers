@@ -4,8 +4,30 @@ import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
 import type { WorkerTransport } from '@angular-helpers/worker-http/transport';
 
 import { MetricsCollector } from './metrics-collector';
-import type { BenchmarkMetrics } from './metrics-collector';
+import type { BenchmarkMetrics, RequestMetrics, StageMetrics } from './metrics-collector';
 import type { BenchmarkScenario, ScenarioRequestSpec } from './benchmark-scenarios';
+
+/**
+ * Granular request timing for pipeline stage analysis.
+ * Tracks all 6 stages: init, serialization, transfer-out, processing, transfer-in, deserialization
+ */
+interface GranularRequestTiming {
+  requestId: string;
+  startTime: number;
+  stages: Map<string, { start: number; end?: number }>;
+  payloadSize: number;
+}
+
+/** Global request metrics storage for test instrumentation */
+declare global {
+  interface Window {
+    __benchmarkMetrics?: RequestMetrics[];
+    __droppedFramesWorker?: number;
+    __droppedFramesFetch?: number;
+    __benchmarkComplete?: boolean;
+    __runBenchmark?: (scenario: string, transport: string) => Promise<void>;
+  }
+}
 
 const BENCHMARK_WORKER_URL = 'assets/workers/benchmark.worker.js';
 
@@ -181,6 +203,135 @@ function generatePayload(bytes: number): string {
   const chunk = 'abcdefghijklmnopqrstuvwxyz0123456789';
   const repeats = Math.ceil(bytes / chunk.length);
   return chunk.repeat(repeats).slice(0, bytes);
+}
+
+/**
+ * Granular stage tracking for performance analysis.
+ * Creates a timing recorder that tracks all 6 pipeline stages.
+ */
+function createGranularTracker(requestId: string, payloadSize: number) {
+  const timing: GranularRequestTiming = {
+    requestId,
+    startTime: performance.now(),
+    stages: new Map(),
+    payloadSize,
+  };
+
+  return {
+    markStageStart: (stage: string) => {
+      timing.stages.set(stage, { start: performance.now() });
+    },
+    markStageEnd: (stage: string) => {
+      const existing = timing.stages.get(stage);
+      if (existing) {
+        existing.end = performance.now();
+      }
+    },
+    getRequestMetrics: (): RequestMetrics => {
+      const stages: StageMetrics[] = [];
+      let totalDuration = 0;
+
+      // Process stages in order
+      const stageOrder = ['worker-init', 'serialization', 'transfer-out', 'worker-processing', 'transfer-in', 'deserialization'];
+      
+      for (const stageName of stageOrder) {
+        const stage = timing.stages.get(stageName);
+        if (stage?.end && stage?.start) {
+          const duration = stage.end - stage.start;
+          stages.push({ stage: stageName as StageMetrics['stage'], durationMs: duration });
+          totalDuration += duration;
+        }
+      }
+
+      // Calculate total from start to final end
+      const totalStage = timing.stages.get('total');
+      const totalDurationMs = totalStage?.end && totalStage?.start 
+        ? totalStage.end - totalStage.start 
+        : performance.now() - timing.startTime;
+
+      return {
+        requestId: timing.requestId,
+        stages,
+        totalDurationMs,
+        payloadSizeBytes: timing.payloadSize,
+      };
+    },
+  };
+}
+
+/**
+ * Simulates a main-thread request with granular stage tracking.
+ * Used for "fetch" baseline comparison.
+ */
+async function simulateMainThreadResponseGranular(
+  req: ScenarioRequestSpec,
+  requestId: string,
+): Promise<{ response: BenchmarkResponse; metrics: RequestMetrics }> {
+  const tracker = createGranularTracker(requestId, req.payloadBytes);
+
+  // Stage 1: Worker init (N/A for main thread - mark as 0)
+  tracker.markStageStart('worker-init');
+  tracker.markStageEnd('worker-init');
+
+  // Stage 2: Serialization (JSON stringify of request)
+  tracker.markStageStart('serialization');
+  const serializedReq = JSON.stringify(req);
+  tracker.markStageEnd('serialization');
+
+  // Stage 3: Transfer out (N/A for main thread)
+  tracker.markStageStart('transfer-out');
+  tracker.markStageEnd('transfer-out');
+
+  // Stage 4: Worker processing (simulated server work)
+  tracker.markStageStart('worker-processing');
+  burnCpu(req.cpuBurnMs);
+  if (req.delayMs > 0) {
+    await new Promise((resolve) => setTimeout(resolve, req.delayMs));
+  }
+  const body = generatePayload(req.payloadBytes);
+  const response: BenchmarkResponse = {
+    generatedAt: Date.now(),
+    bytes: body.length,
+    payload: body,
+  };
+  tracker.markStageEnd('worker-processing');
+
+  // Stage 5: Transfer in (N/A for main thread)
+  tracker.markStageStart('transfer-in');
+  tracker.markStageEnd('transfer-in');
+
+  // Stage 6: Deserialization (JSON parse of response)
+  tracker.markStageStart('deserialization');
+  const _deserialized = JSON.parse(JSON.stringify(response)); // Simulate parse
+  tracker.markStageEnd('deserialization');
+
+  tracker.markStageStart('total');
+  tracker.markStageEnd('total');
+
+  return { response, metrics: tracker.getRequestMetrics() };
+}
+
+/**
+ * Calculates average stage times from a collection of request metrics.
+ */
+export function calculateStageAverages(metrics: RequestMetrics[]): Record<string, number> {
+  const stageTotals: Record<string, number[]> = {};
+
+  for (const metric of metrics) {
+    for (const stage of metric.stages) {
+      if (!stageTotals[stage.stage]) stageTotals[stage.stage] = [];
+      stageTotals[stage.stage].push(stage.durationMs);
+    }
+  }
+
+  const averages: Record<string, number> = {};
+  for (const [stage, times] of Object.entries(stageTotals)) {
+    averages[stage] = times.length > 0 
+      ? times.reduce((a, b) => a + b, 0) / times.length 
+      : 0;
+  }
+
+  return averages;
 }
 
 /**
