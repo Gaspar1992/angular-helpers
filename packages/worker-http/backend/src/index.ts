@@ -22,7 +22,16 @@ export {
   withWorkerFallback,
   withWorkerSerialization,
   withWorkerInterceptors,
+  withTelemetry,
 } from './worker-http-providers';
+export type {
+  WorkerHttpTelemetry,
+  WorkerHttpTelemetryEventBase,
+  WorkerHttpRequestEvent,
+  WorkerHttpResponseEvent,
+  WorkerHttpErrorEvent,
+  WorkerHttpTransportKind,
+} from './worker-http-telemetry';
 
 export { WorkerHttpBackend } from './worker-http-backend';
 
