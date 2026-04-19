@@ -117,15 +117,26 @@ describe('WebSocketClient', () => {
         },
         noopLogger,
       );
-      // Force immediate failures
-      for (let i = 0; i < 5; i++) {
-        const sock = FakeWebSocket.instances.at(-1)!;
-        sock.open();
-        sock.triggerClose({ wasClean: false });
-        vi.advanceTimersByTime(200);
-      }
-      expect(client.status().reconnectAttempts).toBeLessThanOrEqual(2);
+
+      // Initial cycle: open succeeds, then closes uncleanly → schedules attempt 1.
+      FakeWebSocket.instances[0].open();
+      FakeWebSocket.instances[0].triggerClose({ wasClean: false });
+      expect(client.status().reconnectAttempts).toBe(1);
+
+      // Reconnect attempts that fail at construction time (FakeWebSocket throws).
+      // Simulate by tripping immediately on close without opening successfully.
+      vi.advanceTimersByTime(200); // attempt 1 fires → new socket
+      FakeWebSocket.instances[1].triggerClose({ wasClean: false }); // attempt 2 scheduled
+      expect(client.status().reconnectAttempts).toBe(2);
+
+      vi.advanceTimersByTime(200); // attempt 2 fires → new socket
+      FakeWebSocket.instances[2].triggerClose({ wasClean: false }); // would be attempt 3, capped
+
+      // Capped at max (2), no further socket created.
+      expect(client.status().reconnectAttempts).toBe(2);
+      expect(client.status().state).toBe('closed');
       expect(client.status().error).toMatch(/Max reconnect attempts/);
+      expect(FakeWebSocket.instances.length).toBe(3);
       client.close();
     });
   });

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 import { BatteryInfo, BatteryManager } from '../interfaces/battery.interface';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 // Battery API is not standardized in TypeScript, so we need this helper interface
 interface NavigatorWithBattery extends Navigator {
@@ -16,12 +17,8 @@ export class BatteryService extends BrowserApiBaseService {
     return 'battery';
   }
 
-  protected override ensureSupported(): void {
-    super.ensureSupported();
-    const nav = navigator as NavigatorWithBattery;
-    if (!('getBattery' in nav)) {
-      throw new Error('Battery Status API not supported in this browser');
-    }
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'battery';
   }
 
   async initialize(): Promise<BatteryInfo> {

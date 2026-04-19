@@ -32,6 +32,9 @@ jobs:
       - name: Run Linter
         run: npm run lint
 
+      - name: Run Unit Tests (browser-web-apis)
+        run: npm run test --workspace=@angular-helpers/browser-web-apis -- run
+
       - name: Generate SSL certificates
         run: npm run ssl:generate
 

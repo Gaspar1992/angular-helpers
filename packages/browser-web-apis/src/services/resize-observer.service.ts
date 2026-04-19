@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 import { resizeObserverEntriesStream, resizeObserverStream } from '../utils/resize-observer.utils';
 
@@ -21,8 +22,8 @@ export class ResizeObserverService extends BrowserApiBaseService {
     return 'resize-observer';
   }
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && 'ResizeObserver' in window;
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'resizeObserver';
   }
 
   observe(

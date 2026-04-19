@@ -32,7 +32,7 @@ export class StorageManagerService extends BrowserApiBaseService {
     return 'storage-manager';
   }
 
-  isSupported(): boolean {
+  override isSupported(): boolean {
     if (!this.isBrowserEnvironment()) return false;
     const sm = (navigator as unknown as NavigatorWithStorageManager).storage;
     return !!sm && typeof sm.estimate === 'function';

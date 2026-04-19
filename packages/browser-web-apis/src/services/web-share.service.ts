@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 interface ShareResult {
   shared: boolean;
@@ -12,11 +13,8 @@ export class WebShareService extends BrowserApiBaseService {
     return 'web-share';
   }
 
-  protected override ensureSupported(): void {
-    super.ensureSupported();
-    if (!('share' in navigator)) {
-      throw new Error('Web Share API not supported in this browser');
-    }
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'webShare';
   }
 
   async share(data: ShareData): Promise<ShareResult> {

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 export type WakeLockType = 'screen';
 
@@ -18,8 +19,8 @@ export class ScreenWakeLockService extends BrowserApiBaseService {
     return 'screen-wake-lock';
   }
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && 'wakeLock' in navigator;
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'screenWakeLock';
   }
 
   get isActive(): boolean {

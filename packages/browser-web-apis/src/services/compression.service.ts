@@ -31,7 +31,7 @@ export class CompressionService extends BrowserApiBaseService {
     return 'compression-streams';
   }
 
-  isSupported(): boolean {
+  override isSupported(): boolean {
     if (!this.isBrowserEnvironment()) return false;
     const g = globalThis as unknown as GlobalWithCompression;
     return typeof g.CompressionStream === 'function' && typeof g.DecompressionStream === 'function';

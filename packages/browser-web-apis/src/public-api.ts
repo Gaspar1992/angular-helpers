@@ -32,6 +32,7 @@ export {
   type WorkerMessage,
   type WorkerStatus,
   type WorkerTask,
+  type WorkerRequestOptions,
 } from './services/web-worker.service';
 
 // Tier 1 — New services
@@ -152,6 +153,14 @@ export {
   type PerformanceObserverRef,
 } from './fns/inject-performance-observer';
 export { injectGamepad, type GamepadRef } from './fns/inject-gamepad';
+export { injectClipboard, type ClipboardRef } from './fns/inject-clipboard';
+export {
+  injectGeolocation,
+  type GeolocationRef,
+  type GeolocationOptions,
+} from './fns/inject-geolocation';
+export { injectBattery, type BatteryRef, type BatteryInfo } from './fns/inject-battery';
+export { injectWakeLock, type WakeLockRef } from './fns/inject-wake-lock';
 
 // Utils and Guards
 export * from './utils/browser-support.util';

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 import { getOrientationSnapshot, screenOrientationStream } from '../utils/screen-orientation.utils';
 
@@ -35,8 +36,8 @@ export class ScreenOrientationService extends BrowserApiBaseService {
     return 'screen-orientation';
   }
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && 'screen' in window && 'orientation' in screen;
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'screenOrientation';
   }
 
   getSnapshot(): OrientationInfo {

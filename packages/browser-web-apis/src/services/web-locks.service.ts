@@ -50,7 +50,7 @@ export class WebLocksService extends BrowserApiBaseService {
     return 'web-locks';
   }
 
-  isSupported(): boolean {
+  override isSupported(): boolean {
     if (!this.isBrowserEnvironment()) return false;
     return !!(navigator as unknown as NavigatorWithLocks).locks;
   }

@@ -67,6 +67,7 @@
     "@angular-eslint/template-parser": "^21.3.1",
     "@angular/cli": "^21.2.2",
     "@angular/compiler-cli": "^21.0.0",
+    "@angular/platform-browser-dynamic": "21.2.4",
     "@axe-core/playwright": "^4.11.1",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.54.2",

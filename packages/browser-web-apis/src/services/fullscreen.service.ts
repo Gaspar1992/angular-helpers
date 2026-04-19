@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 @Injectable()
 export class FullscreenService extends BrowserApiBaseService {
@@ -8,8 +9,13 @@ export class FullscreenService extends BrowserApiBaseService {
     return 'fullscreen';
   }
 
-  isSupported(): boolean {
-    if (!this.isBrowserEnvironment()) return false;
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'fullscreen';
+  }
+
+  /** Override to also check the *enabled* flag (browser may have disabled fullscreen). */
+  override isSupported(): boolean {
+    if (!super.isSupported()) return false;
     return !!(
       document.fullscreenEnabled ??
       (document as Document & { webkitFullscreenEnabled?: boolean }).webkitFullscreenEnabled
