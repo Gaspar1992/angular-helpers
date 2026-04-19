@@ -1,6 +1,6 @@
 {
   "name": "angular-helpers",
-  "version": "1.16.1",
+  "version": "1.20.0",
   "type": "module",
   "scripts": {
     "ng": "ng",
