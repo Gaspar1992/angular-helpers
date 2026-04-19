@@ -6,38 +6,54 @@ on:
     types:
       - published
 
-permissions:
-  contents: write
+permissions: {}
+
+concurrency:
+  # Allow only one publish run at a time to avoid racy npm publishes.
+  group: publish-packages
+  cancel-in-progress: false
 
 jobs:
   publish:
-    name: Publish npm workspaces
+    name: Publish ${{ matrix.package.name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - name: '@angular-helpers/browser-web-apis'
+            workspace: packages/browser-web-apis
+            dist: dist/browser-web-apis
+          - name: '@angular-helpers/security'
+            workspace: packages/security
+            dist: dist/security
+          - name: '@angular-helpers/worker-http'
+            workspace: packages/worker-http
+            dist: dist/worker-http
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Setup workspace
+        uses: ./.github/actions/setup
         with:
-          node-version: 22.x
-          cache: npm
           registry-url: https://registry.npmjs.org
 
-      - name: Install Dependencies
-        run: npm ci
+      - name: Build ${{ matrix.package.name }} (production)
+        run: npm run build:prod --workspace ${{ matrix.package.workspace }}
 
-      - name: Build browser-web-apis (production)
-        run: npm run build:prod --workspace packages/browser-web-apis
-
-      - name: Publish browser-web-apis
-        id: publish_browser
+      - name: Publish ${{ matrix.package.name }}
+        id: publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          PACKAGE_WORKSPACE: ${{ matrix.package.workspace }}
+          PACKAGE_DIST: ${{ matrix.package.dist }}
         run: |
-          PACKAGE_NAME=$(node -p "require('./packages/browser-web-apis/package.json').name")
-          PACKAGE_VERSION=$(node -p "require('./packages/browser-web-apis/package.json').version")
+          PACKAGE_NAME=$(node -p "require('./${PACKAGE_WORKSPACE}/package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./${PACKAGE_WORKSPACE}/package.json').version")
           RELEASE_TAG="${PACKAGE_NAME}@${PACKAGE_VERSION}"
 
           if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version > /dev/null 2>&1; then
@@ -46,120 +62,32 @@ jobs:
             exit 0
           fi
 
-          npm publish ./dist/browser-web-apis --access public
-          echo "published=true" >> "$GITHUB_OUTPUT"
-          echo "release_tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
-          echo "package_version=${PACKAGE_VERSION}" >> "$GITHUB_OUTPUT"
+          npm publish "./${PACKAGE_DIST}" --access public
+          {
+            echo "published=true"
+            echo "release_tag=${RELEASE_TAG}"
+            echo "package_name=${PACKAGE_NAME}"
+            echo "package_version=${PACKAGE_VERSION}"
+          } >> "$GITHUB_OUTPUT"
 
-      - name: Create GitHub release for browser-web-apis
-        if: steps.publish_browser.outputs.published == 'true'
+      - name: Create GitHub release for ${{ matrix.package.name }}
+        if: steps.publish.outputs.published == 'true'
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_TAG: ${{ steps.publish.outputs.release_tag }}
+          PACKAGE_NAME: ${{ steps.publish.outputs.package_name }}
+          PACKAGE_VERSION: ${{ steps.publish.outputs.package_version }}
         run: |
-          RELEASE_TAG="${{ steps.publish_browser.outputs.release_tag }}"
-          VERSION="${{ steps.publish_browser.outputs.package_version }}"
           gh release create "${RELEASE_TAG}" \
-            --title "@angular-helpers/browser-web-apis v${VERSION}" \
-            --notes "## @angular-helpers/browser-web-apis@${VERSION}
+            --title "${PACKAGE_NAME} v${PACKAGE_VERSION}" \
+            --notes "## ${PACKAGE_NAME}@${PACKAGE_VERSION}
 
-          📦 Published to npm: https://www.npmjs.com/package/@angular-helpers/browser-web-apis/v/${VERSION}
+          📦 Published to npm: https://www.npmjs.com/package/${PACKAGE_NAME}/v/${PACKAGE_VERSION}
 
           ### Install
 
           \`\`\`bash
-          npm install @angular-helpers/browser-web-apis@${VERSION}
-          \`\`\`
-
-          See [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details." \
-            --latest=false
-
-      - name: Build security (production)
-        run: npm run build:prod --workspace packages/security
-
-      - name: Publish security
-        id: publish_security
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          PACKAGE_NAME=$(node -p "require('./packages/security/package.json').name")
-          PACKAGE_VERSION=$(node -p "require('./packages/security/package.json').version")
-          RELEASE_TAG="${PACKAGE_NAME}@${PACKAGE_VERSION}"
-
-          if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version > /dev/null 2>&1; then
-            echo "${RELEASE_TAG} is already published. Skipping."
-            echo "published=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          npm publish ./dist/security --access public
-          echo "published=true" >> "$GITHUB_OUTPUT"
-          echo "release_tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
-          echo "package_version=${PACKAGE_VERSION}" >> "$GITHUB_OUTPUT"
-
-      - name: Create GitHub release for security
-        if: steps.publish_security.outputs.published == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          RELEASE_TAG="${{ steps.publish_security.outputs.release_tag }}"
-          VERSION="${{ steps.publish_security.outputs.package_version }}"
-          gh release create "${RELEASE_TAG}" \
-            --title "@angular-helpers/security v${VERSION}" \
-            --notes "## @angular-helpers/security@${VERSION}
-
-          📦 Published to npm: https://www.npmjs.com/package/@angular-helpers/security/v/${VERSION}
-
-          ### Install
-
-          \`\`\`bash
-          npm install @angular-helpers/security@${VERSION}
-          \`\`\`
-
-          See [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details." \
-            --latest=false
-
-      - name: Build worker-http (production)
-        run: npm run build:prod --workspace packages/worker-http
-
-      - name: Publish worker-http
-        id: publish_worker_http
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          PACKAGE_NAME=$(node -p "require('./packages/worker-http/package.json').name")
-          PACKAGE_VERSION=$(node -p "require('./packages/worker-http/package.json').version")
-          RELEASE_TAG="${PACKAGE_NAME}@${PACKAGE_VERSION}"
-
-          if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version > /dev/null 2>&1; then
-            echo "${RELEASE_TAG} is already published. Skipping."
-            echo "published=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          npm publish ./dist/worker-http --access public
-          echo "published=true" >> "$GITHUB_OUTPUT"
-          echo "release_tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
-          echo "package_version=${PACKAGE_VERSION}" >> "$GITHUB_OUTPUT"
-
-      - name: Create GitHub release for worker-http
-        if: steps.publish_worker_http.outputs.published == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          RELEASE_TAG="${{ steps.publish_worker_http.outputs.release_tag }}"
-          VERSION="${{ steps.publish_worker_http.outputs.package_version }}"
-          gh release create "${RELEASE_TAG}" \
-            --title "@angular-helpers/worker-http v${VERSION}" \
-            --notes "## @angular-helpers/worker-http@${VERSION}
-
-          📦 Published to npm: https://www.npmjs.com/package/@angular-helpers/worker-http/v/${VERSION}
-
-          ### Install
-
-          \`\`\`bash
-          npm install @angular-helpers/worker-http@${VERSION}
+          npm install ${PACKAGE_NAME}@${PACKAGE_VERSION}
           \`\`\`
 
           See [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details." \

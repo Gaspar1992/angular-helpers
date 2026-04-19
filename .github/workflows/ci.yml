@@ -1,5 +1,7 @@
-# Continuous Integration Workflow
-# This workflow runs on every pull request to the main branch.
+# Continuous Integration
+# Runs on pull requests targeting main and on pushes to main.
+# PRs run a fast path (chromium-only browser tests).
+# Pushes to main additionally run the cross-browser smoke suite.
 
 name: CI
 
@@ -7,45 +9,95 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - main
+
+# Cancel in-progress runs for the same ref (PR branch or main) on new pushes.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
-  build-and-test:
-    name: Build and Test
+  lint-and-unit:
+    name: Lint, format and unit tests
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-          cache: 'npm'
+      - name: Setup workspace
+        uses: ./.github/actions/setup
 
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Check Formatting
+      - name: Check formatting
         run: npm run format:check
 
-      - name: Run Linter
+      - name: Run linter
         run: npm run lint
 
-      - name: Run Unit Tests (browser-web-apis)
+      - name: Run unit tests (browser-web-apis)
         run: npm run test --workspace=@angular-helpers/browser-web-apis -- run
+
+      - name: Build packages
+        run: npm run build:packages
+
+  browser-tests:
+    name: Browser tests (chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup
+        with:
+          playwright-cache: 'true'
 
       - name: Generate SSL certificates
         run: npm run ssl:generate
 
       - name: Build worker files
-        run: npx vite build
+        run: npm run build:workers
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
 
-      - name: Run Tests
-        run: npm run test:browser:all
+      - name: Run browser CI suite
+        run: npm run test:browser:ci
 
-      - name: Build Packages
-        run: npm run build
+  cross-browser-smoke:
+    name: Cross-browser smoke (firefox + webkit)
+    # Only run on pushes to main (post-merge validation) to save PR minutes.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup
+        with:
+          playwright-cache: 'true'
+
+      - name: Generate SSL certificates
+        run: npm run ssl:generate
+
+      - name: Build worker files
+        run: npm run build:workers
+
+      - name: Install Playwright Firefox and WebKit
+        run: npx playwright install --with-deps firefox webkit
+
+      - name: Run cross-browser smoke suite
+        run: npm run test:browser:cross
