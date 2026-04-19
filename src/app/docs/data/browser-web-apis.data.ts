@@ -63,6 +63,38 @@ export class BatteryComponent {
     });
   }
 }`,
+    fnVersion: {
+      name: 'injectBattery',
+      importPath: '@angular-helpers/browser-web-apis',
+      returnType: 'BatteryRef',
+      description:
+        'Provides reactive battery status via signals. Automatically initializes and watches battery changes with cleanup on destroy.',
+      fields: [
+        {
+          name: 'info',
+          type: 'Signal<BatteryInfo | null>',
+          description: 'Current battery info (level, charging state, times).',
+        },
+        {
+          name: 'error',
+          type: 'Signal<string | null>',
+          description: 'Last error from battery API.',
+        },
+        {
+          name: 'isSupported',
+          type: 'Signal<boolean>',
+          description: 'True when Battery API is available.',
+        },
+      ],
+      example: `import { injectBattery } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class BatteryComponent {
+  protected battery = injectBattery();
+
+  // In template: {{ battery.info()?.level }}% {{ battery.info()?.charging ? '⚡' : '' }}
+}`,
+    },
   },
   {
     id: 'browser-capability',
@@ -202,6 +234,46 @@ export class ClipboardComponent {
     console.log('Pasted:', text);
   }
 }`,
+    fnVersion: {
+      name: 'injectClipboard',
+      importPath: '@angular-helpers/browser-web-apis',
+      returnType: 'ClipboardRef',
+      description:
+        'Provides reactive clipboard access via signals. Tracks text content, errors, busy state, and API support without manual subscription management.',
+      fields: [
+        {
+          name: 'text',
+          type: 'Signal<string | null>',
+          description: 'Last text successfully read from clipboard.',
+        },
+        {
+          name: 'error',
+          type: 'Signal<string | null>',
+          description: 'Last error message from read/write attempt.',
+        },
+        {
+          name: 'busy',
+          type: 'Signal<boolean>',
+          description: 'True when a read/write operation is in progress.',
+        },
+        {
+          name: 'isSupported',
+          type: 'Signal<boolean>',
+          description: 'True when Clipboard API is available.',
+        },
+      ],
+      example: `import { injectClipboard } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class CopyButtonComponent {
+  protected cb = injectClipboard();
+
+  // In template: @if (cb.busy()) { 'Copying...' } @else { 'Copy' }
+  async copyValue(value: string) {
+    await this.cb.writeText(value);
+  }
+}`,
+    },
   },
   {
     id: 'geolocation',
@@ -253,6 +325,43 @@ export class MapComponent {
     this.geo.watchPosition().subscribe(pos => this.position.set(pos));
   }
 }`,
+    fnVersion: {
+      name: 'injectGeolocation',
+      importPath: '@angular-helpers/browser-web-apis',
+      returnType: 'GeolocationRef',
+      description:
+        'Provides reactive geolocation via signals. Tracks position, errors, and watch state with automatic cleanup on component destroy.',
+      fields: [
+        {
+          name: 'position',
+          type: 'Signal<GeolocationPosition | null>',
+          description: 'Current geolocation position or null.',
+        },
+        {
+          name: 'error',
+          type: 'Signal<GeolocationPositionError | null>',
+          description: 'Last error from geolocation API.',
+        },
+        {
+          name: 'watching',
+          type: 'Signal<boolean>',
+          description: 'True when actively watching position updates.',
+        },
+        {
+          name: 'isSupported',
+          type: 'Signal<boolean>',
+          description: 'True when Geolocation API is available.',
+        },
+      ],
+      example: `import { injectGeolocation } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MapComponent {
+  protected geo = injectGeolocation({ watch: true });
+
+  // In template: Lat: {{ geo.position()?.coords.latitude }}
+}`,
+    },
   },
   {
     id: 'media-devices',
@@ -2451,6 +2560,180 @@ export class LoginComponent {
   async saveCredentials(id: string, password: string) {
     const cred = await this.credentials.createPasswordCredential({ id, password });
     await this.credentials.store(cred);
+  }
+}`,
+  },
+  // --- New Web Platform Services (v21.11) ---
+  {
+    id: 'web-locks',
+    name: 'WebLocksService',
+    apiName: 'Web Locks',
+    description:
+      'Coordinates exclusive or shared access to a named resource across tabs and workers using the Web Locks API. Useful for preventing concurrent operations on shared resources.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Firefox ✓ · Safari ✓ · Edge ✓',
+    notes: [
+      'Locks are automatically released when the callback completes or rejects.',
+      'Use query() for diagnostics only — do not gate critical logic on it.',
+    ],
+    methods: [
+      {
+        name: 'acquire',
+        signature:
+          'acquire<T>(name: string, callback: () => Promise<T> | T, options?: LockOptions): Promise<T>',
+        description:
+          'Acquires a lock and runs the callback while holding it. Lock is released automatically when callback completes.',
+        returns: 'Promise<T>',
+      },
+      {
+        name: 'query',
+        signature: 'query(): Promise<LockManagerSnapshot>',
+        description: 'Queries current lock state (held and pending locks). Diagnostic use only.',
+        returns: 'Promise<{ held: LockInfo[], pending: LockInfo[] }>',
+      },
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether the Web Locks API is available.',
+        returns: 'boolean',
+      },
+    ],
+    example: `import { WebLocksService } from '@angular-helpers/browser-web-apis';
+
+@Component({ providers: [WebLocksService] })
+export class SyncComponent {
+  private locks = inject(WebLocksService);
+
+  async syncUserData() {
+    // Only one tab can execute this at a time
+    await this.locks.acquire('user-cache', async () => {
+      await this.performSync();
+    });
+  }
+}`,
+  },
+  {
+    id: 'storage-manager',
+    name: 'StorageManagerService',
+    apiName: 'Storage Manager',
+    description:
+      'Provides access to the Storage Manager API for checking storage quotas and requesting persistent storage that is protected from automatic eviction.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Firefox ✓ · Safari ✓ · Edge ✓',
+    notes: [
+      'Storage quota estimates are best-effort and may vary between browsers.',
+      'Persistent storage requires user permission in some browsers.',
+    ],
+    methods: [
+      {
+        name: 'estimate',
+        signature: 'estimate(): Promise<StorageQuotaEstimate>',
+        description: 'Returns storage usage and quota information for the current origin.',
+        returns: 'Promise<{ usage: number, quota: number, usageDetails?: Record<string, number> }>',
+      },
+      {
+        name: 'persist',
+        signature: 'persist(): Promise<boolean>',
+        description: 'Requests that storage be made persistent (eviction-protected).',
+        returns: 'Promise<boolean>',
+      },
+      {
+        name: 'persisted',
+        signature: 'persisted(): Promise<boolean>',
+        description: 'Checks whether storage is currently persistent.',
+        returns: 'Promise<boolean>',
+      },
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether the Storage Manager API is available.',
+        returns: 'boolean',
+      },
+    ],
+    example: `import { StorageManagerService } from '@angular-helpers/browser-web-apis';
+
+@Component({ providers: [StorageManagerService] })
+export class StorageComponent {
+  private storage = inject(StorageManagerService);
+
+  async checkStorage() {
+    const estimate = await this.storage.estimate();
+    console.log('Using', estimate.usage, 'of', estimate.quota, 'bytes');
+  }
+
+  async requestPersistence() {
+    const persisted = await this.storage.persist();
+    if (persisted) console.log('Storage is now persistent');
+  }
+}`,
+  },
+  {
+    id: 'compression',
+    name: 'CompressionService',
+    apiName: 'Compression Streams',
+    description:
+      'Wraps the Compression Streams API for gzip/deflate compression and decompression of Uint8Array data. Useful for reducing transfer sizes or storing compressed data locally.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: false,
+    browserSupport: 'Chrome ✓ · Firefox ✓ · Safari ✗ · Edge ✓',
+    notes: [
+      'Safari does not support Compression Streams API as of 2024.',
+      'Always use try/catch when compressing/decompressing.',
+    ],
+    methods: [
+      {
+        name: 'compress',
+        signature:
+          'compress(data: Uint8Array | ArrayBuffer, format?: CompressionFormat): Promise<Uint8Array>',
+        description: 'Compresses data using the specified format (default: gzip).',
+        returns: 'Promise<Uint8Array>',
+      },
+      {
+        name: 'decompress',
+        signature:
+          'decompress(data: Uint8Array | ArrayBuffer, format?: CompressionFormat): Promise<Uint8Array>',
+        description: 'Decompresses data using the specified format (default: gzip).',
+        returns: 'Promise<Uint8Array>',
+      },
+      {
+        name: 'compressString',
+        signature: 'compressString(value: string, format?: CompressionFormat): Promise<Uint8Array>',
+        description: 'Convenience method to compress a UTF-8 string.',
+        returns: 'Promise<Uint8Array>',
+      },
+      {
+        name: 'decompressString',
+        signature:
+          'decompressString(data: Uint8Array | ArrayBuffer, format?: CompressionFormat): Promise<string>',
+        description: 'Convenience method to decompress into a UTF-8 string.',
+        returns: 'Promise<string>',
+      },
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns whether the Compression Streams API is available.',
+        returns: 'boolean',
+      },
+    ],
+    example: `import { CompressionService } from '@angular-helpers/browser-web-apis';
+
+@Component({ providers: [CompressionService] })
+export class CompressionComponent {
+  private compression = inject(CompressionService);
+
+  async compressJson(data: unknown): Promise<Uint8Array> {
+    const json = JSON.stringify(data);
+    return await this.compression.compressString(json, 'gzip');
+  }
+
+  async decompressToJson(compressed: Uint8Array): Promise<unknown> {
+    const json = await this.compression.decompressString(compressed, 'gzip');
+    return JSON.parse(json);
   }
 }`,
   },
