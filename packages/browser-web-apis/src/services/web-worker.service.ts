@@ -1,4 +1,10 @@
-import { inject, Injectable, signal, type Signal, type WritableSignal } from '@angular/core';
+import {
+  inject,
+  Injectable,
+  signal,
+  type Signal,
+  type WritableSignal,
+} from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -68,7 +74,9 @@ const DEFAULT_REQUEST_TIMEOUT = 30_000;
 export class WebWorkerService extends BrowserApiBaseService {
   private readonly workerLogger = inject(BROWSER_API_LOGGER);
   private readonly entries = new Map<string, WorkerEntry>();
-  private readonly _cleanup = this.destroyRef.onDestroy(() => this.terminateAllWorkers());
+  private readonly _cleanup = this.destroyRef.onDestroy(() =>
+    this.terminateAllWorkers(),
+  );
 
   protected override getApiName(): string {
     return 'webworker';
@@ -107,8 +115,16 @@ export class WebWorkerService extends BrowserApiBaseService {
       entry.status.set({ initialized: true, running: true, messageCount: 0 });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
-      entry.status.set({ initialized: false, running: false, error: message, messageCount: 0 });
-      this.workerLogger.error(`[webworker] Failed to create worker "${name}"`, error);
+      entry.status.set({
+        initialized: false,
+        running: false,
+        error: message,
+        messageCount: 0,
+      });
+      this.workerLogger.error(
+        `[webworker] Failed to create worker "${name}"`,
+        error,
+      );
     }
     return entry.status.asReadonly();
   }
@@ -132,7 +148,9 @@ export class WebWorkerService extends BrowserApiBaseService {
   postMessage(workerName: string, task: WorkerTask): void {
     const entry = this.entries.get(workerName);
     if (!entry || !entry.worker) {
-      this.workerLogger.error(`[webworker] postMessage: worker "${workerName}" not found`);
+      this.workerLogger.error(
+        `[webworker] postMessage: worker "${workerName}" not found`,
+      );
       return;
     }
     const message: WorkerMessage = {
@@ -149,7 +167,10 @@ export class WebWorkerService extends BrowserApiBaseService {
       }
       this.bumpMessageCount(entry);
     } catch (error) {
-      this.workerLogger.error(`[webworker] postMessage failed for "${workerName}"`, error);
+      this.workerLogger.error(
+        `[webworker] postMessage failed for "${workerName}"`,
+        error,
+      );
     }
   }
 
@@ -177,7 +198,11 @@ export class WebWorkerService extends BrowserApiBaseService {
     return new Promise<TRes>((resolve, reject) => {
       const timer = setTimeout(() => {
         entry.pending.delete(id);
-        reject(new Error(`WebWorker "${workerName}" request timeout after ${timeoutMs}ms`));
+        reject(
+          new Error(
+            `WebWorker "${workerName}" request timeout after ${timeoutMs}ms`,
+          ),
+        );
       }, timeoutMs);
 
       entry.pending.set(id, {
@@ -203,7 +228,9 @@ export class WebWorkerService extends BrowserApiBaseService {
       } catch (error) {
         clearTimeout(timer);
         entry.pending.delete(id);
-        reject(error instanceof Error ? error : new Error('postMessage failed'));
+        reject(
+          error instanceof Error ? error : new Error('postMessage failed'),
+        );
       }
     });
   }
@@ -213,7 +240,10 @@ export class WebWorkerService extends BrowserApiBaseService {
     return entry.messages$.asObservable() as Observable<WorkerMessage<T>>;
   }
 
-  getMessagesByType<T = unknown>(workerName: string, type: string): Observable<WorkerMessage<T>> {
+  getMessagesByType<T = unknown>(
+    workerName: string,
+    type: string,
+  ): Observable<WorkerMessage<T>> {
     return this.getMessages<T>(workerName).pipe(filter((m) => m.type === type));
   }
 
@@ -305,7 +335,11 @@ export class WebWorkerService extends BrowserApiBaseService {
     if (!entry) {
       entry = {
         worker: null,
-        status: signal<WorkerStatus>({ initialized: false, running: false, messageCount: 0 }),
+        status: signal<WorkerStatus>({
+          initialized: false,
+          running: false,
+          messageCount: 0,
+        }),
         messages$: new Subject<WorkerMessage>(),
         pending: new Map(),
       };
