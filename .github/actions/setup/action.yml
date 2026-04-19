@@ -1,0 +1,41 @@
+name: Setup workspace
+description: Checkout, install Node.js (from .nvmrc) and npm dependencies, with optional Playwright browser cache.
+
+inputs:
+  playwright-cache:
+    description: When "true", restore/save Playwright browser cache keyed on package-lock.json.
+    required: false
+    default: 'false'
+  registry-url:
+    description: Optional npm registry URL for setup-node (e.g. https://registry.npmjs.org).
+    required: false
+    default: ''
+
+outputs:
+  playwright-cache-hit:
+    description: Whether the Playwright browser cache was restored.
+    value: ${{ steps.playwright-cache.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+        cache: npm
+        registry-url: ${{ inputs.registry-url }}
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Cache Playwright browsers
+      id: playwright-cache
+      if: inputs.playwright-cache == 'true'
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          playwright-${{ runner.os }}-
