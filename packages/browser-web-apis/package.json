@@ -44,5 +44,9 @@
     "@angular/platform-browser": "^21.0.0",
     "@angular/ssr": "^21.0.0",
     "rxjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "jsdom": "^26.0.0",
+    "vitest": "^4.0.0"
   }
 }
