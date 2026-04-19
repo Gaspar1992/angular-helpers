@@ -39,6 +39,8 @@ export interface BenchmarkRunResult {
   metrics: BenchmarkMetrics;
   successCount: number;
   failureCount: number;
+  /** Granular per-request metrics with pipeline stage breakdown */
+  requestMetrics?: RequestMetrics[];
 }
 
 interface BenchmarkResponse {
@@ -67,7 +69,14 @@ export class BenchmarkRunnerService implements OnDestroy {
 
   async run(scenario: BenchmarkScenario, mode: BenchmarkMode): Promise<BenchmarkRunResult> {
     const collector = new MetricsCollector();
-    const dispatch = this.getDispatcher(mode);
+    
+    // Array to collect granular metrics for each request
+    const requestMetrics: RequestMetrics[] = [];
+    
+    // Get instrumented dispatcher based on mode
+    const dispatch = mode === 'main-thread'
+      ? this.getInstrumentedMainThreadDispatcher(requestMetrics)
+      : this.getInstrumentedWorkerDispatcher(mode, requestMetrics);
 
     // Warm-up: ensure worker is booted before measurement starts.
     if (mode !== 'main-thread') {
@@ -97,6 +106,11 @@ export class BenchmarkRunnerService implements OnDestroy {
     const [results] = await Promise.all([Promise.all(requests), burnPromise]);
 
     const metrics = collector.stop();
+    
+    // Add granular metrics to the metrics object
+    metrics.requestMetrics = requestMetrics;
+    metrics.stageAverages = calculateStageAverages(requestMetrics);
+    
     let successCount = 0;
     let failureCount = 0;
     for (const r of results) {
@@ -110,6 +124,7 @@ export class BenchmarkRunnerService implements OnDestroy {
       metrics,
       successCount,
       failureCount,
+      requestMetrics,
     };
   }
 
@@ -133,6 +148,124 @@ export class BenchmarkRunnerService implements OnDestroy {
 
     const transport = mode === 'worker-pool-4' ? this.getOrCreatePool(4) : this.getOrCreatePool(1);
     return (req) => firstValueFrom(transport.execute(req));
+  }
+
+  /**
+   * Returns an instrumented dispatcher for main-thread mode that captures
+   * granular pipeline stage metrics.
+   */
+  private getInstrumentedMainThreadDispatcher(
+    metricsCollector: RequestMetrics[],
+  ): (req: ScenarioRequestSpec) => Promise<BenchmarkResponse> {
+    let requestCounter = 0;
+
+    return async (req) => {
+      const requestId = `main-${++requestCounter}`;
+      const tracker = createGranularTracker(requestId, req.payloadBytes);
+
+      // Stage 1: Worker init (N/A for main thread)
+      tracker.markStageStart('worker-init');
+      tracker.markStageEnd('worker-init');
+
+      // Stage 2: Serialization
+      tracker.markStageStart('serialization');
+      const serializedReq = JSON.stringify(req);
+      tracker.markStageEnd('serialization');
+
+      // Stage 3: Transfer out (N/A for main thread)
+      tracker.markStageStart('transfer-out');
+      tracker.markStageEnd('transfer-out');
+
+      // Stage 4: Worker processing (simulated on main thread)
+      tracker.markStageStart('worker-processing');
+      const response = await simulateMainThreadResponse(req);
+      tracker.markStageEnd('worker-processing');
+
+      // Stage 5: Transfer in (N/A for main thread)
+      tracker.markStageStart('transfer-in');
+      tracker.markStageEnd('transfer-in');
+
+      // Stage 6: Deserialization
+      tracker.markStageStart('deserialization');
+      const _deserialized = JSON.parse(JSON.stringify(response));
+      tracker.markStageEnd('deserialization');
+
+      tracker.markStageStart('total');
+      tracker.markStageEnd('total');
+
+      const metrics = tracker.getRequestMetrics();
+      metricsCollector.push(metrics);
+
+      return response;
+    };
+  }
+
+  /**
+   * Returns an instrumented dispatcher for worker mode that captures
+   * granular pipeline stage metrics including transfer times.
+   */
+  private getInstrumentedWorkerDispatcher(
+    mode: 'worker-pool-1' | 'worker-pool-4',
+    metricsCollector: RequestMetrics[],
+  ): (req: ScenarioRequestSpec) => Promise<BenchmarkResponse> {
+    let requestCounter = 0;
+    const transport = mode === 'worker-pool-4' ? this.getOrCreatePool(4) : this.getOrCreatePool(1);
+
+    return async (req) => {
+      const requestId = `worker-${++requestCounter}`;
+      const tracker = createGranularTracker(requestId, req.payloadBytes);
+
+      // Stage 1: Worker init - already done in warm-up, mark as 0
+      tracker.markStageStart('worker-init');
+      tracker.markStageEnd('worker-init');
+
+      // Stage 2: Serialization (main thread)
+      tracker.markStageStart('serialization');
+      const serializedReq = JSON.stringify(req);
+      tracker.markStageEnd('serialization');
+
+      // Stage 3: Transfer out + Stage 4: Worker processing + Stage 5: Transfer in
+      // These are measured together via the transport execute
+      tracker.markStageStart('transfer-out');
+      
+      // Execute via worker transport and capture timing from response
+      const response = await firstValueFrom(transport.execute(req));
+      
+      tracker.markStageEnd('transfer-out');
+
+      // The worker returns timing data in workerTiming property
+      // Note: In the actual implementation, we'd need the transport to expose this
+      // For now, we estimate based on what we can measure
+      const workerTiming = (response as unknown as { workerTiming?: { 
+        deserializationMs: number; 
+        processingMs: number; 
+        serializationMs: number;
+        totalInWorkerMs: number;
+        workerReceivedAt: number;
+        workerSendingAt: number;
+      }}).workerTiming;
+
+      if (workerTiming) {
+        // Add worker-reported stages
+        tracker.stages.set('worker-processing', { 
+          start: 0, 
+          end: workerTiming.processingMs 
+        });
+      }
+
+      // Stage 6: Deserialization (main thread)
+      tracker.markStageStart('deserialization');
+      const _deserialized = JSON.parse(JSON.stringify(response));
+      tracker.markStageEnd('deserialization');
+
+      tracker.markStageStart('total');
+      tracker.markStageEnd('total');
+
+      const metrics = tracker.getRequestMetrics();
+      metricsCollector.push(metrics);
+
+      return response;
+    };
   }
 
   private getOrCreatePool(size: 1 | 4): WorkerTransport<ScenarioRequestSpec, BenchmarkResponse> {
@@ -227,6 +360,8 @@ function createGranularTracker(requestId: string, payloadSize: number) {
         existing.end = performance.now();
       }
     },
+    // Expose stages map for injecting worker-reported timings
+    stages: timing.stages,
     getRequestMetrics: (): RequestMetrics => {
       const stages: StageMetrics[] = [];
       let totalDuration = 0;
