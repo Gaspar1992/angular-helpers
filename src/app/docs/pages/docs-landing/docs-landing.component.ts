@@ -36,12 +36,12 @@ import { RouterLink } from '@angular/router';
             </div>
           </div>
           <p class="text-sm text-base-content/70 leading-relaxed">
-            37 strongly typed Angular services for Camera, Geolocation, Storage, WebSocket,
-            Bluetooth, Gamepad, NFC, and more — all with built-in browser support detection and
-            reactive APIs.
+            40 strongly typed Angular services for Camera, Geolocation, Storage, WebSocket,
+            WebLocks, Bluetooth, Gamepad, NFC, and more — all with built-in browser support
+            detection and reactive APIs.
           </p>
           <div class="flex flex-wrap gap-2">
-            <span class="badge badge-sm badge-ghost">37 services</span>
+            <span class="badge badge-sm badge-ghost">40 services</span>
             <span class="badge badge-sm badge-ghost">Signals</span>
             <span class="badge badge-sm badge-ghost">OnPush</span>
           </div>
@@ -106,7 +106,7 @@ import &#123; provideSecurity &#125; from '&#64;angular-helpers/security';
 
 bootstrapApplication(AppComponent, &#123;
   providers: [
-    provideBrowserWebApis(&#123; enableCamera: true, enableGeolocation: true &#125;),
+    provideBrowserWebApis(&#123; services: [CameraService, GeolocationService] &#125;),
     provideSecurity(&#123; enableRegexSecurity: true &#125;),
   ],
 &#125;);</code></pre>
