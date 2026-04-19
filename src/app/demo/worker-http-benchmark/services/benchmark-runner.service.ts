@@ -69,14 +69,15 @@ export class BenchmarkRunnerService implements OnDestroy {
 
   async run(scenario: BenchmarkScenario, mode: BenchmarkMode): Promise<BenchmarkRunResult> {
     const collector = new MetricsCollector();
-    
+
     // Array to collect granular metrics for each request
     const requestMetrics: RequestMetrics[] = [];
-    
+
     // Get instrumented dispatcher based on mode
-    const dispatch = mode === 'main-thread'
-      ? this.getInstrumentedMainThreadDispatcher(requestMetrics)
-      : this.getInstrumentedWorkerDispatcher(mode, requestMetrics);
+    const dispatch =
+      mode === 'main-thread'
+        ? this.getInstrumentedMainThreadDispatcher(requestMetrics)
+        : this.getInstrumentedWorkerDispatcher(mode, requestMetrics);
 
     // Warm-up: ensure worker is booted before measurement starts.
     if (mode !== 'main-thread') {
@@ -106,11 +107,11 @@ export class BenchmarkRunnerService implements OnDestroy {
     const [results] = await Promise.all([Promise.all(requests), burnPromise]);
 
     const metrics = collector.stop();
-    
+
     // Add granular metrics to the metrics object
     metrics.requestMetrics = requestMetrics;
     metrics.stageAverages = calculateStageAverages(requestMetrics);
-    
+
     let successCount = 0;
     let failureCount = 0;
     for (const r of results) {
@@ -227,29 +228,33 @@ export class BenchmarkRunnerService implements OnDestroy {
       // Stage 3: Transfer out + Stage 4: Worker processing + Stage 5: Transfer in
       // These are measured together via the transport execute
       tracker.markStageStart('transfer-out');
-      
+
       // Execute via worker transport and capture timing from response
       const response = await firstValueFrom(transport.execute(req));
-      
+
       tracker.markStageEnd('transfer-out');
 
       // The worker returns timing data in workerTiming property
       // Note: In the actual implementation, we'd need the transport to expose this
       // For now, we estimate based on what we can measure
-      const workerTiming = (response as unknown as { workerTiming?: { 
-        deserializationMs: number; 
-        processingMs: number; 
-        serializationMs: number;
-        totalInWorkerMs: number;
-        workerReceivedAt: number;
-        workerSendingAt: number;
-      }}).workerTiming;
+      const workerTiming = (
+        response as unknown as {
+          workerTiming?: {
+            deserializationMs: number;
+            processingMs: number;
+            serializationMs: number;
+            totalInWorkerMs: number;
+            workerReceivedAt: number;
+            workerSendingAt: number;
+          };
+        }
+      ).workerTiming;
 
       if (workerTiming) {
         // Add worker-reported stages
-        tracker.stages.set('worker-processing', { 
-          start: 0, 
-          end: workerTiming.processingMs 
+        tracker.stages.set('worker-processing', {
+          start: 0,
+          end: workerTiming.processingMs,
         });
       }
 
@@ -367,8 +372,15 @@ function createGranularTracker(requestId: string, payloadSize: number) {
       let totalDuration = 0;
 
       // Process stages in order
-      const stageOrder = ['worker-init', 'serialization', 'transfer-out', 'worker-processing', 'transfer-in', 'deserialization'];
-      
+      const stageOrder = [
+        'worker-init',
+        'serialization',
+        'transfer-out',
+        'worker-processing',
+        'transfer-in',
+        'deserialization',
+      ];
+
       for (const stageName of stageOrder) {
         const stage = timing.stages.get(stageName);
         if (stage?.end && stage?.start) {
@@ -380,9 +392,10 @@ function createGranularTracker(requestId: string, payloadSize: number) {
 
       // Calculate total from start to final end
       const totalStage = timing.stages.get('total');
-      const totalDurationMs = totalStage?.end && totalStage?.start 
-        ? totalStage.end - totalStage.start 
-        : performance.now() - timing.startTime;
+      const totalDurationMs =
+        totalStage?.end && totalStage?.start
+          ? totalStage.end - totalStage.start
+          : performance.now() - timing.startTime;
 
       return {
         requestId: timing.requestId,
@@ -461,9 +474,7 @@ export function calculateStageAverages(metrics: RequestMetrics[]): Record<string
 
   const averages: Record<string, number> = {};
   for (const [stage, times] of Object.entries(stageTotals)) {
-    averages[stage] = times.length > 0 
-      ? times.reduce((a, b) => a + b, 0) / times.length 
-      : 0;
+    averages[stage] = times.length > 0 ? times.reduce((a, b) => a + b, 0) / times.length : 0;
   }
 
   return averages;

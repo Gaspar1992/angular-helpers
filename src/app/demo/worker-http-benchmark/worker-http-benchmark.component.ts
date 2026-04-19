@@ -11,7 +11,11 @@ import { DecimalPipe } from '@angular/common';
 
 import { SCENARIOS } from './services/benchmark-scenarios';
 import type { BenchmarkScenario } from './services/benchmark-scenarios';
-import { BenchmarkRunnerService, type BenchmarkMode, calculateStageAverages } from './services/benchmark-runner.service';
+import {
+  BenchmarkRunnerService,
+  type BenchmarkMode,
+  calculateStageAverages,
+} from './services/benchmark-runner.service';
 import type { BenchmarkRunResult } from './services/benchmark-runner.service';
 import type { RequestMetrics } from './services/metrics-collector';
 
@@ -284,7 +288,7 @@ export class WorkerHttpBenchmarkComponent implements OnInit, OnDestroy {
 
     // Programmatic runner for tests
     window.__runBenchmark = async (scenarioId: string, mode: string) => {
-      const scenario = this.states().find(s => s.scenario.id === scenarioId)?.scenario;
+      const scenario = this.states().find((s) => s.scenario.id === scenarioId)?.scenario;
       if (!scenario) {
         console.error(`Scenario not found: ${scenarioId}`);
         return;
@@ -292,8 +296,8 @@ export class WorkerHttpBenchmarkComponent implements OnInit, OnDestroy {
 
       // Map transport mode to BenchmarkMode
       const modeMap: Record<string, BenchmarkMode> = {
-        'worker': 'worker-pool-1',
-        'fetch': 'main-thread',
+        worker: 'worker-pool-1',
+        fetch: 'main-thread',
         'worker-pool-4': 'worker-pool-4',
       };
       const benchmarkMode = modeMap[mode] || (mode as BenchmarkMode);
@@ -341,7 +345,7 @@ export class WorkerHttpBenchmarkComponent implements OnInit, OnDestroy {
       const result = await this.runner.run(scenario, mode);
 
       // Store granular metrics if available in result
-      const granularMetrics = result.metrics.requestMetrics || [];
+      const granularMetrics = result.requestMetrics || [];
 
       this.updateState(scenario.id, (s) => ({
         ...s,

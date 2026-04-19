@@ -14,7 +14,14 @@
  * Granular stage timing for pipeline analysis
  */
 export interface StageMetrics {
-  stage: 'worker-init' | 'serialization' | 'transfer-out' | 'worker-processing' | 'transfer-in' | 'deserialization' | 'total';
+  stage:
+    | 'worker-init'
+    | 'serialization'
+    | 'transfer-out'
+    | 'worker-processing'
+    | 'transfer-in'
+    | 'deserialization'
+    | 'total';
   durationMs: number;
   details?: Record<string, number>;
 }
