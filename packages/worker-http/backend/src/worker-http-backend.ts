@@ -5,9 +5,10 @@ import {
   HttpErrorResponse,
   HttpEvent,
   HttpRequest,
+  HttpResponse,
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 
 import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
 import type { WorkerTransport } from '@angular-helpers/worker-http/transport';
@@ -18,6 +19,7 @@ import {
   WORKER_HTTP_INTERCEPTORS_TOKEN,
   WORKER_HTTP_ROUTES_TOKEN,
   WORKER_HTTP_SERIALIZER_TOKEN,
+  WORKER_HTTP_TELEMETRY_TOKEN,
   WORKER_TARGET,
 } from './worker-http-tokens';
 import type { WorkerInterceptorSpec } from '@angular-helpers/worker-http/interceptors';
@@ -26,7 +28,27 @@ import type {
   SerializableResponse,
   WorkerConfig,
 } from './worker-http-backend.types';
+import type {
+  WorkerHttpErrorEvent,
+  WorkerHttpRequestEvent,
+  WorkerHttpResponseEvent,
+  WorkerHttpTelemetry,
+  WorkerHttpTelemetryEventBase,
+  WorkerHttpTransportKind,
+} from './worker-http-telemetry';
 import { matchWorkerRoute, toHttpResponse, toSerializableRequest } from './worker-request-adapter';
+
+let telemetryRequestCounter = 0;
+function nextTelemetryRequestId(): string {
+  telemetryRequestCounter = (telemetryRequestCounter + 1) >>> 0;
+  return `whttp-${telemetryRequestCounter.toString(36)}`;
+}
+
+function now(): number {
+  return typeof performance !== 'undefined' && typeof performance.now === 'function'
+    ? performance.now()
+    : Date.now();
+}
 
 /**
  * Angular `HttpBackend` replacement that routes HTTP requests to web workers.
@@ -48,6 +70,7 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
   private readonly serializer = inject(WORKER_HTTP_SERIALIZER_TOKEN);
   private readonly interceptorSpecs = inject(WORKER_HTTP_INTERCEPTORS_TOKEN);
   private readonly fetchBackend = inject(FetchBackend, { optional: true });
+  private readonly telemetry = inject(WORKER_HTTP_TELEMETRY_TOKEN);
 
   private readonly transports = new Map<
     string,
@@ -56,13 +79,17 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
 
   override handle(req: HttpRequest<unknown>): Observable<HttpEvent<unknown>> {
     if (typeof Worker === 'undefined') {
-      return this.handleFallback(req, 'Web Workers are not available in this environment (SSR)');
+      return this.handleFallback(
+        req,
+        null,
+        'Web Workers are not available in this environment (SSR)',
+      );
     }
 
     const workerId = req.context.get(WORKER_TARGET) ?? matchWorkerRoute(req.url, this.routes);
 
     if (!workerId) {
-      return this.handleFallback(req, `No worker route matched for URL: ${req.url}`);
+      return this.handleFallback(req, null, `No worker route matched for URL: ${req.url}`);
     }
 
     const config = this.configs.find((c) => c.id === workerId);
@@ -86,19 +113,26 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
         : serializable.body;
     const payload = body !== serializable.body ? { ...serializable, body } : serializable;
 
+    const base = this.buildEventBase(req, workerId, 'worker');
+    this.emitRequest(base);
+
     return transport.execute(payload).pipe(
       map((res) => toHttpResponse(res as SerializableResponse, req)),
-      catchError((err: unknown) =>
-        throwError(
-          () =>
-            new HttpErrorResponse({
-              error: err,
-              status: 0,
-              statusText: 'Worker Error',
-              url: req.urlWithParams,
-            }),
-        ),
-      ),
+      tap((event) => {
+        if (event instanceof HttpResponse) {
+          this.emitResponse(base, event.status);
+        }
+      }),
+      catchError((err: unknown) => {
+        const httpError = new HttpErrorResponse({
+          error: err,
+          status: 0,
+          statusText: 'Worker Error',
+          url: req.urlWithParams,
+        });
+        this.emitError(base, httpError);
+        return throwError(() => httpError);
+      }),
     );
   }
 
@@ -137,11 +171,85 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
 
   private handleFallback(
     req: HttpRequest<unknown>,
+    workerId: string | null,
     reason: string,
   ): Observable<HttpEvent<unknown>> {
     if (this.fallback === 'error' || !this.fetchBackend) {
       return throwError(() => new Error(`[WorkerHttpBackend] ${reason}`));
     }
-    return this.fetchBackend.handle(req);
+
+    const base = this.buildEventBase(req, workerId, 'fallback-fetch');
+    this.emitRequest(base);
+
+    return this.fetchBackend.handle(req).pipe(
+      tap((event) => {
+        if (event instanceof HttpResponse) {
+          this.emitResponse(base, event.status);
+        }
+      }),
+      catchError((err: unknown) => {
+        this.emitError(base, err);
+        return throwError(() => err);
+      }),
+    );
+  }
+
+  // --- Telemetry ---------------------------------------------------------
+
+  private buildEventBase(
+    req: HttpRequest<unknown>,
+    workerId: string | null,
+    transport: WorkerHttpTransportKind,
+  ): WorkerHttpTelemetryEventBase {
+    return {
+      requestId: nextTelemetryRequestId(),
+      method: req.method,
+      url: req.url,
+      urlWithParams: req.urlWithParams,
+      workerId,
+      transport,
+      timestamp: now(),
+    };
+  }
+
+  private emitRequest(base: WorkerHttpTelemetryEventBase): void {
+    if (this.telemetry.length === 0) return;
+    const event: WorkerHttpRequestEvent = { ...base, kind: 'request' };
+    this.dispatch((sub) => sub.onRequest?.(event));
+  }
+
+  private emitResponse(base: WorkerHttpTelemetryEventBase, status: number): void {
+    if (this.telemetry.length === 0) return;
+    const event: WorkerHttpResponseEvent = {
+      ...base,
+      kind: 'response',
+      status,
+      durationMs: now() - base.timestamp,
+      timestamp: now(),
+    };
+    this.dispatch((sub) => sub.onResponse?.(event));
+  }
+
+  private emitError(base: WorkerHttpTelemetryEventBase, error: unknown): void {
+    if (this.telemetry.length === 0) return;
+    const event: WorkerHttpErrorEvent = {
+      ...base,
+      kind: 'error',
+      error,
+      durationMs: now() - base.timestamp,
+      timestamp: now(),
+    };
+    this.dispatch((sub) => sub.onError?.(event));
+  }
+
+  private dispatch(invoke: (subscriber: WorkerHttpTelemetry) => void): void {
+    for (const subscriber of this.telemetry) {
+      try {
+        invoke(subscriber);
+      } catch (telemetryError) {
+        // A throwing telemetry subscriber must never affect the HTTP request.
+        console.error('[WorkerHttpBackend] telemetry subscriber threw:', telemetryError);
+      }
+    }
   }
 }
