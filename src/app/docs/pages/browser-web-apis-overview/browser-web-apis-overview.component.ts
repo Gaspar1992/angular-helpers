@@ -39,21 +39,6 @@ bootstrapApplication(AppComponent, {
   ],
 });`;
 
-const CONFIG_TOKENS_EXAMPLE = `import {
-  provideBrowserApiLogLevel,
-  BROWSER_API_EXPERIMENTAL_SILENT,
-} from '@angular-helpers/browser-web-apis';
-
-bootstrapApplication(AppComponent, {
-  providers: [
-    // Control logging verbosity: 'debug' | 'info' | 'warn' | 'error' | 'silent'
-    provideBrowserApiLogLevel('warn'),
-
-    // Suppress experimental API warnings
-    { provide: BROWSER_API_EXPERIMENTAL_SILENT, useValue: true },
-  ],
-});`;
-
 const SERVICE_GROUPS = [
   {
     label: 'Media & Device',
@@ -335,14 +320,6 @@ const SERVICE_GROUPS = [
       </section>
 
       <section class="docs-section">
-        <h2 class="docs-section-title">Configuration Tokens</h2>
-        <p class="docs-section-text">
-          Control logging and experimental API warnings via injection tokens:
-        </p>
-        <app-code-block [code]="configTokensExample" />
-      </section>
-
-      <section class="docs-section">
         <h2 class="docs-section-title">Services</h2>
         @for (group of serviceGroups; track group.label) {
           <div class="service-group">
@@ -433,6 +410,5 @@ export class BrowserWebApisOverviewComponent {
   ];
   protected readonly providerAllInOne = PROVIDER_ALL_IN_ONE;
   protected readonly providerGranular = PROVIDER_GRANULAR;
-  protected readonly configTokensExample = CONFIG_TOKENS_EXAMPLE;
   protected readonly serviceGroups = SERVICE_GROUPS;
 }
