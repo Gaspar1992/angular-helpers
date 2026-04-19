@@ -32,6 +32,7 @@ export {
   type WorkerMessage,
   type WorkerStatus,
   type WorkerTask,
+  type WorkerRequestOptions,
 } from './services/web-worker.service';
 
 // Tier 1 — New services
@@ -109,6 +110,14 @@ export {
 } from './services/web-audio.service';
 export { GamepadService, type GamepadState } from './services/gamepad.service';
 
+// New web platform services
+export { WebLocksService } from './services/web-locks.service';
+export {
+  StorageManagerService,
+  type StorageQuotaEstimate,
+} from './services/storage-manager.service';
+export { CompressionService, type CompressionFormat } from './services/compression.service';
+
 // Tokens
 export {
   BROWSER_API_LOGGER,
@@ -155,6 +164,14 @@ export {
   type PerformanceObserverRef,
 } from './fns/inject-performance-observer';
 export { injectGamepad, type GamepadRef } from './fns/inject-gamepad';
+export { injectClipboard, type ClipboardRef } from './fns/inject-clipboard';
+export {
+  injectGeolocation,
+  type GeolocationRef,
+  type GeolocationOptions,
+} from './fns/inject-geolocation';
+export { injectBattery, type BatteryRef, type BatteryInfo } from './fns/inject-battery';
+export { injectWakeLock, type WakeLockRef } from './fns/inject-wake-lock';
 
 // Utils and Guards
 export * from './utils/browser-support.util';

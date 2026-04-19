@@ -1,3 +1,10 @@
+# [1.20.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.19.0...v1.20.0) (2026-04-19)
+
+
+### Features
+
+* **browser-web-apis:** add Web Locks, Storage Manager, and Compression Streams services ([#72](https://github.com/Gaspar1992/angular-helpers/issues/72)) ([84b641a](https://github.com/Gaspar1992/angular-helpers/commit/84b641ac34b3d7aec28f1e68333149dd146783bc))
+
 ## [1.16.1](https://github.com/Gaspar1992/angular-helpers/compare/v1.16.0...v1.16.1) (2026-04-13)
 
 

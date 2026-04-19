@@ -37,7 +37,10 @@ export type BrowserCapabilityId =
   | 'webUsb'
   | 'webNfc'
   | 'paymentRequest'
-  | 'credentialManagement';
+  | 'credentialManagement'
+  | 'webLocks'
+  | 'storageManager'
+  | 'compressionStreams';
 
 const BROWSER_CAPABILITIES = [
   { id: 'permissions', label: 'Permissions API', requiresSecureContext: false },
@@ -77,6 +80,9 @@ const BROWSER_CAPABILITIES = [
   { id: 'webNfc', label: 'Web NFC API', requiresSecureContext: true },
   { id: 'paymentRequest', label: 'Payment Request API', requiresSecureContext: true },
   { id: 'credentialManagement', label: 'Credential Management API', requiresSecureContext: true },
+  { id: 'webLocks', label: 'Web Locks API', requiresSecureContext: true },
+  { id: 'storageManager', label: 'Storage Manager API', requiresSecureContext: true },
+  { id: 'compressionStreams', label: 'Compression Streams API', requiresSecureContext: false },
 ] as const satisfies ReadonlyArray<{
   id: BrowserCapabilityId;
   label: string;
@@ -173,6 +179,18 @@ export class BrowserCapabilityService {
         return typeof window !== 'undefined' && 'PaymentRequest' in window;
       case 'credentialManagement':
         return typeof navigator !== 'undefined' && 'credentials' in navigator;
+      case 'webLocks':
+        return typeof navigator !== 'undefined' && 'locks' in navigator;
+      case 'storageManager':
+        return (
+          typeof navigator !== 'undefined' &&
+          'storage' in navigator &&
+          typeof (navigator.storage as { estimate?: unknown }).estimate === 'function'
+        );
+      case 'compressionStreams':
+        return (
+          typeof CompressionStream !== 'undefined' && typeof DecompressionStream !== 'undefined'
+        );
       default:
         return false;
     }

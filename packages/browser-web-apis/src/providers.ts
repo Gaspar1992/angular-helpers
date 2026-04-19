@@ -56,6 +56,9 @@ export { provideMutationObserver } from './providers/mutation-observer';
 export { providePerformanceObserver } from './providers/performance-observer';
 export { provideWebAudio } from './providers/web-audio';
 export { provideGamepad } from './providers/gamepad';
+export { provideWebLocks } from './providers/web-locks';
+export { provideStorageManager } from './providers/storage-manager';
+export { provideCompression } from './providers/compression';
 export {
   provideMediaApis,
   provideLocationApis,
