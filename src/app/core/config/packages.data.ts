@@ -74,7 +74,7 @@ export const PACKAGES: readonly PackageInfo[] = [
     installCmd: 'npm i @angular-helpers/worker-http',
     docsLink: '/docs/worker-http',
     demoLink: '/demo/worker-http',
-    badge: 'Preview',
+    badge: null,
     promise: 'performance',
   },
 ];
