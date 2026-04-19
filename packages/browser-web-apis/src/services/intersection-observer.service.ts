@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 import {
   intersectionObserverEntriesStream,
@@ -19,8 +20,8 @@ export class IntersectionObserverService extends BrowserApiBaseService {
     return 'intersection-observer';
   }
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && 'IntersectionObserver' in window;
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'intersectionObserver';
   }
 
   observe(

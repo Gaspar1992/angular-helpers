@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  OnDestroy,
+  signal,
+} from '@angular/core';
 import {
   BroadcastChannelService,
   BrowserCapabilityService,
@@ -258,6 +265,25 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   readonly errorMessage = signal<string>('');
   readonly lastAction = signal<string>('idle');
 
+  // Sync WebWorker status signal to harness state (signal-first approach from PR4)
+  private readonly workerStatusEffect = effect(() => {
+    if (!this.webWorkerSupported()) return;
+    const status = this.webWorkerService.getStatusSignal(this.harnessWorkerName)();
+    if (status.error) {
+      this.workerState.set('error');
+      return;
+    }
+    if (!status.initialized) {
+      this.workerState.set('idle');
+      return;
+    }
+    if (status.running) {
+      this.workerState.set('running');
+    } else {
+      this.workerState.set('terminated');
+    }
+  });
+
   async queryCameraPermission(): Promise<void> {
     this.lastAction.set('query-camera-permission');
     this.cameraPermissionState.set(
@@ -509,19 +535,10 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     const workerBlob = new Blob([this.getHarnessWorkerCode()], { type: 'application/javascript' });
     const workerUrl = URL.createObjectURL(workerBlob);
 
-    this.webWorkerService.createWorker(this.harnessWorkerName, workerUrl).subscribe({
-      next: (status) => {
-        if (!status.running) {
-          this.workerState.set('error');
-          this.setError(status.error ?? 'Worker failed to initialize');
-          return;
-        }
-
-        this.workerState.set('running');
-        this.workerMessageCount.set(0);
-        this.workerLastMessage.set('none');
-      },
-    });
+    // Use signal-first API (PR4) - the workerStatusEffect will sync state automatically
+    this.webWorkerService.createWorkerSignal(this.harnessWorkerName, workerUrl);
+    this.workerMessageCount.set(0);
+    this.workerLastMessage.set('none');
   }
 
   async sendHarnessWorkerMessage(): Promise<void> {

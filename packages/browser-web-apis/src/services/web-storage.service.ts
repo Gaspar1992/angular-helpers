@@ -3,6 +3,7 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { fromEvent, Observable } from 'rxjs';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 import { BROWSER_API_LOGGER } from '../tokens/logger.token';
 import type { StorageValue } from '../interfaces/common.types';
 import {
@@ -75,15 +76,12 @@ export class WebStorageService extends BrowserApiBaseService {
     return 'storage';
   }
 
-  protected override ensureSupported(): void {
-    super.ensureSupported();
-    if (typeof Storage === 'undefined') {
-      throw new Error('Storage API not supported in this browser');
-    }
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'webStorage';
   }
 
   /** Returns true if either local or session storage is usable. */
-  isSupported(): boolean {
+  override isSupported(): boolean {
     return this.local.isSupported() || this.session.isSupported();
   }
 

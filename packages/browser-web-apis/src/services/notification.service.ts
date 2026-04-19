@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 @Injectable()
 export class NotificationService extends BrowserApiBaseService {
@@ -7,11 +8,8 @@ export class NotificationService extends BrowserApiBaseService {
     return 'notifications';
   }
 
-  protected override ensureSupported(): void {
-    super.ensureSupported();
-    if (!('Notification' in window)) {
-      throw new Error('Notifications API not supported in this browser');
-    }
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'notification';
   }
 
   get permission(): NotificationPermission {

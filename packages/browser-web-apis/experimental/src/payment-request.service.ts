@@ -38,7 +38,7 @@ export class PaymentRequestService extends BrowserApiBaseService {
     return 'payment-request';
   }
 
-  isSupported(): boolean {
+  override isSupported(): boolean {
     return this.isBrowserEnvironment() && 'PaymentRequest' in window;
   }
 

@@ -7,6 +7,15 @@ import type {
   WorkerRoute,
 } from './worker-http-backend.types';
 import type { WorkerSerializer } from '@angular-helpers/worker-http/serializer';
+import type { WorkerInterceptorSpec } from '@angular-helpers/worker-http/interceptors';
+
+/**
+ * Per-worker interceptor specs map. Key is the worker id from
+ * `WorkerConfig.id`, plus the special `'*'` wildcard that applies to every
+ * worker. Specs from `'*'` are prepended to the worker-specific specs at
+ * resolve time.
+ */
+export type WorkerInterceptorSpecsMap = Readonly<Record<string, readonly WorkerInterceptorSpec[]>>;
 
 /**
  * Per-request HttpContextToken that carries the target worker ID.
@@ -60,4 +69,13 @@ export const WORKER_HTTP_FALLBACK_TOKEN = new InjectionToken<WorkerFallbackStrat
 export const WORKER_HTTP_SERIALIZER_TOKEN = new InjectionToken<WorkerSerializer | null>(
   'WorkerHttpSerializer',
   { factory: () => null },
+);
+
+/**
+ * Per-worker interceptor specs provided via `withWorkerInterceptors()`.
+ * Defaults to an empty map (no interceptors).
+ */
+export const WORKER_HTTP_INTERCEPTORS_TOKEN = new InjectionToken<WorkerInterceptorSpecsMap>(
+  'WorkerHttpInterceptors',
+  { factory: () => ({}) },
 );

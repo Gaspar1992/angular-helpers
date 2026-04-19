@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 import { BROWSER_API_LOGGER } from '../tokens/logger.token';
 import {
   WebSocketClient,
@@ -61,11 +62,8 @@ export class WebSocketService extends BrowserApiBaseService {
     return 'websocket';
   }
 
-  protected override ensureSupported(): void {
-    super.ensureSupported();
-    if (typeof WebSocket === 'undefined') {
-      throw new Error('WebSocket API not supported in this browser');
-    }
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'webSocket';
   }
 
   /**

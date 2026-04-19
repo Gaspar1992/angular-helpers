@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ConnectionRegistryBaseService } from './base/connection-registry-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 export type SSEConnectionState = 'connecting' | 'open' | 'closed';
 
@@ -26,14 +27,12 @@ export class ServerSentEventsService extends ConnectionRegistryBaseService<Event
     source.close();
   }
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && 'EventSource' in window;
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'serverSentEvents';
   }
 
   private ensureSSESupported(): void {
-    if (!this.isSupported()) {
-      throw new Error('Server-Sent Events (EventSource) not supported in this environment');
-    }
+    this.ensureSupported();
   }
 
   connect<T = unknown>(url: string, config: SSEConfig = {}): Observable<SSEMessage<T>> {

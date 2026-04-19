@@ -21,7 +21,7 @@ export class WebNfcService extends BrowserApiBaseService {
     return 'web-nfc';
   }
 
-  isSupported(): boolean {
+  override isSupported(): boolean {
     return this.isBrowserEnvironment() && 'NDEFReader' in window;
   }
 

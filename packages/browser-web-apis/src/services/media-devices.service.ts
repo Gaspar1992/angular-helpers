@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 interface DisplayMediaConstraints {
   video?: boolean | MediaTrackConstraints;
@@ -11,6 +12,10 @@ interface DisplayMediaConstraints {
 export class MediaDevicesService extends BrowserApiBaseService {
   protected override getApiName(): string {
     return 'media-devices';
+  }
+
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'mediaDevices';
   }
 
   protected override ensureSupported(): void {
