@@ -2,6 +2,14 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'three-new-web-apis-locks-storage-compression',
+    title: 'browser-web-apis v21.10: Web Locks, Storage Manager, Compression Streams',
+    publishedAt: '2026-04-18',
+    tags: ['browser-web-apis', 'web-locks', 'storage', 'compression', 'angular'],
+    excerpt:
+      'Three new services land: WebLocksService coordinates exclusive access across tabs and workers, StorageManagerService exposes quota estimates and persistence requests, and CompressionService wraps CompressionStream/DecompressionStream for gzip/deflate.',
+  },
+  {
     slug: 'signal-primitives-for-browser-apis',
     title:
       'browser-web-apis v21.9: signal primitives for clipboard, geolocation, battery, and wake-lock',
