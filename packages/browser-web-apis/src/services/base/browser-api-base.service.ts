@@ -97,4 +97,8 @@ export abstract class BrowserApiBaseService {
   protected logInfo(message: string): void {
     this.logger.info(`[${this.getApiName()}] ${message}`);
   }
+
+  protected logDebug(message: string): void {
+    this.logger.debug?.(`[${this.getApiName()}] ${message}`);
+  }
 }

@@ -110,7 +110,18 @@ export {
 export { GamepadService, type GamepadState } from './services/gamepad.service';
 
 // Tokens
-export { BROWSER_API_LOGGER, type BrowserApiLogger } from './tokens/logger.token';
+export {
+  BROWSER_API_LOGGER,
+  BROWSER_API_LOG_LEVEL,
+  provideBrowserApiLogLevel,
+  type BrowserApiLogger,
+  type BrowserApiLogLevel,
+} from './tokens/logger.token';
+export {
+  BROWSER_API_EXPERIMENTAL_SILENT,
+  warnExperimental,
+  type ExperimentalWarnContext,
+} from './tokens/experimental.token';
 
 // Base classes
 export { BrowserApiBaseService } from './services/base/browser-api-base.service';

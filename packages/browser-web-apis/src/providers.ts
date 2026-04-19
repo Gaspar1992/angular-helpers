@@ -63,7 +63,21 @@ export {
   provideCommunicationApis,
 } from './providers/combos';
 
-export interface BrowserWebApisConfig {
+/**
+ * Composition-first config: pass an array of `provide*()` calls and we merge them
+ * into a single `EnvironmentProviders`. Preferred over the `enableX` flag bag.
+ *
+ * ```ts
+ * provideBrowserWebApis({
+ *   services: [provideCamera(), provideClipboard(), provideMediaApis()],
+ * })
+ * ```
+ */
+export interface BrowserWebApisCompositionConfig {
+  services?: EnvironmentProviders[];
+}
+
+export interface BrowserWebApisConfig extends BrowserWebApisCompositionConfig {
   enableCamera?: boolean;
   enableGeolocation?: boolean;
   enableNotifications?: boolean;
@@ -123,10 +137,40 @@ export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
   enableGamepad: false,
 };
 
+let legacyFlagsDeprecationLogged = false;
+
 export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): EnvironmentProviders {
-  const mergedConfig = { ...defaultBrowserWebApisConfig, ...config };
+  const { services, ...flagConfig } = config;
+
+  // Composition-first path: only `services` provided, no flags.
+  if (services && Object.keys(flagConfig).length === 0) {
+    return makeEnvironmentProviders([
+      PermissionsService,
+      ...services.flatMap((env) => (env as unknown as { ɵproviders: Provider[] }).ɵproviders ?? []),
+    ]);
+  }
+
+  // Legacy flag-bag path. Log deprecation once if any enableX is set.
+  if (Object.keys(flagConfig).length > 0 && !legacyFlagsDeprecationLogged) {
+    legacyFlagsDeprecationLogged = true;
+    // oxlint-disable-next-line no-console
+    console.warn(
+      '[browser-web-apis] provideBrowserWebApis(enableX flags) is deprecated. ' +
+        'Pass `{ services: [provideCamera(), ...] }` instead. The flag-bag form will be ' +
+        'removed in v22.',
+    );
+  }
+
+  const mergedConfig = { ...defaultBrowserWebApisConfig, ...flagConfig };
 
   const providers: Provider[] = [PermissionsService];
+
+  if (services) {
+    for (const env of services) {
+      const inner = (env as unknown as { ɵproviders?: Provider[] }).ɵproviders;
+      if (inner) providers.push(...inner);
+    }
+  }
 
   const conditionalProviders: Array<[boolean | undefined, Provider]> = [
     [mergedConfig.enableCamera, CameraService],
