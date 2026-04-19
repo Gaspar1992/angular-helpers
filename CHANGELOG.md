@@ -1,3 +1,10 @@
+# [1.22.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.21.0...v1.22.0) (2026-04-19)
+
+
+### Features
+
+* **worker-http:** SSR-ready + TransferState hydration guarantees ([#75](https://github.com/Gaspar1992/angular-helpers/issues/75)) ([8985d1b](https://github.com/Gaspar1992/angular-helpers/commit/8985d1b99353dcd4ebc2a2fb0c4214c551d5bced))
+
 # [1.20.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.19.0...v1.20.0) (2026-04-19)
 
 

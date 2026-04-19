@@ -9,8 +9,10 @@ import {
   WORKER_HTTP_INTERCEPTORS_TOKEN,
   WORKER_HTTP_ROUTES_TOKEN,
   WORKER_HTTP_SERIALIZER_TOKEN,
+  WORKER_HTTP_TELEMETRY_TOKEN,
 } from './worker-http-tokens';
 import type { WorkerInterceptorSpecsMap } from './worker-http-tokens';
+import type { WorkerHttpTelemetry } from './worker-http-telemetry';
 import type { WorkerSerializer } from '@angular-helpers/worker-http/serializer';
 import type { WorkerInterceptorSpec } from '@angular-helpers/worker-http/interceptors';
 import type {
@@ -195,5 +197,48 @@ export function withWorkerInterceptors(
   return {
     kind: 'WorkerInterceptors',
     providers: [{ provide: WORKER_HTTP_INTERCEPTORS_TOKEN, useValue: map }],
+  };
+}
+
+/**
+ * Registers a telemetry subscriber for `WorkerHttpBackend`.
+ *
+ * Telemetry hooks are a main-thread extension point for APM integrations
+ * (Sentry, Datadog, OpenTelemetry, ad-hoc logging). They fire synchronously
+ * at three lifecycle points of every HTTP request handled by the backend:
+ *
+ * - `onRequest` — after worker resolution, before dispatch
+ * - `onResponse` — when a successful response is emitted
+ * - `onError` — when the request fails
+ *
+ * The feature is repeatable — call `withTelemetry(...)` multiple times to
+ * attach independent subscribers. All of them receive every event, in
+ * registration order. A throwing subscriber is isolated: the backend
+ * catches and logs the error so telemetry bugs never break the request.
+ *
+ * @example Basic counter
+ * ```typescript
+ * const counters = { requests: 0, errors: 0 };
+ * provideWorkerHttpClient(
+ *   withWorkerConfigs([...]),
+ *   withTelemetry({
+ *     onRequest: () => counters.requests++,
+ *     onError: () => counters.errors++,
+ *   }),
+ * );
+ * ```
+ *
+ * @example Latency histogram
+ * ```typescript
+ * withTelemetry({
+ *   onResponse: (e) => histogram.record(e.durationMs, { workerId: e.workerId }),
+ *   onError: (e) => histogram.record(e.durationMs, { workerId: e.workerId, error: true }),
+ * });
+ * ```
+ */
+export function withTelemetry(telemetry: WorkerHttpTelemetry): WorkerHttpFeature<'Telemetry'> {
+  return {
+    kind: 'Telemetry',
+    providers: [{ provide: WORKER_HTTP_TELEMETRY_TOKEN, useValue: telemetry, multi: true }],
   };
 }

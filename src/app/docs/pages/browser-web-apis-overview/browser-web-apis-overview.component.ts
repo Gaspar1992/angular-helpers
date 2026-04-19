@@ -5,15 +5,22 @@ import { DocsPageHeaderComponent } from '../../shared/page-header/docs-page-head
 import { BreadcrumbItem } from '../../models/doc-meta.model';
 
 const PROVIDER_ALL_IN_ONE = `import { provideBrowserWebApis } from '@angular-helpers/browser-web-apis';
+import {
+  CameraService, GeolocationService, WebStorageService,
+  WebSocketService, WebWorkerService
+} from '@angular-helpers/browser-web-apis';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideBrowserWebApis({
-      enableCamera: true,
-      enableGeolocation: true,
-      enableWebStorage: true,
-      enableWebSocket: true,
-      enableWebWorker: true,
+      services: [
+        CameraService,
+        GeolocationService,
+        WebStorageService,
+        WebSocketService,
+        WebWorkerService,
+        // ...add more as needed
+      ],
     }),
   ],
 });`;
@@ -29,6 +36,21 @@ bootstrapApplication(AppComponent, {
     provideCamera(),       // → only CameraService + PermissionsService
     provideGeolocation(),  // → only GeolocationService + PermissionsService
     provideWebStorage(),   // → only WebStorageService
+  ],
+});`;
+
+const CONFIG_TOKENS_EXAMPLE = `import {
+  provideBrowserApiLogLevel,
+  BROWSER_API_EXPERIMENTAL_SILENT,
+} from '@angular-helpers/browser-web-apis';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    // Control logging verbosity: 'debug' | 'info' | 'warn' | 'error' | 'silent'
+    provideBrowserApiLogLevel('warn'),
+
+    // Suppress experimental API warnings
+    { provide: BROWSER_API_EXPERIMENTAL_SILENT, useValue: true },
   ],
 });`;
 
@@ -134,6 +156,11 @@ const SERVICE_GROUPS = [
         name: 'WebAudioService',
         description: 'Audio context, oscillators, analysers',
       },
+      {
+        id: 'web-locks',
+        name: 'WebLocksService',
+        description: 'Cross-tab resource locking coordination',
+      },
     ],
   },
   {
@@ -178,6 +205,16 @@ const SERVICE_GROUPS = [
         id: 'file-system-access',
         name: 'FileSystemAccessService',
         description: 'Open/save files via native picker',
+      },
+      {
+        id: 'storage-manager',
+        name: 'StorageManagerService',
+        description: 'Storage quotas and persistence',
+      },
+      {
+        id: 'compression',
+        name: 'CompressionService',
+        description: 'Gzip/deflate compression streams',
       },
     ],
   },
@@ -286,7 +323,7 @@ const SERVICE_GROUPS = [
       <section class="docs-section">
         <h2 class="docs-section-title">Setup</h2>
         <p class="docs-section-text">
-          <strong>All-in-one</strong> — register everything you need at once via config flags:
+          <strong>All-in-one</strong> — register services via composition (recommended):
         </p>
         <app-code-block [code]="providerAllInOne" />
         <p class="docs-section-text" style="margin-top: var(--sp-4)">
@@ -295,6 +332,14 @@ const SERVICE_GROUPS = [
           tree-shake everything you don't include:
         </p>
         <app-code-block [code]="providerGranular" />
+      </section>
+
+      <section class="docs-section">
+        <h2 class="docs-section-title">Configuration Tokens</h2>
+        <p class="docs-section-text">
+          Control logging and experimental API warnings via injection tokens:
+        </p>
+        <app-code-block [code]="configTokensExample" />
       </section>
 
       <section class="docs-section">
@@ -388,5 +433,6 @@ export class BrowserWebApisOverviewComponent {
   ];
   protected readonly providerAllInOne = PROVIDER_ALL_IN_ONE;
   protected readonly providerGranular = PROVIDER_GRANULAR;
+  protected readonly configTokensExample = CONFIG_TOKENS_EXAMPLE;
   protected readonly serviceGroups = SERVICE_GROUPS;
 }

@@ -8,6 +8,7 @@ import type {
 } from './worker-http-backend.types';
 import type { WorkerSerializer } from '@angular-helpers/worker-http/serializer';
 import type { WorkerInterceptorSpec } from '@angular-helpers/worker-http/interceptors';
+import type { WorkerHttpTelemetry } from './worker-http-telemetry';
 
 /**
  * Per-worker interceptor specs map. Key is the worker id from
@@ -78,4 +79,17 @@ export const WORKER_HTTP_SERIALIZER_TOKEN = new InjectionToken<WorkerSerializer 
 export const WORKER_HTTP_INTERCEPTORS_TOKEN = new InjectionToken<WorkerInterceptorSpecsMap>(
   'WorkerHttpInterceptors',
   { factory: () => ({}) },
+);
+
+/**
+ * Telemetry subscribers registered via `withTelemetry()`.
+ *
+ * Multi-provider token — each `withTelemetry(...)` call appends one
+ * subscriber. All subscribers are invoked on every emission; a throwing
+ * subscriber is isolated (the backend swallows the error so it never
+ * affects the HTTP request).
+ */
+export const WORKER_HTTP_TELEMETRY_TOKEN = new InjectionToken<readonly WorkerHttpTelemetry[]>(
+  'WorkerHttpTelemetry',
+  { factory: () => [] },
 );

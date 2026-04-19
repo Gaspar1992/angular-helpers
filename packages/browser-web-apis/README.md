@@ -45,6 +45,9 @@ Angular services package for a structured and secure access layer over browser W
 - `IdleDetectorService` - Detect user idle state and screen lock
 - `GamepadService` - Game controller input polling
 - `WebAudioService` - Audio context, oscillators, and analysers
+- `WebLocksService` - Cross-tab resource locking coordination
+- `StorageManagerService` - Storage quotas and persistence
+- `CompressionService` - Gzip/deflate compression streams
 
 ### Network APIs
 
@@ -101,13 +104,21 @@ npm install @angular-helpers/browser-web-apis
 
 ```typescript
 import { provideBrowserWebApis } from '@angular-helpers/browser-web-apis';
+import {
+  CameraService,
+  GeolocationService,
+  NotificationService,
+} from '@angular-helpers/browser-web-apis';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideBrowserWebApis({
-      enableCamera: true,
-      enableGeolocation: true,
-      enableNotifications: true,
+      services: [
+        CameraService,
+        GeolocationService,
+        NotificationService,
+        // Add more services as needed
+      ],
     }),
   ],
 });
@@ -152,6 +163,9 @@ Every service has a matching `provideX()` function:
 | `providePerformanceObserver()`  | `PerformanceObserverService`                |
 | `providePageVisibility()`       | `PageVisibilityService`                     |
 | `provideNetworkInformation()`   | `NetworkInformationService`                 |
+| `provideWebLocks()`             | `WebLocksService`                           |
+| `provideStorageManager()`       | `StorageManagerService`                     |
+| `provideCompression()`          | `CompressionService`                        |
 | …and 22 more                    | See `src/providers/`                        |
 
 ### Combo providers
@@ -752,6 +766,88 @@ export class MyComponent {
   // gp.buttons()   → ReadonlyArray<{ pressed: boolean; value: number }>
   // gp.axes()      → readonly number[]
   // gp.state()     → GamepadState | null
+}
+```
+
+### injectClipboard
+
+```typescript
+import { injectClipboard } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly cb = injectClipboard();
+
+  // cb.text()        → string | null (last copied text)
+  // cb.error()       → string | null
+  // cb.busy()        → boolean
+  // cb.isSupported() → boolean
+
+  async copy(text: string) {
+    await this.cb.writeText(text);
+  }
+}
+```
+
+### injectGeolocation
+
+```typescript
+import { injectGeolocation } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly geo = injectGeolocation({ watch: true });
+
+  // geo.position()  → GeolocationPosition | null
+  // geo.error()     → GeolocationPositionError | null
+  // geo.watching()  → boolean
+  // geo.isSupported() → boolean
+
+  stopWatching() {
+    this.geo.stop();
+  }
+}
+```
+
+### injectBattery
+
+```typescript
+import { injectBattery } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly battery = injectBattery();
+
+  // battery.info()        → BatteryInfo | null (level, charging, times)
+  // battery.error()       → string | null
+  // battery.isSupported() → boolean
+
+  async refresh() {
+    await this.battery.refresh();
+  }
+}
+```
+
+### injectWakeLock
+
+```typescript
+import { injectWakeLock } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly wakeLock = injectWakeLock();
+
+  // wakeLock.active()      → boolean
+  // wakeLock.error()       → string | null
+  // wakeLock.isSupported() → boolean
+
+  async toggle() {
+    if (this.wakeLock.active()) {
+      await this.wakeLock.release();
+    } else {
+      await this.wakeLock.request();
+    }
+  }
 }
 ```
 

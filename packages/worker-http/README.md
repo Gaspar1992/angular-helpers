@@ -406,6 +406,79 @@ manual control.
 
 ---
 
+## Telemetry
+
+Main-thread extension point for APM / metrics. `withTelemetry(...)` registers
+a subscriber that fires synchronously at three lifecycle points of every
+request handled by `WorkerHttpBackend`:
+
+- **`onRequest`** — after worker resolution, before dispatch
+- **`onResponse`** — when a successful response is emitted
+- **`onError`** — when the request fails (transport or non-2xx)
+
+Events share a `requestId` so you can correlate the three emissions for one
+request. `transport` is `'worker'` or `'fallback-fetch'` (SSR /
+no-route). Errors in your subscriber are caught and logged — they **never**
+affect the actual HTTP request.
+
+Call `withTelemetry(...)` multiple times to attach independent subscribers
+(e.g. one for Sentry, one for custom metrics). All subscribers receive every
+event in registration order.
+
+```ts
+provideWorkerHttpClient(
+  withWorkerConfigs([{ id: 'api', workerUrl: new URL('./workers/api.worker', import.meta.url) }]),
+  withWorkerRoutes([{ pattern: /\/api\//, worker: 'api' }]),
+
+  // Latency histogram
+  withTelemetry({
+    onResponse: (e) =>
+      histogram.record(e.durationMs, {
+        workerId: e.workerId,
+        status: e.status,
+        transport: e.transport,
+      }),
+    onError: (e) =>
+      histogram.record(e.durationMs, {
+        workerId: e.workerId,
+        status: 'error',
+      }),
+  }),
+
+  // Sentry breadcrumbs
+  withTelemetry({
+    onRequest: (e) =>
+      Sentry.addBreadcrumb({
+        category: 'worker-http',
+        message: `${e.method} ${e.url}`,
+        data: { requestId: e.requestId, workerId: e.workerId },
+      }),
+    onError: (e) =>
+      Sentry.captureException(e.error, {
+        tags: { workerId: e.workerId ?? 'fallback' },
+      }),
+  }),
+);
+```
+
+Event interface:
+
+```ts
+interface WorkerHttpTelemetryEventBase {
+  readonly requestId: string; // unique per request, correlates events
+  readonly method: string;
+  readonly url: string;
+  readonly urlWithParams: string;
+  readonly workerId: string | null; // null = fallback fetch
+  readonly transport: 'worker' | 'fallback-fetch';
+  readonly timestamp: number; // performance.now() at emission
+}
+// onResponse adds: kind: 'response', status, durationMs
+// onError    adds: kind: 'error',    error,  durationMs
+```
+
+---
+
 ## SSR + hydration
 
 Worker HTTP integrates transparently with Angular SSR. The two problems SSR

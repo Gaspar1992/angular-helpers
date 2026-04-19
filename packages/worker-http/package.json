@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/worker-http",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Angular HTTP over Web Workers — off-main-thread HTTP pipelines with configurable interceptors, WebCrypto security, and pluggable serialization",
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
