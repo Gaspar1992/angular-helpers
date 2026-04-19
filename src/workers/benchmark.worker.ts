@@ -48,8 +48,15 @@ function generatePayload(bytes: number): string {
   return chunk.repeat(repeats).slice(0, bytes);
 }
 
+/**
+ * Benchmark worker — deterministic synthetic backend with granular timing.
+ *
+ * Receives a request describing what work to simulate, performs that work
+ * inside the worker (cpu burn, payload generation, delay), then returns a
+ * synthetic response with detailed stage timing for performance analysis.
+ */
 self.onmessage = async (event: MessageEvent) => {
-  const { type, requestId, payload } = event.data;
+  const { type, requestId, payload, timing } = event.data;
 
   if (type === 'cancel') {
     return;
@@ -59,8 +66,18 @@ self.onmessage = async (event: MessageEvent) => {
     return;
   }
 
+  // Capture entry timestamp for transfer-in timing
+  const workerReceivedAt = performance.now();
+
   const req = (payload as BenchmarkRequest) ?? { payloadBytes: 0, delayMs: 0, cpuBurnMs: 0 };
 
+  // Deserialize request (minimal for this synthetic worker)
+  const deserializationStart = performance.now();
+  // In a real worker-http scenario, this would deserialize SerializableRequest
+  const deserializationEnd = performance.now();
+
+  // Worker processing stage
+  const processingStart = performance.now();
   burnCpu(req.cpuBurnMs);
 
   if (req.delayMs > 0) {
@@ -68,15 +85,37 @@ self.onmessage = async (event: MessageEvent) => {
   }
 
   const body = generatePayload(req.payloadBytes);
+  const processingEnd = performance.now();
+
+  // Serialize response
+  const serializationStart = performance.now();
   const result: BenchmarkResponse = {
     generatedAt: Date.now(),
     bytes: body.length,
     payload: body,
   };
+  const serializationEnd = performance.now();
+
+  // Capture exit timestamp for transfer-out timing
+  const workerSendingAt = performance.now();
 
   self.postMessage({
     type: 'response',
     requestId,
     result,
+    // Granular timing data for performance analysis
+    workerTiming: {
+      // Time from message received to start of processing
+      deserializationMs: deserializationEnd - deserializationStart,
+      // Time spent doing actual work
+      processingMs: processingEnd - processingStart,
+      // Time to serialize response
+      serializationMs: serializationEnd - serializationStart,
+      // Total time in worker (for transfer calculations)
+      totalInWorkerMs: workerSendingAt - workerReceivedAt,
+      // Timestamps for calculating transfer times on main thread
+      workerReceivedAt,
+      workerSendingAt,
+    },
   });
 };
