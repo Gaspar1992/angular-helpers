@@ -44,7 +44,7 @@ export class BarcodeDetectorService extends BrowserApiBaseService {
     return 'barcode-detector';
   }
 
-  isSupported(): boolean {
+  override isSupported(): boolean {
     return this.isBrowserEnvironment() && 'BarcodeDetector' in window;
   }
 

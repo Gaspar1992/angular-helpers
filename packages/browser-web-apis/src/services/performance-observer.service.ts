@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 import {
   type PerformanceEntryType,
   type PerformanceObserverConfig,
-  isPerformanceObserverSupported,
   performanceObserverStream,
 } from '../utils/performance-observer.utils';
 
@@ -17,8 +17,8 @@ export class PerformanceObserverService extends BrowserApiBaseService {
     return 'performance-observer';
   }
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && isPerformanceObserverSupported();
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'performanceObserver';
   }
 
   observe(config: PerformanceObserverConfig): Observable<PerformanceEntryList> {

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
+import type { BrowserCapabilityId } from './browser-capability.service';
 
 export type SpeechState = 'idle' | 'speaking' | 'paused';
 
@@ -18,14 +19,12 @@ export class SpeechSynthesisService extends BrowserApiBaseService {
     return 'speech-synthesis';
   }
 
-  isSupported(): boolean {
-    return this.isBrowserEnvironment() && 'speechSynthesis' in window;
+  protected override getCapabilityId(): BrowserCapabilityId {
+    return 'speechSynthesis';
   }
 
   private ensureSpeechSynthesisSupported(): void {
-    if (!this.isSupported()) {
-      throw new Error('Speech Synthesis API not supported in this browser');
-    }
+    this.ensureSupported();
   }
 
   get state(): SpeechState {
