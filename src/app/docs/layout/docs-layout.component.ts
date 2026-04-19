@@ -95,6 +95,11 @@ import type { NavSection } from '../config/docs-nav.data';
                           (click)="closeSidebar()"
                         >
                           {{ item.label }}
+                          @if (item.experimental) {
+                            <span class="badge badge-xs badge-warning" aria-label="Experimental API"
+                              >exp</span
+                            >
+                          }
                           @if (item.hasFn) {
                             <span class="badge badge-xs badge-info" aria-label="Signal Fn available"
                               >fn</span

@@ -2,6 +2,7 @@ export interface NavItem {
   label: string;
   route: string;
   hasFn?: boolean;
+  experimental?: boolean;
 }
 
 export interface NavSection {
@@ -17,19 +18,32 @@ export const DOCS_NAV_SECTIONS: readonly NavSection[] = [
     overviewRoute: '/docs/browser-web-apis',
     servicesLabel: 'Services',
     serviceItems: [
-      { label: 'Barcode Detector', route: '/docs/browser-web-apis/barcode-detector' },
+      {
+        label: 'Barcode Detector',
+        route: '/docs/browser-web-apis/barcode-detector',
+        experimental: true,
+      },
       { label: 'Battery', route: '/docs/browser-web-apis/battery' },
       { label: 'Browser Capability', route: '/docs/browser-web-apis/browser-capability' },
       { label: 'Broadcast Channel', route: '/docs/browser-web-apis/broadcast-channel' },
       { label: 'Camera', route: '/docs/browser-web-apis/camera' },
       { label: 'Clipboard', route: '/docs/browser-web-apis/clipboard' },
-      { label: 'Credential Management', route: '/docs/browser-web-apis/credential-management' },
-      { label: 'EyeDropper', route: '/docs/browser-web-apis/eye-dropper' },
+      {
+        label: 'Credential Management',
+        route: '/docs/browser-web-apis/credential-management',
+        experimental: true,
+      },
+      { label: 'EyeDropper', route: '/docs/browser-web-apis/eye-dropper', experimental: true },
       { label: 'File System Access', route: '/docs/browser-web-apis/file-system-access' },
       { label: 'Fullscreen', route: '/docs/browser-web-apis/fullscreen' },
       { label: 'Gamepad', route: '/docs/browser-web-apis/gamepad', hasFn: true },
       { label: 'Geolocation', route: '/docs/browser-web-apis/geolocation' },
-      { label: 'Idle Detector', route: '/docs/browser-web-apis/idle-detector', hasFn: true },
+      {
+        label: 'Idle Detector',
+        route: '/docs/browser-web-apis/idle-detector',
+        hasFn: true,
+        experimental: true,
+      },
       {
         label: 'Intersection Observer',
         route: '/docs/browser-web-apis/intersection-observer',
@@ -49,7 +63,11 @@ export const DOCS_NAV_SECTIONS: readonly NavSection[] = [
       },
       { label: 'Notifications', route: '/docs/browser-web-apis/notification' },
       { label: 'Page Visibility', route: '/docs/browser-web-apis/page-visibility', hasFn: true },
-      { label: 'Payment Request', route: '/docs/browser-web-apis/payment-request' },
+      {
+        label: 'Payment Request',
+        route: '/docs/browser-web-apis/payment-request',
+        experimental: true,
+      },
       {
         label: 'Performance Observer',
         route: '/docs/browser-web-apis/performance-observer',
@@ -67,10 +85,10 @@ export const DOCS_NAV_SECTIONS: readonly NavSection[] = [
       { label: 'Speech Synthesis', route: '/docs/browser-web-apis/speech-synthesis' },
       { label: 'Vibration', route: '/docs/browser-web-apis/vibration' },
       { label: 'Web Audio', route: '/docs/browser-web-apis/web-audio' },
-      { label: 'Web Bluetooth', route: '/docs/browser-web-apis/web-bluetooth' },
-      { label: 'Web NFC', route: '/docs/browser-web-apis/web-nfc' },
+      { label: 'Web Bluetooth', route: '/docs/browser-web-apis/web-bluetooth', experimental: true },
+      { label: 'Web NFC', route: '/docs/browser-web-apis/web-nfc', experimental: true },
       { label: 'Web Share', route: '/docs/browser-web-apis/web-share' },
-      { label: 'Web USB', route: '/docs/browser-web-apis/web-usb' },
+      { label: 'Web USB', route: '/docs/browser-web-apis/web-usb', experimental: true },
       { label: 'WebSocket', route: '/docs/browser-web-apis/web-socket' },
       { label: 'Web Storage', route: '/docs/browser-web-apis/web-storage' },
       { label: 'Web Worker', route: '/docs/browser-web-apis/web-worker' },
