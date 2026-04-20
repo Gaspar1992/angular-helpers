@@ -3,38 +3,23 @@ import { OverviewConfig } from '../feature/unified-overview/unified-overview.com
 import { BROWSER_WEB_APIS_SERVICES } from '../data/browser-web-apis.data';
 import { SECURITY_SERVICES } from '../data/security.data';
 import { WORKER_HTTP_ENTRIES } from '../data/worker-http.data';
+import { generateServiceGroups } from './overview.utils';
 
 const OVERVIEW_CONFIGS: Record<string, OverviewConfig> = {
   'browser-web-apis': {
     packageName: 'browser-web-apis',
     npmPackage: '@angular-helpers/browser-web-apis',
     lead: 'Angular services for structured, secure, and reactive access to Browser Web APIs.',
-    providerExample: `import { provideBrowserWebApis } from '@angular-helpers/browser-web-apis';
+    providerExample: `import { provideBrowserWebApis, CameraService, GeolocationService } from '@angular-helpers/browser-web-apis';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideBrowserWebApis({
-      enableCamera: true,
-      enableGeolocation: true,
+      services: [CameraService, GeolocationService],
     }),
   ],
 });`,
-    serviceGroups: [
-      {
-        label: 'Media & Device',
-        icon: '📷',
-        items: BROWSER_WEB_APIS_SERVICES.filter((s) =>
-          ['camera', 'media-devices', 'geolocation', 'notification'].includes(s.id),
-        ),
-      },
-      {
-        label: 'Network APIs',
-        icon: '🌐',
-        items: BROWSER_WEB_APIS_SERVICES.filter((s) =>
-          ['web-socket', 'server-sent-events', 'broadcast-channel'].includes(s.id),
-        ),
-      },
-    ],
+    serviceGroups: generateServiceGroups(BROWSER_WEB_APIS_SERVICES),
   },
   security: {
     packageName: 'security',

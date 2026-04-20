@@ -2,6 +2,14 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'browser-web-apis-v21-11-signal-injection',
+    title: 'browser-web-apis v21.11: Signal-based Injection & Composition-First API',
+    publishedAt: '2026-04-19',
+    tags: ['browser-web-apis', 'signals', 'inject', 'angular', 'v21.11'],
+    excerpt:
+      'Four new signal-based inject functions bring reactive Battery, Clipboard, Geolocation, and Screen Wake Lock APIs to your components. Plus the new composition-first provider API replaces the legacy flag-bag configuration.',
+  },
+  {
     slug: 'log-levels-and-experimental-policy',
     title:
       'browser-web-apis v21.11: log levels, experimental policy, and composition-first providers',

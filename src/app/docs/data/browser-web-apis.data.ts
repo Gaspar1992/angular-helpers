@@ -14,6 +14,7 @@ export const BROWSER_WEB_APIS_SERVICES: ServiceDoc[] = [
       'Call initialize() before any other method.',
       'Battery API is not available in Safari.',
     ],
+    category: 'storage-io',
     methods: [
       {
         name: 'initialize',
@@ -106,6 +107,7 @@ export class BatteryComponent {
     requiresSecureContext: false,
     browserSupport: 'All modern browsers',
     notes: ['Use this service to guard API usage before instantiating other services.'],
+    category: 'security',
     methods: [
       {
         name: 'isSupported',
@@ -147,6 +149,7 @@ export class MyComponent {
       'Requires camera permission to be granted by the user.',
       'Must be used in a secure context (HTTPS).',
     ],
+    category: 'media-device',
     methods: [
       {
         name: 'startCamera',
@@ -205,6 +208,7 @@ export class PhotoComponent {
       'Requires clipboard-read / clipboard-write permissions.',
       'Must be called from a user gesture context.',
     ],
+    category: 'storage-io',
     methods: [
       {
         name: 'writeText',
@@ -288,6 +292,7 @@ export class CopyButtonComponent {
       'Requires geolocation permission.',
       'Use watchPosition() Observable — it auto-unsubscribes via DestroyRef.',
     ],
+    category: 'media-device',
     methods: [
       {
         name: 'getCurrentPosition',
@@ -373,6 +378,7 @@ export class MapComponent {
     requiresSecureContext: true,
     browserSupport: 'Chrome ✓ · Firefox ✓ · Safari ✓ · Edge ✓',
     notes: ['Device labels are only available after permission is granted.'],
+    category: 'media-device',
     methods: [
       {
         name: 'enumerateDevices',
@@ -425,6 +431,7 @@ export class DeviceSelectorComponent {
       'Safari has limited support for the Notifications API.',
       'User must explicitly grant permission.',
     ],
+    category: 'system',
     methods: [
       {
         name: 'permission',
@@ -479,6 +486,7 @@ export class AlertComponent {
     requiresSecureContext: false,
     browserSupport: 'Chrome ✓ · Firefox ✓ · Safari partial · Edge ✓',
     notes: ['Some permissions are not queryable in all browsers (e.g. clipboard in Firefox).'],
+    category: 'security',
     methods: [
       {
         name: 'query',
@@ -509,6 +517,7 @@ export class PermissionCheckComponent {
     requiresSecureContext: true,
     browserSupport: 'Chrome ✓ · Firefox partial · Safari ✓ · Edge ✓ (mobile focused)',
     notes: ['Requires a user gesture to trigger.', 'File sharing support varies by browser.'],
+    category: 'system',
     methods: [
       {
         name: 'share',
@@ -558,6 +567,7 @@ export class ShareButtonComponent {
       'Supports automatic reconnection with configurable retries.',
       'Heartbeat keeps idle connections alive.',
     ],
+    category: 'network',
     methods: [
       {
         name: 'connect',
@@ -614,6 +624,7 @@ export class ChatComponent {
       'Storage events only fire across tabs, not within the same tab.',
       'Values are auto-serialized with JSON.stringify.',
     ],
+    category: 'storage-io',
     methods: [
       {
         name: 'setLocalStorage',
@@ -683,6 +694,7 @@ export class PreferencesComponent {
       'Worker scripts must be served from the same origin.',
       'Workers are auto-terminated on component destroy via DestroyRef.',
     ],
+    category: 'worker-compute',
     methods: [
       {
         name: 'createWorker',
@@ -745,6 +757,7 @@ export class ProcessingComponent {
       'Automatically disconnects when the component is destroyed via DestroyRef.',
       'Use observeVisibility() for a simple boolean stream.',
     ],
+    category: 'observer',
     methods: [
       {
         name: 'observe',
@@ -821,6 +834,7 @@ export class LazyCardComponent {
     requiresSecureContext: false,
     browserSupport: 'All modern browsers',
     notes: ['Automatically disconnects on component destroy.'],
+    category: 'observer',
     methods: [
       {
         name: 'observe',
@@ -915,6 +929,7 @@ export class ResponsiveComponent {
       'Automatically cleans up the event listener on component destroy.',
       'Use watchVisibility() for a simple boolean stream.',
     ],
+    category: 'system',
     methods: [
       {
         name: 'watch',
@@ -1007,6 +1022,7 @@ export class VideoComponent {
       'Channels are closed automatically when the service is destroyed.',
       'Messages sent to a channel are not received by the sender itself.',
     ],
+    category: 'network',
     methods: [
       {
         name: 'open',
@@ -1065,6 +1081,7 @@ export class SyncComponent {
       'Connection type details (type, effectiveType, rtt) are only available in Chrome/Edge.',
       'navigator.onLine is universally available; extended info is optional.',
     ],
+    category: 'network',
     methods: [
       {
         name: 'getSnapshot',
@@ -1162,6 +1179,7 @@ export class OfflineBannerComponent {
       'The lock is released automatically when the tab is hidden and re-acquired on visibility.',
       'Call release() when the lock is no longer needed.',
     ],
+    category: 'system',
     methods: [
       {
         name: 'request',
@@ -1260,6 +1278,7 @@ export class PresentationComponent {
       'Orientation locking (lock()) requires fullscreen and is not supported in all browsers.',
       'getSnapshot() always returns a safe default on unsupported browsers.',
     ],
+    category: 'system',
     methods: [
       {
         name: 'getSnapshot',
@@ -1374,6 +1393,7 @@ export class MobileComponent {
       'Fullscreen requests must be triggered by a user gesture.',
       'Includes webkit prefix support for Safari.',
     ],
+    category: 'system',
     methods: [
       {
         name: 'request',
@@ -1438,6 +1458,7 @@ export class VideoPlayerComponent {
       'Requires a secure context (HTTPS).',
       'Returns empty array / null when the user cancels (AbortError).',
     ],
+    category: 'storage-io',
     methods: [
       {
         name: 'openFile',
@@ -1499,6 +1520,7 @@ export class FileEditorComponent {
       'Requires a MediaStream from getUserMedia or screen capture.',
       'Call stop() to get the final RecordingResult with the Blob URL.',
     ],
+    category: 'media-device',
     methods: [
       {
         name: 'start',
@@ -1565,6 +1587,7 @@ export class RecorderComponent {
       'EventSource connections are automatically closed on component destroy.',
       'Use disconnect(url) to close a specific connection manually.',
     ],
+    category: 'network',
     methods: [
       {
         name: 'connect',
@@ -1625,6 +1648,7 @@ export class LiveFeedComponent {
       'Most browsers require the device to have a vibration motor.',
       'isSupported() returns false on desktop browsers.',
     ],
+    category: 'media-device',
     methods: [
       {
         name: 'vibrate',
@@ -1690,6 +1714,7 @@ export class FeedbackComponent {
       'Available voices vary by OS and browser.',
       'Voices may load asynchronously — use watchVoices() to react when they are ready.',
     ],
+    category: 'media-device',
     methods: [
       {
         name: 'speak',
@@ -1760,6 +1785,7 @@ export class VoiceComponent {
       'Automatically disconnects when the subscription is closed.',
       'Use with subtree: true to observe deep DOM changes.',
     ],
+    category: 'observer',
     methods: [
       {
         name: 'observe',
@@ -1830,6 +1856,7 @@ export class DomWatcherComponent {
       'Use buffered: true to receive entries logged before the observer was created.',
       'Entry types vary by browser — use getSupportedEntryTypes() to check.',
     ],
+    category: 'observer',
     methods: [
       {
         name: 'observe',
@@ -1916,6 +1943,7 @@ export class MetricsComponent {
       'Default idle threshold is 60 seconds.',
       'Chrome-only as of 2024.',
     ],
+    category: 'media-device',
     methods: [
       {
         name: 'watch',
@@ -1998,6 +2026,7 @@ export class PresenceComponent {
     requiresSecureContext: true,
     browserSupport: 'Chrome ✓ · Firefox ✗ · Safari ✗ · Edge ✓',
     notes: ['Must be triggered by a user gesture.', 'Only available in Chromium-based browsers.'],
+    category: 'media-device',
     methods: [
       {
         name: 'open',
@@ -2041,6 +2070,7 @@ export class ColorPickerComponent {
       'Supports multiple barcode formats: QR, EAN, UPC, Code 128, etc.',
       'Use getSupportedFormats() to check availability.',
     ],
+    category: 'media-device',
     methods: [
       {
         name: 'detect',
@@ -2090,6 +2120,7 @@ export class ScannerComponent {
       'Context is auto-closed on component destroy.',
       'Call resume() after a user gesture if the context starts suspended.',
     ],
+    category: 'media-device',
     methods: [
       {
         name: 'getContext',
@@ -2172,6 +2203,7 @@ export class ToneComponent {
       'Use poll() with requestAnimationFrame timing (16ms) for real-time input.',
       'A user gesture (button press) is required before gamepads are reported.',
     ],
+    category: 'media-device',
     methods: [
       {
         name: 'poll',
@@ -2271,6 +2303,7 @@ export class GameInputComponent {
       'Requires HTTPS and a user gesture to trigger device discovery.',
       'Use requestDevice() to initiate Bluetooth pairing.',
     ],
+    category: 'media-device',
     methods: [
       {
         name: 'requestDevice',
@@ -2351,6 +2384,7 @@ export class BleComponent {
       'Requires HTTPS and a user gesture.',
       'Device must not be claimed by a kernel driver.',
     ],
+    category: 'media-device',
     methods: [
       {
         name: 'requestDevice',
@@ -2432,6 +2466,7 @@ export class UsbComponent {
       'Requires HTTPS.',
       'Physical NFC hardware is required.',
     ],
+    category: 'media-device',
     methods: [
       {
         name: 'scan',
@@ -2486,6 +2521,7 @@ export class NfcComponent {
       'Use canMakePayment() to check if the user has a valid payment method.',
       'show() must be called from a user gesture.',
     ],
+    category: 'system',
     methods: [
       {
         name: 'canMakePayment',
@@ -2539,6 +2575,7 @@ export class CheckoutComponent {
       'PublicKeyCredential (WebAuthn) support varies by browser.',
       'Use isConditionalMediationAvailable() to check passkey autofill support.',
     ],
+    category: 'security',
     methods: [
       {
         name: 'get',
@@ -2616,6 +2653,7 @@ export class LoginComponent {
       'Locks are automatically released when the callback completes or rejects.',
       'Use query() for diagnostics only — do not gate critical logic on it.',
     ],
+    category: 'worker-compute',
     methods: [
       {
         name: 'acquire',
@@ -2666,6 +2704,7 @@ export class SyncComponent {
       'Storage quota estimates are best-effort and may vary between browsers.',
       'Persistent storage requires user permission in some browsers.',
     ],
+    category: 'storage-io',
     methods: [
       {
         name: 'estimate',
@@ -2723,6 +2762,7 @@ export class StorageComponent {
       'Safari does not support Compression Streams API as of 2024.',
       'Always use try/catch when compressing/decompressing.',
     ],
+    category: 'storage-io',
     methods: [
       {
         name: 'compress',
