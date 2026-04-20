@@ -1,3 +1,5 @@
+import { SERVICE_COUNT, INJECT_FN_COUNT } from './packages.generated';
+
 export interface PackageInfo {
   icon: string;
   name: string;
@@ -19,9 +21,8 @@ export const PACKAGES: readonly PackageInfo[] = [
     icon: '🌐',
     name: 'browser-web-apis',
     npmPackage: '@angular-helpers/browser-web-apis',
-    tagline: '37 typed Angular services for the browser. One provider.',
-    description:
-      '37 typed Angular services covering Camera, Geolocation, Storage, WebSocket, Bluetooth, NFC, Payments, Gamepad, and 29 more. Plus 9 signal-based inject() primitives.',
+    tagline: `${SERVICE_COUNT} typed Angular services for the browser. One provider.`,
+    description: `${SERVICE_COUNT} typed Angular services covering Camera, Geolocation, Storage, WebSocket, WebLocks, StorageManager, Compression, Bluetooth, NFC, Payments, Gamepad, and 29 more. Plus ${INJECT_FN_COUNT} signal-based inject() primitives.`,
     highlights: [
       'Geolocation · Camera · MediaDevices · MediaRecorder',
       'WebSocket · WebWorker · ServerSentEvents · BroadcastChannel',
@@ -34,7 +35,7 @@ export const PACKAGES: readonly PackageInfo[] = [
     demoLink: '/demo/browser-apis',
     badge: null,
     promise: 'lightweight',
-    serviceCount: 37,
+    serviceCount: SERVICE_COUNT,
   },
   {
     icon: '🛡️',
@@ -74,10 +75,12 @@ export const PACKAGES: readonly PackageInfo[] = [
     installCmd: 'npm i @angular-helpers/worker-http',
     docsLink: '/docs/worker-http',
     demoLink: '/demo/worker-http',
-    badge: null,
+    badge: 'Preview',
     promise: 'performance',
   },
 ];
 
 export const TOTAL_SERVICE_COUNT = PACKAGES.reduce((sum, pkg) => sum + (pkg.serviceCount ?? 0), 0);
-export { INJECT_FN_COUNT } from './packages.generated';
+
+// Re-export for convenience
+export { SERVICE_COUNT, INJECT_FN_COUNT } from './packages.generated';
