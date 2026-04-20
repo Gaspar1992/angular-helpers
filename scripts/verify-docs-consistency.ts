@@ -179,7 +179,25 @@ for (const expId of expectedExperimental) {
 
 console.log('✅ Experimental services checks passed\n');
 
-// 5. Check for deprecated API patterns
+// 5. Check service categories for overview grouping
+console.log('📁 Checking service categories...');
+const servicesWithoutCategory = BROWSER_WEB_APIS_SERVICES.filter((s) => !s.category);
+
+if (servicesWithoutCategory.length > 0) {
+  for (const service of servicesWithoutCategory) {
+    assert(
+      false,
+      `Service "${service.id}" (${service.name}) is missing category field needed for overview grouping`,
+      'src/app/docs/data/browser-web-apis.data.ts',
+    );
+  }
+} else {
+  console.log(`✅ All ${BROWSER_WEB_APIS_SERVICES.length} services have categories assigned`);
+}
+
+console.log('✅ Service category checks passed\n');
+
+// 6. Check for deprecated API patterns
 console.log('🚫 Checking for deprecated API patterns...');
 const deprecatedPatterns = ['enableCamera:', 'enableGeolocation:', 'enableWebStorage:'];
 
