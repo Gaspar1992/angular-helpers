@@ -71,7 +71,20 @@ export interface ServiceDoc {
   requiresSecureContext: boolean;
   notes: string[];
   fnVersion?: FnDoc;
+  /** Category for grouping in overview pages */
+  category?: ServiceCategory;
 }
+
+/** Service categories for automatic overview grouping */
+export type ServiceCategory =
+  | 'media-device'
+  | 'observer'
+  | 'system'
+  | 'network'
+  | 'storage-io'
+  | 'worker-compute'
+  | 'experimental'
+  | 'security';
 
 export interface PackageDoc {
   id: string;

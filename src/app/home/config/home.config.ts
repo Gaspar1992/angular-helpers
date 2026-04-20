@@ -1,4 +1,4 @@
-import { PACKAGES, TOTAL_SERVICE_COUNT } from '../../core/config/packages.data';
+import { PACKAGES, TOTAL_SERVICE_COUNT, INJECT_FN_COUNT } from '../../core/config/packages.data';
 import type { Feature } from '../models/feature.model';
 import type { Stat } from '../models/stat.model';
 import type { CodeExample } from '../models/code-example.model';
@@ -39,7 +39,7 @@ export const HOME_FEATURES: readonly Feature[] = [
 export const HOME_STATS: readonly Stat[] = [
   { value: String(TOTAL_SERVICE_COUNT), label: 'Browser API services' },
   { value: String(PACKAGES.length), label: 'Focused packages' },
-  { value: '9', label: 'Signal primitives' },
+  { value: String(INJECT_FN_COUNT), label: 'Signal primitives' },
   { value: 'MIT', label: 'Open source' },
 ];
 
@@ -49,7 +49,7 @@ export { PACKAGES as HOME_PACKAGES };
 export const HOME_CODE_EXAMPLES: readonly CodeExample[] = [
   {
     title: 'app.config.ts',
-    html: `<span class="c-kw">import</span> <span class="c-brace">{</span> provideBrowserWebApis <span class="c-brace">}</span> <span class="c-kw">from</span>
+    html: `<span class="c-kw">import</span> <span class="c-brace">{</span> provideBrowserWebApis, CameraService, GeolocationService <span class="c-brace">}</span> <span class="c-kw">from</span>
   <span class="c-str">'@angular-helpers/browser-web-apis'</span><span class="c-punc">;</span>
 <span class="c-kw">import</span> <span class="c-brace">{</span> provideSecurity <span class="c-brace">}</span> <span class="c-kw">from</span>
   <span class="c-str">'@angular-helpers/security'</span><span class="c-punc">;</span>
@@ -57,10 +57,7 @@ export const HOME_CODE_EXAMPLES: readonly CodeExample[] = [
 <span class="c-kw">export const</span> <span class="c-var">appConfig</span> <span class="c-punc">=</span> <span class="c-brace">{</span>
   providers<span class="c-punc">:</span> <span class="c-brace">[</span>
     provideBrowserWebApis<span class="c-punc">({</span>
-      enableGeolocation<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
-      enableCamera<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
-      enableWebStorage<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>
-      <span class="c-cmt">// ... 37 more APIs</span>
+      services<span class="c-punc">:</span> <span class="c-brace">[</span>CameraService, GeolocationService<span class="c-brace">]</span>
     <span class="c-punc">}),</span>
     provideSecurity<span class="c-punc">({</span>
       enableRegexSecurity<span class="c-punc">:</span> <span class="c-bool">true</span><span class="c-punc">,</span>

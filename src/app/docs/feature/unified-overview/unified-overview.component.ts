@@ -4,10 +4,17 @@ import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.c
 import { DocsPageHeaderComponent } from '../../../docs/shared/page-header/docs-page-header.component';
 import { BreadcrumbItem, ServiceDoc } from '../../../docs/models/doc-meta.model';
 
+export interface ServiceGroupItem {
+  id: string;
+  name: string;
+  description: string;
+  experimental?: boolean;
+}
+
 export interface ServiceGroup {
   label: string;
   icon: string;
-  items: ServiceDoc[];
+  items: ServiceGroupItem[];
 }
 
 export interface OverviewConfig {

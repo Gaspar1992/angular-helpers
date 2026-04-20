@@ -14,6 +14,7 @@ export const BROWSER_WEB_APIS_SERVICES: ServiceDoc[] = [
       'Call initialize() before any other method.',
       'Battery API is not available in Safari.',
     ],
+    category: 'storage-io',
     methods: [
       {
         name: 'initialize',
@@ -106,6 +107,7 @@ export class BatteryComponent {
     requiresSecureContext: false,
     browserSupport: 'All modern browsers',
     notes: ['Use this service to guard API usage before instantiating other services.'],
+    category: 'security',
     methods: [
       {
         name: 'isSupported',

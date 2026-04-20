@@ -80,3 +80,4 @@ export const PACKAGES: readonly PackageInfo[] = [
 ];
 
 export const TOTAL_SERVICE_COUNT = PACKAGES.reduce((sum, pkg) => sum + (pkg.serviceCount ?? 0), 0);
+export { INJECT_FN_COUNT } from './packages.generated';

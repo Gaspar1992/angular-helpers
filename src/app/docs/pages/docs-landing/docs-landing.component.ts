@@ -36,12 +36,13 @@ import { RouterLink } from '@angular/router';
             </div>
           </div>
           <p class="text-sm text-base-content/70 leading-relaxed">
-            37 strongly typed Angular services for Camera, Geolocation, Storage, WebSocket,
-            Bluetooth, Gamepad, NFC, and more — all with built-in browser support detection and
-            reactive APIs.
+            40 strongly typed Angular services + 13 signal-based inject functions for Camera,
+            Geolocation, Storage, WebSocket, Bluetooth, Battery, Gamepad, NFC, and more — all with
+            built-in browser support detection and reactive APIs.
           </p>
           <div class="flex flex-wrap gap-2">
-            <span class="badge badge-sm badge-ghost">37 services</span>
+            <span class="badge badge-sm badge-ghost">40 services</span>
+            <span class="badge badge-sm badge-ghost">13 signal injectors</span>
             <span class="badge badge-sm badge-ghost">Signals</span>
             <span class="badge badge-sm badge-ghost">OnPush</span>
           </div>
@@ -101,12 +102,14 @@ import { RouterLink } from '@angular/router';
         <div class="bg-base-200 border border-base-300 rounded-xl overflow-auto">
           <pre
             class="p-4 sm:p-6 text-xs sm:text-sm font-mono text-base-content leading-relaxed"
-          ><code>import &#123; provideBrowserWebApis &#125; from '&#64;angular-helpers/browser-web-apis';
+          ><code>import &#123; provideBrowserWebApis, CameraService, GeolocationService &#125; from '&#64;angular-helpers/browser-web-apis';
 import &#123; provideSecurity &#125; from '&#64;angular-helpers/security';
 
 bootstrapApplication(AppComponent, &#123;
   providers: [
-    provideBrowserWebApis(&#123; enableCamera: true, enableGeolocation: true &#125;),
+    provideBrowserWebApis(&#123;
+      services: [CameraService, GeolocationService]
+    &#125;),
     provideSecurity(&#123; enableRegexSecurity: true &#125;),
   ],
 &#125;);</code></pre>
