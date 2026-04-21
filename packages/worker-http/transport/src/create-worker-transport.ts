@@ -1,5 +1,7 @@
 import { Observable } from 'rxjs';
 
+import { detectTransferables } from './detect-transferables';
+import { WorkerHttpTimeoutError } from './worker-http-timeout-error';
 import type {
   WorkerTransport,
   WorkerTransportConfig,
@@ -7,15 +9,19 @@ import type {
   WorkerResponse,
 } from './worker-transport.types';
 
+const DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
+
 /**
  * Creates a typed, Observable-based transport for communicating with a web worker.
  *
  * Features:
  * - Request/response correlation via `requestId`
- * - Automatic cancellation on Observable unsubscribe
+ * - Cancellation on Observable unsubscribe (also aborts `fetch()` in the worker)
+ * - Per-request timeout (default 30 s) rejecting with `WorkerHttpTimeoutError`
  * - Optional worker pool with round-robin dispatch
  * - Lazy worker creation (default)
- * - Transferable auto-detection for ArrayBuffer payloads
+ * - Opt-in transferable detection (`transferDetection: 'auto'`) for zero-copy
+ *   `ArrayBuffer` / stream payloads
  *
  * @example
  * ```typescript
@@ -41,6 +47,9 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
     config.maxInstances ?? 1,
     typeof navigator !== 'undefined' ? (navigator.hardwareConcurrency ?? 4) : 1,
   );
+
+  const requestTimeout = config.requestTimeout ?? DEFAULT_REQUEST_TIMEOUT_MS;
+  const transferDetection = config.transferDetection ?? 'none';
 
   function createWorker(): Worker {
     if (config.workerFactory) {
@@ -81,15 +90,26 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
 
     return new Observable<TResponse>((subscriber) => {
       const worker = getOrCreateWorker();
+      let settled = false;
+      let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+
+      const cleanup = () => {
+        worker.removeEventListener('message', messageHandler);
+        worker.removeEventListener('error', errorHandler);
+        if (timeoutHandle !== undefined) {
+          clearTimeout(timeoutHandle);
+          timeoutHandle = undefined;
+        }
+      };
 
       const messageHandler = (
         event: MessageEvent<WorkerResponse<TResponse> | WorkerErrorResponse>,
       ) => {
         const data = event.data;
         if (data.requestId !== requestId) return;
-
-        worker.removeEventListener('message', messageHandler);
-        worker.removeEventListener('error', errorHandler);
+        if (settled) return;
+        settled = true;
+        cleanup();
 
         if (data.type === 'error') {
           const err = (data as WorkerErrorResponse).error;
@@ -101,20 +121,39 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
       };
 
       const errorHandler = (event: ErrorEvent) => {
-        worker.removeEventListener('message', messageHandler);
-        worker.removeEventListener('error', errorHandler);
+        if (settled) return;
+        settled = true;
+        cleanup();
         subscriber.error(new Error(event.message ?? 'Worker error'));
       };
 
       worker.addEventListener('message', messageHandler);
       worker.addEventListener('error', errorHandler);
 
-      worker.postMessage({ type: 'request', requestId, payload: request });
+      if (transferDetection === 'auto') {
+        const transferables = detectTransferables(request);
+        worker.postMessage({ type: 'request', requestId, payload: request }, transferables);
+      } else {
+        worker.postMessage({ type: 'request', requestId, payload: request });
+      }
+
+      if (requestTimeout > 0 && Number.isFinite(requestTimeout)) {
+        timeoutHandle = setTimeout(() => {
+          if (settled) return;
+          settled = true;
+          cleanup();
+          // Ask the worker to abort any in-flight work for this id. The
+          // cancellation fix wires this through to `fetch()`.
+          worker.postMessage({ type: 'cancel', requestId });
+          subscriber.error(new WorkerHttpTimeoutError(requestTimeout));
+        }, requestTimeout);
+      }
 
       // Teardown: send cancel message on unsubscribe
       return () => {
-        worker.removeEventListener('message', messageHandler);
-        worker.removeEventListener('error', errorHandler);
+        if (settled) return;
+        settled = true;
+        cleanup();
         worker.postMessage({ type: 'cancel', requestId });
       };
     });

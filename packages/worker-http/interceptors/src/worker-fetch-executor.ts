@@ -4,18 +4,26 @@ import type {
   WorkerInterceptorFn,
 } from './worker-interceptor.types';
 
-export type RequestHandler = (req: SerializableRequest) => Promise<SerializableResponse>;
+export type RequestHandler = (
+  req: SerializableRequest,
+  signal?: AbortSignal,
+) => Promise<SerializableResponse>;
 
 /**
  * Composes interceptor functions around a final handler, producing a single
- * `(req) => Promise<resp>` chain. Pure — no side effects.
+ * `(req, signal?) => Promise<resp>` chain. Pure — no side effects.
+ *
+ * The optional `signal` is threaded through interceptor boundaries automatically
+ * via a wrapper around `next`, so legacy `WorkerInterceptorFn` implementations
+ * (which take only `req, next`) keep working and still propagate cancellation
+ * when they invoke `next(req)`.
  */
 export function buildChain(
   fns: readonly WorkerInterceptorFn[],
   finalHandler: RequestHandler,
 ): RequestHandler {
   return fns.reduceRight<RequestHandler>(
-    (next, interceptor) => (req) => interceptor(req, next),
+    (next, interceptor) => (req, signal) => interceptor(req, (r) => next(r, signal)),
     finalHandler,
   );
 }

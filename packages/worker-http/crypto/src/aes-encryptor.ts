@@ -43,9 +43,14 @@ export async function createAesEncryptor(config: AesEncryptorConfig): Promise<Ae
     ['encrypt', 'decrypt'],
   );
 
+  // AES-GCM uses a 96-bit (12-byte) IV per NIST SP 800-38D recommendation.
+  // AES-CBC and AES-CTR require exactly one block (16 bytes) for their IV /
+  // counter respectively; passing 12 bytes causes `OperationError`.
+  const ivLength = algorithm === 'AES-GCM' ? 12 : 16;
+
   return {
     async encrypt(data: string | ArrayBuffer | Uint8Array): Promise<EncryptedPayload> {
-      const iv = crypto.getRandomValues(new Uint8Array(12)) as Uint8Array<ArrayBuffer>;
+      const iv = crypto.getRandomValues(new Uint8Array(ivLength)) as Uint8Array<ArrayBuffer>;
 
       const params =
         algorithm === 'AES-GCM'

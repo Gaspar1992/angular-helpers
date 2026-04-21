@@ -32,7 +32,7 @@ export function attachRequestLoop(chain: RequestHandler): () => void {
     controllers.set(requestId, controller);
 
     try {
-      const response = await chain(payload as SerializableRequest);
+      const response = await chain(payload as SerializableRequest, controller.signal);
       self.postMessage({ type: 'response', requestId, result: response });
     } catch (error) {
       self.postMessage({

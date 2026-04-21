@@ -106,7 +106,7 @@ export function createConfigurableWorkerPipeline(): void {
     if (data.type === INIT_MESSAGE_TYPE) {
       const specs = (data as WorkerInterceptorInitMessage).specs ?? [];
       const fns = specs.map((spec) => resolveSpec(spec));
-      const chain = buildChain(fns, (req) => executeFetch(req));
+      const chain = buildChain(fns, (req, signal) => executeFetch(req, signal));
       // Swap to the regular request loop and replay any buffered messages.
       attachRequestLoop(chain);
       const handler = self.onmessage;

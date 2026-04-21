@@ -2,6 +2,15 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'worker-http-hardening',
+    title:
+      'worker-http v0.7.0: hardening — cancellation that actually cancels, real timeouts, and a latent AES bug',
+    publishedAt: '2026-04-21',
+    tags: ['worker-http', 'bugfix', 'web-workers', 'webcrypto', 'angular'],
+    excerpt:
+      'A full audit of @angular-helpers/worker-http turned up three bugs hiding in plain sight — cancellation that did not cancel, a requestTimeout option that did nothing, and an AES-CBC/CTR path that threw on every call. Here is what we found, why it happened, and the plumbing fix that makes the package honest.',
+  },
+  {
     slug: 'security-utilities-expansion',
     title: 'security v21.3: JWT, HIBP, rate limiter, and a two-paradigm forms bridge',
     publishedAt: '2026-04-21',
