@@ -128,6 +128,8 @@ export class WebWorkerService extends BrowserApiBaseService {
   }
 
   terminateAllWorkers(): void {
+    // Snapshot keys before mutating the map inside terminateWorker.
+    // oxlint-disable-next-line unicorn/no-useless-spread
     for (const name of [...this.entries.keys()]) {
       this.terminateWorker(name);
     }

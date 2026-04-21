@@ -1,3 +1,4 @@
+/* oxlint-disable no-console -- performance specs intentionally print metrics to stdout */
 import { test, expect } from '@playwright/test';
 
 /**

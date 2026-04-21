@@ -248,6 +248,7 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
         invoke(subscriber);
       } catch (telemetryError) {
         // A throwing telemetry subscriber must never affect the HTTP request.
+        // oxlint-disable-next-line no-console -- defensive log when user-provided telemetry throws
         console.error('[WorkerHttpBackend] telemetry subscriber threw:', telemetryError);
       }
     }

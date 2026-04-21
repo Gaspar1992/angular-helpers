@@ -28,6 +28,7 @@ export const permissionGuard = (permission: PermissionNameExt): CanActivateFn =>
 
       return true;
     } catch (error) {
+      // oxlint-disable-next-line no-console -- guard errors must surface to DevTools; no injectable logger here
       console.error('Permission guard error:', error);
       router.navigate(['/permission-denied'], {
         queryParams: { permission },
