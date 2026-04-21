@@ -46,6 +46,22 @@ jobs:
       - name: Build packages
         run: npm run build:packages
 
+  docs-consistency:
+    name: Documentation consistency
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup
+
+      - name: Verify docs consistency
+        run: npx tsx scripts/verify-docs-consistency.ts
+
   browser-tests:
     name: Browser tests (chromium)
     runs-on: ubuntu-latest
