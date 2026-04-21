@@ -1,3 +1,10 @@
+# [1.27.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.26.0...v1.27.0) (2026-04-21)
+
+
+### Features
+
+* **benchmark:** instrument benchmark page for 6-stage pipeline analysis ([#82](https://github.com/Gaspar1992/angular-helpers/issues/82)) ([dda93c8](https://github.com/Gaspar1992/angular-helpers/commit/dda93c89cbbe8a16de4f017599c0f01a4aade75e))
+
 # [1.22.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.21.0...v1.22.0) (2026-04-19)
 
 
