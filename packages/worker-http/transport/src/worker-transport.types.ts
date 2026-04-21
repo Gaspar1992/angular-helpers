@@ -37,10 +37,28 @@ export interface WorkerTransportConfig {
   /** Maximum number of worker instances in the pool (default: 1) */
   maxInstances?: number;
 
-  /** Transfer strategy for large payloads */
+  /**
+   * Transfer strategy for `postMessage` payloads.
+   *
+   * - `'none'` (default) — payloads are always structured-cloned, preserving
+   *   the caller's access to the original data after post.
+   * - `'auto'` — shallowly walks the payload and passes every detected
+   *   `Transferable` (ArrayBuffer, MessagePort, ImageBitmap, OffscreenCanvas,
+   *   ReadableStream, WritableStream, TransformStream) in the transfer list
+   *   of `postMessage`. Large buffers move zero-copy; their `byteLength`
+   *   becomes `0` in the main thread after post.
+   *
+   * The `'manual'` value is reserved for a future API where callers supply
+   * their own transfer list per request. It currently behaves like `'none'`.
+   */
   transferDetection?: 'auto' | 'manual' | 'none';
 
-  /** Timeout in ms for a single request (default: 30000) */
+  /**
+   * Per-request timeout in milliseconds. If the worker does not respond
+   * within this window, `execute()` errors with `WorkerHttpTimeoutError`
+   * and a cancel message is posted to the worker. Set to `0` or
+   * non-finite to disable the timeout entirely. Default: `30000` (30 s).
+   */
   requestTimeout?: number;
 
   /**

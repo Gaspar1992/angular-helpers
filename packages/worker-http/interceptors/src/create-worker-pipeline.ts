@@ -22,6 +22,6 @@ import type { WorkerInterceptorFn } from './worker-interceptor.types';
  * ```
  */
 export function createWorkerPipeline(interceptors: WorkerInterceptorFn[]): void {
-  const chain = buildChain(interceptors, (req) => executeFetch(req));
+  const chain = buildChain(interceptors, (req, signal) => executeFetch(req, signal));
   attachRequestLoop(chain);
 }

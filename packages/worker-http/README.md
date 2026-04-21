@@ -67,9 +67,40 @@ transport.terminate();
 **Features:**
 
 - Round-robin pool (`maxInstances`) for parallel request handling
-- Request cancellation via `AbortController` in the worker
-- Automatic `Transferable` detection for zero-copy `ArrayBuffer` transfer
 - Lazy worker instantiation — no worker created until first request
+- **Cancellation that actually aborts `fetch()`** — unsubscribing posts a
+  cancel message; the worker-side message loop threads an `AbortSignal` all
+  the way into `fetch()` so the in-flight HTTP request is truly aborted
+- **Per-request timeout** (default `30_000` ms) via `requestTimeout`; errors
+  with `WorkerHttpTimeoutError` and sends a cancel message to the worker.
+  Set to `0` to disable.
+- **Opt-in transferable detection** via `transferDetection: 'auto'` — passes
+  detected `ArrayBuffer` / `MessagePort` / `ImageBitmap` /
+  `OffscreenCanvas` / streams as the transfer list of `postMessage`, enabling
+  zero-copy transfer of large buffers. Default is `'none'` to preserve the
+  caller's access to the original data after post.
+
+```typescript
+import {
+  createWorkerTransport,
+  WorkerHttpTimeoutError,
+} from '@angular-helpers/worker-http/transport';
+
+const transport = createWorkerTransport({
+  workerUrl: new URL('./workers/api.worker', import.meta.url),
+  maxInstances: 2,
+  requestTimeout: 10_000, // override default 30 s
+  transferDetection: 'auto', // zero-copy ArrayBuffer at postMessage
+});
+
+transport.execute(request).subscribe({
+  error: (err) => {
+    if (err instanceof WorkerHttpTimeoutError) {
+      // dedicated timeout handling
+    }
+  },
+});
+```
 
 ---
 
