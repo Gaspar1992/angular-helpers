@@ -2,6 +2,23 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'security-utilities-expansion',
+    title: 'security v21.3: JWT, HIBP, rate limiter, and a two-paradigm forms bridge',
+    publishedAt: '2026-04-21',
+    tags: [
+      'security',
+      'angular',
+      'signal-forms',
+      'reactive-forms',
+      'jwt',
+      'hibp',
+      'csrf',
+      'rate-limiter',
+    ],
+    excerpt:
+      'Seven new utilities land in @angular-helpers/security, including a Reactive Forms bridge, a Signal Forms bridge with async HIBP validation, client-side JWT inspection, CSRF helpers, and a verified-auto-clear sensitive clipboard.',
+  },
+  {
     slug: 'browser-web-apis-v21-11-signal-injection',
     title: 'browser-web-apis v21.11: Signal-based Injection & Composition-First API',
     publishedAt: '2026-04-19',

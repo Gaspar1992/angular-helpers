@@ -18,7 +18,10 @@ import type {
  * ```
  */
 export function loggingInterceptor(config?: LoggingConfig): WorkerInterceptorFn {
-  const logger = config?.logger ?? ((msg: string, data?: unknown) => console.log(msg, data));
+  const logger =
+    config?.logger ??
+    // oxlint-disable-next-line no-console -- default logger of a logging interceptor; consumers inject their own via config.logger
+    ((msg: string, data?: unknown) => console.log(msg, data));
   const includeHeaders = config?.includeHeaders ?? false;
 
   function safeLog(message: string, data?: unknown): void {

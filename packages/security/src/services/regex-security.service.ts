@@ -110,10 +110,10 @@ export class RegexSecurityService {
         message: 'Nested quantifiers (catastrophic backtracking)',
       },
       { pattern: /\+\+/, risk: 'high' as const, message: 'Nested plus quantifiers' },
-      { pattern: /\(\?\=/, risk: 'medium' as const, message: 'Lookahead assertions' },
-      { pattern: /\(\?\!/, risk: 'medium' as const, message: 'Negative lookahead' },
-      { pattern: /\(\?\:/, risk: 'low' as const, message: 'Non-capturing groups' },
-      { pattern: /\(\?\</, risk: 'high' as const, message: 'Lookbehind assertions' },
+      { pattern: /\(\?=/, risk: 'medium' as const, message: 'Lookahead assertions' },
+      { pattern: /\(\?!/, risk: 'medium' as const, message: 'Negative lookahead' },
+      { pattern: /\(\?:/, risk: 'low' as const, message: 'Non-capturing groups' },
+      { pattern: /\(\?</, risk: 'high' as const, message: 'Lookbehind assertions' },
       { pattern: /\(\?\(\?\)/, risk: 'critical' as const, message: 'Recursive patterns' },
       { pattern: /(\{(\d+,)?\d+\})/, risk: 'medium' as const, message: 'Quantified repetition' },
       {
@@ -317,8 +317,8 @@ export class RegexSecurityService {
     complexity += (pattern.match(/\?\?/g) || []).length * 3;
 
     // Lookaheads/lookbehinds
-    complexity += (pattern.match(/\(\?\=/g) || []).length * 2;
-    complexity += (pattern.match(/\(\?\!/g) || []).length * 2;
+    complexity += (pattern.match(/\(\?=/g) || []).length * 2;
+    complexity += (pattern.match(/\(\?!/g) || []).length * 2;
     complexity += (pattern.match(/\(\?</g) || []).length * 3;
 
     // Nested groups

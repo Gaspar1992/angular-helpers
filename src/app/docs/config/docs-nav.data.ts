@@ -108,6 +108,13 @@ export const DOCS_NAV_SECTIONS: readonly NavSection[] = [
       { label: 'SecureStorageService', route: '/docs/security/secure-storage' },
       { label: 'InputSanitizerService', route: '/docs/security/input-sanitizer' },
       { label: 'PasswordStrengthService', route: '/docs/security/password-strength' },
+      { label: 'JwtService', route: '/docs/security/jwt' },
+      { label: 'HibpService', route: '/docs/security/hibp' },
+      { label: 'CsrfService', route: '/docs/security/csrf' },
+      { label: 'RateLimiterService', route: '/docs/security/rate-limiter' },
+      { label: 'SensitiveClipboardService', route: '/docs/security/sensitive-clipboard' },
+      { label: 'SecurityValidators', route: '/docs/security/security-validators' },
+      { label: 'Signal Forms validators', route: '/docs/security/signal-forms-validators' },
     ],
   },
   {

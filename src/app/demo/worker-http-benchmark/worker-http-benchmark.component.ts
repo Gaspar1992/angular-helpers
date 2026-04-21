@@ -290,6 +290,7 @@ export class WorkerHttpBenchmarkComponent implements OnInit, OnDestroy {
     window.__runBenchmark = async (scenarioId: string, mode: string) => {
       const scenario = this.states().find((s) => s.scenario.id === scenarioId)?.scenario;
       if (!scenario) {
+        // oxlint-disable-next-line no-console -- benchmark helper exposed on window for perf tests; surfaces errors to stdout
         console.error(`Scenario not found: ${scenarioId}`);
         return;
       }
@@ -357,6 +358,7 @@ export class WorkerHttpBenchmarkComponent implements OnInit, OnDestroy {
       // Log stage breakdown for debugging
       if (granularMetrics.length > 0 && mode === 'worker-pool-1') {
         const averages = calculateStageAverages(granularMetrics);
+        // oxlint-disable-next-line no-console -- benchmark diagnostics consumed by perf tests via console output
         console.log(`Scenario "${scenario.id}" stage averages:`, averages);
       }
     } finally {
