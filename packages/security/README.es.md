@@ -49,6 +49,37 @@ Paquete de seguridad para aplicaciones Angular que previene ataques comunes como
 - **Detección de Patrones**: Detectar patrones de teclado y secuencias
 - **Feedback Accionable**: Sugerencias específicas para mejorar
 
+### **Validators de Formularios (sub-entries)**
+
+- **`@angular-helpers/security/forms`**: puente para Reactive Forms — `SecurityValidators.strongPassword`, `safeHtml`, `safeUrl`, `noScriptInjection`, `noSqlInjectionHints`.
+- **`@angular-helpers/security/signal-forms`**: puente para Signal Forms de Angular v21 — `strongPassword`, `safeHtml`, `safeUrl`, `noScriptInjection`, `noSqlInjectionHints`, y el async `hibpPassword`.
+- **Core compartido**: ambos paradigmas delegan en los mismos helpers puros para garantizar paridad de comportamiento.
+
+### **Inspección de JWT**
+
+- **Decodificación client-side**: `decode`, `claim`, `isExpired`, `expiresIn`.
+- **Explícitamente NO verifica firma**: la validación criptográfica se hace server-side.
+
+### **Protección CSRF**
+
+- **`CsrfService`**: double-submit con tokens generados por `WebCryptoService.generateRandomBytes`.
+- **`withCsrfHeader()`**: interceptor funcional que inyecta el header en POST/PUT/PATCH/DELETE.
+
+### **Rate Limiter**
+
+- **Token-bucket** y **sliding-window**, configurables por clave.
+- **Estado basado en signals**: `canExecute(key)` y `remaining(key)` devuelven `Signal<T>`.
+
+### **HIBP Leaked Password Check**
+
+- **k-anonymity**: sólo los primeros 5 caracteres hex del SHA-1 salen del navegador.
+- **Fail-open**: los errores de red nunca bloquean el envío del formulario.
+
+### **Clipboard Sensible**
+
+- **Auto-clear verificado**: lee el clipboard antes de limpiar para no pisar contenido ajeno.
+- **Estilo password-manager**: default 15 segundos, configurable.
+
 ### **Patrón Builder**
 
 - **API Fluida**: Construye expresiones regulares de forma intuitiva.
@@ -304,6 +335,170 @@ export class RegistrationComponent {
   }
 }
 ```
+
+### **SecurityValidators — Reactive Forms**
+
+```typescript
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { SecurityValidators } from '@angular-helpers/security/forms';
+
+export class SignupFormComponent {
+  form = new FormGroup({
+    password: new FormControl('', [
+      Validators.required,
+      SecurityValidators.strongPassword({ minScore: 3 }),
+    ]),
+    bio: new FormControl('', [SecurityValidators.safeHtml()]),
+    homepage: new FormControl('', [SecurityValidators.safeUrl({ schemes: ['https:'] })]),
+  });
+}
+```
+
+Los validators son factory functions estáticas — no hace falta registrar providers. Delegan en los
+mismos helpers puros que usa la versión Signal Forms, así que ambos paradigmas devuelven resultados
+equivalentes para el mismo input.
+
+### **Validators para Signal Forms**
+
+```typescript
+import { signal } from '@angular/core';
+import { form, required } from '@angular/forms/signals';
+import {
+  strongPassword,
+  hibpPassword,
+  safeHtml,
+  safeUrl,
+} from '@angular-helpers/security/signal-forms';
+
+export class SignupSignalFormsComponent {
+  model = signal({ email: '', password: '', bio: '', homepage: '' });
+
+  f = form(this.model, (p) => {
+    required(p.email);
+    required(p.password);
+    strongPassword(p.password, { minScore: 3 });
+    hibpPassword(p.password); // async — valida contra HIBP
+    safeHtml(p.bio);
+    safeUrl(p.homepage, { schemes: ['https:'] });
+  });
+}
+```
+
+**Requisito del sub-entry**: instalar `@angular/forms`. El entry principal
+`@angular-helpers/security` no depende de `@angular/forms`.
+
+**Regla HIBP async**: `hibpPassword` requiere `provideHibp()` en la jerarquía del inyector. Falla
+en modo open — errores de red nunca bloquean el submit del formulario.
+
+### **JwtService — Inspección Client-Side**
+
+```typescript
+import { JwtService } from '@angular-helpers/security';
+
+export class SessionGuard {
+  private jwt = inject(JwtService);
+
+  isAuthenticated(): boolean {
+    const token = localStorage.getItem('access_token');
+    if (!token) return false;
+    return !this.jwt.isExpired(token, 30); // 30 segundos de leeway
+  }
+
+  currentUserId(): string | null {
+    const token = localStorage.getItem('access_token');
+    return token ? this.jwt.claim<string>(token, 'sub') : null;
+  }
+}
+```
+
+> **Nota de seguridad**: `JwtService` sólo decodifica payloads para inspección. **Nunca** confíes
+> en el contenido para decisiones de autorización — la verificación de la firma va siempre
+> server-side.
+
+### **CsrfService + `withCsrfHeader()`**
+
+```typescript
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideSecurity, CsrfService, withCsrfHeader } from '@angular-helpers/security';
+
+bootstrapApplication(App, {
+  providers: [
+    provideSecurity({ enableCsrf: true }),
+    provideHttpClient(withInterceptors([withCsrfHeader()])),
+  ],
+});
+
+// Tras el login:
+const csrf = inject(CsrfService);
+csrf.storeToken(response.csrfToken);
+// A partir de ahora, todas las requests POST/PUT/PATCH/DELETE llevan X-CSRF-Token.
+```
+
+### **RateLimiterService**
+
+```typescript
+import { RateLimiterService, RateLimitExceededError } from '@angular-helpers/security';
+
+export class SearchComponent {
+  private rateLimiter = inject(RateLimiterService);
+
+  constructor() {
+    this.rateLimiter.configure('search', {
+      type: 'token-bucket',
+      capacity: 5,
+      refillPerSecond: 1,
+    });
+  }
+
+  canSearch = this.rateLimiter.canExecute('search'); // Signal<boolean>
+  remaining = this.rateLimiter.remaining('search'); // Signal<number>
+
+  async search(query: string) {
+    try {
+      await this.rateLimiter.consume('search');
+      return this.api.search(query);
+    } catch (err) {
+      if (err instanceof RateLimitExceededError) {
+        // Mostrar countdown usando err.retryAfterMs
+      }
+    }
+  }
+}
+```
+
+### **HibpService**
+
+```typescript
+import { HibpService } from '@angular-helpers/security';
+
+export class RegistrationComponent {
+  private hibp = inject(HibpService);
+
+  async checkPassword(password: string) {
+    const { leaked, count, error } = await this.hibp.isPasswordLeaked(password);
+    if (error) return; // fail-open en errores de red
+    if (leaked) alert(`Esta contraseña apareció en ${count} brechas.`);
+  }
+}
+```
+
+### **SensitiveClipboardService**
+
+```typescript
+import { SensitiveClipboardService } from '@angular-helpers/security';
+
+export class ApiKeyPanel {
+  private sensitiveClipboard = inject(SensitiveClipboardService);
+
+  async copy(value: string) {
+    await this.sensitiveClipboard.copy(value, { clearAfterMs: 15_000 });
+  }
+}
+```
+
+El servicio lee el clipboard antes de limpiarlo y omite el clear si el contenido ya no coincide con
+lo que escribió — así evita pisar copias que el usuario haya hecho en otra parte.
 
 ## 📊 Niveles de Riesgo
 
