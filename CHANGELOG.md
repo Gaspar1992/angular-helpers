@@ -1,3 +1,10 @@
+# [1.28.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.27.0...v1.28.0) (2026-04-21)
+
+
+### Features
+
+* **security:** v21.3 utilities expansion (JWT, HIBP, CSRF, rate-limiter, clipboard, Reactive + Signal Forms) ([#86](https://github.com/Gaspar1992/angular-helpers/issues/86)) ([eeeaeaf](https://github.com/Gaspar1992/angular-helpers/commit/eeeaeaf8f3765b0e55ad6d912af55a49f62ff9a6))
+
 # [1.27.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.26.0...v1.27.0) (2026-04-21)
 
 
