@@ -96,8 +96,8 @@ test.describe('Security Utilities Demo', () => {
 
     await page.getByTestId('csrf-generate').click();
 
-    const tokenText = await tokenDisplay.textContent();
-    expect(tokenText).toMatch(/^[0-9a-f]{64}$/);
+    // Waits until the signal propagates and the DOM holds a 64-hex token.
+    await expect(tokenDisplay).toHaveText(/[0-9a-f]{64}/);
 
     await page.getByTestId('csrf-clear').click();
     await expect(tokenDisplay).toContainText('(no token)');

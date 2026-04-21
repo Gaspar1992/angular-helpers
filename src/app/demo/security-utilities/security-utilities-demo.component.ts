@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { SecurityValidators } from '@angular-helpers/security/forms';
@@ -70,13 +70,10 @@ interface DemoLog {
                 class="input input-bordered input-sm w-full"
                 data-testid="validators-password"
               />
-              @if (passwordErrors(); as errors) {
-                @if (errors['weakPassword']) {
-                  <p class="text-xs text-error mt-1" data-testid="validators-password-weak">
-                    Score {{ errors['weakPassword'].score }} / required
-                    {{ errors['weakPassword'].required }}
-                  </p>
-                }
+              @if (form.controls.password.errors?.['weakPassword']; as weak) {
+                <p class="text-xs text-error mt-1" data-testid="validators-password-weak">
+                  Score {{ weak.score }} / required {{ weak.required }}
+                </p>
               }
             </div>
 
@@ -363,8 +360,6 @@ export class SecurityUtilitiesDemoComponent {
     bio: ['', [SecurityValidators.safeHtml()]],
     homepage: ['', [SecurityValidators.safeUrl({ schemes: ['https:'] })]],
   });
-
-  readonly passwordErrors = computed(() => this.form.controls.password.errors);
 
   readonly jwtInput = signal('');
   readonly jwtResult = signal<{ expired: boolean; expiresIn: number; sub: string | null } | null>(
