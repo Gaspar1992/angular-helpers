@@ -2,6 +2,7 @@ import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  cacheDir: '../../node_modules/.vitest-cache/browser-web-apis',
   resolve: {
     alias: {
       '@angular-helpers/browser-web-apis': resolve(__dirname, 'src/public-api.ts'),

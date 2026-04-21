@@ -2,6 +2,7 @@ import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  cacheDir: '../../node_modules/.vitest-cache/worker-http',
   resolve: {
     alias: {
       '@angular-helpers/worker-http/transport': resolve(__dirname, 'transport/src/index.ts'),

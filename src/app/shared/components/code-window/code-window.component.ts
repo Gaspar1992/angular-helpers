@@ -18,6 +18,9 @@ import { Component, ChangeDetectionStrategy, input } from '@angular/core';
       </div>
       <pre
         class="m-0 px-5 py-4 overflow-x-auto"
+        tabindex="0"
+        role="region"
+        [attr.aria-label]="title() + ' code snippet'"
       ><code class="font-mono text-[0.8rem] leading-[1.7] block" [innerHTML]="code()"></code></pre>
     </div>
   `,

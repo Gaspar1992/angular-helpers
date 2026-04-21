@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
+  OnInit,
   computed,
   inject,
   signal,
@@ -10,8 +11,13 @@ import { DecimalPipe } from '@angular/common';
 
 import { SCENARIOS } from './services/benchmark-scenarios';
 import type { BenchmarkScenario } from './services/benchmark-scenarios';
-import { BenchmarkRunnerService } from './services/benchmark-runner.service';
-import type { BenchmarkMode, BenchmarkRunResult } from './services/benchmark-runner.service';
+import {
+  BenchmarkRunnerService,
+  type BenchmarkMode,
+  calculateStageAverages,
+} from './services/benchmark-runner.service';
+import type { BenchmarkRunResult } from './services/benchmark-runner.service';
+import type { RequestMetrics } from './services/metrics-collector';
 
 const MODES: readonly BenchmarkMode[] = ['main-thread', 'worker-pool-1', 'worker-pool-4'];
 
@@ -23,8 +29,10 @@ const MODE_LABELS: Record<BenchmarkMode, string> = {
 
 interface ScenarioState {
   scenario: BenchmarkScenario;
-  results: Partial<Record<BenchmarkMode, BenchmarkRunResult>>;
   runningMode: BenchmarkMode | null;
+  results: Partial<Record<BenchmarkMode, BenchmarkRunResult>>;
+  /** Granular request metrics for performance analysis */
+  granularMetrics?: Partial<Record<BenchmarkMode, RequestMetrics[]>>;
 }
 
 @Component({
@@ -185,7 +193,7 @@ interface ScenarioState {
     </div>
   `,
 })
-export class WorkerHttpBenchmarkComponent implements OnDestroy {
+export class WorkerHttpBenchmarkComponent implements OnInit, OnDestroy {
   private readonly runner = inject(BenchmarkRunnerService);
 
   protected readonly modes = MODES;
@@ -235,12 +243,125 @@ export class WorkerHttpBenchmarkComponent implements OnDestroy {
     this.states.set(SCENARIOS.map((scenario) => ({ scenario, results: {}, runningMode: null })));
   }
 
+  ngOnInit(): void {
+    // Expose metrics to global window for Playwright tests
+    this.setupGlobalTestInterface();
+  }
+
   ngOnDestroy(): void {
     this.runner.dispose();
   }
 
   private updateState(scenarioId: string, mutator: (s: ScenarioState) => ScenarioState): void {
     this.states.update((arr) => arr.map((s) => (s.scenario.id === scenarioId ? mutator(s) : s)));
+  }
+
+  /**
+   * Sets up global window interface for Playwright test instrumentation.
+   * Exposes:
+   * - window.__benchmarkMetrics - granular per-request stage timings
+   * - window.__droppedFramesWorker / __droppedFramesFetch - UI smoothness metrics
+   * - window.__benchmarkComplete - completion flag
+   * - window.__runBenchmark - programmatic execution for tests
+   */
+  private setupGlobalTestInterface(): void {
+    if (typeof window === 'undefined') return;
+
+    // Expose granular metrics from all scenarios
+    Object.defineProperty(window, '__benchmarkMetrics', {
+      get: () => this.getAllGranularMetrics(),
+      configurable: true,
+    });
+
+    // Expose dropped frames by mode
+    Object.defineProperty(window, '__droppedFramesWorker', {
+      get: () => this.getDroppedFramesForMode('worker-pool-1'),
+      configurable: true,
+    });
+    Object.defineProperty(window, '__droppedFramesFetch', {
+      get: () => this.getDroppedFramesForMode('main-thread'),
+      configurable: true,
+    });
+
+    // Completion flag - set when any scenario finishes
+    window.__benchmarkComplete = false;
+
+    // Programmatic runner for tests
+    window.__runBenchmark = async (scenarioId: string, mode: string) => {
+      const scenario = this.states().find((s) => s.scenario.id === scenarioId)?.scenario;
+      if (!scenario) {
+        console.error(`Scenario not found: ${scenarioId}`);
+        return;
+      }
+
+      // Map transport mode to BenchmarkMode
+      const modeMap: Record<string, BenchmarkMode> = {
+        worker: 'worker-pool-1',
+        fetch: 'main-thread',
+        'worker-pool-4': 'worker-pool-4',
+      };
+      const benchmarkMode = modeMap[mode] || (mode as BenchmarkMode);
+
+      await this.runScenarioWithGranularMetrics(scenario, benchmarkMode);
+      window.__benchmarkComplete = true;
+    };
+  }
+
+  /**
+   * Collects granular metrics from all completed scenario runs.
+   */
+  private getAllGranularMetrics(): RequestMetrics[] {
+    const allMetrics: RequestMetrics[] = [];
+    for (const state of this.states()) {
+      if (!state.granularMetrics) continue;
+      for (const metrics of Object.values(state.granularMetrics)) {
+        if (metrics) allMetrics.push(...metrics);
+      }
+    }
+    return allMetrics;
+  }
+
+  /**
+   * Gets dropped frames for a specific transport mode.
+   */
+  private getDroppedFramesForMode(mode: BenchmarkMode): number {
+    for (const state of this.states()) {
+      const result = state.results[mode];
+      if (result) return result.metrics.droppedFrames;
+    }
+    return 0;
+  }
+
+  /**
+   * Runs a scenario with granular metrics collection for stage analysis.
+   */
+  private async runScenarioWithGranularMetrics(
+    scenario: BenchmarkScenario,
+    mode: BenchmarkMode,
+  ): Promise<void> {
+    this.updateState(scenario.id, (s) => ({ ...s, runningMode: mode }));
+
+    try {
+      const result = await this.runner.run(scenario, mode);
+
+      // Store granular metrics if available in result
+      const granularMetrics = result.requestMetrics || [];
+
+      this.updateState(scenario.id, (s) => ({
+        ...s,
+        results: { ...s.results, [mode]: result },
+        granularMetrics: { ...s.granularMetrics, [mode]: granularMetrics },
+        runningMode: null,
+      }));
+
+      // Log stage breakdown for debugging
+      if (granularMetrics.length > 0 && mode === 'worker-pool-1') {
+        const averages = calculateStageAverages(granularMetrics);
+        console.log(`Scenario "${scenario.id}" stage averages:`, averages);
+      }
+    } finally {
+      this.updateState(scenario.id, (s) => ({ ...s, runningMode: null }));
+    }
   }
 }
 

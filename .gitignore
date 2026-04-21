@@ -20,7 +20,8 @@ dist/
 public/assets/workers/
 
 # Node
-/node_modules
+node_modules/
+**/node_modules/
 npm-debug.log
 yarn-error.log
 package-lock.json

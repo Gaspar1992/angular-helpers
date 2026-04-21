@@ -10,6 +10,29 @@
  * (Chromium-family). On Firefox/Safari the count will be 0 — the wall clock
  * and dropped-frames metrics still work cross-browser.
  */
+/**
+ * Granular stage timing for pipeline analysis
+ */
+export interface StageMetrics {
+  stage:
+    | 'worker-init'
+    | 'serialization'
+    | 'transfer-out'
+    | 'worker-processing'
+    | 'transfer-in'
+    | 'deserialization'
+    | 'total';
+  durationMs: number;
+  details?: Record<string, number>;
+}
+
+export interface RequestMetrics {
+  requestId: string;
+  stages: StageMetrics[];
+  totalDurationMs: number;
+  payloadSizeBytes: number;
+}
+
 export interface BenchmarkMetrics {
   totalMs: number;
   longTaskCount: number;
@@ -17,6 +40,10 @@ export interface BenchmarkMetrics {
   droppedFrames: number;
   totalFrames: number;
   longTaskSupported: boolean;
+  /** Granular per-request stage metrics (when available) */
+  requestMetrics?: RequestMetrics[];
+  /** Aggregated stage averages */
+  stageAverages?: Record<string, number>;
 }
 
 const FRAME_BUDGET_MS = 1000 / 60; // 16.67ms
