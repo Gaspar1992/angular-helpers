@@ -86,7 +86,9 @@ export class SensitiveClipboardService {
     return new Observable<CopyStatus>((subscriber) => {
       if (!this.isSupported()) {
         subscriber.error(new ClipboardUnsupportedError());
-        return;
+        return () => {
+          /* no teardown */
+        };
       }
 
       const clearAfterMs = options.clearAfterMs ?? DEFAULT_CLEAR_MS;

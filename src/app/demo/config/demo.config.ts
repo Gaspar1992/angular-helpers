@@ -23,6 +23,22 @@ export const PUBLIC_DEMO_SECTIONS: readonly DemoSection[] = [
     packageName: '@angular-helpers/security',
   },
   {
+    path: '/demo/security-utilities',
+    title: 'Security Utilities',
+    description:
+      'Reactive Forms validators, JWT inspection, HIBP, CSRF, rate limiter, and sensitive clipboard.',
+    icon: '🧰',
+    packageName: '@angular-helpers/security',
+  },
+  {
+    path: '/demo/security-signal-forms',
+    title: 'Security — Signal Forms',
+    description:
+      'Angular v21 Signal Forms validators with sync strongPassword and async hibpPassword rules.',
+    icon: '🧪',
+    packageName: '@angular-helpers/security/signal-forms',
+  },
+  {
     path: '/demo/worker-http',
     title: 'Worker HTTP',
     description:

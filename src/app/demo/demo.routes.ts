@@ -35,6 +35,36 @@ export const DEMO_ROUTES: Routes = [
         title: 'Security — Demo',
       },
       {
+        path: 'security-utilities',
+        loadComponent: () =>
+          import('./security-utilities/security-utilities-demo.component').then(
+            (m) => m.SecurityUtilitiesDemoComponent,
+          ),
+        providers: [
+          provideSecurity({
+            enableJwt: true,
+            enableHibp: true,
+            enableRateLimiter: true,
+            enableCsrf: true,
+            enableSensitiveClipboard: true,
+          }),
+        ],
+        title: 'Security Utilities — Demo',
+      },
+      {
+        path: 'security-signal-forms',
+        loadComponent: () =>
+          import('./security-signal-forms/security-signal-forms-demo.component').then(
+            (m) => m.SecuritySignalFormsDemoComponent,
+          ),
+        providers: [
+          provideSecurity({
+            enableHibp: true,
+          }),
+        ],
+        title: 'Security Signal Forms — Demo',
+      },
+      {
         path: 'worker-http',
         loadComponent: () =>
           import('./worker-http/worker-http-demo.component').then((m) => m.WorkerHttpDemoComponent),
