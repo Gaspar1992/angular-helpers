@@ -1,3 +1,10 @@
+## [1.28.1](https://github.com/Gaspar1992/angular-helpers/compare/v1.28.0...v1.28.1) (2026-04-21)
+
+
+### Bug Fixes
+
+* **worker-http:** hardening v0.7.0 — cancellation, timeout, crypto fixes, tests, docs ([#88](https://github.com/Gaspar1992/angular-helpers/issues/88)) ([f30942f](https://github.com/Gaspar1992/angular-helpers/commit/f30942f7d5bdb000fc26f790ebb5edad4a4af905))
+
 # [1.28.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.27.0...v1.28.0) (2026-04-21)
 
 
