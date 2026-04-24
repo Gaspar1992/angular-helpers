@@ -106,9 +106,12 @@ test.describe('Documentation - layout sidebar', () => {
     const firstSidebar = page.locator('aside').first();
     await expect(firstSidebar).toBeVisible();
 
-    // Check library icons are present
-    await expect(page.getByRole('link', { name: /browser-web-apis/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /security/i })).toBeVisible();
+    // Check library navigation has links (aria-label matching)
+    const libNav = page.locator('nav[aria-label="Library navigation"]');
+    await expect(libNav).toBeVisible();
+    // Should have 4 library links
+    const libLinks = libNav.locator('a');
+    await expect(libLinks).toHaveCount(4);
   });
 
   test('second sidebar shows library sections when library is active', async ({ page }) => {
@@ -136,7 +139,8 @@ test.describe('Documentation - layout sidebar', () => {
     await page.goto('/docs/browser-web-apis');
     await page.waitForLoadState('networkidle');
 
-    const topbar = page.locator('header');
+    // Use last() to target the docs layout header (not the site header)
+    const topbar = page.locator('header').last();
     await expect(topbar).toBeVisible();
 
     // Breadcrumb shows docs link
