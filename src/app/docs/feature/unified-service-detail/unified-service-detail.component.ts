@@ -26,7 +26,7 @@ export interface InterfaceDoc {
 
 export interface ServiceDetailConfig {
   service: ServiceDoc;
-  section: 'browser-web-apis' | 'security' | 'worker-http';
+  section: 'browser-web-apis' | 'security' | 'worker-http' | 'openlayers';
   backRoute: string;
   backLabel: string;
   interfaces?: InterfaceDoc[];
@@ -39,11 +39,7 @@ export interface ServiceDetailConfig {
   template: `
     <div class="unified-service-detail">
       @if (service(); as s) {
-        <app-docs-page-header
-          [breadcrumbs]="breadcrumbs()"
-          [title]="s.name"
-          [lead]="s.description"
-        />
+        <app-docs-page-header [title]="s.name" [lead]="s.description" />
 
         @if (s.fnVersion) {
           <div class="api-variant-toggle">
@@ -103,7 +99,7 @@ export interface ServiceDetailConfig {
           }
           @case ('example') {
             <div class="usd-tab-content">
-              <app-code-block language="ts" filename="usage.example.ts" [code]="s.example" />
+              <app-code-block language="ts" filename="usage.example.ts" [code]="exampleCode()" />
             </div>
           }
         }
@@ -211,17 +207,6 @@ export class UnifiedServiceDetailComponent {
 
   protected service = computed(() => this.config()?.service);
 
-  protected breadcrumbs = computed(() => {
-    const cfg = this.config();
-    const s = this.service();
-    if (!cfg) return [{ label: 'docs', routerLink: '/docs' }];
-    return [
-      { label: 'docs', routerLink: '/docs' },
-      { label: cfg.section, routerLink: cfg.backRoute },
-      { label: s?.name ?? '' },
-    ];
-  });
-
   protected importExample = computed(() => {
     const s = this.service();
     if (!s) return '';
@@ -244,6 +229,15 @@ export class UnifiedServiceDetailComponent {
       return s.fnVersion.fields as unknown as ApiRow[];
     }
     return s.methods as unknown as ApiRow[];
+  });
+
+  protected exampleCode = computed(() => {
+    const s = this.service();
+    if (!s) return '';
+    if (this.apiVariant() === 'fn' && s.fnVersion?.example) {
+      return s.fnVersion.example;
+    }
+    return s.example;
   });
 
   constructor() {

@@ -6,6 +6,7 @@ import {
   viewChild,
   ChangeDetectionStrategy,
   effect,
+  computed,
 } from '@angular/core';
 import hljs from 'highlight.js/lib/core';
 import typescript from 'highlight.js/lib/languages/typescript';
@@ -16,22 +17,27 @@ hljs.registerLanguage('typescript', typescript);
 hljs.registerLanguage('bash', bash);
 hljs.registerLanguage('json', json);
 
+const LANGUAGE_ALIASES: Record<string, string> = {
+  ts: 'typescript',
+  js: 'javascript',
+};
+
 @Component({
   selector: 'app-code-block',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="code-block-wrapper">
       <div class="code-header">
-        <span class="lang-badge">{{ language() }}</span>
+        <span class="lang-badge">{{ displayLanguage() }}</span>
         <button
           class="copy-btn"
           (click)="copy()"
-          [attr.aria-label]="'Copy ' + language() + ' code'"
+          [attr.aria-label]="'Copy ' + displayLanguage() + ' code'"
         >
           {{ copied ? 'Copied!' : 'Copy' }}
         </button>
       </div>
-      <pre><code #codeEl class="language-{{ language() }}">{{ code() }}</code></pre>
+      <pre><code #codeEl class="language-{{ normalizedLanguage() }}">{{ code() }}</code></pre>
     </div>
   `,
   styles: [
@@ -113,6 +119,18 @@ hljs.registerLanguage('json', json);
 export class CodeBlockComponent implements AfterViewInit {
   readonly code = input.required<string>();
   readonly language = input<string>('typescript');
+
+  protected normalizedLanguage = computed(() => {
+    const lang = this.language();
+    return LANGUAGE_ALIASES[lang] ?? lang;
+  });
+
+  protected displayLanguage = computed(() => {
+    const lang = this.language();
+    if (lang === 'ts') return 'TypeScript';
+    if (lang === 'js') return 'JavaScript';
+    return lang.charAt(0).toUpperCase() + lang.slice(1);
+  });
 
   protected codeEl = viewChild.required<ElementRef<HTMLElement>>('codeEl');
   protected copied = false;

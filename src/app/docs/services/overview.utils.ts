@@ -22,6 +22,10 @@ const CATEGORY_ICONS: Record<ServiceCategory, string> = {
   'worker-compute': '⚙',
   experimental: '🧪',
   security: '🔐',
+  'ol-core': '🗺️',
+  'ol-layers': '📐',
+  'ol-controls': '🎮',
+  'ol-interactions': '👆',
 };
 
 const CATEGORY_LABELS: Record<ServiceCategory, string> = {
@@ -33,6 +37,10 @@ const CATEGORY_LABELS: Record<ServiceCategory, string> = {
   'worker-compute': 'Web Worker & Compute',
   experimental: 'Experimental APIs',
   security: 'Security & Permissions',
+  'ol-core': 'Core',
+  'ol-layers': 'Layers',
+  'ol-controls': 'Controls',
+  'ol-interactions': 'Interactions',
 };
 
 /**
@@ -88,6 +96,10 @@ export function generateServiceGroups(
     'worker-compute',
     'security',
     'experimental',
+    'ol-core',
+    'ol-layers',
+    'ol-controls',
+    'ol-interactions',
   ];
 
   return categoryOrder

@@ -1,3 +1,6 @@
+/* ─── OpenLayers CSS ──────────────────────────────── */
+@import 'ol/ol.css';
+
 /* ─── Tailwind v4 + DaisyUI v5 ───────────────────────── */
 @import 'tailwindcss';
 

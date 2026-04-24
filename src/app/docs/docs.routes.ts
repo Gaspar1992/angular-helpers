@@ -1,14 +1,14 @@
 import { Routes } from '@angular/router';
 import { serviceDetailResolver } from './services/service-detail.resolver';
 import { overviewResolver } from './services/overview.resolver';
-import { DOCS_NAV_SECTIONS } from './config/docs-nav.data';
+import { DOCS_NAV_LIBRARIES, DOCS_NAV_SECTIONS } from './config/docs-nav.data';
 
 export const DOCS_ROUTES: Routes = [
   {
     path: '',
     loadComponent: () =>
       import('./layout/docs-layout.component').then((m) => m.DocsLayoutComponent),
-    data: { navSections: DOCS_NAV_SECTIONS },
+    data: { navSections: DOCS_NAV_SECTIONS, navLibraries: DOCS_NAV_LIBRARIES },
     children: [
       {
         path: '',
@@ -69,6 +69,24 @@ export const DOCS_ROUTES: Routes = [
           ),
         resolve: { config: serviceDetailResolver },
         title: 'Entry Point — Angular Helpers',
+      },
+      {
+        path: 'openlayers',
+        loadComponent: () =>
+          import('./feature/unified-overview/unified-overview.component').then(
+            (m) => m.UnifiedOverviewComponent,
+          ),
+        resolve: { config: overviewResolver },
+        title: 'openlayers — Angular Helpers',
+      },
+      {
+        path: 'openlayers/:component',
+        loadComponent: () =>
+          import('./feature/unified-service-detail/unified-service-detail.component').then(
+            (m) => m.UnifiedServiceDetailComponent,
+          ),
+        resolve: { config: serviceDetailResolver },
+        title: 'Component — Angular Helpers',
       },
       {
         path: '**',

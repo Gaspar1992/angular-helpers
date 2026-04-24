@@ -84,7 +84,11 @@ export type ServiceCategory =
   | 'storage-io'
   | 'worker-compute'
   | 'experimental'
-  | 'security';
+  | 'security'
+  | 'ol-core'
+  | 'ol-layers'
+  | 'ol-controls'
+  | 'ol-interactions';
 
 export interface PackageDoc {
   id: string;

@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { BROWSER_WEB_APIS_SERVICES } from '../data/browser-web-apis.data';
 import { SECURITY_SERVICES, SECURITY_INTERFACES } from '../data/security.data';
 import { WORKER_HTTP_ENTRIES, WORKER_HTTP_INTERFACES } from '../data/worker-http.data';
+import { OPENLAYERS_SERVICES } from '../data/openlayers.data';
 import {
   ServiceDetailConfig,
   InterfaceDoc,
@@ -24,6 +25,11 @@ const SECTION_DATA = {
     backRoute: '/docs/worker-http',
     backLabel: 'worker-http',
   },
+  openlayers: {
+    dataSource: OPENLAYERS_SERVICES,
+    backRoute: '/docs/openlayers',
+    backLabel: 'openlayers',
+  },
 };
 
 function getInterfaces(section: string, itemId: string): InterfaceDoc[] | undefined {
@@ -39,7 +45,8 @@ function getInterfaces(section: string, itemId: string): InterfaceDoc[] | undefi
 export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (route) => {
   const router = inject(Router);
   const section = route.url[0]?.path as keyof typeof SECTION_DATA;
-  const paramName = section === 'worker-http' ? 'entry' : 'service';
+  const paramName =
+    section === 'worker-http' ? 'entry' : section === 'openlayers' ? 'component' : 'service';
   const itemId = route.paramMap.get(paramName) ?? '';
 
   // Safety check for invalid section - redirect to docs
