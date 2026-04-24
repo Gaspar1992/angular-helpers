@@ -13,73 +13,56 @@ export const OPENLAYERS_SERVICES: ServiceDoc[] = [
     notes: [
       'Must wrap all other OpenLayers components',
       'Automatically cleans up map instance on destroy',
+      'Requires OpenLayers CSS: import "ol/ol.css" in your global styles',
     ],
     category: 'ol-core',
-    methods: [
+    inputs: [
       {
-        name: 'getMap',
-        signature: 'getMap(): Map | null',
-        description: 'Returns the underlying OpenLayers Map instance.',
-        returns: 'Map | null',
+        name: 'center',
+        type: 'Coordinate',
+        defaultValue: '[0, 0]',
+        description: 'Initial map center as [longitude, latitude]',
+      },
+      { name: 'zoom', type: 'number', defaultValue: '0', description: 'Initial zoom level' },
+      {
+        name: 'rotation',
+        type: 'number',
+        defaultValue: '0',
+        description: 'Map rotation in radians (clockwise)',
       },
       {
-        name: 'setView',
-        signature: 'setView(view: View): void',
-        description: 'Sets a new view for the map.',
-        returns: 'void',
+        name: 'projection',
+        type: 'string',
+        defaultValue: 'EPSG:3857',
+        description: 'Projection code for the map view',
       },
     ],
+    outputs: [
+      {
+        name: 'viewChange',
+        type: 'ViewState',
+        description: 'Emitted when the view changes (center, zoom, or rotation)',
+      },
+      { name: 'mapClick', type: 'MapClickEvent', description: 'Emitted when the map is clicked' },
+      {
+        name: 'mapDblClick',
+        type: 'MapClickEvent',
+        description: 'Emitted when the map is double-clicked',
+      },
+    ],
+    methods: [],
     example: `import { OlMapComponent } from '@angular-helpers/openlayers';
 
 @Component({
   imports: [OlMapComponent, OlTileLayerComponent, OlZoomControlComponent],
   template: \`
-    <ah-ol-map [center]="[0, 0]" [zoom]="2">
-      <ah-ol-tile-layer />
-      <ah-ol-zoom-control />
-    </ah-ol-map>
+    <ol-map>
+      <ol-tile-layer />
+      <ol-zoom-control />
+    </ol-map>
   \`
 })
 export class MapComponent {}`,
-  },
-  {
-    id: 'view',
-    name: 'OlViewDirective',
-    description:
-      'Directive to configure the map view, including center, zoom, rotation, and projection.',
-    scope: 'component',
-    importPath: '@angular-helpers/openlayers',
-    requiresSecureContext: false,
-    browserSupport: 'All modern browsers',
-    notes: ['Can be used as directive or configured via OlMapComponent inputs.'],
-    category: 'ol-core',
-    methods: [
-      {
-        name: 'fit',
-        signature: 'fit(extent: Extent, options?: FitOptions): void',
-        description: 'Fits the view to a given extent.',
-        returns: 'void',
-      },
-      {
-        name: 'animate',
-        signature: 'animate(...animations: AnimationOptions[]): Promise<void>',
-        description: 'Animates the view with one or more animations.',
-        returns: 'Promise<void>',
-      },
-    ],
-    example: `import { OlViewDirective } from '@angular-helpers/openlayers';
-
-@Component({
-  template: \`
-    <ah-ol-map>
-      <div ahOlView [center]="center()" [zoom]="zoom()"></div>
-    </ah-ol-map>
-  \`
-})
-export class MapComponent {
-  center = signal([0, 0]);
-  zoom = signal(2);
-}`,
   },
   {
     id: 'tile-layer',
@@ -92,33 +75,45 @@ export class MapComponent {
     browserSupport: 'All modern browsers',
     notes: ['Default source is OpenStreetMap', 'Supports custom XYZ and WMS sources via inputs.'],
     category: 'ol-layers',
-    methods: [
+    inputs: [
+      { name: 'id', type: 'string', description: 'Unique identifier for the layer (required)' },
+      { name: 'source', type: "'osm' | 'xyz' | 'wms'", description: 'Tile source type (required)' },
+      { name: 'url', type: 'string', description: 'URL template for XYZ or WMS sources' },
       {
-        name: 'setSource',
-        signature: 'setSource(source: TileSource): void',
-        description: 'Sets a new tile source for the layer.',
-        returns: 'void',
+        name: 'attributions',
+        type: 'string | string[]',
+        description: 'Attribution text for the layer source',
       },
       {
-        name: 'setOpacity',
-        signature: 'setOpacity(opacity: number): void',
-        description: 'Sets the layer opacity (0-1).',
-        returns: 'void',
+        name: 'params',
+        type: 'Record<string, unknown>',
+        description: 'Additional parameters for WMS sources',
+      },
+      { name: 'zIndex', type: 'number', defaultValue: '0', description: 'Layer stacking order' },
+      { name: 'opacity', type: 'number', defaultValue: '1', description: 'Layer opacity (0-1)' },
+      {
+        name: 'visible',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Whether the layer is visible',
       },
     ],
+    outputs: [],
+    methods: [],
     example: `import { OlTileLayerComponent } from '@angular-helpers/openlayers';
 
 @Component({
   template: \`
-    <ah-ol-map>
+    <ol-map>
       <!-- OSM default -->
-      <ah-ol-tile-layer />
-      
+      <ol-tile-layer source="osm" />
+
       <!-- Custom XYZ source -->
-      <ah-ol-tile-layer 
-        [url]="'https://example.com/tiles/{z}/{x}/{y}.png'"
-        [attribution]="'© Custom Tiles'" />
-    </ah-ol-map>
+      <ol-tile-layer
+        source="xyz"
+        url="https://example.com/tiles/{z}/{x}/{y}.png"
+        [attributions]="'© Custom Tiles'" />
+    </ol-map>
   \`
 })
 export class MapComponent {}`,
@@ -137,34 +132,38 @@ export class MapComponent {}`,
       'Supports reactive styling with style functions.',
     ],
     category: 'ol-layers',
-    methods: [
+    inputs: [
+      { name: 'id', type: 'string', description: 'Unique identifier for the layer (required)' },
       {
-        name: 'addFeature',
-        signature: 'addFeature(feature: Feature): void',
-        description: 'Adds a feature to the layer.',
-        returns: 'void',
+        name: 'features',
+        type: 'Feature[]',
+        defaultValue: '[]',
+        description: 'Array of features to display',
+      },
+      { name: 'zIndex', type: 'number', defaultValue: '0', description: 'Layer stacking order' },
+      { name: 'opacity', type: 'number', defaultValue: '1', description: 'Layer opacity (0-1)' },
+      {
+        name: 'visible',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Whether the layer is visible',
       },
       {
-        name: 'removeFeature',
-        signature: 'removeFeature(feature: Feature): void',
-        description: 'Removes a feature from the layer.',
-        returns: 'void',
-      },
-      {
-        name: 'clear',
-        signature: 'clear(): void',
-        description: 'Removes all features from the layer.',
-        returns: 'void',
+        name: 'style',
+        type: 'Style | (feature: Feature) => Style',
+        description: 'Style or style function for features',
       },
     ],
+    outputs: [],
+    methods: [],
     example: `import { OlVectorLayerComponent } from '@angular-helpers/openlayers/layers';
 
 @Component({
   template: \`
-    <ah-ol-map>
-      <ah-ol-tile-layer />
-      <ah-ol-vector-layer [features]="features()" [style]="pointStyle" />
-    </ah-ol-map>
+    <ol-map>
+      <ol-tile-layer source="osm" />
+      <ol-vector-layer [features]="features()" [style]="pointStyle" />
+    </ol-map>
   \`
 })
 export class MapComponent {
@@ -190,15 +189,30 @@ export class MapComponent {
     browserSupport: 'All modern browsers',
     notes: ['Can be positioned via CSS or class inputs.'],
     category: 'ol-controls',
+    inputs: [
+      {
+        name: 'delta',
+        type: 'number',
+        defaultValue: '1',
+        description: 'Zoom delta (amount to zoom in/out per click)',
+      },
+      {
+        name: 'duration',
+        type: 'number',
+        defaultValue: '250',
+        description: 'Animation duration in milliseconds',
+      },
+    ],
+    outputs: [],
     methods: [],
     example: `import { OlZoomControlComponent } from '@angular-helpers/openlayers/controls';
 
 @Component({
   template: \`
-    <ah-ol-map>
-      <ah-ol-tile-layer />
-      <ah-ol-zoom-control [delta]="1" class="top-4 right-4" />
-    </ah-ol-map>
+    <ol-map>
+      <ol-tile-layer source="osm" />
+      <ol-zoom-control [delta]="1" />
+    </ol-map>
   \`
 })
 export class MapComponent {}`,
@@ -214,101 +228,130 @@ export class MapComponent {}`,
     browserSupport: 'All modern browsers',
     notes: ['Automatically collects attributions from all visible layers.'],
     category: 'ol-controls',
-    methods: [
+    inputs: [
       {
-        name: 'setCollapsed',
-        signature: 'setCollapsed(collapsed: boolean): void',
-        description: 'Sets whether the attribution is collapsed.',
-        returns: 'void',
+        name: 'collapsible',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Whether the attribution can be collapsed',
+      },
+      {
+        name: 'collapsed',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Whether the attribution starts collapsed',
       },
     ],
+    outputs: [],
+    methods: [],
     example: `import { OlAttributionControlComponent } from '@angular-helpers/openlayers/controls';
 
 @Component({
   template: \`
-    <ah-ol-map>
-      <ah-ol-tile-layer />
-      <ah-ol-attribution-control [collapsed]="false" />
-    </ah-ol-map>
+    <ol-map>
+      <ol-tile-layer source="osm" />
+      <ol-attribution-control [collapsed]="false" />
+    </ol-map>
   \`
 })
 export class MapComponent {}`,
   },
   {
-    id: 'select-interaction',
-    name: 'OlSelectInteractionComponent',
+    id: 'scale-line-control',
+    name: 'OlScaleLineControlComponent',
     description:
-      'Interaction component for selecting features. Emits selection changes via output.',
+      'Scale line control that displays the current map scale. Supports metric, imperial, nautical, and US units.',
     scope: 'component',
-    importPath: '@angular-helpers/openlayers/interactions',
+    importPath: '@angular-helpers/openlayers/controls',
     requiresSecureContext: false,
     browserSupport: 'All modern browsers',
-    notes: ['Works with any vector layer', 'Supports multi-select with modifier keys.'],
-    category: 'ol-interactions',
+    notes: ['Automatically updates as the view changes', 'Can display as a bar or text.'],
+    category: 'ol-controls',
+    inputs: [
+      {
+        name: 'units',
+        type: "'metric' | 'imperial' | 'nautical' | 'us'",
+        defaultValue: 'metric',
+        description: 'Unit system for the scale',
+      },
+      {
+        name: 'bar',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Whether to show as a scale bar instead of text',
+      },
+      {
+        name: 'steps',
+        type: 'number',
+        defaultValue: '4',
+        description: 'Number of steps for the scale bar',
+      },
+    ],
+    outputs: [],
     methods: [],
-    example: `import { OlSelectInteractionComponent } from '@angular-helpers/openlayers/interactions';
+    example: `import { OlScaleLineControlComponent } from '@angular-helpers/openlayers/controls';
 
 @Component({
   template: \`
-    <ah-ol-map>
-      <ah-ol-tile-layer />
-      <ah-ol-vector-layer [features]="features()" />
-      <ah-ol-select-interaction 
-        (select)="onSelect($event)" />
-    </ah-ol-map>
+    <ol-map>
+      <ol-tile-layer source="osm" />
+      <ol-scale-line-control unit="metric" />
+    </ol-map>
   \`
 })
-export class MapComponent {
-  onSelect(event: SelectEvent) {
-    console.log('Selected:', event.selected);
-  }
-}`,
+export class MapComponent {}`,
   },
   {
-    id: 'draw-interaction',
-    name: 'OlDrawInteractionComponent',
-    description: 'Interaction component for drawing geometries (Point, LineString, Polygon).',
+    id: 'fullscreen-control',
+    name: 'OlFullscreenControlComponent',
+    description:
+      'Fullscreen control that toggles the map to fullscreen mode. Supports custom labels and tooltips.',
     scope: 'component',
-    importPath: '@angular-helpers/openlayers/interactions',
+    importPath: '@angular-helpers/openlayers/controls',
     requiresSecureContext: false,
     browserSupport: 'All modern browsers',
     notes: [
-      'Drawn features are automatically added to the target layer',
-      'Supports freehand drawing mode.',
+      'Can target a specific element or the entire map',
+      'Customizable labels for active/inactive states.',
     ],
-    category: 'ol-interactions',
-    methods: [
+    category: 'ol-controls',
+    inputs: [
       {
-        name: 'setActive',
-        signature: 'setActive(active: boolean): void',
-        description: 'Activates or deactivates the drawing interaction.',
-        returns: 'void',
+        name: 'source',
+        type: 'HTMLElement',
+        description: 'Element to make fullscreen (defaults to map element)',
       },
       {
-        name: 'finishDrawing',
-        signature: 'finishDrawing(): void',
-        description: 'Finishes the current drawing.',
-        returns: 'void',
+        name: 'label',
+        type: 'string',
+        defaultValue: '⤢',
+        description: 'Label for the fullscreen button',
+      },
+      {
+        name: 'labelActive',
+        type: 'string',
+        defaultValue: '⤡',
+        description: 'Label when in fullscreen mode',
+      },
+      {
+        name: 'tipLabel',
+        type: 'string',
+        defaultValue: 'Toggle full-screen',
+        description: 'Tooltip text for the button',
       },
     ],
-    example: `import { OlDrawInteractionComponent } from '@angular-helpers/openlayers/interactions';
+    outputs: [],
+    methods: [],
+    example: `import { OlFullscreenControlComponent } from '@angular-helpers/openlayers/controls';
 
 @Component({
   template: \`
-    <ah-ol-map>
-      <ah-ol-tile-layer />
-      <ah-ol-vector-layer #drawLayer />
-      <ah-ol-draw-interaction 
-        type="Polygon"
-        [targetLayer]="drawLayer"
-        (drawend)="onDrawEnd($event)" />
-    </ah-ol-map>
+    <ol-map>
+      <ol-tile-layer source="osm" />
+      <ol-fullscreen-control label="[+]" labelActive="[-]" />
+    </ol-map>
   \`
 })
-export class MapComponent {
-  onDrawEnd(event: DrawEvent) {
-    console.log('Drew:', event.feature);
-  }
-}`,
+export class MapComponent {}`,
   },
 ];

@@ -74,9 +74,9 @@ bootstrapApplication(AppComponent, {
 @Component({
   imports: [OlMapComponent, OlTileLayerComponent],
   template: \`
-    <ah-ol-map [center]="[0, 0]" [zoom]="2">
-      <ah-ol-tile-layer />
-    </ah-ol-map>
+    <ol-map [center]="[0, 0]" [zoom]="2">
+      <ol-tile-layer source="osm" />
+    </ol-map>
   \`,
 })
 export class MapComponent {}`,

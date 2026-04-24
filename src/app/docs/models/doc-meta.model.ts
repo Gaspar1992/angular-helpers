@@ -5,6 +5,19 @@ export interface MethodDoc {
   returns: string;
 }
 
+export interface InputDoc {
+  name: string;
+  type: string;
+  defaultValue?: string;
+  description: string;
+}
+
+export interface OutputDoc {
+  name: string;
+  type: string;
+  description: string;
+}
+
 export interface BreadcrumbItem {
   label: string;
   route?: string;
@@ -49,6 +62,19 @@ export const FN_FIELDS_COLUMNS: ApiColumn[] = [
   { key: 'description', header: 'Description', cellClass: 'docs-cell-desc' },
 ];
 
+export const INPUTS_COLUMNS: ApiColumn[] = [
+  { key: 'name', header: 'Input', cellClass: 'docs-code-name' },
+  { key: 'type', header: 'Type', cellClass: 'docs-code-ret' },
+  { key: 'defaultValue', header: 'Default', cellClass: 'docs-code-default' },
+  { key: 'description', header: 'Description', cellClass: 'docs-cell-desc' },
+];
+
+export const OUTPUTS_COLUMNS: ApiColumn[] = [
+  { key: 'name', header: 'Output', cellClass: 'docs-code-name' },
+  { key: 'type', header: 'Type', cellClass: 'docs-code-ret' },
+  { key: 'description', header: 'Description', cellClass: 'docs-cell-desc' },
+];
+
 export interface FnDoc {
   name: string;
   importPath: string;
@@ -73,6 +99,10 @@ export interface ServiceDoc {
   fnVersion?: FnDoc;
   /** Category for grouping in overview pages */
   category?: ServiceCategory;
+  /** Component inputs (for Angular components) */
+  inputs?: InputDoc[];
+  /** Component outputs (for Angular components) */
+  outputs?: OutputDoc[];
 }
 
 /** Service categories for automatic overview grouping */
@@ -87,8 +117,7 @@ export type ServiceCategory =
   | 'security'
   | 'ol-core'
   | 'ol-layers'
-  | 'ol-controls'
-  | 'ol-interactions';
+  | 'ol-controls';
 
 export interface PackageDoc {
   id: string;

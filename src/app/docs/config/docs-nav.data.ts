@@ -226,10 +226,7 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
     sections: [
       {
         title: 'Core',
-        items: [
-          { label: 'Map', route: '/docs/openlayers/map' },
-          { label: 'View', route: '/docs/openlayers/view' },
-        ],
+        items: [{ label: 'Map', route: '/docs/openlayers/map' }],
       },
       {
         title: 'Layers',
@@ -243,13 +240,8 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
         items: [
           { label: 'Zoom', route: '/docs/openlayers/zoom-control' },
           { label: 'Attribution', route: '/docs/openlayers/attribution-control' },
-        ],
-      },
-      {
-        title: 'Interactions',
-        items: [
-          { label: 'Select', route: '/docs/openlayers/select-interaction' },
-          { label: 'Draw', route: '/docs/openlayers/draw-interaction' },
+          { label: 'Scale Line', route: '/docs/openlayers/scale-line-control' },
+          { label: 'Fullscreen', route: '/docs/openlayers/fullscreen-control' },
         ],
       },
     ],

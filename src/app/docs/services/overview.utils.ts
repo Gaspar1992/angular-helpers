@@ -25,7 +25,6 @@ const CATEGORY_ICONS: Record<ServiceCategory, string> = {
   'ol-core': '🗺️',
   'ol-layers': '📐',
   'ol-controls': '🎮',
-  'ol-interactions': '👆',
 };
 
 const CATEGORY_LABELS: Record<ServiceCategory, string> = {
@@ -40,7 +39,6 @@ const CATEGORY_LABELS: Record<ServiceCategory, string> = {
   'ol-core': 'Core',
   'ol-layers': 'Layers',
   'ol-controls': 'Controls',
-  'ol-interactions': 'Interactions',
 };
 
 /**
@@ -99,7 +97,6 @@ export function generateServiceGroups(
     'ol-core',
     'ol-layers',
     'ol-controls',
-    'ol-interactions',
   ];
 
   return categoryOrder
