@@ -308,7 +308,6 @@ const SERVICE_GROUPS = [
   template: `
     <div class="docs-page">
       <app-docs-page-header
-        [breadcrumbs]="breadcrumbs"
         title="browser-web-apis"
         badge="@angular-helpers/browser-web-apis"
         badgeVariant="npm"

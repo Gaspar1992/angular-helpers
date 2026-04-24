@@ -11,10 +11,11 @@
 import { describe, it, expect } from 'vitest';
 import { PACKAGES, TOTAL_SERVICE_COUNT } from '../src/app/core/config/packages.data';
 import { HOME_STATS } from '../src/app/home/config/home.config';
-import { DOCS_NAV_SECTIONS } from '../src/app/docs/config/docs-nav.data';
+import { DOCS_NAV_SECTIONS, DOCS_NAV_LIBRARIES } from '../src/app/docs/config/docs-nav.data';
 import { BROWSER_WEB_APIS_SERVICES } from '../src/app/docs/data/browser-web-apis.data';
 import { SECURITY_SERVICES } from '../src/app/docs/data/security.data';
 import { WORKER_HTTP_ENTRIES } from '../src/app/docs/data/worker-http.data';
+import { OPENLAYERS_SERVICES } from '../src/app/docs/data/openlayers.data';
 
 describe('Documentation Consistency', () => {
   describe('Package Metadata', () => {
@@ -36,42 +37,57 @@ describe('Documentation Consistency', () => {
   });
 
   describe('Service Documentation Coverage', () => {
+    const LIBRARY_DATA: Record<
+      string,
+      { services: { id: string; fnVersion?: unknown }[]; dataFile: string }
+    > = {
+      'browser-web-apis': {
+        services: BROWSER_WEB_APIS_SERVICES,
+        dataFile: 'browser-web-apis.data.ts',
+      },
+      security: { services: SECURITY_SERVICES, dataFile: 'security.data.ts' },
+      'worker-http': { services: WORKER_HTTP_ENTRIES, dataFile: 'worker-http.data.ts' },
+      openlayers: { services: OPENLAYERS_SERVICES, dataFile: 'openlayers.data.ts' },
+    };
+
     it('every service in DOCS_NAV_SECTIONS should have a documentation entry', () => {
-      const navServiceIds = new Set(
-        DOCS_NAV_SECTIONS.flatMap((section) =>
-          section.serviceItems.map((item) => {
-            // Extract ID from route: /docs/browser-web-apis/camera -> camera
-            const parts = item.route.split('/');
-            return parts[parts.length - 1];
-          }),
-        ),
-      );
+      for (const section of DOCS_NAV_SECTIONS) {
+        const libData = LIBRARY_DATA[section.label];
+        if (!libData) continue;
 
-      const docIds = new Set(BROWSER_WEB_APIS_SERVICES.map((s) => s.id));
+        const docIds = new Set(libData.services.map((s) => s.id));
+        const navIds = section.serviceItems.map((item) => {
+          const parts = item.route.split('/');
+          return parts[parts.length - 1];
+        });
 
-      for (const navId of navServiceIds) {
-        expect(
-          docIds.has(navId),
-          `Service "${navId}" in navigation missing from browser-web-apis.data.ts`,
-        ).toBe(true);
+        for (const navId of navIds) {
+          expect(
+            docIds.has(navId),
+            `Service "${navId}" in navigation missing from ${libData.dataFile}`,
+          ).toBe(true);
+        }
       }
     });
 
     it('every documented service should be in navigation', () => {
-      const navServiceIds = new Set(
-        DOCS_NAV_SECTIONS.flatMap((section) =>
+      for (const section of DOCS_NAV_SECTIONS) {
+        const libData = LIBRARY_DATA[section.label];
+        if (!libData) continue;
+
+        const navIds = new Set(
           section.serviceItems.map((item) => {
             const parts = item.route.split('/');
             return parts[parts.length - 1];
           }),
-        ),
-      );
+        );
 
-      for (const doc of BROWSER_WEB_APIS_SERVICES) {
-        expect(
-          navServiceIds.has(doc.id),
-          `Documented service "${doc.id}" not found in navigation`,
-        ).toBe(true);
+        for (const doc of libData.services) {
+          expect(
+            navIds.has(doc.id),
+            `Documented service "${doc.id}" not found in navigation for ${section.label}`,
+          ).toBe(true);
+        }
       }
     });
 

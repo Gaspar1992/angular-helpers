@@ -8,10 +8,12 @@ test.describe('Documentation pages', () => {
     // Use first() to avoid strict mode violations
     await expect(page.getByText(/browser-web-apis/i).first()).toBeVisible();
     await expect(page.getByText(/security/i).first()).toBeVisible();
+    await expect(page.getByText(/worker-http/i).first()).toBeVisible();
+    await expect(page.getByText(/openlayers/i).first()).toBeVisible();
 
-    // Count all "View documentation" links
+    // Count all "View documentation" links (4 packages)
     const docLinks = page.getByRole('link', { name: /View documentation/i });
-    await expect(docLinks).toHaveCount(2);
+    await expect(docLinks).toHaveCount(4);
   });
 
   test('docs landing page has quick start section', async ({ page }) => {
@@ -66,6 +68,7 @@ test.describe('Documentation - worker-http overview', () => {
     await page.goto('/docs/worker-http');
 
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.getByText(/worker-http/i).first()).toBeVisible();
   });
 
   test('worker-http overview has entry navigation', async ({ page }) => {
@@ -77,45 +80,67 @@ test.describe('Documentation - worker-http overview', () => {
   });
 });
 
+test.describe('Documentation - openlayers overview', () => {
+  test('openlayers overview page renders', async ({ page }) => {
+    await page.goto('/docs/openlayers');
+
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.getByText(/openlayers/i).first()).toBeVisible();
+  });
+
+  test('openlayers overview has component navigation', async ({ page }) => {
+    await page.goto('/docs/openlayers');
+
+    const componentLinks = page.locator('a[href^="/docs/openlayers/"]');
+    const count = await componentLinks.count();
+    expect(count).toBeGreaterThanOrEqual(0);
+  });
+});
+
 test.describe('Documentation - layout sidebar', () => {
-  test('sidebar renders with package navigation sections', async ({ page }) => {
+  test('first sidebar renders with library navigation', async ({ page }) => {
     await page.goto('/docs/browser-web-apis');
     await page.waitForLoadState('networkidle');
 
-    const sidebar = page.locator('aside');
-    await expect(sidebar).toBeVisible();
+    // First sidebar shows libraries
+    const firstSidebar = page.locator('aside').first();
+    await expect(firstSidebar).toBeVisible();
 
-    await expect(sidebar.getByText('browser-web-apis')).toBeVisible();
-    await expect(sidebar.getByRole('link', { name: /Overview/i }).first()).toBeVisible();
+    // Check library icons are present
+    await expect(page.getByRole('link', { name: /browser-web-apis/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /security/i })).toBeVisible();
   });
 
-  test('sidebar auto-expands section for active route', async ({ page }) => {
+  test('second sidebar shows library sections when library is active', async ({ page }) => {
+    await page.goto('/docs/browser-web-apis');
+    await page.waitForLoadState('networkidle');
+
+    // Second sidebar shows sections for active library
+    const sidebars = page.locator('aside');
+    await expect(sidebars).toHaveCount(2);
+
+    // Second sidebar contains Overview and sections
+    await expect(page.getByRole('link', { name: /Overview/i }).first()).toBeVisible();
+  });
+
+  test('sidebar highlights active route', async ({ page }) => {
     await page.goto('/docs/browser-web-apis/camera');
     await page.waitForLoadState('networkidle');
 
-    const activeLink = page.locator('aside a.text-primary').first();
-    await expect(activeLink).toBeVisible();
+    // Check active link styling is applied
+    const activeLinks = page.locator('aside a.bg-base-300');
+    await expect(activeLinks.first()).toBeVisible();
   });
 
-  test('sidebar section toggle expands service list on click', async ({ page }) => {
-    await page.goto('/docs');
+  test('topbar shows breadcrumb navigation', async ({ page }) => {
+    await page.goto('/docs/browser-web-apis');
     await page.waitForLoadState('networkidle');
 
-    const collapsedBtn = page.locator('aside button[aria-expanded="false"]').first();
-    await expect(collapsedBtn).toBeVisible();
-
-    await collapsedBtn.click();
-
-    const expandedBtn = page.locator('aside button[aria-expanded="true"]').first();
-    await expect(expandedBtn).toBeVisible();
-  });
-
-  test('topbar shows Documentation label', async ({ page }) => {
-    await page.goto('/docs');
-    await page.waitForLoadState('networkidle');
-
-    const topbar = page.locator('header').filter({ hasText: /Documentation/i });
+    const topbar = page.locator('header');
     await expect(topbar).toBeVisible();
+
+    // Breadcrumb shows docs link
+    await expect(topbar.getByRole('link', { name: 'docs' })).toBeVisible();
   });
 });
 

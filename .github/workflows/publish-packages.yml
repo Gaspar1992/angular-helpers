@@ -33,6 +33,9 @@ jobs:
           - name: '@angular-helpers/worker-http'
             workspace: packages/worker-http
             dist: dist/worker-http
+          - name: '@angular-helpers/openlayers'
+            workspace: packages/openlayers
+            dist: dist/openlayers
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

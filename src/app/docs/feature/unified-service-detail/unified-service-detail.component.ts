@@ -16,6 +16,8 @@ import {
   ApiRow,
   METHODS_COLUMNS,
   FN_FIELDS_COLUMNS,
+  INPUTS_COLUMNS,
+  OUTPUTS_COLUMNS,
 } from '../../../docs/models/doc-meta.model';
 
 export interface InterfaceDoc {
@@ -26,7 +28,7 @@ export interface InterfaceDoc {
 
 export interface ServiceDetailConfig {
   service: ServiceDoc;
-  section: 'browser-web-apis' | 'security' | 'worker-http';
+  section: 'browser-web-apis' | 'security' | 'worker-http' | 'openlayers';
   backRoute: string;
   backLabel: string;
   interfaces?: InterfaceDoc[];
@@ -39,11 +41,7 @@ export interface ServiceDetailConfig {
   template: `
     <div class="unified-service-detail">
       @if (service(); as s) {
-        <app-docs-page-header
-          [breadcrumbs]="breadcrumbs()"
-          [title]="s.name"
-          [lead]="s.description"
-        />
+        <app-docs-page-header [title]="s.name" [lead]="s.description" />
 
         @if (s.fnVersion) {
           <div class="api-variant-toggle">
@@ -80,8 +78,20 @@ export interface ServiceDetailConfig {
             <div class="usd-tab-content">
               <app-code-block language="ts" filename="example.ts" [code]="importExample()" />
 
-              <h3 class="section-title">API Reference</h3>
-              <app-docs-api-table [columns]="currentColumns()" [rows]="methodRows()" />
+              @if (hasInputs()) {
+                <h3 class="section-title">Inputs</h3>
+                <app-docs-api-table [columns]="INPUTS_COLUMNS" [rows]="inputRows()" />
+              }
+
+              @if (hasOutputs()) {
+                <h3 class="section-title">Outputs</h3>
+                <app-docs-api-table [columns]="OUTPUTS_COLUMNS" [rows]="outputRows()" />
+              }
+
+              @if (hasMethods()) {
+                <h3 class="section-title">Methods</h3>
+                <app-docs-api-table [columns]="currentColumns()" [rows]="methodRows()" />
+              }
 
               @if (config().interfaces; as interfaces) {
                 @for (iface of interfaces; track iface.name) {
@@ -103,7 +113,7 @@ export interface ServiceDetailConfig {
           }
           @case ('example') {
             <div class="usd-tab-content">
-              <app-code-block language="ts" filename="usage.example.ts" [code]="s.example" />
+              <app-code-block language="ts" filename="usage.example.ts" [code]="exampleCode()" />
             </div>
           }
         }
@@ -211,15 +221,48 @@ export class UnifiedServiceDetailComponent {
 
   protected service = computed(() => this.config()?.service);
 
-  protected breadcrumbs = computed(() => {
-    const cfg = this.config();
+  // Expose column constants to template
+  protected readonly INPUTS_COLUMNS = INPUTS_COLUMNS;
+  protected readonly OUTPUTS_COLUMNS = OUTPUTS_COLUMNS;
+
+  protected hasInputs = computed(() => {
     const s = this.service();
-    if (!cfg) return [{ label: 'docs', routerLink: '/docs' }];
-    return [
-      { label: 'docs', routerLink: '/docs' },
-      { label: cfg.section, routerLink: cfg.backRoute },
-      { label: s?.name ?? '' },
-    ];
+    return !!s && !!s.inputs && s.inputs.length > 0;
+  });
+
+  protected hasOutputs = computed(() => {
+    const s = this.service();
+    return !!s && !!s.outputs && s.outputs.length > 0;
+  });
+
+  protected hasMethods = computed(() => {
+    const s = this.service();
+    if (!s) return false;
+    if (this.apiVariant() === 'fn' && s.fnVersion) {
+      return s.fnVersion.fields.length > 0;
+    }
+    return s.methods.length > 0;
+  });
+
+  protected inputRows = computed<ApiRow[]>(() => {
+    const s = this.service();
+    if (!s?.inputs) return [];
+    return s.inputs.map((input) => ({
+      name: input.name,
+      type: input.type,
+      defaultValue: input.defaultValue ?? '-',
+      description: input.description,
+    }));
+  });
+
+  protected outputRows = computed<ApiRow[]>(() => {
+    const s = this.service();
+    if (!s?.outputs) return [];
+    return s.outputs.map((output) => ({
+      name: output.name,
+      type: output.type,
+      description: output.description,
+    }));
   });
 
   protected importExample = computed(() => {
@@ -244,6 +287,15 @@ export class UnifiedServiceDetailComponent {
       return s.fnVersion.fields as unknown as ApiRow[];
     }
     return s.methods as unknown as ApiRow[];
+  });
+
+  protected exampleCode = computed(() => {
+    const s = this.service();
+    if (!s) return '';
+    if (this.apiVariant() === 'fn' && s.fnVersion?.example) {
+      return s.fnVersion.example;
+    }
+    return s.example;
   });
 
   constructor() {

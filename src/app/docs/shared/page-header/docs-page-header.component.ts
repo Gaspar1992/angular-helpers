@@ -1,15 +1,11 @@
 import { Component, input, ChangeDetectionStrategy } from '@angular/core';
-import { BreadcrumbItem } from '../../models/doc-meta.model';
-import { DocsBreadcrumbComponent } from '../breadcrumb/docs-breadcrumb.component';
 
 @Component({
   selector: 'app-docs-page-header',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DocsBreadcrumbComponent],
+  imports: [],
   template: `
     <div class="docs-page-header">
-      <app-docs-breadcrumb [items]="breadcrumbs()" />
-
       <h1 [class]="'docs-page-title' + (titleMono() ? ' title-mono' : '')">
         {{ title() }}
       </h1>
@@ -43,7 +39,6 @@ import { DocsBreadcrumbComponent } from '../breadcrumb/docs-breadcrumb.component
   ],
 })
 export class DocsPageHeaderComponent {
-  readonly breadcrumbs = input.required<BreadcrumbItem[]>();
   readonly title = input.required<string>();
   readonly titleMono = input(false);
   readonly badge = input<string>();

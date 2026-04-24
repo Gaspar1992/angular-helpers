@@ -1,7 +1,13 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  signal,
+  inject,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { OlMapComponent } from '@angular-helpers/openlayers/core';
-import { OlTileLayerComponent } from '@angular-helpers/openlayers/layers';
+import { OlMapComponent, OlMapService } from '@angular-helpers/openlayers/core';
+import { OlTileLayerComponent, OlLayerService } from '@angular-helpers/openlayers/layers';
 import {
   OlZoomControlComponent,
   OlAttributionControlComponent,
@@ -27,6 +33,7 @@ interface City {
     OlScaleLineControlComponent,
     OlFullscreenControlComponent,
   ],
+  providers: [OlMapService, OlLayerService],
   template: `
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       <!-- Header -->
@@ -64,7 +71,7 @@ interface City {
               [center]="center()"
               [zoom]="zoom()"
               (viewChange)="onViewChange($event)"
-              (click)="onMapClick($event)"
+              (mapClick)="onMapClick($event)"
               class="w-full h-full"
             >
               <!-- Base Layer: OSM -->
@@ -83,7 +90,10 @@ interface City {
             <div class="bg-base-100 rounded-lg p-4 border border-base-300">
               <h3 class="text-sm font-semibold text-base-content mb-2">View State</h3>
               <div class="space-y-1 text-sm text-base-content/80 font-mono">
-                <div>Center: {{ center()[0].toFixed(4) }}, {{ center()[1].toFixed(4) }}</div>
+                <div>
+                  Center: {{ center()?.[0]?.toFixed(4) ?? '-' }},
+                  {{ center()?.[1]?.toFixed(4) ?? '-' }}
+                </div>
                 <div>Zoom: {{ zoom() }}</div>
               </div>
             </div>
@@ -93,10 +103,10 @@ interface City {
               <div class="space-y-1 text-sm text-base-content/80 font-mono">
                 @if (lastClick(); as click) {
                   <div>
-                    Coord: {{ click.coordinate[0].toFixed(4) }},
-                    {{ click.coordinate[1].toFixed(4) }}
+                    Coord: {{ click.coordinate?.[0]?.toFixed(4) ?? '-' }},
+                    {{ click.coordinate?.[1]?.toFixed(4) ?? '-' }}
                   </div>
-                  <div>Pixel: {{ click.pixel[0] }}, {{ click.pixel[1] }}</div>
+                  <div>Pixel: {{ click.pixel?.[0] ?? '-' }}, {{ click.pixel?.[1] ?? '-' }}</div>
                 } @else {
                   <div class="text-base-content/50">Click on map to see coordinates</div>
                 }
@@ -145,6 +155,8 @@ interface City {
   `,
 })
 export class OpenLayersDemoComponent {
+  private cdr = inject(ChangeDetectorRef);
+
   center = signal<[number, number]>([2.17, 41.38]);
   zoom = signal<number>(12);
   lastClick = signal<{ coordinate: [number, number]; pixel: [number, number] } | null>(null);
@@ -161,5 +173,6 @@ export class OpenLayersDemoComponent {
   jumpTo(coords: [number, number], zoom: number): void {
     this.center.set(coords);
     this.zoom.set(zoom);
+    this.cdr.markForCheck();
   }
 }

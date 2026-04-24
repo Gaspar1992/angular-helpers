@@ -93,6 +93,76 @@ import { RouterLink } from '@angular/router';
             View documentation →
           </a>
         </div>
+
+        <!-- Worker HTTP -->
+        <div
+          class="bg-base-200 border border-base-300 rounded-xl p-6 flex flex-col gap-4 hover:border-primary/40 transition-colors"
+        >
+          <div class="flex items-start gap-3">
+            <span class="text-3xl leading-none mt-0.5">⚙️</span>
+            <div>
+              <h2 class="text-lg font-bold text-base-content mb-1">worker-http</h2>
+              <code class="text-xs text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono">
+                &#64;angular-helpers/worker-http
+              </code>
+            </div>
+          </div>
+          <p class="text-sm text-base-content/70 leading-relaxed">
+            HTTP client for Web Workers with interceptors, retry logic, and caching. Offload network
+            operations to workers for improved main-thread performance.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="badge badge-sm badge-ghost">Web Workers</span>
+            <span class="badge badge-sm badge-ghost">Interceptors</span>
+            <span class="badge badge-sm badge-ghost">Caching</span>
+          </div>
+          <div class="bg-base-300 border border-base-300 rounded-lg px-3 py-2">
+            <code class="text-xs text-success font-mono">
+              npm install &#64;angular-helpers/worker-http
+            </code>
+          </div>
+          <a
+            routerLink="/docs/worker-http"
+            class="text-primary font-semibold text-sm hover:underline mt-auto inline-flex items-center gap-1"
+          >
+            View documentation →
+          </a>
+        </div>
+
+        <!-- OpenLayers -->
+        <div
+          class="bg-base-200 border border-base-300 rounded-xl p-6 flex flex-col gap-4 hover:border-primary/40 transition-colors"
+        >
+          <div class="flex items-start gap-3">
+            <span class="text-3xl leading-none mt-0.5">🗺️</span>
+            <div>
+              <h2 class="text-lg font-bold text-base-content mb-1">openlayers</h2>
+              <code class="text-xs text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono">
+                &#64;angular-helpers/openlayers
+              </code>
+            </div>
+          </div>
+          <p class="text-sm text-base-content/70 leading-relaxed">
+            Modern Angular wrapper for OpenLayers with modular architecture, standalone components,
+            and reactive signal-based APIs for maps, layers, and controls.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="badge badge-sm badge-ghost">Maps</span>
+            <span class="badge badge-sm badge-ghost">Standalone</span>
+            <span class="badge badge-sm badge-ghost">Signals</span>
+          </div>
+          <div class="bg-base-300 border border-base-300 rounded-lg px-3 py-2">
+            <code class="text-xs text-success font-mono">
+              npm install &#64;angular-helpers/openlayers
+            </code>
+          </div>
+          <a
+            routerLink="/docs/openlayers"
+            class="text-primary font-semibold text-sm hover:underline mt-auto inline-flex items-center gap-1"
+          >
+            View documentation →
+          </a>
+        </div>
       </div>
 
       <!-- Quick Start -->

@@ -27,8 +27,17 @@ export class OlAttributionControlComponent implements OnInit, OnDestroy {
   private control?: Attribution;
 
   ngOnInit(): void {
+    this.tryAddControl();
+  }
+
+  private tryAddControl(retryCount = 0): void {
     const map = this.mapService.getMap();
-    if (!map) return;
+    if (!map) {
+      if (retryCount < 10) {
+        setTimeout(() => this.tryAddControl(retryCount + 1), Math.min(50 * (retryCount + 1), 500));
+      }
+      return;
+    }
 
     this.ngZone.runOutsideAngular(() => {
       this.control = new Attribution({

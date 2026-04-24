@@ -25,11 +25,17 @@ export class OlLayerService {
   private layerCache = new Map<string, BaseLayer>();
 
   addLayer(config: LayerConfig): { id: string } {
-    const map = this.mapService.getMap();
-    if (!map) {
-      console.warn('Map not initialized');
+    // If layer already exists, return it (idempotent for retries)
+    if (this.layerCache.has(config.id)) {
       return { id: config.id };
     }
+
+    const map = this.mapService.getMap();
+    if (!map) {
+      // Map not ready yet - caller should retry
+      return { id: config.id };
+    }
+
     switch (config.type) {
       case 'vector':
         return this.createVectorLayer(config as VectorLayerConfig, map);

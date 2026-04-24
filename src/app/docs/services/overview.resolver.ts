@@ -3,6 +3,7 @@ import { OverviewConfig } from '../feature/unified-overview/unified-overview.com
 import { BROWSER_WEB_APIS_SERVICES } from '../data/browser-web-apis.data';
 import { SECURITY_SERVICES } from '../data/security.data';
 import { WORKER_HTTP_ENTRIES } from '../data/worker-http.data';
+import { OPENLAYERS_SERVICES } from '../data/openlayers.data';
 import { generateServiceGroups } from './overview.utils';
 
 const OVERVIEW_CONFIGS: Record<string, OverviewConfig> = {
@@ -63,6 +64,23 @@ bootstrapApplication(AppComponent, {
         items: WORKER_HTTP_ENTRIES,
       },
     ],
+  },
+  openlayers: {
+    packageName: 'openlayers',
+    npmPackage: '@angular-helpers/openlayers',
+    lead: 'Modern Angular wrapper for OpenLayers with modular architecture and standalone components.',
+    providerExample: `import { OlMapComponent, OlTileLayerComponent } from '@angular-helpers/openlayers';
+
+@Component({
+  imports: [OlMapComponent, OlTileLayerComponent],
+  template: \`
+    <ol-map [center]="[0, 0]" [zoom]="2">
+      <ol-tile-layer source="osm" />
+    </ol-map>
+  \`,
+})
+export class MapComponent {}`,
+    serviceGroups: generateServiceGroups(OPENLAYERS_SERVICES),
   },
 };
 

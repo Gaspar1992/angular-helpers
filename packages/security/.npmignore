@@ -1,0 +1,27 @@
+# Source maps
+*.map
+
+# TypeScript source files (published as .js + .d.ts)
+*.ts
+!*.d.ts
+
+# Tests
+tests/
+__tests__/
+*.spec.ts
+*.test.ts
+
+# Development configs
+vitest.config.ts
+tsconfig.json
+ng-package.json
+
+# Build artifacts
+dist/
+
+# Node modules
+node_modules/
+
+# Misc
+*.log
+.DS_Store

@@ -32,7 +32,6 @@ export interface OverviewConfig {
   template: `
     <div class="unified-overview">
       <app-docs-page-header
-        [breadcrumbs]="breadcrumbs"
         [title]="config().packageName"
         badge="npm"
         badgeVariant="npm"

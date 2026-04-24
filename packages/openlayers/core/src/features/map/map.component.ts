@@ -15,7 +15,7 @@ import {
 } from '@angular/core';
 import OLMap from 'ol/Map';
 import View from 'ol/View';
-import { fromLonLat } from 'ol/proj';
+import { fromLonLat, toLonLat } from 'ol/proj';
 import type { Coordinate, Pixel, ViewState } from '../../models/types';
 import { OlMapService } from '../../services/map.service';
 
@@ -54,21 +54,24 @@ export class OlMapComponent implements AfterViewInit, OnDestroy {
   projection = input<string>('EPSG:3857');
 
   viewChange = output<ViewState>();
-  click = output<MapClickEvent>();
-  dblclick = output<MapClickEvent>();
+  mapClick = output<MapClickEvent>();
+  mapDblClick = output<MapClickEvent>();
 
   mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
   private map?: OLMap;
 
   constructor() {
     effect(() => {
-      if (this.map) this.updateCenter(this.center());
+      const center = this.center();
+      if (this.map) this.updateCenter(center);
     });
     effect(() => {
-      if (this.map) this.updateZoom(this.zoom());
+      const zoom = this.zoom();
+      if (this.map) this.updateZoom(zoom);
     });
     effect(() => {
-      if (this.map) this.updateRotation(this.rotation());
+      const rotation = this.rotation();
+      if (this.map) this.updateRotation(rotation);
     });
   }
 
@@ -97,7 +100,7 @@ export class OlMapComponent implements AfterViewInit, OnDestroy {
 
       this.map.on('click', (e) =>
         this.ngZone.run(() =>
-          this.click.emit({
+          this.mapClick.emit({
             coordinate: e.coordinate as Coordinate,
             pixel: e.pixel as Pixel,
           }),
@@ -105,7 +108,7 @@ export class OlMapComponent implements AfterViewInit, OnDestroy {
       );
       this.map.on('dblclick', (e) =>
         this.ngZone.run(() =>
-          this.dblclick.emit({
+          this.mapDblClick.emit({
             coordinate: e.coordinate as Coordinate,
             pixel: e.pixel as Pixel,
           }),
@@ -127,10 +130,10 @@ export class OlMapComponent implements AfterViewInit, OnDestroy {
   }
 
   private updateCenter(center: Coordinate): void {
-    if (this.map)
-      this.ngZone.runOutsideAngular(() =>
-        this.map!.getView().setCenter(fromLonLat(center, this.projection())),
-      );
+    if (this.map) {
+      const projectedCenter = fromLonLat(center, this.projection());
+      this.ngZone.runOutsideAngular(() => this.map!.getView().setCenter(projectedCenter));
+    }
   }
 
   private updateZoom(zoom: number): void {
@@ -143,11 +146,14 @@ export class OlMapComponent implements AfterViewInit, OnDestroy {
 
   private emitViewChange(): void {
     const view = this.map?.getView();
-    if (view)
+    if (view) {
+      const projectedCenter = view.getCenter() ?? [0, 0];
+      const lonLatCenter = toLonLat(projectedCenter, this.projection()) as Coordinate;
       this.viewChange.emit({
-        center: (view.getCenter() ?? [0, 0]) as Coordinate,
+        center: lonLatCenter,
         zoom: view.getZoom() ?? 0,
         rotation: view.getRotation() ?? 0,
       });
+    }
   }
 }
