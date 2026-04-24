@@ -1,13 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { OlMapComponent, provideOpenLayers } from '@angular-helpers/openlayers/core';
-import { OlTileLayerComponent, withLayers } from '@angular-helpers/openlayers/layers';
+import { OlMapComponent } from '@angular-helpers/openlayers/core';
+import { OlTileLayerComponent } from '@angular-helpers/openlayers/layers';
 import {
   OlZoomControlComponent,
   OlAttributionControlComponent,
   OlScaleLineControlComponent,
   OlFullscreenControlComponent,
-  withControls,
 } from '@angular-helpers/openlayers/controls';
 
 interface City {
@@ -28,7 +27,6 @@ interface City {
     OlScaleLineControlComponent,
     OlFullscreenControlComponent,
   ],
-  providers: [provideOpenLayers(withLayers(), withControls())],
   template: `
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       <!-- Header -->
