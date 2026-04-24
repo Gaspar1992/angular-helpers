@@ -25,7 +25,7 @@ npm install @angular-helpers/openlayers ol
 ```typescript
 // app.config.ts
 import { ApplicationConfig } from '@angular/core';
-import { provideOpenLayers } from '@angular-helpers/openlayers';
+import { provideOpenLayers } from '@angular-helpers/openlayers/core';
 import { withLayers } from '@angular-helpers/openlayers/layers';
 import { withControls } from '@angular-helpers/openlayers/controls';
 
@@ -38,36 +38,61 @@ export const appConfig: ApplicationConfig = {
 
 ```typescript
 // map.component.ts
-import { Component, inject } from '@angular/core';
-import { OlMapComponent } from '@angular-helpers/openlayers';
-import { OlVectorLayerComponent } from '@angular-helpers/openlayers/layers';
-import { OlCustomControlComponent } from '@angular-helpers/openlayers/controls';
-import { OlMapService } from '@angular-helpers/openlayers';
+import { Component, inject, signal } from '@angular/core';
+import { OlMapComponent } from '@angular-helpers/openlayers/core';
+import { OlTileLayerComponent } from '@angular-helpers/openlayers/layers';
+import {
+  OlZoomControlComponent,
+  OlScaleLineControlComponent,
+} from '@angular-helpers/openlayers/controls';
+import { OlMapService } from '@angular-helpers/openlayers/core';
 
 @Component({
   selector: 'app-map',
   standalone: true,
-  imports: [OlMapComponent, OlVectorLayerComponent, OlCustomControlComponent],
+  imports: [
+    OlMapComponent,
+    OlTileLayerComponent,
+    OlZoomControlComponent,
+    OlScaleLineControlComponent,
+  ],
   template: `
-    <ol-map [center]="[2.2945, 48.8584]" [zoom]="12">
-      <!-- Data via Input -->
-      <ol-tile-layer [source]="{ type: 'osm' }"></ol-tile-layer>
-      <ol-vector-layer [features]="points" [zIndex]="10"></ol-vector-layer>
+    <ol-map
+      [center]="center()"
+      [zoom]="zoom()"
+      (viewChange)="onViewChange($event)"
+      (click)="onMapClick($event)"
+      style="display: block; height: 400px;"
+    >
+      <!-- Base Layer -->
+      <ol-tile-layer id="osm" source="osm"></ol-tile-layer>
 
-      <!-- UI via Template -->
-      <ol-custom-control position="top-right">
-        <button (click)="flyToEiffel()">Eiffel Tower</button>
-      </ol-custom-control>
+      <!-- Controls -->
+      <ol-zoom-control></ol-zoom-control>
+      <ol-scale-line-control unit="metric"></ol-scale-line-control>
     </ol-map>
+
+    <p>Clicked: {{ lastClick()?.coordinate | json }}</p>
   `,
 })
 export class MapComponent {
-  private ol = inject(OlMapService);
+  private mapService = inject(OlMapService);
 
-  points = [{ id: '1', geometry: { type: 'Point', coordinates: [2.2945, 48.8584] } }];
+  center = signal<[number, number]>([2.2945, 48.8584]);
+  zoom = signal<number>(12);
+  lastClick = signal<{ coordinate: [number, number]; pixel: [number, number] } | null>(null);
+
+  onViewChange(state: { center: [number, number]; zoom: number }): void {
+    this.center.set(state.center);
+    this.zoom.set(state.zoom);
+  }
+
+  onMapClick(event: { coordinate: [number, number]; pixel: [number, number] }): void {
+    this.lastClick.set(event);
+  }
 
   flyToEiffel() {
-    this.ol.animateView({ center: [2.2945, 48.8584], zoom: 15, duration: 1000 });
+    this.mapService.animateView({ center: [2.2945, 48.8584], zoom: 15, duration: 1000 });
   }
 }
 ```

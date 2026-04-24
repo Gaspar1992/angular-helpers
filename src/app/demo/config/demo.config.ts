@@ -54,4 +54,12 @@ export const PUBLIC_DEMO_SECTIONS: readonly DemoSection[] = [
     icon: '📊',
     packageName: '@angular-helpers/worker-http',
   },
+  {
+    path: '/demo/openlayers',
+    title: 'OpenLayers',
+    description:
+      'Interactive maps with OpenLayers: tile layers, controls, and reactive vector layers.',
+    icon: '🗺️',
+    packageName: '@angular-helpers/openlayers',
+  },
 ];

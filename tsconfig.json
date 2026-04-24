@@ -29,14 +29,12 @@
       "@angular-helpers/browser-web-apis/experimental": [
         "packages/browser-web-apis/experimental/src/index.ts"
       ],
-      "@angular-helpers/openlayers/core": ["packages/openlayers/src/core/src/index.ts"],
-      "@angular-helpers/openlayers/layers": ["packages/openlayers/src/layers/src/index.ts"],
-      "@angular-helpers/openlayers/controls": ["packages/openlayers/src/controls/src/index.ts"],
-      "@angular-helpers/openlayers/interactions": [
-        "packages/openlayers/src/interactions/src/index.ts"
-      ],
-      "@angular-helpers/openlayers/overlays": ["packages/openlayers/src/overlays/src/index.ts"],
-      "@angular-helpers/openlayers/military": ["packages/openlayers/src/military/src/index.ts"]
+      "@angular-helpers/openlayers/core": ["packages/openlayers/core/src/index.ts"],
+      "@angular-helpers/openlayers/layers": ["packages/openlayers/layers/src/index.ts"],
+      "@angular-helpers/openlayers/controls": ["packages/openlayers/controls/src/index.ts"],
+      "@angular-helpers/openlayers/interactions": ["packages/openlayers/interactions/src/index.ts"],
+      "@angular-helpers/openlayers/overlays": ["packages/openlayers/overlays/src/index.ts"],
+      "@angular-helpers/openlayers/military": ["packages/openlayers/military/src/index.ts"]
     }
   },
   "angularCompilerOptions": {
