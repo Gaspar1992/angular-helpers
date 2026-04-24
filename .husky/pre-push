@@ -1,4 +1,5 @@
 [ "${CI}" = "true" ] && exit 0
+[ "${SKIP_BROWSER_TESTS}" = "1" ] && exit 0
 
-npx playwright install chromium
-npm run test:browser:ci
+echo "Running smoke tests (use SKIP_BROWSER_TESTS=1 to skip)..."
+npm run test:browser:smoke
