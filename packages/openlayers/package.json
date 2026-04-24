@@ -1,0 +1,57 @@
+{
+  "name": "@angular-helpers/openlayers",
+  "version": "0.1.0",
+  "description": "Modern Angular wrapper for OpenLayers with modular architecture, standalone components, and hybrid template/programmatic API",
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json",
+    "build:prod": "ng-packagr -p ng-package.json && find ../../dist/openlayers -name '*.map' -delete && find ../../dist/openlayers -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
+    "build:watch": "ng-packagr -p ng-package.json --watch",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "clean": "rm -rf dist",
+    "lint": "oxlint src",
+    "prepublishOnly": "npm run build"
+  },
+  "homepage": "https://gaspar1992.github.io/angular-helpers/docs/openlayers",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gaspar1992/angular-helpers"
+  },
+  "bugs": {
+    "url": "https://github.com/Gaspar1992/angular-helpers/issues"
+  },
+  "keywords": [
+    "angular",
+    "openlayers",
+    "ol",
+    "mapping",
+    "gis",
+    "cartography",
+    "standalone",
+    "signals",
+    "modular",
+    "military",
+    "milsymbol"
+  ],
+  "author": "",
+  "license": "MIT",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@angular/core": "^21.0.0",
+    "@angular/common": "^21.0.0",
+    "ol": "^10.0.0"
+  },
+  "peerDependenciesMeta": {
+    "ol": {
+      "optional": false
+    }
+  },
+  "devDependencies": {
+    "jsdom": "^26.0.0",
+    "vitest": "^4.0.0"
+  }
+}

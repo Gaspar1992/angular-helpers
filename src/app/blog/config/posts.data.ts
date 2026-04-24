@@ -2,6 +2,14 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'openlayers-phase2',
+    title: 'OpenLayers for Angular — Phase 2 Complete',
+    publishedAt: '2026-04-24',
+    tags: ['openlayers', 'angular', 'maps', 'gis', 'standalone-components'],
+    excerpt:
+      'A modern Angular wrapper for OpenLayers with standalone components, signals-based reactivity, and modular secondary entry points. Now with interactive controls and full demo.',
+  },
+  {
     slug: 'worker-http-hardening',
     title:
       'worker-http v0.7.0: hardening — cancellation that actually cancels, real timeouts, and a latent AES bug',

@@ -1,5 +1,8 @@
 import { Routes } from '@angular/router';
 import { provideSecurity } from '@angular-helpers/security';
+import { provideOpenLayers } from '@angular-helpers/openlayers/core';
+import { withLayers } from '@angular-helpers/openlayers/layers';
+import { withControls } from '@angular-helpers/openlayers/controls';
 
 export const DEMO_ROUTES: Routes = [
   {
@@ -77,6 +80,13 @@ export const DEMO_ROUTES: Routes = [
             (m) => m.WorkerHttpBenchmarkComponent,
           ),
         title: 'Worker HTTP — Benchmark Suite',
+      },
+      {
+        path: 'openlayers',
+        loadComponent: () =>
+          import('./openlayers/openlayers-demo.component').then((m) => m.OpenLayersDemoComponent),
+        providers: [provideOpenLayers(withLayers(), withControls())],
+        title: 'OpenLayers — Demo',
       },
       {
         path: 'library-services',
