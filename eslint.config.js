@@ -17,6 +17,32 @@ export default [
         'error',
         { type: 'attribute', prefix: 'app', style: 'camelCase' },
       ],
+    },
+  },
+  {
+    files: ['packages/openlayers/**/*.ts'],
+    languageOptions: {
+      parser: tsparser,
+    },
+    plugins: {
+      '@angular-eslint': angularEslint,
+    },
+    rules: {
+      '@angular-eslint/component-selector': [
+        'error',
+        { type: 'element', prefix: 'ol', style: 'kebab-case' },
+      ],
+    },
+  },
+  {
+    files: ['src/**/*.ts'],
+    languageOptions: {
+      parser: tsparser,
+    },
+    plugins: {
+      '@angular-eslint': angularEslint,
+    },
+    rules: {
       '@angular-eslint/component-selector': [
         'error',
         { type: 'element', prefix: 'app', style: 'kebab-case' },
