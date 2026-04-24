@@ -1,3 +1,10 @@
+# [1.29.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.28.1...v1.29.0) (2026-04-24)
+
+
+### Features
+
+* **openlayers:** Phase 2 - complete implementation with demo, controls, and docs ([#90](https://github.com/Gaspar1992/angular-helpers/issues/90)) ([10e634f](https://github.com/Gaspar1992/angular-helpers/commit/10e634f7a8c83057cba3a4a2d7234c90c2cadac7))
+
 ## [1.28.1](https://github.com/Gaspar1992/angular-helpers/compare/v1.28.0...v1.28.1) (2026-04-21)
 
 
