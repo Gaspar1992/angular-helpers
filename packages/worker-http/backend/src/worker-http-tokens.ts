@@ -93,3 +93,16 @@ export const WORKER_HTTP_TELEMETRY_TOKEN = new InjectionToken<readonly WorkerHtt
   'WorkerHttpTelemetry',
   { factory: () => [] },
 );
+
+/**
+ * Enable Safari streams polyfill for transferable ReadableStream/TransformStream
+ * support in workers. Provided via `withWorkerStreamsPolyfill()`.
+ * Defaults to `false` (native streams only).
+ *
+ * When enabled, the transport dynamically imports `@angular-helpers/worker-http/streams-polyfill`
+ * on Safari 16-17 to enable stream transfer via postMessage.
+ */
+export const WORKER_HTTP_STREAMS_POLYFILL_TOKEN = new InjectionToken<boolean>(
+  'WorkerHttpStreamsPolyfill',
+  { factory: () => false },
+);

@@ -12,6 +12,7 @@ export {
   WORKER_TARGET,
   WORKER_HTTP_SERIALIZER_TOKEN,
   WORKER_HTTP_INTERCEPTORS_TOKEN,
+  WORKER_HTTP_STREAMS_POLYFILL_TOKEN,
 } from './worker-http-tokens';
 export type { WorkerInterceptorSpecsMap } from './worker-http-tokens';
 
@@ -23,6 +24,7 @@ export {
   withWorkerSerialization,
   withWorkerInterceptors,
   withTelemetry,
+  withWorkerStreamsPolyfill,
 } from './worker-http-providers';
 export type {
   WorkerHttpTelemetry,

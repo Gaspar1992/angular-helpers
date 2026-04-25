@@ -19,6 +19,7 @@ import {
   WORKER_HTTP_INTERCEPTORS_TOKEN,
   WORKER_HTTP_ROUTES_TOKEN,
   WORKER_HTTP_SERIALIZER_TOKEN,
+  WORKER_HTTP_STREAMS_POLYFILL_TOKEN,
   WORKER_HTTP_TELEMETRY_TOKEN,
   WORKER_TARGET,
 } from './worker-http-tokens';
@@ -71,6 +72,7 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
   private readonly interceptorSpecs = inject(WORKER_HTTP_INTERCEPTORS_TOKEN);
   private readonly fetchBackend = inject(FetchBackend, { optional: true });
   private readonly telemetry = inject(WORKER_HTTP_TELEMETRY_TOKEN);
+  private readonly streamsPolyfill = inject(WORKER_HTTP_STREAMS_POLYFILL_TOKEN);
 
   private readonly transports = new Map<
     string,
@@ -155,6 +157,7 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
       workerFactory: () => new Worker(config.workerUrl, { type: 'module' }),
       maxInstances: config.maxInstances ?? 1,
       initMessage: specs.length > 0 ? { type: 'init-interceptors', specs } : undefined,
+      streamsPolyfill: this.streamsPolyfill,
     });
 
     this.transports.set(config.id, transport);
