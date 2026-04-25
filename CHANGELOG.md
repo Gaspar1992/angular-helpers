@@ -1,3 +1,10 @@
+## [1.29.2](https://github.com/Gaspar1992/angular-helpers/compare/v1.29.1...v1.29.2) (2026-04-25)
+
+
+### Bug Fixes
+
+* **tests:** resolve docs layout sidebar test failures ([#94](https://github.com/Gaspar1992/angular-helpers/issues/94)) ([2252962](https://github.com/Gaspar1992/angular-helpers/commit/22529628b818b371902dbce2ed6053a39984853e))
+
 # [1.29.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.28.1...v1.29.0) (2026-04-24)
 
 
