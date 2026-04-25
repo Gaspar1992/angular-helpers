@@ -1,5 +1,12 @@
 # [1.30.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.29.2...v1.30.0) (2026-04-25)
 
+
+### Features
+
+* **worker-http:** v1.0.0 release — ng-add, esbuild plugin, Safari polyfill ([#95](https://github.com/Gaspar1992/angular-helpers/issues/95)) ([6690a31](https://github.com/Gaspar1992/angular-helpers/commit/6690a31e5dc162a095c82ee86f177ad3dd299a6b))
+
+# [1.30.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.29.2...v1.30.0) (2026-04-25)
+
 ### Features
 
 * **worker-http:** v1.0.0 release — ng-add schematic, esbuild plugin, Safari streams polyfill, docs, blog post
