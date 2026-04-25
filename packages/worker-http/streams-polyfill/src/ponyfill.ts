@@ -26,8 +26,7 @@ export async function ponyfillStreams(): Promise<StreamPonyfillExports> {
   }
 
   // Dynamic import to avoid bundling polyfill for non-Safari users
-  const { ReadableStream, TransformStream, WritableStream } =
-    await import('web-streams-polyfill/ponyfill');
+  const { ReadableStream, TransformStream, WritableStream } = await import('web-streams-polyfill');
 
   cachedPonyfill = {
     ReadableStream,

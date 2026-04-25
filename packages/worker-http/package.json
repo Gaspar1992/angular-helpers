@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/worker-http",
-  "version": "0.7.0",
+  "version": "1.0.0",
   "description": "Angular HTTP over Web Workers — off-main-thread HTTP pipelines with configurable interceptors, WebCrypto security, and pluggable serialization",
   "schematics": "./schematics/collection.json",
   "exports": {
@@ -106,6 +106,7 @@
   "devDependencies": {
     "@angular-devkit/core": "^21.0.0",
     "@angular-devkit/schematics": "^21.0.0",
-    "esbuild": "^0.21.0"
+    "esbuild": "^0.21.0",
+    "web-streams-polyfill": "^4.2.0"
   }
 }
