@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/worker-http",
-  "version": "1.0.0",
+  "version": "21.0.0",
   "description": "Angular HTTP over Web Workers — off-main-thread HTTP pipelines with configurable interceptors, WebCrypto security, and pluggable serialization",
   "schematics": "./schematics/collection.json",
   "exports": {
