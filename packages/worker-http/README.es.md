@@ -16,13 +16,15 @@ Además, los workers proveen un límite de aislamiento natural para lógica sens
 
 ## Mapa de paquetes
 
-| Entry point                                 | Descripción                                                         | Estado        |
-| ------------------------------------------- | ------------------------------------------------------------------- | ------------- |
-| `@angular-helpers/worker-http/transport`    | Bridge RPC tipado, pool round-robin, cancelación                    | ✅ Disponible |
-| `@angular-helpers/worker-http/serializer`   | Serialización pluggable (structured clone, seroval, auto-detect)    | ✅ Disponible |
-| `@angular-helpers/worker-http/interceptors` | Pipeline de interceptors de funciones puras para workers            | ✅ Disponible |
-| `@angular-helpers/worker-http/crypto`       | Primitivas WebCrypto (HMAC, AES-GCM, hashing SHA)                   | ✅ Disponible |
-| `@angular-helpers/worker-http/backend`      | Reemplazo de `HttpBackend` de Angular — `provideWorkerHttpClient()` | ✅ Disponible |
+| Entry point                                     | Descripción                                                         | Estado        |
+| ----------------------------------------------- | ------------------------------------------------------------------- | ------------- |
+| `@angular-helpers/worker-http/transport`        | Bridge RPC tipado, pool round-robin, cancelación                    | ✅ Disponible |
+| `@angular-helpers/worker-http/serializer`       | Serialización pluggable (structured clone, seroval, auto-detect)    | ✅ Disponible |
+| `@angular-helpers/worker-http/interceptors`     | Pipeline de interceptors de funciones puras para workers            | ✅ Disponible |
+| `@angular-helpers/worker-http/crypto`           | Primitivas WebCrypto (HMAC, AES-GCM, hashing SHA)                   | ✅ Disponible |
+| `@angular-helpers/worker-http/backend`          | Reemplazo de `HttpBackend` de Angular — `provideWorkerHttpClient()` | ✅ Disponible |
+| `@angular-helpers/worker-http/esbuild-plugin`   | Plugin esbuild para auto-bundle de interceptors en workers          | ✅ Disponible |
+| `@angular-helpers/worker-http/streams-polyfill` | Ponyfill de streams para Safari (transferible streams)              | ✅ Disponible |
 
 ---
 
@@ -40,6 +42,43 @@ Angular HttpClient                   createWorkerPipeline([
                              (zero-copy)
                                      fetch() ──► API Server
 ```
+
+---
+
+## Instalación
+
+### Setup rápido con ng-add
+
+La forma más fácil de empezar es usando el schematic de Angular CLI:
+
+```bash
+ng add @angular-helpers/worker-http
+```
+
+Esto va a:
+
+1. Instalar el paquete
+2. Crear un archivo worker en `src/app/workers/http-api.worker.ts`
+3. Actualizar `tsconfig.json` con la lib webworker
+4. Agregar `provideWorkerHttpClient()` a tu `app.config.ts`
+
+**Opciones:**
+
+```bash
+# Path custom del worker
+ng add @angular-helpers/worker-http --workerPath=src/workers/api.worker.ts
+
+# Configurar el plugin de esbuild (para setups de build custom)
+ng add @angular-helpers/worker-http --installEsbuildPlugin=true
+```
+
+### Instalación manual
+
+```bash
+npm install @angular-helpers/worker-http
+```
+
+Después seguí la configuración en la sección `/backend` más abajo.
 
 ---
 
@@ -423,6 +462,61 @@ createWorkerPipeline([
 - `WorkerHttpClient` — wrapper de `HttpClient` con campo opcional `{ worker: string }` de ruteo
 - `WorkerHttpBackend` — la implementación de `HttpBackend` (inyectable para uso avanzado)
 - `matchWorkerRoute(url, routes)` — utilidad pura para testear reglas de ruteo
+
+---
+
+### `/esbuild-plugin` — Auto-bundle de interceptors
+
+Un plugin de esbuild que descubre y bundlea automáticamente archivos de interceptors en tus builds de workers. Cuando usás Angular con una configuración custom de webpack/esbuild, esto asegura que tus interceptors se incluyan en el bundle del worker sin imports manuales.
+
+```typescript
+// esbuild.config.ts
+import { workerHttpPlugin } from '@angular-helpers/worker-http/esbuild-plugin';
+
+export default {
+  plugins: [
+    workerHttpPlugin({
+      // Interceptors explícitos (relativo a la raíz del proyecto)
+      interceptors: ['./src/interceptors/auth.ts', './src/interceptors/logging.ts'],
+
+      // O auto-descubrir todos los archivos que matcheen el patrón interceptor
+      autoDiscover: true,
+    }),
+  ],
+};
+```
+
+**Opciones:**
+
+| Opción         | Tipo       | Default | Descripción                                                |
+| -------------- | ---------- | ------- | ---------------------------------------------------------- |
+| `interceptors` | `string[]` | `[]`    | Lista explícita de paths de interceptors para bundle       |
+| `autoDiscover` | `boolean`  | `false` | Scannear `src/` para archivos que matcheen `*interceptor*` |
+
+Los interceptors descubiertos se mergean con los explícitos. Los archivos de test (`.spec.ts`, `.test.ts`) se excluyen automáticamente.
+
+---
+
+### `/streams-polyfill` — Streams transferibles en Safari
+
+Safari 16-17 no tienen soporte nativo para `ReadableStream`/`TransformStream` transferibles. Este ponyfill habilita el transfer de streams en workers para esos browsers, cargado lazy solo cuando se necesita.
+
+```typescript
+// Habilitar en tu app config (hilo principal)
+import { withWorkerStreamsPolyfill } from '@angular-helpers/worker-http/backend';
+
+provideWorkerHttpClient(
+  withWorkerConfigs([...]),
+  withWorkerStreamsPolyfill(), // Habilitar compatibilidad Safari 16-17
+);
+```
+
+**Cuándo usar:**
+
+- Tu app usa `responseType: 'stream'` y targetea Safari 16-17
+- Ves `DataCloneError` cuando transferís streams hacia/desde workers
+
+**Impacto en bundle:** Cero para browsers modernos. El polyfill se carga lazy solo en versiones afectadas de Safari cuando los streams se usan realmente.
 
 ---
 

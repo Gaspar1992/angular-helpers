@@ -1,0 +1,19 @@
+import {
+  createWorkerMessageLoop,
+  type WorkerMessageLoopConfig,
+} from '@angular-helpers/worker-http/backend';
+
+/**
+ * HTTP API Worker
+ * 
+ * This worker handles HTTP requests off the main thread,
+ * with configurable interceptors, serialization, and crypto.
+ * 
+ * Customize by importing interceptors and adding them to the config.
+ */
+const config: WorkerMessageLoopConfig = {
+  // Add custom interceptors here:
+  // interceptors: [loggingInterceptor, authInterceptor],
+};
+
+createWorkerMessageLoop(config);

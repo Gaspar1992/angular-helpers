@@ -6,6 +6,7 @@ import {
   withWorkerInterceptors,
   withWorkerRoutes,
   withWorkerSerialization,
+  withWorkerStreamsPolyfill,
 } from './worker-http-providers';
 import {
   WORKER_HTTP_CONFIGS_TOKEN,
@@ -13,6 +14,7 @@ import {
   WORKER_HTTP_INTERCEPTORS_TOKEN,
   WORKER_HTTP_ROUTES_TOKEN,
   WORKER_HTTP_SERIALIZER_TOKEN,
+  WORKER_HTTP_STREAMS_POLYFILL_TOKEN,
 } from './worker-http-tokens';
 import type { WorkerInterceptorSpecsMap } from './worker-http-tokens';
 import type { WorkerSerializer } from '../../serializer/src/worker-serializer.types';
@@ -136,5 +138,20 @@ describe('withWorkerInterceptors', () => {
     const feature = withWorkerInterceptors([]);
     const provider = feature.providers[0] as { useValue: WorkerInterceptorSpecsMap };
     expect(provider.useValue).toStrictEqual({ '*': [] });
+  });
+});
+
+describe('withWorkerStreamsPolyfill', () => {
+  it('returns kind StreamsPolyfill', () => {
+    const feature = withWorkerStreamsPolyfill();
+    expect(feature.kind).toBe('StreamsPolyfill');
+  });
+
+  it('provides WORKER_HTTP_STREAMS_POLYFILL_TOKEN with true', () => {
+    const feature = withWorkerStreamsPolyfill();
+    expect(feature.providers).toHaveLength(1);
+    const provider = feature.providers[0] as { provide: unknown; useValue: unknown };
+    expect(provider.provide).toBe(WORKER_HTTP_STREAMS_POLYFILL_TOKEN);
+    expect(provider.useValue).toBe(true);
   });
 });

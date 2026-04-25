@@ -10,6 +10,14 @@ export default defineConfig({
       '@angular-helpers/worker-http/interceptors': resolve(__dirname, 'interceptors/src/index.ts'),
       '@angular-helpers/worker-http/crypto': resolve(__dirname, 'crypto/src/index.ts'),
       '@angular-helpers/worker-http/backend': resolve(__dirname, 'backend/src/index.ts'),
+      '@angular-helpers/worker-http/esbuild-plugin': resolve(
+        __dirname,
+        'esbuild-plugin/src/index.ts',
+      ),
+      '@angular-helpers/worker-http/streams-polyfill': resolve(
+        __dirname,
+        'streams-polyfill/src/index.ts',
+      ),
       '@angular-helpers/worker-http': resolve(__dirname, 'src/index.ts'),
     },
   },

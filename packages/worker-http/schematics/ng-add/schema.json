@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "WorkerHttpNgAddSchema",
+  "title": "worker-http ng-add options",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Name of the project to target",
+      "$default": {
+        "$source": "projectName"
+      }
+    },
+    "workerPath": {
+      "type": "string",
+      "description": "Path where the worker file will be created",
+      "default": "src/app/workers/http-api.worker.ts"
+    },
+    "installEsbuildPlugin": {
+      "type": "boolean",
+      "description": "Whether to configure the esbuild plugin in angular.json",
+      "default": false
+    }
+  },
+  "required": []
+}

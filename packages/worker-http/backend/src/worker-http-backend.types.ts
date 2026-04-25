@@ -10,7 +10,8 @@ export type WorkerHttpFeatureKind =
   | 'WorkerFallback'
   | 'WorkerSerialization'
   | 'WorkerInterceptors'
-  | 'Telemetry';
+  | 'Telemetry'
+  | 'StreamsPolyfill';
 
 /**
  * Feature object — mirrors Angular's HttpFeature<K> shape.

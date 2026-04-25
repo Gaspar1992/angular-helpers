@@ -9,6 +9,7 @@ import {
   WORKER_HTTP_INTERCEPTORS_TOKEN,
   WORKER_HTTP_ROUTES_TOKEN,
   WORKER_HTTP_SERIALIZER_TOKEN,
+  WORKER_HTTP_STREAMS_POLYFILL_TOKEN,
   WORKER_HTTP_TELEMETRY_TOKEN,
 } from './worker-http-tokens';
 import type { WorkerInterceptorSpecsMap } from './worker-http-tokens';
@@ -240,5 +241,35 @@ export function withTelemetry(telemetry: WorkerHttpTelemetry): WorkerHttpFeature
   return {
     kind: 'Telemetry',
     providers: [{ provide: WORKER_HTTP_TELEMETRY_TOKEN, useValue: telemetry, multi: true }],
+  };
+}
+
+/**
+ * Enables the Safari streams polyfill for transferable ReadableStream/TransformStream
+ * support in Web Workers.
+ *
+ * Safari 16-17 lacks native transferable streams. When this feature is enabled,
+ * the transport layer dynamically loads a ponyfill that enables stream transfer
+ * via postMessage on affected browsers.
+ *
+ * **When to use:**
+ * - Your application uses `responseType: 'stream'` and targets Safari 16-17
+ * - You see "DataCloneError" when transferring streams to/from workers
+ *
+ * **Bundle impact:** The polyfill is lazy-loaded only on Safari 16-17 when
+ * streams are actually used. Non-Safari browsers and modern Safari pay 0 bytes.
+ *
+ * @example
+ * ```typescript
+ * provideWorkerHttpClient(
+ *   withWorkerConfigs([...]),
+ *   withWorkerStreamsPolyfill(), // Enable for Safari compatibility
+ * )
+ * ```
+ */
+export function withWorkerStreamsPolyfill(): WorkerHttpFeature<'StreamsPolyfill'> {
+  return {
+    kind: 'StreamsPolyfill',
+    providers: [{ provide: WORKER_HTTP_STREAMS_POLYFILL_TOKEN, useValue: true }],
   };
 }

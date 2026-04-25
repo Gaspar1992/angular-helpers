@@ -2,6 +2,14 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'worker-http-v1-0',
+    title: 'worker-http v1.0.0: The Journey from Proof-of-Concept to Production',
+    publishedAt: '2026-04-25',
+    tags: ['worker-http', 'v1.0', 'web-workers', 'angular', 'esbuild', 'schematics', 'safari'],
+    excerpt:
+      'Five phases, three new entry points, one schematic, and a lot of lessons learned. The complete story of how @angular-helpers/worker-http went from a promising experiment to a production-ready toolkit for off-main-thread HTTP.',
+  },
+  {
     slug: 'openlayers-phase2',
     title: 'OpenLayers for Angular — Phase 2 Complete',
     publishedAt: '2026-04-24',
