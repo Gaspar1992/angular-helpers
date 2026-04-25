@@ -106,9 +106,9 @@ test.describe('Documentation - layout sidebar', () => {
     const firstSidebar = page.locator('aside').first();
     await expect(firstSidebar).toBeVisible();
 
-    // Check library icons are present
-    await expect(page.getByRole('link', { name: /browser-web-apis/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /security/i })).toBeVisible();
+    // Check library icons are present (use text filter instead of role to match icons + labels)
+    await expect(page.getByText(/Browser Web APIs/i).first()).toBeVisible();
+    await expect(page.getByText(/Security/i).first()).toBeVisible();
   });
 
   test('second sidebar shows library sections when library is active', async ({ page }) => {
@@ -136,7 +136,8 @@ test.describe('Documentation - layout sidebar', () => {
     await page.goto('/docs/browser-web-apis');
     await page.waitForLoadState('networkidle');
 
-    const topbar = page.locator('header');
+    // Target the docs topbar specifically (not the main app header)
+    const topbar = page.locator('header.bg-base-200\\/80');
     await expect(topbar).toBeVisible();
 
     // Breadcrumb shows docs link
