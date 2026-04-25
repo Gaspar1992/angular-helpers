@@ -3,7 +3,7 @@
   "schematics": {
     "ng-add": {
       "description": "Add @angular-helpers/worker-http to a project",
-      "factory": "./ng-add/index#ngAdd",
+      "factory": "./ng-add/index.cjs#ngAdd",
       "schema": "./ng-add/schema.json"
     }
   }

@@ -1,6 +1,5 @@
 import type { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
-import { NodePackageInstallTask, RunSchematicTask } from '@angular-devkit/schematics/tasks';
-import { strings } from '@angular-devkit/core';
+import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
 import * as path from 'node:path';
 import type { Schema } from './schema';
 
@@ -79,7 +78,7 @@ function getDefaultProject(tree: Tree): string {
   }
 
   // Return default project or first project
-  return angularJson.defaultProject ?? projects[0];
+  return (angularJson.defaultProject as string | undefined) ?? projects[0];
 }
 
 /**
@@ -137,7 +136,7 @@ function updateTsConfig(tree: Tree): void {
       continue;
     }
 
-    const tsConfig = readJson(tree, tsConfigPath);
+    const tsConfig = readJson(tree, tsConfigPath) as { compilerOptions?: { lib?: string[] } };
 
     // Ensure compilerOptions exists
     tsConfig.compilerOptions = tsConfig.compilerOptions ?? {};
@@ -227,7 +226,7 @@ function addImport(content: string, importStatement: string): string {
 /**
  * Adds the worker HTTP provider to the application config
  */
-function addProviderToConfig(content: string, workerPath: string): string {
+function addProviderToConfig(content: string, _workerPath: string): string {
   const workerConfig = `provideWorkerHttpClient(
     withWorkerConfigs([
       {
@@ -273,7 +272,11 @@ function updateAngularJson(tree: Tree, options: NormalizedOptions): void {
   }
 
   const angularJson = readJson(tree, 'angular.json');
-  const project = angularJson.projects?.[options.project];
+  const project = (
+    angularJson.projects as
+      | Record<string, { architect?: { build?: { options?: { plugins?: unknown[] } } } }>
+      | undefined
+  )?.[options.project];
 
   if (!project) {
     return;
@@ -292,8 +295,8 @@ function updateAngularJson(tree: Tree, options: NormalizedOptions): void {
     };
 
     // Check if plugin already configured
-    const hasPlugin = buildOptions.plugins.some(
-      (p: { path?: string }) => p.path === pluginConfig.path,
+    const hasPlugin = (buildOptions.plugins as Array<{ path?: string }>).some(
+      (p) => p.path === pluginConfig.path,
     );
 
     if (!hasPlugin) {

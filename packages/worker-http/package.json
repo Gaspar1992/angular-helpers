@@ -49,6 +49,7 @@
     "build": "ng-packagr -p ng-package.json",
     "build:prod": "ng-packagr -p ng-package.json && find ../../dist/worker-http -name '*.map' -delete && find ../../dist/worker-http -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
     "build:watch": "ng-packagr -p ng-package.json --watch",
+    "build:schematics": "tsc -p tsconfig.schematics.json && node scripts/rename-to-cjs.mjs",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
