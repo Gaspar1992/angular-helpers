@@ -70,6 +70,15 @@ export interface WorkerTransportConfig {
    * recognising and acting on it.
    */
   initMessage?: { type: string; [key: string]: unknown };
+
+  /**
+   * Enable Safari streams polyfill for transferable ReadableStream/TransformStream
+   * support. When `true`, the transport lazy-loads the ponyfill on Safari 16-17
+   * to enable stream transfer via postMessage.
+   *
+   * @default false
+   */
+  streamsPolyfill?: boolean;
 }
 
 /**

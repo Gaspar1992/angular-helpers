@@ -50,6 +50,8 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
 
   const requestTimeout = config.requestTimeout ?? DEFAULT_REQUEST_TIMEOUT_MS;
   const transferDetection = config.transferDetection ?? 'none';
+  const streamsPolyfill = config.streamsPolyfill ?? false;
+  let polyfillLoaded = false;
 
   function createWorker(): Worker {
     if (config.workerFactory) {
@@ -89,6 +91,13 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
     const requestId = crypto.randomUUID();
 
     return new Observable<TResponse>((subscriber) => {
+      // Lazy-load polyfill on first request if enabled
+      if (streamsPolyfill && !polyfillLoaded) {
+        loadStreamsPolyfill().catch((err) => {
+          console.warn('[worker-http] Streams polyfill failed to load:', err);
+        });
+      }
+
       const worker = getOrCreateWorker();
       let settled = false;
       let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
@@ -157,6 +166,30 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
         worker.postMessage({ type: 'cancel', requestId });
       };
     });
+  }
+
+  /**
+   * Lazy-loads the streams polyfill if enabled and not already loaded.
+   * Called before operations that might involve stream transfer.
+   */
+  async function loadStreamsPolyfill(): Promise<void> {
+    if (!streamsPolyfill || polyfillLoaded) {
+      return;
+    }
+
+    try {
+      const { needsPolyfill, ponyfillStreams } =
+        await import('@angular-helpers/worker-http/streams-polyfill');
+
+      if (needsPolyfill()) {
+        await ponyfillStreams();
+      }
+
+      polyfillLoaded = true;
+    } catch (err) {
+      // Log warning but don't block request — streams will fail naturally
+      console.warn('[worker-http] Failed to load streams polyfill:', err);
+    }
   }
 
   function terminate(): void {

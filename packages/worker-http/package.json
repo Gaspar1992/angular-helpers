@@ -1,11 +1,55 @@
 {
   "name": "@angular-helpers/worker-http",
-  "version": "0.7.0",
+  "version": "21.0.0",
   "description": "Angular HTTP over Web Workers — off-main-thread HTTP pipelines with configurable interceptors, WebCrypto security, and pluggable serialization",
+  "schematics": "./schematics/collection.json",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "esm": "./esm/src/index.js",
+      "default": "./src/index.js"
+    },
+    "./backend": {
+      "types": "./backend/src/index.d.ts",
+      "esm": "./esm/backend/src/index.js",
+      "default": "./backend/src/index.js"
+    },
+    "./transport": {
+      "types": "./transport/src/index.d.ts",
+      "esm": "./esm/transport/src/index.js",
+      "default": "./transport/src/index.js"
+    },
+    "./interceptors": {
+      "types": "./interceptors/src/index.d.ts",
+      "esm": "./esm/interceptors/src/index.js",
+      "default": "./interceptors/src/index.js"
+    },
+    "./crypto": {
+      "types": "./crypto/src/index.d.ts",
+      "esm": "./esm/crypto/src/index.js",
+      "default": "./crypto/src/index.js"
+    },
+    "./serializer": {
+      "types": "./serializer/src/index.d.ts",
+      "esm": "./esm/serializer/src/index.js",
+      "default": "./serializer/src/index.js"
+    },
+    "./esbuild-plugin": {
+      "types": "./esbuild-plugin/src/index.d.ts",
+      "esm": "./esm/esbuild-plugin/src/index.js",
+      "default": "./esbuild-plugin/src/index.js"
+    },
+    "./streams-polyfill": {
+      "types": "./streams-polyfill/src/index.d.ts",
+      "esm": "./esm/streams-polyfill/src/index.js",
+      "default": "./streams-polyfill/src/index.js"
+    }
+  },
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
     "build:prod": "ng-packagr -p ng-package.json && find ../../dist/worker-http -name '*.map' -delete && find ../../dist/worker-http -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
     "build:watch": "ng-packagr -p ng-package.json --watch",
+    "build:schematics": "tsc -p tsconfig.schematics.json && node scripts/rename-to-cjs.mjs",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
@@ -52,6 +96,18 @@
     },
     "seroval": {
       "optional": true
+    },
+    "esbuild": {
+      "optional": true
+    },
+    "web-streams-polyfill": {
+      "optional": true
     }
+  },
+  "devDependencies": {
+    "@angular-devkit/core": "^21.0.0",
+    "@angular-devkit/schematics": "^21.0.0",
+    "esbuild": "^0.21.0",
+    "web-streams-polyfill": "^4.2.0"
   }
 }

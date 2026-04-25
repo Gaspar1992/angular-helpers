@@ -1,3 +1,15 @@
+# [1.30.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.29.2...v1.30.0) (2026-04-25)
+
+### Features
+
+* **worker-http:** v1.0.0 release — ng-add schematic, esbuild plugin, Safari streams polyfill, docs, blog post
+  - `ng add @angular-helpers/worker-http` — one-command setup with worker template, tsconfig update, provider injection
+  - `@angular-helpers/worker-http/esbuild-plugin` — auto-discover and bundle interceptors into worker files
+  - `@angular-helpers/worker-http/streams-polyfill` — lazy-loaded ponyfill for transferable streams on Safari 16-17
+  - `withWorkerStreamsPolyfill()` — opt-in feature for Safari compatibility
+  - Full documentation updates (README, README.es, MIGRATION.md)
+  - v1.0.0 retrospective blog post
+
 ## [1.29.2](https://github.com/Gaspar1992/angular-helpers/compare/v1.29.1...v1.29.2) (2026-04-25)
 
 
