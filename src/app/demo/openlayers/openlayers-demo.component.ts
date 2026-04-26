@@ -178,7 +178,7 @@ const BASEMAPS: BasemapConfig[] = [
           <div class="flex flex-wrap gap-2 pt-2">
             <span class="text-sm text-base-content/70 self-center mr-2">Jump to:</span>
             <button class="btn btn-sm btn-primary" (click)="fitToCities()">
-              🗺️ Ver todas las ciudades
+              🗺️ View all cities
             </button>
             <button class="btn btn-sm btn-outline" (click)="jumpTo([2.17, 41.38], 12)">
               Barcelona
