@@ -2,7 +2,7 @@
 
 import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import type { BasemapConfig } from '../models/basemap-switcher.types';
+import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-switcher.types';
 
 /**
  * A basemap switcher control that allows switching between
@@ -30,8 +30,10 @@ import type { BasemapConfig } from '../models/basemap-switcher.types';
     <div
       class="ol-basemap-switcher"
       [class.ol-basemap-switcher--top-left]="position() === 'top-left'"
+      [class.ol-basemap-switcher--top-center]="position() === 'top-center'"
       [class.ol-basemap-switcher--top-right]="position() === 'top-right'"
       [class.ol-basemap-switcher--bottom-left]="position() === 'bottom-left'"
+      [class.ol-basemap-switcher--bottom-center]="position() === 'bottom-center'"
       [class.ol-basemap-switcher--bottom-right]="position() === 'bottom-right'"
     >
       @if (isExpanded()) {
@@ -84,6 +86,12 @@ import type { BasemapConfig } from '../models/basemap-switcher.types';
         left: 0.5em;
       }
 
+      .ol-basemap-switcher--top-center {
+        top: 0.5em;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
       .ol-basemap-switcher--top-right {
         top: 0.5em;
         right: 0.5em;
@@ -92,6 +100,12 @@ import type { BasemapConfig } from '../models/basemap-switcher.types';
       .ol-basemap-switcher--bottom-left {
         bottom: 0.5em;
         left: 0.5em;
+      }
+
+      .ol-basemap-switcher--bottom-center {
+        bottom: 0.5em;
+        left: 50%;
+        transform: translateX(-50%);
       }
 
       .ol-basemap-switcher--bottom-right {
@@ -187,7 +201,7 @@ import type { BasemapConfig } from '../models/basemap-switcher.types';
 export class OlBasemapSwitcherComponent {
   basemaps = input<BasemapConfig[]>([{ id: 'osm', name: 'OpenStreetMap', type: 'osm' }]);
   activeBasemap = input<string>('osm');
-  position = input<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'>('bottom-left');
+  position = input<BasemapSwitcherPosition>('bottom-left');
 
   basemapChange = output<string>();
 

@@ -126,7 +126,7 @@ const BASEMAPS: BasemapConfig[] = [
 
               <!-- Basemap Switcher -->
               <ol-basemap-switcher
-                position="bottom-left"
+                position="top-center"
                 [basemaps]="basemaps"
                 [activeBasemap]="activeBasemap()"
                 (basemapChange)="onBasemapChange($event)"

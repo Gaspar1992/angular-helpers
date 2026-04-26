@@ -23,4 +23,10 @@ export interface BasemapConfig {
 /**
  * Position options for the basemap switcher control
  */
-export type BasemapSwitcherPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+export type BasemapSwitcherPosition =
+  | 'top-left'
+  | 'top-center'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-center'
+  | 'bottom-right';
