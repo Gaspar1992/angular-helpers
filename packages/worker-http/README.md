@@ -88,6 +88,9 @@ Then follow the setup in the `/backend` section below.
 
 A framework-agnostic, type-safe bridge between the main thread and a Web Worker. Wraps `postMessage` with request/response correlation, Observable API, and automatic cancellation on unsubscribe.
 
+<details>
+<summary><strong>API and examples</strong></summary>
+
 ```typescript
 import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
 
@@ -141,11 +144,16 @@ transport.execute(request).subscribe({
 });
 ```
 
+</details>
+
 ---
 
 ### `/interceptors` — Worker-side pipeline
 
 Pure-function interceptors that run inside the worker. No Angular DI, no DOM access — just `(req, next) => Promise<response>`.
+
+<details>
+<summary><strong>Setup, built-in interceptors, and custom interceptors</strong></summary>
 
 #### Setup in your worker file
 
@@ -278,11 +286,22 @@ export const authTokenInterceptor: WorkerInterceptorFn = (req, next) => {
 };
 ```
 
+</details>
+
 ---
 
 ### `/serializer` — Pluggable serialization
 
-Handles the `postMessage` serialization boundary. Structured clone is zero-overhead but loses `Date`, `Map`, `Set` fidelity. `seroval` preserves full type fidelity. The auto-serializer picks the best strategy per payload.
+Handles the `postMessage` serialization boundary. Three strategies, each with a clear sweet spot:
+
+- `structuredCloneSerializer` — zero overhead, default
+- `createToonSerializer()` — 30–60% smaller for uniform arrays of objects
+- `createSerovalSerializer()` — full type fidelity (`Date`, `Map`, `Set`, circular refs)
+
+The auto-serializer picks the best strategy per payload.
+
+<details>
+<summary><strong>Per-strategy API and examples</strong></summary>
 
 #### `structuredCloneSerializer` (default)
 
@@ -311,14 +330,49 @@ const original = serializer.deserialize(payload);
 // original.tags instanceof Set → true
 ```
 
+#### `createToonSerializer()` — Token-Oriented Object Notation
+
+Requires `@toon-format/toon` as an optional peer dependency (`npm install @toon-format/toon`).
+
+[TOON](https://toonformat.dev) declares object keys once and emits values as CSV-like rows. For uniform arrays of objects (the most common API response shape — `User[]`, `Product[]`, paginated lists), it cuts payload size by **30–60%** compared to JSON, with negligible parsing overhead.
+
+```typescript
+import { createToonSerializer } from '@angular-helpers/worker-http/serializer';
+
+const serializer = await createToonSerializer();
+
+const payload = serializer.serialize([
+  { id: 1, name: 'Alice', role: 'admin' },
+  { id: 2, name: 'Bob', role: 'member' },
+  { id: 3, name: 'Carol', role: 'member' },
+  { id: 4, name: 'Dave', role: 'guest' },
+  { id: 5, name: 'Eve', role: 'admin' },
+]);
+
+// payload.data is a TOON string:
+//   [5]{id,name,role}:
+//     1,Alice,admin
+//     2,Bob,member
+//     3,Carol,member
+//     4,Dave,guest
+//     5,Eve,admin
+```
+
+**When TOON shines**: uniform arrays of objects with primitive values (numbers, strings, booleans, nulls) at depth-1.
+
+**When TOON does NOT help**: payloads with `Date`, `Map`, `Set`, nested objects, or single objects — use `seroval` or structured clone instead.
+
 #### `createAutoSerializer()` — Smart auto-detection
 
-Automatically picks the best strategy per payload. The factory is async (pre-loads `seroval` during initialization), but the returned serializer is fully synchronous.
+Automatically picks the best strategy per payload. The factory is async (pre-loads `seroval` and `@toon-format/toon` during initialization, both optional), but the returned serializer is fully synchronous.
 
-**Detection logic (depth-1):**
+**Detection logic (depth-1, top-down, first match wins):**
 
-- Contains `Date`, `Map`, `Set`, or `RegExp` at the top level or as direct array/object values → `seroval`
-- Otherwise → structured clone (zero overhead)
+1. Contains `Date`, `Map`, `Set`, or `RegExp` at the top level or as direct array/object values → `seroval`
+2. Uniform array of plain objects with primitive values, length ≥ 5 → `toon`
+3. Otherwise → structured clone (zero overhead)
+
+The TOON threshold is conservative (length ≥ 5). Smaller arrays don't justify the encoding overhead.
 
 Payloads larger than `transferThreshold` (default: 100 KiB) are encoded to `ArrayBuffer` and transferred zero-copy.
 
@@ -341,11 +395,16 @@ auto.serialize(hugeDataset); // transferables: [ArrayBuffer]
 
 > **Depth-1 limitation**: `[{ createdAt: new Date() }]` — the `Date` is inside a nested object; not detected at depth-1. For deeply nested complex types, use `createSerovalSerializer()` directly.
 
+</details>
+
 ---
 
 ### `/crypto` — WebCrypto primitives
 
 Standalone WebCrypto utilities. Useful in both workers and the main thread, but workers provide memory isolation for key material.
+
+<details>
+<summary><strong>HMAC, AES, hashing examples</strong></summary>
 
 #### `createHmacSigner(config)`
 
@@ -381,11 +440,16 @@ const hasher = createContentHasher();
 const hash = await hasher.hash('SHA-256', data); // → hex string
 ```
 
+</details>
+
 ---
 
 ### `/backend` — Angular `HttpBackend` replacement
 
 Drop-in replacement for Angular's `HttpBackend` that transparently routes `HttpClient` requests to Web Workers. Use `WorkerHttpClient` exactly like `HttpClient` — the routing is invisible to application code.
+
+<details>
+<summary><strong>Configuration, providers, and consumer code</strong></summary>
 
 ```typescript
 // app.config.ts
@@ -474,13 +538,18 @@ manual control.
 - `WorkerHttpBackend` — the `HttpBackend` implementation (injectable for advanced use)
 - `matchWorkerRoute(url, routes)` — pure utility to test routing rules
 
+</details>
+
 ---
 
 ## Telemetry
 
-Main-thread extension point for APM / metrics. `withTelemetry(...)` registers
-a subscriber that fires synchronously at three lifecycle points of every
-request handled by `WorkerHttpBackend`:
+Main-thread extension point for APM / metrics. `withTelemetry(...)` registers a subscriber that fires synchronously at three lifecycle points of every request handled by `WorkerHttpBackend` (`onRequest`, `onResponse`, `onError`).
+
+<details>
+<summary><strong>Subscriber semantics, examples, and event interface</strong></summary>
+
+Lifecycle points:
 
 - **`onRequest`** — after worker resolution, before dispatch
 - **`onResponse`** — when a successful response is emitted
@@ -547,11 +616,16 @@ interface WorkerHttpTelemetryEventBase {
 // onError    adds: kind: 'error',    error,  durationMs
 ```
 
+</details>
+
 ---
 
 ### `/esbuild-plugin` — Interceptor auto-bundling
 
 An esbuild plugin that automatically discovers and bundles interceptor files into your worker builds. When using Angular with a custom webpack/esbuild configuration, this ensures your interceptors are included in the worker bundle without manual imports.
+
+<details>
+<summary><strong>Plugin options and example</strong></summary>
 
 ```typescript
 // esbuild.config.ts
@@ -579,11 +653,16 @@ export default {
 
 Discovered interceptors are merged with explicit ones. Test files (`.spec.ts`, `.test.ts`) are automatically excluded.
 
+</details>
+
 ---
 
 ### `/streams-polyfill` — Safari transferable streams
 
 Safari 16-17 lack native transferable `ReadableStream`/`TransformStream` support. This ponyfill enables stream transfer in workers for those browsers, loaded lazily only when needed.
+
+<details>
+<summary><strong>Setup and bundle impact</strong></summary>
 
 ```typescript
 // Enable in your app config (main thread)
@@ -602,12 +681,16 @@ provideWorkerHttpClient(
 
 **Bundle impact:** Zero for modern browsers. The polyfill is lazy-loaded only on affected Safari versions when streams are actually used.
 
+</details>
+
 ---
 
 ## SSR + hydration
 
-Worker HTTP integrates transparently with Angular SSR. The two problems SSR
-creates for worker-based HTTP are handled out of the box:
+Worker HTTP integrates transparently with Angular SSR. SSR's two problems for worker-based HTTP — missing `Worker` global on the server and the post-hydration re-fetch — are both handled out of the box.
+
+<details>
+<summary><strong>How SSR fallback and the transfer cache work</strong></summary>
 
 **1. Workers do not exist on the server.**
 During SSR, `typeof Worker === 'undefined'`. `WorkerHttpBackend` detects this
@@ -657,6 +740,8 @@ To customise which headers are captured or to cache `POST` requests, pass
 `withHttpTransferCacheOptions(...)` to `provideClientHydration()` — both are
 re-exported from `@angular/platform-browser`.
 
+</details>
+
 ---
 
 ## Design principles
@@ -671,13 +756,14 @@ re-exported from `@angular/platform-browser`.
 
 ## Serialization strategy decision guide
 
-| Payload type                         | Recommended serializer                 | Reason                      |
-| ------------------------------------ | -------------------------------------- | --------------------------- |
-| Simple objects, arrays of primitives | `structuredCloneSerializer` (default)  | Zero overhead               |
-| Objects with `Date`, `Map`, `Set`    | `createSerovalSerializer()`            | Full type fidelity          |
-| Unknown payload shape                | `createAutoSerializer()`               | Depth-1 auto-detect         |
-| Large arrays (> 100 KiB)             | `createAutoSerializer()`               | Auto ArrayBuffer transfer   |
-| Deeply nested complex types          | `createSerovalSerializer()` explicitly | Auto-detect is depth-1 only |
+| Payload type                               | Recommended serializer                 | Reason                      |
+| ------------------------------------------ | -------------------------------------- | --------------------------- |
+| Simple objects, arrays of primitives       | `structuredCloneSerializer` (default)  | Zero overhead               |
+| Uniform array of plain objects (≥ 5 items) | `createToonSerializer()`               | 30–60% size reduction       |
+| Objects with `Date`, `Map`, `Set`          | `createSerovalSerializer()`            | Full type fidelity          |
+| Unknown payload shape                      | `createAutoSerializer()`               | Depth-1 auto-detect         |
+| Large arrays (> 100 KiB)                   | `createAutoSerializer()`               | Auto ArrayBuffer transfer   |
+| Deeply nested complex types                | `createSerovalSerializer()` explicitly | Auto-detect is depth-1 only |
 
 ---
 
@@ -695,9 +781,12 @@ Server-Side Rendering (SSR) is supported via automatic fallback to the main thre
 
 ## Benchmarks
 
-A reproducible benchmark suite ships with the demo app at
-[`/demo/worker-http-benchmark`](../../src/app/demo/worker-http-benchmark) and compares three
-transport modes across four workloads:
+A reproducible benchmark suite ships with the demo app at [`/demo/worker-http-benchmark`](../../src/app/demo/worker-http-benchmark).
+
+<details>
+<summary><strong>Modes, workloads, metrics, and how to run</strong></summary>
+
+It compares three transport modes across four workloads:
 
 | Mode            | What it measures                                           |
 | --------------- | ---------------------------------------------------------- |
@@ -732,6 +821,8 @@ npm start
 
 Numbers vary by hardware, browser, and current system load — always run a scenario several times
 and watch the trend, not a single value.
+
+</details>
 
 ---
 

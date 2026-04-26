@@ -88,6 +88,9 @@ Después seguí la configuración en la sección `/backend` más abajo.
 
 Un bridge type-safe y framework-agnostic entre el hilo principal y un Web Worker. Envuelve `postMessage` con correlación request/response, API Observable y cancelación automática al desubscribirse.
 
+<details>
+<summary><strong>API y ejemplos</strong></summary>
+
 ```typescript
 import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
 
@@ -141,11 +144,16 @@ transport.execute(request).subscribe({
 });
 ```
 
+</details>
+
 ---
 
 ### `/interceptors` — Pipeline del lado del worker
 
 Interceptors de funciones puras que corren dentro del worker. Sin Angular DI, sin acceso al DOM — solo `(req, next) => Promise<response>`.
+
+<details>
+<summary><strong>Setup, interceptors built-in y custom</strong></summary>
 
 #### Setup en tu archivo worker
 
@@ -278,11 +286,16 @@ export const authTokenInterceptor: WorkerInterceptorFn = (req, next) => {
 };
 ```
 
+</details>
+
 ---
 
 ### `/serializer` — Serialización pluggable
 
 Maneja el límite de serialización de `postMessage`. El structured clone tiene overhead cero pero pierde fidelidad de `Date`, `Map`, `Set`. `seroval` preserva fidelidad de tipos completa. El auto-serializer elige la mejor estrategia por payload.
+
+<details>
+<summary><strong>API por estrategia y ejemplos</strong></summary>
 
 #### `structuredCloneSerializer` (default)
 
@@ -311,14 +324,47 @@ const original = serializer.deserialize(payload);
 // original.tags instanceof Set → true
 ```
 
+#### `createToonSerializer()` — Notación Orientada a Tokens
+
+Requiere `@toon-format/toon` como peer dependency opcional (`npm install @toon-format/toon`).
+
+[TOON](https://toonformat.dev) declara las claves de los objetos una sola vez y emite los valores como filas tipo CSV. Para arrays uniformes de objetos (la forma más común de respuesta de API — `User[]`, `Product[]`, listados paginados), reduce el tamaño del payload entre **30 y 60%** vs. JSON, con un overhead de parsing despreciable.
+
+```typescript
+import { createToonSerializer } from '@angular-helpers/worker-http/serializer';
+
+const serializer = await createToonSerializer();
+
+const payload = serializer.serialize([
+  { id: 1, name: 'Alice', role: 'admin' },
+  { id: 2, name: 'Bob', role: 'member' },
+  { id: 3, name: 'Carol', role: 'member' },
+  { id: 4, name: 'Dave', role: 'guest' },
+  { id: 5, name: 'Eve', role: 'admin' },
+]);
+
+// payload.data es un string TOON:
+//   [5]{id,name,role}:
+//     1,Alice,admin
+//     2,Bob,member
+//     ...
+```
+
+**Cuándo TOON brilla**: arrays uniformes de objetos con valores primitivos (números, strings, booleans, nulls) en profundidad-1.
+
+**Cuándo TOON NO ayuda**: payloads con `Date`, `Map`, `Set`, objetos anidados o un solo objeto — usá `seroval` o structured clone.
+
 #### `createAutoSerializer()` — Auto-detección inteligente
 
-Elige automáticamente la mejor estrategia por payload. La factory es async (pre-carga `seroval` durante la inicialización), pero el serializer devuelto es completamente síncrono.
+Elige automáticamente la mejor estrategia por payload. La factory es async (pre-carga `seroval` y `@toon-format/toon` durante la inicialización, ambos opcionales), pero el serializer devuelto es completamente síncrono.
 
-**Lógica de detección (profundidad-1):**
+**Lógica de detección (profundidad-1, top-down, gana la primera coincidencia):**
 
-- Contiene `Date`, `Map`, `Set` o `RegExp` en el nivel superior o como valores directos de array/objeto → `seroval`
-- Si no → structured clone (overhead cero)
+1. Contiene `Date`, `Map`, `Set` o `RegExp` en el nivel superior o como valores directos de array/objeto → `seroval`
+2. Array uniforme de objetos planos con valores primitivos, longitud ≥ 5 → `toon`
+3. Si no → structured clone (overhead cero)
+
+El umbral de TOON es conservador (longitud ≥ 5). Arrays más cortos no justifican el overhead de codificación.
 
 Los payloads más grandes que `transferThreshold` (default: 100 KiB) se codifican a `ArrayBuffer` y se transfieren zero-copy.
 
@@ -341,11 +387,16 @@ auto.serialize(datasetGrande); // transferables: [ArrayBuffer]
 
 > **Limitación de profundidad-1**: `[{ createdAt: new Date() }]` — el `Date` está dentro de un objeto anidado; no se detecta en profundidad-1. Para tipos complejos profundamente anidados, usá `createSerovalSerializer()` directamente.
 
+</details>
+
 ---
 
 ### `/crypto` — Primitivas WebCrypto
 
 Utilidades WebCrypto standalone. Útiles tanto en workers como en el hilo principal, pero los workers proveen aislamiento de memoria para el material de claves.
+
+<details>
+<summary><strong>Ejemplos de HMAC, AES y hashing</strong></summary>
 
 #### `createHmacSigner(config)`
 
@@ -381,11 +432,16 @@ const hasher = createContentHasher();
 const hash = await hasher.hash('SHA-256', data); // → string hex
 ```
 
+</details>
+
 ---
 
 ### `/backend` — Reemplazo de `HttpBackend` de Angular
 
 Reemplazo drop-in del `HttpBackend` de Angular que enruta requests de `HttpClient` a Web Workers de forma transparente. Usas `WorkerHttpClient` exactamente igual que `HttpClient` — el ruteo es invisible para el código de aplicación.
+
+<details>
+<summary><strong>Configuración, providers y código del consumer</strong></summary>
 
 ```typescript
 // app.config.ts
@@ -463,11 +519,16 @@ createWorkerPipeline([
 - `WorkerHttpBackend` — la implementación de `HttpBackend` (inyectable para uso avanzado)
 - `matchWorkerRoute(url, routes)` — utilidad pura para testear reglas de ruteo
 
+</details>
+
 ---
 
 ### `/esbuild-plugin` — Auto-bundle de interceptors
 
 Un plugin de esbuild que descubre y bundlea automáticamente archivos de interceptors en tus builds de workers. Cuando usás Angular con una configuración custom de webpack/esbuild, esto asegura que tus interceptors se incluyan en el bundle del worker sin imports manuales.
+
+<details>
+<summary><strong>Opciones del plugin y ejemplo</strong></summary>
 
 ```typescript
 // esbuild.config.ts
@@ -495,11 +556,16 @@ export default {
 
 Los interceptors descubiertos se mergean con los explícitos. Los archivos de test (`.spec.ts`, `.test.ts`) se excluyen automáticamente.
 
+</details>
+
 ---
 
 ### `/streams-polyfill` — Streams transferibles en Safari
 
 Safari 16-17 no tienen soporte nativo para `ReadableStream`/`TransformStream` transferibles. Este ponyfill habilita el transfer de streams en workers para esos browsers, cargado lazy solo cuando se necesita.
+
+<details>
+<summary><strong>Setup e impacto de bundle</strong></summary>
 
 ```typescript
 // Habilitar en tu app config (hilo principal)
@@ -518,6 +584,8 @@ provideWorkerHttpClient(
 
 **Impacto en bundle:** Cero para browsers modernos. El polyfill se carga lazy solo en versiones afectadas de Safari cuando los streams se usan realmente.
 
+</details>
+
 ---
 
 ## Principios de diseño
@@ -535,6 +603,7 @@ provideWorkerHttpClient(
 | Tipo de payload                        | Serializer recomendado                | Razón                                |
 | -------------------------------------- | ------------------------------------- | ------------------------------------ |
 | Objetos simples, arrays de primitivos  | `structuredCloneSerializer` (default) | Overhead cero                        |
+| Array uniforme de objetos planos (≥ 5) | `createToonSerializer()`              | Reducción de tamaño del 30–60%       |
 | Objetos con `Date`, `Map`, `Set`       | `createSerovalSerializer()`           | Fidelidad completa de tipos          |
 | Forma de payload desconocida           | `createAutoSerializer()`              | Auto-detect profundidad-1            |
 | Arrays grandes (> 100 KiB)             | `createAutoSerializer()`              | Transferencia ArrayBuffer automática |

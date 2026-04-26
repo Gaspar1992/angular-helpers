@@ -2,6 +2,15 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'worker-http-toon-serializer',
+    title:
+      'worker-http v21.1.0: TOON serializer — 30–60% smaller postMessage payloads for uniform arrays',
+    publishedAt: '2026-04-26',
+    tags: ['worker-http', 'toon', 'serialization', 'performance', 'angular', 'postMessage'],
+    excerpt:
+      'Most API responses are uniform arrays of objects, and most of those bytes are repeated keys. We added TOON (Token-Oriented Object Notation) as a first-class serializer for the worker↔main boundary. The auto-serializer now picks it automatically when it makes sense — and falls back to structured-clone or seroval when it does not.',
+  },
+  {
     slug: 'worker-http-v1-0',
     title: 'worker-http v1.0.0: The Journey from Proof-of-Concept to Production',
     publishedAt: '2026-04-25',
