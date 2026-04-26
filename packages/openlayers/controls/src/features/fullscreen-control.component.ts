@@ -29,26 +29,16 @@ export class OlFullscreenControlComponent implements OnInit, OnDestroy {
   private control?: FullScreen;
 
   ngOnInit(): void {
-    this.tryAddControl();
-  }
-
-  private tryAddControl(retryCount = 0): void {
-    const map = this.mapService.getMap();
-    if (!map) {
-      if (retryCount < 10) {
-        setTimeout(() => this.tryAddControl(retryCount + 1), Math.min(50 * (retryCount + 1), 500));
-      }
-      return;
-    }
-
-    this.ngZone.runOutsideAngular(() => {
-      this.control = new FullScreen({
-        source: this.source(),
-        label: this.label(),
-        labelActive: this.labelActive(),
-        tipLabel: this.tipLabel(),
+    this.mapService.onReady((map) => {
+      this.ngZone.runOutsideAngular(() => {
+        this.control = new FullScreen({
+          source: this.source(),
+          label: this.label(),
+          labelActive: this.labelActive(),
+          tipLabel: this.tipLabel(),
+        });
+        map.addControl(this.control);
       });
-      map.addControl(this.control);
     });
   }
 

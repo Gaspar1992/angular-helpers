@@ -19,6 +19,7 @@ import Rotate from 'ol/control/Rotate';
  */
 export interface RotateControlMapService {
   getMap(): OLMap | null;
+  onReady(callback: (map: OLMap) => void): void;
 }
 
 /**
@@ -48,28 +49,16 @@ export class OlRotateControlComponent implements OnInit, OnDestroy {
   private control?: Rotate;
 
   ngOnInit(): void {
-    this.tryAddControl();
-  }
-
-  private tryAddControl(retryCount = 0): void {
-    if (!this.mapService) {
-      return;
-    }
-    const map = this.mapService.getMap();
-    if (!map) {
-      if (retryCount < 10) {
-        setTimeout(() => this.tryAddControl(retryCount + 1), Math.min(50 * (retryCount + 1), 500));
-      }
-      return;
-    }
-
-    this.ngZone.runOutsideAngular(() => {
-      this.control = new Rotate({
-        autoHide: this.autoHide(),
-        duration: this.duration(),
-        tipLabel: this.tipLabel(),
+    if (!this.mapService) return;
+    this.mapService.onReady((map) => {
+      this.ngZone.runOutsideAngular(() => {
+        this.control = new Rotate({
+          autoHide: this.autoHide(),
+          duration: this.duration(),
+          tipLabel: this.tipLabel(),
+        });
+        map.addControl(this.control);
       });
-      map.addControl(this.control);
     });
   }
 

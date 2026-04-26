@@ -29,12 +29,7 @@ export class OlTileLayerComponent implements OnInit, OnDestroy {
   visible = input<boolean>(true);
 
   ngOnInit(): void {
-    // Retry adding layer if map is not ready yet
-    this.tryAddLayer();
-  }
-
-  private tryAddLayer(retryCount = 0): void {
-    const result = this.layerService.addLayer({
+    this.layerService.addLayer({
       id: this.id(),
       type: 'tile',
       source: {
@@ -47,17 +42,6 @@ export class OlTileLayerComponent implements OnInit, OnDestroy {
       opacity: this.opacity(),
       visible: this.visible(),
     } as TileLayerConfig);
-
-    // If layer wasn't added (map not ready), retry with exponential backoff
-    if (retryCount < 10) {
-      setTimeout(
-        () => {
-          // Check if layer was actually added by trying again
-          this.tryAddLayer(retryCount + 1);
-        },
-        Math.min(50 * (retryCount + 1), 500),
-      );
-    }
   }
 
   ngOnDestroy(): void {

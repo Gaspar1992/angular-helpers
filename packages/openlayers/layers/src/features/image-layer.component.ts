@@ -29,11 +29,7 @@ export class OlImageLayerComponent implements OnInit, OnDestroy {
   visible = input<boolean>(true);
 
   ngOnInit(): void {
-    this.tryAddLayer();
-  }
-
-  private tryAddLayer(retryCount = 0): void {
-    const result = this.layerService.addLayer({
+    this.layerService.addLayer({
       id: this.id(),
       type: 'image',
       source: {
@@ -46,15 +42,6 @@ export class OlImageLayerComponent implements OnInit, OnDestroy {
       opacity: this.opacity(),
       visible: this.visible(),
     } as ImageLayerConfig);
-
-    if (retryCount < 10) {
-      setTimeout(
-        () => {
-          this.tryAddLayer(retryCount + 1);
-        },
-        Math.min(50 * (retryCount + 1), 500),
-      );
-    }
   }
 
   ngOnDestroy(): void {

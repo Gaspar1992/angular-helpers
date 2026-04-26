@@ -5,8 +5,8 @@ import {
   Component,
   inject,
   input,
-  OnInit,
   OnDestroy,
+  OnInit,
 } from '@angular/core';
 import { NgZone } from '@angular/core';
 import { OlMapService } from '@angular-helpers/openlayers/core';
@@ -27,24 +27,11 @@ export class OlZoomControlComponent implements OnInit, OnDestroy {
   private control?: Zoom;
 
   ngOnInit(): void {
-    this.tryAddControl();
-  }
-
-  private tryAddControl(retryCount = 0): void {
-    const map = this.mapService.getMap();
-    if (!map) {
-      if (retryCount < 10) {
-        setTimeout(() => this.tryAddControl(retryCount + 1), Math.min(50 * (retryCount + 1), 500));
-      }
-      return;
-    }
-
-    this.ngZone.runOutsideAngular(() => {
-      this.control = new Zoom({
-        delta: this.delta(),
-        duration: this.duration(),
+    this.mapService.onReady((map) => {
+      this.ngZone.runOutsideAngular(() => {
+        this.control = new Zoom({ delta: this.delta(), duration: this.duration() });
+        map.addControl(this.control);
       });
-      map.addControl(this.control);
     });
   }
 

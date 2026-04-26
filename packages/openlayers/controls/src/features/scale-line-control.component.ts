@@ -28,25 +28,15 @@ export class OlScaleLineControlComponent implements OnInit, OnDestroy {
   private control?: ScaleLine;
 
   ngOnInit(): void {
-    this.tryAddControl();
-  }
-
-  private tryAddControl(retryCount = 0): void {
-    const map = this.mapService.getMap();
-    if (!map) {
-      if (retryCount < 10) {
-        setTimeout(() => this.tryAddControl(retryCount + 1), Math.min(50 * (retryCount + 1), 500));
-      }
-      return;
-    }
-
-    this.ngZone.runOutsideAngular(() => {
-      this.control = new ScaleLine({
-        units: this.units(),
-        bar: this.bar(),
-        steps: this.steps(),
+    this.mapService.onReady((map) => {
+      this.ngZone.runOutsideAngular(() => {
+        this.control = new ScaleLine({
+          units: this.units(),
+          bar: this.bar(),
+          steps: this.steps(),
+        });
+        map.addControl(this.control);
       });
-      map.addControl(this.control);
     });
   }
 
