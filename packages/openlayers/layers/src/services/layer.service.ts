@@ -187,7 +187,10 @@ export class OlLayerService {
           const geom = feature.geometry;
           let geometry;
 
-          if (geom.type === 'Point') {
+          // Validate coordinates exist before processing
+          if (!geom.coordinates) {
+            geometry = new Point([0, 0]);
+          } else if (geom.type === 'Point') {
             const coords = geom.coordinates as [number, number];
             geometry = new Point(fromLonLat(coords));
           } else if (geom.type === 'LineString') {
@@ -244,12 +247,25 @@ export class OlLayerService {
         const geom = feature.geometry;
         let geometry;
 
-        if (geom.type === 'Point') {
+        // Validate coordinates exist before processing
+        if (!geom.coordinates) {
+          geometry = new Point([0, 0]);
+        } else if (geom.type === 'Point') {
           // Transform from EPSG:4326 (lon/lat) to EPSG:3857 (map projection)
           const coords = geom.coordinates as [number, number];
           geometry = new Point(fromLonLat(coords));
+        } else if (geom.type === 'LineString') {
+          const coords = (geom.coordinates as [number, number][]).map((c) => fromLonLat(c));
+          geometry = new LineString(coords);
+        } else if (geom.type === 'Polygon') {
+          const rings = (geom.coordinates as [number, number][][]).map((ring) =>
+            ring.map((c) => fromLonLat(c)),
+          );
+          geometry = new Polygon(rings);
+        } else if (geom.type === 'Circle') {
+          const center = fromLonLat(geom.coordinates as [number, number]);
+          geometry = new CircleGeom(center, (geom as { radius?: number }).radius ?? 1000);
         } else {
-          // For other geometry types, create empty point as fallback
           geometry = new Point([0, 0]);
         }
 
