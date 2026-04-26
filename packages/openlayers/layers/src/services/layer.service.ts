@@ -5,6 +5,9 @@ import VectorLayer from 'ol/layer/Vector';
 import TileLayer from 'ol/layer/Tile';
 import ImageLayer from 'ol/layer/Image';
 import VectorSource from 'ol/source/Vector';
+import { Feature as OLFeature } from 'ol';
+import { Point } from 'ol/geom';
+import { fromLonLat } from 'ol/proj';
 import OSM from 'ol/source/OSM';
 import XYZ from 'ol/source/XYZ';
 import TileWMS from 'ol/source/TileWMS';
@@ -170,8 +173,36 @@ export class OlLayerService {
   }
 
   private createVectorLayer(config: VectorLayerConfig, map: OLMap): { id: string } {
+    const source = new VectorSource();
+
+    // Add features if provided
+    if (config.features && config.features.length > 0) {
+      const olFeatures = config.features.map((feature) => {
+        const geom = feature.geometry;
+        let geometry;
+
+        if (geom.type === 'Point') {
+          // Transform from EPSG:4326 (lon/lat) to EPSG:3857 (map projection)
+          const coords = geom.coordinates as [number, number];
+          geometry = new Point(fromLonLat(coords));
+        } else {
+          // For other geometry types, create empty point as fallback
+          geometry = new Point([0, 0]);
+        }
+
+        const olFeature = new OLFeature({
+          geometry,
+          ...feature.properties,
+        });
+        olFeature.setId(feature.id);
+        return olFeature;
+      });
+
+      source.addFeatures(olFeatures);
+    }
+
     const layer = new VectorLayer({
-      source: new VectorSource(),
+      source,
       visible: config.visible ?? true,
       opacity: config.opacity ?? 1,
       zIndex: config.zIndex,

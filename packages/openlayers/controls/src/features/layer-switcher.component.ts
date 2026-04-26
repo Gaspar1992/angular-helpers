@@ -102,6 +102,7 @@ import type { LayerSwitcherItem } from '../models/layer-switcher.types';
       .ol-layer-switcher {
         position: absolute;
         background: white;
+        color: #333;
         border-radius: 4px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -140,6 +141,7 @@ import type { LayerSwitcherItem } from '../models/layer-switcher.types';
         gap: 8px;
         padding: 8px 12px;
         background: #f5f5f5;
+        color: #333;
         border: none;
         border-radius: 4px;
         cursor: pointer;
@@ -172,7 +174,7 @@ import type { LayerSwitcherItem } from '../models/layer-switcher.types';
 
       .ol-layer-switcher__empty {
         padding: 16px;
-        color: #666;
+        color: #555;
         text-align: center;
         font-style: italic;
       }
@@ -206,6 +208,7 @@ import type { LayerSwitcherItem } from '../models/layer-switcher.types';
       .ol-layer-switcher__name {
         flex: 1;
         font-weight: 500;
+        color: #333;
       }
 
       .ol-layer-switcher__type {

@@ -78,6 +78,7 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
         position: absolute;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         font-size: 14px;
+        color: #333;
         z-index: 1000;
       }
 
@@ -119,6 +120,7 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
         gap: 8px;
         padding: 8px 12px;
         background: white;
+        color: #333;
         border: none;
         border-radius: 4px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -143,6 +145,7 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
         bottom: calc(100% + 8px);
         left: 0;
         background: white;
+        color: #333;
         border-radius: 4px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         padding: 4px;
@@ -201,6 +204,7 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
 
       .ol-basemap-switcher__name {
         font-weight: 500;
+        color: #333;
       }
     `,
   ],
