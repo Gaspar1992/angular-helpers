@@ -1,12 +1,12 @@
 // OlRotateControlComponent
 
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   inject,
   input,
-  OnInit,
-  OnDestroy,
   InjectionToken,
 } from '@angular/core';
 import { NgZone } from '@angular/core';
@@ -38,7 +38,7 @@ export const ROTATE_CONTROL_MAP_SERVICE = new InjectionToken<RotateControlMapSer
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OlRotateControlComponent implements OnInit, OnDestroy {
+export class OlRotateControlComponent {
   private mapService = inject(ROTATE_CONTROL_MAP_SERVICE, { optional: true });
   private ngZone = inject(NgZone);
 
@@ -48,9 +48,23 @@ export class OlRotateControlComponent implements OnInit, OnDestroy {
 
   private control?: Rotate;
 
-  ngOnInit(): void {
+  constructor() {
     if (!this.mapService) return;
-    this.mapService.onReady((map) => {
+
+    const destroyRef = inject(DestroyRef);
+    let destroyed = false;
+    destroyRef.onDestroy(() => {
+      if (this.control) {
+        const map = this.mapService!.getMap();
+        if (map) this.ngZone.runOutsideAngular(() => map.removeControl(this.control!));
+      }
+      destroyed = true;
+    });
+
+    afterNextRender(() => {
+      if (destroyed) return;
+      const map = this.mapService!.getMap();
+      if (!map) return;
       this.ngZone.runOutsideAngular(() => {
         this.control = new Rotate({
           autoHide: this.autoHide(),
@@ -59,15 +73,6 @@ export class OlRotateControlComponent implements OnInit, OnDestroy {
         });
         map.addControl(this.control);
       });
-    });
-  }
-
-  ngOnDestroy(): void {
-    if (!this.mapService) return;
-    const map = this.mapService.getMap();
-    if (!this.control || !map) return;
-    this.ngZone.runOutsideAngular(() => {
-      map.removeControl(this.control!);
     });
   }
 }

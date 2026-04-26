@@ -1,12 +1,12 @@
 // OlScaleLineControlComponent
 
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   inject,
   input,
-  OnInit,
-  OnDestroy,
 } from '@angular/core';
 import { NgZone } from '@angular/core';
 import { OlMapService } from '@angular-helpers/openlayers/core';
@@ -17,7 +17,7 @@ import ScaleLine from 'ol/control/ScaleLine';
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OlScaleLineControlComponent implements OnInit, OnDestroy {
+export class OlScaleLineControlComponent {
   private mapService = inject(OlMapService);
   private ngZone = inject(NgZone);
 
@@ -27,8 +27,21 @@ export class OlScaleLineControlComponent implements OnInit, OnDestroy {
 
   private control?: ScaleLine;
 
-  ngOnInit(): void {
-    this.mapService.onReady((map) => {
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    let destroyed = false;
+    destroyRef.onDestroy(() => {
+      if (this.control) {
+        const map = this.mapService.getMap();
+        if (map) this.ngZone.runOutsideAngular(() => map.removeControl(this.control!));
+      }
+      destroyed = true;
+    });
+
+    afterNextRender(() => {
+      if (destroyed) return;
+      const map = this.mapService.getMap();
+      if (!map) return;
       this.ngZone.runOutsideAngular(() => {
         this.control = new ScaleLine({
           units: this.units(),
@@ -37,14 +50,6 @@ export class OlScaleLineControlComponent implements OnInit, OnDestroy {
         });
         map.addControl(this.control);
       });
-    });
-  }
-
-  ngOnDestroy(): void {
-    const map = this.mapService.getMap();
-    if (!this.control || !map) return;
-    this.ngZone.runOutsideAngular(() => {
-      map.removeControl(this.control!);
     });
   }
 }

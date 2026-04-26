@@ -1,12 +1,12 @@
 // OlAttributionControlComponent
 
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   inject,
   input,
-  OnInit,
-  OnDestroy,
 } from '@angular/core';
 import { NgZone } from '@angular/core';
 import { OlMapService } from '@angular-helpers/openlayers/core';
@@ -17,7 +17,7 @@ import Attribution from 'ol/control/Attribution';
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OlAttributionControlComponent implements OnInit, OnDestroy {
+export class OlAttributionControlComponent {
   private mapService = inject(OlMapService);
   private ngZone = inject(NgZone);
 
@@ -26,8 +26,21 @@ export class OlAttributionControlComponent implements OnInit, OnDestroy {
 
   private control?: Attribution;
 
-  ngOnInit(): void {
-    this.mapService.onReady((map) => {
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    let destroyed = false;
+    destroyRef.onDestroy(() => {
+      if (this.control) {
+        const map = this.mapService.getMap();
+        if (map) this.ngZone.runOutsideAngular(() => map.removeControl(this.control!));
+      }
+      destroyed = true;
+    });
+
+    afterNextRender(() => {
+      if (destroyed) return;
+      const map = this.mapService.getMap();
+      if (!map) return;
       this.ngZone.runOutsideAngular(() => {
         this.control = new Attribution({
           collapsible: this.collapsible(),
@@ -35,14 +48,6 @@ export class OlAttributionControlComponent implements OnInit, OnDestroy {
         });
         map.addControl(this.control);
       });
-    });
-  }
-
-  ngOnDestroy(): void {
-    const map = this.mapService.getMap();
-    if (!this.control || !map) return;
-    this.ngZone.runOutsideAngular(() => {
-      map.removeControl(this.control!);
     });
   }
 }

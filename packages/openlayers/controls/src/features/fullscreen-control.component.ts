@@ -1,12 +1,12 @@
 // OlFullscreenControlComponent
 
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   inject,
   input,
-  OnInit,
-  OnDestroy,
 } from '@angular/core';
 import { NgZone } from '@angular/core';
 import { OlMapService } from '@angular-helpers/openlayers/core';
@@ -17,7 +17,7 @@ import FullScreen from 'ol/control/FullScreen';
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OlFullscreenControlComponent implements OnInit, OnDestroy {
+export class OlFullscreenControlComponent {
   private mapService = inject(OlMapService);
   private ngZone = inject(NgZone);
 
@@ -28,8 +28,21 @@ export class OlFullscreenControlComponent implements OnInit, OnDestroy {
 
   private control?: FullScreen;
 
-  ngOnInit(): void {
-    this.mapService.onReady((map) => {
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    let destroyed = false;
+    destroyRef.onDestroy(() => {
+      if (this.control) {
+        const map = this.mapService.getMap();
+        if (map) this.ngZone.runOutsideAngular(() => map.removeControl(this.control!));
+      }
+      destroyed = true;
+    });
+
+    afterNextRender(() => {
+      if (destroyed) return;
+      const map = this.mapService.getMap();
+      if (!map) return;
       this.ngZone.runOutsideAngular(() => {
         this.control = new FullScreen({
           source: this.source(),
@@ -39,14 +52,6 @@ export class OlFullscreenControlComponent implements OnInit, OnDestroy {
         });
         map.addControl(this.control);
       });
-    });
-  }
-
-  ngOnDestroy(): void {
-    const map = this.mapService.getMap();
-    if (!this.control || !map) return;
-    this.ngZone.runOutsideAngular(() => {
-      map.removeControl(this.control!);
     });
   }
 }

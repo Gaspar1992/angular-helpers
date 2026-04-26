@@ -1,12 +1,12 @@
 // OlZoomControlComponent
 
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   inject,
   input,
-  OnDestroy,
-  OnInit,
 } from '@angular/core';
 import { NgZone } from '@angular/core';
 import { OlMapService } from '@angular-helpers/openlayers/core';
@@ -17,7 +17,7 @@ import Zoom from 'ol/control/Zoom';
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OlZoomControlComponent implements OnInit, OnDestroy {
+export class OlZoomControlComponent {
   private mapService = inject(OlMapService);
   private ngZone = inject(NgZone);
 
@@ -26,20 +26,25 @@ export class OlZoomControlComponent implements OnInit, OnDestroy {
 
   private control?: Zoom;
 
-  ngOnInit(): void {
-    this.mapService.onReady((map) => {
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    let destroyed = false;
+    destroyRef.onDestroy(() => {
+      if (this.control) {
+        const map = this.mapService.getMap();
+        if (map) this.ngZone.runOutsideAngular(() => map.removeControl(this.control!));
+      }
+      destroyed = true;
+    });
+
+    afterNextRender(() => {
+      if (destroyed) return;
+      const map = this.mapService.getMap();
+      if (!map) return;
       this.ngZone.runOutsideAngular(() => {
         this.control = new Zoom({ delta: this.delta(), duration: this.duration() });
         map.addControl(this.control);
       });
-    });
-  }
-
-  ngOnDestroy(): void {
-    const map = this.mapService.getMap();
-    if (!this.control || !map) return;
-    this.ngZone.runOutsideAngular(() => {
-      map.removeControl(this.control!);
     });
   }
 }
