@@ -34,12 +34,26 @@ export interface MapViewOptions {
 export class OlMapService {
   private ngZone = inject(NgZone);
   private map: OLMap | null = null;
+  private readyCallbacks: Array<(map: OLMap) => void> = [];
 
   setMap(map: OLMap): void {
     this.map = map;
+    const callbacks = this.readyCallbacks.splice(0);
+    for (const cb of callbacks) {
+      cb(map);
+    }
   }
+
   getMap(): OLMap | null {
     return this.map;
+  }
+
+  onReady(callback: (map: OLMap) => void): void {
+    if (this.map) {
+      callback(this.map);
+    } else {
+      this.readyCallbacks.push(callback);
+    }
   }
   getView(): View | null {
     return this.map?.getView() ?? null;

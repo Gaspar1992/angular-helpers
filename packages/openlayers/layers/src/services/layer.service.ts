@@ -32,6 +32,7 @@ export interface LayerInfo {
 export class OlLayerService {
   private mapService = inject(OlMapService);
   private layerCache = new Map<string, BaseLayer>();
+  private pendingConfigs: LayerConfig[] = [];
 
   private layerState = signal<LayerInfo[]>([]);
 
@@ -50,9 +51,24 @@ export class OlLayerService {
 
     const map = this.mapService.getMap();
     if (!map) {
+      this.pendingConfigs.push(config);
+      this.mapService.onReady((readyMap) => this.flushPending(readyMap));
       return { id: config.id };
     }
 
+    return this.createLayer(config, map);
+  }
+
+  private flushPending(map: OLMap): void {
+    const pending = this.pendingConfigs.splice(0);
+    for (const config of pending) {
+      if (!this.layerCache.has(config.id)) {
+        this.createLayer(config, map);
+      }
+    }
+  }
+
+  private createLayer(config: LayerConfig, map: OLMap): { id: string } {
     switch (config.type) {
       case 'vector':
         return this.createVectorLayer(config as VectorLayerConfig, map);
@@ -74,6 +90,13 @@ export class OlLayerService {
   }
 
   removeLayer(id: string): void {
+    // Cancel if it's still pending (map not ready yet)
+    const pendingIdx = this.pendingConfigs.findIndex((c) => c.id === id);
+    if (pendingIdx !== -1) {
+      this.pendingConfigs.splice(pendingIdx, 1);
+      return;
+    }
+
     const map = this.mapService.getMap();
     const layer = this.layerCache.get(id);
     if (map && layer) {
