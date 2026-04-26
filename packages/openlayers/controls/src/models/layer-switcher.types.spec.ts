@@ -1,7 +1,6 @@
-// OlLayerSwitcher types unit tests
-
+// LayerSwitcher types unit tests
 import { describe, it, expect } from 'vitest';
-import type { LayerSwitcherItem } from '../models/layer-switcher.types';
+import type { LayerSwitcherItem } from './layer-switcher.types';
 
 describe('LayerSwitcherItem interface', () => {
   it('should have correct structure', () => {
