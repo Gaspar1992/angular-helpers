@@ -128,18 +128,38 @@ export class OlMapComponent implements OnDestroy {
   }
 
   private updateCenter(center: Coordinate): void {
-    if (this.map) {
-      const projectedCenter = fromLonLat(center, this.projection());
-      this.ngZone.runOutsideAngular(() => this.map!.getView().setCenter(projectedCenter));
+    if (!this.map) return;
+    const view = this.map.getView();
+    const projectedCenter = fromLonLat(center, this.projection());
+    const currentCenter = view.getCenter();
+    // Only update if center is significantly different (prevents interfering with animations)
+    if (
+      !currentCenter ||
+      Math.abs(currentCenter[0] - projectedCenter[0]) > 1 ||
+      Math.abs(currentCenter[1] - projectedCenter[1]) > 1
+    ) {
+      this.ngZone.runOutsideAngular(() => view.setCenter(projectedCenter));
     }
   }
 
   private updateZoom(zoom: number): void {
-    if (this.map) this.ngZone.runOutsideAngular(() => this.map!.getView().setZoom(zoom));
+    if (!this.map) return;
+    const view = this.map.getView();
+    const currentZoom = view.getZoom();
+    // Only update if zoom is different (prevents interfering with animations)
+    if (currentZoom !== zoom) {
+      this.ngZone.runOutsideAngular(() => view.setZoom(zoom));
+    }
   }
 
   private updateRotation(rotation: number): void {
-    if (this.map) this.ngZone.runOutsideAngular(() => this.map!.getView().setRotation(rotation));
+    if (!this.map) return;
+    const view = this.map.getView();
+    const currentRotation = view.getRotation();
+    // Only update if rotation is significantly different
+    if (Math.abs(currentRotation - rotation) > 0.001) {
+      this.ngZone.runOutsideAngular(() => view.setRotation(rotation));
+    }
   }
 
   private emitViewChange(): void {

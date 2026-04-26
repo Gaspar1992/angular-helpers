@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  Injector,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OlMapComponent, OlMapService } from '@angular-helpers/openlayers/core';
 import { transformExtent } from 'ol/proj';
@@ -227,7 +220,6 @@ const BASEMAPS: BasemapConfig[] = [
 export class OpenLayersDemoComponent {
   private layerService = inject(OlLayerService);
   private mapService = inject(OlMapService);
-  private injector = inject(Injector);
   protected basemaps = BASEMAPS;
 
   center = signal<[number, number]>([2.17, 41.38]);
@@ -352,18 +344,7 @@ export class OpenLayersDemoComponent {
       number,
     ];
 
-    // Use onReady to ensure map is initialized
-    this.mapService.onReady((map) => {
-      // Force size recalculation before fit
-      map.updateSize();
-      // Use requestAnimationFrame to ensure DOM is fully updated
-      requestAnimationFrame(() => {
-        this.mapService.fitExtent(extent3857, {
-          padding: [60, 60, 60, 60],
-          maxZoom: 8,
-          duration: 600,
-        });
-      });
-    });
+    // fitExtent now handles the deferral internally
+    this.mapService.fitExtent(extent3857, { padding: [60, 60, 60, 60], maxZoom: 8, duration: 600 });
   }
 }

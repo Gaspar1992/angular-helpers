@@ -70,9 +70,18 @@ export class OlMapService {
   }
 
   fitExtent(extent: Extent, options?: FitOptions): void {
+    const map = this.map;
     const view = this.getView();
-    if (view)
-      this.ngZone.runOutsideAngular(() => view.fit(extent as OLExtent, options as OLFitOptions));
+    if (!map || !view) return;
+
+    // Defer to next macrotask to ensure DOM layout is complete
+    setTimeout(() => {
+      this.ngZone.runOutsideAngular(() => {
+        // Force size recalculation before fitting
+        map.updateSize();
+        view.fit(extent as OLExtent, options as OLFitOptions);
+      });
+    }, 0);
   }
 
   animateView(options: AnimationOptions): Promise<void> {
