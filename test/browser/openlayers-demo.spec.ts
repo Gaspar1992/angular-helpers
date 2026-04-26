@@ -18,24 +18,16 @@ test.describe('OpenLayers Demo', () => {
   test('map controls are rendered', async ({ page }) => {
     await page.goto('/demo/openlayers');
 
-    // Wait for map to initialize (controls may render asynchronously)
+    // Wait for map to initialize
     await page.waitForSelector('ol-map .ol-map-container', { timeout: 10000 });
-    await page.waitForTimeout(3000); // Additional wait for controls to mount
+    await page.waitForTimeout(3000);
 
-    // Verify zoom control is present (may be in shadow DOM or delayed)
-    await expect(page.locator('ol-zoom-control, .ol-zoom')).toBeAttached();
-
-    // Verify attribution control
-    await expect(page.locator('ol-attribution-control, .ol-attribution')).toBeAttached();
-
-    // Verify scale line control
-    await expect(page.locator('ol-scale-line-control, .ol-scale-line')).toBeAttached();
-
-    // Verify fullscreen control
-    await expect(page.locator('ol-fullscreen-control, .ol-fullscreen')).toBeAttached();
-
-    // Verify rotate control
-    await expect(page.locator('ol-rotate-control, .ol-rotate')).toBeAttached();
+    // Verify Angular component controls are present (custom elements)
+    await expect(page.locator('ol-zoom-control')).toBeAttached();
+    await expect(page.locator('ol-attribution-control')).toBeAttached();
+    await expect(page.locator('ol-scale-line-control')).toBeAttached();
+    await expect(page.locator('ol-fullscreen-control')).toBeAttached();
+    await expect(page.locator('ol-rotate-control')).toBeAttached();
   });
 
   test('layer switcher and basemap switcher are present', async ({ page }) => {
@@ -45,20 +37,23 @@ test.describe('OpenLayers Demo', () => {
     await page.waitForSelector('ol-map .ol-map-container', { timeout: 10000 });
     await page.waitForTimeout(3000);
 
-    // Verify layer switcher (may use custom class names)
-    await expect(page.locator('ol-layer-switcher, .ol-layer-switcher')).toBeAttached();
-
-    // Verify basemap switcher
-    await expect(page.locator('ol-basemap-switcher, .ol-basemap-switcher')).toBeAttached();
+    // Verify custom Angular components are attached
+    await expect(page.locator('ol-layer-switcher')).toBeAttached();
+    await expect(page.locator('ol-basemap-switcher')).toBeAttached();
+    await expect(page.locator('ol-vector-layer')).toBeAttached();
   });
 
   test('map info panel displays coordinates', async ({ page }) => {
     await page.goto('/demo/openlayers');
 
-    // Verify info panel is visible
+    // Wait for data to load
+    await page.waitForTimeout(2000);
+
+    // Verify info panel sections are visible
+    await expect(page.getByText(/View State/i)).toBeVisible();
     await expect(page.getByText(/Center:/i)).toBeVisible();
     await expect(page.getByText(/Zoom:/i)).toBeVisible();
-    await expect(page.getByText(/Rotation:/i)).toBeVisible();
+    await expect(page.getByText(/Last Click/i)).toBeVisible();
   });
 
   test('city markers are displayed on the map', async ({ page }) => {
@@ -66,10 +61,11 @@ test.describe('OpenLayers Demo', () => {
 
     // Wait for map and vector layer to initialize
     await page.waitForSelector('ol-map .ol-map-container', { timeout: 10000 });
-    await page.waitForTimeout(3000); // Allow time for features to render
+    await page.waitForTimeout(3000);
 
-    // Verify vector layer is present (may use different selector)
-    await expect(page.locator('ol-vector-layer')).toBeAttached();
+    // Verify vector layer with cities is attached
+    const vectorLayer = page.locator('ol-vector-layer#cities');
+    await expect(vectorLayer).toBeAttached();
   });
 
   test('basemap switcher allows changing basemaps', async ({ page }) => {
