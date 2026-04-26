@@ -32,7 +32,7 @@ export interface MapViewOptions {
 
 @Injectable()
 export class OlMapService {
-  private ngZone = inject(NgZone);
+  private ngZone = inject(NgZone, { optional: true });
   private map: OLMap | null = null;
   private readyCallbacks: Array<(map: OLMap) => void> = [];
 
@@ -61,12 +61,12 @@ export class OlMapService {
 
   setCenter(coordinate: Coordinate): void {
     const view = this.getView();
-    if (view) this.ngZone.runOutsideAngular(() => view.setCenter(coordinate as OLCoordinate));
+    if (view) this.runOutsideAngular(() => view.setCenter(coordinate as OLCoordinate));
   }
 
   setZoom(level: number): void {
     const view = this.getView();
-    if (view) this.ngZone.runOutsideAngular(() => view.setZoom(level));
+    if (view) this.runOutsideAngular(() => view.setZoom(level));
   }
 
   fitExtent(extent: Extent, options?: FitOptions): void {
@@ -76,7 +76,7 @@ export class OlMapService {
 
     // Defer to next macrotask to ensure DOM layout is complete
     setTimeout(() => {
-      this.ngZone.runOutsideAngular(() => {
+      this.runOutsideAngular(() => {
         // Force size recalculation before fitting
         map.updateSize();
         view.fit(extent as OLExtent, options as OLFitOptions);
@@ -88,7 +88,7 @@ export class OlMapService {
     const view = this.getView();
     if (!view) return Promise.resolve();
     return new Promise((resolve) => {
-      this.ngZone.runOutsideAngular(() => {
+      this.runOutsideAngular(() => {
         view.animate(
           {
             center: options.center as OLCoordinate,
@@ -96,10 +96,30 @@ export class OlMapService {
             rotation: options.rotation,
             duration: options.duration ?? 250,
           } as OLAnimationOptions,
-          () => this.ngZone.run(() => resolve()),
+          () => this.runInsideAngular(() => resolve()),
         );
       });
     });
+  }
+
+  /**
+   * Runs callback outside Angular zone if available, or directly if zoneless.
+   */
+  private runOutsideAngular<T>(fn: () => T): T {
+    if (this.ngZone) {
+      return this.ngZone.runOutsideAngular(fn);
+    }
+    return fn();
+  }
+
+  /**
+   * Runs callback inside Angular zone if available, or directly if zoneless.
+   */
+  private runInsideAngular<T>(fn: () => T): T {
+    if (this.ngZone) {
+      return this.ngZone.run(fn);
+    }
+    return fn();
   }
 
   getViewState(): { center: Coordinate; zoom: number; rotation: number } {

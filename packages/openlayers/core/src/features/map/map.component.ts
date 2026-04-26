@@ -46,7 +46,7 @@ export interface MapClickEvent {
 })
 export class OlMapComponent implements OnDestroy {
   private mapService = inject(OlMapService);
-  private ngZone = inject(NgZone);
+  private ngZone = inject(NgZone, { optional: true });
 
   center = input<Coordinate>([0, 0]);
   zoom = input<number>(0);
@@ -93,11 +93,11 @@ export class OlMapComponent implements OnDestroy {
       this.map = new OLMap({ target: container, view, layers: [] });
       this.mapService.setMap(this.map);
 
-      view.on('change:center', () => this.ngZone.run(() => this.emitViewChange()));
-      view.on('change:resolution', () => this.ngZone.run(() => this.emitViewChange()));
+      view.on('change:center', () => this.runInsideAngular(() => this.emitViewChange()));
+      view.on('change:resolution', () => this.runInsideAngular(() => this.emitViewChange()));
 
       this.map.on('click', (e) =>
-        this.ngZone.run(() =>
+        this.runInsideAngular(() =>
           this.mapClick.emit({
             coordinate: e.coordinate as Coordinate,
             pixel: e.pixel as Pixel,
@@ -105,7 +105,7 @@ export class OlMapComponent implements OnDestroy {
         ),
       );
       this.map.on('dblclick', (e) =>
-        this.ngZone.run(() =>
+        this.runInsideAngular(() =>
           this.mapDblClick.emit({
             coordinate: e.coordinate as Coordinate,
             pixel: e.pixel as Pixel,
@@ -116,9 +116,31 @@ export class OlMapComponent implements OnDestroy {
     this.emitViewChange();
   }
 
+  /**
+   * Runs callback outside Angular zone if available (for performance with NgZone),
+   * or directly if zoneless.
+   */
+  private runOutsideAngular<T>(fn: () => T): T {
+    if (this.ngZone) {
+      return this.ngZone.runOutsideAngular(fn);
+    }
+    return fn();
+  }
+
+  /**
+   * Runs callback inside Angular zone if available (for triggering CD),
+   * or directly if zoneless (signals handle reactivity).
+   */
+  private runInsideAngular<T>(fn: () => T): T {
+    if (this.ngZone) {
+      return this.ngZone.run(fn);
+    }
+    return fn();
+  }
+
   private destroyMap(): void {
     if (this.map) {
-      this.ngZone.runOutsideAngular(() => {
+      this.runOutsideAngular(() => {
         this.map!.setTarget(undefined);
         this.map!.dispose();
       });
@@ -138,7 +160,7 @@ export class OlMapComponent implements OnDestroy {
       Math.abs(currentCenter[0] - projectedCenter[0]) > 1 ||
       Math.abs(currentCenter[1] - projectedCenter[1]) > 1
     ) {
-      this.ngZone.runOutsideAngular(() => view.setCenter(projectedCenter));
+      this.runOutsideAngular(() => view.setCenter(projectedCenter));
     }
   }
 
@@ -148,7 +170,7 @@ export class OlMapComponent implements OnDestroy {
     const currentZoom = view.getZoom();
     // Only update if zoom is different (prevents interfering with animations)
     if (currentZoom !== zoom) {
-      this.ngZone.runOutsideAngular(() => view.setZoom(zoom));
+      this.runOutsideAngular(() => view.setZoom(zoom));
     }
   }
 
@@ -158,7 +180,7 @@ export class OlMapComponent implements OnDestroy {
     const currentRotation = view.getRotation();
     // Only update if rotation is significantly different
     if (Math.abs(currentRotation - rotation) > 0.001) {
-      this.ngZone.runOutsideAngular(() => view.setRotation(rotation));
+      this.runOutsideAngular(() => view.setRotation(rotation));
     }
   }
 
