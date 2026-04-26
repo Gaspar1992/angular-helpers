@@ -156,6 +156,89 @@ const BASEMAPS: BasemapConfig[] = [
               >
               </ol-vector-layer>
             </ol-map>
+
+            <!-- Interaction Controls (floating over map) -->
+            <div
+              class="absolute top-20 left-2 z-[1000] flex flex-col gap-2 bg-base-100/90 backdrop-blur rounded-lg p-2 shadow-lg border border-base-300"
+            >
+              <div class="text-xs font-semibold text-base-content/70 px-1 mb-1">Tools</div>
+
+              <!-- Select Toggle -->
+              <button
+                class="btn btn-xs"
+                [class.btn-primary]="selectActive()"
+                [class.btn-ghost]="!selectActive()"
+                (click)="toggleSelect()"
+                title="Select Features"
+              >
+                {{ selectActive() ? '✓' : '' }} Select
+              </button>
+
+              <!-- Draw Toggle -->
+              <button
+                class="btn btn-xs"
+                [class.btn-primary]="drawActive()"
+                [class.btn-ghost]="!drawActive()"
+                (click)="toggleDraw()"
+                title="Draw {{ drawType() }}"
+              >
+                {{ drawActive() ? '✓' : '' }} Draw
+              </button>
+
+              <!-- Modify Toggle -->
+              <button
+                class="btn btn-xs"
+                [class.btn-primary]="modifyActive()"
+                [class.btn-ghost]="!modifyActive()"
+                (click)="toggleModify()"
+                title="Modify Features"
+              >
+                {{ modifyActive() ? '✓' : '' }} Modify
+              </button>
+
+              @if (selectActive() && interactionService.hasSelection()) {
+                <button class="btn btn-xs btn-ghost" (click)="clearSelection()">Clear</button>
+              }
+
+              <div class="border-t border-base-300 my-1"></div>
+
+              <!-- Draw Type Selector -->
+              <div class="text-xs font-semibold text-base-content/70 px-1">Draw Mode</div>
+              <div class="flex flex-col gap-1">
+                @for (type of ['Polygon', 'LineString', 'Point', 'Circle']; track type) {
+                  <button
+                    class="btn btn-xs"
+                    [class.btn-secondary]="drawType() === type"
+                    [class.btn-ghost]="drawType() !== type"
+                    (click)="onDrawTypeClick(type)"
+                  >
+                    {{ type }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Status Badge -->
+            @if (interactionService.selectionCount() > 0 || drawnFeatures().length > 0) {
+              <div class="absolute bottom-2 left-2 z-[1000] flex gap-2">
+                @if (interactionService.selectionCount() > 0) {
+                  <span class="badge badge-sm badge-primary">
+                    {{ interactionService.selectionCount() }} selected
+                  </span>
+                }
+                @if (drawnFeatures().length > 0) {
+                  <span class="badge badge-sm badge-secondary">
+                    {{ drawnFeatures().length }} drawn
+                  </span>
+                  <button
+                    class="badge badge-sm badge-ghost cursor-pointer"
+                    (click)="clearDrawnFeatures()"
+                  >
+                    Clear
+                  </button>
+                }
+              </div>
+            }
           </div>
 
           <!-- Info Panel -->
@@ -206,105 +289,6 @@ const BASEMAPS: BasemapConfig[] = [
               Sevilla
             </button>
           </div>
-
-          <!-- Interaction Controls -->
-          <div class="pt-4 border-t border-base-300">
-            <h3 class="text-sm font-semibold text-base-content mb-3">
-              🖱️ Interactions ({{ interactionService.selectionCount() }} selected)
-            </h3>
-
-            <div class="flex flex-wrap gap-2 mb-4">
-              <!-- Select Toggle -->
-              <button
-                class="btn btn-sm"
-                [class.btn-primary]="selectActive()"
-                [class.btn-outline]="!selectActive()"
-                (click)="toggleSelect()"
-              >
-                {{ selectActive() ? '✓' : '' }} Select Features
-              </button>
-
-              <!-- Draw Toggle -->
-              <button
-                class="btn btn-sm"
-                [class.btn-primary]="drawActive()"
-                [class.btn-outline]="!drawActive()"
-                (click)="toggleDraw()"
-              >
-                {{ drawActive() ? '✓' : '' }} Draw {{ drawType() }}
-              </button>
-
-              <!-- Modify Toggle -->
-              <button
-                class="btn btn-sm"
-                [class.btn-primary]="modifyActive()"
-                [class.btn-outline]="!modifyActive()"
-                (click)="toggleModify()"
-              >
-                {{ modifyActive() ? '✓' : '' }} Modify Features
-              </button>
-
-              @if (selectActive() && interactionService.hasSelection()) {
-                <button class="btn btn-sm btn-ghost" (click)="clearSelection()">
-                  Clear Selection
-                </button>
-              }
-            </div>
-
-            <!-- Draw Type Selector (only when draw active) -->
-            @if (drawActive()) {
-              <div class="flex flex-wrap gap-2 mb-4">
-                <span class="text-sm text-base-content/70 self-center mr-2">Draw type:</span>
-                @for (type of ['Polygon', 'LineString', 'Point']; track type) {
-                  <button
-                    class="btn btn-xs"
-                    [class.btn-secondary]="drawType() === type"
-                    [class.btn-ghost]="drawType() !== type"
-                    (click)="onDrawTypeClick(type)"
-                  >
-                    {{ type }}
-                  </button>
-                }
-              </div>
-            }
-
-            <!-- Selected Features Display -->
-            @if (interactionService.hasSelection()) {
-              <div class="bg-base-100 rounded-lg p-3 border border-base-300 mb-3">
-                <h4 class="text-xs font-semibold text-base-content mb-2">Selected Features:</h4>
-                <div class="space-y-1 text-xs text-base-content/80">
-                  @for (feature of interactionService.selectedFeatures(); track feature.id) {
-                    <div class="flex items-center gap-2">
-                      <span class="badge badge-sm badge-primary">{{ feature.id }}</span>
-                      <span class="font-mono">{{ feature.geometry.type }}</span>
-                    </div>
-                  }
-                </div>
-              </div>
-            }
-
-            <!-- Drawn Features Display -->
-            @if (drawnFeatures().length > 0) {
-              <div class="bg-base-100 rounded-lg p-3 border border-base-300">
-                <div class="flex items-center justify-between mb-2">
-                  <h4 class="text-xs font-semibold text-base-content">
-                    Drawn Features ({{ drawnFeatures().length }}):
-                  </h4>
-                  <button class="btn btn-xs btn-ghost" (click)="clearDrawnFeatures()">Clear</button>
-                </div>
-                <div class="space-y-1 text-xs text-base-content/80">
-                  @for (feature of drawnFeatures(); track feature.id) {
-                    <div class="flex items-center gap-2">
-                      <span class="badge badge-sm badge-secondary">{{
-                        feature.geometry.type
-                      }}</span>
-                      <span class="font-mono">{{ feature.id.slice(0, 8) }}...</span>
-                    </div>
-                  }
-                </div>
-              </div>
-            }
-          </div>
         </div>
       </div>
 
@@ -344,7 +328,7 @@ export class OpenLayersDemoComponent {
   selectActive = signal<boolean>(false);
   drawActive = signal<boolean>(false);
   modifyActive = signal<boolean>(false);
-  drawType = signal<'Polygon' | 'LineString' | 'Point'>('Polygon');
+  drawType = signal<'Polygon' | 'LineString' | 'Point' | 'Circle'>('Polygon');
 
   // Track drawn features for display
   drawnFeatures = signal<Feature[]>([]);
@@ -497,10 +481,6 @@ export class OpenLayersDemoComponent {
     this.drawActive.set(newState);
 
     if (newState) {
-      // Disable other interactions
-      if (this.modifyActive()) {
-        this.toggleModify();
-      }
       this.interactionService.enableDraw('demo-draw', {
         type: this.drawType(),
         source: 'cities',
@@ -515,9 +495,9 @@ export class OpenLayersDemoComponent {
     this.modifyActive.set(newState);
 
     if (newState) {
-      // Disable draw when modifying
-      if (this.drawActive()) {
-        this.toggleDraw();
+      // Enable select if not active (to select features to modify)
+      if (!this.selectActive()) {
+        this.toggleSelect();
       }
       this.interactionService.enableModify('demo-modify', { source: 'cities' });
     } else {
@@ -526,10 +506,10 @@ export class OpenLayersDemoComponent {
   }
 
   onDrawTypeClick(type: string): void {
-    this.setDrawType(type as 'Polygon' | 'LineString' | 'Point');
+    this.setDrawType(type as 'Polygon' | 'LineString' | 'Point' | 'Circle');
   }
 
-  setDrawType(type: 'Polygon' | 'LineString' | 'Point'): void {
+  setDrawType(type: 'Polygon' | 'LineString' | 'Point' | 'Circle'): void {
     this.drawType.set(type);
     // If draw is active, restart with new type
     if (this.drawActive()) {
