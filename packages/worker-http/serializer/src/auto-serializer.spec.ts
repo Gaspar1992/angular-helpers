@@ -93,13 +93,91 @@ describe('createAutoSerializer', () => {
     expect(restored).toHaveProperty('createdAt');
   });
 
-  it('uses structuredCloneSerializer for simple array of objects', async () => {
+  it('uses structuredCloneSerializer for short arrays of objects (below TOON threshold)', async () => {
     const auto = await createAutoSerializer();
     const data = [{ id: 1 }, { id: 2 }, { id: 3 }];
 
     const payload = auto.serialize(data);
 
     expect(payload.format).toBe('structured-clone');
+  });
+
+  it('routes a uniform array of >= 5 plain-object items to TOON', async () => {
+    const auto = await createAutoSerializer();
+    const data = [
+      { id: 1, name: 'A' },
+      { id: 2, name: 'B' },
+      { id: 3, name: 'C' },
+      { id: 4, name: 'D' },
+      { id: 5, name: 'E' },
+    ];
+
+    const payload = auto.serialize(data);
+
+    expect(payload.format).toBe('toon');
+  });
+
+  it('round-trips a TOON-routed uniform array', async () => {
+    const auto = await createAutoSerializer();
+    const data = [
+      { id: 1, name: 'Alice', active: true },
+      { id: 2, name: 'Bob', active: false },
+      { id: 3, name: 'Carol', active: true },
+      { id: 4, name: 'Dave', active: false },
+      { id: 5, name: 'Eve', active: true },
+    ];
+
+    const payload = auto.serialize(data);
+    const restored = auto.deserialize(payload);
+
+    expect(restored).toEqual(data);
+  });
+
+  it('falls back to structured-clone for heterogeneous arrays', async () => {
+    const auto = await createAutoSerializer();
+    const data = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { name: 'no-id' }];
+
+    const payload = auto.serialize(data);
+
+    expect(payload.format).toBe('structured-clone');
+  });
+
+  it('falls back to structured-clone when items contain nested values', async () => {
+    const auto = await createAutoSerializer();
+    const data = Array.from({ length: 6 }, (_, i) => ({ id: i, tags: ['a', 'b'] }));
+
+    const payload = auto.serialize(data);
+
+    expect(payload.format).toBe('structured-clone');
+  });
+
+  it('prefers seroval over toon when complex types are present at depth-1', async () => {
+    const auto = await createAutoSerializer();
+    const data = {
+      users: Array.from({ length: 5 }, (_, i) => ({ id: i })),
+      fetchedAt: new Date(),
+    };
+
+    const payload = auto.serialize(data);
+
+    expect(payload.format).toBe('seroval');
+  });
+
+  it('encodes large TOON payloads to ArrayBuffer for transfer', async () => {
+    const auto = await createAutoSerializer({ transferThreshold: 10 });
+    const data = Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      label: 'x'.repeat(50),
+    }));
+
+    const payload = auto.serialize(data);
+
+    expect(payload.format).toBe('toon');
+    expect(payload.data).toBeInstanceOf(ArrayBuffer);
+    expect(payload.transferables[0]).toBeInstanceOf(ArrayBuffer);
+
+    const restored = auto.deserialize(payload);
+    expect(restored).toEqual(data);
   });
 
   it('uses structured-clone for array of objects (Date is depth-2, not detected)', async () => {

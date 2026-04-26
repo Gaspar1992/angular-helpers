@@ -3,11 +3,20 @@ import type { BlogPost } from '../models/blog-post.model';
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
     slug: 'worker-http-cancellation',
-    title: 'worker-http v21.1: per-request cancellation with AbortSignal and typed timeouts',
+    title: 'worker-http v21.1.0: per-request cancellation with AbortSignal and typed timeouts',
     publishedAt: '2026-04-26',
     tags: ['worker-http', 'cancellation', 'abort-signal', 'angular', 'web-workers'],
     excerpt:
       'v0.7.0 made cancellation work end-to-end internally. v21.1 exposes it: bring your own AbortSignal, override the timeout per request, and branch on a typed WorkerHttpAbortError vs WorkerHttpTimeoutError. No more relying on RxJS unsubscribe to cancel a worker fetch.',
+  },
+  {
+    slug: 'worker-http-toon-serializer',
+    title:
+      'worker-http v21.2.0: TOON serializer — 30–60% smaller postMessage payloads for uniform arrays',
+    publishedAt: '2026-04-26',
+    tags: ['worker-http', 'toon', 'serialization', 'performance', 'angular', 'postMessage'],
+    excerpt:
+      'Most API responses are uniform arrays of objects, and most of those bytes are repeated keys. We added TOON (Token-Oriented Object Notation) as a first-class serializer for the worker↔main boundary. The auto-serializer now picks it automatically when it makes sense — and falls back to structured-clone or seroval when it does not.',
   },
   {
     slug: 'worker-http-v1-0',

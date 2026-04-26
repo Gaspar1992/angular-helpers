@@ -1,5 +1,6 @@
 import { structuredCloneSerializer } from './structured-clone-serializer';
 import { createSerovalSerializer } from './seroval-serializer';
+import { createToonSerializer, isUniformObjectArray } from './toon-serializer';
 import type {
   AutoSerializerConfig,
   SerializedPayload,
@@ -51,9 +52,11 @@ function encodeToTransferable(str: string): { data: ArrayBuffer; transferables: 
  * The factory is async because it pre-loads `seroval` during initialization
  * so the returned serializer methods are fully synchronous (no await in hot path).
  *
- * Strategy selection per `serialize()` call:
- * - Contains `Date`, `Map`, `Set`, or `RegExp` at depth-1 → `seroval` (full fidelity)
- * - Otherwise → structured clone (native, zero overhead)
+ * Strategy selection per `serialize()` call (top-down, first match wins):
+ * 1. Contains `Date`, `Map`, `Set`, or `RegExp` at depth-1 → `seroval` (full fidelity)
+ * 2. Uniform array of plain objects (length ≥ 5, primitive values, identical key set)
+ *    → `toon` (30–60% size reduction)
+ * 3. Otherwise → structured clone (native, zero overhead)
  *
  * Large payloads (> `transferThreshold`, default 100 KiB) are encoded to
  * `ArrayBuffer` and added to `transferables` for zero-copy `postMessage` transfer.
@@ -77,6 +80,13 @@ export async function createAutoSerializer(
     // seroval not installed — complex types will throw at serialize time with a clear message
   }
 
+  let toon: WorkerSerializer | null = null;
+  try {
+    toon = await createToonSerializer();
+  } catch {
+    // @toon-format/toon not installed — uniform arrays will fall back to structured-clone
+  }
+
   return {
     serialize(data: unknown): SerializedPayload {
       let payload: SerializedPayload;
@@ -89,6 +99,8 @@ export async function createAutoSerializer(
           );
         }
         payload = sv.serialize(data);
+      } else if (toon && isUniformObjectArray(data)) {
+        payload = toon.serialize(data);
       } else {
         payload = structuredCloneSerializer.serialize(data);
       }
@@ -124,6 +136,16 @@ export async function createAutoSerializer(
           );
         }
         return sv.deserialize(resolved);
+      }
+
+      if (resolved.format === 'toon') {
+        if (!toon) {
+          throw new Error(
+            '@toon-format/toon is required to deserialize this payload. ' +
+              'Install it with: npm install @toon-format/toon',
+          );
+        }
+        return toon.deserialize(resolved);
       }
 
       throw new Error(`Unknown serialization format: '${resolved.format}'`);
