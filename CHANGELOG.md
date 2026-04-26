@@ -1,3 +1,10 @@
+# [1.34.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.33.0...v1.34.0) (2026-04-26)
+
+
+### Features
+
+* **openlayers:** layers, controls expansion and zoneless compatibility ([#101](https://github.com/Gaspar1992/angular-helpers/issues/101)) ([47cdf2d](https://github.com/Gaspar1992/angular-helpers/commit/47cdf2d15f7fc60110decce01eebf6bffaf313f0)), closes [#333](https://github.com/Gaspar1992/angular-helpers/issues/333) [#333](https://github.com/Gaspar1992/angular-helpers/issues/333)
+
 # [1.33.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.32.0...v1.33.0) (2026-04-26)
 
 
