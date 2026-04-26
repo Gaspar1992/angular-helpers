@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  Injector,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OlMapComponent, OlMapService } from '@angular-helpers/openlayers/core';
 import { transformExtent } from 'ol/proj';
@@ -220,6 +228,7 @@ const BASEMAPS: BasemapConfig[] = [
 export class OpenLayersDemoComponent {
   private layerService = inject(OlLayerService);
   private mapService = inject(OlMapService);
+  private injector = inject(Injector);
   protected basemaps = BASEMAPS;
 
   center = signal<[number, number]>([2.17, 41.38]);
@@ -346,11 +355,16 @@ export class OpenLayersDemoComponent {
 
     // Use onReady to ensure map is initialized
     this.mapService.onReady(() => {
-      this.mapService.fitExtent(extent3857, {
-        padding: [60, 60, 60, 60],
-        maxZoom: 8,
-        duration: 600,
-      });
+      afterNextRender(
+        () => {
+          this.mapService.fitExtent(extent3857, {
+            padding: [60, 60, 60, 60],
+            maxZoom: 8,
+            duration: 600,
+          });
+        },
+        { injector: this.injector },
+      );
     });
   }
 }
