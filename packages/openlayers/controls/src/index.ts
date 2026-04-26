@@ -9,12 +9,12 @@ export {
   ROTATE_CONTROL_MAP_SERVICE,
   type RotateControlMapService,
 } from './features/rotate-control.component';
-export {
-  OlLayerSwitcherComponent,
-  type LayerSwitcherItem,
-} from './features/layer-switcher.component';
+export { OlLayerSwitcherComponent } from './features/layer-switcher.component';
 export { OlBasemapSwitcherComponent } from './features/basemap-switcher.component';
 export { OlControlService } from './services/control.service';
 export { withControls, provideControls } from './config/providers';
 export type { ControlPosition, ControlConfig } from './models/control.types';
-export type { BasemapConfig } from './features/basemap-switcher.component';
+
+// Types from new dedicated files
+export type { LayerSwitcherItem, LayerSwitcherPosition } from './models/layer-switcher.types';
+export type { BasemapConfig, BasemapSwitcherPosition } from './models/basemap-switcher.types';

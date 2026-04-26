@@ -10,10 +10,9 @@ import {
   OlRotateControlComponent,
   OlLayerSwitcherComponent,
   OlBasemapSwitcherComponent,
-  type BasemapConfig,
-  type LayerSwitcherItem,
   ROTATE_CONTROL_MAP_SERVICE,
 } from '@angular-helpers/openlayers/controls';
+import type { BasemapConfig, LayerSwitcherItem } from '@angular-helpers/openlayers/controls';
 import type { Feature } from '@angular-helpers/openlayers/core';
 
 interface City {

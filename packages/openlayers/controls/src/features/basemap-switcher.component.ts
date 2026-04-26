@@ -2,16 +2,7 @@
 
 import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export interface BasemapConfig {
-  id: string;
-  name: string;
-  type: 'osm' | 'xyz' | 'wms';
-  url?: string;
-  params?: Record<string, unknown>;
-  attributions?: string | string[];
-  icon?: string;
-}
+import type { BasemapConfig } from '../models/basemap-switcher.types';
 
 /**
  * A basemap switcher control that allows switching between

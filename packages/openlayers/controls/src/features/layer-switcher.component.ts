@@ -2,14 +2,7 @@
 
 import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export interface LayerSwitcherItem {
-  id: string;
-  name: string;
-  type: 'vector' | 'tile' | 'image';
-  visible: boolean;
-  opacity: number;
-}
+import type { LayerSwitcherItem } from '../models/layer-switcher.types';
 
 /**
  * A reusable layer switcher control that displays all layers
