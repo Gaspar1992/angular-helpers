@@ -159,63 +159,182 @@ const BASEMAPS: BasemapConfig[] = [
 
             <!-- Interaction Controls (floating over map) -->
             <div
-              class="absolute top-20 left-2 z-[1000] flex flex-col gap-2 bg-base-100/90 backdrop-blur rounded-lg p-2 shadow-lg border border-base-300"
+              class="absolute top-20 left-2 z-[1000] flex flex-col gap-1 bg-base-100/90 backdrop-blur rounded-lg p-2 shadow-lg border border-base-300"
             >
-              <div class="text-xs font-semibold text-base-content/70 px-1 mb-1">Tools</div>
-
               <!-- Select Toggle -->
               <button
-                class="btn btn-xs"
+                class="btn btn-square btn-sm"
                 [class.btn-primary]="selectActive()"
                 [class.btn-ghost]="!selectActive()"
                 (click)="toggleSelect()"
                 title="Select Features"
               >
-                {{ selectActive() ? '✓' : '' }} Select
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" />
+                </svg>
               </button>
 
               <!-- Draw Toggle -->
               <button
-                class="btn btn-xs"
+                class="btn btn-square btn-sm"
                 [class.btn-primary]="drawActive()"
                 [class.btn-ghost]="!drawActive()"
                 (click)="toggleDraw()"
                 title="Draw {{ drawType() }}"
               >
-                {{ drawActive() ? '✓' : '' }} Draw
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                </svg>
               </button>
 
               <!-- Modify Toggle -->
               <button
-                class="btn btn-xs"
+                class="btn btn-square btn-sm"
                 [class.btn-primary]="modifyActive()"
                 [class.btn-ghost]="!modifyActive()"
                 (click)="toggleModify()"
                 title="Modify Features"
               >
-                {{ modifyActive() ? '✓' : '' }} Modify
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
               </button>
 
               @if (selectActive() && interactionService.hasSelection()) {
-                <button class="btn btn-xs btn-ghost" (click)="clearSelection()">Clear</button>
+                <button
+                  class="btn btn-square btn-sm btn-ghost"
+                  (click)="clearSelection()"
+                  title="Clear Selection"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
               }
 
-              <div class="border-t border-base-300 my-1"></div>
-
-              <!-- Draw Type Selector -->
-              <div class="text-xs font-semibold text-base-content/70 px-1">Draw Mode</div>
-              <div class="flex flex-col gap-1">
-                @for (type of ['Polygon', 'LineString', 'Point', 'Circle']; track type) {
+              <!-- Draw Type Selector - only when draw is active -->
+              @if (drawActive()) {
+                <div class="border-t border-base-300 my-1 pt-1"></div>
+                <div class="flex flex-col gap-1">
                   <button
-                    class="btn btn-xs"
-                    [class.btn-secondary]="drawType() === type"
-                    [class.btn-ghost]="drawType() !== type"
-                    (click)="onDrawTypeClick(type)"
+                    class="btn btn-square btn-xs"
+                    [class.btn-secondary]="drawType() === 'Polygon'"
+                    [class.btn-ghost]="drawType() !== 'Polygon'"
+                    (click)="onDrawTypeClick('Polygon')"
+                    title="Polygon"
                   >
-                    {{ type }}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M12 2l10 6v10l-10 6-10-6V8z" />
+                    </svg>
                   </button>
-                }
-              </div>
+                  <button
+                    class="btn btn-square btn-xs"
+                    [class.btn-secondary]="drawType() === 'LineString'"
+                    [class.btn-ghost]="drawType() !== 'LineString'"
+                    (click)="onDrawTypeClick('LineString')"
+                    title="Line"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M5 19L19 5" />
+                    </svg>
+                  </button>
+                  <button
+                    class="btn btn-square btn-xs"
+                    [class.btn-secondary]="drawType() === 'Point'"
+                    [class.btn-ghost]="drawType() !== 'Point'"
+                    (click)="onDrawTypeClick('Point')"
+                    title="Point"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <circle cx="12" cy="12" r="4" />
+                    </svg>
+                  </button>
+                  <button
+                    class="btn btn-square btn-xs"
+                    [class.btn-secondary]="drawType() === 'Circle'"
+                    [class.btn-ghost]="drawType() !== 'Circle'"
+                    (click)="onDrawTypeClick('Circle')"
+                    title="Circle"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                    </svg>
+                  </button>
+                </div>
+              }
             </div>
 
             <!-- Status Badge -->
