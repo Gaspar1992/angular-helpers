@@ -1,7 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OlMapComponent, OlMapService } from '@angular-helpers/openlayers/core';
-import { OlVectorLayerComponent, OlLayerService } from '@angular-helpers/openlayers/layers';
+import {
+  OlVectorLayerComponent,
+  OlLayerService,
+  type TileLayerConfig,
+} from '@angular-helpers/openlayers/layers';
 import {
   OlZoomControlComponent,
   OlAttributionControlComponent,
@@ -218,6 +222,11 @@ export class OpenLayersDemoComponent {
   lastClick = signal<{ coordinate: [number, number]; pixel: [number, number] } | null>(null);
   activeBasemap = signal<string>('osm');
 
+  constructor() {
+    // Initialize default basemap on component creation
+    this.createBasemapLayer('osm');
+  }
+
   // Layer switcher items derived from service state
   layerSwitcherItems = computed<LayerSwitcherItem[]>(() => {
     return this.layerService.layers().map((layer) => ({
@@ -264,6 +273,31 @@ export class OpenLayersDemoComponent {
 
   onBasemapChange(basemapId: string): void {
     this.activeBasemap.set(basemapId);
+    this.createBasemapLayer(basemapId);
+  }
+
+  private createBasemapLayer(basemapId: string): void {
+    // Remove existing basemap layer
+    this.layerService.removeLayer('basemap');
+
+    const basemap = this.basemaps.find((b) => b.id === basemapId);
+    if (!basemap) return;
+
+    // Add new basemap layer using TileLayerConfig
+    const layerConfig: TileLayerConfig = {
+      id: 'basemap',
+      type: 'tile',
+      source: {
+        type: basemap.type,
+        url: basemap.url,
+        params: basemap.params,
+        attributions: basemap.attributions,
+      },
+      zIndex: 0,
+      visible: true,
+      opacity: 1,
+    };
+    this.layerService.addLayer(layerConfig);
   }
 
   onLayerVisibilityChange(event: { id: string; visible: boolean }): void {
