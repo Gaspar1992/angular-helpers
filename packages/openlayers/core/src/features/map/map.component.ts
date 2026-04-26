@@ -1,7 +1,7 @@
 // OlMapComponent
 
 import {
-  AfterViewInit,
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   effect,
@@ -44,7 +44,7 @@ export interface MapClickEvent {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OlMapComponent implements AfterViewInit, OnDestroy {
+export class OlMapComponent implements OnDestroy {
   private mapService = inject(OlMapService);
   private ngZone = inject(NgZone);
 
@@ -61,6 +61,8 @@ export class OlMapComponent implements AfterViewInit, OnDestroy {
   private map?: OLMap;
 
   constructor() {
+    afterNextRender(() => this.initMap());
+
     effect(() => {
       const center = this.center();
       if (this.map) this.updateCenter(center);
@@ -73,10 +75,6 @@ export class OlMapComponent implements AfterViewInit, OnDestroy {
       const rotation = this.rotation();
       if (this.map) this.updateRotation(rotation);
     });
-  }
-
-  ngAfterViewInit(): void {
-    this.initMap();
   }
 
   ngOnDestroy(): void {
