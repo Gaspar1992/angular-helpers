@@ -1,7 +1,6 @@
-// OlBasemapSwitcher types unit tests
-
+// BasemapSwitcher types unit tests
 import { describe, it, expect } from 'vitest';
-import type { BasemapConfig } from '../models/basemap-switcher.types';
+import type { BasemapConfig } from './basemap-switcher.types';
 
 describe('BasemapConfig interface', () => {
   it('should have correct structure for OSM', () => {

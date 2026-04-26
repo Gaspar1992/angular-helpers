@@ -1,7 +1,9 @@
+import angular from '@analogjs/vite-plugin-angular';
 import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  plugins: [angular()],
   cacheDir: '../../node_modules/.vitest-cache/worker-http',
   resolve: {
     alias: {
@@ -23,8 +25,14 @@ export default defineConfig({
   },
   test: {
     globals: true,
+    environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
     include: ['**/*.spec.ts'],
-    exclude: ['**/node_modules/**'],
+    pool: 'threads',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      exclude: ['node_modules/', 'dist/', '**/*.spec.ts'],
+    },
   },
 });

@@ -24,7 +24,7 @@ renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
 </div>`;
 };
 
-marked.setOptions({ renderer });
+marked.use({ renderer });
 
 export interface BlogPostData {
   meta: BlogPost;

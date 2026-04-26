@@ -111,7 +111,7 @@
   "devDependencies": {
     "@angular-devkit/core": "^21.0.0",
     "@angular-devkit/schematics": "^21.0.0",
-    "esbuild": "^0.21.0",
+    "esbuild": "^0.27.3",
     "web-streams-polyfill": "^4.2.0"
   }
 }
