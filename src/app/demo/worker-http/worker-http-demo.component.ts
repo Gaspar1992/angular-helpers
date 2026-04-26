@@ -7,6 +7,7 @@ import { BackendCardComponent } from './cards/backend-card.component';
 import { CancellationCardComponent } from './cards/cancellation-card.component';
 import { SerializerComparisonCardComponent } from './cards/serializer-comparison-card.component';
 import { WorkerVsHttpClientCardComponent } from './cards/worker-vs-httpclient-card.component';
+import { StreamsPolyfillCardComponent } from './cards/streams-polyfill-card.component';
 import { WorkerHttpDemoLogService } from './shared/log.service';
 
 @Component({
@@ -22,6 +23,7 @@ import { WorkerHttpDemoLogService } from './shared/log.service';
     CancellationCardComponent,
     SerializerComparisonCardComponent,
     WorkerVsHttpClientCardComponent,
+    StreamsPolyfillCardComponent,
   ],
   template: `
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
@@ -43,6 +45,7 @@ import { WorkerHttpDemoLogService } from './shared/log.service';
           <span class="badge badge-success badge-md">HttpBackend</span>
           <span class="badge badge-warning badge-md">Cancellation</span>
           <span class="badge badge-neutral badge-md">TOON Serializer</span>
+          <span class="badge badge-info badge-md">Streams Polyfill</span>
         </div>
       </header>
 
@@ -53,8 +56,12 @@ import { WorkerHttpDemoLogService } from './shared/log.service';
         <app-worker-http-aes-card />
       </div>
 
-      <div class="mt-6 grid grid-cols-1 gap-6">
+      <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <app-worker-http-streams-polyfill-card />
         <app-worker-http-cancellation-card />
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 gap-6">
         <app-worker-http-backend-card />
         <app-worker-http-serializer-comparison-card />
         <app-worker-http-vs-httpclient-card />
