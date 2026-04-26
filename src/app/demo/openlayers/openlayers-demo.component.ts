@@ -1,25 +1,48 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  signal,
-  inject,
-  ChangeDetectorRef,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OlMapComponent, OlMapService } from '@angular-helpers/openlayers/core';
-import { OlTileLayerComponent, OlLayerService } from '@angular-helpers/openlayers/layers';
+import {
+  OlTileLayerComponent,
+  OlVectorLayerComponent,
+  OlLayerService,
+} from '@angular-helpers/openlayers/layers';
 import {
   OlZoomControlComponent,
   OlAttributionControlComponent,
   OlScaleLineControlComponent,
   OlFullscreenControlComponent,
+  OlRotateControlComponent,
+  OlLayerSwitcherComponent,
+  OlBasemapSwitcherComponent,
+  type BasemapConfig,
 } from '@angular-helpers/openlayers/controls';
+import type { Feature } from '@angular-helpers/openlayers/core';
 
 interface City {
   name: string;
   coords: [number, number];
   population: number;
 }
+
+const BASEMAPS: BasemapConfig[] = [
+  { id: 'osm', name: 'OpenStreetMap', type: 'osm', icon: '🗺️' },
+  {
+    id: 'satellite',
+    name: 'Satellite',
+    type: 'xyz',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attributions: 'Tiles © Esri',
+    icon: '🛰️',
+  },
+  {
+    id: 'terrain',
+    name: 'Terrain',
+    type: 'xyz',
+    url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attributions: '© OpenTopoMap',
+    icon: '⛰️',
+  },
+];
 
 @Component({
   selector: 'app-openlayers-demo',
@@ -28,10 +51,14 @@ interface City {
     CommonModule,
     OlMapComponent,
     OlTileLayerComponent,
+    OlVectorLayerComponent,
     OlZoomControlComponent,
     OlAttributionControlComponent,
     OlScaleLineControlComponent,
     OlFullscreenControlComponent,
+    OlRotateControlComponent,
+    OlLayerSwitcherComponent,
+    OlBasemapSwitcherComponent,
   ],
   providers: [OlMapService, OlLayerService],
   template: `
@@ -74,14 +101,34 @@ interface City {
               (mapClick)="onMapClick($event)"
               class="w-full h-full"
             >
-              <!-- Base Layer: OSM -->
-              <ol-tile-layer id="osm" source="osm"> </ol-tile-layer>
-
               <!-- Controls -->
               <ol-zoom-control [delta]="1"></ol-zoom-control>
+              <ol-rotate-control [autoHide]="true"></ol-rotate-control>
               <ol-attribution-control [collapsible]="true"></ol-attribution-control>
               <ol-scale-line-control unit="metric"></ol-scale-line-control>
               <ol-fullscreen-control></ol-fullscreen-control>
+
+              <!-- Layer Switcher -->
+              <ol-layer-switcher position="top-right" [collapsible]="true" [showOpacity]="true">
+              </ol-layer-switcher>
+
+              <!-- Basemap Switcher -->
+              <ol-basemap-switcher
+                position="bottom-left"
+                [basemaps]="basemaps"
+                defaultBasemap="osm"
+                (basemapChange)="onBasemapChange($event)"
+              >
+              </ol-basemap-switcher>
+
+              <!-- Vector Layer: Cities -->
+              <ol-vector-layer
+                id="cities"
+                [features]="cityFeatures()"
+                [zIndex]="10"
+                [visible]="true"
+              >
+              </ol-vector-layer>
             </ol-map>
           </div>
 
@@ -155,11 +202,35 @@ interface City {
   `,
 })
 export class OpenLayersDemoComponent {
-  private cdr = inject(ChangeDetectorRef);
+  protected basemaps = BASEMAPS;
 
   center = signal<[number, number]>([2.17, 41.38]);
   zoom = signal<number>(12);
   lastClick = signal<{ coordinate: [number, number]; pixel: [number, number] } | null>(null);
+
+  // Sample city features for the vector layer
+  cityFeatures = signal<Feature[]>([
+    {
+      id: 'barcelona',
+      geometry: { type: 'Point', coordinates: [2.17, 41.38] },
+      properties: { name: 'Barcelona', population: 1600000 },
+    },
+    {
+      id: 'madrid',
+      geometry: { type: 'Point', coordinates: [-3.7, 40.42] },
+      properties: { name: 'Madrid', population: 3200000 },
+    },
+    {
+      id: 'valencia',
+      geometry: { type: 'Point', coordinates: [-0.38, 39.47] },
+      properties: { name: 'Valencia', population: 790000 },
+    },
+    {
+      id: 'seville',
+      geometry: { type: 'Point', coordinates: [-5.98, 37.39] },
+      properties: { name: 'Seville', population: 690000 },
+    },
+  ]);
 
   onViewChange(viewState: { center: [number, number]; zoom: number; rotation?: number }): void {
     this.center.set(viewState.center);
@@ -170,9 +241,12 @@ export class OpenLayersDemoComponent {
     this.lastClick.set(event);
   }
 
+  onBasemapChange(basemapId: string): void {
+    console.log('Switched to basemap:', basemapId);
+  }
+
   jumpTo(coords: [number, number], zoom: number): void {
     this.center.set(coords);
     this.zoom.set(zoom);
-    this.cdr.markForCheck();
   }
 }
