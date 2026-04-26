@@ -6,9 +6,9 @@ import TileLayer from 'ol/layer/Tile';
 import ImageLayer from 'ol/layer/Image';
 import VectorSource from 'ol/source/Vector';
 import { Feature as OLFeature } from 'ol';
-import { Point } from 'ol/geom';
+import { Circle as CircleGeom, LineString, Point, Polygon } from 'ol/geom';
 import { fromLonLat } from 'ol/proj';
-import { Style, Circle, Fill, Stroke } from 'ol/style';
+import { Style, Circle as CircleStyle, Fill, Stroke } from 'ol/style';
 import OSM from 'ol/source/OSM';
 import XYZ from 'ol/source/XYZ';
 import TileWMS from 'ol/source/TileWMS';
@@ -190,6 +190,18 @@ export class OlLayerService {
           if (geom.type === 'Point') {
             const coords = geom.coordinates as [number, number];
             geometry = new Point(fromLonLat(coords));
+          } else if (geom.type === 'LineString') {
+            const coords = (geom.coordinates as [number, number][]).map((c) => fromLonLat(c));
+            geometry = new LineString(coords);
+          } else if (geom.type === 'Polygon') {
+            const rings = (geom.coordinates as [number, number][][]).map((ring) =>
+              ring.map((c) => fromLonLat(c)),
+            );
+            geometry = new Polygon(rings);
+          } else if (geom.type === 'Circle') {
+            const center = fromLonLat(geom.coordinates as [number, number]);
+            // Approximate radius in meters - use 1000m as default if not specified
+            geometry = new CircleGeom(center, (geom as { radius?: number }).radius ?? 1000);
           } else {
             geometry = new Point([0, 0]);
           }
@@ -256,7 +268,7 @@ export class OlLayerService {
     const defaultStyle = new Style({
       fill: new Fill({ color: 'rgba(25, 118, 210, 0.3)' }),
       stroke: new Stroke({ color: '#1976d2', width: 2 }),
-      image: new Circle({
+      image: new CircleStyle({
         radius: 8,
         fill: new Fill({ color: '#1976d2' }),
         stroke: new Stroke({ color: '#d32f2f', width: 2 }),

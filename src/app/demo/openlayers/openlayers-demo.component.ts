@@ -157,9 +157,9 @@ const BASEMAPS: BasemapConfig[] = [
               </ol-vector-layer>
             </ol-map>
 
-            <!-- Interaction Controls (floating over map at bottom) -->
+            <!-- Interaction Controls (floating over map at bottom center) -->
             <div
-              class="absolute bottom-10 left-12 z-[1000] flex flex-col gap-1 bg-base-100/90 backdrop-blur rounded-lg p-2 shadow-lg border border-base-300"
+              class="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] flex flex-row gap-1 bg-base-100/90 backdrop-blur rounded-lg p-2 shadow-lg border border-base-300"
             >
               <!-- Select Toggle -->
               <button
@@ -255,8 +255,8 @@ const BASEMAPS: BasemapConfig[] = [
 
               <!-- Draw Type Selector - only when draw is active -->
               @if (drawActive()) {
-                <div class="border-t border-base-300 my-1 pt-1"></div>
-                <div class="flex flex-col gap-1">
+                <div class="border-l border-base-300 mx-1 pl-1"></div>
+                <div class="flex flex-row gap-1">
                   <button
                     class="btn btn-square btn-xs"
                     [class.btn-secondary]="drawType() === 'Polygon'"
