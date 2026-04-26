@@ -101,21 +101,21 @@ The detection helper **MUST** be a pure function with the following contract.
 
 **Threshold constant**: `MIN_UNIFORM_ARRAY_LENGTH = 5` (exported for testing).
 
-| Input | Expected | Reason |
-|-------|----------|--------|
-| `Array(5).fill({a:1})` (5 identical objects) | true | Length ≥ 5, primitives, identical keys |
-| `[{a:1},{a:2},{a:3},{a:4},{a:5}]` | true | Length 5, single key, primitives |
-| `[{a:1},{a:2},{a:3},{a:4}]` | false | Length 4 < 5 |
-| 10× `{a:1,b:'x'}` items | true | Multiple keys, primitives |
-| 5 items with different keys | false | Heterogeneous keys |
-| 5 items: `[{a:1},{a:'x'},...]` | true | TOON allows mixed primitive types per column |
-| 5 items with nested array value | false | Nested array value |
-| 5 items with nested object value | false | Nested object value |
-| `[{a:1}]` | false | Length < 5 |
-| `[]` | false | Empty array |
-| `[1,2,3,4,5]` | false | Not array of objects |
-| `null` / `undefined` / `42` / `"x"` | false | Not array |
-| 5 Dates | false | Not plain-object items (handled upstream) |
+| Input                                        | Expected | Reason                                       |
+| -------------------------------------------- | -------- | -------------------------------------------- |
+| `Array(5).fill({a:1})` (5 identical objects) | true     | Length ≥ 5, primitives, identical keys       |
+| `[{a:1},{a:2},{a:3},{a:4},{a:5}]`            | true     | Length 5, single key, primitives             |
+| `[{a:1},{a:2},{a:3},{a:4}]`                  | false    | Length 4 < 5                                 |
+| 10× `{a:1,b:'x'}` items                      | true     | Multiple keys, primitives                    |
+| 5 items with different keys                  | false    | Heterogeneous keys                           |
+| 5 items: `[{a:1},{a:'x'},...]`               | true     | TOON allows mixed primitive types per column |
+| 5 items with nested array value              | false    | Nested array value                           |
+| 5 items with nested object value             | false    | Nested object value                          |
+| `[{a:1}]`                                    | false    | Length < 5                                   |
+| `[]`                                         | false    | Empty array                                  |
+| `[1,2,3,4,5]`                                | false    | Not array of objects                         |
+| `null` / `undefined` / `42` / `"x"`          | false    | Not array                                    |
+| 5 Dates                                      | false    | Not plain-object items (handled upstream)    |
 
 ---
 
@@ -194,6 +194,7 @@ The `worker-http-demo.component.ts` **MUST** be expanded to surface the package'
 3. **Existing cards** (kept): Worker Transport, HMAC Signing, Content Hashing, AES Encryption
 
 All cards **MUST**:
+
 - Use existing Tailwind/DaisyUI patterns (`bg-base-200`, `border-base-300`, `rounded-xl`, `badge`)
 - Pass AXE accessibility checks
 - Use signals for state, no Observables in templates without async pipe
@@ -270,18 +271,18 @@ All cards **MUST**:
 
 ## Acceptance Criteria Summary
 
-| ID | Description | Verification |
-|----|-------------|--------------|
-| AC-1 | `createToonSerializer()` exported and round-trips uniform arrays | Unit test |
-| AC-2 | Missing peer dep produces clear error message | Unit test (mock import failure) |
-| AC-3 | Auto-serializer routes uniform arrays to TOON | Unit test |
-| AC-4 | Auto-serializer falls back for non-uniform / nested / single-item / heterogeneous arrays | Unit test |
-| AC-5 | Complex-type detection wins over uniform-array detection | Unit test |
-| AC-6 | Large TOON payload → ArrayBuffer transfer | Unit test |
-| AC-7 | Bundle does not statically include `@toon-format/toon` | Manual / build inspection |
-| AC-8 | Existing serializer tests pass unchanged | Test suite |
-| AC-9 | Version bumped to 21.1.0 with optional peer dep declared | grep + manual |
-| AC-10 | README + blog post + demo card landed | Manual review |
+| ID    | Description                                                                              | Verification                    |
+| ----- | ---------------------------------------------------------------------------------------- | ------------------------------- |
+| AC-1  | `createToonSerializer()` exported and round-trips uniform arrays                         | Unit test                       |
+| AC-2  | Missing peer dep produces clear error message                                            | Unit test (mock import failure) |
+| AC-3  | Auto-serializer routes uniform arrays to TOON                                            | Unit test                       |
+| AC-4  | Auto-serializer falls back for non-uniform / nested / single-item / heterogeneous arrays | Unit test                       |
+| AC-5  | Complex-type detection wins over uniform-array detection                                 | Unit test                       |
+| AC-6  | Large TOON payload → ArrayBuffer transfer                                                | Unit test                       |
+| AC-7  | Bundle does not statically include `@toon-format/toon`                                   | Manual / build inspection       |
+| AC-8  | Existing serializer tests pass unchanged                                                 | Test suite                      |
+| AC-9  | Version bumped to 21.1.0 with optional peer dep declared                                 | grep + manual                   |
+| AC-10 | README + blog post + demo card landed                                                    | Manual review                   |
 
 ---
 

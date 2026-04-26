@@ -113,6 +113,11 @@ transport.terminate();
 - **Per-request timeout** (default `30_000` ms) via `requestTimeout`; errors
   with `WorkerHttpTimeoutError` and sends a cancel message to the worker.
   Set to `0` to disable.
+- **Per-call `AbortSignal` and `timeout` overrides** via the second argument
+  to `execute(request, { signal, timeout })`. The signal triggers a typed
+  `WorkerHttpAbortError`; an aborted-at-call-time signal fails fast with no
+  postMessage round-trip. Distinct error class from `WorkerHttpTimeoutError`
+  so consumers can branch on `instanceof`.
 - **Opt-in transferable detection** via `transferDetection: 'auto'` — passes
   detected `ArrayBuffer` / `MessagePort` / `ImageBitmap` /
   `OffscreenCanvas` / streams as the transfer list of `postMessage`, enabling
@@ -470,9 +475,10 @@ manual control.
 - `withWorkerSerialization(serializer)` — plug in `createSerovalSerializer()` for complex request bodies (`Date`, `Map`, `Set`)
 - `withWorkerInterceptors(specs | specsByWorker)` — configure the worker-side pipeline from Angular DI; pairs with `createConfigurableWorkerPipeline()` in the worker file
 - `WORKER_TARGET` — `HttpContextToken<string | null>` for per-request worker routing via `HttpContext`
-- `WorkerHttpClient` — `HttpClient` wrapper with optional `{ worker: string }` routing field
+- `WorkerHttpClient` — `HttpClient` wrapper with optional `{ worker: string }` routing field, plus per-request `signal?: AbortSignal` and `timeout?: number` for cancellation. Aborted requests error with `WorkerHttpAbortError`; expired timeouts with `WorkerHttpTimeoutError`.
 - `WorkerHttpBackend` — the `HttpBackend` implementation (injectable for advanced use)
 - `matchWorkerRoute(url, routes)` — pure utility to test routing rules
+- `WORKER_HTTP_SIGNAL`, `WORKER_HTTP_TIMEOUT` — `HttpContextToken`s used internally by `WorkerHttpClient`; set them directly on the `HttpContext` if you're using `HttpClient` rather than the wrapper.
 
 ---
 

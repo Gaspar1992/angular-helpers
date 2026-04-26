@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { WORKER_TARGET } from './worker-http-tokens';
+import { WORKER_HTTP_SIGNAL, WORKER_HTTP_TIMEOUT, WORKER_TARGET } from './worker-http-tokens';
 
 /**
  * Options accepted by `WorkerHttpClient` methods.
@@ -11,6 +11,20 @@ import { WORKER_TARGET } from './worker-http-tokens';
 export interface WorkerRequestOptions {
   /** Target worker ID. Overrides URL-pattern routing for this specific request. */
   worker?: string | null;
+  /**
+   * External `AbortSignal`. When it fires, the backend posts a `cancel` to
+   * the worker and the request errors with `WorkerHttpAbortError` (wrapped in
+   * `HttpErrorResponse`). Useful with `AbortController` or
+   * `takeUntilDestroyed()`.
+   */
+  signal?: AbortSignal;
+  /**
+   * Per-request timeout in milliseconds. Overrides the transport-level
+   * `requestTimeout` for this single call. On expiry the request errors with
+   * `WorkerHttpTimeoutError`. `0` or non-finite disables the timeout for this
+   * request only.
+   */
+  timeout?: number;
   context?: HttpContext;
   headers?: Record<string, string | string[]>;
   params?: Record<string, string | number | boolean | ReadonlyArray<string | number | boolean>>;
@@ -78,11 +92,15 @@ export class WorkerHttpClient {
 
   private withWorker(
     options?: WorkerRequestOptions,
-  ): Omit<WorkerRequestOptions, 'worker'> & { context: HttpContext } {
-    const { worker = null, context, ...rest } = options ?? {};
-    return {
-      ...rest,
-      context: (context ?? new HttpContext()).set(WORKER_TARGET, worker),
-    };
+  ): Omit<WorkerRequestOptions, 'worker' | 'signal' | 'timeout'> & { context: HttpContext } {
+    const { worker = null, signal, timeout, context, ...rest } = options ?? {};
+    let ctx = (context ?? new HttpContext()).set(WORKER_TARGET, worker);
+    if (signal !== undefined) {
+      ctx = ctx.set(WORKER_HTTP_SIGNAL, signal);
+    }
+    if (timeout !== undefined) {
+      ctx = ctx.set(WORKER_HTTP_TIMEOUT, timeout);
+    }
+    return { ...rest, context: ctx };
   }
 }

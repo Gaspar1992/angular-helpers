@@ -1,8 +1,10 @@
 import { Observable } from 'rxjs';
 
 import { detectTransferables } from './detect-transferables';
+import { WorkerHttpAbortError } from './worker-http-abort-error';
 import { WorkerHttpTimeoutError } from './worker-http-timeout-error';
 import type {
+  WorkerExecuteOptions,
   WorkerTransport,
   WorkerTransportConfig,
   WorkerErrorResponse,
@@ -81,7 +83,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
     return worker;
   }
 
-  function execute(request: TRequest): Observable<TResponse> {
+  function execute(request: TRequest, options?: WorkerExecuteOptions): Observable<TResponse> {
     if (terminated) {
       return new Observable((subscriber) => {
         subscriber.error(new Error('WorkerTransport has been terminated'));
@@ -89,8 +91,16 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
     }
 
     const requestId = crypto.randomUUID();
+    const externalSignal = options?.signal;
+    const effectiveTimeout = options?.timeout ?? requestTimeout;
 
     return new Observable<TResponse>((subscriber) => {
+      // Fail-fast: if the caller's signal was already aborted before we even
+      // touched a worker, surface it immediately with no postMessage roundtrip.
+      if (externalSignal?.aborted) {
+        subscriber.error(new WorkerHttpAbortError(externalSignal.reason));
+        return () => undefined;
+      }
       // Lazy-load polyfill on first request if enabled
       if (streamsPolyfill && !polyfillLoaded) {
         loadStreamsPolyfill().catch((err) => {
@@ -101,6 +111,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
       const worker = getOrCreateWorker();
       let settled = false;
       let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+      let abortListener: (() => void) | undefined;
 
       const cleanup = () => {
         worker.removeEventListener('message', messageHandler);
@@ -108,6 +119,10 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
         if (timeoutHandle !== undefined) {
           clearTimeout(timeoutHandle);
           timeoutHandle = undefined;
+        }
+        if (abortListener && externalSignal) {
+          externalSignal.removeEventListener('abort', abortListener);
+          abortListener = undefined;
         }
       };
 
@@ -146,7 +161,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
         worker.postMessage({ type: 'request', requestId, payload: request });
       }
 
-      if (requestTimeout > 0 && Number.isFinite(requestTimeout)) {
+      if (effectiveTimeout > 0 && Number.isFinite(effectiveTimeout)) {
         timeoutHandle = setTimeout(() => {
           if (settled) return;
           settled = true;
@@ -154,8 +169,23 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
           // Ask the worker to abort any in-flight work for this id. The
           // cancellation fix wires this through to `fetch()`.
           worker.postMessage({ type: 'cancel', requestId });
-          subscriber.error(new WorkerHttpTimeoutError(requestTimeout));
-        }, requestTimeout);
+          subscriber.error(new WorkerHttpTimeoutError(effectiveTimeout));
+        }, effectiveTimeout);
+      }
+
+      // External AbortSignal: surface a typed abort error and cancel the
+      // worker-side fetch. Distinct from a silent unsubscribe (no error) and
+      // from a timeout (different error type).
+      if (externalSignal) {
+        abortListener = () => {
+          if (settled) return;
+          settled = true;
+          const reason = externalSignal.reason;
+          cleanup();
+          worker.postMessage({ type: 'cancel', requestId });
+          subscriber.error(new WorkerHttpAbortError(reason));
+        };
+        externalSignal.addEventListener('abort', abortListener, { once: true });
       }
 
       // Teardown: send cancel message on unsubscribe

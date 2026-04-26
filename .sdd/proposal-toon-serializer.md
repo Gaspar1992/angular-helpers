@@ -28,18 +28,18 @@ Ship `toonSerializer` as a first-class, opt-in serializer in `@angular-helpers/w
 
 ## In-Scope
 
-| # | Deliverable | Description |
-|---|-------------|-------------|
-| 1 | `createToonSerializer()` factory | Async factory (lazy-loads `@toon-format/toon`); returns `WorkerSerializer` with `format: 'toon'` |
-| 2 | Uniform-array detection helper | Pure function: detects array of plain objects with identical primitive-valued keys |
-| 3 | `createAutoSerializer()` extension | Adds depth-1 uniform-array detection → routes to TOON when applicable |
-| 4 | TOON deserialization in auto-serializer | `deserialize()` resolves `format: 'toon'` payloads |
-| 5 | ArrayBuffer transfer for large TOON | When TOON output exceeds `transferThreshold`, encode to `ArrayBuffer` and add to transfer list |
-| 6 | Unit tests | `toon-serializer.spec.ts` + extended `auto-serializer.spec.ts` coverage |
-| 7 | Documentation updates | README.md / README.es.md sections on TOON; decision-guide table updated |
-| 8 | Blog post | `public/content/blog/worker-http-toon-serializer.md` + `posts.data.ts` entry |
-| 9 | Demo cards | Serializer comparison card + Worker vs HttpClient comparison card in `worker-http-demo.component.ts` |
-| 10 | Version bump | `21.0.0` → `21.1.0` |
+| #   | Deliverable                             | Description                                                                                          |
+| --- | --------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| 1   | `createToonSerializer()` factory        | Async factory (lazy-loads `@toon-format/toon`); returns `WorkerSerializer` with `format: 'toon'`     |
+| 2   | Uniform-array detection helper          | Pure function: detects array of plain objects with identical primitive-valued keys                   |
+| 3   | `createAutoSerializer()` extension      | Adds depth-1 uniform-array detection → routes to TOON when applicable                                |
+| 4   | TOON deserialization in auto-serializer | `deserialize()` resolves `format: 'toon'` payloads                                                   |
+| 5   | ArrayBuffer transfer for large TOON     | When TOON output exceeds `transferThreshold`, encode to `ArrayBuffer` and add to transfer list       |
+| 6   | Unit tests                              | `toon-serializer.spec.ts` + extended `auto-serializer.spec.ts` coverage                              |
+| 7   | Documentation updates                   | README.md / README.es.md sections on TOON; decision-guide table updated                              |
+| 8   | Blog post                               | `public/content/blog/worker-http-toon-serializer.md` + `posts.data.ts` entry                         |
+| 9   | Demo cards                              | Serializer comparison card + Worker vs HttpClient comparison card in `worker-http-demo.component.ts` |
+| 10  | Version bump                            | `21.0.0` → `21.1.0`                                                                                  |
 
 ---
 
@@ -56,9 +56,11 @@ Ship `toonSerializer` as a first-class, opt-in serializer in `@angular-helpers/w
 ## Capabilities
 
 ### New Capabilities
+
 - `worker-http-toon-serializer`: TOON-format serializer entry in `@angular-helpers/worker-http/serializer`
 
 ### Modified Capabilities
+
 - `worker-http-auto-serializer`: extend depth-1 detection to recognize uniform arrays and route them to TOON
 
 ---
@@ -93,12 +95,15 @@ function isUniformObjectArray(value: unknown): boolean {
   const first = value[0];
   if (first === null || typeof first !== 'object' || Array.isArray(first)) return false;
   const keys = Object.keys(first).sort().join(',');
-  return value.every((item) =>
-    item !== null &&
-    typeof item === 'object' &&
-    !Array.isArray(item) &&
-    Object.keys(item).sort().join(',') === keys &&
-    Object.values(item).every((v) => v === null || ['string', 'number', 'boolean'].includes(typeof v))
+  return value.every(
+    (item) =>
+      item !== null &&
+      typeof item === 'object' &&
+      !Array.isArray(item) &&
+      Object.keys(item).sort().join(',') === keys &&
+      Object.values(item).every(
+        (v) => v === null || ['string', 'number', 'boolean'].includes(typeof v),
+      ),
   );
 }
 ```
@@ -119,30 +124,30 @@ function isUniformObjectArray(value: unknown): boolean {
 
 ## Affected Areas
 
-| Area | Impact | Description |
-|------|--------|-------------|
-| `packages/worker-http/serializer/src/toon-serializer.ts` | New | Factory + lazy loader |
-| `packages/worker-http/serializer/src/toon-serializer.spec.ts` | New | Unit tests |
-| `packages/worker-http/serializer/src/auto-serializer.ts` | Modified | Add uniform-array detection branch |
-| `packages/worker-http/serializer/src/auto-serializer.spec.ts` | Modified | TOON routing assertions |
-| `packages/worker-http/serializer/src/index.ts` | Modified | Re-export `createToonSerializer` |
-| `packages/worker-http/package.json` | Modified | Add optional peer dep, bump to 21.1.0 |
-| `packages/worker-http/README.md` / `README.es.md` | Modified | TOON section + decision guide |
-| `public/content/blog/worker-http-toon-serializer.md` | New | Blog post |
-| `src/app/blog/config/posts.data.ts` | Modified | Register post |
-| `src/app/demo/worker-http/worker-http-demo.component.ts` | Modified | Add TOON demo card |
+| Area                                                          | Impact   | Description                           |
+| ------------------------------------------------------------- | -------- | ------------------------------------- |
+| `packages/worker-http/serializer/src/toon-serializer.ts`      | New      | Factory + lazy loader                 |
+| `packages/worker-http/serializer/src/toon-serializer.spec.ts` | New      | Unit tests                            |
+| `packages/worker-http/serializer/src/auto-serializer.ts`      | Modified | Add uniform-array detection branch    |
+| `packages/worker-http/serializer/src/auto-serializer.spec.ts` | Modified | TOON routing assertions               |
+| `packages/worker-http/serializer/src/index.ts`                | Modified | Re-export `createToonSerializer`      |
+| `packages/worker-http/package.json`                           | Modified | Add optional peer dep, bump to 21.1.0 |
+| `packages/worker-http/README.md` / `README.es.md`             | Modified | TOON section + decision guide         |
+| `public/content/blog/worker-http-toon-serializer.md`          | New      | Blog post                             |
+| `src/app/blog/config/posts.data.ts`                           | Modified | Register post                         |
+| `src/app/demo/worker-http/worker-http-demo.component.ts`      | Modified | Add TOON demo card                    |
 
 ---
 
 ## Risks
 
-| Risk | Likelihood | Mitigation |
-|------|------------|------------|
-| `@toon-format/toon` API changes (spec is v3 draft) | Med | Pin to a specific minor; abstract behind our factory; integration test with the pinned version |
-| Auto-serializer mis-detects uniform arrays | Med | Strict depth-1 check (primitives only, identical key set, length ≥ 2); extensive spec coverage |
-| Bundle bloat for non-TOON consumers | Low | TOON is dynamic-imported only when factory is called or auto detects a uniform array |
-| Performance regression on small arrays | Low | Skip TOON for arrays of length < 2; consumers control via threshold |
-| Decoded TOON loses fidelity (numeric precision, etc.) | Low | TOON encodes the JSON data model; same fidelity as `JSON.parse(JSON.stringify(x))` |
+| Risk                                                  | Likelihood | Mitigation                                                                                     |
+| ----------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------- |
+| `@toon-format/toon` API changes (spec is v3 draft)    | Med        | Pin to a specific minor; abstract behind our factory; integration test with the pinned version |
+| Auto-serializer mis-detects uniform arrays            | Med        | Strict depth-1 check (primitives only, identical key set, length ≥ 2); extensive spec coverage |
+| Bundle bloat for non-TOON consumers                   | Low        | TOON is dynamic-imported only when factory is called or auto detects a uniform array           |
+| Performance regression on small arrays                | Low        | Skip TOON for arrays of length < 2; consumers control via threshold                            |
+| Decoded TOON loses fidelity (numeric precision, etc.) | Low        | TOON encodes the JSON data model; same fidelity as `JSON.parse(JSON.stringify(x))`             |
 
 ---
 

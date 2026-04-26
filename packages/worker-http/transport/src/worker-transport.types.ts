@@ -117,12 +117,26 @@ export interface WorkerErrorResponse {
 }
 
 /**
+ * Per-request options accepted by `WorkerTransport.execute()`.
+ *
+ * - `signal` — external `AbortSignal`. When it fires, the transport posts a
+ *   `cancel` message to the worker and rejects the Observable with
+ *   `WorkerHttpAbortError`.
+ * - `timeout` — overrides the transport-level `requestTimeout` for this single
+ *   call. `0` or non-finite disables the timeout for this request.
+ */
+export interface WorkerExecuteOptions {
+  signal?: AbortSignal;
+  timeout?: number;
+}
+
+/**
  * Typed transport interface for communicating with a web worker.
  * Observable-based: unsubscribing sends a cancel message to the worker.
  */
 export interface WorkerTransport<TRequest = unknown, TResponse = unknown> {
   /** Send a request to the worker and get an Observable response */
-  execute(request: TRequest): Observable<TResponse>;
+  execute(request: TRequest, options?: WorkerExecuteOptions): Observable<TResponse>;
 
   /** Terminate all workers and release resources */
   terminate(): void;
