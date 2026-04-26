@@ -157,6 +157,56 @@ export class OlLayerService {
     return this.layerCache.get(id)?.getZIndex() ?? 0;
   }
 
+  /**
+   * Updates the features of a vector layer.
+   * Syncs new features without clearing existing ones (preserves OL modifications).
+   * @param id - Layer identifier
+   * @param features - New features to sync
+   */
+  updateFeatures(id: string, features: VectorLayerConfig['features']): void {
+    const layer = this.layerCache.get(id);
+    if (!(layer instanceof VectorLayer)) return;
+
+    const source = layer.getSource();
+    if (!source) return;
+
+    // Get existing feature IDs from source
+    const existingIds = new Set(
+      source
+        .getFeatures()
+        .map((f) => f.getId())
+        .filter((id): id is string | number => id !== undefined),
+    );
+
+    // Only add features that don't already exist in the source
+    if (features && features.length > 0) {
+      const newFeatures = features.filter((f) => !existingIds.has(f.id));
+
+      if (newFeatures.length > 0) {
+        const olFeatures = newFeatures.map((feature) => {
+          const geom = feature.geometry;
+          let geometry;
+
+          if (geom.type === 'Point') {
+            const coords = geom.coordinates as [number, number];
+            geometry = new Point(fromLonLat(coords));
+          } else {
+            geometry = new Point([0, 0]);
+          }
+
+          const olFeature = new OLFeature({
+            geometry,
+            ...feature.properties,
+          });
+          olFeature.setId(feature.id);
+          return olFeature;
+        });
+
+        source.addFeatures(olFeatures);
+      }
+    }
+  }
+
   private updateLayerState(): void {
     const layers: LayerInfo[] = [];
     this.layerCache.forEach((layer, id) => {
@@ -202,8 +252,10 @@ export class OlLayerService {
       source.addFeatures(olFeatures);
     }
 
-    // Default style for points - visible blue circle with red outline
+    // Default style for all geometry types (points, lines, polygons)
     const defaultStyle = new Style({
+      fill: new Fill({ color: 'rgba(25, 118, 210, 0.3)' }),
+      stroke: new Stroke({ color: '#1976d2', width: 2 }),
       image: new Circle({
         radius: 8,
         fill: new Fill({ color: '#1976d2' }),

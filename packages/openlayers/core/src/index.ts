@@ -1,6 +1,6 @@
 // @angular-helpers/openlayers/core
 
-export { OlMapComponent, type MapClickEvent } from './features/map/map.component';
+export { OlMapComponent, type MapClickEvent } from './features/map.component';
 export {
   OlMapService,
   type AnimationOptions,

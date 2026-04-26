@@ -1,12 +1,12 @@
 // OlTileLayerComponent
 
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   inject,
   input,
-  OnInit,
-  OnDestroy,
 } from '@angular/core';
 import { OlLayerService } from '../services/layer.service';
 import type { TileLayerConfig } from '../models/layer.types';
@@ -16,8 +16,9 @@ import type { TileLayerConfig } from '../models/layer.types';
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OlTileLayerComponent implements OnInit, OnDestroy {
+export class OlTileLayerComponent {
   private layerService = inject(OlLayerService);
+  private destroyRef = inject(DestroyRef);
 
   id = input.required<string>();
   source = input.required<'osm' | 'xyz' | 'wms'>();
@@ -28,23 +29,27 @@ export class OlTileLayerComponent implements OnInit, OnDestroy {
   opacity = input<number>(1);
   visible = input<boolean>(true);
 
-  ngOnInit(): void {
-    this.layerService.addLayer({
-      id: this.id(),
-      type: 'tile',
-      source: {
-        type: this.source(),
-        url: this.url(),
-        attributions: this.attributions(),
-        params: this.params(),
-      },
-      zIndex: this.zIndex(),
-      opacity: this.opacity(),
-      visible: this.visible(),
-    } as TileLayerConfig);
-  }
+  constructor() {
+    // Initialize layer after DOM is ready
+    afterNextRender(() => {
+      this.layerService.addLayer({
+        id: this.id(),
+        type: 'tile',
+        source: {
+          type: this.source(),
+          url: this.url(),
+          attributions: this.attributions(),
+          params: this.params(),
+        },
+        zIndex: this.zIndex(),
+        opacity: this.opacity(),
+        visible: this.visible(),
+      } as TileLayerConfig);
+    });
 
-  ngOnDestroy(): void {
-    this.layerService.removeLayer(this.id());
+    // Cleanup when component is destroyed
+    this.destroyRef.onDestroy(() => {
+      this.layerService.removeLayer(this.id());
+    });
   }
 }

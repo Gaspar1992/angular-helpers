@@ -1,11 +1,42 @@
 // @angular-helpers/openlayers/interactions
 
+// Main orchestrator service
 export { OlInteractionService } from './services/interaction.service';
-export { withInteractions, provideInteractions } from './config/providers';
+
+// State management
+export { InteractionStateService } from './services/interaction-state.service';
+
+// Specialized interaction services
+export { SelectInteractionService } from './services/select-interaction.service';
+export { DrawInteractionService } from './services/draw-interaction.service';
+export { ModifyInteractionService } from './services/modify-interaction.service';
+
+// Feature utilities
+export { olFeatureToFeature } from './services/feature-utils';
+
+// Provider functions
+export {
+  withInteractions,
+  provideInteractions,
+  withSelectInteraction,
+  withDrawInteraction,
+  withModifyInteraction,
+} from './config/providers';
+
+// Public types from models
 export type {
   InteractionType,
   InteractionConfig,
   SelectConfig,
   DrawConfig,
+  ModifyConfig,
+  DragAndDropConfig,
   SelectEvent,
+  DrawEndEvent,
+  DrawStartEvent,
+  ModifyEvent,
+  InteractionState,
 } from './models/interaction.types';
+
+// Internal types (for advanced use cases)
+export type { ManagedInteraction } from './services/types';
