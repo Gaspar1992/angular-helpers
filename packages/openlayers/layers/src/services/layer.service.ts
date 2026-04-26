@@ -8,6 +8,7 @@ import VectorSource from 'ol/source/Vector';
 import { Feature as OLFeature } from 'ol';
 import { Point } from 'ol/geom';
 import { fromLonLat } from 'ol/proj';
+import { Style, Circle, Fill, Stroke } from 'ol/style';
 import OSM from 'ol/source/OSM';
 import XYZ from 'ol/source/XYZ';
 import TileWMS from 'ol/source/TileWMS';
@@ -201,11 +202,21 @@ export class OlLayerService {
       source.addFeatures(olFeatures);
     }
 
+    // Default style for points - visible blue circle with red outline
+    const defaultStyle = new Style({
+      image: new Circle({
+        radius: 8,
+        fill: new Fill({ color: '#1976d2' }),
+        stroke: new Stroke({ color: '#d32f2f', width: 2 }),
+      }),
+    });
+
     const layer = new VectorLayer({
       source,
       visible: config.visible ?? true,
       opacity: config.opacity ?? 1,
       zIndex: config.zIndex,
+      style: defaultStyle,
     });
     layer.set('id', config.id);
     map.addLayer(layer);
