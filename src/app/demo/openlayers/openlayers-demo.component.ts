@@ -157,9 +157,9 @@ const BASEMAPS: BasemapConfig[] = [
               </ol-vector-layer>
             </ol-map>
 
-            <!-- Interaction Controls (floating over map) -->
+            <!-- Interaction Controls (floating over map at bottom) -->
             <div
-              class="absolute top-20 left-2 z-[1000] flex flex-col gap-1 bg-base-100/90 backdrop-blur rounded-lg p-2 shadow-lg border border-base-300"
+              class="absolute bottom-10 left-12 z-[1000] flex flex-col gap-1 bg-base-100/90 backdrop-blur rounded-lg p-2 shadow-lg border border-base-300"
             >
               <!-- Select Toggle -->
               <button
