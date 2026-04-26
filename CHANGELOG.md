@@ -1,3 +1,10 @@
+# [1.33.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.32.0...v1.33.0) (2026-04-26)
+
+
+### Features
+
+* **demo:** add streams-polyfill demo card and esbuild-plugin docs ([#100](https://github.com/Gaspar1992/angular-helpers/issues/100)) ([33e2ce5](https://github.com/Gaspar1992/angular-helpers/commit/33e2ce5ce4ecce8a9ce0bd32d228f4afb8769951))
+
 # [1.30.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.29.2...v1.30.0) (2026-04-25)
 
 
