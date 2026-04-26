@@ -1,6 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
+import {
+  createWorkerTransport,
+  WorkerHttpAbortError,
+  WorkerHttpTimeoutError,
+} from '@angular-helpers/worker-http/transport';
 import type { WorkerTransport } from '@angular-helpers/worker-http/transport';
 import { matchWorkerRoute } from '@angular-helpers/worker-http/backend';
 import type { WorkerRoute, SerializableResponse } from '@angular-helpers/worker-http/backend';
@@ -209,6 +213,73 @@ interface LogEntry {
         </div>
       </div>
 
+      <!-- Cancellation Demo -->
+      <div class="bg-base-200 border border-base-300 rounded-xl p-6 col-span-full mt-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
+            🛑 Cancellation
+          </h2>
+          <span class="badge badge-warning">New in v0.8.0</span>
+        </div>
+        <p class="text-sm text-base-content/80 mb-4">
+          Per-request
+          <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded">signal</code> and
+          <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded">timeout</code>
+          flow from the main thread to the worker as a typed
+          <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded">cancel</code>
+          message. The Observable rejects with a typed
+          <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded"
+            >WorkerHttpAbortError</code
+          >
+          (signal) or
+          <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded"
+            >WorkerHttpTimeoutError</code
+          >
+          (timeout) — the caller can branch on
+          <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded">instanceof</code>.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+          <button
+            (click)="startSlowRequest()"
+            [disabled]="cancelStatus() === 'running'"
+            class="btn btn-primary btn-sm"
+          >
+            @if (cancelStatus() === 'running') {
+              <span class="loading loading-spinner loading-xs"></span>
+            }
+            Start 5 s request
+          </button>
+          <button
+            (click)="abortCurrent()"
+            [disabled]="cancelStatus() !== 'running' || !currentAbortController"
+            class="btn btn-error btn-sm"
+          >
+            Abort (signal)
+          </button>
+          <button
+            (click)="startWithTimeout(500)"
+            [disabled]="cancelStatus() === 'running'"
+            class="btn btn-warning btn-sm"
+          >
+            Run with 500 ms timeout
+          </button>
+          <button
+            (click)="failFastAlreadyAborted()"
+            [disabled]="cancelStatus() === 'running'"
+            class="btn btn-secondary btn-sm"
+          >
+            Fail-fast (pre-aborted)
+          </button>
+        </div>
+
+        @if (cancelResult()) {
+          <div class="p-3 rounded-lg font-mono text-xs break-all" [class]="cancelResultClass()">
+            {{ cancelResult() }}
+          </div>
+        }
+      </div>
+
       <!-- HttpBackend Demo -->
       <div class="bg-base-200 border border-base-300 rounded-xl p-6 col-span-full mt-6">
         <div class="flex items-center justify-between mb-4">
@@ -358,6 +429,13 @@ export class WorkerHttpDemoComponent implements OnDestroy {
   private contentHasher: ContentHasher | null = null;
   private aesEncryptor: AesEncryptor | null = null;
   private lastEncrypted: EncryptedPayload | null = null;
+
+  // --- Cancellation state ---
+  protected readonly cancelStatus = signal<'idle' | 'running' | 'done' | 'error'>('idle');
+  protected readonly cancelResult = signal<string>('');
+  protected readonly cancelResultClass = signal<string>('bg-base-300');
+  /** Public so the template can disable the abort button when there's nothing to abort. */
+  protected currentAbortController: AbortController | null = null;
 
   // --- Shared log ---
   protected readonly logs = signal<LogEntry[]>([]);
@@ -575,6 +653,111 @@ export class WorkerHttpDemoComponent implements OnDestroy {
     } catch (err) {
       this.log('AES', `Decrypt error: ${err}`, 'error');
     }
+  }
+
+  // ──────────────────────────────────────────────────────
+  // Cancellation tests
+  // ──────────────────────────────────────────────────────
+
+  private getCancelTransport(): WorkerTransport<unknown, unknown> {
+    if (!this.transport) {
+      this.transport = createWorkerTransport({
+        workerUrl: ECHO_WORKER_URL,
+        maxInstances: 1,
+      });
+    }
+    return this.transport;
+  }
+
+  startSlowRequest(): void {
+    this.cancelStatus.set('running');
+    this.cancelResult.set('');
+    const ac = new AbortController();
+    this.currentAbortController = ac;
+    const start = performance.now();
+
+    this.getCancelTransport()
+      .execute({ message: 'slow', delay: 5000 }, { signal: ac.signal })
+      .subscribe({
+        next: () => {
+          const elapsed = Math.round(performance.now() - start);
+          this.cancelStatus.set('done');
+          this.cancelResultClass.set('bg-success/10 text-success');
+          this.cancelResult.set(`✅ Completed in ${elapsed}ms (no abort)`);
+          this.currentAbortController = null;
+          this.log('Cancel', `Slow request completed in ${elapsed}ms`, 'success');
+        },
+        error: (err) => this.handleCancelError(err, start),
+      });
+    this.log('Cancel', 'Started 5 s request — click "Abort" to cancel', 'info');
+  }
+
+  abortCurrent(): void {
+    if (!this.currentAbortController) return;
+    this.currentAbortController.abort('user clicked abort');
+  }
+
+  startWithTimeout(timeoutMs: number): void {
+    this.cancelStatus.set('running');
+    this.cancelResult.set('');
+    this.currentAbortController = null;
+    const start = performance.now();
+
+    this.getCancelTransport()
+      .execute({ message: 'slow', delay: 5000 }, { timeout: timeoutMs })
+      .subscribe({
+        next: () => {
+          this.cancelStatus.set('done');
+          this.cancelResultClass.set('bg-success/10 text-success');
+          this.cancelResult.set('✅ Completed before timeout');
+        },
+        error: (err) => this.handleCancelError(err, start),
+      });
+    this.log('Cancel', `Started request with ${timeoutMs} ms timeout`, 'info');
+  }
+
+  failFastAlreadyAborted(): void {
+    this.cancelStatus.set('running');
+    this.cancelResult.set('');
+    const ac = new AbortController();
+    ac.abort('preempted');
+    this.currentAbortController = null;
+    const start = performance.now();
+
+    this.getCancelTransport()
+      .execute({ message: 'never', delay: 5000 }, { signal: ac.signal })
+      .subscribe({
+        next: () => {
+          /* unreachable */
+        },
+        error: (err) => this.handleCancelError(err, start),
+      });
+  }
+
+  private handleCancelError(err: unknown, start: number): void {
+    const elapsed = Math.round(performance.now() - start);
+    this.currentAbortController = null;
+    this.cancelStatus.set('error');
+
+    if (err instanceof WorkerHttpAbortError) {
+      this.cancelResultClass.set('bg-warning/10 text-warning');
+      this.cancelResult.set(
+        `🛑 WorkerHttpAbortError after ${elapsed}ms — reason: ${String(err.reason)}`,
+      );
+      this.log('Cancel', `Aborted via signal in ${elapsed}ms (${String(err.reason)})`, 'info');
+      return;
+    }
+    if (err instanceof WorkerHttpTimeoutError) {
+      this.cancelResultClass.set('bg-error/10 text-error');
+      this.cancelResult.set(
+        `⏱️ WorkerHttpTimeoutError after ${elapsed}ms (timeoutMs=${err.timeoutMs})`,
+      );
+      this.log('Cancel', `Timed out after ${err.timeoutMs}ms`, 'error');
+      return;
+    }
+    this.cancelResultClass.set('bg-error/10 text-error');
+    this.cancelResult.set(`❌ ${String(err)}`);
+    this.log('Cancel', `Unexpected error: ${String(err)}`, 'error');
   }
 
   // ──────────────────────────────────────────────────────

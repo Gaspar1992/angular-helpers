@@ -80,6 +80,7 @@
     "@semantic-release/npm": "^13.1.5",
     "@semantic-release/release-notes-generator": "^14.1.0",
     "@tailwindcss/postcss": "^4.2.2",
+    "@toon-format/toon": "^2.1.0",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^8.57.1",
     "@typescript-eslint/parser": "^8.57.1",
