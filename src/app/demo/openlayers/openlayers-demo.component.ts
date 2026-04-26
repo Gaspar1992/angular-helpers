@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OlMapComponent, OlMapService } from '@angular-helpers/openlayers/core';
+import { transformExtent } from 'ol/proj';
 import {
   OlVectorLayerComponent,
   OlLayerService,
@@ -176,6 +177,9 @@ const BASEMAPS: BasemapConfig[] = [
           <!-- Quick Navigation -->
           <div class="flex flex-wrap gap-2 pt-2">
             <span class="text-sm text-base-content/70 self-center mr-2">Jump to:</span>
+            <button class="btn btn-sm btn-primary" (click)="fitToCities()">
+              🗺️ Ver todas las ciudades
+            </button>
             <button class="btn btn-sm btn-outline" (click)="jumpTo([2.17, 41.38], 12)">
               Barcelona
             </button>
@@ -215,6 +219,7 @@ const BASEMAPS: BasemapConfig[] = [
 })
 export class OpenLayersDemoComponent {
   private layerService = inject(OlLayerService);
+  private mapService = inject(OlMapService);
   protected basemaps = BASEMAPS;
 
   center = signal<[number, number]>([2.17, 41.38]);
@@ -311,5 +316,19 @@ export class OpenLayersDemoComponent {
   jumpTo(coords: [number, number], zoom: number): void {
     this.center.set(coords);
     this.zoom.set(zoom);
+  }
+
+  fitToCities(): void {
+    // Bounding box of all cities in EPSG:4326 [minLon, minLat, maxLon, maxLat]
+    // Barcelona [2.17, 41.38], Madrid [-3.7, 40.42], Valencia [-0.38, 39.47], Seville [-5.98, 37.39]
+    const extent4326: [number, number, number, number] = [-5.98, 37.39, 2.17, 41.38];
+    // Transform to map projection (EPSG:3857)
+    const extent3857 = transformExtent(extent4326, 'EPSG:4326', 'EPSG:3857') as [
+      number,
+      number,
+      number,
+      number,
+    ];
+    this.mapService.fitExtent(extent3857, { padding: [50, 50, 50, 50], duration: 500 });
   }
 }
