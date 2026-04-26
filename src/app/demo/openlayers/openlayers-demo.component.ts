@@ -1,11 +1,7 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OlMapComponent, OlMapService } from '@angular-helpers/openlayers/core';
-import {
-  OlTileLayerComponent,
-  OlVectorLayerComponent,
-  OlLayerService,
-} from '@angular-helpers/openlayers/layers';
+import { OlVectorLayerComponent, OlLayerService } from '@angular-helpers/openlayers/layers';
 import {
   OlZoomControlComponent,
   OlAttributionControlComponent,
@@ -15,6 +11,8 @@ import {
   OlLayerSwitcherComponent,
   OlBasemapSwitcherComponent,
   type BasemapConfig,
+  type LayerSwitcherItem,
+  ROTATE_CONTROL_MAP_SERVICE,
 } from '@angular-helpers/openlayers/controls';
 import type { Feature } from '@angular-helpers/openlayers/core';
 
@@ -50,7 +48,6 @@ const BASEMAPS: BasemapConfig[] = [
   imports: [
     CommonModule,
     OlMapComponent,
-    OlTileLayerComponent,
     OlVectorLayerComponent,
     OlZoomControlComponent,
     OlAttributionControlComponent,
@@ -60,7 +57,12 @@ const BASEMAPS: BasemapConfig[] = [
     OlLayerSwitcherComponent,
     OlBasemapSwitcherComponent,
   ],
-  providers: [OlMapService, OlLayerService],
+  providers: [
+    OlMapService,
+    OlLayerService,
+    // Provide the rotate control with access to map service
+    { provide: ROTATE_CONTROL_MAP_SERVICE, useExisting: OlMapService },
+  ],
   template: `
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       <!-- Header -->
@@ -109,14 +111,21 @@ const BASEMAPS: BasemapConfig[] = [
               <ol-fullscreen-control></ol-fullscreen-control>
 
               <!-- Layer Switcher -->
-              <ol-layer-switcher position="top-right" [collapsible]="true" [showOpacity]="true">
+              <ol-layer-switcher
+                position="top-right"
+                [layers]="layerSwitcherItems()"
+                [collapsible]="true"
+                [showOpacity]="true"
+                (visibilityChange)="onLayerVisibilityChange($event)"
+                (opacityChange)="onLayerOpacityChange($event)"
+              >
               </ol-layer-switcher>
 
               <!-- Basemap Switcher -->
               <ol-basemap-switcher
                 position="bottom-left"
                 [basemaps]="basemaps"
-                defaultBasemap="osm"
+                [activeBasemap]="activeBasemap()"
                 (basemapChange)="onBasemapChange($event)"
               >
               </ol-basemap-switcher>
@@ -202,11 +211,24 @@ const BASEMAPS: BasemapConfig[] = [
   `,
 })
 export class OpenLayersDemoComponent {
+  private layerService = inject(OlLayerService);
   protected basemaps = BASEMAPS;
 
   center = signal<[number, number]>([2.17, 41.38]);
   zoom = signal<number>(12);
   lastClick = signal<{ coordinate: [number, number]; pixel: [number, number] } | null>(null);
+  activeBasemap = signal<string>('osm');
+
+  // Layer switcher items derived from service state
+  layerSwitcherItems = computed<LayerSwitcherItem[]>(() => {
+    return this.layerService.layers().map((layer) => ({
+      id: layer.id,
+      name: layer.id.charAt(0).toUpperCase() + layer.id.slice(1),
+      type: layer.type,
+      visible: layer.visible,
+      opacity: layer.opacity,
+    }));
+  });
 
   // Sample city features for the vector layer
   cityFeatures = signal<Feature[]>([
@@ -242,7 +264,15 @@ export class OpenLayersDemoComponent {
   }
 
   onBasemapChange(basemapId: string): void {
-    console.log('Switched to basemap:', basemapId);
+    this.activeBasemap.set(basemapId);
+  }
+
+  onLayerVisibilityChange(event: { id: string; visible: boolean }): void {
+    this.layerService.setVisibility(event.id, event.visible);
+  }
+
+  onLayerOpacityChange(event: { id: string; opacity: number }): void {
+    this.layerService.setOpacity(event.id, event.opacity);
   }
 
   jumpTo(coords: [number, number], zoom: number): void {

@@ -1,8 +1,15 @@
 // OlLayerSwitcherComponent - UI control for managing layer visibility
 
-import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { OlLayerService } from '../../../layers/src/services/layer.service';
+
+export interface LayerSwitcherItem {
+  id: string;
+  name: string;
+  type: 'vector' | 'tile' | 'image';
+  visible: boolean;
+  opacity: number;
+}
 
 /**
  * A reusable layer switcher control that displays all layers
@@ -12,8 +19,11 @@ import { OlLayerService } from '../../../layers/src/services/layer.service';
  * ```html
  * <ol-layer-switcher
  *   position="top-right"
- *   collapsible="true"
- *   [showOpacity]="true">
+ *   [layers]="layerItems()"
+ *   [collapsible]="true"
+ *   [showOpacity]="true"
+ *   (visibilityChange)="onVisibilityChange($event)"
+ *   (opacityChange)="onOpacityChange($event)">
  * </ol-layer-switcher>
  * ```
  */
@@ -44,12 +54,12 @@ import { OlLayerService } from '../../../layers/src/services/layer.service';
 
       @if (!isCollapsed()) {
         <div class="ol-layer-switcher__panel">
-          @if (layerService.layers(); as layers) {
-            @if (layers.length === 0) {
+          @if (layers(); as layerList) {
+            @if (layerList.length === 0) {
               <div class="ol-layer-switcher__empty">No layers</div>
             } @else {
               <ul class="ol-layer-switcher__list">
-                @for (layer of layers; track layer.id) {
+                @for (layer of layerList; track layer.id) {
                   <li class="ol-layer-switcher__item">
                     <label class="ol-layer-switcher__label">
                       <input
@@ -238,14 +248,16 @@ import { OlLayerService } from '../../../layers/src/services/layer.service';
   ],
 })
 export class OlLayerSwitcherComponent {
-  protected layerService = inject(OlLayerService);
-
   position = input<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'>('top-right');
+  layers = input<LayerSwitcherItem[]>([]);
   collapsible = input<boolean>(true);
   showOpacity = input<boolean>(false);
   startCollapsed = input<boolean>(false);
 
-  protected isCollapsed = signal(this.startCollapsed());
+  visibilityChange = output<{ id: string; visible: boolean }>();
+  opacityChange = output<{ id: string; opacity: number }>();
+
+  protected isCollapsed = signal(false);
 
   toggleCollapsed(): void {
     if (this.collapsible()) {
@@ -254,11 +266,14 @@ export class OlLayerSwitcherComponent {
   }
 
   toggleLayer(id: string): void {
-    this.layerService.toggleVisibility(id);
+    const layer = this.layers().find((l) => l.id === id);
+    if (layer) {
+      this.visibilityChange.emit({ id, visible: !layer.visible });
+    }
   }
 
   setOpacity(id: string, event: Event): void {
     const value = (event.target as HTMLInputElement).valueAsNumber;
-    this.layerService.setOpacity(id, value);
+    this.opacityChange.emit({ id, opacity: value });
   }
 }

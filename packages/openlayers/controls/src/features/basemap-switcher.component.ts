@@ -1,8 +1,7 @@
 // OlBasemapSwitcherComponent - Switch between base map providers
 
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { OlLayerService } from '../../../layers/src/services/layer.service';
 
 export interface BasemapConfig {
   id: string;
@@ -26,7 +25,7 @@ export interface BasemapConfig {
  *     { id: 'osm', name: 'OpenStreetMap', type: 'osm' },
  *     { id: 'satellite', name: 'Satellite', type: 'xyz', url: 'https://...' }
  *   ]"
- *   [defaultBasemap]="'osm'"
+ *   [activeBasemap]="'osm'"
  *   (basemapChange)="onBasemapChange($event)">
  * </ol-basemap-switcher>
  * ```
@@ -195,49 +194,19 @@ export interface BasemapConfig {
   ],
 })
 export class OlBasemapSwitcherComponent {
-  private layerService = inject(OlLayerService);
-
   basemaps = input<BasemapConfig[]>([{ id: 'osm', name: 'OpenStreetMap', type: 'osm' }]);
-  defaultBasemap = input<string>('osm');
+  activeBasemap = input<string>('osm');
   position = input<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'>('bottom-left');
-  layerId = input<string>('basemap');
 
   basemapChange = output<string>();
 
-  protected activeBasemap = signal<string>('');
   protected isExpanded = signal(false);
-
-  constructor() {
-    // Initialize with default basemap
-    const defaultId = this.defaultBasemap();
-    this.activeBasemap.set(defaultId);
-    this.switchToBasemap(defaultId);
-  }
 
   toggleExpanded(): void {
     this.isExpanded.update((v: boolean) => !v);
   }
 
   switchBasemap(basemap: BasemapConfig): void {
-    // Remove current basemap layer
-    this.layerService.removeLayer(this.layerId());
-
-    // Add new basemap layer
-    this.layerService.addLayer({
-      id: this.layerId(),
-      type: 'tile',
-      source: {
-        type: basemap.type,
-        url: basemap.url,
-        params: basemap.params,
-        attributions: basemap.attributions,
-      },
-      zIndex: 0,
-      visible: true,
-      opacity: 1,
-    });
-
-    this.activeBasemap.set(basemap.id);
     this.basemapChange.emit(basemap.id);
     this.isExpanded.set(false);
   }
@@ -257,13 +226,6 @@ export class OlBasemapSwitcherComponent {
         return '📡';
       default:
         return '🗺️';
-    }
-  }
-
-  private switchToBasemap(id: string): void {
-    const basemap = this.basemaps().find((b) => b.id === id);
-    if (basemap) {
-      this.switchBasemap(basemap);
     }
   }
 }
