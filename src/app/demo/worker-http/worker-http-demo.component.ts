@@ -4,6 +4,7 @@ import { HmacCardComponent } from './cards/hmac-card.component';
 import { HashCardComponent } from './cards/hash-card.component';
 import { AesCardComponent } from './cards/aes-card.component';
 import { BackendCardComponent } from './cards/backend-card.component';
+import { CancellationCardComponent } from './cards/cancellation-card.component';
 import { SerializerComparisonCardComponent } from './cards/serializer-comparison-card.component';
 import { WorkerVsHttpClientCardComponent } from './cards/worker-vs-httpclient-card.component';
 import { WorkerHttpDemoLogService } from './shared/log.service';
@@ -18,6 +19,7 @@ import { WorkerHttpDemoLogService } from './shared/log.service';
     HashCardComponent,
     AesCardComponent,
     BackendCardComponent,
+    CancellationCardComponent,
     SerializerComparisonCardComponent,
     WorkerVsHttpClientCardComponent,
   ],
@@ -39,7 +41,8 @@ import { WorkerHttpDemoLogService } from './shared/log.service';
           <span class="badge badge-accent badge-md">Content Hashing</span>
           <span class="badge badge-info badge-md">AES Encryption</span>
           <span class="badge badge-success badge-md">HttpBackend</span>
-          <span class="badge badge-warning badge-md">TOON Serializer</span>
+          <span class="badge badge-warning badge-md">Cancellation</span>
+          <span class="badge badge-neutral badge-md">TOON Serializer</span>
         </div>
       </header>
 
@@ -51,6 +54,7 @@ import { WorkerHttpDemoLogService } from './shared/log.service';
       </div>
 
       <div class="mt-6 grid grid-cols-1 gap-6">
+        <app-worker-http-cancellation-card />
         <app-worker-http-backend-card />
         <app-worker-http-serializer-comparison-card />
         <app-worker-http-vs-httpclient-card />

@@ -19,8 +19,10 @@ import {
   WORKER_HTTP_INTERCEPTORS_TOKEN,
   WORKER_HTTP_ROUTES_TOKEN,
   WORKER_HTTP_SERIALIZER_TOKEN,
+  WORKER_HTTP_SIGNAL,
   WORKER_HTTP_STREAMS_POLYFILL_TOKEN,
   WORKER_HTTP_TELEMETRY_TOKEN,
+  WORKER_HTTP_TIMEOUT,
   WORKER_TARGET,
 } from './worker-http-tokens';
 import type { WorkerInterceptorSpec } from '@angular-helpers/worker-http/interceptors';
@@ -118,7 +120,14 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
     const base = this.buildEventBase(req, workerId, 'worker');
     this.emitRequest(base);
 
-    return transport.execute(payload).pipe(
+    const signal = req.context.get(WORKER_HTTP_SIGNAL) ?? undefined;
+    const timeout = req.context.get(WORKER_HTTP_TIMEOUT);
+    const executeOptions =
+      signal !== undefined || timeout !== null
+        ? { signal, timeout: timeout ?? undefined }
+        : undefined;
+
+    return transport.execute(payload, executeOptions).pipe(
       map((res) => toHttpResponse(res as SerializableResponse, req)),
       tap((event) => {
         if (event instanceof HttpResponse) {

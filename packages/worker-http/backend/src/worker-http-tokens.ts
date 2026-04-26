@@ -37,6 +37,33 @@ export type WorkerInterceptorSpecsMap = Readonly<Record<string, readonly WorkerI
 export const WORKER_TARGET = new HttpContextToken<string | null>(() => null);
 
 /**
+ * Per-request HttpContextToken carrying an external `AbortSignal`.
+ *
+ * When the signal fires, the backend posts a `cancel` message to the worker
+ * and the request errors with `WorkerHttpAbortError` (wrapped by Angular into
+ * `HttpErrorResponse`).
+ *
+ * @example
+ * ```typescript
+ * const ac = new AbortController();
+ * this.http.get('/api/users', { signal: ac.signal });
+ * // later
+ * ac.abort();
+ * ```
+ */
+export const WORKER_HTTP_SIGNAL = new HttpContextToken<AbortSignal | null>(() => null);
+
+/**
+ * Per-request HttpContextToken carrying a timeout in milliseconds.
+ *
+ * When set, overrides the transport-level `requestTimeout` for this single
+ * call. `0` or non-finite disables the timeout for this request only.
+ *
+ * On expiry the request errors with `WorkerHttpTimeoutError`.
+ */
+export const WORKER_HTTP_TIMEOUT = new HttpContextToken<number | null>(() => null);
+
+/**
  * Registered worker definitions provided via `withWorkerConfigs()`.
  */
 export const WORKER_HTTP_CONFIGS_TOKEN = new InjectionToken<WorkerConfig[]>('WorkerHttpConfigs', {

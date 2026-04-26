@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { firstValueFrom, lastValueFrom, take, toArray } from 'rxjs';
 
 import { createWorkerTransport } from './create-worker-transport';
+import { WorkerHttpAbortError } from './worker-http-abort-error';
 import { WorkerHttpTimeoutError } from './worker-http-timeout-error';
 
 /**
@@ -349,6 +350,116 @@ describe('createWorkerTransport', () => {
         (m) => (m.message as { type: string }).type === 'request',
       )!;
       expect(req.transfer).toEqual([]);
+    });
+  });
+
+  describe('cancellation via AbortSignal', () => {
+    it('rejects with WorkerHttpAbortError when external signal fires', async () => {
+      const transport = createWorkerTransport({ workerFactory: makeFactory() });
+      const ac = new AbortController();
+
+      const promise = firstValueFrom(transport.execute({ slow: true }, { signal: ac.signal }));
+      const worker = FakeWorker.instances[0];
+
+      ac.abort('user navigated');
+
+      await expect(promise).rejects.toBeInstanceOf(WorkerHttpAbortError);
+      const cancel = worker.postedMessages.find(
+        (m) => (m.message as { type: string }).type === 'cancel',
+      );
+      expect(cancel).toBeDefined();
+      expect((cancel!.message as { requestId: string }).requestId).toBe(
+        worker.lastRequest!.requestId,
+      );
+    });
+
+    it('preserves the abort reason on the error', async () => {
+      const transport = createWorkerTransport({ workerFactory: makeFactory() });
+      const ac = new AbortController();
+
+      const promise = firstValueFrom(transport.execute({ x: 1 }, { signal: ac.signal }));
+
+      ac.abort('navigation');
+
+      try {
+        await promise;
+        throw new Error('promise should have rejected');
+      } catch (err) {
+        expect(err).toBeInstanceOf(WorkerHttpAbortError);
+        expect((err as WorkerHttpAbortError).reason).toBe('navigation');
+      }
+    });
+
+    it('fails fast when signal is already aborted at execute() time', async () => {
+      const transport = createWorkerTransport({ workerFactory: makeFactory() });
+      const ac = new AbortController();
+      ac.abort('preempted');
+
+      // No worker should be touched: the FakeWorker pool is created lazily on
+      // first request, but execute() should error before any postMessage.
+      const promise = firstValueFrom(transport.execute({ x: 1 }, { signal: ac.signal }));
+
+      await expect(promise).rejects.toBeInstanceOf(WorkerHttpAbortError);
+    });
+
+    it('removes the abort listener on successful response', async () => {
+      const transport = createWorkerTransport({ workerFactory: makeFactory() });
+      const ac = new AbortController();
+      const removeSpy = vi.spyOn(ac.signal, 'removeEventListener');
+
+      const promise = firstValueFrom(transport.execute({ x: 1 }, { signal: ac.signal }));
+      const worker = FakeWorker.instances[0];
+      worker.respond(worker.lastRequest!.requestId, { ok: true });
+
+      await expect(promise).resolves.toEqual({ ok: true });
+      expect(removeSpy).toHaveBeenCalledWith('abort', expect.any(Function));
+    });
+
+    it('does not error after subscriber already settled (race)', async () => {
+      const transport = createWorkerTransport({ workerFactory: makeFactory() });
+      const ac = new AbortController();
+
+      const promise = firstValueFrom(transport.execute({ x: 1 }, { signal: ac.signal }));
+      const worker = FakeWorker.instances[0];
+
+      // Settle first, then abort. The abort listener must be a no-op.
+      worker.respond(worker.lastRequest!.requestId, { ok: true });
+      ac.abort('late');
+
+      await expect(promise).resolves.toEqual({ ok: true });
+    });
+  });
+
+  describe('per-request timeout override', () => {
+    it('uses options.timeout instead of the transport-level requestTimeout', async () => {
+      vi.useFakeTimers();
+      const transport = createWorkerTransport({
+        workerFactory: makeFactory(),
+        requestTimeout: 60_000,
+      });
+
+      const promise = firstValueFrom(transport.execute({ slow: true }, { timeout: 50 }));
+
+      vi.advanceTimersByTime(50);
+
+      await expect(promise).rejects.toBeInstanceOf(WorkerHttpTimeoutError);
+    });
+
+    it('options.timeout=0 disables timeout for this request only', async () => {
+      vi.useFakeTimers();
+      const transport = createWorkerTransport({
+        workerFactory: makeFactory(),
+        requestTimeout: 100,
+      });
+
+      const promise = firstValueFrom(transport.execute({ forever: true }, { timeout: 0 }));
+
+      vi.advanceTimersByTime(60_000);
+
+      const worker = FakeWorker.instances[0];
+      worker.respond(worker.lastRequest!.requestId, { eventual: true });
+
+      await expect(promise).resolves.toEqual({ eventual: true });
     });
   });
 
