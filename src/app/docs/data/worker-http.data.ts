@@ -417,6 +417,100 @@ const decrypted = await encryptor.decrypt({ ciphertext, iv });
 const hasher = createContentHasher('SHA-256');
 const hash = await hasher.hash('data to hash');`,
   },
+  {
+    id: 'streams-polyfill',
+    name: 'Streams Polyfill',
+    description:
+      'Safari Transferable Streams Ponyfill. Provides ReadableStream, TransformStream, and WritableStream implementations that support structuredClone transfer to/from Web Workers on Safari 16-17.',
+    scope: 'root',
+    importPath: '@angular-helpers/worker-http/streams-polyfill',
+    requiresSecureContext: false,
+    browserSupport: 'Safari 16-17 (other browsers use native streams)',
+    notes: [
+      'Ponyfill (not polyfill) — does not modify global scope',
+      'Lazy-loaded — only downloads when Safari 16-17 is detected',
+      'Used automatically by transport when safariPolyfill: true is configured',
+      'Native implementations re-exported when available',
+    ],
+    methods: [
+      {
+        name: 'needsPolyfill',
+        signature: 'needsPolyfill(userAgent?: string): boolean',
+        description:
+          'Detects if the current browser needs the streams ponyfill. Safari 16-17 fails to transfer ReadableStream/TransformStream via structuredClone.',
+        returns: 'boolean',
+      },
+      {
+        name: 'ponyfillStreams',
+        signature: 'ponyfillStreams(): Promise<StreamPonyfillExports>',
+        description:
+          'Lazily loads the web-streams-polyfill ponyfill. Returns ponyfilled streams or native if not needed.',
+        returns: 'Promise<{ ReadableStream, TransformStream, WritableStream }>',
+      },
+    ],
+    example: `import { needsPolyfill, ponyfillStreams } from '@angular-helpers/worker-http/streams-polyfill';
+
+// Check if ponyfill is needed
+if (needsPolyfill()) {
+  console.log('Safari 16-17 detected — loading ponyfill');
+  const streams = await ponyfillStreams();
+  // Use ponyfilled streams
+  const rs = new streams.ReadableStream({
+    start(controller) { controller.close(); }
+  });
+} else {
+  console.log('Native transferable streams supported');
+}
+
+// Or let the transport auto-detect
+const transport = createWorkerTransport({
+  workerUrl: new URL('./worker.ts', import.meta.url),
+  safariPolyfill: true, // Auto-injects when needed
+});`,
+  },
+  {
+    id: 'esbuild-plugin',
+    name: 'esbuild Plugin',
+    description:
+      'Build-time esbuild plugin for bundling worker interceptors. Auto-discovers and injects interceptor imports into worker files during compilation.',
+    scope: 'root',
+    importPath: '@angular-helpers/worker-http/esbuild-plugin',
+    requiresSecureContext: false,
+    browserSupport: 'N/A (build-time only)',
+    notes: [
+      'Only needed for custom esbuild setups (not Angular CLI default)',
+      'Auto-discovers interceptors from src directory when autoDiscover: true',
+      'Injects interceptor imports into worker files at build time',
+      'Works with any esbuild-based setup (Vite, custom webpack, etc.)',
+    ],
+    methods: [
+      {
+        name: 'workerHttpPlugin',
+        signature: 'workerHttpPlugin(options?: WorkerHttpPluginOptions): Plugin',
+        description:
+          'Creates an esbuild plugin that bundles interceptors into worker files. Intercepts .worker.{ts,js,mjs} files.',
+        returns: 'esbuild Plugin',
+      },
+    ],
+    example: `import { workerHttpPlugin } from '@angular-helpers/worker-http/esbuild-plugin';
+
+// esbuild.config.ts
+export default {
+  plugins: [
+    workerHttpPlugin({
+      // Option 1: Explicit interceptor paths
+      interceptors: ['./src/interceptors/auth.ts', './src/interceptors/logging.ts'],
+
+      // Option 2: Auto-discover from src directory
+      autoDiscover: true,
+
+      // Option 3: Combine both approaches
+      interceptors: ['./src/interceptors/custom.ts'],
+      autoDiscover: true, // merges discovered with explicit
+    }),
+  ],
+};`,
+  },
 ];
 
 export const WORKER_HTTP_INTERFACES = [
