@@ -156,9 +156,16 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
       }
 
       .ol-basemap-switcher--top-left .ol-basemap-switcher__panel,
+      .ol-basemap-switcher--top-center .ol-basemap-switcher__panel,
       .ol-basemap-switcher--top-right .ol-basemap-switcher__panel {
         bottom: auto;
         top: calc(100% + 8px);
+      }
+
+      .ol-basemap-switcher--top-center .ol-basemap-switcher__panel,
+      .ol-basemap-switcher--bottom-center .ol-basemap-switcher__panel {
+        left: 50%;
+        transform: translateX(-50%);
       }
 
       .ol-basemap-switcher__item {
