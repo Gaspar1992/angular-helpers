@@ -1,15 +1,14 @@
 // OlScaleLineControlComponent
 
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   inject,
   input,
-  OnInit,
-  OnDestroy,
 } from '@angular/core';
-import { NgZone } from '@angular/core';
-import { OlMapService } from '@angular-helpers/openlayers/core';
+import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import ScaleLine from 'ol/control/ScaleLine';
 
 @Component({
@@ -17,9 +16,9 @@ import ScaleLine from 'ol/control/ScaleLine';
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OlScaleLineControlComponent implements OnInit, OnDestroy {
+export class OlScaleLineControlComponent {
   private mapService = inject(OlMapService);
-  private ngZone = inject(NgZone);
+  private zoneHelper = inject(OlZoneHelper);
 
   units = input<'metric' | 'imperial' | 'nautical' | 'us'>('metric');
   bar = input<boolean>(false);
@@ -27,34 +26,29 @@ export class OlScaleLineControlComponent implements OnInit, OnDestroy {
 
   private control?: ScaleLine;
 
-  ngOnInit(): void {
-    this.tryAddControl();
-  }
-
-  private tryAddControl(retryCount = 0): void {
-    const map = this.mapService.getMap();
-    if (!map) {
-      if (retryCount < 10) {
-        setTimeout(() => this.tryAddControl(retryCount + 1), Math.min(50 * (retryCount + 1), 500));
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    let destroyed = false;
+    destroyRef.onDestroy(() => {
+      if (this.control) {
+        const map = this.mapService.getMap();
+        if (map) this.zoneHelper.runOutsideAngular(() => map.removeControl(this.control!));
       }
-      return;
-    }
-
-    this.ngZone.runOutsideAngular(() => {
-      this.control = new ScaleLine({
-        units: this.units(),
-        bar: this.bar(),
-        steps: this.steps(),
-      });
-      map.addControl(this.control);
+      destroyed = true;
     });
-  }
 
-  ngOnDestroy(): void {
-    const map = this.mapService.getMap();
-    if (!this.control || !map) return;
-    this.ngZone.runOutsideAngular(() => {
-      map.removeControl(this.control!);
+    afterNextRender(() => {
+      if (destroyed) return;
+      const map = this.mapService.getMap();
+      if (!map) return;
+      this.zoneHelper.runOutsideAngular(() => {
+        this.control = new ScaleLine({
+          units: this.units(),
+          bar: this.bar(),
+          steps: this.steps(),
+        });
+        map.addControl(this.control);
+      });
     });
   }
 }

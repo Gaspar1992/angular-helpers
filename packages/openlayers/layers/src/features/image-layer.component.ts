@@ -1,4 +1,4 @@
-// OlTileLayerComponent
+// OlImageLayerComponent
 
 import {
   ChangeDetectionStrategy,
@@ -9,21 +9,21 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { OlLayerService } from '../services/layer.service';
-import type { TileLayerConfig } from '../models/layer.types';
+import type { ImageLayerConfig } from '../models/layer.types';
 
 @Component({
-  selector: 'ol-tile-layer',
+  selector: 'ol-image-layer',
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OlTileLayerComponent implements OnInit, OnDestroy {
+export class OlImageLayerComponent implements OnInit, OnDestroy {
   private layerService = inject(OlLayerService);
 
   id = input.required<string>();
-  source = input.required<'osm' | 'xyz' | 'wms'>();
-  url = input<string>();
-  attributions = input<string | string[]>();
+  sourceType = input.required<'wms' | 'static'>();
+  url = input.required<string>();
   params = input<Record<string, unknown>>();
+  imageExtent = input<[number, number, number, number]>();
   zIndex = input<number>(0);
   opacity = input<number>(1);
   visible = input<boolean>(true);
@@ -31,17 +31,17 @@ export class OlTileLayerComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.layerService.addLayer({
       id: this.id(),
-      type: 'tile',
+      type: 'image',
       source: {
-        type: this.source(),
+        type: this.sourceType(),
         url: this.url(),
-        attributions: this.attributions(),
         params: this.params(),
+        imageExtent: this.imageExtent(),
       },
       zIndex: this.zIndex(),
       opacity: this.opacity(),
       visible: this.visible(),
-    } as TileLayerConfig);
+    } as ImageLayerConfig);
   }
 
   ngOnDestroy(): void {

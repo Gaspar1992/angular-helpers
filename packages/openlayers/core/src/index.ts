@@ -7,6 +7,7 @@ export {
   type FitOptions,
   type MapViewOptions,
 } from './services/map.service';
+export { OlZoneHelper } from './services/zone-helper.service';
 export { provideOpenLayers, type OlFeature, type OlFeatureKind } from './config/providers';
 export type {
   Coordinate,

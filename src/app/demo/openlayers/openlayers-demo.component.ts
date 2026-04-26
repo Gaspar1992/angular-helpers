@@ -1,19 +1,24 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  signal,
-  inject,
-  ChangeDetectorRef,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OlMapComponent, OlMapService } from '@angular-helpers/openlayers/core';
-import { OlTileLayerComponent, OlLayerService } from '@angular-helpers/openlayers/layers';
+import { transformExtent } from 'ol/proj';
+import {
+  OlVectorLayerComponent,
+  OlLayerService,
+  type TileLayerConfig,
+} from '@angular-helpers/openlayers/layers';
 import {
   OlZoomControlComponent,
   OlAttributionControlComponent,
   OlScaleLineControlComponent,
   OlFullscreenControlComponent,
+  OlRotateControlComponent,
+  OlLayerSwitcherComponent,
+  OlBasemapSwitcherComponent,
+  ROTATE_CONTROL_MAP_SERVICE,
 } from '@angular-helpers/openlayers/controls';
+import type { BasemapConfig, LayerSwitcherItem } from '@angular-helpers/openlayers/controls';
+import type { Feature } from '@angular-helpers/openlayers/core';
 
 interface City {
   name: string;
@@ -21,19 +26,47 @@ interface City {
   population: number;
 }
 
+const BASEMAPS: BasemapConfig[] = [
+  { id: 'osm', name: 'OpenStreetMap', type: 'osm', icon: '🗺️' },
+  {
+    id: 'satellite',
+    name: 'Satellite',
+    type: 'xyz',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attributions: 'Tiles © Esri',
+    icon: '🛰️',
+  },
+  {
+    id: 'terrain',
+    name: 'Terrain',
+    type: 'xyz',
+    url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attributions: '© OpenTopoMap',
+    icon: '⛰️',
+  },
+];
+
 @Component({
   selector: 'app-openlayers-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     OlMapComponent,
-    OlTileLayerComponent,
+    OlVectorLayerComponent,
     OlZoomControlComponent,
     OlAttributionControlComponent,
     OlScaleLineControlComponent,
     OlFullscreenControlComponent,
+    OlRotateControlComponent,
+    OlLayerSwitcherComponent,
+    OlBasemapSwitcherComponent,
   ],
-  providers: [OlMapService, OlLayerService],
+  providers: [
+    OlMapService,
+    OlLayerService,
+    // Provide the rotate control with access to map service
+    { provide: ROTATE_CONTROL_MAP_SERVICE, useExisting: OlMapService },
+  ],
   template: `
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       <!-- Header -->
@@ -74,14 +107,41 @@ interface City {
               (mapClick)="onMapClick($event)"
               class="w-full h-full"
             >
-              <!-- Base Layer: OSM -->
-              <ol-tile-layer id="osm" source="osm"> </ol-tile-layer>
-
               <!-- Controls -->
               <ol-zoom-control [delta]="1"></ol-zoom-control>
+              <ol-rotate-control [autoHide]="true"></ol-rotate-control>
               <ol-attribution-control [collapsible]="true"></ol-attribution-control>
               <ol-scale-line-control unit="metric"></ol-scale-line-control>
               <ol-fullscreen-control></ol-fullscreen-control>
+
+              <!-- Layer Switcher -->
+              <ol-layer-switcher
+                position="top-right"
+                [layers]="layerSwitcherItems()"
+                [collapsible]="true"
+                [showOpacity]="true"
+                (visibilityChange)="onLayerVisibilityChange($event)"
+                (opacityChange)="onLayerOpacityChange($event)"
+              >
+              </ol-layer-switcher>
+
+              <!-- Basemap Switcher -->
+              <ol-basemap-switcher
+                position="top-center"
+                [basemaps]="basemaps"
+                [activeBasemap]="activeBasemap()"
+                (basemapChange)="onBasemapChange($event)"
+              >
+              </ol-basemap-switcher>
+
+              <!-- Vector Layer: Cities -->
+              <ol-vector-layer
+                id="cities"
+                [features]="cityFeatures()"
+                [zIndex]="10"
+                [visible]="true"
+              >
+              </ol-vector-layer>
             </ol-map>
           </div>
 
@@ -117,17 +177,20 @@ interface City {
           <!-- Quick Navigation -->
           <div class="flex flex-wrap gap-2 pt-2">
             <span class="text-sm text-base-content/70 self-center mr-2">Jump to:</span>
+            <button class="btn btn-sm btn-primary" (click)="fitToCities()">
+              🗺️ View all cities
+            </button>
             <button class="btn btn-sm btn-outline" (click)="jumpTo([2.17, 41.38], 12)">
               Barcelona
             </button>
-            <button class="btn btn-sm btn-outline" (click)="jumpTo([-0.13, 51.51], 11)">
-              London
+            <button class="btn btn-sm btn-outline" (click)="jumpTo([-3.7, 40.42], 12)">
+              Madrid
             </button>
-            <button class="btn btn-sm btn-outline" (click)="jumpTo([-74.01, 40.71], 11)">
-              New York
+            <button class="btn btn-sm btn-outline" (click)="jumpTo([-0.38, 39.47], 12)">
+              Valencia
             </button>
-            <button class="btn btn-sm btn-outline" (click)="jumpTo([139.69, 35.69], 11)">
-              Tokyo
+            <button class="btn btn-sm btn-outline" (click)="jumpTo([-5.98, 37.39], 12)">
+              Sevilla
             </button>
           </div>
         </div>
@@ -155,11 +218,54 @@ interface City {
   `,
 })
 export class OpenLayersDemoComponent {
-  private cdr = inject(ChangeDetectorRef);
+  private layerService = inject(OlLayerService);
+  private mapService = inject(OlMapService);
+  protected basemaps = BASEMAPS;
 
   center = signal<[number, number]>([2.17, 41.38]);
   zoom = signal<number>(12);
   lastClick = signal<{ coordinate: [number, number]; pixel: [number, number] } | null>(null);
+  activeBasemap = signal<string>('osm');
+
+  constructor() {
+    // Initialize default basemap on component creation
+    this.createBasemapLayer('osm');
+  }
+
+  // Layer switcher items derived from service state
+  layerSwitcherItems = computed<LayerSwitcherItem[]>(() => {
+    return this.layerService.layers().map((layer) => ({
+      id: layer.id,
+      name: layer.id.charAt(0).toUpperCase() + layer.id.slice(1),
+      type: layer.type,
+      visible: layer.visible,
+      opacity: layer.opacity,
+    }));
+  });
+
+  // Sample city features for the vector layer
+  cityFeatures = signal<Feature[]>([
+    {
+      id: 'barcelona',
+      geometry: { type: 'Point', coordinates: [2.17, 41.38] },
+      properties: { name: 'Barcelona', population: 1600000 },
+    },
+    {
+      id: 'madrid',
+      geometry: { type: 'Point', coordinates: [-3.7, 40.42] },
+      properties: { name: 'Madrid', population: 3200000 },
+    },
+    {
+      id: 'valencia',
+      geometry: { type: 'Point', coordinates: [-0.38, 39.47] },
+      properties: { name: 'Valencia', population: 790000 },
+    },
+    {
+      id: 'seville',
+      geometry: { type: 'Point', coordinates: [-5.98, 37.39] },
+      properties: { name: 'Seville', population: 690000 },
+    },
+  ]);
 
   onViewChange(viewState: { center: [number, number]; zoom: number; rotation?: number }): void {
     this.center.set(viewState.center);
@@ -170,9 +276,75 @@ export class OpenLayersDemoComponent {
     this.lastClick.set(event);
   }
 
+  onBasemapChange(basemapId: string): void {
+    this.activeBasemap.set(basemapId);
+    this.createBasemapLayer(basemapId);
+  }
+
+  private createBasemapLayer(basemapId: string): void {
+    // Remove existing basemap layer
+    this.layerService.removeLayer('basemap');
+
+    const basemap = this.basemaps.find((b) => b.id === basemapId);
+    if (!basemap) return;
+
+    // Add new basemap layer using TileLayerConfig
+    const layerConfig: TileLayerConfig = {
+      id: 'basemap',
+      type: 'tile',
+      source: {
+        type: basemap.type,
+        url: basemap.url,
+        params: basemap.params,
+        attributions: basemap.attributions,
+      },
+      zIndex: 0,
+      visible: true,
+      opacity: 1,
+    };
+    this.layerService.addLayer(layerConfig);
+  }
+
+  onLayerVisibilityChange(event: { id: string; visible: boolean }): void {
+    this.layerService.setVisibility(event.id, event.visible);
+  }
+
+  onLayerOpacityChange(event: { id: string; opacity: number }): void {
+    this.layerService.setOpacity(event.id, event.opacity);
+  }
+
   jumpTo(coords: [number, number], zoom: number): void {
     this.center.set(coords);
     this.zoom.set(zoom);
-    this.cdr.markForCheck();
+  }
+
+  fitToCities(): void {
+    // Calculate extent from actual city features
+    const features = this.cityFeatures();
+    if (features.length === 0) return;
+
+    // Get all coordinates
+    const coords = features.map((f) => f.geometry.coordinates as [number, number]);
+    const lons = coords.map((c) => c[0]);
+    const lats = coords.map((c) => c[1]);
+
+    // Calculate bounding box in EPSG:4326
+    const extent4326: [number, number, number, number] = [
+      Math.min(...lons), // minLon
+      Math.min(...lats), // minLat
+      Math.max(...lons), // maxLon
+      Math.max(...lats), // maxLat
+    ];
+
+    // Transform to map projection (EPSG:3857)
+    const extent3857 = transformExtent(extent4326, 'EPSG:4326', 'EPSG:3857') as [
+      number,
+      number,
+      number,
+      number,
+    ];
+
+    // fitExtent now handles the deferral internally
+    this.mapService.fitExtent(extent3857, { padding: [60, 60, 60, 60], maxZoom: 8, duration: 600 });
   }
 }

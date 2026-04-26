@@ -1,15 +1,14 @@
 // OlZoomControlComponent
 
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   inject,
   input,
-  OnInit,
-  OnDestroy,
 } from '@angular/core';
-import { NgZone } from '@angular/core';
-import { OlMapService } from '@angular-helpers/openlayers/core';
+import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import Zoom from 'ol/control/Zoom';
 
 @Component({
@@ -17,42 +16,34 @@ import Zoom from 'ol/control/Zoom';
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OlZoomControlComponent implements OnInit, OnDestroy {
+export class OlZoomControlComponent {
   private mapService = inject(OlMapService);
-  private ngZone = inject(NgZone);
+  private zoneHelper = inject(OlZoneHelper);
 
   delta = input<number>(1);
   duration = input<number>(250);
 
   private control?: Zoom;
 
-  ngOnInit(): void {
-    this.tryAddControl();
-  }
-
-  private tryAddControl(retryCount = 0): void {
-    const map = this.mapService.getMap();
-    if (!map) {
-      if (retryCount < 10) {
-        setTimeout(() => this.tryAddControl(retryCount + 1), Math.min(50 * (retryCount + 1), 500));
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    let destroyed = false;
+    destroyRef.onDestroy(() => {
+      if (this.control) {
+        const map = this.mapService.getMap();
+        if (map) this.zoneHelper.runOutsideAngular(() => map.removeControl(this.control!));
       }
-      return;
-    }
-
-    this.ngZone.runOutsideAngular(() => {
-      this.control = new Zoom({
-        delta: this.delta(),
-        duration: this.duration(),
-      });
-      map.addControl(this.control);
+      destroyed = true;
     });
-  }
 
-  ngOnDestroy(): void {
-    const map = this.mapService.getMap();
-    if (!this.control || !map) return;
-    this.ngZone.runOutsideAngular(() => {
-      map.removeControl(this.control!);
+    afterNextRender(() => {
+      if (destroyed) return;
+      const map = this.mapService.getMap();
+      if (!map) return;
+      this.zoneHelper.runOutsideAngular(() => {
+        this.control = new Zoom({ delta: this.delta(), duration: this.duration() });
+        map.addControl(this.control);
+      });
     });
   }
 }

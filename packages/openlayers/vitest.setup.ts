@@ -1,5 +1,7 @@
-// Vitest setup for @angular-helpers/openlayers
-import 'zone.js';
+// Vitest setup for @angular-helpers/openlayers using Analog
+
+import '@angular/compiler';
+import '@analogjs/vitest-angular/setup-testbed';
 
 // Mock OpenLayers for unit tests
 global.HTMLElement.prototype.getBoundingClientRect = () => ({
