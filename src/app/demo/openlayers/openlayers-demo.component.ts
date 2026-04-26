@@ -1,5 +1,4 @@
 import {
-  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -354,17 +353,17 @@ export class OpenLayersDemoComponent {
     ];
 
     // Use onReady to ensure map is initialized
-    this.mapService.onReady(() => {
-      afterNextRender(
-        () => {
-          this.mapService.fitExtent(extent3857, {
-            padding: [60, 60, 60, 60],
-            maxZoom: 8,
-            duration: 600,
-          });
-        },
-        { injector: this.injector },
-      );
+    this.mapService.onReady((map) => {
+      // Force size recalculation before fit
+      map.updateSize();
+      // Use requestAnimationFrame to ensure DOM is fully updated
+      requestAnimationFrame(() => {
+        this.mapService.fitExtent(extent3857, {
+          padding: [60, 60, 60, 60],
+          maxZoom: 8,
+          duration: 600,
+        });
+      });
     });
   }
 }
