@@ -183,14 +183,14 @@ const BASEMAPS: BasemapConfig[] = [
             <button class="btn btn-sm btn-outline" (click)="jumpTo([2.17, 41.38], 12)">
               Barcelona
             </button>
-            <button class="btn btn-sm btn-outline" (click)="jumpTo([-0.13, 51.51], 11)">
-              London
+            <button class="btn btn-sm btn-outline" (click)="jumpTo([-3.7, 40.42], 12)">
+              Madrid
             </button>
-            <button class="btn btn-sm btn-outline" (click)="jumpTo([-74.01, 40.71], 11)">
-              New York
+            <button class="btn btn-sm btn-outline" (click)="jumpTo([-0.38, 39.47], 12)">
+              Valencia
             </button>
-            <button class="btn btn-sm btn-outline" (click)="jumpTo([139.69, 35.69], 11)">
-              Tokyo
+            <button class="btn btn-sm btn-outline" (click)="jumpTo([-5.98, 37.39], 12)">
+              Sevilla
             </button>
           </div>
         </div>
@@ -319,9 +319,23 @@ export class OpenLayersDemoComponent {
   }
 
   fitToCities(): void {
-    // Bounding box of all cities in EPSG:4326 [minLon, minLat, maxLon, maxLat]
-    // Barcelona [2.17, 41.38], Madrid [-3.7, 40.42], Valencia [-0.38, 39.47], Seville [-5.98, 37.39]
-    const extent4326: [number, number, number, number] = [-5.98, 37.39, 2.17, 41.38];
+    // Calculate extent from actual city features
+    const features = this.cityFeatures();
+    if (features.length === 0) return;
+
+    // Get all coordinates
+    const coords = features.map((f) => f.geometry.coordinates as [number, number]);
+    const lons = coords.map((c) => c[0]);
+    const lats = coords.map((c) => c[1]);
+
+    // Calculate bounding box in EPSG:4326
+    const extent4326: [number, number, number, number] = [
+      Math.min(...lons), // minLon
+      Math.min(...lats), // minLat
+      Math.max(...lons), // maxLon
+      Math.max(...lats), // maxLat
+    ];
+
     // Transform to map projection (EPSG:3857)
     const extent3857 = transformExtent(extent4326, 'EPSG:4326', 'EPSG:3857') as [
       number,
@@ -329,6 +343,14 @@ export class OpenLayersDemoComponent {
       number,
       number,
     ];
-    this.mapService.fitExtent(extent3857, { padding: [50, 50, 50, 50], duration: 500 });
+
+    // Use onReady to ensure map is initialized
+    this.mapService.onReady(() => {
+      this.mapService.fitExtent(extent3857, {
+        padding: [60, 60, 60, 60],
+        maxZoom: 8,
+        duration: 600,
+      });
+    });
   }
 }
