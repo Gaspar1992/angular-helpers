@@ -8,8 +8,7 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { NgZone } from '@angular/core';
-import { OlMapService } from '@angular-helpers/openlayers/core';
+import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import Attribution from 'ol/control/Attribution';
 
 @Component({
@@ -19,7 +18,7 @@ import Attribution from 'ol/control/Attribution';
 })
 export class OlAttributionControlComponent {
   private mapService = inject(OlMapService);
-  private ngZone = inject(NgZone);
+  private zoneHelper = inject(OlZoneHelper);
 
   collapsible = input<boolean>(true);
   collapsed = input<boolean>(true);
@@ -32,7 +31,7 @@ export class OlAttributionControlComponent {
     destroyRef.onDestroy(() => {
       if (this.control) {
         const map = this.mapService.getMap();
-        if (map) this.ngZone.runOutsideAngular(() => map.removeControl(this.control!));
+        if (map) this.zoneHelper.runOutsideAngular(() => map.removeControl(this.control!));
       }
       destroyed = true;
     });
@@ -41,7 +40,7 @@ export class OlAttributionControlComponent {
       if (destroyed) return;
       const map = this.mapService.getMap();
       if (!map) return;
-      this.ngZone.runOutsideAngular(() => {
+      this.zoneHelper.runOutsideAngular(() => {
         this.control = new Attribution({
           collapsible: this.collapsible(),
           collapsed: this.collapsed(),

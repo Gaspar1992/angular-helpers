@@ -8,8 +8,7 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { NgZone } from '@angular/core';
-import { OlMapService } from '@angular-helpers/openlayers/core';
+import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import Zoom from 'ol/control/Zoom';
 
 @Component({
@@ -19,7 +18,7 @@ import Zoom from 'ol/control/Zoom';
 })
 export class OlZoomControlComponent {
   private mapService = inject(OlMapService);
-  private ngZone = inject(NgZone);
+  private zoneHelper = inject(OlZoneHelper);
 
   delta = input<number>(1);
   duration = input<number>(250);
@@ -32,7 +31,7 @@ export class OlZoomControlComponent {
     destroyRef.onDestroy(() => {
       if (this.control) {
         const map = this.mapService.getMap();
-        if (map) this.ngZone.runOutsideAngular(() => map.removeControl(this.control!));
+        if (map) this.zoneHelper.runOutsideAngular(() => map.removeControl(this.control!));
       }
       destroyed = true;
     });
@@ -41,7 +40,7 @@ export class OlZoomControlComponent {
       if (destroyed) return;
       const map = this.mapService.getMap();
       if (!map) return;
-      this.ngZone.runOutsideAngular(() => {
+      this.zoneHelper.runOutsideAngular(() => {
         this.control = new Zoom({ delta: this.delta(), duration: this.duration() });
         map.addControl(this.control);
       });

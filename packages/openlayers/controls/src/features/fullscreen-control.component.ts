@@ -8,8 +8,7 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { NgZone } from '@angular/core';
-import { OlMapService } from '@angular-helpers/openlayers/core';
+import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import FullScreen from 'ol/control/FullScreen';
 
 @Component({
@@ -19,7 +18,7 @@ import FullScreen from 'ol/control/FullScreen';
 })
 export class OlFullscreenControlComponent {
   private mapService = inject(OlMapService);
-  private ngZone = inject(NgZone);
+  private zoneHelper = inject(OlZoneHelper);
 
   source = input<HTMLElement>();
   label = input<string>('⤢');
@@ -34,7 +33,7 @@ export class OlFullscreenControlComponent {
     destroyRef.onDestroy(() => {
       if (this.control) {
         const map = this.mapService.getMap();
-        if (map) this.ngZone.runOutsideAngular(() => map.removeControl(this.control!));
+        if (map) this.zoneHelper.runOutsideAngular(() => map.removeControl(this.control!));
       }
       destroyed = true;
     });
@@ -43,7 +42,7 @@ export class OlFullscreenControlComponent {
       if (destroyed) return;
       const map = this.mapService.getMap();
       if (!map) return;
-      this.ngZone.runOutsideAngular(() => {
+      this.zoneHelper.runOutsideAngular(() => {
         this.control = new FullScreen({
           source: this.source(),
           label: this.label(),

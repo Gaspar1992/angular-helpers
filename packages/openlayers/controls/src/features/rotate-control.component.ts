@@ -9,7 +9,7 @@ import {
   input,
   InjectionToken,
 } from '@angular/core';
-import { NgZone } from '@angular/core';
+import { OlZoneHelper } from '@angular-helpers/openlayers/core';
 import type OLMap from 'ol/Map';
 import Rotate from 'ol/control/Rotate';
 
@@ -40,7 +40,7 @@ export const ROTATE_CONTROL_MAP_SERVICE = new InjectionToken<RotateControlMapSer
 })
 export class OlRotateControlComponent {
   private mapService = inject(ROTATE_CONTROL_MAP_SERVICE, { optional: true });
-  private ngZone = inject(NgZone);
+  private zoneHelper = inject(OlZoneHelper);
 
   autoHide = input<boolean>(true);
   duration = input<number>(250);
@@ -56,7 +56,7 @@ export class OlRotateControlComponent {
     destroyRef.onDestroy(() => {
       if (this.control) {
         const map = this.mapService!.getMap();
-        if (map) this.ngZone.runOutsideAngular(() => map.removeControl(this.control!));
+        if (map) this.zoneHelper.runOutsideAngular(() => map.removeControl(this.control!));
       }
       destroyed = true;
     });
@@ -65,7 +65,7 @@ export class OlRotateControlComponent {
       if (destroyed) return;
       const map = this.mapService!.getMap();
       if (!map) return;
-      this.ngZone.runOutsideAngular(() => {
+      this.zoneHelper.runOutsideAngular(() => {
         this.control = new Rotate({
           autoHide: this.autoHide(),
           duration: this.duration(),

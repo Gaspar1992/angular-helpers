@@ -8,8 +8,7 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { NgZone } from '@angular/core';
-import { OlMapService } from '@angular-helpers/openlayers/core';
+import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import ScaleLine from 'ol/control/ScaleLine';
 
 @Component({
@@ -19,7 +18,7 @@ import ScaleLine from 'ol/control/ScaleLine';
 })
 export class OlScaleLineControlComponent {
   private mapService = inject(OlMapService);
-  private ngZone = inject(NgZone);
+  private zoneHelper = inject(OlZoneHelper);
 
   units = input<'metric' | 'imperial' | 'nautical' | 'us'>('metric');
   bar = input<boolean>(false);
@@ -33,7 +32,7 @@ export class OlScaleLineControlComponent {
     destroyRef.onDestroy(() => {
       if (this.control) {
         const map = this.mapService.getMap();
-        if (map) this.ngZone.runOutsideAngular(() => map.removeControl(this.control!));
+        if (map) this.zoneHelper.runOutsideAngular(() => map.removeControl(this.control!));
       }
       destroyed = true;
     });
@@ -42,7 +41,7 @@ export class OlScaleLineControlComponent {
       if (destroyed) return;
       const map = this.mapService.getMap();
       if (!map) return;
-      this.ngZone.runOutsideAngular(() => {
+      this.zoneHelper.runOutsideAngular(() => {
         this.control = new ScaleLine({
           units: this.units(),
           bar: this.bar(),
