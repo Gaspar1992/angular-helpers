@@ -358,11 +358,15 @@ export class OlLayerService {
             stroke: new Stroke({ color: '#fff', width: 2 }),
           }),
           text: showCount
-            ? ({
-                text_: String(size),
-                fill_: new Fill({ color: '#fff' }),
-                font_: 'bold 12px sans-serif',
-              } as unknown as import('ol/style/Text').default)
+            ? new (Text as unknown as new (options: {
+                text: string;
+                fill: Fill;
+                font: string;
+              }) => import('ol/style/Text').default)({
+                text: String(size),
+                fill: new Fill({ color: '#fff' }),
+                font: 'bold 12px sans-serif',
+              })
             : undefined,
         });
       }
