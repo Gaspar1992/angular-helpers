@@ -1,7 +1,12 @@
 // Vitest setup for @angular-helpers/openlayers using Analog
 
 import '@angular/compiler';
-import '@analogjs/vitest-angular/setup-testbed';
+import { setupTestBed } from '@analogjs/vitest-angular/setup-testbed';
+
+// Initialize Angular's TestBed once per test environment.
+// Required by specs that use `TestBed.configureTestingModule` and by `createComponent`,
+// which depends on framework providers registered through `BrowserTestingModule`.
+setupTestBed();
 
 // Mock OpenLayers for unit tests
 global.HTMLElement.prototype.getBoundingClientRect = () => ({
