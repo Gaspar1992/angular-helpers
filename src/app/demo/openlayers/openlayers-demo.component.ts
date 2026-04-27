@@ -40,6 +40,7 @@ import {
   OlPopupService,
   OlTooltipDirective,
 } from '@angular-helpers/openlayers/overlays';
+import { OlMilitaryService } from '@angular-helpers/openlayers/military';
 import type { BasemapConfig, LayerSwitcherItem } from '@angular-helpers/openlayers/controls';
 import type { Feature } from '@angular-helpers/openlayers/core';
 
@@ -182,6 +183,7 @@ const BASEMAPS: BasemapConfig[] = [
     DrawInteractionService,
     ModifyInteractionService,
     OlPopupService,
+    OlMilitaryService,
     // Provide the rotate control with access to map service
     { provide: ROTATE_CONTROL_MAP_SERVICE, useExisting: OlMapService },
   ],
@@ -284,6 +286,15 @@ const BASEMAPS: BasemapConfig[] = [
 
               <!-- Vector Layer: Drawn features — OL Draw manages this source directly -->
               <ol-vector-layer id="drawn-features" [zIndex]="11" [visible]="true">
+              </ol-vector-layer>
+
+              <!-- Vector Layer: Military symbology (NATO symbols + ellipse / sector / donut) -->
+              <ol-vector-layer
+                id="military"
+                [features]="militaryFeatures()"
+                [zIndex]="12"
+                [visible]="true"
+              >
               </ol-vector-layer>
             </ol-map>
 
@@ -516,6 +527,29 @@ const BASEMAPS: BasemapConfig[] = [
             <button class="btn btn-sm btn-accent" (click)="openRandomCityComponentPopup()">
               🎯 Random component popup
             </button>
+            <span class="text-sm text-base-content/70 self-center mx-2">|</span>
+            <span class="text-sm text-base-content/70 self-center">Military:</span>
+            <button
+              class="btn btn-sm btn-warning"
+              [disabled]="loadingSymbol()"
+              (click)="addRandomSymbol()"
+            >
+              ➕ Symbol
+            </button>
+            <button class="btn btn-sm btn-warning btn-outline" (click)="addEllipse()">
+              ➕ Ellipse
+            </button>
+            <button class="btn btn-sm btn-warning btn-outline" (click)="addSector()">
+              ➕ Sector
+            </button>
+            <button class="btn btn-sm btn-warning btn-outline" (click)="addDonut()">
+              ➕ Donut
+            </button>
+            @if (militaryFeatures().length > 0) {
+              <button class="btn btn-sm btn-ghost" (click)="clearMilitary()">
+                🧹 Clear ({{ militaryFeatures().length }})
+              </button>
+            }
             <button class="btn btn-sm btn-primary" (click)="fitToCities()">
               🗺️ View all cities
             </button>
@@ -560,6 +594,7 @@ export class OpenLayersDemoComponent {
   private layerService = inject(OlLayerService);
   private mapService = inject(OlMapService);
   private popupService = inject(OlPopupService);
+  private militaryService = inject(OlMilitaryService);
   readonly interactionService = inject(OlInteractionService);
   protected basemaps = BASEMAPS;
 
@@ -576,6 +611,13 @@ export class OpenLayersDemoComponent {
 
   // Count of drawn features (OL Draw manages the actual source directly)
   drawnCount = signal<number>(0);
+
+  // Military features layer — driven by the military service helpers.
+  militaryFeatures = signal<Feature[]>([]);
+
+  // Lock the Symbol button while milsymbol is being lazy-loaded for the
+  // very first call.
+  loadingSymbol = signal<boolean>(false);
 
   // Selected city derived from the Select interaction's first selected feature.
   selectedCity = computed(() => {
@@ -795,6 +837,66 @@ export class OpenLayersDemoComponent {
 
   clearSelection(): void {
     this.interactionService.clearSelection();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Military symbology demo
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Drop a random NATO friendly-infantry symbol on Madrid. The first call
+   * lazy-loads `milsymbol`; subsequent ones are sub-millisecond.
+   */
+  async addRandomSymbol(): Promise<void> {
+    this.loadingSymbol.set(true);
+    try {
+      const symbol = await this.militaryService.createMilSymbol({
+        sidc: 'SFGPUCI-----',
+        position: [-3.7 + (Math.random() - 0.5) * 0.4, 40.42 + (Math.random() - 0.5) * 0.3],
+        size: 36,
+        uniqueDesignation: 'A1',
+      });
+      this.militaryFeatures.update((prev) => [...prev, symbol]);
+    } finally {
+      this.loadingSymbol.set(false);
+    }
+  }
+
+  /** Add a defensive ellipse around Barcelona. */
+  addEllipse(): void {
+    const ellipse = this.militaryService.createEllipse({
+      center: [2.17, 41.38],
+      semiMajor: 6_000,
+      semiMinor: 3_000,
+      rotation: Math.PI / 6,
+    });
+    this.militaryFeatures.update((prev) => [...prev, ellipse]);
+  }
+
+  /** Add a 60° sector north of Valencia. */
+  addSector(): void {
+    const sector = this.militaryService.createSector({
+      center: [-0.38, 39.47],
+      radius: 8_000,
+      startAngle: Math.PI / 6,
+      endAngle: Math.PI / 2,
+    });
+    this.militaryFeatures.update((prev) => [...prev, sector]);
+  }
+
+  /** Add a range-ring donut (5–10 km) around Sevilla. */
+  addDonut(): void {
+    const donut = this.militaryService.createDonut({
+      center: [-5.99, 37.39],
+      innerRadius: 5_000,
+      outerRadius: 10_000,
+    });
+    this.militaryFeatures.update((prev) => [...prev, donut]);
+  }
+
+  /** Empty the military layer. */
+  clearMilitary(): void {
+    this.militaryFeatures.set([]);
   }
 
   /**
