@@ -8,7 +8,8 @@ import VectorSource from 'ol/source/Vector';
 import { Feature as OLFeature } from 'ol';
 import { Circle as CircleGeom, LineString, Point, Polygon } from 'ol/geom';
 import { fromLonLat } from 'ol/proj';
-import { Style, Circle as CircleStyle, Fill, Stroke } from 'ol/style';
+import { Style, Circle as CircleStyle, Fill, Icon, Stroke } from 'ol/style';
+import type { Style as AbstractStyle } from '@angular-helpers/openlayers/core';
 import OSM from 'ol/source/OSM';
 import XYZ from 'ol/source/XYZ';
 import TileWMS from 'ol/source/TileWMS';
@@ -23,6 +24,13 @@ import type {
   TileLayerConfig,
   ImageLayerConfig,
 } from '../models/layer.types';
+
+/**
+ * Internal property key used to stash the abstract style metadata on the
+ * underlying `ol/Feature` so the layer style function can resolve a
+ * per-feature visual without colliding with user `properties`.
+ */
+const STYLE_PROP = '__angular_helpers_style__';
 
 export interface LayerInfo {
   id: string;
@@ -284,6 +292,9 @@ export class OlLayerService {
           geometry,
           ...feature.properties,
         });
+        if (feature.style) {
+          olFeature.set(STYLE_PROP, feature.style);
+        }
         olFeature.setId(feature.id);
         return olFeature;
       });
@@ -302,12 +313,32 @@ export class OlLayerService {
       }),
     });
 
+    // Per-feature style resolver: features carrying `style.icon` (e.g. those
+    // produced by `OlMilitaryService.createMilSymbol`) render as an Icon;
+    // every other feature falls back to the default style.
+    // Structural type avoids importing `FeatureLike` from `ol/Feature`;
+    // tooling has been observed to auto-remove the unused-looking import.
+    const styleFn = (olFeature: { get(key: string): unknown }): Style => {
+      const abstractStyle = olFeature.get(STYLE_PROP) as AbstractStyle | undefined;
+      const icon = abstractStyle?.icon;
+      if (icon?.src) {
+        return new Style({
+          image: new Icon({
+            src: icon.src,
+            ...(icon.size ? { size: icon.size } : {}),
+            ...(icon.anchor ? { anchor: icon.anchor } : {}),
+          }),
+        });
+      }
+      return defaultStyle;
+    };
+
     const layer = new VectorLayer({
       source,
       visible: config.visible ?? true,
       opacity: config.opacity ?? 1,
       zIndex: config.zIndex,
-      style: defaultStyle,
+      style: styleFn,
     });
     layer.set('id', config.id);
     map.addLayer(layer);
