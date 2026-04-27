@@ -97,6 +97,85 @@ export class MapComponent {
 }
 ```
 
+## Overlays — popups and tooltips
+
+Available since `0.3.0` from `@angular-helpers/openlayers/overlays`.
+
+### `<ol-popup>` — declarative popup with content projection
+
+The popup's host element is used directly as the underlying `ol/Overlay` element, so projected children stay inside Angular's view tree and benefit from change detection without any extra plumbing.
+
+```typescript
+import { OlPopupComponent } from '@angular-helpers/openlayers/overlays';
+
+@Component({
+  imports: [OlMapComponent, OlVectorLayerComponent, OlPopupComponent],
+  template: `
+    <ol-map [center]="[2.17, 41.38]" [zoom]="12">
+      <ol-vector-layer id="cities" [features]="cities()" />
+
+      <ol-popup
+        [position]="selectedCoord()"
+        [closeButton]="true"
+        [autoPan]="true"
+        (closed)="clearSelection()"
+      >
+        <h3>{{ selected()?.name }}</h3>
+        <p>{{ selected()?.description }}</p>
+      </ol-popup>
+    </ol-map>
+  `,
+})
+export class MyMap {
+  // …
+}
+```
+
+Setting `[position]="null"` hides the popup and emits `closed`.
+
+### `[olTooltip]` — feature hover tooltip
+
+```html
+<ol-vector-layer
+  id="cities"
+  [features]="cities()"
+  [olTooltip]="'name'"
+  [olTooltipLayer]="'cities'"
+/>
+```
+
+Reads `feature.get('name')` for any feature on layer `cities` under the cursor and renders a styled `<div role="tooltip">` near the pointer. Use the `.ol-tooltip` class to override the default look.
+
+### `OlPopupService` — programmatic popups
+
+Three content modes from a service:
+
+```typescript
+const popups = inject(OlPopupService);
+
+// 1) Plain text / HTMLElement
+popups.open({
+  id: 'simple',
+  position: [2.17, 41.38],
+  content: 'Hello map',
+  positioning: 'bottom-center',
+  autoPan: true,
+});
+
+// 2) Dynamic Angular component (createComponent + hostElement)
+const handle = popups.openComponent({
+  id: 'city-popup',
+  position: [2.17, 41.38],
+  component: CityCardComponent,
+  bindings: [
+    inputBinding('city', () => selected()),
+    outputBinding<void>('closed', () => handle.close()),
+  ],
+});
+```
+
+`open` is idempotent by `id` and updates the existing overlay in place. `openComponent` always recreates the `ComponentRef` on a repeated id and disposes the previous one (`appRef.detachView` + `ref.destroy`) to avoid CD leaks. Calls made before the map is ready are queued and replayed on `OlMapService.onReady`.
+
 ## Architecture
 
 ### Data vs UI Separation
