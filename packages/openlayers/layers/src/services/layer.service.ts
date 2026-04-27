@@ -8,6 +8,7 @@ import VectorSource from 'ol/source/Vector';
 import OLFeature from 'ol/Feature';
 import { Circle as CircleGeom, LineString, Point, Polygon } from 'ol/geom';
 import { fromLonLat } from 'ol/proj';
+import { getCenter } from 'ol/extent';
 import { Style, Circle as CircleStyle, Fill, Icon, Stroke } from 'ol/style';
 import Text from 'ol/style/Text';
 import ClusterSource from 'ol/source/Cluster';
@@ -331,6 +332,18 @@ export class OlLayerService {
           source: vectorSource,
           distance: clusterCfg.distance ?? 40,
           minDistance: clusterCfg.minDistance ?? 20,
+          geometryFunction: (feature) => {
+            const geometry = feature.getGeometry();
+            if (!geometry) return null;
+            // For Point geometries, use as-is
+            if (geometry.getType() === 'Point') {
+              return geometry as Point;
+            }
+            // For other geometries (Polygon, Circle, etc.), use center point
+            const extent = geometry.getExtent();
+            const center = getCenter(extent);
+            return new Point(center);
+          },
         })
       : vectorSource;
 
