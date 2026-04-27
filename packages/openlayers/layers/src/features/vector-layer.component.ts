@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import type { Feature, Style } from '@angular-helpers/openlayers/core';
 import { OlLayerService } from '../services/layer.service';
-import type { VectorLayerConfig } from '../models/layer.types';
+import type { ClusterConfig, VectorLayerConfig } from '../models/layer.types';
 
 @Component({
   selector: 'ol-vector-layer',
@@ -27,6 +27,7 @@ export class OlVectorLayerComponent {
   opacity = input<number>(1);
   visible = input<boolean>(true);
   style = input<Style | ((feature: Feature) => Style)>();
+  cluster = input<ClusterConfig>();
 
   constructor() {
     // Initialize layer after DOM is ready
@@ -39,6 +40,7 @@ export class OlVectorLayerComponent {
         opacity: this.opacity(),
         visible: this.visible(),
         style: this.style(),
+        cluster: this.cluster(),
       } as VectorLayerConfig);
     });
 

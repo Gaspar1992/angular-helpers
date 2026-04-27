@@ -298,6 +298,7 @@ const BASEMAPS: BasemapConfig[] = [
                 [features]="militaryFeatures()"
                 [zIndex]="12"
                 [visible]="layerVisibility()['military']"
+                [cluster]="{ enabled: true, distance: 40, showCount: true }"
               >
               </ol-vector-layer>
             </ol-map>
