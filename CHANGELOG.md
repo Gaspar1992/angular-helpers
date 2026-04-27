@@ -1,3 +1,10 @@
+# [1.35.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.34.0...v1.35.0) (2026-04-27)
+
+
+### Features
+
+* **openlayers:** refactor interactions to SRP with improved UX ([#104](https://github.com/Gaspar1992/angular-helpers/issues/104)) ([67d93e4](https://github.com/Gaspar1992/angular-helpers/commit/67d93e43093ecfd4bcda62264e683ee35ba20da7)), closes [#cities](https://github.com/Gaspar1992/angular-helpers/issues/cities) [#drawn-features](https://github.com/Gaspar1992/angular-helpers/issues/drawn-features)
+
 # [1.34.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.33.0...v1.34.0) (2026-04-26)
 
 
