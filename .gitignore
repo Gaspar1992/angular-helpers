@@ -48,6 +48,7 @@ yarn.lock
 
 # Testing
 /coverage
+**/coverage/
 *.lcov
 .nyc_output
 test-results/

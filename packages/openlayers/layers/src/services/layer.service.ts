@@ -13,7 +13,7 @@ import OSM from 'ol/source/OSM';
 import XYZ from 'ol/source/XYZ';
 import TileWMS from 'ol/source/TileWMS';
 import ImageWMS from 'ol/source/ImageWMS';
-import { ImageStatic } from 'ol/source';
+import ImageStatic from 'ol/source/ImageStatic';
 import type BaseLayer from 'ol/layer/Base';
 import type OLMap from 'ol/Map';
 import { OlMapService } from '@angular-helpers/openlayers/core';
