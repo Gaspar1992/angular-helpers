@@ -367,17 +367,23 @@ export class OlLayerService {
         });
       }
 
-      // Single feature: use original style resolution
-      const abstractStyle = olFeature.get(STYLE_PROP) as AbstractStyle | undefined;
-      const icon = abstractStyle?.icon;
-      if (icon?.src) {
-        return new Style({
-          image: new Icon({
-            src: icon.src,
-            ...(icon.size ? { size: icon.size } : {}),
-            ...(icon.anchor ? { anchor: icon.anchor } : {}),
-          }),
-        });
+      // Single feature: get the original feature from the cluster and use its style
+      const originalFeatures = olFeature.get('features') as
+        | Array<{ get(key: string): unknown }>
+        | undefined;
+      const originalFeature = originalFeatures?.[0];
+      if (originalFeature) {
+        const abstractStyle = originalFeature.get(STYLE_PROP) as AbstractStyle | undefined;
+        const icon = abstractStyle?.icon;
+        if (icon?.src) {
+          return new Style({
+            image: new Icon({
+              src: icon.src,
+              ...(icon.size ? { size: icon.size } : {}),
+              ...(icon.anchor ? { anchor: icon.anchor } : {}),
+            }),
+          });
+        }
       }
       return defaultStyle;
     };
