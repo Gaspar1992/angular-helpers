@@ -78,6 +78,27 @@ export const PACKAGES: readonly PackageInfo[] = [
     badge: 'Preview',
     promise: 'performance',
   },
+  {
+    icon: '🗺️',
+    name: 'openlayers',
+    npmPackage: '@angular-helpers/openlayers',
+    tagline: 'Modern Angular wrapper for OpenLayers. Standalone, signal-first, modular.',
+    description:
+      'Standalone components and signal-based services for OpenLayers. Modular secondary entry points (core, layers, controls, interactions) so you only pay for what you use. Zoneless-safe by design.',
+    highlights: [
+      'OlMapComponent with reactive [center] / [zoom] inputs',
+      'Tile, Vector, and Image layers with signal-driven features',
+      'Built-in controls: Zoom, Attribution, Scale, Fullscreen, Rotate, Layer Switcher, Basemap Switcher',
+      'Interactions: Select / Draw (Point, Line, Polygon, Circle) / Modify, all SRP-split',
+      'Runs OL operations outside NgZone — no change detection storms',
+    ],
+    highlightsLabel: 'Map features',
+    installCmd: 'npm i @angular-helpers/openlayers ol',
+    docsLink: '/docs/openlayers',
+    demoLink: '/demo/openlayers',
+    badge: 'Preview',
+    promise: 'lightweight',
+  },
 ];
 
 export const TOTAL_SERVICE_COUNT = PACKAGES.reduce((sum, pkg) => sum + (pkg.serviceCount ?? 0), 0);
