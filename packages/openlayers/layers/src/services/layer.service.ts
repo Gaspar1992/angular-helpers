@@ -9,6 +9,7 @@ import { Feature as OLFeature } from 'ol';
 import { Circle as CircleGeom, LineString, Point, Polygon } from 'ol/geom';
 import { fromLonLat } from 'ol/proj';
 import { Style, Circle as CircleStyle, Fill, Icon, Stroke } from 'ol/style';
+import Cluster from 'ol/source/Cluster';
 import type { Style as AbstractStyle } from '@angular-helpers/openlayers/core';
 import OSM from 'ol/source/OSM';
 import XYZ from 'ol/source/XYZ';
@@ -261,7 +262,7 @@ export class OlLayerService {
   }
 
   private createVectorLayer(config: VectorLayerConfig, map: OLMap): { id: string } {
-    const source = new VectorSource();
+    const vectorSource = new VectorSource();
 
     // Add features if provided
     if (config.features && config.features.length > 0) {
@@ -302,8 +303,18 @@ export class OlLayerService {
         return olFeature;
       });
 
-      source.addFeatures(olFeatures);
+      vectorSource.addFeatures(olFeatures);
     }
+
+    // Wrap in cluster source if enabled
+    const clusterCfg = config.cluster;
+    const source = clusterCfg?.enabled
+      ? new Cluster({
+          source: vectorSource,
+          distance: clusterCfg.distance ?? 40,
+          minDistance: clusterCfg.minDistance ?? 20,
+        })
+      : vectorSource;
 
     // Default style for all geometry types (points, lines, polygons)
     const defaultStyle = new Style({
@@ -315,6 +326,44 @@ export class OlLayerService {
         stroke: new Stroke({ color: '#d32f2f', width: 2 }),
       }),
     });
+
+    // Cluster style: shows count badge when features are clustered
+    const clusterStyleFn = (olFeature: { get(key: string): unknown }): Style => {
+      const features = olFeature.get('features') as unknown[] | undefined;
+      const size = features?.length ?? 1;
+
+      if (size > 1) {
+        const showCount = clusterCfg?.showCount ?? true;
+        return new Style({
+          image: new CircleStyle({
+            radius: 15 + Math.min(size * 2, 15),
+            fill: new Fill({ color: 'rgba(255, 100, 100, 0.8)' }),
+            stroke: new Stroke({ color: '#fff', width: 2 }),
+          }),
+          text: showCount
+            ? ({
+                text_: String(size),
+                fill_: new Fill({ color: '#fff' }),
+                font_: 'bold 12px sans-serif',
+              } as unknown as import('ol/style/Text').default)
+            : undefined,
+        });
+      }
+
+      // Single feature: use original style resolution
+      const abstractStyle = olFeature.get(STYLE_PROP) as AbstractStyle | undefined;
+      const icon = abstractStyle?.icon;
+      if (icon?.src) {
+        return new Style({
+          image: new Icon({
+            src: icon.src,
+            ...(icon.size ? { size: icon.size } : {}),
+            ...(icon.anchor ? { anchor: icon.anchor } : {}),
+          }),
+        });
+      }
+      return defaultStyle;
+    };
 
     // Per-feature style resolver: features carrying `style.icon` (e.g. those
     // produced by `OlMilitaryService.createMilSymbol`) render as an Icon;
@@ -341,7 +390,7 @@ export class OlLayerService {
       visible: config.visible ?? true,
       opacity: config.opacity ?? 1,
       zIndex: config.zIndex,
-      style: styleFn,
+      style: clusterCfg?.enabled ? clusterStyleFn : styleFn,
     });
     layer.set('id', config.id);
     map.addLayer(layer);

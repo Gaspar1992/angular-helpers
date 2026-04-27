@@ -703,13 +703,7 @@ const BASEMAPS: BasemapConfig[] = [
           @if (activeLayerId() === 'military') {
             <div class="flex flex-wrap gap-2 pt-2 border-t border-base-300 mt-2">
               <span class="text-sm text-base-content/70 self-center mr-2">Military tools:</span>
-              <button
-                class="btn btn-sm btn-warning"
-                [disabled]="loadingSymbol()"
-                (click)="addRandomSymbol()"
-              >
-                ➕ Symbol
-              </button>
+              <button class="btn btn-sm btn-warning" (click)="addRandomSymbol()">➕ Symbol</button>
               <button class="btn btn-sm btn-warning btn-outline" (click)="addEllipse()">
                 ➕ Ellipse
               </button>
@@ -788,10 +782,6 @@ export class OpenLayersDemoComponent {
 
   // Military features layer — driven by the military service helpers.
   militaryFeatures = signal<Feature[]>([]);
-
-  // Lock the Symbol button while milsymbol is being lazy-loaded for the
-  // very first call.
-  loadingSymbol = signal<boolean>(false);
 
   // Layer visibility states (toggle with eye icon)
   layerVisibility = signal<Record<string, boolean>>({
@@ -1028,22 +1018,17 @@ export class OpenLayersDemoComponent {
   // ---------------------------------------------------------------------------
 
   /**
-   * Drop a random NATO friendly-infantry symbol on Madrid. The first call
-   * lazy-loads `milsymbol`; subsequent ones are sub-millisecond.
+   * Drop a random NATO friendly-infantry symbol on Madrid.
+   * Uses milsymbol via static ESM import (path mapping trick).
    */
-  async addRandomSymbol(): Promise<void> {
-    this.loadingSymbol.set(true);
-    try {
-      const symbol = await this.militaryService.createMilSymbol({
-        sidc: 'SFGPUCI-----',
-        position: [-3.7 + (Math.random() - 0.5) * 0.4, 40.42 + (Math.random() - 0.5) * 0.3],
-        size: 36,
-        uniqueDesignation: 'A1',
-      });
-      this.militaryFeatures.update((prev) => [...prev, symbol]);
-    } finally {
-      this.loadingSymbol.set(false);
-    }
+  addRandomSymbol(): void {
+    const symbol = this.militaryService.createMilSymbol({
+      sidc: 'SFGPUCI-----',
+      position: [-3.7 + (Math.random() - 0.5) * 0.4, 40.42 + (Math.random() - 0.5) * 0.3],
+      size: 36,
+      uniqueDesignation: 'A1',
+    });
+    this.militaryFeatures.update((prev) => [...prev, symbol]);
   }
 
   /** Add a defensive ellipse around Barcelona. */

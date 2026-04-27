@@ -2,6 +2,7 @@
 
 import { Injectable } from '@angular/core';
 import type { Coordinate, Feature } from '@angular-helpers/openlayers/core';
+import ms from 'milsymbol';
 import type {
   DonutConfig,
   EllipseConfig,
@@ -21,14 +22,12 @@ const METERS_PER_DEGREE_LAT = 111_320;
  *
  * - `createEllipse`, `createSector`, `createDonut` are **pure math** and
  *   have no runtime dependencies beyond the bundled types.
- * - `createMilSymbol`, `createMilSymbolSync`, `preloadMilsymbol` lazy-load
- *   the optional `milsymbol` peer dependency on first use.
+ * - `createMilSymbol` uses the milsymbol library via ESM import (path mapping
+ *   trick in tsconfig.json avoids dynamic import() gymnastics).
  */
 @Injectable()
 export class OlMilitaryService {
   private idCounter = 0;
-  private milsymbolModule: unknown = null;
-  private milsymbolLoader: Promise<unknown> | null = null;
 
   // ---------------------------------------------------------------------------
   // Geometry helpers (pure math, no deps)
@@ -153,35 +152,10 @@ export class OlMilitaryService {
    * to `createMilSymbol` / `createMilSymbolSync` resolve immediately.
    * Idempotent — multiple calls share the same promise.
    */
-  preloadMilsymbol(): Promise<void> {
-    return this.loadMilsymbol().then(() => undefined);
-  }
-
-  /**
-   * Build a `Feature<Point>` for a MIL-STD-2525 symbol. Lazily loads
-   * `milsymbol` on first call (or awaits the in-flight loader).
-   */
-  async createMilSymbol(config: MilSymbolConfig): Promise<Feature> {
-    this.assertSidc(config.sidc);
+  createMilSymbol(config: MilSymbolConfig): Feature {
     this.assertBrowser();
-    const ml = await this.loadMilsymbol();
-    return this.buildSymbolFeature(ml, config);
-  }
-
-  /**
-   * Synchronous variant of `createMilSymbol`. Throws if `milsymbol` has
-   * not yet been loaded — call `preloadMilsymbol()` (or await one
-   * `createMilSymbol` call) first.
-   */
-  createMilSymbolSync(config: MilSymbolConfig): Feature {
     this.assertSidc(config.sidc);
-    this.assertBrowser();
-    if (!this.milsymbolModule) {
-      throw new Error(
-        'milsymbol is not loaded yet; call createMilSymbol once first or preload via preloadMilsymbol()',
-      );
-    }
-    return this.buildSymbolFeature(this.milsymbolModule, config);
+    return this.buildSymbolFeature(config);
   }
 
   // ---------------------------------------------------------------------------
@@ -205,30 +179,7 @@ export class OlMilitaryService {
     return `${kind}-${++this.idCounter}`;
   }
 
-  private loadMilsymbol(): Promise<any> {
-    if (!this.milsymbolLoader) {
-      this.milsymbolLoader = import('milsymbol').then((mod) => {
-        // milsymbol exports `ms` as default; `ms.Symbol` is the constructor
-        const ms = mod.default;
-        this.milsymbolModule = ms;
-        return ms;
-      });
-    }
-    return this.milsymbolLoader;
-  }
-
-  private buildSymbolFeature(ml: unknown, config: MilSymbolConfig): Feature {
-    // runtime guard: ml carries a Symbol constructor from the milsymbol library
-    const M = ml as {
-      Symbol: new (
-        sidc: string,
-        options?: Record<string, unknown>,
-      ) => {
-        asSVG(): string;
-        getSize(): { width: number; height: number };
-        getAnchor(): { x: number; y: number };
-      };
-    };
+  private buildSymbolFeature(config: MilSymbolConfig): Feature {
     const { sidc, position, properties, quantity, ...rest } = config;
     // `milsymbol` types `quantity` as a string, but a number is the
     // ergonomic shape; coerce here.
@@ -236,7 +187,7 @@ export class OlMilitaryService {
       ...rest,
       ...(quantity !== undefined ? { quantity: String(quantity) } : {}),
     };
-    const symbol = new M.Symbol(sidc, milOptions);
+    const symbol = new ms.Symbol(sidc, milOptions);
     const style = this.symbolToStyleResult(symbol);
     const mergedProperties: Record<string, unknown> = { sidc, ...milOptions, ...properties };
 
