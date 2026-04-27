@@ -5,6 +5,14 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*",
+    "core/**/*",
+    "controls/**/*",
+    "interactions/**/*",
+    "layers/**/*",
+    "military/**/*",
+    "overlays/**/*"
+  ],
   "exclude": ["**/*.spec.ts", "dist"]
 }

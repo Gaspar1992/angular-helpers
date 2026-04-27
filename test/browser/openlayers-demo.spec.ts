@@ -85,8 +85,14 @@ test.describe('OpenLayers Demo', () => {
     if (await toggle.isVisible().catch(() => false)) {
       await toggle.click();
 
-      // Verify basemap options are available
-      await expect(basemapSwitcher.getByText(/OpenStreetMap|Satellite|Terrain/i)).toBeVisible();
+      // The panel is @if-mounted only while open, so attached == opened.
+      const panel = basemapSwitcher.locator('.ol-basemap-switcher__panel');
+      await expect(panel).toBeAttached();
+
+      // Scope the option-text lookup to the panel — the toggle itself also
+      // renders the active basemap name, which would otherwise match in
+      // strict mode.
+      await expect(panel.getByText(/OpenStreetMap|Satellite|Terrain/i).first()).toBeVisible();
     }
   });
 
@@ -106,10 +112,10 @@ test.describe('OpenLayers Demo', () => {
     if (await toggle.isVisible().catch(() => false)) {
       await toggle.click();
 
-      // Verify layer list is visible
-      await expect(
-        layerSwitcher.locator('.ol-layer-switcher__panel, ol-layer-switcher__panel'),
-      ).toBeVisible();
+      // The panel is @if-mounted only while open, so attached == opened —
+      // this avoids flakes caused by the panel being present in the DOM
+      // before CSS/layout has settled.
+      await expect(layerSwitcher.locator('.ol-layer-switcher__panel')).toBeAttached();
     }
   });
 });

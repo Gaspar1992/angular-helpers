@@ -2,6 +2,24 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'openlayers-overlays',
+    title:
+      'openlayers v0.3.0: Overlays — Popups, Tooltips, and Dynamic Angular Components on the Map',
+    publishedAt: '2026-04-27',
+    tags: [
+      'openlayers',
+      'angular',
+      'maps',
+      'overlays',
+      'popups',
+      'tooltips',
+      'createcomponent',
+      'signals',
+    ],
+    excerpt:
+      'The overlays entry point grows up. v0.3.0 ships <ol-popup> with content projection, [olTooltip] for hover labels, and a real OlPopupService that supports three content modes — string, HTMLElement, and dynamic Angular components via createComponent + hostElement.',
+  },
+  {
     slug: 'openlayers-interactions-srp',
     title:
       'openlayers v0.2.0: SRP-refactored interactions, Circle draw, and a native-style toolbar',
