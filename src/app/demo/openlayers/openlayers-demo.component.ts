@@ -527,8 +527,11 @@ const BASEMAPS: BasemapConfig[] = [
             <button class="btn btn-sm btn-accent" (click)="openRandomCityComponentPopup()">
               🎯 Random component popup
             </button>
-            <span class="text-sm text-base-content/70 self-center mx-2">|</span>
-            <span class="text-sm text-base-content/70 self-center">Military:</span>
+          </div>
+
+          <!-- Military Controls -->
+          <div class="flex flex-wrap gap-2 pt-2 border-t border-base-300 mt-2">
+            <span class="text-sm text-base-content/70 self-center mr-2">Military:</span>
             <button
               class="btn btn-sm btn-warning"
               [disabled]="loadingSymbol()"
@@ -550,6 +553,11 @@ const BASEMAPS: BasemapConfig[] = [
                 🧹 Clear ({{ militaryFeatures().length }})
               </button>
             }
+          </div>
+
+          <!-- City Controls -->
+          <div class="flex flex-wrap gap-2 pt-2 border-t border-base-300 mt-2">
+            <span class="text-sm text-base-content/70 self-center mr-2">Cities:</span>
             <button class="btn btn-sm btn-primary" (click)="fitToCities()">
               🗺️ View all cities
             </button>
@@ -901,7 +909,8 @@ export class OpenLayersDemoComponent {
 
   /**
    * Programmatic popup demo — opens a dynamically instantiated
-   * `DemoCityCardComponent` at a random city via `OlPopupService.openComponent()`.
+   * `DemoCityCardComponent` at a random city via `OlPopupService.openComponent()`,
+   * then centers the view on that location.
    */
   openRandomCityComponentPopup(): void {
     const cities = this.cityFeatures();
@@ -923,5 +932,8 @@ export class OpenLayersDemoComponent {
         outputBinding<void>('closed', () => handle.close()),
       ],
     });
+
+    // Center the view on the popup location
+    this.mapService.animateView({ center: lonLat, zoom: 12 });
   }
 }

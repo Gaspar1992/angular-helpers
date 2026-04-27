@@ -11,28 +11,30 @@ const symbolCtor = vi.fn();
 vi.mock('milsymbol', () => {
   symbolCtor.mockClear();
   return {
-    Symbol: class MockSymbol {
-      constructor(
-        public sidc: string,
-        public options: Record<string, unknown> = {},
-      ) {
-        symbolCtor(sidc, options);
-      }
-      asSVG(): string {
-        return `<svg data-sidc="${this.sidc}"/>`;
-      }
-      getSize(): { width: number; height: number } {
-        return { width: 100, height: 80 };
-      }
-      getAnchor(): { x: number; y: number } {
-        return { x: 50, y: 40 };
-      }
-      getColors(): unknown {
-        return {};
-      }
-      getOctagonAnchor(): { x: number; y: number } {
-        return { x: 50, y: 40 };
-      }
+    default: {
+      Symbol: class MockSymbol {
+        constructor(
+          public sidc: string,
+          public options: Record<string, unknown> = {},
+        ) {
+          symbolCtor(sidc, options);
+        }
+        asSVG(): string {
+          return `<svg data-sidc="${this.sidc}"/>`;
+        }
+        getSize(): { width: number; height: number } {
+          return { width: 100, height: 80 };
+        }
+        getAnchor(): { x: number; y: number } {
+          return { x: 50, y: 40 };
+        }
+        getColors(): unknown {
+          return {};
+        }
+        getOctagonAnchor(): { x: number; y: number } {
+          return { x: 50, y: 40 };
+        }
+      },
     },
   };
 });

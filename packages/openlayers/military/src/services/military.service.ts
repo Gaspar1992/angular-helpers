@@ -27,8 +27,8 @@ const METERS_PER_DEGREE_LAT = 111_320;
 @Injectable()
 export class OlMilitaryService {
   private idCounter = 0;
-  private milsymbolModule: typeof import('milsymbol') | null = null;
-  private milsymbolLoader: Promise<typeof import('milsymbol')> | null = null;
+  private milsymbolModule: unknown = null;
+  private milsymbolLoader: Promise<unknown> | null = null;
 
   // ---------------------------------------------------------------------------
   // Geometry helpers (pure math, no deps)
@@ -205,17 +205,30 @@ export class OlMilitaryService {
     return `${kind}-${++this.idCounter}`;
   }
 
-  private loadMilsymbol(): Promise<typeof import('milsymbol')> {
+  private loadMilsymbol(): Promise<any> {
     if (!this.milsymbolLoader) {
       this.milsymbolLoader = import('milsymbol').then((mod) => {
-        this.milsymbolModule = mod;
-        return mod;
+        // milsymbol exports `ms` as default; `ms.Symbol` is the constructor
+        const ms = mod.default;
+        this.milsymbolModule = ms;
+        return ms;
       });
     }
     return this.milsymbolLoader;
   }
 
-  private buildSymbolFeature(ml: typeof import('milsymbol'), config: MilSymbolConfig): Feature {
+  private buildSymbolFeature(ml: unknown, config: MilSymbolConfig): Feature {
+    // runtime guard: ml carries a Symbol constructor from the milsymbol library
+    const M = ml as {
+      Symbol: new (
+        sidc: string,
+        options?: Record<string, unknown>,
+      ) => {
+        asSVG(): string;
+        getSize(): { width: number; height: number };
+        getAnchor(): { x: number; y: number };
+      };
+    };
     const { sidc, position, properties, quantity, ...rest } = config;
     // `milsymbol` types `quantity` as a string, but a number is the
     // ergonomic shape; coerce here.
@@ -223,7 +236,7 @@ export class OlMilitaryService {
       ...rest,
       ...(quantity !== undefined ? { quantity: String(quantity) } : {}),
     };
-    const symbol = new ml.Symbol(sidc, milOptions);
+    const symbol = new M.Symbol(sidc, milOptions);
     const style = this.symbolToStyleResult(symbol);
     const mergedProperties: Record<string, unknown> = { sidc, ...milOptions, ...properties };
 
@@ -235,7 +248,11 @@ export class OlMilitaryService {
     };
   }
 
-  private symbolToStyleResult(symbol: import('milsymbol').Symbol): MilSymbolStyleResult {
+  private symbolToStyleResult(symbol: {
+    asSVG(): string;
+    getSize(): { width: number; height: number };
+    getAnchor(): { x: number; y: number };
+  }): MilSymbolStyleResult {
     const svg = symbol.asSVG();
     const { width, height } = symbol.getSize();
     const { x: ax, y: ay } = symbol.getAnchor();
