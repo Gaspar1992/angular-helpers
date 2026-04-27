@@ -92,6 +92,7 @@
     "eslint-plugin-oxlint": "^1.61.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
+    "milsymbol": "^3.0.4",
     "ng-packagr": "^21.2.3",
     "oxfmt": "^0.46.0",
     "oxlint": "^1.61.0",

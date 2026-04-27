@@ -43,9 +43,13 @@
   "peerDependencies": {
     "@angular/common": "^21.0.0",
     "@angular/core": "^21.0.0",
+    "milsymbol": "^3.0.0",
     "ol": "^10.0.0"
   },
   "peerDependenciesMeta": {
+    "milsymbol": {
+      "optional": true
+    },
     "ol": {
       "optional": false
     }
