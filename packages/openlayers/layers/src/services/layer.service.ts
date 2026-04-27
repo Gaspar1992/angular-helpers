@@ -232,6 +232,9 @@ export class OlLayerService {
             geometry,
             ...feature.properties,
           });
+          if (feature.style) {
+            olFeature.set(STYLE_PROP, feature.style);
+          }
           olFeature.setId(feature.id);
           return olFeature;
         });
