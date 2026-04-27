@@ -27,6 +27,22 @@ export interface Style {
     fill?: { color?: string };
     stroke?: { color?: string; width?: number };
   };
+  /**
+   * Icon style for Point features. When set, renderers should produce an
+   * `ol/style/Icon` with the given source. Used by the military symbology
+   * helpers to embed `milsymbol`-generated SVGs as data URLs.
+   */
+  icon?: {
+    /** Image source — typically a `data:image/svg+xml;base64,...` URL */
+    src: string;
+    /** Pixel size `[width, height]` */
+    size?: [number, number];
+    /**
+     * Anchor in fractional coordinates `[x, y]` where `0..1` is the icon
+     * extent. `[0.5, 0.5]` centers the icon on the feature.
+     */
+    anchor?: [number, number];
+  };
   text?: {
     text?: string;
     font?: string;
