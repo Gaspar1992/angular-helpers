@@ -40,7 +40,8 @@ test.describe('OpenLayers Demo', () => {
     // Verify custom Angular components are attached
     await expect(page.locator('ol-layer-switcher')).toBeAttached();
     await expect(page.locator('ol-basemap-switcher')).toBeAttached();
-    await expect(page.locator('ol-vector-layer')).toBeAttached();
+    await expect(page.locator('ol-vector-layer#cities')).toBeAttached();
+    await expect(page.locator('ol-vector-layer#drawn-features')).toBeAttached();
   });
 
   test('map info panel displays coordinates', async ({ page }) => {
