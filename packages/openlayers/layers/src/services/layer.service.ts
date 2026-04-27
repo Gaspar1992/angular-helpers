@@ -5,11 +5,12 @@ import VectorLayer from 'ol/layer/Vector';
 import TileLayer from 'ol/layer/Tile';
 import ImageLayer from 'ol/layer/Image';
 import VectorSource from 'ol/source/Vector';
-import { Feature as OLFeature } from 'ol';
+import OLFeature from 'ol/Feature';
 import { Circle as CircleGeom, LineString, Point, Polygon } from 'ol/geom';
 import { fromLonLat } from 'ol/proj';
 import { Style, Circle as CircleStyle, Fill, Icon, Stroke } from 'ol/style';
-import Cluster from 'ol/source/Cluster';
+import Text from 'ol/style/Text';
+import ClusterSource from 'ol/source/Cluster';
 import type { Style as AbstractStyle } from '@angular-helpers/openlayers/core';
 import OSM from 'ol/source/OSM';
 import XYZ from 'ol/source/XYZ';
@@ -326,7 +327,7 @@ export class OlLayerService {
     // Wrap in cluster source if enabled
     const clusterCfg = config.cluster;
     const source = clusterCfg?.enabled
-      ? new Cluster({
+      ? new ClusterSource({
           source: vectorSource,
           distance: clusterCfg.distance ?? 40,
           minDistance: clusterCfg.minDistance ?? 20,
@@ -358,14 +359,9 @@ export class OlLayerService {
             stroke: new Stroke({ color: '#fff', width: 2 }),
           }),
           text: showCount
-            ? new (Text as unknown as new (options: {
-                text: string;
-                fill: Fill;
-                font: string;
-              }) => import('ol/style/Text').default)({
+            ? new Text({
                 text: String(size),
                 fill: new Fill({ color: '#fff' }),
-                font: 'bold 12px sans-serif',
               })
             : undefined,
         });
