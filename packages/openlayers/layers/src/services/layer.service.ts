@@ -174,7 +174,16 @@ export class OlLayerService {
   clearFeatures(id: string): void {
     const layer = this.layerCache.get(id);
     if (!(layer instanceof VectorLayer)) return;
-    layer.getSource()?.clear();
+    const source = layer.getSource();
+    if (!source) return;
+
+    // Handle Cluster source: clear the underlying VectorSource
+    const clusterSource = source as unknown as { getSource?: () => VectorSource };
+    const vectorSource = clusterSource.getSource
+      ? clusterSource.getSource()
+      : (source as VectorSource);
+
+    vectorSource?.clear();
   }
 
   /**
@@ -190,9 +199,17 @@ export class OlLayerService {
     const source = layer.getSource();
     if (!source) return;
 
+    // Handle Cluster source: get the underlying VectorSource
+    const clusterSource = source as unknown as { getSource?: () => VectorSource };
+    const vectorSource = clusterSource.getSource
+      ? clusterSource.getSource()
+      : (source as VectorSource);
+
+    if (!(vectorSource instanceof VectorSource)) return;
+
     // Get existing feature IDs from source
     const existingIds = new Set(
-      source
+      vectorSource
         .getFeatures()
         .map((f) => f.getId())
         .filter((id): id is string | number => id !== undefined),
@@ -240,7 +257,7 @@ export class OlLayerService {
           return olFeature;
         });
 
-        source.addFeatures(olFeatures);
+        vectorSource.addFeatures(olFeatures);
       }
     }
   }
