@@ -1,8 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  inputBinding,
+  output,
+  outputBinding,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { OlMapComponent, OlMapService } from '@angular-helpers/openlayers/core';
-import { transformExtent } from 'ol/proj';
+import { fromLonLat, transformExtent } from 'ol/proj';
 import {
   OlVectorLayerComponent,
   OlLayerService,
@@ -25,8 +35,32 @@ import {
   DrawInteractionService,
   ModifyInteractionService,
 } from '@angular-helpers/openlayers/interactions';
+import {
+  OlPopupComponent,
+  OlPopupService,
+  OlTooltipDirective,
+} from '@angular-helpers/openlayers/overlays';
 import type { BasemapConfig, LayerSwitcherItem } from '@angular-helpers/openlayers/controls';
 import type { Feature } from '@angular-helpers/openlayers/core';
+
+@Component({
+  selector: 'app-demo-city-card',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div class="bg-base-100 border border-base-300 rounded-lg shadow-md p-3 min-w-[180px] text-sm">
+      <div class="font-semibold text-base-content">{{ name() }}</div>
+      <div class="text-base-content/70 text-xs mt-1">
+        Population: {{ population().toLocaleString() }}
+      </div>
+      <button class="btn btn-xs btn-ghost mt-2" (click)="closed.emit()">Close</button>
+    </div>
+  `,
+})
+export class DemoCityCardComponent {
+  readonly name = input.required<string>();
+  readonly population = input.required<number>();
+  readonly closed = output<void>();
+}
 
 interface City {
   name: string;
@@ -68,6 +102,8 @@ const BASEMAPS: BasemapConfig[] = [
     OlRotateControlComponent,
     OlLayerSwitcherComponent,
     OlBasemapSwitcherComponent,
+    OlPopupComponent,
+    OlTooltipDirective,
   ],
   styles: [
     `
@@ -145,6 +181,7 @@ const BASEMAPS: BasemapConfig[] = [
     SelectInteractionService,
     DrawInteractionService,
     ModifyInteractionService,
+    OlPopupService,
     // Provide the rotate control with access to map service
     { provide: ROTATE_CONTROL_MAP_SERVICE, useExisting: OlMapService },
   ],
@@ -215,14 +252,35 @@ const BASEMAPS: BasemapConfig[] = [
               >
               </ol-basemap-switcher>
 
-              <!-- Vector Layer: City pins -->
+              <!-- Vector Layer: City pins (with hover tooltip showing the name property) -->
               <ol-vector-layer
                 id="cities"
                 [features]="cityFeatures()"
                 [zIndex]="10"
                 [visible]="true"
+                [olTooltip]="'name'"
+                [olTooltipLayer]="'cities'"
               >
               </ol-vector-layer>
+
+              <!-- Declarative popup bound to the selected city -->
+              <ol-popup
+                [position]="selectedCityCoord()"
+                [closeButton]="true"
+                [autoPan]="true"
+                (closed)="clearSelection()"
+              >
+                @if (selectedCityInfo(); as info) {
+                  <div
+                    class="bg-base-100 border border-base-300 rounded-lg shadow-md p-3 min-w-[200px]"
+                  >
+                    <div class="font-semibold text-base-content">{{ info.name }}</div>
+                    <div class="text-base-content/70 text-xs mt-1">
+                      Population: {{ info.population.toLocaleString() }}
+                    </div>
+                  </div>
+                }
+              </ol-popup>
 
               <!-- Vector Layer: Drawn features — OL Draw manages this source directly -->
               <ol-vector-layer id="drawn-features" [zIndex]="11" [visible]="true">
@@ -455,6 +513,9 @@ const BASEMAPS: BasemapConfig[] = [
           <!-- Quick Navigation -->
           <div class="flex flex-wrap gap-2 pt-2">
             <span class="text-sm text-base-content/70 self-center mr-2">Jump to:</span>
+            <button class="btn btn-sm btn-accent" (click)="openRandomCityComponentPopup()">
+              🎯 Random component popup
+            </button>
             <button class="btn btn-sm btn-primary" (click)="fitToCities()">
               🗺️ View all cities
             </button>
@@ -498,6 +559,7 @@ const BASEMAPS: BasemapConfig[] = [
 export class OpenLayersDemoComponent {
   private layerService = inject(OlLayerService);
   private mapService = inject(OlMapService);
+  private popupService = inject(OlPopupService);
   readonly interactionService = inject(OlInteractionService);
   protected basemaps = BASEMAPS;
 
@@ -514,6 +576,31 @@ export class OpenLayersDemoComponent {
 
   // Count of drawn features (OL Draw manages the actual source directly)
   drawnCount = signal<number>(0);
+
+  // Selected city derived from the Select interaction's first selected feature.
+  selectedCity = computed(() => {
+    const selected = this.interactionService.selectedFeatures();
+    if (selected.length === 0) return null;
+    const first = selected[0];
+    return this.cityFeatures().find((c) => c.id === first.id) ?? null;
+  });
+
+  // Map coordinate (in EPSG:3857) where the popup anchors. `null` hides it.
+  selectedCityCoord = computed<[number, number] | null>(() => {
+    const city = this.selectedCity();
+    if (!city) return null;
+    return fromLonLat(city.geometry.coordinates as [number, number]) as [number, number];
+  });
+
+  // Strongly-typed view of the selected city's properties for the template.
+  selectedCityInfo = computed<{ name: string; population: number } | null>(() => {
+    const city = this.selectedCity();
+    if (!city) return null;
+    return {
+      name: String(city.properties?.['name'] ?? city.id),
+      population: Number(city.properties?.['population'] ?? 0),
+    };
+  });
 
   constructor() {
     // Initialize default basemap on component creation
@@ -708,5 +795,31 @@ export class OpenLayersDemoComponent {
 
   clearSelection(): void {
     this.interactionService.clearSelection();
+  }
+
+  /**
+   * Programmatic popup demo — opens a dynamically instantiated
+   * `DemoCityCardComponent` at a random city via `OlPopupService.openComponent()`.
+   */
+  openRandomCityComponentPopup(): void {
+    const cities = this.cityFeatures();
+    if (cities.length === 0) return;
+    const city = cities[Math.floor(Math.random() * cities.length)];
+    const lonLat = city.geometry.coordinates as [number, number];
+    const position = fromLonLat(lonLat) as [number, number];
+    const id = 'random-city';
+
+    const handle = this.popupService.openComponent({
+      id,
+      position,
+      component: DemoCityCardComponent,
+      autoPan: true,
+      offset: [0, -12],
+      bindings: [
+        inputBinding('name', () => String(city.properties?.['name'] ?? city.id)),
+        inputBinding('population', () => Number(city.properties?.['population'] ?? 0)),
+        outputBinding<void>('closed', () => handle.close()),
+      ],
+    });
   }
 }
