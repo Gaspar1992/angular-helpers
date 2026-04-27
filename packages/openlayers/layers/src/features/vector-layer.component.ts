@@ -1,12 +1,13 @@
 // OlVectorLayerComponent
 
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  effect,
   inject,
   input,
-  OnInit,
-  OnDestroy,
 } from '@angular/core';
 import type { Feature, Style } from '@angular-helpers/openlayers/core';
 import { OlLayerService } from '../services/layer.service';
@@ -17,8 +18,9 @@ import type { VectorLayerConfig } from '../models/layer.types';
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OlVectorLayerComponent implements OnInit, OnDestroy {
+export class OlVectorLayerComponent {
   private layerService = inject(OlLayerService);
+  private destroyRef = inject(DestroyRef);
   id = input.required<string>();
   features = input<Feature[]>([]);
   zIndex = input<number>(0);
@@ -26,18 +28,32 @@ export class OlVectorLayerComponent implements OnInit, OnDestroy {
   visible = input<boolean>(true);
   style = input<Style | ((feature: Feature) => Style)>();
 
-  ngOnInit(): void {
-    this.layerService.addLayer({
-      id: this.id(),
-      type: 'vector',
-      features: this.features(),
-      zIndex: this.zIndex(),
-      opacity: this.opacity(),
-      visible: this.visible(),
-      style: this.style(),
-    } as VectorLayerConfig);
-  }
-  ngOnDestroy(): void {
-    this.layerService.removeLayer(this.id());
+  constructor() {
+    // Initialize layer after DOM is ready
+    afterNextRender(() => {
+      this.layerService.addLayer({
+        id: this.id(),
+        type: 'vector',
+        features: this.features(),
+        zIndex: this.zIndex(),
+        opacity: this.opacity(),
+        visible: this.visible(),
+        style: this.style(),
+      } as VectorLayerConfig);
+    });
+
+    // Effect to sync features when input changes
+    effect(() => {
+      const currentFeatures = this.features();
+      // Only update if layer already exists (afterNextRender already created it)
+      if (this.layerService.getLayer(this.id())) {
+        this.layerService.updateFeatures(this.id(), currentFeatures);
+      }
+    });
+
+    // Cleanup when component is destroyed
+    this.destroyRef.onDestroy(() => {
+      this.layerService.removeLayer(this.id());
+    });
   }
 }

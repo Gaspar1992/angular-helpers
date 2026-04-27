@@ -2,12 +2,13 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
-    slug: 'worker-http-cancellation',
-    title: 'worker-http v21.1.0: per-request cancellation with AbortSignal and typed timeouts',
-    publishedAt: '2026-04-26',
-    tags: ['worker-http', 'cancellation', 'abort-signal', 'angular', 'web-workers'],
+    slug: 'openlayers-interactions-srp',
+    title:
+      'openlayers v0.2.0: SRP-refactored interactions, Circle draw, and a native-style toolbar',
+    publishedAt: '2026-04-27',
+    tags: ['openlayers', 'angular', 'maps', 'interactions', 'srp', 'signals'],
     excerpt:
-      'v0.7.0 made cancellation work end-to-end internally. v21.1 exposes it: bring your own AbortSignal, override the timeout per request, and branch on a typed WorkerHttpAbortError vs WorkerHttpTimeoutError. No more relying on RxJS unsubscribe to cancel a worker fetch.',
+      'The interactions entry point gets a clean Single-Responsibility split into Select / Draw / Modify services, a dedicated InteractionStateService for signal-based state, public types for every config and event, Circle drawing, and a demo toolbar restyled to match the native OpenLayers control aesthetic.',
   },
   {
     slug: 'worker-http-toon-serializer',
@@ -17,6 +18,14 @@ export const BLOG_POSTS: readonly BlogPost[] = [
     tags: ['worker-http', 'toon', 'serialization', 'performance', 'angular', 'postMessage'],
     excerpt:
       'Most API responses are uniform arrays of objects, and most of those bytes are repeated keys. We added TOON (Token-Oriented Object Notation) as a first-class serializer for the worker↔main boundary. The auto-serializer now picks it automatically when it makes sense — and falls back to structured-clone or seroval when it does not.',
+  },
+  {
+    slug: 'worker-http-cancellation',
+    title: 'worker-http v21.1.0: per-request cancellation with AbortSignal and typed timeouts',
+    publishedAt: '2026-04-26',
+    tags: ['worker-http', 'cancellation', 'abort-signal', 'angular', 'web-workers'],
+    excerpt:
+      'v0.7.0 made cancellation work end-to-end internally. v21.1 exposes it: bring your own AbortSignal, override the timeout per request, and branch on a typed WorkerHttpAbortError vs WorkerHttpTimeoutError. No more relying on RxJS unsubscribe to cancel a worker fetch.',
   },
   {
     slug: 'worker-http-v1-0',
