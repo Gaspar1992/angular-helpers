@@ -259,7 +259,7 @@ const BASEMAPS: BasemapConfig[] = [
                 id="cities"
                 [features]="cityFeatures()"
                 [zIndex]="10"
-                [visible]="true"
+                [visible]="layerVisibility()['cities']"
                 [olTooltip]="'name'"
                 [olTooltipLayer]="'cities'"
               >
@@ -285,7 +285,11 @@ const BASEMAPS: BasemapConfig[] = [
               </ol-popup>
 
               <!-- Vector Layer: Drawn features — OL Draw manages this source directly -->
-              <ol-vector-layer id="drawn-features" [zIndex]="11" [visible]="true">
+              <ol-vector-layer
+                id="drawn-features"
+                [zIndex]="11"
+                [visible]="layerVisibility()['drawn-features']"
+              >
               </ol-vector-layer>
 
               <!-- Vector Layer: Military symbology (NATO symbols + ellipse / sector / donut) -->
@@ -293,7 +297,7 @@ const BASEMAPS: BasemapConfig[] = [
                 id="military"
                 [features]="militaryFeatures()"
                 [zIndex]="12"
-                [visible]="true"
+                [visible]="layerVisibility()['military']"
               >
               </ol-vector-layer>
             </ol-map>
@@ -529,51 +533,213 @@ const BASEMAPS: BasemapConfig[] = [
             </button>
           </div>
 
-          <!-- Military Controls -->
-          <div class="flex flex-wrap gap-2 pt-2 border-t border-base-300 mt-2">
-            <span class="text-sm text-base-content/70 self-center mr-2">Military:</span>
-            <button
-              class="btn btn-sm btn-warning"
-              [disabled]="loadingSymbol()"
-              (click)="addRandomSymbol()"
+          <!-- Layer Controls -->
+          <div class="flex flex-wrap gap-3 pt-3 border-t border-base-300 mt-2">
+            <span class="text-sm text-base-content/70 self-center mr-1">Layers:</span>
+
+            <!-- Cities Layer -->
+            <div
+              class="flex items-center gap-1 rounded-lg border px-2 py-1 cursor-pointer transition-colors"
+              [class.border-primary]="activeLayerId() === 'cities'"
+              [class.bg-primary/10]="activeLayerId() === 'cities'"
+              [class.border-base-300]="activeLayerId() !== 'cities'"
+              [class.bg-base-100]="activeLayerId() !== 'cities'"
+              (click)="setActiveLayer('cities')"
             >
-              ➕ Symbol
-            </button>
-            <button class="btn btn-sm btn-warning btn-outline" (click)="addEllipse()">
-              ➕ Ellipse
-            </button>
-            <button class="btn btn-sm btn-warning btn-outline" (click)="addSector()">
-              ➕ Sector
-            </button>
-            <button class="btn btn-sm btn-warning btn-outline" (click)="addDonut()">
-              ➕ Donut
-            </button>
-            @if (militaryFeatures().length > 0) {
-              <button class="btn btn-sm btn-ghost" (click)="clearMilitary()">
-                🧹 Clear ({{ militaryFeatures().length }})
+              <button
+                class="btn btn-xs btn-ghost p-1 h-auto min-h-0"
+                (click)="toggleLayerVisibility('cities'); $event.stopPropagation()"
+                [title]="layerVisibility()['cities'] ? 'Hide cities' : 'Show cities'"
+              >
+                @if (layerVisibility()['cities']) {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                } @else {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M9.88 9.88a3 3 0 1 0 4.24 4.24m-4.24-4.24L2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"
+                    />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                }
               </button>
-            }
+              <span class="text-xs font-medium">Cities</span>
+              <button
+                class="btn btn-xs btn-primary btn-outline ml-1 h-5 min-h-0 px-1 text-[10px]"
+                (click)="fitToCities(); $event.stopPropagation()"
+              >
+                View all
+              </button>
+            </div>
+
+            <!-- Military Layer -->
+            <div
+              class="flex items-center gap-1 rounded-lg border px-2 py-1 cursor-pointer transition-colors"
+              [class.border-warning]="activeLayerId() === 'military'"
+              [class.bg-warning/10]="activeLayerId() === 'military'"
+              [class.border-base-300]="activeLayerId() !== 'military'"
+              [class.bg-base-100]="activeLayerId() !== 'military'"
+              (click)="setActiveLayer('military')"
+            >
+              <button
+                class="btn btn-xs btn-ghost p-1 h-auto min-h-0"
+                (click)="toggleLayerVisibility('military'); $event.stopPropagation()"
+                [title]="layerVisibility()['military'] ? 'Hide military' : 'Show military'"
+              >
+                @if (layerVisibility()['military']) {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                } @else {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M9.88 9.88a3 3 0 1 0 4.24 4.24m-4.24-4.24L2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"
+                    />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                }
+              </button>
+              <span class="text-xs font-medium">Military</span>
+              <span class="text-xs text-base-content/50">({{ militaryFeatures().length }})</span>
+              @if (militaryFeatures().length > 0) {
+                <button
+                  class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
+                  (click)="clearMilitary(); $event.stopPropagation()"
+                >
+                  Clear
+                </button>
+              }
+            </div>
+
+            <!-- Drawn Features Layer -->
+            <div
+              class="flex items-center gap-1 rounded-lg border px-2 py-1 cursor-pointer transition-colors"
+              [class.border-secondary]="activeLayerId() === 'drawn-features'"
+              [class.bg-secondary/10]="activeLayerId() === 'drawn-features'"
+              [class.border-base-300]="activeLayerId() !== 'drawn-features'"
+              [class.bg-base-100]="activeLayerId() !== 'drawn-features'"
+              (click)="setActiveLayer('drawn-features')"
+            >
+              <button
+                class="btn btn-xs btn-ghost p-1 h-auto min-h-0"
+                (click)="toggleLayerVisibility('drawn-features'); $event.stopPropagation()"
+                [title]="
+                  layerVisibility()['drawn-features']
+                    ? 'Hide drawn features'
+                    : 'Show drawn features'
+                "
+              >
+                @if (layerVisibility()['drawn-features']) {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                } @else {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M9.88 9.88a3 3 0 1 0 4.24 4.24m-4.24-4.24L2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"
+                    />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                }
+              </button>
+              <span class="text-xs font-medium">Drawn</span>
+              <span class="text-xs text-base-content/50">({{ drawnCount() }})</span>
+            </div>
           </div>
 
-          <!-- City Controls -->
-          <div class="flex flex-wrap gap-2 pt-2 border-t border-base-300 mt-2">
-            <span class="text-sm text-base-content/70 self-center mr-2">Cities:</span>
-            <button class="btn btn-sm btn-primary" (click)="fitToCities()">
-              🗺️ View all cities
-            </button>
-            <button class="btn btn-sm btn-outline" (click)="jumpTo([2.17, 41.38], 12)">
-              Barcelona
-            </button>
-            <button class="btn btn-sm btn-outline" (click)="jumpTo([-3.7, 40.42], 12)">
-              Madrid
-            </button>
-            <button class="btn btn-sm btn-outline" (click)="jumpTo([-0.38, 39.47], 12)">
-              Valencia
-            </button>
-            <button class="btn btn-sm btn-outline" (click)="jumpTo([-5.98, 37.39], 12)">
-              Sevilla
-            </button>
-          </div>
+          <!-- Military Tools -->
+          @if (activeLayerId() === 'military') {
+            <div class="flex flex-wrap gap-2 pt-2 border-t border-base-300 mt-2">
+              <span class="text-sm text-base-content/70 self-center mr-2">Military tools:</span>
+              <button
+                class="btn btn-sm btn-warning"
+                [disabled]="loadingSymbol()"
+                (click)="addRandomSymbol()"
+              >
+                ➕ Symbol
+              </button>
+              <button class="btn btn-sm btn-warning btn-outline" (click)="addEllipse()">
+                ➕ Ellipse
+              </button>
+              <button class="btn btn-sm btn-warning btn-outline" (click)="addSector()">
+                ➕ Sector
+              </button>
+              <button class="btn btn-sm btn-warning btn-outline" (click)="addDonut()">
+                ➕ Donut
+              </button>
+            </div>
+          }
+
+          <!-- City Tools -->
+          @if (activeLayerId() === 'cities') {
+            <div class="flex flex-wrap gap-2 pt-2 border-t border-base-300 mt-2">
+              <span class="text-sm text-base-content/70 self-center mr-2">Jump to city:</span>
+              <button class="btn btn-sm btn-outline" (click)="jumpTo([2.17, 41.38], 12)">
+                Barcelona
+              </button>
+              <button class="btn btn-sm btn-outline" (click)="jumpTo([-3.7, 40.42], 12)">
+                Madrid
+              </button>
+              <button class="btn btn-sm btn-outline" (click)="jumpTo([-0.38, 39.47], 12)">
+                Valencia
+              </button>
+              <button class="btn btn-sm btn-outline" (click)="jumpTo([-5.98, 37.39], 12)">
+                Sevilla
+              </button>
+            </div>
+          }
         </div>
       </div>
 
@@ -626,6 +792,16 @@ export class OpenLayersDemoComponent {
   // Lock the Symbol button while milsymbol is being lazy-loaded for the
   // very first call.
   loadingSymbol = signal<boolean>(false);
+
+  // Layer visibility states (toggle with eye icon)
+  layerVisibility = signal<Record<string, boolean>>({
+    cities: true,
+    military: true,
+    'drawn-features': true,
+  });
+
+  // Currently active/selected layer for visual feedback
+  activeLayerId = signal<string | null>(null);
 
   // Selected city derived from the Select interaction's first selected feature.
   selectedCity = computed(() => {
@@ -905,6 +1081,21 @@ export class OpenLayersDemoComponent {
   /** Empty the military layer. */
   clearMilitary(): void {
     this.militaryFeatures.set([]);
+    // Also clear from OL source since updateFeatures doesn't remove existing
+    this.layerService.clearFeatures('military');
+  }
+
+  /** Toggle layer visibility by ID. */
+  toggleLayerVisibility(layerId: string): void {
+    const current = this.layerVisibility();
+    const newVisibility = !current[layerId];
+    this.layerVisibility.set({ ...current, [layerId]: newVisibility });
+    this.layerService.setVisibility(layerId, newVisibility);
+  }
+
+  /** Set the active layer (visual feedback in UI). */
+  setActiveLayer(layerId: string): void {
+    this.activeLayerId.set(layerId);
   }
 
   /**
@@ -933,7 +1124,7 @@ export class OpenLayersDemoComponent {
       ],
     });
 
-    // Center the view on the popup location
-    this.mapService.animateView({ center: lonLat, zoom: 12 });
+    // Center the view on the popup location (use projected coordinates)
+    this.mapService.animateView({ center: position, zoom: 12 });
   }
 }
