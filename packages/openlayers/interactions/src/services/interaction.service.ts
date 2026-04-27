@@ -140,8 +140,21 @@ export class OlInteractionService {
 
   /**
    * Clear the current selection.
+   * Also clears the OL Select interaction's internal feature collection so the
+   * visual selection is removed from the map.
    */
   clearSelection(): void {
+    const interactions = this.stateService.getInteractions();
+    for (const managed of interactions) {
+      if (managed.type === 'select') {
+        this.zoneHelper.runOutsideAngular(() => {
+          const olSelect = managed.olInteraction as unknown as {
+            getFeatures(): { clear(): void } | undefined;
+          };
+          olSelect.getFeatures?.()?.clear();
+        });
+      }
+    }
     this.stateService.clearSelection();
   }
 

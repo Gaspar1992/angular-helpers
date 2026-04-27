@@ -40,11 +40,15 @@ export class SelectInteractionService {
         hitTolerance: config.hitTolerance ?? 0,
       });
 
-      // Listen to selection changes
-      select.on('select', (e: { selected: OLFeature[]; deselected: OLFeature[] }) => {
+      // Listen to selection changes — use getFeatures().getArray() for the full
+      // accumulated collection, not e.selected which only contains newly added ones
+      select.on('select', (_e: { selected: OLFeature[]; deselected: OLFeature[] }) => {
         this.zoneHelper.runInsideAngular(() => {
-          const selected = e.selected.map((f) => olFeatureToFeature(f));
-          this.stateService.setSelectedFeatures(selected);
+          const allSelected = select
+            .getFeatures()
+            .getArray()
+            .map((f) => olFeatureToFeature(f));
+          this.stateService.setSelectedFeatures(allSelected);
         });
       });
 

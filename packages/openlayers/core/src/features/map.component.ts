@@ -101,7 +101,7 @@ export class OlMapComponent {
       this.map.on('click', (e) =>
         this.zoneHelper.runInsideAngular(() =>
           this.mapClick.emit({
-            coordinate: e.coordinate as Coordinate,
+            coordinate: toLonLat(e.coordinate, this.projection()) as Coordinate,
             pixel: e.pixel as Pixel,
           }),
         ),
@@ -109,7 +109,7 @@ export class OlMapComponent {
       this.map.on('dblclick', (e) =>
         this.zoneHelper.runInsideAngular(() =>
           this.mapDblClick.emit({
-            coordinate: e.coordinate as Coordinate,
+            coordinate: toLonLat(e.coordinate, this.projection()) as Coordinate,
             pixel: e.pixel as Pixel,
           }),
         ),

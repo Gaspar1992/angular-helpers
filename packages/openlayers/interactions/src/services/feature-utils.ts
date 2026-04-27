@@ -16,15 +16,21 @@ export function olFeatureToFeature(olFeature: OLFeature): Feature {
 
   // Convert coordinates based on geometry type
   let coordinates: Coordinate | Coordinate[] | Coordinate[][];
-  // oxlint-disable-next-line no-explicit-any
-  const olCoords = (geometry as unknown as { getCoordinates(): unknown }).getCoordinates();
 
-  if (Array.isArray(olCoords) && Array.isArray(olCoords[0])) {
-    // Multi-coordinate structures (LineString, Polygon, etc.)
-    coordinates = olCoords as Coordinate[] | Coordinate[][];
+  if (geomType === 'Circle') {
+    // ol/geom/Circle has no getCoordinates() — use getCenter() instead
+    const circle = geometry as unknown as { getCenter(): number[]; getRadius(): number };
+    coordinates = circle.getCenter() as Coordinate;
   } else {
-    // Single point
-    coordinates = olCoords as Coordinate;
+    // oxlint-disable-next-line no-explicit-any
+    const olCoords = (geometry as unknown as { getCoordinates(): unknown }).getCoordinates();
+    if (Array.isArray(olCoords) && Array.isArray(olCoords[0])) {
+      // Multi-coordinate structures (LineString, Polygon, etc.)
+      coordinates = olCoords as Coordinate[] | Coordinate[][];
+    } else {
+      // Single point
+      coordinates = olCoords as Coordinate;
+    }
   }
 
   return {

@@ -158,6 +158,17 @@ export class OlLayerService {
   }
 
   /**
+   * Clears all features from a vector layer's source.
+   * Does not remove the layer itself.
+   * @param id - Layer identifier
+   */
+  clearFeatures(id: string): void {
+    const layer = this.layerCache.get(id);
+    if (!(layer instanceof VectorLayer)) return;
+    layer.getSource()?.clear();
+  }
+
+  /**
    * Updates the features of a vector layer.
    * Syncs new features without clearing existing ones (preserves OL modifications).
    * @param id - Layer identifier

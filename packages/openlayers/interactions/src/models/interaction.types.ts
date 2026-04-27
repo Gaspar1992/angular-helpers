@@ -21,7 +21,6 @@ export interface DrawConfig extends InteractionConfig {
 
 export interface ModifyConfig extends InteractionConfig {
   source?: string;
-  layers?: string[];
   snapTolerance?: number;
 }
 

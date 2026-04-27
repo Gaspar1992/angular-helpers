@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { OlMapComponent, OlMapService } from '@angular-helpers/openlayers/core';
 import { transformExtent } from 'ol/proj';
@@ -26,7 +27,6 @@ import {
 } from '@angular-helpers/openlayers/interactions';
 import type { BasemapConfig, LayerSwitcherItem } from '@angular-helpers/openlayers/controls';
 import type { Feature } from '@angular-helpers/openlayers/core';
-import type { DrawEndEvent } from '@angular-helpers/openlayers/interactions';
 
 interface City {
   name: string;
@@ -68,6 +68,74 @@ const BASEMAPS: BasemapConfig[] = [
     OlRotateControlComponent,
     OlLayerSwitcherComponent,
     OlBasemapSwitcherComponent,
+  ],
+  styles: [
+    `
+      .ol-demo-toolbar {
+        display: flex;
+        gap: 4px;
+        padding: 6px;
+        background: white;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+        .ol-demo-toolbar__btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          padding: 0;
+          background: #f5f5f5;
+          color: #333;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          transition:
+            background 0.15s,
+            color 0.15s;
+
+          &:hover {
+            background: #e0e0e0;
+          }
+
+          &:focus-visible {
+            outline: 2px solid #1976d2;
+            outline-offset: 1px;
+          }
+        }
+
+        .ol-demo-toolbar__btn--sm {
+          width: 28px;
+          height: 28px;
+        }
+
+        .ol-demo-toolbar__btn--active {
+          background: #1976d2;
+          color: white;
+
+          &:hover {
+            background: #1565c0;
+          }
+        }
+
+        .ol-demo-toolbar__btn--active-secondary {
+          background: #e3f2fd;
+          color: #1976d2;
+
+          &:hover {
+            background: #bbdefb;
+          }
+        }
+
+        .ol-demo-toolbar__divider {
+          width: 1px;
+          margin: 4px 2px;
+          background: #e0e0e0;
+        }
+      }
+    `,
   ],
   providers: [
     OlMapService,
@@ -147,25 +215,28 @@ const BASEMAPS: BasemapConfig[] = [
               >
               </ol-basemap-switcher>
 
-              <!-- Vector Layer: Cities + Drawn Features -->
+              <!-- Vector Layer: City pins -->
               <ol-vector-layer
                 id="cities"
-                [features]="allFeatures()"
+                [features]="cityFeatures()"
                 [zIndex]="10"
                 [visible]="true"
               >
+              </ol-vector-layer>
+
+              <!-- Vector Layer: Drawn features — OL Draw manages this source directly -->
+              <ol-vector-layer id="drawn-features" [zIndex]="11" [visible]="true">
               </ol-vector-layer>
             </ol-map>
 
             <!-- Interaction Controls (floating over map at bottom center) -->
             <div
-              class="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] flex flex-row gap-1 bg-base-100/90 backdrop-blur rounded-lg p-2 shadow-lg border border-base-300"
+              class="ol-demo-toolbar absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] flex flex-row gap-1"
             >
               <!-- Select Toggle -->
               <button
-                class="btn btn-square btn-sm"
-                [class.btn-primary]="selectActive()"
-                [class.btn-ghost]="!selectActive()"
+                class="ol-demo-toolbar__btn"
+                [class.ol-demo-toolbar__btn--active]="selectActive()"
                 (click)="toggleSelect()"
                 title="Select Features"
               >
@@ -186,9 +257,8 @@ const BASEMAPS: BasemapConfig[] = [
 
               <!-- Draw Toggle -->
               <button
-                class="btn btn-square btn-sm"
-                [class.btn-primary]="drawActive()"
-                [class.btn-ghost]="!drawActive()"
+                class="ol-demo-toolbar__btn"
+                [class.ol-demo-toolbar__btn--active]="drawActive()"
                 (click)="toggleDraw()"
                 title="Draw {{ drawType() }}"
               >
@@ -209,9 +279,8 @@ const BASEMAPS: BasemapConfig[] = [
 
               <!-- Modify Toggle -->
               <button
-                class="btn btn-square btn-sm"
-                [class.btn-primary]="modifyActive()"
-                [class.btn-ghost]="!modifyActive()"
+                class="ol-demo-toolbar__btn"
+                [class.ol-demo-toolbar__btn--active]="modifyActive()"
                 (click)="toggleModify()"
                 title="Modify Features"
               >
@@ -233,7 +302,7 @@ const BASEMAPS: BasemapConfig[] = [
 
               @if (selectActive() && interactionService.hasSelection()) {
                 <button
-                  class="btn btn-square btn-sm btn-ghost"
+                  class="ol-demo-toolbar__btn"
                   (click)="clearSelection()"
                   title="Clear Selection"
                 >
@@ -255,12 +324,11 @@ const BASEMAPS: BasemapConfig[] = [
 
               <!-- Draw Type Selector - only when draw is active -->
               @if (drawActive()) {
-                <div class="border-l border-base-300 mx-1 pl-1"></div>
+                <div class="ol-demo-toolbar__divider"></div>
                 <div class="flex flex-row gap-1">
                   <button
-                    class="btn btn-square btn-xs"
-                    [class.btn-secondary]="drawType() === 'Polygon'"
-                    [class.btn-ghost]="drawType() !== 'Polygon'"
+                    class="ol-demo-toolbar__btn ol-demo-toolbar__btn--sm"
+                    [class.ol-demo-toolbar__btn--active-secondary]="drawType() === 'Polygon'"
                     (click)="onDrawTypeClick('Polygon')"
                     title="Polygon"
                   >
@@ -277,9 +345,8 @@ const BASEMAPS: BasemapConfig[] = [
                     </svg>
                   </button>
                   <button
-                    class="btn btn-square btn-xs"
-                    [class.btn-secondary]="drawType() === 'LineString'"
-                    [class.btn-ghost]="drawType() !== 'LineString'"
+                    class="ol-demo-toolbar__btn ol-demo-toolbar__btn--sm"
+                    [class.ol-demo-toolbar__btn--active-secondary]="drawType() === 'LineString'"
                     (click)="onDrawTypeClick('LineString')"
                     title="Line"
                   >
@@ -296,9 +363,8 @@ const BASEMAPS: BasemapConfig[] = [
                     </svg>
                   </button>
                   <button
-                    class="btn btn-square btn-xs"
-                    [class.btn-secondary]="drawType() === 'Point'"
-                    [class.btn-ghost]="drawType() !== 'Point'"
+                    class="ol-demo-toolbar__btn ol-demo-toolbar__btn--sm"
+                    [class.ol-demo-toolbar__btn--active-secondary]="drawType() === 'Point'"
                     (click)="onDrawTypeClick('Point')"
                     title="Point"
                   >
@@ -315,9 +381,8 @@ const BASEMAPS: BasemapConfig[] = [
                     </svg>
                   </button>
                   <button
-                    class="btn btn-square btn-xs"
-                    [class.btn-secondary]="drawType() === 'Circle'"
-                    [class.btn-ghost]="drawType() !== 'Circle'"
+                    class="ol-demo-toolbar__btn ol-demo-toolbar__btn--sm"
+                    [class.ol-demo-toolbar__btn--active-secondary]="drawType() === 'Circle'"
                     (click)="onDrawTypeClick('Circle')"
                     title="Circle"
                   >
@@ -338,17 +403,15 @@ const BASEMAPS: BasemapConfig[] = [
             </div>
 
             <!-- Status Badge -->
-            @if (interactionService.selectionCount() > 0 || drawnFeatures().length > 0) {
+            @if (interactionService.selectionCount() > 0 || drawnCount() > 0) {
               <div class="absolute bottom-2 left-2 z-[1000] flex gap-2">
                 @if (interactionService.selectionCount() > 0) {
                   <span class="badge badge-sm badge-primary">
                     {{ interactionService.selectionCount() }} selected
                   </span>
                 }
-                @if (drawnFeatures().length > 0) {
-                  <span class="badge badge-sm badge-secondary">
-                    {{ drawnFeatures().length }} drawn
-                  </span>
+                @if (drawnCount() > 0) {
+                  <span class="badge badge-sm badge-secondary"> {{ drawnCount() }} drawn </span>
                   <button
                     class="badge badge-sm badge-ghost cursor-pointer"
                     (click)="clearDrawnFeatures()"
@@ -449,22 +512,17 @@ export class OpenLayersDemoComponent {
   modifyActive = signal<boolean>(false);
   drawType = signal<'Polygon' | 'LineString' | 'Point' | 'Circle'>('Polygon');
 
-  // Track drawn features for display
-  drawnFeatures = signal<Feature[]>([]);
-
-  // Combine original cities with drawn features for the layer
-  allFeatures = computed<Feature[]>(() => [...this.cityFeatures(), ...this.drawnFeatures()]);
+  // Count of drawn features (OL Draw manages the actual source directly)
+  drawnCount = signal<number>(0);
 
   constructor() {
     // Initialize default basemap on component creation
     this.createBasemapLayer('osm');
 
-    // Subscribe to draw events
-    this.interactionService.drawEnd$.subscribe((event: DrawEndEvent) => {
-      this.drawnFeatures.update((features) => [...features, event.feature]);
-    });
-
-    // React to selection changes automatically via signals
+    // Track draw count — Draw adds to the OL source directly, we only count
+    this.interactionService.drawEnd$
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.drawnCount.update((n) => n + 1));
   }
 
   // Layer switcher items derived from service state
@@ -589,7 +647,10 @@ export class OpenLayersDemoComponent {
     this.selectActive.set(newState);
 
     if (newState) {
-      this.interactionService.enableSelect('demo-select', { layers: ['cities'], multi: true });
+      this.interactionService.enableSelect('demo-select', {
+        layers: ['cities', 'drawn-features'],
+        multi: true,
+      });
     } else {
       this.interactionService.disableInteraction('demo-select');
     }
@@ -602,7 +663,7 @@ export class OpenLayersDemoComponent {
     if (newState) {
       this.interactionService.enableDraw('demo-draw', {
         type: this.drawType(),
-        source: 'cities',
+        source: 'drawn-features',
       });
     } else {
       this.interactionService.disableInteraction('demo-draw');
@@ -618,7 +679,7 @@ export class OpenLayersDemoComponent {
       if (!this.selectActive()) {
         this.toggleSelect();
       }
-      this.interactionService.enableModify('demo-modify', { source: 'cities' });
+      this.interactionService.enableModify('demo-modify', { source: 'drawn-features' });
     } else {
       this.interactionService.disableInteraction('demo-modify');
     }
@@ -635,13 +696,14 @@ export class OpenLayersDemoComponent {
       this.interactionService.disableInteraction('demo-draw');
       this.interactionService.enableDraw('demo-draw', {
         type,
-        source: 'cities',
+        source: 'drawn-features',
       });
     }
   }
 
   clearDrawnFeatures(): void {
-    this.drawnFeatures.set([]);
+    this.layerService.clearFeatures('drawn-features');
+    this.drawnCount.set(0);
   }
 
   clearSelection(): void {
