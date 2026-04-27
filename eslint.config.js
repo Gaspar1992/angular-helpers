@@ -35,6 +35,10 @@ export default [
         'error',
         { type: 'element', prefix: 'ol', style: 'kebab-case' },
       ],
+      '@angular-eslint/directive-selector': [
+        'error',
+        { type: 'attribute', prefix: 'ol', style: 'camelCase' },
+      ],
     },
   },
   {
