@@ -176,6 +176,94 @@ const handle = popups.openComponent({
 
 `open` is idempotent by `id` and updates the existing overlay in place. `openComponent` always recreates the `ComponentRef` on a repeated id and disposes the previous one (`appRef.detachView` + `ref.destroy`) to avoid CD leaks. Calls made before the map is ready are queued and replayed on `OlMapService.onReady`.
 
+## Military symbology
+
+Available since `0.4.0` from `@angular-helpers/openlayers/military`.
+
+Three pure-math geometry helpers (no extra deps) plus a NATO MIL-STD-2525 symbol helper backed by the optional [`milsymbol`](https://github.com/spatialillusions/milsymbol) peer dependency.
+
+```typescript
+import { inject, signal } from '@angular/core';
+import { OlMilitaryService } from '@angular-helpers/openlayers/military';
+import type { Feature } from '@angular-helpers/openlayers/core';
+
+@Component({
+  // …
+  imports: [OlMapComponent, OlVectorLayerComponent],
+  template: `
+    <ol-map [center]="[2.17, 41.38]" [zoom]="8">
+      <ol-tile-layer id="osm" source="osm" />
+      <ol-vector-layer id="military" [features]="features()" [zIndex]="10" />
+    </ol-map>
+  `,
+})
+export class MilDemo {
+  private ml = inject(OlMilitaryService);
+  features = signal<Feature[]>([]);
+
+  async ngOnInit() {
+    const ellipse = this.ml.createEllipse({
+      center: [2.17, 41.38],
+      semiMajor: 6_000,
+      semiMinor: 3_000,
+      rotation: Math.PI / 6,
+    });
+    const sector = this.ml.createSector({
+      center: [-0.38, 39.47],
+      radius: 8_000,
+      startAngle: Math.PI / 6,
+      endAngle: Math.PI / 2,
+    });
+    const donut = this.ml.createDonut({
+      center: [-5.99, 37.39],
+      innerRadius: 5_000,
+      outerRadius: 10_000,
+    });
+    const symbol = await this.ml.createMilSymbol({
+      sidc: 'SFGPUCI-----',
+      position: [-3.7, 40.42],
+      size: 36,
+    });
+    this.features.set([ellipse, sector, donut, symbol]);
+  }
+}
+```
+
+### Geometry helpers
+
+| Method                  | Output             | Notes                                                                                                                  |
+| ----------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `createEllipse(config)` | `Feature<Polygon>` | Optional `rotation` in radians, configurable `segments` (default 64)                                                   |
+| `createSector(config)`  | `Feature<Polygon>` | Pie-slice (apex-arc-apex). `startAngle < endAngle ≤ start + 2π`                                                        |
+| `createDonut(config)`   | `Feature<Polygon>` | Two rings: outer CCW, inner CW (right-hand rule). Renders as an annular band with the basemap visible through the hole |
+
+Coordinates are emitted in `EPSG:4326` (lon/lat) using a local tangent-plane projection. Accurate up to ~100 km from the center; for very large radii or polar regions, geodesic-correct math is on the Phase 3 roadmap.
+
+### MIL-STD-2525 symbols
+
+`createMilSymbol` lazy-loads `milsymbol` on first use and returns a `Feature<Point>` with style metadata (`feature.style.icon`) so the vector layer renders it as an `ol/style/Icon`. The library is declared as an **optional peer dependency** — install it only if you use this helper:
+
+```bash
+npm install milsymbol
+```
+
+```ts
+const symbol = await ml.createMilSymbol({
+  sidc: 'SFGPUCI-----', // friendly infantry, ground unit
+  position: [-3.7, 40.42],
+  size: 36,
+  uniqueDesignation: 'A1',
+});
+```
+
+Three flavors:
+
+- **`createMilSymbol(config)`** — async; lazy-loads on first call.
+- **`createMilSymbolSync(config)`** — sync; throws if `milsymbol` is not loaded yet.
+- **`preloadMilsymbol()`** — fire-and-forget on app init to make the first symbol render synchronous.
+
+The service throws clearly on non-browser environments (`createMilSymbol` requires `window`).
+
 ## Architecture
 
 ### Data vs UI Separation
@@ -206,8 +294,8 @@ import {
   withInteractions,
 } from '@angular-helpers/openlayers/interactions';
 
-// Add military features (~10KB additional)
-import { OlEllipseFeatureComponent, withMilitary } from '@angular-helpers/openlayers/military';
+// Add military features — pure-math helpers + lazy-loaded milsymbol
+import { OlMilitaryService, withMilitary } from '@angular-helpers/openlayers/military';
 ```
 
 ## API Reference

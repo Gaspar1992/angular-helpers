@@ -4,6 +4,12 @@ export type InteractionType = 'select' | 'draw' | 'modify' | 'dragAndDrop';
 
 export interface InteractionConfig {
   active?: boolean;
+  /**
+   * If true, enabling this interaction will automatically disable other active exclusive interactions.
+   * Useful for mutually exclusive tools like Draw and Modify.
+   * @default true
+   */
+  exclusive?: boolean;
 }
 
 export interface SelectConfig extends InteractionConfig {

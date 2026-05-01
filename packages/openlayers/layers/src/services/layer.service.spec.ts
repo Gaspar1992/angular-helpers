@@ -2,6 +2,10 @@
 import '@angular/compiler';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
+import { Feature as OLFeature } from 'ol';
+import { Point } from 'ol/geom';
+import type VectorLayer from 'ol/layer/Vector';
+import { Icon, Style } from 'ol/style';
 import type OLMap from 'ol/Map';
 import type BaseLayer from 'ol/layer/Base';
 import { OlMapService } from '@angular-helpers/openlayers/core';
@@ -288,6 +292,57 @@ describe('OlLayerService', () => {
 
     // No throw means coordinate transformation worked for all geometry types
     expect(svc.hasLayer('v')).toBe(true);
+  });
+
+  describe('per-feature icon style', () => {
+    it('returns the default style for features without style metadata', () => {
+      svc.addLayer({
+        id: 'v-default',
+        type: 'vector',
+        features: [{ id: 'p', geometry: { type: 'Point', coordinates: [0, 0] } }],
+      } as VectorLayerConfig);
+
+      const layer = svc.getLayer('v-default') as unknown as VectorLayer;
+      const styleFn = layer.getStyle();
+      expect(typeof styleFn).toBe('function');
+
+      const olF = new OLFeature({ geometry: new Point([0, 0]) });
+      const out = (styleFn as (f: OLFeature) => Style)(olF);
+      expect(out).toBeInstanceOf(Style);
+      // Default style does not use an Icon image — it uses CircleStyle.
+      expect(out.getImage()).not.toBeInstanceOf(Icon);
+    });
+
+    it('returns an Icon style for features with style.icon', () => {
+      const tinySvg =
+        'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciLz4=';
+      svc.addLayer({
+        id: 'v-icon',
+        type: 'vector',
+        features: [
+          {
+            id: 'sym',
+            geometry: { type: 'Point', coordinates: [0, 0] },
+            style: { icon: { src: tinySvg, size: [32, 32], anchor: [0.5, 0.5] } },
+          },
+        ],
+      } as VectorLayerConfig);
+
+      const layer = svc.getLayer('v-icon') as unknown as VectorLayer;
+      const styleFn = layer.getStyle();
+
+      // The styleFn reads the feature's __angular_helpers_style__ property,
+      // which the service stamped onto the underlying ol/Feature when the
+      // layer was created. We pull that exact OL feature out of the source
+      // and call the function with it.
+      const source = layer.getSource();
+      const olF = source?.getFeatureById('sym') as OLFeature;
+      expect(olF).toBeTruthy();
+
+      const out = (styleFn as (f: OLFeature) => Style)(olF);
+      expect(out).toBeInstanceOf(Style);
+      expect(out.getImage()).toBeInstanceOf(Icon);
+    });
   });
 
   it('visibleLayers / tileLayers / vectorLayers computed signals filter correctly', () => {

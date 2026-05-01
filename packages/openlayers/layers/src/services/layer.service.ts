@@ -5,10 +5,14 @@ import VectorLayer from 'ol/layer/Vector';
 import TileLayer from 'ol/layer/Tile';
 import ImageLayer from 'ol/layer/Image';
 import VectorSource from 'ol/source/Vector';
-import { Feature as OLFeature } from 'ol';
+import OLFeature from 'ol/Feature';
 import { Circle as CircleGeom, LineString, Point, Polygon } from 'ol/geom';
 import { fromLonLat } from 'ol/proj';
-import { Style, Circle as CircleStyle, Fill, Stroke } from 'ol/style';
+import { getCenter } from 'ol/extent';
+import { Style, Circle as CircleStyle, Fill, Icon, Stroke } from 'ol/style';
+import Text from 'ol/style/Text';
+import ClusterSource from 'ol/source/Cluster';
+import type { Style as AbstractStyle } from '@angular-helpers/openlayers/core';
 import OSM from 'ol/source/OSM';
 import XYZ from 'ol/source/XYZ';
 import TileWMS from 'ol/source/TileWMS';
@@ -23,6 +27,13 @@ import type {
   TileLayerConfig,
   ImageLayerConfig,
 } from '../models/layer.types';
+
+/**
+ * Internal property key used to stash the abstract style metadata on the
+ * underlying `ol/Feature` so the layer style function can resolve a
+ * per-feature visual without colliding with user `properties`.
+ */
+const STYLE_PROP = '__angular_helpers_style__';
 
 export interface LayerInfo {
   id: string;
@@ -165,7 +176,16 @@ export class OlLayerService {
   clearFeatures(id: string): void {
     const layer = this.layerCache.get(id);
     if (!(layer instanceof VectorLayer)) return;
-    layer.getSource()?.clear();
+    const source = layer.getSource();
+    if (!source) return;
+
+    // Handle Cluster source: clear the underlying VectorSource
+    const clusterSource = source as unknown as { getSource?: () => VectorSource };
+    const vectorSource = clusterSource.getSource
+      ? clusterSource.getSource()
+      : (source as VectorSource);
+
+    vectorSource?.clear();
   }
 
   /**
@@ -181,9 +201,17 @@ export class OlLayerService {
     const source = layer.getSource();
     if (!source) return;
 
+    // Handle Cluster source: get the underlying VectorSource
+    const clusterSource = source as unknown as { getSource?: () => VectorSource };
+    const vectorSource = clusterSource.getSource
+      ? clusterSource.getSource()
+      : (source as VectorSource);
+
+    if (!(vectorSource instanceof VectorSource)) return;
+
     // Get existing feature IDs from source
     const existingIds = new Set(
-      source
+      vectorSource
         .getFeatures()
         .map((f) => f.getId())
         .filter((id): id is string | number => id !== undefined),
@@ -224,11 +252,14 @@ export class OlLayerService {
             geometry,
             ...feature.properties,
           });
+          if (feature.style) {
+            olFeature.set(STYLE_PROP, feature.style);
+          }
           olFeature.setId(feature.id);
           return olFeature;
         });
 
-        source.addFeatures(olFeatures);
+        vectorSource.addFeatures(olFeatures);
       }
     }
   }
@@ -250,7 +281,7 @@ export class OlLayerService {
   }
 
   private createVectorLayer(config: VectorLayerConfig, map: OLMap): { id: string } {
-    const source = new VectorSource();
+    const vectorSource = new VectorSource();
 
     // Add features if provided
     if (config.features && config.features.length > 0) {
@@ -284,12 +315,37 @@ export class OlLayerService {
           geometry,
           ...feature.properties,
         });
+        if (feature.style) {
+          olFeature.set(STYLE_PROP, feature.style);
+        }
         olFeature.setId(feature.id);
         return olFeature;
       });
 
-      source.addFeatures(olFeatures);
+      vectorSource.addFeatures(olFeatures);
     }
+
+    // Wrap in cluster source if enabled
+    const clusterCfg = config.cluster;
+    const source = clusterCfg?.enabled
+      ? new ClusterSource({
+          source: vectorSource,
+          distance: clusterCfg.distance ?? 40,
+          minDistance: clusterCfg.minDistance ?? 20,
+          geometryFunction: (feature) => {
+            const geometry = feature.getGeometry();
+            if (!geometry) return null;
+            // For Point geometries, use as-is
+            if (geometry.getType() === 'Point') {
+              return geometry as Point;
+            }
+            // For other geometries (Polygon, Circle, etc.), use center point
+            const extent = geometry.getExtent();
+            const center = getCenter(extent);
+            return new Point(center);
+          },
+        })
+      : vectorSource;
 
     // Default style for all geometry types (points, lines, polygons)
     const defaultStyle = new Style({
@@ -302,12 +358,94 @@ export class OlLayerService {
       }),
     });
 
+    // Cluster style: shows count badge when features are clustered
+    const clusterStyleFn = (olFeature: { get(key: string): unknown }): Style => {
+      const features = olFeature.get('features') as unknown[] | undefined;
+      const size = features?.length ?? 1;
+
+      if (size > 1) {
+        const showCount = clusterCfg?.showCount ?? true;
+        return new Style({
+          image: new CircleStyle({
+            radius: 15 + Math.min(size * 2, 15),
+            fill: new Fill({ color: 'rgba(255, 100, 100, 0.8)' }),
+            stroke: new Stroke({ color: '#fff', width: 2 }),
+          }),
+          text: showCount
+            ? new Text({
+                text: String(size),
+                fill: new Fill({ color: '#fff' }),
+              })
+            : undefined,
+        });
+      }
+
+      // Single feature: get the original feature from the cluster and use its style
+      const originalFeatures = olFeature.get('features') as
+        | Array<{ get(key: string): unknown }>
+        | undefined;
+      const originalFeature = originalFeatures?.[0];
+      if (originalFeature) {
+        const abstractStyle = originalFeature.get(STYLE_PROP) as AbstractStyle | undefined;
+        if (abstractStyle) {
+          const style = new Style();
+          const { icon, fill, stroke } = abstractStyle;
+          if (icon?.src) {
+            style.setImage(
+              new Icon({
+                src: icon.src,
+                ...(icon.size ? { size: icon.size } : {}),
+                ...(icon.anchor ? { anchor: icon.anchor } : {}),
+              }),
+            );
+          }
+          if (fill) {
+            style.setFill(new Fill({ color: fill.color }));
+          }
+          if (stroke) {
+            style.setStroke(new Stroke({ color: stroke.color, width: stroke.width }));
+          }
+          // If we mapped at least one property, return it, otherwise fallback
+          if (icon?.src || fill || stroke) return style;
+        }
+      }
+      return defaultStyle;
+    };
+
+    // Per-feature style resolver: features carrying `style` render it.
+    // Structural type avoids importing `FeatureLike` from `ol/Feature`;
+    // tooling has been observed to auto-remove the unused-looking import.
+    const styleFn = (olFeature: { get(key: string): unknown }): Style => {
+      const abstractStyle = olFeature.get(STYLE_PROP) as AbstractStyle | undefined;
+      if (abstractStyle) {
+        const style = new Style();
+        const { icon, fill, stroke } = abstractStyle;
+        if (icon?.src) {
+          style.setImage(
+            new Icon({
+              src: icon.src,
+              ...(icon.size ? { size: icon.size } : {}),
+              ...(icon.anchor ? { anchor: icon.anchor } : {}),
+            }),
+          );
+        }
+        if (fill) {
+          style.setFill(new Fill({ color: fill.color }));
+        }
+        if (stroke) {
+          style.setStroke(new Stroke({ color: stroke.color, width: stroke.width }));
+        }
+        if (icon?.src || fill || stroke) return style;
+      }
+      return defaultStyle;
+    };
+
     const layer = new VectorLayer({
       source,
       visible: config.visible ?? true,
       opacity: config.opacity ?? 1,
       zIndex: config.zIndex,
-      style: defaultStyle,
+      style: clusterCfg?.enabled ? clusterStyleFn : styleFn,
     });
     layer.set('id', config.id);
     map.addLayer(layer);

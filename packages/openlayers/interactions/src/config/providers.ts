@@ -1,5 +1,6 @@
 import type { Provider } from '@angular/core';
 import type { OlFeature } from '@angular-helpers/openlayers/core';
+import { OlLayerService } from '@angular-helpers/openlayers/layers';
 import { OlInteractionService } from '../services/interaction.service';
 import { InteractionStateService } from '../services/interaction-state.service';
 import { SelectInteractionService } from '../services/select-interaction.service';
@@ -16,6 +17,7 @@ export function withInteractions(): OlFeature<'interactions'> {
   return {
     kind: 'interactions',
     providers: [
+      OlLayerService, // DX: interactions often need layers
       OlInteractionService,
       InteractionStateService,
       SelectInteractionService,

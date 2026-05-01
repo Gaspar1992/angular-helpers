@@ -39,7 +39,7 @@ const buildService = () => {
 
   // Sub-services as spies that simulate adding the managed interaction to state
   const selectService = {
-    createSelectInteraction: vi.fn((id: string, _cfg: unknown) => {
+    createSelectInteraction: vi.fn((id: string, config: any = {}) => {
       const cleanup = vi.fn();
       const managed: ManagedInteraction = {
         id,
@@ -47,19 +47,19 @@ const buildService = () => {
         olInteraction: {
           getFeatures: () => ({ clear: vi.fn() }),
         } as never,
-        config: { active: true },
+        config: { active: true, ...config },
         cleanup,
       };
       stateService.addInteraction(managed);
     }),
   };
   const drawService = {
-    createDrawInteraction: vi.fn((id: string, _cfg: unknown) => {
+    createDrawInteraction: vi.fn((id: string, config: any = {}) => {
       const managed: ManagedInteraction = {
         id,
         type: 'draw',
         olInteraction: {} as never,
-        config: { active: true },
+        config: { active: true, ...config },
         cleanup: vi.fn(),
       };
       stateService.addInteraction(managed);
@@ -67,12 +67,12 @@ const buildService = () => {
     }),
   };
   const modifyService = {
-    createModifyInteraction: vi.fn((id: string, _cfg: unknown) => {
+    createModifyInteraction: vi.fn((id: string, config: any = {}) => {
       const managed: ManagedInteraction = {
         id,
         type: 'modify',
         olInteraction: {} as never,
-        config: { active: true },
+        config: { active: true, ...config },
         cleanup: vi.fn(),
       };
       stateService.addInteraction(managed);
@@ -223,8 +223,8 @@ describe('OlInteractionService', () => {
   });
 
   it('getInteractionState mirrors stateService.getInteractionState', () => {
-    ctx.svc.enableSelect('s1');
-    ctx.svc.enableDraw('d1', { type: 'Point' });
+    ctx.svc.enableSelect('s1', { exclusive: false });
+    ctx.svc.enableDraw('d1', { type: 'Point', exclusive: false });
 
     expect(ctx.svc.getInteractionState()).toEqual([
       { id: 's1', type: 'select', active: true },

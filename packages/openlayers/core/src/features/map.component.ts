@@ -60,6 +60,7 @@ export class OlMapComponent {
 
   mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
   private map?: OLMap;
+  private resizeObserver?: ResizeObserver;
 
   constructor() {
     afterNextRender(() => this.initMap());
@@ -93,6 +94,19 @@ export class OlMapComponent {
       this.map = new OLMap({ target: container, view, layers: [] });
       this.mapService.setMap(this.map);
 
+      // Add ResizeObserver to handle container size changes (e.g. sidebars, window resize)
+      if (typeof ResizeObserver !== 'undefined') {
+        this.resizeObserver = new ResizeObserver(() => {
+          if (this.map) {
+            // Using requestAnimationFrame prevents "ResizeObserver loop limit exceeded" errors
+            requestAnimationFrame(() => {
+              if (this.map) this.map.updateSize();
+            });
+          }
+        });
+        this.resizeObserver.observe(container);
+      }
+
       view.on('change:center', () => this.zoneHelper.runInsideAngular(() => this.emitViewChange()));
       view.on('change:resolution', () =>
         this.zoneHelper.runInsideAngular(() => this.emitViewChange()),
@@ -119,6 +133,10 @@ export class OlMapComponent {
   }
 
   private destroyMap(): void {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = undefined;
+    }
     if (this.map) {
       this.zoneHelper.runOutsideAngular(() => {
         this.map!.setTarget(undefined);
