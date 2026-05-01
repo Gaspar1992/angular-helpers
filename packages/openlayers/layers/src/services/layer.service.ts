@@ -7,7 +7,7 @@ import TileLayer from 'ol/layer/Tile';
 import ImageLayer from 'ol/layer/Image';
 import VectorSource from 'ol/source/Vector';
 import OLFeature from 'ol/Feature';
-import { Circle as CircleGeom, LineString, Point, Polygon } from 'ol/geom';
+import { Circle as CircleGeom, LineString, Point, Polygon, type Geometry } from 'ol/geom';
 import { fromLonLat } from 'ol/proj';
 import { getCenter } from 'ol/extent';
 import { Style, Circle as CircleStyle, Fill, Icon, Stroke } from 'ol/style';
@@ -389,7 +389,7 @@ export class OlLayerService {
 
       // Single feature: get the original feature from the cluster and use its style
       const originalFeatures = olFeature.get('features') as
-        | Array<{ get(key: string): unknown; getGeometry?(): any }>
+        | Array<{ get(key: string): unknown; getGeometry?(): Geometry | undefined }>
         | undefined;
       const originalFeature = originalFeatures?.[0];
       if (originalFeature) {
@@ -418,7 +418,7 @@ export class OlLayerService {
             styleToUse = style;
           }
         }
-        
+
         if (!styleToUse) {
           styleToUse = defaultStyle.clone();
         }
@@ -427,7 +427,7 @@ export class OlLayerService {
         if (origGeom) {
           styleToUse.setGeometry(origGeom);
         }
-        
+
         return styleToUse;
       }
       return defaultStyle;
@@ -518,9 +518,11 @@ export class OlLayerService {
       zIndex: config.zIndex,
       ...(config.blur !== undefined && { blur: config.blur }),
       ...(config.radius !== undefined && { radius: config.radius }),
-      ...(config.weight !== undefined && { weight: config.weight as any }),
+      ...(config.weight !== undefined && {
+        weight: config.weight as string | ((feature: OLFeature) => number),
+      }),
     });
-    
+
     layer.set('id', config.id);
     map.addLayer(layer);
     this.layerCache.set(config.id, layer);
