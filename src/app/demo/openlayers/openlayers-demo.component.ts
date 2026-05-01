@@ -175,6 +175,10 @@ const BASEMAPS: BasemapConfig[] = [
     `,
   ],
   providers: [
+    // Feature-specific services that should be provided globally or via their respective feature packages
+    // For demo purposes, we provide them here if they aren't globally provided.
+    // OlMapService, OlLayerService, OlInteractionService, etc. should ideally be loaded in app.config.ts
+    // but the demo isolates them to prevent polluting other routes.
     OlMapService,
     OlLayerService,
     OlInteractionService,
@@ -772,10 +776,10 @@ export class OpenLayersDemoComponent {
   lastClick = signal<{ coordinate: [number, number]; pixel: [number, number] } | null>(null);
   activeBasemap = signal<string>('osm');
 
-  // Interaction state
-  selectActive = signal<boolean>(false);
-  drawActive = signal<boolean>(false);
-  modifyActive = signal<boolean>(false);
+  // Interaction state - derived from the InteractionService natively
+  selectActive = computed(() => this.interactionService.isActive('demo-select'));
+  drawActive = computed(() => this.interactionService.isActive('demo-draw'));
+  modifyActive = computed(() => this.interactionService.isActive('demo-modify'));
   drawType = signal<'Polygon' | 'LineString' | 'Point' | 'Circle'>('Polygon');
 
   // Count of drawn features (OL Draw manages the actual source directly)
@@ -947,45 +951,39 @@ export class OpenLayersDemoComponent {
 
   // Interaction control methods
   toggleSelect(): void {
-    const newState = !this.selectActive();
-    this.selectActive.set(newState);
-
-    if (newState) {
+    if (this.selectActive()) {
+      this.interactionService.disableInteraction('demo-select');
+    } else {
       this.interactionService.enableSelect('demo-select', {
         layers: ['cities', 'drawn-features'],
         multi: true,
       });
-    } else {
-      this.interactionService.disableInteraction('demo-select');
     }
   }
 
   toggleDraw(): void {
-    const newState = !this.drawActive();
-    this.drawActive.set(newState);
-
-    if (newState) {
+    if (this.drawActive()) {
+      this.interactionService.disableInteraction('demo-draw');
+    } else {
       this.interactionService.enableDraw('demo-draw', {
         type: this.drawType(),
         source: 'drawn-features',
       });
-    } else {
-      this.interactionService.disableInteraction('demo-draw');
     }
   }
 
   toggleModify(): void {
-    const newState = !this.modifyActive();
-    this.modifyActive.set(newState);
-
-    if (newState) {
+    if (this.modifyActive()) {
+      this.interactionService.disableInteraction('demo-modify');
+    } else {
       // Enable select if not active (to select features to modify)
       if (!this.selectActive()) {
         this.toggleSelect();
       }
-      this.interactionService.enableModify('demo-modify', { source: 'drawn-features' });
-    } else {
-      this.interactionService.disableInteraction('demo-modify');
+      this.interactionService.enableModify('demo-modify', {
+        source: 'drawn-features',
+        exclusive: false,
+      });
     }
   }
 
@@ -1020,10 +1018,10 @@ export class OpenLayersDemoComponent {
 
   /**
    * Drop a random NATO friendly-infantry symbol on Madrid.
-   * Uses milsymbol via static ESM import (path mapping trick).
+   * Uses milsymbol via dynamic ESM import (lazy loaded).
    */
-  addRandomSymbol(): void {
-    const symbol = this.militaryService.createMilSymbol({
+  async addRandomSymbol(): Promise<void> {
+    const symbol = await this.militaryService.createMilSymbol({
       sidc: 'SFGPUCI-----',
       position: [-3.7 + (Math.random() - 0.5) * 0.4, 40.42 + (Math.random() - 0.5) * 0.3],
       size: 36,

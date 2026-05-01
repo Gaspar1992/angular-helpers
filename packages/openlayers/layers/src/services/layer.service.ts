@@ -387,36 +387,55 @@ export class OlLayerService {
       const originalFeature = originalFeatures?.[0];
       if (originalFeature) {
         const abstractStyle = originalFeature.get(STYLE_PROP) as AbstractStyle | undefined;
-        const icon = abstractStyle?.icon;
-        if (icon?.src) {
-          return new Style({
-            image: new Icon({
-              src: icon.src,
-              ...(icon.size ? { size: icon.size } : {}),
-              ...(icon.anchor ? { anchor: icon.anchor } : {}),
-            }),
-          });
+        if (abstractStyle) {
+          const style = new Style();
+          const { icon, fill, stroke } = abstractStyle;
+          if (icon?.src) {
+            style.setImage(
+              new Icon({
+                src: icon.src,
+                ...(icon.size ? { size: icon.size } : {}),
+                ...(icon.anchor ? { anchor: icon.anchor } : {}),
+              }),
+            );
+          }
+          if (fill) {
+            style.setFill(new Fill({ color: fill.color }));
+          }
+          if (stroke) {
+            style.setStroke(new Stroke({ color: stroke.color, width: stroke.width }));
+          }
+          // If we mapped at least one property, return it, otherwise fallback
+          if (icon?.src || fill || stroke) return style;
         }
       }
       return defaultStyle;
     };
 
-    // Per-feature style resolver: features carrying `style.icon` (e.g. those
-    // produced by `OlMilitaryService.createMilSymbol`) render as an Icon;
-    // every other feature falls back to the default style.
+    // Per-feature style resolver: features carrying `style` render it.
     // Structural type avoids importing `FeatureLike` from `ol/Feature`;
     // tooling has been observed to auto-remove the unused-looking import.
     const styleFn = (olFeature: { get(key: string): unknown }): Style => {
       const abstractStyle = olFeature.get(STYLE_PROP) as AbstractStyle | undefined;
-      const icon = abstractStyle?.icon;
-      if (icon?.src) {
-        return new Style({
-          image: new Icon({
-            src: icon.src,
-            ...(icon.size ? { size: icon.size } : {}),
-            ...(icon.anchor ? { anchor: icon.anchor } : {}),
-          }),
-        });
+      if (abstractStyle) {
+        const style = new Style();
+        const { icon, fill, stroke } = abstractStyle;
+        if (icon?.src) {
+          style.setImage(
+            new Icon({
+              src: icon.src,
+              ...(icon.size ? { size: icon.size } : {}),
+              ...(icon.anchor ? { anchor: icon.anchor } : {}),
+            }),
+          );
+        }
+        if (fill) {
+          style.setFill(new Fill({ color: fill.color }));
+        }
+        if (stroke) {
+          style.setStroke(new Stroke({ color: stroke.color, width: stroke.width }));
+        }
+        if (icon?.src || fill || stroke) return style;
       }
       return defaultStyle;
     };

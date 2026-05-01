@@ -245,8 +245,8 @@ describe('OlMilitaryService', () => {
   // -------------------------------------------------------------------------
 
   describe('createMilSymbol', () => {
-    it('produces a feature with icon style', () => {
-      const f = service.createMilSymbol({ sidc: 'SFGPUCI-----', position: center });
+    it('produces a feature with icon style', async () => {
+      const f = await service.createMilSymbol({ sidc: 'SFGPUCI-----', position: center });
       expect(f.style?.icon?.src).toMatch(/^data:image\/svg\+xml;base64,/);
       // Real milsymbol generates sizes based on the symbol type
       expect(f.style?.icon?.size).toBeDefined();
@@ -255,13 +255,19 @@ describe('OlMilitaryService', () => {
       expect(f.properties?.['sidc']).toBe('SFGPUCI-----');
     });
 
-    it('coerces a numeric quantity to a string for milsymbol', () => {
-      const f = service.createMilSymbol({ sidc: 'SFGPUCI-----', position: center, quantity: 12 });
+    it('coerces a numeric quantity to a string for milsymbol', async () => {
+      const f = await service.createMilSymbol({
+        sidc: 'SFGPUCI-----',
+        position: center,
+        quantity: 12,
+      });
       expect(f.properties?.['quantity']).toBe('12');
     });
 
-    it('throws on invalid SIDC', () => {
-      expect(() => service.createMilSymbol({ sidc: 'short', position: center })).toThrow(/SIDC/);
+    it('throws on invalid SIDC', async () => {
+      await expect(service.createMilSymbol({ sidc: 'short', position: center })).rejects.toThrow(
+        /SIDC/,
+      );
     });
   });
 
@@ -281,16 +287,16 @@ describe('OlMilitaryService', () => {
       });
     });
 
-    it('createMilSymbol throws when window is undefined', () => {
+    it('createMilSymbol throws when window is undefined', async () => {
       // Simulate a Node-only environment by hiding `window`.
       Object.defineProperty(globalThis, 'window', {
         value: undefined,
         configurable: true,
         writable: true,
       });
-      expect(() => service.createMilSymbol({ sidc: 'SFGPUCI-----', position: center })).toThrow(
-        /browser environment/,
-      );
+      await expect(
+        service.createMilSymbol({ sidc: 'SFGPUCI-----', position: center }),
+      ).rejects.toThrow(/browser environment/);
     });
   });
 });

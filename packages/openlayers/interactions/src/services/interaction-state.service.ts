@@ -41,9 +41,20 @@ export class InteractionStateService {
 
   /**
    * Adds a managed interaction to the state.
+   * If the interaction is marked as exclusive, it disables other exclusive interactions.
    * @param interaction - The interaction to add
    */
   addInteraction(interaction: ManagedInteraction): void {
+    if (interaction.config.exclusive !== false) {
+      // Disable other exclusive interactions to maintain mutual exclusivity
+      const currentInteractions = this.interactions();
+      for (const existing of currentInteractions) {
+        if (existing.id !== interaction.id && existing.config.exclusive !== false) {
+          existing.cleanup();
+          this.removeInteraction(existing.id);
+        }
+      }
+    }
     this.interactions.update((list) => [...list, interaction]);
   }
 

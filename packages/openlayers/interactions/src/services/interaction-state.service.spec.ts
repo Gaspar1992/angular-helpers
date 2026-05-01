@@ -16,7 +16,7 @@ const makeManaged = (id: string, type: ManagedInteraction['type'] = 'select'): M
     id,
     type,
     olInteraction: {} as never,
-    config: { active: true },
+    config: { active: true, exclusive: false },
     cleanup: vi.fn(),
   }) as ManagedInteraction;
 
