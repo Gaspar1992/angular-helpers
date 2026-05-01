@@ -19,13 +19,13 @@ import type { HeatmapLayerConfig } from '../models/layer.types';
 export class OlHeatmapLayerComponent {
   private layerService = inject(OlLayerService);
   private destroyRef = inject(DestroyRef);
-  
+
   id = input.required<string>();
   features = input<Feature[]>([]);
   zIndex = input<number>(0);
   opacity = input<number>(1);
   visible = input<boolean>(true);
-  
+
   blur = input<number>(15);
   radius = input<number>(8);
   weight = input<string | ((feature: Feature) => number)>();

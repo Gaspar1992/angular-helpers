@@ -27,14 +27,27 @@ import type { ControlPosition } from '../models/control.types';
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div #controlElement class="ol-geolocation-control ol-unselectable ol-control" [ngClass]="position()">
+    <div
+      #controlElement
+      class="ol-geolocation-control ol-unselectable ol-control"
+      [ngClass]="position()"
+    >
       <button
         type="button"
         [class.active]="tracking()"
         (click)="toggleTracking()"
         [attr.title]="tracking() ? 'Stop tracking' : 'Track location'"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="geolocation-icon">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="geolocation-icon"
+        >
           <circle cx="12" cy="12" r="10"></circle>
           <circle cx="12" cy="12" r="3" [attr.fill]="tracking() ? 'currentColor' : 'none'"></circle>
           <line x1="12" y1="2" x2="12" y2="4"></line>
@@ -50,10 +63,22 @@ import type { ControlPosition } from '../models/control.types';
       .ol-geolocation-control {
         position: absolute;
       }
-      .ol-geolocation-control.top-left { top: 4.5em; left: 0.5em; }
-      .ol-geolocation-control.top-right { top: 4.5em; right: 0.5em; }
-      .ol-geolocation-control.bottom-left { bottom: 0.5em; left: 0.5em; }
-      .ol-geolocation-control.bottom-right { bottom: 0.5em; right: 0.5em; }
+      .ol-geolocation-control.top-left {
+        top: 4.5em;
+        left: 0.5em;
+      }
+      .ol-geolocation-control.top-right {
+        top: 4.5em;
+        right: 0.5em;
+      }
+      .ol-geolocation-control.bottom-left {
+        bottom: 0.5em;
+        left: 0.5em;
+      }
+      .ol-geolocation-control.bottom-right {
+        bottom: 0.5em;
+        right: 0.5em;
+      }
 
       button {
         display: flex;
@@ -140,14 +165,14 @@ export class OlGeolocationControlComponent {
                 width: 2,
               }),
             }),
-          })
+          }),
         );
 
         // Setup Vector Layer to show position
         const vectorSource = new VectorSource({
           features: [this.accuracyFeature, this.positionFeature],
         });
-        
+
         this.layer = new VectorLayer({
           source: vectorSource,
           zIndex: 9999, // Always on top
@@ -162,7 +187,7 @@ export class OlGeolocationControlComponent {
         this.geolocation.on('change:position', () => {
           const coordinates = this.geolocation?.getPosition();
           this.positionFeature?.setGeometry(coordinates ? new Point(coordinates) : undefined);
-          
+
           if (coordinates && this.tracking()) {
             map.getView().animate({ center: coordinates, duration: 500 });
           }
@@ -186,14 +211,17 @@ export class OlGeolocationControlComponent {
     const nextState = !this.tracking();
     this.tracking.set(nextState);
     this.trackingChange.emit(nextState);
-    
+
     if (this.geolocation) {
       this.zoneHelper.runOutsideAngular(() => {
         this.geolocation!.setTracking(nextState);
         if (nextState) {
           const coordinates = this.geolocation!.getPosition();
           if (coordinates) {
-            this.mapService.getMap()?.getView().animate({ center: coordinates, zoom: 15, duration: 500 });
+            this.mapService
+              .getMap()
+              ?.getView()
+              .animate({ center: coordinates, zoom: 15, duration: 500 });
           }
         } else {
           this.positionFeature?.setGeometry(undefined);

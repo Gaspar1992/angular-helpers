@@ -36,13 +36,17 @@ export class OlVectorLayerComponent {
     // Initialize layer after DOM is ready
     afterNextRender(() => {
       const clusterCmp = this.clusterComponent();
-      const resolvedClusterConfig: ClusterConfig | undefined = this.cluster() ?? (clusterCmp ? {
-        enabled: true,
-        distance: clusterCmp.distance(),
-        minDistance: clusterCmp.minDistance(),
-        showCount: clusterCmp.showCount(),
-        featureStyle: clusterCmp.featureStyle(),
-      } : undefined);
+      const resolvedClusterConfig: ClusterConfig | undefined =
+        this.cluster() ??
+        (clusterCmp
+          ? {
+              enabled: true,
+              distance: clusterCmp.distance(),
+              minDistance: clusterCmp.minDistance(),
+              showCount: clusterCmp.showCount(),
+              featureStyle: clusterCmp.featureStyle(),
+            }
+          : undefined);
 
       this.layerService.addLayer({
         id: this.id(),

@@ -542,7 +542,7 @@ export class OlLayerService {
       case 'wms':
         source = new TileWMS({
           url: config.source.url,
-          params: config.source.params,
+          params: config.source.params ?? {},
           attributions: config.source.attributions,
         });
         break;
