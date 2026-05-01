@@ -4,6 +4,7 @@ import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  contentChild,
   DestroyRef,
   effect,
   inject,
@@ -12,6 +13,7 @@ import {
 import type { Feature, Style } from '@angular-helpers/openlayers/core';
 import { OlLayerService } from '../services/layer.service';
 import type { ClusterConfig, VectorLayerConfig } from '../models/layer.types';
+import { OlClusterComponent } from './cluster.component';
 
 @Component({
   selector: 'ol-vector-layer',
@@ -28,10 +30,20 @@ export class OlVectorLayerComponent {
   visible = input<boolean>(true);
   style = input<Style | ((feature: Feature) => Style)>();
   cluster = input<ClusterConfig>();
+  clusterComponent = contentChild(OlClusterComponent);
 
   constructor() {
     // Initialize layer after DOM is ready
     afterNextRender(() => {
+      const clusterCmp = this.clusterComponent();
+      const resolvedClusterConfig: ClusterConfig | undefined = this.cluster() ?? (clusterCmp ? {
+        enabled: true,
+        distance: clusterCmp.distance(),
+        minDistance: clusterCmp.minDistance(),
+        showCount: clusterCmp.showCount(),
+        featureStyle: clusterCmp.featureStyle(),
+      } : undefined);
+
       this.layerService.addLayer({
         id: this.id(),
         type: 'vector',
@@ -40,7 +52,7 @@ export class OlVectorLayerComponent {
         opacity: this.opacity(),
         visible: this.visible(),
         style: this.style(),
-        cluster: this.cluster(),
+        cluster: resolvedClusterConfig,
       } as VectorLayerConfig);
     });
 

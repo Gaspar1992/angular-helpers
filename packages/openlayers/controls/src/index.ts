@@ -11,6 +11,7 @@ export {
 } from './features/rotate-control.component';
 export { OlLayerSwitcherComponent } from './features/layer-switcher.component';
 export { OlBasemapSwitcherComponent } from './features/basemap-switcher.component';
+export { OlGeolocationControlComponent } from './features/geolocation-control.component';
 export { OlControlService } from './services/control.service';
 export { withControls, provideControls } from './config/providers';
 export type { ControlPosition, ControlConfig } from './models/control.types';

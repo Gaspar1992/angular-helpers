@@ -118,18 +118,23 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 8px 12px;
-        background: white;
-        color: #333;
-        border: none;
-        border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        padding: 8px 16px;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        color: #1f2937;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         cursor: pointer;
         font-size: 14px;
+        transition: all 0.2s ease;
       }
 
       .ol-basemap-switcher__toggle:hover {
-        background: #f5f5f5;
+        background: rgba(255, 255, 255, 0.95);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
       }
 
       .ol-basemap-switcher__toggle-icon {
@@ -144,12 +149,18 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
         position: absolute;
         bottom: calc(100% + 8px);
         left: 0;
-        background: white;
-        color: #333;
-        border-radius: 4px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        padding: 4px;
-        min-width: 160px;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        color: #1f2937;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        padding: 6px;
+        min-width: 180px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
       }
 
       .ol-basemap-switcher--bottom-right .ol-basemap-switcher__panel,
@@ -174,28 +185,29 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
       .ol-basemap-switcher__item {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 12px;
         width: 100%;
-        padding: 8px 12px;
+        padding: 10px 14px;
         border: none;
         background: transparent;
-        border-radius: 4px;
+        border-radius: 12px;
         cursor: pointer;
         text-align: left;
-        transition: background 0.15s ease;
+        transition: all 0.2s ease;
       }
 
       .ol-basemap-switcher__item:hover {
-        background: #f5f5f5;
+        background: rgba(0, 0, 0, 0.05);
       }
 
       .ol-basemap-switcher__item--active {
-        background: #e3f2fd;
-        color: #1976d2;
+        background: rgba(59, 130, 246, 0.1);
+        color: #2563eb;
+        font-weight: 600;
       }
 
       .ol-basemap-switcher__item--active:hover {
-        background: #bbdefb;
+        background: rgba(59, 130, 246, 0.15);
       }
 
       .ol-basemap-switcher__icon {

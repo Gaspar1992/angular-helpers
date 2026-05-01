@@ -10,6 +10,7 @@ export { InteractionStateService } from './services/interaction-state.service';
 export { SelectInteractionService } from './services/select-interaction.service';
 export { DrawInteractionService } from './services/draw-interaction.service';
 export { ModifyInteractionService } from './services/modify-interaction.service';
+export { MeasurementInteractionService } from './services/measurement-interaction.service';
 
 // Feature utilities
 export { olFeatureToFeature } from './services/feature-utils';
@@ -21,6 +22,7 @@ export {
   withSelectInteraction,
   withDrawInteraction,
   withModifyInteraction,
+  withMeasurementInteraction,
 } from './config/providers';
 
 // Public types from models
