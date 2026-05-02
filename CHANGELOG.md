@@ -1,3 +1,10 @@
+# [1.39.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.38.0...v1.39.0) (2026-05-02)
+
+
+### Features
+
+* declarative interactions and WebGL rendering ([#111](https://github.com/Gaspar1992/angular-helpers/issues/111)) ([8635280](https://github.com/Gaspar1992/angular-helpers/commit/8635280b25324384a25d7274357417968c95072a))
+
 # [1.38.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.37.0...v1.38.0) (2026-05-02)
 
 
