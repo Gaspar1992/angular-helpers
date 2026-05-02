@@ -69,6 +69,18 @@ export class OlVectorLayerComponent {
       }
     });
 
+    effect(() => {
+      this.layerService.setOpacity(this.id(), this.opacity());
+    });
+
+    effect(() => {
+      this.layerService.setVisibility(this.id(), this.visible());
+    });
+
+    effect(() => {
+      this.layerService.setZIndex(this.id(), this.zIndex());
+    });
+
     // Cleanup when component is destroyed
     this.destroyRef.onDestroy(() => {
       this.layerService.removeLayer(this.id());

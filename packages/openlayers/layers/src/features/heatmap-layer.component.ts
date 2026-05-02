@@ -48,8 +48,28 @@ export class OlHeatmapLayerComponent {
     effect(() => {
       const currentFeatures = this.features();
       if (this.layerService.getLayer(this.id())) {
-        this.layerService.updateFeatures(this.id(), currentFeatures as any);
+        this.layerService.updateFeatures(this.id(), currentFeatures);
       }
+    });
+
+    effect(() => {
+      this.layerService.setOpacity(this.id(), this.opacity());
+    });
+
+    effect(() => {
+      this.layerService.setVisibility(this.id(), this.visible());
+    });
+
+    effect(() => {
+      this.layerService.setZIndex(this.id(), this.zIndex());
+    });
+
+    effect(() => {
+      this.layerService.setHeatmapProperties(this.id(), {
+        blur: this.blur(),
+        radius: this.radius(),
+        weight: this.weight(),
+      });
     });
 
     this.destroyRef.onDestroy(() => {

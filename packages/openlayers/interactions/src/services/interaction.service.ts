@@ -46,6 +46,7 @@ export class OlInteractionService {
   readonly drawStart$ = this.stateService.drawStart$;
   readonly drawEnd$ = this.stateService.drawEnd$;
   readonly modify$ = this.stateService.modify$;
+  readonly select$ = this.stateService.select$;
 
   /**
    * Enable a select interaction on the map.

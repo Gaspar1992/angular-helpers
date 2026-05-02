@@ -7,6 +7,7 @@ import type {
   DrawEndEvent,
   DrawStartEvent,
   ModifyEvent,
+  SelectEvent,
   InteractionState,
 } from '../models/interaction.types';
 import type { ManagedInteraction } from './types';
@@ -25,6 +26,7 @@ export class InteractionStateService {
   private drawStartSubject = new Subject<DrawStartEvent>();
   private drawEndSubject = new Subject<DrawEndEvent>();
   private modifySubject = new Subject<ModifyEvent>();
+  private selectSubject = new Subject<SelectEvent>();
 
   // Public readonly signals
   readonly selectedFeatures = computed(() => this.selectedFeaturesInternal());
@@ -38,6 +40,7 @@ export class InteractionStateService {
   readonly drawStart$ = this.drawStartSubject.asObservable();
   readonly drawEnd$ = this.drawEndSubject.asObservable();
   readonly modify$ = this.modifySubject.asObservable();
+  readonly select$ = this.selectSubject.asObservable();
 
   /**
    * Adds a managed interaction to the state.
@@ -120,6 +123,14 @@ export class InteractionStateService {
    */
   emitModify(event: ModifyEvent): void {
     this.modifySubject.next(event);
+  }
+
+  /**
+   * Emits a select event.
+   * @param event - The select event data
+   */
+  emitSelect(event: SelectEvent): void {
+    this.selectSubject.next(event);
   }
 
   /**

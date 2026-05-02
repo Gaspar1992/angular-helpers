@@ -61,7 +61,7 @@ export class DrawInteractionService {
       draw.on('drawstart', (e: { feature: OLFeature }) => {
         this.zoneHelper.runInsideAngular(() => {
           const feature = olFeatureToFeature(e.feature);
-          this.stateService.emitDrawStart({ feature });
+          this.stateService.emitDrawStart({ interactionId: id, feature });
         });
       });
 
@@ -69,7 +69,7 @@ export class DrawInteractionService {
       draw.on('drawend', (e: { feature: OLFeature }) => {
         this.zoneHelper.runInsideAngular(() => {
           const feature = olFeatureToFeature(e.feature);
-          const event: DrawEndEvent = { feature, type: config.type };
+          const event: DrawEndEvent = { interactionId: id, feature, type: config.type };
           this.stateService.emitDrawEnd(event);
         });
       });

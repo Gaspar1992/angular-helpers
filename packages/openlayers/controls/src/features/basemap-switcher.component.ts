@@ -61,7 +61,24 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
         [attr.aria-expanded]="isExpanded()"
         aria-label="Toggle basemap switcher"
       >
-        <span class="ol-basemap-switcher__toggle-icon">🗺️</span>
+        <span class="ol-basemap-switcher__toggle-icon"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path
+              d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+            ></path></svg
+        ></span>
         <span class="ol-basemap-switcher__toggle-text">
           {{ getActiveBasemapName() }}
         </span>
@@ -77,9 +94,9 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
       .ol-basemap-switcher {
         position: absolute;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        font-size: 14px;
+        font-size: 13px;
         color: #333;
-        z-index: 1000;
+        z-index: 100;
       }
 
       .ol-basemap-switcher--top-left {
@@ -117,50 +134,48 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
       .ol-basemap-switcher__toggle {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        color: #1f2937;
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        border-radius: 16px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        gap: 6px;
+        padding: 4px 10px;
+        background: rgba(255, 255, 255, 0.95);
+        color: #333;
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
         cursor: pointer;
-        font-size: 14px;
-        transition: all 0.2s ease;
+        font-size: 12px;
+        font-weight: 600;
+        transition: background 0.15s ease;
+        min-height: 36px;
       }
 
       .ol-basemap-switcher__toggle:hover {
-        background: rgba(255, 255, 255, 0.95);
-        transform: translateY(-1px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        background: rgba(255, 255, 255, 1);
       }
 
       .ol-basemap-switcher__toggle-icon {
-        font-size: 16px;
+        font-size: 14px;
+        line-height: 1;
       }
 
       .ol-basemap-switcher__toggle-text {
-        font-weight: 500;
+        font-weight: 600;
+        font-size: 12px;
       }
 
       .ol-basemap-switcher__panel {
         position: absolute;
-        bottom: calc(100% + 8px);
+        bottom: calc(100% + 6px);
         left: 0;
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        color: #1f2937;
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-        padding: 6px;
-        min-width: 180px;
+        background: rgba(255, 255, 255, 0.95);
+        border: none;
+        color: #333;
+        border-radius: 4px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        padding: 4px;
+        min-width: 160px;
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 2px;
       }
 
       .ol-basemap-switcher--bottom-right .ol-basemap-switcher__panel,
@@ -173,7 +188,7 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
       .ol-basemap-switcher--top-center .ol-basemap-switcher__panel,
       .ol-basemap-switcher--top-right .ol-basemap-switcher__panel {
         bottom: auto;
-        top: calc(100% + 8px);
+        top: calc(100% + 6px);
       }
 
       .ol-basemap-switcher--top-center .ol-basemap-switcher__panel,
@@ -185,15 +200,16 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
       .ol-basemap-switcher__item {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 8px;
         width: 100%;
-        padding: 10px 14px;
+        padding: 6px 10px;
         border: none;
         background: transparent;
-        border-radius: 12px;
+        border-radius: 3px;
         cursor: pointer;
         text-align: left;
-        transition: all 0.2s ease;
+        font-size: 12px;
+        transition: background 0.15s ease;
       }
 
       .ol-basemap-switcher__item:hover {
@@ -201,22 +217,23 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
       }
 
       .ol-basemap-switcher__item--active {
-        background: rgba(59, 130, 246, 0.1);
-        color: #2563eb;
+        background: rgba(26, 115, 232, 0.12);
+        color: #1a73e8;
         font-weight: 600;
       }
 
       .ol-basemap-switcher__item--active:hover {
-        background: rgba(59, 130, 246, 0.15);
+        background: rgba(26, 115, 232, 0.18);
       }
 
       .ol-basemap-switcher__icon {
-        font-size: 16px;
+        font-size: 14px;
       }
 
       .ol-basemap-switcher__name {
         font-weight: 500;
         color: #333;
+        font-size: 12px;
       }
     `,
   ],

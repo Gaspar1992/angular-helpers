@@ -32,7 +32,7 @@ export class MeasurementInteractionService {
   startMeasuring(type: 'LineString' | 'Polygon'): void {
     if (this.isMeasuring) this.stopMeasuring();
 
-    this.map = this.mapService.getMap();
+    this.map = this.mapService.getMap() ?? undefined;
     if (!this.map) return;
 
     this.zoneHelper.runOutsideAngular(() => {
