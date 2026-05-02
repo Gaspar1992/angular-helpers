@@ -17,6 +17,7 @@ import {
   OlVectorLayerComponent,
   OlClusterComponent,
   OlHeatmapLayerComponent,
+  OlWebGLVectorLayerComponent,
   OlLayerService,
 } from '@angular-helpers/openlayers/layers';
 import type { TileLayerConfig } from '@angular-helpers/openlayers/layers';
@@ -110,6 +111,7 @@ const BASEMAPS: BasemapConfig[] = [
     OlBasemapSwitcherComponent,
     OlGeolocationControlComponent,
     OlHeatmapLayerComponent,
+    OlWebGLVectorLayerComponent,
     OlPopupComponent,
     OlTooltipDirective,
   ],
@@ -354,6 +356,32 @@ const BASEMAPS: BasemapConfig[] = [
           >
             <ol-cluster [distance]="40" [showCount]="true"></ol-cluster>
           </ol-vector-layer>
+
+          <!-- WebGL Performance Layer vs Standard Vector Layer -->
+          @if (webglActive()) {
+            <ol-webgl-vector-layer
+              id="webgl-perf"
+              [features]="webglFeatures()"
+              [zIndex]="15"
+              [flatStyle]="{
+                'circle-radius': 5,
+                'circle-fill-color': '#ff5252',
+                'circle-stroke-color': '#ffffff',
+                'circle-stroke-width': 1,
+              }"
+            >
+            </ol-webgl-vector-layer>
+          } @else if (webglFeatures().length > 0) {
+            <ol-vector-layer
+              id="webgl-perf-canvas"
+              [features]="webglFeatures()"
+              [zIndex]="15"
+              [style]="{
+                icon: { src: 'assets/marker.png', size: [32, 32] },
+              }"
+            >
+            </ol-vector-layer>
+          }
         </ol-map>
 
         <!-- Premium Glassmorphic Toolbar (floating over map) -->
@@ -1343,6 +1371,90 @@ const BASEMAPS: BasemapConfig[] = [
         </div>
       </div>
 
+      <!-- WebGL Performance Demo -->
+      <div class="mt-10">
+        <h2
+          class="text-sm font-bold text-base-content/60 uppercase tracking-wider mb-4 ml-2 flex items-center gap-2"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          WebGL Performance Demo
+        </h2>
+        <div class="bg-base-100/50 border border-base-300 rounded-2xl p-6">
+          <div class="flex flex-wrap items-center gap-4 mb-4">
+            <button
+              class="btn btn-sm font-semibold rounded-lg shadow-sm"
+              [class.btn-primary]="!webglActive()"
+              [class.btn-outline]="webglActive()"
+              (click)="generateWebGLPoints()"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              Generate {{ webglPointCount() }} Points
+            </button>
+            <input
+              type="range"
+              min="500"
+              max="20000"
+              step="500"
+              [value]="webglPointCount()"
+              (input)="webglPointCount.set(+$any($event.target).value)"
+              class="range range-primary range-xs w-40"
+              aria-label="Point count"
+            />
+            <span class="text-xs text-base-content/50 font-mono">
+              {{ webglPointCount() | number }} pts
+            </span>
+            <label class="label cursor-pointer gap-2">
+              <span class="label-text text-xs">WebGL</span>
+              <input
+                type="checkbox"
+                class="toggle toggle-sm toggle-primary"
+                [checked]="webglActive()"
+                (change)="webglActive.set(!webglActive())"
+              />
+            </label>
+            @if (webglFeatures().length > 0) {
+              <span
+                class="badge badge-sm"
+                [class.badge-success]="webglActive()"
+                [class.badge-neutral]="!webglActive()"
+              >
+                {{ webglActive() ? 'GPU' : 'Canvas' }} ·
+                {{ webglFeatures().length | number }} features
+              </span>
+            }
+          </div>
+          <p class="text-xs text-base-content/50">
+            Toggle between Canvas 2D and WebGL rendering to compare performance with large point
+            datasets. WebGL uses GPU acceleration with
+            <code class="text-primary">FlatStyleLike</code> for maximum throughput.
+          </p>
+        </div>
+      </div>
+
       <!-- Package Info Footer -->
       <div class="mt-12 opacity-80 hover:opacity-100 transition-opacity duration-300">
         <h2 class="text-sm font-bold text-base-content/60 uppercase tracking-wider mb-4 ml-2">
@@ -1395,6 +1507,11 @@ export class OpenLayersDemoComponent {
 
   center = signal<[number, number]>([2.17, 41.38]);
   zoom = signal<number>(12);
+
+  // WebGL Performance Demo state
+  webglActive = signal<boolean>(false);
+  webglPointCount = signal<number>(5000);
+  webglFeatures = signal<Feature[]>([]);
   lastClick = signal<{ coordinate: [number, number]; pixel: [number, number] } | null>(null);
   activeBasemap = signal<string>('osm');
 
@@ -1730,11 +1847,33 @@ export class OpenLayersDemoComponent {
   }
 
   /** Toggle layer visibility by ID. */
-  toggleLayerVisibility(layerId: string): void {
-    const current = this.layerVisibility();
-    const newVisibility = !current[layerId];
-    this.layerVisibility.set({ ...current, [layerId]: newVisibility });
-    this.layerService.setVisibility(layerId, newVisibility);
+  toggleLayerVisibility(id: string): void {
+    this.layerVisibility.update((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  }
+
+  /** Generate random points for WebGL performance demonstration */
+  generateWebGLPoints(): void {
+    const count = this.webglPointCount();
+    const features: Feature[] = [];
+    const [lon, lat] = this.center();
+
+    for (let i = 0; i < count; i++) {
+      features.push({
+        id: `webgl-${i}`,
+        geometry: {
+          type: 'Point',
+          coordinates: [lon + (Math.random() - 0.5) * 2, lat + (Math.random() - 0.5) * 2],
+        },
+        properties: {
+          index: i,
+          type: Math.random() > 0.5 ? 'alert' : 'normal',
+        },
+      });
+    }
+    this.webglFeatures.set(features);
   }
 
   /** Set the active layer (visual feedback in UI). */
