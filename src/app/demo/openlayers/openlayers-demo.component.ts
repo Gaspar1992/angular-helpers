@@ -1681,10 +1681,10 @@ export class OpenLayersDemoComponent {
     this.militaryFeatures.update((prev) => [...prev, symbol]);
   }
 
-  /** Add a defensive ellipse around Barcelona. */
+  /** Add a defensive ellipse near Barcelona with random jitter. */
   addEllipse(): void {
     const ellipse = this.militaryService.createEllipse({
-      center: [2.17, 41.38],
+      center: this.jitter([2.17, 41.38]),
       semiMajor: 6_000,
       semiMinor: 3_000,
       rotation: Math.PI / 6,
@@ -1692,10 +1692,10 @@ export class OpenLayersDemoComponent {
     this.militaryFeatures.update((prev) => [...prev, ellipse]);
   }
 
-  /** Add a 60° sector north of Valencia. */
+  /** Add a 60° sector near Valencia with random jitter. */
   addSector(): void {
     const sector = this.militaryService.createSector({
-      center: [-0.38, 39.47],
+      center: this.jitter([-0.38, 39.47]),
       radius: 8_000,
       startAngle: Math.PI / 6,
       endAngle: Math.PI / 2,
@@ -1703,14 +1703,23 @@ export class OpenLayersDemoComponent {
     this.militaryFeatures.update((prev) => [...prev, sector]);
   }
 
-  /** Add a range-ring donut (5–10 km) around Sevilla. */
+  /** Add a range-ring donut (5–10 km) near Sevilla with random jitter. */
   addDonut(): void {
     const donut = this.militaryService.createDonut({
-      center: [-5.99, 37.39],
+      center: this.jitter([-5.99, 37.39]),
       innerRadius: 5_000,
       outerRadius: 10_000,
     });
     this.militaryFeatures.update((prev) => [...prev, donut]);
+  }
+
+  /**
+   * Apply a small random offset (~0.15°) to a coordinate so features
+   * created at the same base location don't share identical centroids,
+   * which would prevent the cluster source from ever splitting them.
+   */
+  private jitter(coords: [number, number]): [number, number] {
+    return [coords[0] + (Math.random() - 0.5) * 1.0, coords[1] + (Math.random() - 0.5) * 0.8];
   }
 
   /** Empty the military layer. */

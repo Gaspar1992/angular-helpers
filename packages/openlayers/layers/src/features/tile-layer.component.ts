@@ -5,6 +5,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  effect,
   inject,
   input,
 } from '@angular/core';
@@ -45,6 +46,18 @@ export class OlTileLayerComponent {
         opacity: this.opacity(),
         visible: this.visible(),
       } as TileLayerConfig);
+    });
+
+    effect(() => {
+      this.layerService.setOpacity(this.id(), this.opacity());
+    });
+
+    effect(() => {
+      this.layerService.setVisibility(this.id(), this.visible());
+    });
+
+    effect(() => {
+      this.layerService.setZIndex(this.id(), this.zIndex());
     });
 
     // Cleanup when component is destroyed

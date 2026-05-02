@@ -41,7 +41,22 @@ import type { LayerSwitcherItem } from '../models/layer-switcher.types';
         [attr.aria-expanded]="!isCollapsed()"
         aria-label="Toggle layer switcher"
       >
-        <span class="ol-layer-switcher__icon">🗺️</span>
+        <span class="ol-layer-switcher__icon"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline></svg
+        ></span>
         <span class="ol-layer-switcher__title">Layers</span>
       </button>
 
@@ -101,18 +116,16 @@ import type { LayerSwitcherItem } from '../models/layer-switcher.types';
 
       .ol-layer-switcher {
         position: absolute;
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        color: #1f2937;
-        border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        background: rgba(255, 255, 255, 0.95);
+        color: #333;
+        border-radius: 4px;
+        border: none;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        font-size: 14px;
-        min-width: 220px;
-        z-index: 1000;
-        transition: all 0.3s ease;
+        font-size: 13px;
+        min-width: 36px;
+        z-index: 100;
+        transition: all 0.2s ease;
       }
 
       .ol-layer-switcher--top-left {
@@ -121,7 +134,7 @@ import type { LayerSwitcherItem } from '../models/layer-switcher.types';
       }
 
       .ol-layer-switcher--top-right {
-        top: 0.5em;
+        top: 10em;
         right: 0.5em;
       }
 
@@ -142,34 +155,42 @@ import type { LayerSwitcherItem } from '../models/layer-switcher.types';
       .ol-layer-switcher__toggle {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 10px 16px;
+        gap: 6px;
+        padding: 4px 8px;
         background: transparent;
-        color: #1f2937;
+        color: #333;
         border: none;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        border-radius: 16px 16px 0 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 4px 4px 0 0;
         cursor: pointer;
         width: 100%;
-        font-size: 14px;
-        transition: background 0.2s ease;
+        font-size: 13px;
+        font-weight: 600;
+        transition: background 0.15s ease;
+        min-height: 36px;
       }
 
       .ol-layer-switcher.collapsed .ol-layer-switcher__toggle {
         border-bottom: none;
-        border-radius: 16px;
+        border-radius: 4px;
+        padding: 4px 6px;
+        justify-content: center;
       }
 
       .ol-layer-switcher__toggle:hover {
-        background: rgba(0, 0, 0, 0.03);
+        background: rgba(0, 0, 0, 0.05);
       }
 
       .ol-layer-switcher__icon {
-        font-size: 16px;
+        font-size: 14px;
+        line-height: 1;
       }
 
       .ol-layer-switcher__title {
-        font-weight: 500;
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
 
       .ol-layer-switcher.collapsed .ol-layer-switcher__title,
@@ -178,16 +199,17 @@ import type { LayerSwitcherItem } from '../models/layer-switcher.types';
       }
 
       .ol-layer-switcher__panel {
-        padding: 8px;
-        max-height: 350px;
+        padding: 6px;
+        max-height: 300px;
         overflow-y: auto;
       }
 
       .ol-layer-switcher__empty {
-        padding: 16px;
+        padding: 12px;
         color: #6b7280;
         text-align: center;
         font-style: italic;
+        font-size: 12px;
       }
 
       .ol-layer-switcher__list {
@@ -196,65 +218,71 @@ import type { LayerSwitcherItem } from '../models/layer-switcher.types';
         padding: 0;
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 2px;
       }
 
       .ol-layer-switcher__item {
-        padding: 8px 12px;
-        border-radius: 12px;
-        transition: background 0.2s ease;
+        padding: 5px 8px;
+        border-radius: 3px;
+        transition: background 0.15s ease;
       }
 
       .ol-layer-switcher__item:hover {
-        background: rgba(0, 0, 0, 0.03);
+        background: rgba(0, 0, 0, 0.04);
       }
 
       .ol-layer-switcher__label {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         cursor: pointer;
+        font-size: 12px;
       }
 
       .ol-layer-switcher__checkbox {
         cursor: pointer;
+        accent-color: #1a73e8;
       }
 
       .ol-layer-switcher__name {
         flex: 1;
         font-weight: 500;
         color: #333;
+        font-size: 12px;
       }
 
       .ol-layer-switcher__type {
-        font-size: 10px;
-        padding: 4px 8px;
-        border-radius: 8px;
-        font-weight: 600;
+        font-size: 9px;
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-weight: 700;
         text-transform: uppercase;
-        background: rgba(0, 0, 0, 0.05);
-        color: #4b5563;
+        background: rgba(0, 0, 0, 0.06);
+        color: #555;
+        letter-spacing: 0.3px;
       }
 
       .ol-layer-switcher__type--vector {
-        background: rgba(59, 130, 246, 0.1);
+        background: rgba(59, 130, 246, 0.12);
         color: #2563eb;
       }
 
       .ol-layer-switcher__type--tile {
-        background: rgba(34, 197, 94, 0.1);
+        background: rgba(34, 197, 94, 0.12);
         color: #16a34a;
       }
 
       .ol-layer-switcher__type--image {
-        background: rgba(245, 158, 11, 0.1);
+        background: rgba(245, 158, 11, 0.12);
         color: #d97706;
       }
 
       .ol-layer-switcher__opacity {
         width: 100%;
-        margin-top: 8px;
+        margin-top: 4px;
         cursor: pointer;
+        height: 4px;
+        accent-color: #1a73e8;
       }
     `,
   ],

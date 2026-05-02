@@ -28,6 +28,7 @@ import type {
   TileLayerConfig,
   ImageLayerConfig,
   HeatmapLayerConfig,
+  AnyLayerConfig,
 } from '../models/layer.types';
 
 /**
@@ -49,7 +50,7 @@ export interface LayerInfo {
 export class OlLayerService {
   private mapService = inject(OlMapService);
   private layerCache = new Map<string, BaseLayer>();
-  private pendingConfigs: LayerConfig[] = [];
+  private pendingConfigs: AnyLayerConfig[] = [];
 
   private layerState = signal<LayerInfo[]>([]);
 
@@ -61,7 +62,7 @@ export class OlLayerService {
 
   readonly vectorLayers = computed(() => this.layerState().filter((l) => l.type === 'vector'));
 
-  addLayer(config: LayerConfig): { id: string } {
+  addLayer(config: AnyLayerConfig): { id: string } {
     if (this.layerCache.has(config.id)) {
       return { id: config.id };
     }
@@ -85,7 +86,7 @@ export class OlLayerService {
     }
   }
 
-  private createLayer(config: LayerConfig, map: OLMap): { id: string } {
+  private createLayer(config: AnyLayerConfig, map: OLMap): { id: string } {
     switch (config.type) {
       case 'vector':
         return this.createVectorLayer(config as VectorLayerConfig, map);
@@ -96,7 +97,7 @@ export class OlLayerService {
       case 'image':
         return this.createImageLayer(config as ImageLayerConfig, map);
       default:
-        return { id: config.id };
+        return { id: (config as AnyLayerConfig).id };
     }
   }
 
@@ -130,6 +131,11 @@ export class OlLayerService {
     if (layer) {
       layer.setVisible(visible);
       this.updateLayerState();
+    } else {
+      const pending = this.pendingConfigs.find((c) => c.id === id);
+      if (pending) {
+        pending.visible = visible;
+      }
     }
   }
 
@@ -149,6 +155,11 @@ export class OlLayerService {
     if (layer) {
       layer.setOpacity(opacity);
       this.updateLayerState();
+    } else {
+      const pending = this.pendingConfigs.find((c) => c.id === id);
+      if (pending) {
+        pending.opacity = opacity;
+      }
     }
   }
 
@@ -157,6 +168,35 @@ export class OlLayerService {
     if (layer) {
       layer.setZIndex(zIndex);
       this.updateLayerState();
+    } else {
+      const pending = this.pendingConfigs.find((c) => c.id === id);
+      if (pending) {
+        pending.zIndex = zIndex;
+      }
+    }
+  }
+
+  setHeatmapProperties(
+    id: string,
+    props: {
+      blur?: number;
+      radius?: number;
+      weight?: string | ((feature: any) => number);
+    },
+  ): void {
+    const layer = this.layerCache.get(id);
+    if (layer instanceof HeatmapLayer) {
+      if (props.blur !== undefined) layer.setBlur(props.blur);
+      if (props.radius !== undefined) layer.setRadius(props.radius);
+      if (props.weight !== undefined) layer.setWeight(props.weight);
+    } else {
+      const pending = this.pendingConfigs.find((c) => c.id === id);
+      if (pending && pending.type === 'heatmap') {
+        const heatmapConfig = pending as HeatmapLayerConfig;
+        if (props.blur !== undefined) heatmapConfig.blur = props.blur;
+        if (props.radius !== undefined) heatmapConfig.radius = props.radius;
+        if (props.weight !== undefined) heatmapConfig.weight = props.weight;
+      }
     }
   }
 

@@ -36,20 +36,24 @@ export interface DragAndDropConfig extends InteractionConfig {
 }
 
 export interface SelectEvent {
-  feature: Feature;
-  selected: boolean;
+  interactionId: string;
+  selected: Feature[];
+  deselected: Feature[];
 }
 
 export interface DrawEndEvent {
+  interactionId: string;
   feature: Feature;
   type: string;
 }
 
 export interface DrawStartEvent {
+  interactionId: string;
   feature: Feature;
 }
 
 export interface ModifyEvent {
+  interactionId: string;
   features: Feature[];
   type: 'modifystart' | 'modifyend';
 }

@@ -15,6 +15,11 @@ export { MeasurementInteractionService } from './services/measurement-interactio
 // Feature utilities
 export { olFeatureToFeature } from './services/feature-utils';
 
+// Declarative components
+export { OlDrawInteractionComponent } from './features/draw-interaction.component';
+export { OlModifyInteractionComponent } from './features/modify-interaction.component';
+export { OlSelectInteractionComponent } from './features/select-interaction.component';
+
 // Provider functions
 export {
   withInteractions,

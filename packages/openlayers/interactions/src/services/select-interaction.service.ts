@@ -42,13 +42,20 @@ export class SelectInteractionService {
 
       // Listen to selection changes — use getFeatures().getArray() for the full
       // accumulated collection, not e.selected which only contains newly added ones
-      select.on('select', (_e: { selected: OLFeature[]; deselected: OLFeature[] }) => {
+      select.on('select', (e: { selected: OLFeature[]; deselected: OLFeature[] }) => {
         this.zoneHelper.runInsideAngular(() => {
           const allSelected = select
             .getFeatures()
             .getArray()
             .map((f) => olFeatureToFeature(f));
+
           this.stateService.setSelectedFeatures(allSelected);
+
+          this.stateService.emitSelect({
+            interactionId: id,
+            selected: e.selected.map((f) => olFeatureToFeature(f)),
+            deselected: e.deselected.map((f) => olFeatureToFeature(f)),
+          });
         });
       });
 

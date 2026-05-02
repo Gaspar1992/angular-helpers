@@ -60,3 +60,9 @@ export interface ImageSourceConfig {
   params?: Record<string, unknown>;
   imageExtent?: Extent;
 }
+
+export type AnyLayerConfig =
+  | VectorLayerConfig
+  | TileLayerConfig
+  | ImageLayerConfig
+  | HeatmapLayerConfig;

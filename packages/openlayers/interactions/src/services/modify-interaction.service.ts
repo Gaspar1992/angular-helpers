@@ -56,7 +56,7 @@ export class ModifyInteractionService {
       modify.on('modifystart', (e: { features: { getArray: () => OLFeature[] } }) => {
         this.zoneHelper.runInsideAngular(() => {
           const features = e.features.getArray().map((f) => olFeatureToFeature(f));
-          const event: ModifyEvent = { features, type: 'modifystart' };
+          const event: ModifyEvent = { interactionId: id, features, type: 'modifystart' };
           this.stateService.emitModify(event);
         });
       });
@@ -65,7 +65,7 @@ export class ModifyInteractionService {
       modify.on('modifyend', (e: { features: { getArray: () => OLFeature[] } }) => {
         this.zoneHelper.runInsideAngular(() => {
           const features = e.features.getArray().map((f) => olFeatureToFeature(f));
-          const event: ModifyEvent = { features, type: 'modifyend' };
+          const event: ModifyEvent = { interactionId: id, features, type: 'modifyend' };
           this.stateService.emitModify(event);
         });
       });
