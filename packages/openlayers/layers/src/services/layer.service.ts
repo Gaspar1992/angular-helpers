@@ -2,11 +2,12 @@
 
 import { inject, Injectable, signal, computed } from '@angular/core';
 import VectorLayer from 'ol/layer/Vector';
+import HeatmapLayer from 'ol/layer/Heatmap';
 import TileLayer from 'ol/layer/Tile';
 import ImageLayer from 'ol/layer/Image';
 import VectorSource from 'ol/source/Vector';
 import OLFeature from 'ol/Feature';
-import { Circle as CircleGeom, LineString, Point, Polygon } from 'ol/geom';
+import { Circle as CircleGeom, LineString, Point, Polygon, type Geometry } from 'ol/geom';
 import { fromLonLat } from 'ol/proj';
 import { getCenter } from 'ol/extent';
 import { Style, Circle as CircleStyle, Fill, Icon, Stroke } from 'ol/style';
@@ -26,6 +27,7 @@ import type {
   VectorLayerConfig,
   TileLayerConfig,
   ImageLayerConfig,
+  HeatmapLayerConfig,
 } from '../models/layer.types';
 
 /**
@@ -37,7 +39,7 @@ const STYLE_PROP = '__angular_helpers_style__';
 
 export interface LayerInfo {
   id: string;
-  type: 'vector' | 'tile' | 'image';
+  type: 'vector' | 'tile' | 'image' | 'heatmap';
   visible: boolean;
   opacity: number;
   zIndex: number;
@@ -87,6 +89,8 @@ export class OlLayerService {
     switch (config.type) {
       case 'vector':
         return this.createVectorLayer(config as VectorLayerConfig, map);
+      case 'heatmap':
+        return this.createHeatmapLayer(config as HeatmapLayerConfig, map);
       case 'tile':
         return this.createTileLayer(config as TileLayerConfig, map);
       case 'image':
@@ -267,11 +271,14 @@ export class OlLayerService {
   private updateLayerState(): void {
     const layers: LayerInfo[] = [];
     this.layerCache.forEach((layer, id) => {
-      const type =
-        layer instanceof VectorLayer ? 'vector' : layer instanceof TileLayer ? 'tile' : 'image';
+      let type = 'vector';
+      if (layer instanceof HeatmapLayer) type = 'heatmap';
+      else if (layer instanceof TileLayer) type = 'tile';
+      else if (layer instanceof ImageLayer) type = 'image';
+
       layers.push({
         id,
-        type: type as 'vector' | 'tile' | 'image',
+        type: type as 'vector' | 'tile' | 'image' | 'heatmap',
         visible: layer.getVisible(),
         opacity: layer.getOpacity(),
         zIndex: layer.getZIndex() ?? 0,
@@ -382,10 +389,11 @@ export class OlLayerService {
 
       // Single feature: get the original feature from the cluster and use its style
       const originalFeatures = olFeature.get('features') as
-        | Array<{ get(key: string): unknown }>
+        | Array<{ get(key: string): unknown; getGeometry?(): Geometry | undefined }>
         | undefined;
       const originalFeature = originalFeatures?.[0];
       if (originalFeature) {
+        let styleToUse: Style | undefined;
         const abstractStyle = originalFeature.get(STYLE_PROP) as AbstractStyle | undefined;
         if (abstractStyle) {
           const style = new Style();
@@ -406,8 +414,21 @@ export class OlLayerService {
             style.setStroke(new Stroke({ color: stroke.color, width: stroke.width }));
           }
           // If we mapped at least one property, return it, otherwise fallback
-          if (icon?.src || fill || stroke) return style;
+          if (icon?.src || fill || stroke) {
+            styleToUse = style;
+          }
         }
+
+        if (!styleToUse) {
+          styleToUse = defaultStyle.clone();
+        }
+
+        const origGeom = originalFeature.getGeometry?.();
+        if (origGeom) {
+          styleToUse.setGeometry(origGeom);
+        }
+
+        return styleToUse;
       }
       return defaultStyle;
     };
@@ -454,6 +475,61 @@ export class OlLayerService {
     return { id: config.id };
   }
 
+  private createHeatmapLayer(config: HeatmapLayerConfig, map: OLMap): { id: string } {
+    const vectorSource = new VectorSource();
+
+    if (config.features && config.features.length > 0) {
+      const olFeatures = config.features.map((feature) => {
+        const geom = feature.geometry;
+        let geometry;
+
+        if (!geom.coordinates) {
+          geometry = new Point([0, 0]);
+        } else if (geom.type === 'Point') {
+          const coords = geom.coordinates as [number, number];
+          geometry = new Point(fromLonLat(coords));
+        } else if (geom.type === 'LineString') {
+          const coords = (geom.coordinates as [number, number][]).map((c) => fromLonLat(c));
+          geometry = new LineString(coords);
+        } else if (geom.type === 'Polygon') {
+          const rings = (geom.coordinates as [number, number][][]).map((ring) =>
+            ring.map((c) => fromLonLat(c)),
+          );
+          geometry = new Polygon(rings);
+        } else {
+          geometry = new Point([0, 0]);
+        }
+
+        const olFeature = new OLFeature({
+          geometry,
+          ...feature.properties,
+        });
+        olFeature.setId(feature.id);
+        return olFeature;
+      });
+
+      vectorSource.addFeatures(olFeatures);
+    }
+
+    const layer = new HeatmapLayer({
+      source: vectorSource,
+      visible: config.visible ?? true,
+      opacity: config.opacity ?? 1,
+      zIndex: config.zIndex,
+      ...(config.blur !== undefined && { blur: config.blur }),
+      ...(config.radius !== undefined && { radius: config.radius }),
+      ...(config.weight !== undefined && {
+        weight: config.weight as string | ((feature: OLFeature) => number),
+      }),
+    });
+
+    layer.set('id', config.id);
+    map.addLayer(layer);
+    this.layerCache.set(config.id, layer);
+    this.updateLayerState();
+    return { id: config.id };
+  }
+
   private createTileLayer(config: TileLayerConfig, map: OLMap): { id: string } {
     let source;
     switch (config.source.type) {
@@ -466,7 +542,7 @@ export class OlLayerService {
       case 'wms':
         source = new TileWMS({
           url: config.source.url,
-          params: config.source.params,
+          params: config.source.params ?? {},
           attributions: config.source.attributions,
         });
         break;

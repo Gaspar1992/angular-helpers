@@ -7,7 +7,7 @@ test.describe('OpenLayers Demo', () => {
     // Verify page title and header
     await expect(page.getByRole('heading', { level: 1, name: /OpenLayers Demo/i })).toBeVisible();
     await expect(
-      page.getByText(/Interactive map with @angular-helpers\/openlayers/i),
+      page.getByText(/High-performance interactive maps with Angular Signals/i),
     ).toBeVisible();
 
     // Verify map container is present (this requires WebGL)
@@ -50,11 +50,11 @@ test.describe('OpenLayers Demo', () => {
     // Wait for data to load
     await page.waitForTimeout(2000);
 
-    // Verify info panel sections are visible
-    await expect(page.getByText(/View State/i)).toBeVisible();
-    await expect(page.getByText(/Center:/i)).toBeVisible();
-    await expect(page.getByText(/Zoom:/i)).toBeVisible();
-    await expect(page.getByText(/Last Click/i)).toBeVisible();
+    // Verify telemetry panel sections are visible
+    await expect(page.getByText(/Telemetry/i)).toBeVisible();
+    await expect(page.getByText(/Center Coord/i)).toBeVisible();
+    await expect(page.getByText(/Zoom Level/i)).toBeVisible();
+    await expect(page.getByText(/Pointer Data/i)).toBeVisible();
   });
 
   test('city markers are displayed on the map', async ({ page }) => {

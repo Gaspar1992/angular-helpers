@@ -39,7 +39,7 @@ const buildService = () => {
 
   // Sub-services as spies that simulate adding the managed interaction to state
   const selectService = {
-    createSelectInteraction: vi.fn((id: string, config: any = {}) => {
+    createSelectInteraction: vi.fn((id: string, config: Record<string, unknown> = {}) => {
       const cleanup = vi.fn();
       const managed: ManagedInteraction = {
         id,
@@ -54,7 +54,7 @@ const buildService = () => {
     }),
   };
   const drawService = {
-    createDrawInteraction: vi.fn((id: string, config: any = {}) => {
+    createDrawInteraction: vi.fn((id: string, config: Record<string, unknown> = {}) => {
       const managed: ManagedInteraction = {
         id,
         type: 'draw',
@@ -67,7 +67,7 @@ const buildService = () => {
     }),
   };
   const modifyService = {
-    createModifyInteraction: vi.fn((id: string, config: any = {}) => {
+    createModifyInteraction: vi.fn((id: string, config: Record<string, unknown> = {}) => {
       const managed: ManagedInteraction = {
         id,
         type: 'modify',

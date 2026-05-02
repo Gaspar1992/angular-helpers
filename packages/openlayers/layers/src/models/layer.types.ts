@@ -3,7 +3,7 @@
 import type { Extent, Feature, Layer, Style } from '@angular-helpers/openlayers/core';
 
 export interface LayerConfig extends Layer {
-  type: 'vector' | 'tile' | 'image';
+  type: 'vector' | 'tile' | 'image' | 'heatmap';
   extent?: Extent;
   minResolution?: number;
   maxResolution?: number;
@@ -27,6 +27,14 @@ export interface VectorLayerConfig extends LayerConfig {
   features?: Feature[];
   style?: Style | ((feature: Feature) => Style);
   cluster?: ClusterConfig;
+}
+
+export interface HeatmapLayerConfig extends LayerConfig {
+  type: 'heatmap';
+  features?: Feature[];
+  weight?: string | ((feature: Feature) => number);
+  blur?: number;
+  radius?: number;
 }
 
 export interface TileLayerConfig extends LayerConfig {

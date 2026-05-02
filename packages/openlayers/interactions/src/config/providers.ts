@@ -6,6 +6,7 @@ import { InteractionStateService } from '../services/interaction-state.service';
 import { SelectInteractionService } from '../services/select-interaction.service';
 import { DrawInteractionService } from '../services/draw-interaction.service';
 import { ModifyInteractionService } from '../services/modify-interaction.service';
+import { MeasurementInteractionService } from '../services/measurement-interaction.service';
 import type { SelectConfig, DrawConfig, ModifyConfig } from '../models/interaction.types';
 
 /**
@@ -23,6 +24,7 @@ export function withInteractions(): OlFeature<'interactions'> {
       SelectInteractionService,
       DrawInteractionService,
       ModifyInteractionService,
+      MeasurementInteractionService,
     ],
   };
 }
@@ -83,5 +85,19 @@ export function withModifyInteraction(id: string, config: ModifyConfig = {}): Pr
       return { id, config };
     },
     deps: [OlInteractionService],
+  };
+}
+
+/**
+ * Enable measurement interaction when providing the interactions feature.
+ * @returns Provider function that enables measurement interaction
+ */
+export function withMeasurementInteraction(): Provider {
+  return {
+    provide: 'MEASUREMENT_INTERACTION_CONFIG',
+    useFactory: (service: MeasurementInteractionService) => {
+      return service;
+    },
+    deps: [MeasurementInteractionService],
   };
 }

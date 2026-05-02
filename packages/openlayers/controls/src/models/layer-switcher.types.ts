@@ -9,7 +9,7 @@ export interface LayerSwitcherItem {
   /** Display name for the layer */
   name: string;
   /** Type of the layer */
-  type: 'vector' | 'tile' | 'image';
+  type: 'vector' | 'tile' | 'image' | 'heatmap';
   /** Whether the layer is currently visible */
   visible: boolean;
   /** Opacity of the layer (0-1) */
