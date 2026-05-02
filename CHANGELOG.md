@@ -1,3 +1,10 @@
+# [1.38.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.37.0...v1.38.0) (2026-05-02)
+
+
+### Features
+
+* **openlayers:** advanced enterprise features (heatmap, geolocation, measurement) ([#110](https://github.com/Gaspar1992/angular-helpers/issues/110)) ([807deb2](https://github.com/Gaspar1992/angular-helpers/commit/807deb2b974ad7cc10ccef73aaf46cc466e15b1c))
+
 # [1.35.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.34.0...v1.35.0) (2026-04-27)
 
 
