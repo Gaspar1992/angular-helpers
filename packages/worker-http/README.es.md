@@ -110,7 +110,8 @@ transport.terminate();
 
 - Pool round-robin (`maxInstances`) para manejar requests en paralelo
 - Instanciación lazy del worker — no se crea ningún worker hasta el primer request
-- **Cancelación que realmente aborta `fetch()`** — al desubscribirse se postea
+- **Soporte para SharedWorker** — configurá `mode: 'shared'` para compartir instancias entre múltiples pestañas, reduciendo el consumo de memoria y compartiendo el estado de los interceptores (como la caché).
+- **Cancelación que realmente aborta `fetch()`** — al desuscribirse se postea
   un mensaje `cancel`; el message loop del worker threadea un `AbortSignal`
   hasta `fetch()` para que la request HTTP en vuelo se corte de verdad
 - **Timeout por request** (default `30_000` ms) via `requestTimeout`; al

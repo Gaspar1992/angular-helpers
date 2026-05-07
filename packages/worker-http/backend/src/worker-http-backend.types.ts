@@ -31,6 +31,19 @@ export interface WorkerConfig {
   workerUrl: URL;
   /** Maximum worker instances in the pool (default: 1) */
   maxInstances?: number;
+  /**
+   * Execution mode for the worker.
+   *
+   * - `'worker'` (default) — Dedicated Web Worker. Each tab has its own worker instance.
+   * - `'shared'` — Shared Web Worker. Multiple tabs share the same worker instances.
+   */
+  mode?: 'worker' | 'shared';
+  /**
+   * Name for the SharedWorker. Required when `mode: 'shared'` to ensure multiple
+   * tabs connect to the same worker instance. If `maxInstances > 1`, names are
+   * suffixed with the instance index (e.g. `api-1`, `api-2`).
+   */
+  name?: string;
 }
 
 /**

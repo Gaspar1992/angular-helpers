@@ -110,6 +110,7 @@ transport.terminate();
 
 - Round-robin pool (`maxInstances`) for parallel request handling
 - Lazy worker instantiation — no worker created until first request
+- **Support for SharedWorker** — set `mode: 'shared'` to share worker instances across multiple tabs, reducing memory usage and sharing interceptor state (like cache).
 - **Cancellation that actually aborts `fetch()`** — unsubscribing posts a
   cancel message; the worker-side message loop threads an `AbortSignal` all
   the way into `fetch()` so the in-flight HTTP request is truly aborted

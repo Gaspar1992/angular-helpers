@@ -4,6 +4,8 @@ export {
   registerInterceptor,
   resolveSpec,
 } from './configurable-pipeline';
+export { attachRequestLoop } from './worker-message-loop';
+export { attachPortLoop } from './worker-port-loop';
 export { retryInterceptor } from './retry-interceptor';
 export { cacheInterceptor } from './cache-interceptor';
 export { hmacSigningInterceptor } from './hmac-signing-interceptor';

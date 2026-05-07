@@ -40,6 +40,14 @@ class FakeWorker {
     });
   }
 
+  start(): void {
+    // SharedWorker port start
+  }
+
+  close(): void {
+    this.terminated = true;
+  }
+
   terminate(): void {
     this.terminated = true;
   }
@@ -82,24 +90,132 @@ class FakeWorker {
   }
 }
 
+class FakeSharedWorker {
+  static instances: FakeSharedWorker[] = [];
+  readonly port: FakeWorker;
+
+  constructor(
+    public readonly scriptUrl: string | URL,
+    public readonly options?: SharedWorkerOptions,
+  ) {
+    this.port = new FakeWorker(scriptUrl);
+    FakeSharedWorker.instances.push(this);
+  }
+}
+
 function makeFactory(): () => Worker {
   return () => new FakeWorker('/fake') as unknown as Worker;
+}
+
+function makeSharedFactory(): () => SharedWorker {
+  return () => new FakeSharedWorker('/fake') as unknown as SharedWorker;
 }
 
 describe('createWorkerTransport', () => {
   beforeEach(() => {
     FakeWorker.instances = [];
+    FakeSharedWorker.instances = [];
     // Ensure a deterministic hardwareConcurrency so the pool size cap is not
     // accidentally smaller than the requested maxInstances.
     Object.defineProperty(globalThis.navigator, 'hardwareConcurrency', {
       value: 4,
       configurable: true,
     });
+
+    // Mock Worker and SharedWorker globals
+    (globalThis as any).Worker = FakeWorker;
+    (globalThis as any).SharedWorker = FakeSharedWorker;
   });
 
   afterEach(() => {
+    delete (globalThis as any).Worker;
+    delete (globalThis as any).SharedWorker;
     vi.useRealTimers();
     FakeWorker.instances.length = 0;
+    FakeSharedWorker.instances.length = 0;
+  });
+
+  describe('SharedWorker mode', () => {
+    it('uses SharedWorker constructor when mode is "shared"', async () => {
+      const transport = createWorkerTransport({
+        workerUrl: '/shared.worker.js',
+        mode: 'shared',
+        sharedWorkerName: 'test-shared',
+      });
+
+      const response$ = transport.execute('test');
+      const promise = firstValueFrom(response$);
+
+      expect(FakeSharedWorker.instances).toHaveLength(1);
+      const sw = FakeSharedWorker.instances[0];
+      expect(sw.options?.name).toBe('test-shared');
+      expect(sw.port.postedMessages).toHaveLength(1);
+
+      sw.port.respond(sw.port.lastRequest!.requestId, 'shared-ok');
+      const result = await promise;
+      expect(result).toBe('shared-ok');
+    });
+
+    it('creates multiple named SharedWorkers when maxInstances > 1', async () => {
+      const transport = createWorkerTransport({
+        workerUrl: '/shared.worker.js',
+        mode: 'shared',
+        sharedWorkerName: 'api',
+        maxInstances: 2,
+      });
+
+      // Request 1 -> api-0
+      const res1$ = transport.execute('req1');
+      firstValueFrom(res1$);
+      expect(FakeSharedWorker.instances).toHaveLength(1);
+      expect(FakeSharedWorker.instances[0].options?.name).toBe('api-0');
+
+      // Request 2 -> api-1
+      const res2$ = transport.execute('req2');
+      firstValueFrom(res2$);
+      expect(FakeSharedWorker.instances).toHaveLength(2);
+      expect(FakeSharedWorker.instances[1].options?.name).toBe('api-1');
+
+      // Request 3 -> round-robin back to api-0
+      transport.execute('req3');
+      expect(FakeSharedWorker.instances).toHaveLength(2);
+    });
+
+    it('uses workerFactory if provided', async () => {
+      const transport = createWorkerTransport({
+        workerFactory: makeSharedFactory(),
+        mode: 'shared',
+      });
+
+      transport.execute('test').subscribe();
+      expect(FakeSharedWorker.instances).toHaveLength(1);
+    });
+
+    it('terminates SharedWorker ports by calling close()', () => {
+      const transport = createWorkerTransport({
+        workerUrl: '/shared.worker.js',
+        mode: 'shared',
+      });
+
+      transport.execute('test').subscribe();
+      const sw = FakeSharedWorker.instances[0];
+      const closeSpy = vi.spyOn(sw.port, 'close');
+
+      transport.terminate();
+      expect(closeSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('Dedicated Worker mode (default)', () => {
+    it('uses Worker constructor (standard behavior)', () => {
+      const transport = createWorkerTransport({
+        workerUrl: '/worker.js',
+      });
+
+      transport.execute('test').subscribe();
+      expect(FakeWorker.instances).toHaveLength(1);
+      expect(FakeSharedWorker.instances).toHaveLength(0);
+    });
   });
 
   it('creates no worker until the first execute() call (lazy)', () => {
@@ -210,7 +326,7 @@ describe('createWorkerTransport', () => {
     await expect(promise).rejects.toThrow('handler crashed');
   });
 
-  it('terminate() stops all workers and rejects subsequent execute() calls', async () => {
+  it('terminate() stops all workers and releases resources', async () => {
     const transport = createWorkerTransport({
       workerFactory: makeFactory(),
       maxInstances: 2,
