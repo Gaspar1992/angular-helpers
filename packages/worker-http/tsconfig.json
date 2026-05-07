@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/worker-http",
+    "declaration": true,
+    "declarationMap": true,
+    "lib": ["ES2022", "dom", "webworker"]
+  },
+  "include": [
+    "src/**/*",
+    "backend/**/*",
+    "crypto/**/*",
+    "esbuild-plugin/**/*",
+    "interceptors/**/*",
+    "serializer/**/*",
+    "streams-polyfill/**/*",
+    "transport/**/*"
+  ],
+  "exclude": ["**/*.spec.ts", "dist", "schematics"]
+}

@@ -3,10 +3,7 @@ import type { RequestHandler } from './worker-fetch-executor';
 /**
  * Common loop logic for handling requests/cancellation on a port.
  */
-export function attachPortLoop(
-  port: MessagePort | DedicatedWorkerGlobalScope,
-  chain: RequestHandler,
-): () => void {
+export function attachPortLoop(port: MessagePort | any, chain: RequestHandler): () => void {
   const controllers = new Map<string, AbortController>();
 
   const messageHandler = async (event: MessageEvent) => {
