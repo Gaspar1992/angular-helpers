@@ -163,7 +163,17 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
     const specs = this.resolveSpecsFor(config.id);
 
     const transport = createWorkerTransport<SerializableRequest, SerializableResponse>({
-      workerFactory: () => new Worker(config.workerUrl, { type: 'module' }),
+      workerFactory: () => {
+        if (config.mode === 'shared') {
+          return new SharedWorker(config.workerUrl, {
+            type: 'module',
+            name: config.name ?? config.id,
+          });
+        }
+        return new Worker(config.workerUrl, { type: 'module' });
+      },
+      mode: config.mode,
+      sharedWorkerName: config.name ?? config.id,
       maxInstances: config.maxInstances ?? 1,
       initMessage: specs.length > 0 ? { type: 'init-interceptors', specs } : undefined,
       streamsPolyfill: this.streamsPolyfill,

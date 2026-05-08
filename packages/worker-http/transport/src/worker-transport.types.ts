@@ -9,16 +9,16 @@ import type { Observable } from 'rxjs';
  */
 export interface WorkerTransportConfig {
   /**
-   * Factory function that creates a new Worker instance.
-   * The `new Worker(new URL(...))` call MUST be in your app code (not a library)
-   * for Angular CLI to bundle the worker correctly.
+   * Factory function that creates a new Worker or SharedWorker instance.
+   * The `new Worker(...)` or `new SharedWorker(...)` call MUST be in your app code
+   * (not a library) for Angular CLI to bundle the worker correctly.
    *
    * @example
    * ```typescript
    * workerFactory: () => new Worker(new URL('./echo.worker.ts', import.meta.url), { type: 'module' })
    * ```
    */
-  workerFactory?: () => Worker;
+  workerFactory?: () => Worker | SharedWorker;
 
   /**
    * URL to a pre-transpiled worker file.
@@ -33,6 +33,21 @@ export interface WorkerTransportConfig {
    * ```
    */
   workerUrl?: string | URL;
+
+  /**
+   * Execution mode for the worker.
+   *
+   * - `'worker'` (default) — Dedicated Web Worker. Each tab has its own worker instance.
+   * - `'shared'` — Shared Web Worker. Multiple tabs share the same worker instances.
+   */
+  mode?: 'worker' | 'shared';
+
+  /**
+   * Name for the SharedWorker. Required when `mode: 'shared'` to ensure multiple
+   * tabs connect to the same worker instance. If `maxInstances > 1`, names are
+   * suffixed with the instance index (e.g. `api-1`, `api-2`).
+   */
+  sharedWorkerName?: string;
 
   /** Maximum number of worker instances in the pool (default: 1) */
   maxInstances?: number;
