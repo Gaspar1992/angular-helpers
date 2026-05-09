@@ -142,4 +142,17 @@ export class SensitiveClipboardService {
       return 'read-denied';
     }
   }
+
+  /**
+   * Forcefully clears the clipboard unconditionally.
+   */
+  async clear(): Promise<void> {
+    if (!this.isSupported()) return;
+    this.cancelPendingClear();
+    try {
+      await navigator.clipboard.writeText('');
+    } catch {
+      // ignore
+    }
+  }
 }

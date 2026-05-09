@@ -27,6 +27,8 @@ import { MutationObserverService } from './services/mutation-observer.service';
 import { PerformanceObserverService } from './services/performance-observer.service';
 import { WebAudioService } from './services/web-audio.service';
 import { GamepadService } from './services/gamepad.service';
+import { EyeDropperService } from './services/eye-dropper.service';
+import { IdleDetectorService } from './services/idle-detector.service';
 
 export { providePermissions } from './providers/permissions';
 export { provideCamera } from './providers/camera';
@@ -59,6 +61,8 @@ export { provideGamepad } from './providers/gamepad';
 export { provideWebLocks } from './providers/web-locks';
 export { provideStorageManager } from './providers/storage-manager';
 export { provideCompression } from './providers/compression';
+export { provideEyeDropper } from './providers/eye-dropper';
+export { provideIdleDetector } from './providers/idle-detector';
 export {
   provideMediaApis,
   provideLocationApis,
@@ -108,6 +112,8 @@ export interface BrowserWebApisConfig extends BrowserWebApisCompositionConfig {
   enablePerformanceObserver?: boolean;
   enableWebAudio?: boolean;
   enableGamepad?: boolean;
+  enableEyeDropper?: boolean;
+  enableIdleDetector?: boolean;
 }
 
 export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
@@ -138,6 +144,8 @@ export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
   enablePerformanceObserver: false,
   enableWebAudio: false,
   enableGamepad: false,
+  enableEyeDropper: false,
+  enableIdleDetector: false,
 };
 
 let legacyFlagsDeprecationLogged = false;
@@ -203,6 +211,8 @@ export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): Enviro
     [mergedConfig.enablePerformanceObserver, PerformanceObserverService],
     [mergedConfig.enableWebAudio, WebAudioService],
     [mergedConfig.enableGamepad, GamepadService],
+    [mergedConfig.enableEyeDropper, EyeDropperService],
+    [mergedConfig.enableIdleDetector, IdleDetectorService],
   ];
 
   for (const [enabled, provider] of conditionalProviders) {

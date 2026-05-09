@@ -119,8 +119,11 @@ export async function createAutoSerializer(
     deserialize(payload: SerializedPayload): unknown {
       let resolved = payload;
 
-      if (payload.data instanceof ArrayBuffer) {
-        const str = new TextDecoder().decode(payload.data);
+      if (
+        payload.data instanceof ArrayBuffer ||
+        Object.prototype.toString.call(payload.data) === '[object ArrayBuffer]'
+      ) {
+        const str = new TextDecoder().decode(payload.data as ArrayBuffer);
         resolved = { ...payload, data: str };
       }
 

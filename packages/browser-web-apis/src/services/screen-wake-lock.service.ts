@@ -14,6 +14,7 @@ export interface WakeLockStatus {
 @Injectable()
 export class ScreenWakeLockService extends BrowserApiBaseService {
   private sentinel: WakeLockSentinel | null = null;
+  private releaseRegistered = false;
 
   protected override getApiName(): string {
     return 'screen-wake-lock';
@@ -43,7 +44,11 @@ export class ScreenWakeLockService extends BrowserApiBaseService {
         this.sentinel = null;
       });
 
-      this.destroyRef.onDestroy(() => this.release());
+      // Register the destroy cleanup only once across multiple request() calls.
+      if (!this.releaseRegistered) {
+        this.releaseRegistered = true;
+        this.destroyRef.onDestroy(() => this.release());
+      }
 
       return { active: true, type, released: false };
     } catch (error) {
@@ -82,11 +87,7 @@ export class ScreenWakeLockService extends BrowserApiBaseService {
       document.addEventListener('visibilitychange', handleVisibilityChange);
       emit();
 
-      const cleanup = () =>
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
-      this.destroyRef.onDestroy(cleanup);
-
-      return cleanup;
+      return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
     });
   }
 }

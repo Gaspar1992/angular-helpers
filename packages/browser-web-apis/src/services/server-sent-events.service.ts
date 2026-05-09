@@ -77,13 +77,9 @@ export class ServerSentEventsService extends ConnectionRegistryBaseService<Event
         }
       }
 
-      const cleanup = () => {
+      return () => {
         this.disconnect(url);
       };
-
-      this.destroyRef.onDestroy(cleanup);
-
-      return cleanup;
     });
   }
 

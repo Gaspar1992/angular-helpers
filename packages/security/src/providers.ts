@@ -21,6 +21,8 @@ import {
   RATE_LIMITER_CONFIG,
 } from './services/rate-limiter.service';
 import { CsrfService, CsrfConfig, CSRF_CONFIG } from './services/csrf.service';
+import { SessionIdleService } from './services/session-idle.service';
+import { SecureMessageService } from './services/secure-message.service';
 
 export interface SecurityConfig {
   enableRegexSecurity?: boolean;
@@ -33,6 +35,8 @@ export interface SecurityConfig {
   enableHibp?: boolean;
   enableRateLimiter?: boolean;
   enableCsrf?: boolean;
+  enableSessionIdle?: boolean;
+  enableSecureMessage?: boolean;
   defaultTimeout?: number;
   safeMode?: boolean;
 }
@@ -48,6 +52,8 @@ export const defaultSecurityConfig: SecurityConfig = {
   enableHibp: false,
   enableRateLimiter: false,
   enableCsrf: false,
+  enableSessionIdle: false,
+  enableSecureMessage: false,
   defaultTimeout: 5000,
   safeMode: false,
 };
@@ -70,6 +76,8 @@ export function provideSecurity(config: SecurityConfig = {}): EnvironmentProvide
   if (mergedConfig.enableCsrf) {
     providers.push(WebCryptoService, CsrfService);
   }
+  if (mergedConfig.enableSessionIdle) providers.push(SessionIdleService);
+  if (mergedConfig.enableSecureMessage) providers.push(SecureMessageService);
 
   return makeEnvironmentProviders(providers);
 }
@@ -129,4 +137,12 @@ export function provideCsrf(config?: CsrfConfig): EnvironmentProviders {
     CsrfService,
     ...(config ? [{ provide: CSRF_CONFIG, useValue: config }] : []),
   ]);
+}
+
+export function provideSessionIdle(): EnvironmentProviders {
+  return makeEnvironmentProviders([SessionIdleService]);
+}
+
+export function provideSecureMessage(): EnvironmentProviders {
+  return makeEnvironmentProviders([WebCryptoService, SecureMessageService]);
 }

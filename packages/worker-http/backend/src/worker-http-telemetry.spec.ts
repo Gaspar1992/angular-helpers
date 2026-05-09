@@ -56,17 +56,31 @@ class FakeWorker {
     this.listeners.get(type)?.delete(listener);
   }
 
-  postMessage(message: FakePostedMessage): void {
-    if (message.type !== 'request') return;
+  postMessage(data: any): void {
+    if (data.type === 'batch') {
+      for (const msg of data.messages || []) {
+        if (msg.type === 'request') this.processRequest(msg);
+      }
+    } else if (data.type === 'request') {
+      this.processRequest(data);
+    }
+  }
+
+  private processRequest(message: FakePostedMessage): void {
     queueMicrotask(() => {
       const payload = message.payload as { url?: string } | undefined;
       if (FakeWorker.nextResponse.fail) {
         for (const listener of this.listeners.get('message') ?? []) {
           listener({
             data: {
-              type: 'error',
-              requestId: message.requestId,
-              error: { message: 'boom' },
+              type: 'batch-response',
+              responses: [
+                {
+                  type: 'error',
+                  requestId: message.requestId,
+                  error: { message: 'boom' },
+                },
+              ],
             },
           });
         }
@@ -75,15 +89,20 @@ class FakeWorker {
       for (const listener of this.listeners.get('message') ?? []) {
         listener({
           data: {
-            type: 'response',
-            requestId: message.requestId,
-            result: {
-              status: FakeWorker.nextResponse.status ?? 200,
-              statusText: 'OK',
-              headers: { 'content-type': ['application/json'] },
-              body: FakeWorker.nextResponse.body ?? { ok: true },
-              url: payload?.url ?? '',
-            },
+            type: 'batch-response',
+            responses: [
+              {
+                type: 'response',
+                requestId: message.requestId,
+                result: {
+                  status: FakeWorker.nextResponse.status ?? 200,
+                  statusText: 'OK',
+                  headers: { 'content-type': ['application/json'] },
+                  body: FakeWorker.nextResponse.body ?? { ok: true },
+                  url: payload?.url ?? '',
+                },
+              },
+            ],
           },
         });
       }

@@ -11,6 +11,8 @@ import type {
   WorkerTransportConfig,
   WorkerErrorResponse,
   WorkerResponse,
+  WorkerMessage,
+  WorkerBatchResponse,
 } from './worker-transport.types';
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
@@ -24,6 +26,45 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
   const instances: TransportPort[] = [];
   let roundRobinIndex = 0;
   let terminated = false;
+
+  const batchBuffer = new Map<TransportPort, Omit<WorkerMessage, 'transferables'>[]>();
+  const batchTransferables = new Map<TransportPort, Transferable[]>();
+  let flushScheduled = false;
+
+  function scheduleFlush() {
+    if (flushScheduled) return;
+    flushScheduled = true;
+    queueMicrotask(() => {
+      flushScheduled = false;
+
+      for (const [instance, messages] of batchBuffer.entries()) {
+        const transferables = batchTransferables.get(instance) || [];
+        instance.postMessage({ type: 'batch', messages }, transferables);
+      }
+
+      batchBuffer.clear();
+      batchTransferables.clear();
+    });
+  }
+
+  function dispatchToWorker(
+    instance: TransportPort,
+    msg: Omit<WorkerMessage, 'transferables'>,
+    transferables?: Transferable[],
+  ) {
+    if (!batchBuffer.has(instance)) {
+      batchBuffer.set(instance, []);
+    }
+    batchBuffer.get(instance)!.push(msg);
+
+    if (transferables?.length) {
+      if (!batchTransferables.has(instance)) {
+        batchTransferables.set(instance, []);
+      }
+      batchTransferables.get(instance)!.push(...transferables);
+    }
+    scheduleFlush();
+  }
 
   const mode = config.mode ?? 'worker';
   const sharedWorkerName = config.sharedWorkerName ?? 'worker-http';
@@ -120,21 +161,29 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
         }
       };
 
-      const messageHandler = (
-        event: MessageEvent<WorkerResponse<TResponse> | WorkerErrorResponse>,
-      ) => {
-        const data = event.data;
+      const handleResponse = (data: WorkerResponse<TResponse> | WorkerErrorResponse) => {
         if (data.requestId !== requestId) return;
         if (settled) return;
         settled = true;
         cleanup();
 
         if (data.type === 'error') {
-          const err = (data as WorkerErrorResponse).error;
-          subscriber.error(new Error(err.message));
+          subscriber.error(new Error(data.error.message));
         } else {
-          subscriber.next((data as WorkerResponse<TResponse>).result);
+          subscriber.next(data.result);
           subscriber.complete();
+        }
+      };
+
+      const messageHandler = (
+        event: MessageEvent<WorkerResponse<TResponse> | WorkerErrorResponse | WorkerBatchResponse>,
+      ) => {
+        const data = event.data;
+        if (data.type === 'batch-response') {
+          const match = data.responses.find((r) => r.requestId === requestId);
+          if (match) handleResponse(match as any);
+        } else {
+          handleResponse(data as any);
         }
       };
 
@@ -150,9 +199,9 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
 
       if (transferDetection === 'auto') {
         const transferables = detectTransferables(request);
-        instance.postMessage({ type: 'request', requestId, payload: request }, transferables);
+        dispatchToWorker(instance, { type: 'request', requestId, payload: request }, transferables);
       } else {
-        instance.postMessage({ type: 'request', requestId, payload: request });
+        dispatchToWorker(instance, { type: 'request', requestId, payload: request });
       }
 
       if (effectiveTimeout > 0 && Number.isFinite(effectiveTimeout)) {
@@ -160,7 +209,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
           if (settled) return;
           settled = true;
           cleanup();
-          instance.postMessage({ type: 'cancel', requestId });
+          dispatchToWorker(instance, { type: 'cancel', requestId });
           subscriber.error(new WorkerHttpTimeoutError(effectiveTimeout));
         }, effectiveTimeout);
       }
@@ -171,7 +220,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
           settled = true;
           const reason = externalSignal.reason;
           cleanup();
-          instance.postMessage({ type: 'cancel', requestId });
+          dispatchToWorker(instance, { type: 'cancel', requestId });
           subscriber.error(new WorkerHttpAbortError(reason));
         };
         externalSignal.addEventListener('abort', abortListener, { once: true });
@@ -181,7 +230,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
         if (settled) return;
         settled = true;
         cleanup();
-        instance.postMessage({ type: 'cancel', requestId });
+        dispatchToWorker(instance, { type: 'cancel', requestId });
       };
     });
   }

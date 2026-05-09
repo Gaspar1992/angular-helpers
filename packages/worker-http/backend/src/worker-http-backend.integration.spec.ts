@@ -49,21 +49,35 @@ class FakeWorker {
     this.listeners.get(type)?.delete(listener);
   }
 
-  postMessage(message: FakePostedMessage): void {
-    if (message.type !== 'request') return;
+  postMessage(data: any): void {
+    if (data.type === 'batch') {
+      for (const msg of data.messages || []) {
+        if (msg.type === 'request') this.processRequest(msg);
+      }
+    } else if (data.type === 'request') {
+      this.processRequest(data);
+    }
+  }
+
+  private processRequest(message: FakePostedMessage): void {
     queueMicrotask(() => {
       const payload = message.payload as { url?: string } | undefined;
       const event = {
         data: {
-          type: 'response',
-          requestId: message.requestId,
-          result: {
-            status: 200,
-            statusText: 'OK',
-            headers: { 'content-type': ['application/json'] },
-            body: { from: 'worker', url: payload?.url },
-            url: payload?.url ?? '',
-          },
+          type: 'batch-response',
+          responses: [
+            {
+              type: 'response',
+              requestId: message.requestId,
+              result: {
+                status: 200,
+                statusText: 'OK',
+                headers: { 'content-type': ['application/json'] },
+                body: { from: 'worker', url: payload?.url },
+                url: payload?.url ?? '',
+              },
+            },
+          ],
         },
       };
       for (const listener of this.listeners.get('message') ?? []) {

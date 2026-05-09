@@ -17,6 +17,7 @@ export class WebAudioService extends BrowserApiBaseService {
   }
 
   private context: AudioContext | null = null;
+  private destroyRegistered = false;
 
   protected override getCapabilityId(): BrowserCapabilityId {
     return 'webAudio';
@@ -28,7 +29,10 @@ export class WebAudioService extends BrowserApiBaseService {
     }
     if (!this.context || this.context.state === 'closed') {
       this.context = new AudioContext();
-      this.destroyRef.onDestroy(() => this.close());
+      if (!this.destroyRegistered) {
+        this.destroyRegistered = true;
+        this.destroyRef.onDestroy(() => this.close());
+      }
     }
     return this.context;
   }

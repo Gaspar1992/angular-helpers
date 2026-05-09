@@ -76,6 +76,19 @@ Security package for Angular applications that prevents common attacks like ReDo
 - **Verified auto-clear**: reads back the clipboard before clearing to avoid clobbering unrelated content.
 - **Password-manager semantics**: default 15-second clear, configurable.
 
+### **Session Inactivity Monitor**
+
+- **NgZone-optimized**: DOM events tracked outside Angular change detection.
+- **Security interop**: Can automatically clear SecureStorage and SensitiveClipboard upon timeout.
+- **Warning states**: Configurable thresholds to warn users before expiration.
+
+### **Secure Cross-Window Messaging**
+
+- **HMAC-SHA-256 signatures**: Every message is signed; tampered payloads are discarded.
+- **Origin whitelist**: Messages from non-allowed origins are rejected before any crypto work.
+- **Anti-replay protection**: Envelope includes `timestamp + nonce`; messages older than 30s are discarded.
+- **SSR-safe**: No-op on the server — no `window` access.
+
 ### **Builder Pattern**
 
 - **Fluent API**: Intuitively build regular expressions.
@@ -567,6 +580,87 @@ export class ApiKeyPanel {
 
 The service reads the clipboard before clearing and skips the clear if the content no longer
 matches what was copied — so third-party copies by the user are never overwritten.
+
+### **SessionIdleService**
+
+```typescript
+import { SessionIdleService } from '@angular-helpers/security';
+
+export class AppComponent {
+  private sessionIdle = inject(SessionIdleService);
+
+  ngOnInit() {
+    this.sessionIdle.start({
+      timeoutMs: 15 * 60 * 1000, // 15 minutes
+      warningThresholdMs: 60 * 1000, // 1 minute warning
+      autoClearStorage: true,
+      autoClearClipboard: true,
+    });
+
+    // React to states
+    effect(() => {
+      if (this.sessionIdle.isWarning()) {
+        console.warn(`Session will expire in ${this.sessionIdle.timeRemaining()}ms`);
+      }
+    });
+
+    // React to timeout
+    this.sessionIdle.onTimeout.subscribe(() => {
+      this.authService.logout();
+    });
+  }
+}
+```
+
+The service tracks DOM events (`mousemove`, `keydown`, etc.) outside the Angular Zone to prevent change detection spam. It can automatically clear `SecureStorageService` and `SensitiveClipboardService` when the session times out.
+
+### **SecureMessageService**
+
+```typescript
+import { SecureMessageService, provideSecureMessage } from '@angular-helpers/security';
+
+// app.config.ts
+bootstrapApplication(AppComponent, {
+  providers: [provideSecureMessage()],
+});
+
+// parent-app.component.ts
+export class ParentComponent {
+  private channel = inject(SecureMessageService);
+
+  async ngOnInit() {
+    // 1. Generate a shared key (transport it to the iframe via a secure channel)
+    const key = await this.channel.generateChannelKey();
+
+    // 2. Configure: only accept messages from the iframe origin
+    this.channel.configure({
+      allowedOrigins: ['https://child-app.example.com'],
+      signingKey: key,
+    });
+
+    // 3. React to incoming messages
+    this.channel.messages$<{ type: string; payload: unknown }>().subscribe(({ data, origin }) => {
+      console.log('Verified message from', origin, data);
+    });
+
+    // 4. Or use the Signal for reactive UI
+    effect(() => {
+      const msg = this.channel.lastMessage()();
+      if (msg) console.log('Last message:', msg.data);
+    });
+  }
+
+  async sendToChild(iframe: HTMLIFrameElement) {
+    await this.channel.send(
+      iframe.contentWindow!,
+      { type: 'INIT', payload: { userId: 42 } },
+      'https://child-app.example.com', // targetOrigin — never '*'
+    );
+  }
+}
+```
+
+> **Key exchange**: `SecureMessageService` does not perform automatic key negotiation — transport the `CryptoKey` to the other context via a secure out-of-band channel (e.g., derive it from a shared secret using `WebCryptoService.generateHmacKey()` seeded by a passphrase). Once both sides share the key, all message integrity is handled automatically.
 
 ## 🔧 Advanced Configuration
 

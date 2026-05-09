@@ -109,6 +109,14 @@ export {
   type AudioAnalyserData,
 } from './services/web-audio.service';
 export { GamepadService, type GamepadState } from './services/gamepad.service';
+export { EyeDropperService, type EyeDropperResult } from './services/eye-dropper.service';
+export {
+  IdleDetectorService,
+  type IdleState,
+  type IdleDetectorOptions,
+  type UserIdleState,
+  type ScreenIdleState,
+} from './services/idle-detector.service';
 
 // New web platform services
 export { WebLocksService } from './services/web-locks.service';
@@ -172,6 +180,8 @@ export {
 } from './fns/inject-geolocation';
 export { injectBattery, type BatteryRef, type BatteryInfo } from './fns/inject-battery';
 export { injectWakeLock, type WakeLockRef } from './fns/inject-wake-lock';
+export { injectEyeDropper, type EyeDropperRef } from './fns/inject-eye-dropper';
+export { injectIdleDetector, type IdleDetectorRef } from './fns/inject-idle-detector';
 
 // Utils and Guards
 export * from './utils/browser-support.util';

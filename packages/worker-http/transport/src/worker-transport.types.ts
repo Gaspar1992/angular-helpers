@@ -107,6 +107,14 @@ export interface WorkerMessage<TPayload = unknown> {
 }
 
 /**
+ * Batched messages sent from main thread to worker.
+ */
+export interface WorkerBatchMessage {
+  type: 'batch';
+  messages: Omit<WorkerMessage, 'transferables'>[];
+}
+
+/**
  * Successful response from worker to main thread.
  */
 export interface WorkerResponse<TResult = unknown> {
@@ -114,6 +122,14 @@ export interface WorkerResponse<TResult = unknown> {
   requestId: string;
   result: TResult;
   transferables?: Transferable[];
+}
+
+/**
+ * Batched responses from worker to main thread.
+ */
+export interface WorkerBatchResponse {
+  type: 'batch-response';
+  responses: Array<Omit<WorkerResponse, 'transferables'> | WorkerErrorResponse>;
 }
 
 /**

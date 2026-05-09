@@ -33,6 +33,9 @@ export function injectWakeLock(): WakeLockRef {
   let disposed = false;
 
   const onRelease = (): void => {
+    if (sentinel) {
+      sentinel.removeEventListener('release', onRelease);
+    }
     if (!disposed) active.set(false);
     sentinel = null;
   };
@@ -69,8 +72,11 @@ export function injectWakeLock(): WakeLockRef {
 
   destroyRef.onDestroy(() => {
     disposed = true;
-    if (sentinel && !sentinel.released) {
-      void sentinel.release();
+    if (sentinel) {
+      sentinel.removeEventListener('release', onRelease);
+      if (!sentinel.released) {
+        void sentinel.release();
+      }
     }
     sentinel = null;
   });

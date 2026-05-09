@@ -6,8 +6,23 @@ import type { RequestHandler } from './worker-fetch-executor';
 export function attachPortLoop(port: MessagePort | any, chain: RequestHandler): () => void {
   const controllers = new Map<string, AbortController>();
 
-  const messageHandler = async (event: MessageEvent) => {
-    const { type, requestId, payload } = event.data ?? {};
+  let responseBuffer: any[] = [];
+  let flushScheduled = false;
+
+  function scheduleFlush() {
+    if (flushScheduled) return;
+    flushScheduled = true;
+    queueMicrotask(() => {
+      flushScheduled = false;
+      if (!responseBuffer.length) return;
+      const responses = responseBuffer;
+      responseBuffer = [];
+      port.postMessage({ type: 'batch-response', responses });
+    });
+  }
+
+  const processMessage = async (msg: any) => {
+    const { type, requestId, payload } = msg;
 
     if (type === 'cancel') {
       controllers.get(requestId)?.abort();
@@ -24,9 +39,10 @@ export function attachPortLoop(port: MessagePort | any, chain: RequestHandler): 
 
     try {
       const response = await chain(payload, controller.signal);
-      port.postMessage({ type: 'response', requestId, result: response });
+      responseBuffer.push({ type: 'response', requestId, result: response });
+      scheduleFlush();
     } catch (error: any) {
-      port.postMessage({
+      responseBuffer.push({
         type: 'error',
         requestId,
         error: {
@@ -35,8 +51,20 @@ export function attachPortLoop(port: MessagePort | any, chain: RequestHandler): 
           stack: error?.stack,
         },
       });
+      scheduleFlush();
     } finally {
       controllers.delete(requestId);
+    }
+  };
+
+  const messageHandler = (event: MessageEvent) => {
+    const data = event.data ?? {};
+    if (data.type === 'batch') {
+      for (const msg of data.messages || []) {
+        processMessage(msg).catch(console.error);
+      }
+    } else {
+      processMessage(data).catch(console.error);
     }
   };
 

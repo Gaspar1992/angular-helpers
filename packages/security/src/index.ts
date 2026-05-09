@@ -8,5 +8,7 @@ export * from './services/sensitive-clipboard.service';
 export * from './services/hibp.service';
 export * from './services/rate-limiter.service';
 export * from './services/csrf.service';
+export * from './services/session-idle.service';
+export * from './services/secure-message.service';
 export * from './providers';
 export * from './internal/validators-core';

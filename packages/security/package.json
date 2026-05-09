@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/security",
-  "version": "21.3.0",
+  "version": "21.4.1",
   "description": "Angular security helpers for preventing ReDoS and other security vulnerabilities",
   "keywords": [
     "angular",
@@ -16,7 +16,12 @@
     "xss",
     "sanitization",
     "password-strength",
-    "secure-storage"
+    "secure-storage",
+    "session-idle",
+    "inactivity",
+    "postmessage",
+    "iframe",
+    "secure-channel"
   ],
   "author": "Angular Helpers Team",
   "license": "MIT",

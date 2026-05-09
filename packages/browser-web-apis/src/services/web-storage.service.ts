@@ -39,36 +39,36 @@ export class WebStorageService extends BrowserApiBaseService {
   private readonly storageLogger = inject(BROWSER_API_LOGGER);
   private storageEvents = signal<StorageEvent | null>(null);
 
-  private readonly eventBus = {
-    emit: (event: StorageEvent) => this.storageEvents.set(event),
-    events$: toObservable(this.storageEvents).pipe(
-      filter((event): event is StorageEvent => event !== null),
-      distinctUntilChanged(
-        (a, b) =>
-          a.key === b.key &&
-          a.newValue === b.newValue &&
-          a.oldValue === b.oldValue &&
-          a.storageArea === b.storageArea,
-      ),
-    ),
+  private readonly eventBus: {
+    emit: (event: StorageEvent) => void;
+    events$: Observable<StorageEvent>;
   };
 
   /** Local storage namespace. */
-  readonly local: StorageNamespace = new StorageNamespaceImpl(
-    'localStorage',
-    this.eventBus,
-    this.storageLogger,
-  );
+  readonly local: StorageNamespace;
 
   /** Session storage namespace. */
-  readonly session: StorageNamespace = new StorageNamespaceImpl(
-    'sessionStorage',
-    this.eventBus,
-    this.storageLogger,
-  );
+  readonly session: StorageNamespace;
 
   constructor() {
     super();
+    this.eventBus = {
+      emit: (event: StorageEvent) => this.storageEvents.set(event),
+      events$: toObservable(this.storageEvents).pipe(
+        filter((event): event is StorageEvent => event !== null),
+        distinctUntilChanged(
+          (a, b) =>
+            a.key === b.key &&
+            a.newValue === b.newValue &&
+            a.oldValue === b.oldValue &&
+            a.storageArea === b.storageArea,
+        ),
+      ),
+    };
+
+    this.local = new StorageNamespaceImpl('localStorage', this.eventBus, this.storageLogger);
+    this.session = new StorageNamespaceImpl('sessionStorage', this.eventBus, this.storageLogger);
+
     this.setupCrossTabListener();
   }
 
