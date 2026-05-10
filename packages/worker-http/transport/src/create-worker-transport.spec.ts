@@ -81,9 +81,17 @@ class FakeWorker {
 
   get lastRequest(): { requestId: string } | undefined {
     for (let i = this.postedMessages.length - 1; i >= 0; i--) {
-      const payload = this.postedMessages[i].message as { type?: string; requestId?: string };
+      const payload = this.postedMessages[i].message as any;
       if (payload?.type === 'request' && payload.requestId) {
         return { requestId: payload.requestId };
+      }
+      if (payload?.type === 'batch' && Array.isArray(payload.messages)) {
+        for (let j = payload.messages.length - 1; j >= 0; j--) {
+          const inner = payload.messages[j];
+          if (inner?.type === 'request' && inner.requestId) {
+            return { requestId: inner.requestId };
+          }
+        }
       }
     }
     return undefined;
@@ -112,7 +120,12 @@ function makeSharedFactory(): () => SharedWorker {
 }
 
 describe('createWorkerTransport', () => {
+  let originalQueueMicrotask: typeof queueMicrotask;
+
   beforeEach(() => {
+    originalQueueMicrotask = globalThis.queueMicrotask;
+    globalThis.queueMicrotask = (fn) => fn();
+
     FakeWorker.instances = [];
     FakeSharedWorker.instances = [];
     // Ensure a deterministic hardwareConcurrency so the pool size cap is not
@@ -128,6 +141,7 @@ describe('createWorkerTransport', () => {
   });
 
   afterEach(() => {
+    globalThis.queueMicrotask = originalQueueMicrotask;
     delete (globalThis as any).Worker;
     delete (globalThis as any).SharedWorker;
     vi.useRealTimers();
@@ -240,8 +254,9 @@ describe('createWorkerTransport', () => {
 
     const worker = FakeWorker.instances[0];
     expect(worker).toBeDefined();
+
     const types = worker.postedMessages.map((m) => (m.message as { type: string }).type);
-    expect(types).toEqual(['init-interceptors', 'request']);
+    expect(types).toEqual(['init-interceptors', 'batch']);
   });
 
   it('correlates responses by requestId and does not cross-talk', async () => {
@@ -256,11 +271,12 @@ describe('createWorkerTransport', () => {
     const bP = firstValueFrom(b$);
 
     const worker = FakeWorker.instances[0];
-    const requests = worker.postedMessages.filter(
-      (m) => (m.message as { type: string }).type === 'request',
-    );
+    const requests = worker.postedMessages
+      .filter((m) => (m.message as { type: string }).type === 'batch')
+      .flatMap((m) => (m.message as any).messages)
+      .filter((m: any) => m.type === 'request');
     expect(requests).toHaveLength(2);
-    const [reqA, reqB] = requests.map((r) => r.message as { requestId: string });
+    const [reqA, reqB] = requests as any[];
 
     // Respond in reverse order — subscribers must still receive the right payload.
     worker.respond(reqB.requestId, { a: 200 });
@@ -299,11 +315,14 @@ describe('createWorkerTransport', () => {
 
     sub.unsubscribe();
 
-    const cancel = worker.postedMessages.find(
-      (m) => (m.message as { type: string }).type === 'cancel',
-    );
+    const cancel = worker.postedMessages
+      .flatMap((m) =>
+        (m.message as any).type === 'batch' ? (m.message as any).messages : [m.message],
+      )
+      .find((m: any) => m.type === 'cancel');
+
     expect(cancel).toBeDefined();
-    expect((cancel!.message as { requestId: string }).requestId).toBe(requestId);
+    expect((cancel as { requestId: string }).requestId).toBe(requestId);
   });
 
   it('errors on worker error event and stops leaking listeners', async () => {
@@ -358,7 +377,11 @@ describe('createWorkerTransport', () => {
       await expect(promise).rejects.toBeInstanceOf(WorkerHttpTimeoutError);
 
       const worker = FakeWorker.instances[0];
-      const lastPosted = worker.postedMessages.at(-1)!.message as { type: string };
+      const lastPostedBatch = worker.postedMessages.at(-1)!.message as {
+        type: string;
+        messages: any[];
+      };
+      const lastPosted = lastPostedBatch.messages?.at(-1);
       expect(lastPosted.type).toBe('cancel');
     });
 
@@ -435,7 +458,7 @@ describe('createWorkerTransport', () => {
 
       const worker = FakeWorker.instances[0];
       const req = worker.postedMessages.find(
-        (m) => (m.message as { type: string }).type === 'request',
+        (m) => (m.message as { type: string }).type === 'batch',
       )!;
       expect(req.transfer).toContain(buffer);
     });
@@ -450,7 +473,7 @@ describe('createWorkerTransport', () => {
 
       const worker = FakeWorker.instances[0];
       const req = worker.postedMessages.find(
-        (m) => (m.message as { type: string }).type === 'request',
+        (m) => (m.message as { type: string }).type === 'batch',
       )!;
       expect(req.transfer).toEqual([]);
     });
@@ -463,7 +486,7 @@ describe('createWorkerTransport', () => {
 
       const worker = FakeWorker.instances[0];
       const req = worker.postedMessages.find(
-        (m) => (m.message as { type: string }).type === 'request',
+        (m) => (m.message as { type: string }).type === 'batch',
       )!;
       expect(req.transfer).toEqual([]);
     });
@@ -480,13 +503,13 @@ describe('createWorkerTransport', () => {
       ac.abort('user navigated');
 
       await expect(promise).rejects.toBeInstanceOf(WorkerHttpAbortError);
-      const cancel = worker.postedMessages.find(
-        (m) => (m.message as { type: string }).type === 'cancel',
-      );
+      const cancel = worker.postedMessages
+        .flatMap((m) =>
+          (m.message as any).type === 'batch' ? (m.message as any).messages : [m.message],
+        )
+        .find((m: any) => m.type === 'cancel');
       expect(cancel).toBeDefined();
-      expect((cancel!.message as { requestId: string }).requestId).toBe(
-        worker.lastRequest!.requestId,
-      );
+      expect((cancel as { requestId: string }).requestId).toBe(worker.lastRequest!.requestId);
     });
 
     it('preserves the abort reason on the error', async () => {

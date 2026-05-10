@@ -56,10 +56,7 @@ export class SpeechSynthesisService extends BrowserApiBaseService {
       speechSynthesis.addEventListener('voiceschanged', emit);
       emit();
 
-      const cleanup = () => speechSynthesis.removeEventListener('voiceschanged', emit);
-      this.destroyRef.onDestroy(cleanup);
-
-      return cleanup;
+      return () => speechSynthesis.removeEventListener('voiceschanged', emit);
     });
   }
 
@@ -89,14 +86,20 @@ export class SpeechSynthesisService extends BrowserApiBaseService {
       observer.next('speaking');
       speechSynthesis.speak(utterance);
 
-      const cleanup = () => {
-        speechSynthesis.cancel();
-        observer.next('idle');
+      let completed = false;
+      const origOnEnd = utterance.onend;
+      utterance.onend = (ev) => {
+        completed = true;
+        origOnEnd?.call(utterance, ev);
       };
 
-      this.destroyRef.onDestroy(cleanup);
-
-      return cleanup;
+      return () => {
+        speechSynthesis.cancel();
+        // Only emit idle if the Observable hasn't already completed via onend/onerror.
+        if (!completed) {
+          observer.next('idle');
+        }
+      };
     });
   }
 

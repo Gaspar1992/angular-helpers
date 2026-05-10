@@ -76,8 +76,8 @@ describe('createAutoSerializer', () => {
     const payload = auto.serialize(data);
 
     if (payload.transferables.length > 0) {
-      expect(payload.data).toBeInstanceOf(ArrayBuffer);
-      expect(payload.transferables[0]).toBeInstanceOf(ArrayBuffer);
+      expect(Object.prototype.toString.call(payload.data)).toBe('[object ArrayBuffer]');
+      expect(Object.prototype.toString.call(payload.transferables[0])).toBe('[object ArrayBuffer]');
     }
   });
 
@@ -173,8 +173,8 @@ describe('createAutoSerializer', () => {
     const payload = auto.serialize(data);
 
     expect(payload.format).toBe('toon');
-    expect(payload.data).toBeInstanceOf(ArrayBuffer);
-    expect(payload.transferables[0]).toBeInstanceOf(ArrayBuffer);
+    expect(Object.prototype.toString.call(payload.data)).toBe('[object ArrayBuffer]');
+    expect(Object.prototype.toString.call(payload.transferables[0])).toBe('[object ArrayBuffer]');
 
     const restored = auto.deserialize(payload);
     expect(restored).toEqual(data);

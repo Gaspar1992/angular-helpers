@@ -18,6 +18,8 @@ import { BroadcastChannelDemoComponent } from '../services/broadcast-channel/bro
 import { ServerSentEventsDemoComponent } from '../services/server-sent-events/server-sent-events-demo.component';
 import { GeolocationDemoComponent } from '../services/geolocation/geolocation-demo.component';
 import { NotificationDemoComponent } from '../services/notification/notification-demo.component';
+import { EyeDropperDemoComponent } from '../services/eye-dropper/eye-dropper-demo.component';
+import { IdleDetectorDemoComponent } from '../services/idle-detector/idle-detector-demo.component';
 
 export type DemoTab = 'observers' | 'media' | 'system' | 'storage' | 'realtime' | 'location';
 
@@ -44,6 +46,8 @@ export type DemoTab = 'observers' | 'media' | 'system' | 'storage' | 'realtime' 
     ServerSentEventsDemoComponent,
     GeolocationDemoComponent,
     NotificationDemoComponent,
+    EyeDropperDemoComponent,
+    IdleDetectorDemoComponent,
   ],
   templateUrl: './browser-apis.html',
   styleUrls: ['./browser-apis.css', '../shared/demo-shared.styles.css'],

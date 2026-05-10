@@ -29,6 +29,8 @@ export class BroadcastChannelService extends ConnectionRegistryBaseService<Broad
       if (!channel) {
         channel = new BroadcastChannel(name);
         this.connections.set(name, channel);
+        // Register cleanup once per channel, not per subscription.
+        this.destroyRef.onDestroy(() => this.close(name));
       }
 
       const handler = (event: MessageEvent<T>) => observer.next(event.data);
@@ -37,14 +39,10 @@ export class BroadcastChannelService extends ConnectionRegistryBaseService<Broad
       channel.addEventListener('message', handler);
       channel.addEventListener('messageerror', errorHandler);
 
-      const cleanup = () => {
+      return () => {
         channel!.removeEventListener('message', handler);
         channel!.removeEventListener('messageerror', errorHandler);
       };
-
-      this.destroyRef.onDestroy(() => this.close(name));
-
-      return cleanup;
     });
   }
 
@@ -55,6 +53,7 @@ export class BroadcastChannelService extends ConnectionRegistryBaseService<Broad
     if (!channel) {
       channel = new BroadcastChannel(name);
       this.connections.set(name, channel);
+      // Register cleanup once per channel creation.
       this.destroyRef.onDestroy(() => this.close(name));
     }
 

@@ -93,14 +93,10 @@ export class FullscreenService extends BrowserApiBaseService {
       document.addEventListener('webkitfullscreenchange', handler);
       observer.next(this.isFullscreen);
 
-      const cleanup = () => {
+      return () => {
         document.removeEventListener('fullscreenchange', handler);
         document.removeEventListener('webkitfullscreenchange', handler);
       };
-
-      this.destroyRef.onDestroy(cleanup);
-
-      return cleanup;
     });
   }
 }
