@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 
-self.onmessage = async (event: MessageEvent) => {
-  const { type, requestId, payload } = event.data;
+async function processMessage(data: any): Promise<void> {
+  const { type, requestId, payload } = data;
 
   if (type === 'cancel') {
     return;
@@ -22,5 +22,16 @@ self.onmessage = async (event: MessageEvent) => {
         thread: 'worker',
       },
     });
+  }
+}
+
+self.onmessage = async (event: MessageEvent) => {
+  const data = event.data;
+
+  if (data.type === 'batch') {
+    const promises = (data.messages || []).map((msg: any) => processMessage(msg));
+    await Promise.all(promises);
+  } else {
+    await processMessage(data);
   }
 };
