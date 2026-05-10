@@ -55,8 +55,13 @@ function generatePayload(bytes: number): string {
  * inside the worker (cpu burn, payload generation, delay), then returns a
  * synthetic response with detailed stage timing for performance analysis.
  */
-self.onmessage = async (event: MessageEvent) => {
-  const { type, requestId, payload, timing } = event.data;
+async function handleMessage(data: {
+  type: string;
+  requestId?: string;
+  payload?: BenchmarkRequest;
+  timing?: unknown;
+}): Promise<void> {
+  const { type, requestId, payload } = data;
 
   if (type === 'cancel') {
     return;
@@ -118,4 +123,19 @@ self.onmessage = async (event: MessageEvent) => {
       workerSendingAt,
     },
   });
+}
+
+/**
+ * onmessage — handles both direct messages and the batch envelope
+ * sent by createWorkerTransport (which wraps requests in
+ * `{ type: 'batch', messages: [...] }` via queueMicrotask).
+ */
+self.onmessage = async (event: MessageEvent) => {
+  const data = event.data;
+
+  if (data?.type === 'batch' && Array.isArray(data.messages)) {
+    await Promise.all(data.messages.map((msg: any) => handleMessage(msg)));
+  } else {
+    await handleMessage(data);
+  }
 };
