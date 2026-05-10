@@ -1,3 +1,10 @@
+## [1.41.1](https://github.com/Gaspar1992/angular-helpers/compare/v1.41.0...v1.41.1) (2026-05-10)
+
+
+### Bug Fixes
+
+* **worker-http:** support batch envelope in benchmark worker ([#117](https://github.com/Gaspar1992/angular-helpers/issues/117)) ([f705ef8](https://github.com/Gaspar1992/angular-helpers/commit/f705ef890119e955ba7479e841ef038ef1060960))
+
 # [1.38.0](https://github.com/Gaspar1992/angular-helpers/compare/v1.37.0...v1.38.0) (2026-05-02)
 
 
