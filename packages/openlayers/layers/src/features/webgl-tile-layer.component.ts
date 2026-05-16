@@ -13,8 +13,12 @@ import {
 import { OlMapService } from '@angular-helpers/openlayers/core';
 import WebGLTileLayer from 'ol/layer/WebGLTile';
 import type { Style as WebGLTileStyle } from 'ol/layer/WebGLTile';
+import WebGLVectorTileLayer from 'ol/layer/WebGLVectorTile';
+import type { FlatStyleLike } from 'ol/style/flat';
 import OSM from 'ol/source/OSM';
 import XYZ from 'ol/source/XYZ';
+import VectorTileSource from 'ol/source/VectorTile';
+import MVT from 'ol/format/MVT';
 
 /**
  * GPU-accelerated tile layer with color/brightness/contrast expressions.
@@ -44,13 +48,13 @@ export class OlWebGLTileLayerComponent {
   /** Unique layer identifier */
   id = input.required<string>();
   /** Tile source type */
-  source = input.required<'osm' | 'xyz'>();
-  /** Tile URL template (required for 'xyz') */
+  source = input.required<'osm' | 'xyz' | 'mvt'>();
+  /** Tile URL template (required for 'xyz' and 'mvt') */
   url = input<string>();
   /** Attribution text */
   attributions = input<string | string[]>();
-  /** WebGL tile style with color expressions */
-  tileStyle = input<WebGLTileStyle>();
+  /** WebGL tile style (raster expressions) or flat style (MVT) */
+  tileStyle = input<WebGLTileStyle | FlatStyleLike>();
   /** Z-index for layer ordering */
   zIndex = input<number>(0);
   /** Opacity (0–1) */
@@ -60,7 +64,7 @@ export class OlWebGLTileLayerComponent {
   /** Preload low-res tiles up to this many zoom levels */
   preload = input<number>(0);
 
-  private layer: WebGLTileLayer | null = null;
+  private layer: WebGLTileLayer | WebGLVectorTileLayer | null = null;
 
   constructor() {
     afterNextRender(() => {
@@ -69,10 +73,32 @@ export class OlWebGLTileLayerComponent {
 
       let tileSource;
       switch (this.source()) {
+        case 'mvt':
+          tileSource = new VectorTileSource({
+            format: new MVT(),
+            url: this.url(),
+            attributions: this.attributions(),
+          });
+          this.layer = new WebGLVectorTileLayer({
+            source: tileSource,
+            visible: this.visible(),
+            opacity: this.opacity(),
+            zIndex: this.zIndex(),
+            ...(this.tileStyle() ? { style: this.tileStyle() as FlatStyleLike } : {}),
+          });
+          break;
         case 'xyz':
           tileSource = new XYZ({
             url: this.url(),
             attributions: this.attributions(),
+          });
+          this.layer = new WebGLTileLayer({
+            source: tileSource,
+            visible: this.visible(),
+            opacity: this.opacity(),
+            zIndex: this.zIndex(),
+            preload: this.preload(),
+            ...(this.tileStyle() ? { style: this.tileStyle() as WebGLTileStyle } : {}),
           });
           break;
         case 'osm':
@@ -80,17 +106,16 @@ export class OlWebGLTileLayerComponent {
           tileSource = new OSM({
             attributions: this.attributions(),
           });
+          this.layer = new WebGLTileLayer({
+            source: tileSource,
+            visible: this.visible(),
+            opacity: this.opacity(),
+            zIndex: this.zIndex(),
+            preload: this.preload(),
+            ...(this.tileStyle() ? { style: this.tileStyle() as WebGLTileStyle } : {}),
+          });
           break;
       }
-
-      this.layer = new WebGLTileLayer({
-        source: tileSource,
-        visible: this.visible(),
-        opacity: this.opacity(),
-        zIndex: this.zIndex(),
-        preload: this.preload(),
-        ...(this.tileStyle() ? { style: this.tileStyle() } : {}),
-      });
 
       this.layer.set('id', this.id());
       map.addLayer(this.layer);
@@ -111,7 +136,11 @@ export class OlWebGLTileLayerComponent {
     effect(() => {
       const style = this.tileStyle();
       if (style && this.layer) {
-        this.layer.setStyle(style);
+        if (this.source() === 'mvt') {
+          (this.layer as WebGLVectorTileLayer).setStyle(style as FlatStyleLike);
+        } else {
+          (this.layer as WebGLTileLayer).setStyle(style as WebGLTileStyle);
+        }
       }
     });
 
