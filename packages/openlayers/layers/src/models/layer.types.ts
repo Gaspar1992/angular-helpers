@@ -25,6 +25,8 @@ export interface ClusterConfig {
 export interface VectorLayerConfig extends LayerConfig {
   type: 'vector';
   features?: Feature[];
+  url?: string;
+  format?: 'geojson' | 'topojson' | 'kml';
   style?: Style | ((feature: Feature) => Style);
   cluster?: ClusterConfig;
 }

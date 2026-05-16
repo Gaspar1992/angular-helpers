@@ -19,6 +19,9 @@ import XYZ from 'ol/source/XYZ';
 import TileWMS from 'ol/source/TileWMS';
 import ImageWMS from 'ol/source/ImageWMS';
 import ImageStatic from 'ol/source/ImageStatic';
+import GeoJSON from 'ol/format/GeoJSON';
+import TopoJSON from 'ol/format/TopoJSON';
+import KML from 'ol/format/KML';
 import type BaseLayer from 'ol/layer/Base';
 import type OLMap from 'ol/Map';
 import { OlMapService } from '@angular-helpers/openlayers/core';
@@ -336,7 +339,14 @@ export class OlLayerService {
   }
 
   private createVectorLayer(config: VectorLayerConfig, map: OLMap): { id: string } {
-    const vectorSource = new VectorSource();
+    const sourceOptions: any = {};
+    if (config.url && config.format) {
+      sourceOptions.url = config.url;
+      if (config.format === 'geojson') sourceOptions.format = new GeoJSON();
+      else if (config.format === 'topojson') sourceOptions.format = new TopoJSON();
+      else if (config.format === 'kml') sourceOptions.format = new KML();
+    }
+    const vectorSource = new VectorSource(sourceOptions);
 
     // Add features if provided
     if (config.features && config.features.length > 0) {

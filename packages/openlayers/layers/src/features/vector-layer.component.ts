@@ -25,6 +25,8 @@ export class OlVectorLayerComponent {
   private destroyRef = inject(DestroyRef);
   id = input.required<string>();
   features = input<Feature[]>([]);
+  url = input<string>();
+  format = input<'geojson' | 'topojson' | 'kml'>();
   zIndex = input<number>(0);
   opacity = input<number>(1);
   visible = input<boolean>(true);
@@ -52,6 +54,8 @@ export class OlVectorLayerComponent {
         id: this.id(),
         type: 'vector',
         features: this.features(),
+        url: this.url(),
+        format: this.format(),
         zIndex: this.zIndex(),
         opacity: this.opacity(),
         visible: this.visible(),
