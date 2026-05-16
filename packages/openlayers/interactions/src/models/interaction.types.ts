@@ -16,6 +16,7 @@ export interface SelectConfig extends InteractionConfig {
   layers?: string[];
   multi?: boolean;
   hitTolerance?: number;
+  condition?: 'click' | 'pointerMove';
 }
 
 export interface DrawConfig extends InteractionConfig {

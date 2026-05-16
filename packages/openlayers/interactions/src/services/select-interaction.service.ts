@@ -3,6 +3,7 @@
 import { inject, Injectable } from '@angular/core';
 import type OLMap from 'ol/Map';
 import Select from 'ol/interaction/Select';
+import { click, pointerMove } from 'ol/events/condition';
 import type BaseLayer from 'ol/layer/Base';
 import type { Feature as OLFeature } from 'ol';
 import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
@@ -38,6 +39,7 @@ export class SelectInteractionService {
           : undefined,
         multi: config.multi ?? false,
         hitTolerance: config.hitTolerance ?? 0,
+        condition: config.condition === 'pointerMove' ? pointerMove : click,
       });
 
       // Listen to selection changes — use getFeatures().getArray() for the full
