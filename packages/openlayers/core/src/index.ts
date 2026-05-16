@@ -10,6 +10,7 @@ export {
 export { OlZoneHelper } from './services/zone-helper.service';
 export { OlGeometryService } from './services/geometry.service';
 export { provideOpenLayers, type OlFeature, type OlFeatureKind } from './config/providers';
+export { withProjections, type Proj4Definition } from './config/with-projections';
 export type {
   Coordinate,
   Extent,
