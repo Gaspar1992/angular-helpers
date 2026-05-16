@@ -19,6 +19,7 @@ renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
   return `<div class="code-block-wrapper">
   <div class="code-header">
     <span class="lang-badge">${displayLang}</span>
+    <button class="copy-btn" onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.innerText).then(() => { const t = this.innerText; this.innerText = 'Copied!'; setTimeout(() => this.innerText = t, 2000); })">Copy</button>
   </div>
   <pre><code class="hljs language-${language}">${highlighted}</code></pre>
 </div>`;
@@ -26,9 +27,11 @@ renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
 
 marked.use({ renderer });
 
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+
 export interface BlogPostData {
   meta: BlogPost;
-  html: string;
+  html: SafeHtml | string;
 }
 
 function parseFrontmatter(raw: string): { meta: Partial<BlogPost>; body: string } {
@@ -62,6 +65,8 @@ export const blogPostResolver: ResolveFn<BlogPostData | null> = (route: Activate
 
   const http = inject(HttpClient);
 
+  const sanitizer = inject(DomSanitizer);
+
   // Use relative path to work with subdirectory deployments (GitHub Pages)
   return http.get(`content/blog/${slug}.md`, { responseType: 'text' }).pipe(
     map((raw) => {
@@ -75,7 +80,7 @@ export const blogPostResolver: ResolveFn<BlogPostData | null> = (route: Activate
           tags: meta.tags ?? [],
           excerpt: meta.excerpt ?? '',
         } satisfies BlogPost,
-        html,
+        html: sanitizer.bypassSecurityTrustHtml(html),
       };
     }),
     catchError(() => of(null)),
