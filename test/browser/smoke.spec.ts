@@ -5,7 +5,7 @@ test.describe('Browser APIs demo smoke', () => {
     await page.goto('/');
 
     await expect(page).toHaveURL('/');
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Every Angular app');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Master Web APIs');
   });
 
   test('renders the demo shell and key sections', async ({ page }) => {
