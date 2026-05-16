@@ -124,7 +124,7 @@ import type { LayerSwitcherItem } from '../models/layer-switcher.types';
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         font-size: 13px;
         min-width: 36px;
-        z-index: 100;
+        z-index: 10;
         transition: all 0.2s ease;
       }
 

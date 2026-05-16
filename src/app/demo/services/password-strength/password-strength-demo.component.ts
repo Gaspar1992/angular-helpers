@@ -6,17 +6,12 @@ import { PasswordStrengthService } from '@angular-helpers/security';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [PasswordStrengthService],
   template: `
-    <section
-      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
-      aria-labelledby="password-title"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="password-title">
-          PasswordStrength Service
-        </h2>
+    <section class="svc-card" aria-labelledby="password-title">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title" id="password-title">PasswordStrength Service</h2>
         <div class="flex gap-2 flex-wrap">
-          <span class="badge badge-success badge-sm">entropy-based</span>
-          <span class="badge badge-info badge-sm">zxcvbn</span>
+          <span class="badge badge-success">entropy-based</span>
+          <span class="badge badge-info">zxcvbn</span>
         </div>
       </div>
       <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
@@ -24,13 +19,13 @@ import { PasswordStrengthService } from '@angular-helpers/security';
         feedback.
       </p>
 
-      <div class="flex flex-col gap-2 mb-4">
-        <label for="password-input" class="text-sm font-medium text-base-content/70"
+      <div class="flex flex-col gap-1 mb-4">
+        <label for="password-input" class="text-xs font-bold uppercase opacity-50 ml-1"
           >Password</label
         >
         <input
           id="password-input"
-          class="input input-sm input-bordered w-full"
+          class="demo-input"
           type="password"
           [value]="passwordInput()"
           (input)="passwordInput.set($any($event.target).value)"
@@ -38,28 +33,28 @@ import { PasswordStrengthService } from '@angular-helpers/security';
         />
       </div>
 
-      <div class="flex flex-wrap gap-2 mb-4">
-        <button class="btn btn-primary btn-sm" (click)="checkPassword()">Check Strength</button>
+      <div class="svc-controls">
+        <button class="btn btn-primary btn-sm font-bold" (click)="checkPassword()">
+          Check Strength
+        </button>
       </div>
 
       @if (passwordScore() !== null) {
-        <div
-          class="bg-base-300 border border-base-300 rounded-lg p-3 mt-3 divide-y divide-base-content/10"
-        >
-          <div class="flex items-center justify-between gap-3 py-2">
+        <div class="svc-result mt-4">
+          <div class="kv-row py-2 border-b border-base-300 last:border-b-0">
             <span class="text-sm text-base-content/60 font-medium">Score</span>
             <span class="text-sm font-semibold" [style.color]="scoreColor()">
               {{ passwordScore() }}/4 ({{ passwordLabel() }})
             </span>
           </div>
-          <div class="flex items-center justify-between gap-3 py-2">
+          <div class="kv-row py-2 border-b border-base-300 last:border-b-0">
             <span class="text-sm text-base-content/60 font-medium">Entropy</span>
             <span class="text-sm text-base-content font-semibold font-mono"
               >{{ passwordEntropy() }} bits</span
             >
           </div>
           @if (passwordFeedback().length > 0) {
-            <div class="flex items-start justify-between gap-3 py-2">
+            <div class="kv-row py-2 border-b border-base-300 last:border-b-0 items-start">
               <span class="text-sm text-base-content/60 font-medium">Feedback</span>
               <span class="text-sm text-base-content text-right">{{
                 passwordFeedback().join(', ')

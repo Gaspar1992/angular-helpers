@@ -19,7 +19,7 @@ export interface SelectConfig extends InteractionConfig {
 }
 
 export interface DrawConfig extends InteractionConfig {
-  type: 'Point' | 'LineString' | 'Polygon' | 'Circle';
+  type: 'Point' | 'LineString' | 'Polygon' | 'Circle' | 'Ellipse' | 'Donut';
   source?: string;
   freehand?: boolean;
   snapTolerance?: number;

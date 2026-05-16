@@ -19,41 +19,40 @@ import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.c
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [IntersectionObserverService],
   imports: [CodeBlockComponent],
+  styleUrls: ['../demo.styles.css'],
   template: `
-    <section
-      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
-      aria-labelledby="inter-title"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="inter-title">
-          Intersection Observer
+    <section class="svc-card" aria-labelledby="inter-title">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title" id="inter-title">
+          <span class="text-primary text-2xl">👁️‍🗨️</span> Intersection Observer
         </h2>
         <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-success badge-sm">supported</span>
+            <span class="badge badge-success font-black">supported</span>
           } @else {
-            <span class="badge badge-error badge-sm">unsupported</span>
+            <span class="badge badge-error font-black">unsupported</span>
           }
-          <span class="badge badge-info badge-sm">{{ apiMode() }}</span>
+          <span class="badge badge-info font-black">{{ apiMode() }}</span>
         </div>
       </div>
 
-      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
-        Fires when an element enters or exits the viewport. Scroll down to trigger it.
+      <p class="svc-desc">
+        Detect when elements enter or leave the viewport. Essential for lazy loading and
+        scroll-triggered animations.
       </p>
 
-      <div class="flex flex-wrap gap-2 items-center mb-4">
-        <div class="join" role="group" aria-label="API mode">
+      <div class="svc-controls mb-8">
+        <div class="segmented" role="group" aria-label="API mode">
           <button
-            class="btn btn-sm join-item"
-            [class.btn-active]="apiMode() === 'Service'"
+            class="btn btn-sm font-black"
+            [class.active]="apiMode() === 'Service'"
             (click)="setMode('Service')"
           >
-            Service (RxJS)
+            Service
           </button>
           <button
-            class="btn btn-sm join-item"
-            [class.btn-active]="apiMode() === 'Signal Fn'"
+            class="btn btn-sm font-black"
+            [class.active]="apiMode() === 'Signal Fn'"
             (click)="setMode('Signal Fn')"
           >
             Signal Fn
@@ -61,49 +60,55 @@ import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.c
         </div>
         @if (apiMode() === 'Service') {
           <button
-            class="btn btn-primary btn-sm"
+            class="btn btn-primary btn-sm font-black"
             (click)="attach()"
             [disabled]="observing() || !supported"
           >
-            {{ observing() ? 'Observing…' : 'Attach observer' }}
+            {{ observing() ? 'Observing…' : 'Attach Observer' }}
           </button>
         }
-        @if (apiMode() === 'Signal Fn') {
-          @if (fnRef.isIntersecting()) {
-            <span class="badge badge-success badge-sm">In viewport</span>
+        <div
+          class="flex items-center gap-2 px-4 py-2 rounded-xl bg-base-content/5 border border-base-content/5 shadow-inner"
+        >
+          <span class="text-[10px] font-black uppercase tracking-widest text-base-content/30"
+            >Viewport</span
+          >
+          @if (apiMode() === 'Signal Fn' ? fnRef.isIntersecting() : isIntersecting()) {
+            <span class="badge badge-success font-black">VISIBLE</span>
           } @else {
-            <span class="badge badge-ghost badge-sm">Out of viewport</span>
+            <span class="badge badge-ghost font-black opacity-30">HIDDEN</span>
           }
-        } @else {
-          @if (isIntersecting()) {
-            <span class="badge badge-success badge-sm">In viewport</span>
-          } @else {
-            <span class="badge badge-ghost badge-sm">Out of viewport</span>
-          }
-        }
+        </div>
       </div>
 
       <div
-        class="h-48 overflow-y-auto bg-base-300 border border-base-300 rounded-lg p-4"
+        class="h-48 overflow-y-auto bg-base-content/5 border border-base-content/5 rounded-2xl p-6 mb-8 shadow-inner no-scrollbar"
         #intersectScroll
-        aria-label="Scrollable area with target"
+        aria-label="Scrollable area"
       >
-        <p class="text-xs text-base-content/80 mb-2">↓ Scroll inside this box to trigger</p>
+        <p
+          class="text-[10px] font-black uppercase tracking-widest text-base-content/20 mb-4 flex items-center gap-2"
+        >
+          <span class="animate-bounce">↓</span> Scroll down inside this box
+        </p>
         <div class="h-48"></div>
         <div
-          class="bg-primary/20 border-2 border-primary rounded p-4 text-center text-primary"
+          class="bg-primary/10 border-2 border-primary border-dashed rounded-2xl p-8 text-center text-primary font-black uppercase tracking-tighter transition-all duration-500"
+          [class.bg-primary/20]="
+            apiMode() === 'Signal Fn' ? fnRef.isIntersecting() : isIntersecting()
+          "
+          [class.scale-105]="apiMode() === 'Signal Fn' ? fnRef.isIntersecting() : isIntersecting()"
           #intersectBox
-          aria-label="Intersection target"
         >
-          Target element
+          Target Element
         </div>
         <div class="h-48"></div>
       </div>
 
-      @if (apiMode() === 'Signal Fn') {
-        <div class="mt-4">
-          <p class="text-xs text-base-content/80 mb-2">
-            Reactive viewport detection with auto-cleanup:
+      <div class="svc-result">
+        @if (apiMode() === 'Signal Fn') {
+          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-base-content/20 mb-3">
+            Composition Utility
           </p>
           <app-code-block
             code="import { injectIntersectionObserver } from '@angular-helpers/browser-web-apis';
@@ -111,33 +116,23 @@ import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.c
 readonly targetRef = viewChild&lt;ElementRef&gt;('target');
 readonly inView = injectIntersectionObserver(this.targetRef);
 
-// Use in template with: inView.isIntersecting()
-// or: inView.isVisible() for visibility tracking"
+// Simple signal boolean:
+// inView.isIntersecting()"
           />
-          <p class="text-xs text-base-content/80 mt-2">
-            <strong>When to use:</strong> Lazy loading, infinite scroll, analytics tracking.
+        } @else {
+          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-base-content/20 mb-3">
+            Service Subscription
           </p>
-        </div>
-      } @else {
-        <div class="mt-4">
-          <p class="text-xs text-base-content/80 mb-2">Manual visibility observation with RxJS:</p>
           <app-code-block
             code="import { IntersectionObserverService } from '@angular-helpers/browser-web-apis';
 
 readonly svc = inject(IntersectionObserverService);
 
-ngOnInit() {
-  this.svc.observeVisibility(element, { threshold: 0.5 })
-    .subscribe(isVisible => {
-      // handle visibility change
-    });
-}"
+this.svc.observeVisibility(element, { threshold: 0.5 })
+  .subscribe(isVisible => { ... });"
           />
-          <p class="text-xs text-base-content/80 mt-2">
-            <strong>When to use:</strong> Complex thresholds, multiple observers, combineLatest.
-          </p>
-        </div>
-      }
+        }
+      </div>
     </section>
   `,
 })

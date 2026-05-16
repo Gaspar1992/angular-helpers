@@ -9,12 +9,12 @@ export interface DocTab {
   selector: 'app-docs-tabs',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="docs-tab-bar" role="tablist" [attr.aria-label]="ariaLabel()">
+    <div class="tabs-container" role="tablist" [attr.aria-label]="ariaLabel()">
       @for (tab of tabs(); track tab.id) {
         <button
           role="tab"
           type="button"
-          class="docs-tab-btn"
+          class="tab-btn"
           [class.active]="activeTab() === tab.id"
           [attr.aria-selected]="activeTab() === tab.id"
           [id]="'tab-' + tab.id"
@@ -28,42 +28,42 @@ export interface DocTab {
   `,
   styles: [
     `
-      .docs-tab-bar {
+      .tabs-container {
         display: flex;
-        border-bottom: 2px solid var(--border-color);
-        margin-bottom: var(--sp-5);
-      }
+        align-items: center;
+        gap: var(--space-1);
+        border-block-end: 2px solid var(--c-border-subtle);
+        margin-block-end: var(--space-8);
 
-      .docs-tab-btn {
-        padding: 0.6rem 1.2rem;
-        background: none;
-        border: none;
-        border-bottom: 2px solid transparent;
-        margin-bottom: -2px;
-        cursor: pointer;
-        font-size: var(--text-base);
-        font-family: inherit;
-        font-weight: 500;
-        color: var(--text-muted);
-        transition:
-          color var(--transition),
-          border-color var(--transition);
-        white-space: nowrap;
-      }
+        .tab-btn {
+          padding: var(--space-2) var(--space-4);
+          font-size: var(--fs-sm);
+          font-weight: 600;
+          color: var(--c-text-muted);
+          background: transparent;
+          border: none;
+          border-block-end: 2px solid transparent;
+          margin-block-end: -2px;
+          cursor: pointer;
+          transition: all var(--t-fast);
+          white-space: nowrap;
 
-      .docs-tab-btn:hover {
-        color: var(--text-primary);
-      }
+          &:hover {
+            color: var(--c-text-main);
+            background-color: var(--c-border-subtle);
+          }
 
-      .docs-tab-btn:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: -2px;
-        border-radius: 2px;
-      }
+          &.active {
+            color: var(--c-text-main);
+            border-block-end-color: var(--c-primary);
+          }
 
-      .docs-tab-btn.active {
-        color: var(--accent);
-        border-bottom-color: var(--accent);
+          &:focus-visible {
+            outline: 2px solid var(--c-primary);
+            outline-offset: -2px;
+            border-radius: 4px;
+          }
+        }
       }
     `,
   ],

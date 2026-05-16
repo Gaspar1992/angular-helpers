@@ -30,7 +30,7 @@ export interface OverviewConfig {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, CodeBlockComponent, DocsPageHeaderComponent],
   template: `
-    <div class="unified-overview">
+    <div class="max-w-[900px] mx-auto py-12 sm:py-16">
       <app-docs-page-header
         [title]="config().packageName"
         badge="npm"
@@ -38,20 +38,42 @@ export interface OverviewConfig {
         [lead]="config().lead"
       />
 
-      <app-code-block language="ts" filename="main.ts" [code]="config().providerExample" />
+      <div class="my-10">
+        <app-code-block language="ts" filename="main.ts" [code]="config().providerExample" />
+      </div>
 
       @for (group of config().serviceGroups; track group.label) {
-        <section class="service-group">
-          <h2 class="group-title">
-            <span class="group-icon">{{ group.icon }}</span>
+        <section class="mt-16">
+          <h2
+            class="text-2xl font-black text-base-content flex items-center gap-4 mb-8 tracking-tight"
+          >
+            <div
+              class="p-3 bg-base-content/5 rounded-xl border border-base-content/10 shadow-inner"
+            >
+              <span class="text-2xl leading-none">{{ group.icon }}</span>
+            </div>
             {{ group.label }}
           </h2>
-          <div class="service-grid">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             @for (service of group.items; track service.id) {
-              <a [routerLink]="[service.id]" class="service-card">
-                <h3 class="service-name">{{ service.name }}</h3>
-                <p class="service-desc">{{ service.description }}</p>
-                <span class="service-arrow">→</span>
+              <a
+                [routerLink]="[service.id]"
+                class="flex flex-col p-8 bg-base-200 border border-base-content/5 rounded-[2rem] transition-all hover:border-primary/40 hover:shadow-2xl group no-underline shadow-sm"
+              >
+                <h3
+                  class="text-lg font-black text-base-content m-0 mb-3 tracking-tight group-hover:text-primary transition-colors"
+                >
+                  {{ service.name }}
+                </h3>
+                <p class="text-sm text-base-content/50 leading-relaxed m-0 flex-1 font-medium">
+                  {{ service.description }}
+                </p>
+                <div
+                  class="flex items-center gap-1.5 text-primary text-sm font-bold mt-6 group-hover:translate-x-1 transition-transform"
+                >
+                  <span>Explore API</span>
+                  <span>→</span>
+                </div>
               </a>
             }
           </div>
@@ -59,80 +81,7 @@ export interface OverviewConfig {
       }
     </div>
   `,
-  styles: [
-    `
-      .unified-overview {
-        padding: var(--sp-6) 0;
-      }
-
-      .lead {
-        font-size: var(--text-lg);
-        color: var(--text-muted);
-        margin: var(--sp-4) 0 var(--sp-6);
-        line-height: 1.6;
-      }
-
-      .service-group {
-        margin-top: var(--sp-8);
-      }
-
-      .group-title {
-        display: flex;
-        align-items: center;
-        gap: var(--sp-2);
-        font-size: var(--text-xl);
-        font-weight: 700;
-        margin: 0 0 var(--sp-4);
-        color: var(--text);
-      }
-
-      .group-icon {
-        font-size: 1.2em;
-      }
-
-      .service-grid {
-        display: grid;
-        gap: var(--sp-4);
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      }
-
-      .service-card {
-        display: flex;
-        flex-direction: column;
-        padding: var(--sp-4);
-        background: var(--bg-elevated);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-lg);
-        text-decoration: none;
-        color: var(--text);
-        transition: all var(--transition);
-      }
-
-      .service-card:hover {
-        border-color: var(--accent);
-        transform: translateY(-2px);
-      }
-
-      .service-name {
-        font-size: var(--text-base);
-        font-weight: 600;
-        margin: 0 0 var(--sp-2);
-      }
-
-      .service-desc {
-        font-size: var(--text-sm);
-        color: var(--text-muted);
-        margin: 0;
-        flex: 1;
-      }
-
-      .service-arrow {
-        align-self: flex-end;
-        color: var(--accent);
-        font-weight: 600;
-      }
-    `,
-  ],
+  styles: [],
 })
 export class UnifiedOverviewComponent {
   readonly config = input.required<OverviewConfig>();

@@ -78,18 +78,22 @@ export class OlWebGLVectorLayerComponent {
 
       this.syncFeatures(this.features());
 
-      this.layer = new WebGLVectorLayer({
-        source: this.vectorSource,
-        style: this.flatStyle(),
-        visible: this.visible(),
-        opacity: this.opacity(),
-        zIndex: this.zIndex(),
-        disableHitDetection: this.disableHitDetection(),
-        ...(this.variables() ? { variables: this.variables() } : {}),
-      });
+      try {
+        this.layer = new WebGLVectorLayer({
+          source: this.vectorSource,
+          style: this.flatStyle(),
+          visible: this.visible(),
+          opacity: this.opacity(),
+          zIndex: this.zIndex(),
+          disableHitDetection: this.disableHitDetection(),
+          ...(this.variables() ? { variables: this.variables() } : {}),
+        });
 
-      this.layer.set('id', this.id());
-      map.addLayer(this.layer);
+        this.layer.set('id', this.id());
+        map.addLayer(this.layer);
+      } catch (err) {
+        console.warn(`[OlWebGLVectorLayer] Failed to initialize WebGL Vector Layer: ${err}`);
+      }
     });
 
     // Reactive feature sync
@@ -129,7 +133,11 @@ export class OlWebGLVectorLayerComponent {
       const map = this.mapService.getMap();
       if (map && this.layer) {
         map.removeLayer(this.layer);
-        this.layer.dispose();
+        try {
+          this.layer.dispose();
+        } catch (e) {
+          // Ignore WebGL layer disposal errors (e.g., reading 'deleteBuffer' if renderer not fully initialized)
+        }
       }
     });
   }

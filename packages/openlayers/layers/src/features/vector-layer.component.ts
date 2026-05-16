@@ -10,7 +10,7 @@ import {
   inject,
   input,
 } from '@angular/core';
-import type { Feature, Style } from '@angular-helpers/openlayers/core';
+import { Feature } from '@angular-helpers/openlayers/core';
 import { OlLayerService } from '../services/layer.service';
 import type { ClusterConfig, VectorLayerConfig } from '../models/layer.types';
 import { OlClusterComponent } from './cluster.component';
@@ -28,7 +28,7 @@ export class OlVectorLayerComponent {
   zIndex = input<number>(0);
   opacity = input<number>(1);
   visible = input<boolean>(true);
-  style = input<Style | ((feature: Feature) => Style)>();
+  style = input<any | ((feature: Feature, resolution: number) => any)>();
   cluster = input<ClusterConfig>();
   clusterComponent = contentChild(OlClusterComponent);
 

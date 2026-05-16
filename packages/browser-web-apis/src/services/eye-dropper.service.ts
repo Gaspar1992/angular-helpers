@@ -16,7 +16,9 @@ interface WindowWithEyeDropper extends Window {
   };
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class EyeDropperService extends BrowserApiBaseService {
   protected override getApiName(): string {
     return 'eye-dropper';

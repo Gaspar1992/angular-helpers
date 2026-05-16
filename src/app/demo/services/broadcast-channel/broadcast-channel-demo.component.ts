@@ -1,5 +1,4 @@
 import { Component, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
 
@@ -8,128 +7,104 @@ import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [BroadcastChannelService],
   imports: [FormsModule],
+  styleUrls: ['../demo.styles.css'],
   template: `
-    <section
-      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
-      aria-labelledby="bc-title"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="bc-title">
-          Broadcast Channel
+    <section class="svc-card" aria-labelledby="bc-title">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title" id="bc-title">
+          <span class="text-primary text-2xl">📡</span> Broadcast Channel
         </h2>
         <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-success badge-sm">supported</span>
+            <span class="badge badge-success font-black">supported</span>
           } @else {
-            <span class="badge badge-error badge-sm">unsupported</span>
-          }
-          @if (channelOpen()) {
-            <span class="badge badge-success badge-sm">open</span>
-          } @else {
-            <span class="badge badge-ghost badge-sm">closed</span>
+            <span class="badge badge-error font-black">unsupported</span>
           }
         </div>
       </div>
-      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
-        Send messages between tabs on the same origin. Open this demo in a second tab and you'll see
-        messages arrive.
+      <p class="svc-desc">
+        Communicate between different tabs or windows of the same origin in real-time.
       </p>
-      <div class="flex flex-col gap-2 mb-4">
-        <div class="flex flex-wrap gap-2 items-center">
-          <input
-            class="input input-bordered input-sm flex-1 min-w-[150px]"
-            name="channel-name"
-            [ngModel]="channelName"
-            (ngModelChange)="channelName = $event"
-            placeholder="Channel name"
-            aria-label="Channel name"
-            [disabled]="channelOpen()"
-          />
-          <button
-            class="btn btn-primary btn-sm"
-            (click)="openChannel()"
-            [disabled]="!supported || channelOpen()"
-          >
-            Listen
-          </button>
-          <button class="btn btn-secondary btn-sm" (click)="clearMessages()">Clear</button>
-        </div>
-        <div class="flex flex-wrap gap-2 items-center">
-          <input
-            class="input input-bordered input-sm flex-1 min-w-[150px]"
-            name="channel-message"
-            [ngModel]="channelMsg"
-            (ngModelChange)="channelMsg = $event"
-            placeholder="Message to broadcast"
-            aria-label="Broadcast message"
-            (keydown.enter)="send()"
-            [disabled]="!channelOpen()"
-          />
-          <button
-            class="btn btn-secondary btn-sm"
-            (click)="send()"
-            [disabled]="!channelOpen() || !channelMsg.trim()"
-          >
-            Send
-          </button>
-        </div>
-      </div>
-      @if (messages().length > 0) {
-        <div
-          class="bg-base-300 border border-base-300 rounded-lg p-3 max-h-60 overflow-y-auto"
-          aria-live="polite"
-          aria-label="Channel messages"
-        >
-          @for (m of messages(); track $index) {
-            <div
-              class="flex items-center gap-3 py-1 border-b border-base-300 last:border-b-0 text-sm"
+
+      <div class="space-y-6">
+        <div class="space-y-2">
+          <label>Broadcast Message</label>
+          <div class="flex gap-3">
+            <input
+              type="text"
+              [(ngModel)]="message"
+              placeholder="Type to sync across tabs..."
+              class="demo-input flex-1 font-bold"
+            />
+            <button
+              class="btn btn-primary font-black px-8"
+              (click)="send()"
+              [disabled]="!message().trim() || !supported"
             >
-              <span
-                class="badge badge-xs"
-                [class.badge-primary]="m.dir === 'sent'"
-                [class.badge-secondary]="m.dir === 'recv'"
-                >{{ m.dir }}</span
+              Broadcast
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-4 pt-4">
+          <div class="flex items-center justify-between">
+            <label class="m-0">Inbound Stream</label>
+            <button class="btn btn-secondary btn-xs font-black" (click)="clearMessages()">
+              Clear
+            </button>
+          </div>
+
+          @if (messages().length === 0) {
+            <div
+              class="py-12 text-center bg-base-content/5 rounded-2xl border border-dashed border-base-content/10 shadow-inner"
+            >
+              <p
+                class="text-[10px] font-black uppercase tracking-widest text-base-content/20 italic"
               >
-              <span class="flex-1 text-base-content">{{ m.text }}</span>
-              <span class="text-xs text-base-content/80">{{ m.time }}</span>
+                No incoming data
+              </p>
+            </div>
+          } @else {
+            <div class="svc-result space-y-3 max-h-48 overflow-y-auto no-scrollbar">
+              @for (msg of messages(); track msg.id) {
+                <div
+                  class="flex items-center gap-3 p-3 rounded-xl bg-base-content/5 border border-base-content/5 animate-in slide-in-from-left-2 duration-300"
+                >
+                  <span class="text-[9px] font-mono opacity-20 whitespace-nowrap">{{
+                    msg.time
+                  }}</span>
+                  <span class="font-bold text-primary italic flex-1 break-all">{{ msg.text }}</span>
+                </div>
+              }
             </div>
           }
         </div>
-      }
+      </div>
     </section>
   `,
 })
 export class BroadcastChannelDemoComponent implements OnDestroy {
   private readonly svc = inject(BroadcastChannelService);
-  private readonly subs: Subscription[] = [];
+  private readonly channelName = 'demo-channel';
 
   readonly supported = this.svc.isSupported();
-  channelName = 'demo-channel';
-  channelMsg = '';
-  readonly channelOpen = signal(false);
-  readonly messages = signal<Array<{ dir: 'sent' | 'recv'; text: string; time: string }>>([]);
+  readonly message = signal('');
+  readonly messages = signal<{ id: number; text: string; time: string }[]>([]);
 
-  openChannel(): void {
-    if (!this.supported) return;
-    this.subs.push(
-      this.svc.open<string>(this.channelName).subscribe((msg) => {
+  constructor() {
+    if (this.supported) {
+      this.svc.open(this.channelName).subscribe((msg) => {
         this.messages.update((prev) => [
-          ...prev,
-          { dir: 'recv', text: msg, time: new Date().toLocaleTimeString() },
+          { id: Date.now(), text: String(msg), time: new Date().toLocaleTimeString() },
+          ...prev.slice(0, 19),
         ]);
-      }),
-    );
-    this.channelOpen.set(true);
+      });
+    }
   }
 
   send(): void {
-    if (!this.channelMsg.trim()) return;
-    this.svc.post(this.channelName, this.channelMsg);
-    this.messages.update((prev) => [
-      ...prev,
-      { dir: 'sent', text: this.channelMsg, time: new Date().toLocaleTimeString() },
-    ]);
-    this.channelMsg = '';
+    this.svc.post(this.channelName, this.message());
+    this.message.set('');
   }
 
   clearMessages(): void {
@@ -137,6 +112,6 @@ export class BroadcastChannelDemoComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subs.forEach((s) => s.unsubscribe());
+    this.svc.close(this.channelName);
   }
 }

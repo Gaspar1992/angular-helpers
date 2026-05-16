@@ -12,47 +12,49 @@ interface StreamCapability {
   selector: 'app-worker-http-streams-polyfill-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-base-200 border border-base-300 rounded-xl p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
-          🌊 Streams Polyfill
-        </h2>
-        <span class="badge badge-info">Safari Support</span>
+    <div class="bg-base-200 border border-base-content/5 rounded-3xl p-8 h-full flex flex-col">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-info m-0 flex items-center gap-2">🌊 Streams Polyfill</h2>
+        <span class="badge badge-info font-semibold">Safari Support</span>
       </div>
-      <p class="text-sm text-base-content/80 mb-4">
+      <p class="text-sm text-base-content/70 mb-8">
         Detects Safari 16-17 transferable streams limitation and provides ponyfill when needed
       </p>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        <button type="button" (click)="detectCapabilities()" class="btn btn-primary btn-sm">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <button type="button" (click)="detectCapabilities()" class="btn btn-primary font-bold">
           Detect Capabilities
         </button>
-        <button type="button" (click)="simulateLegacySafari()" class="btn btn-secondary btn-sm">
+        <button type="button" (click)="simulateLegacySafari()" class="btn btn-secondary font-bold">
           Simulate Safari 17
         </button>
       </div>
 
       @if (detectionResult()) {
-        <div class="space-y-3">
+        <div class="space-y-4 mt-auto">
           <!-- Polyfill Needed -->
           <div
-            class="p-3 rounded-lg border-l-4"
-            [class.bg-success/10]="!detectionResult()?.needsPolyfill"
-            [class.border-success]="!detectionResult()?.needsPolyfill"
-            [class.bg-warning/10]="detectionResult()?.needsPolyfill"
-            [class.border-warning]="detectionResult()?.needsPolyfill"
+            class="p-4 rounded-2xl border bg-base-content/5 shadow-inner"
+            [class.border-success/30]="!detectionResult()?.needsPolyfill"
+            [class.border-warning/30]="detectionResult()?.needsPolyfill"
           >
-            <div class="flex items-center justify-between">
-              <span class="font-semibold text-sm">Polyfill Required</span>
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-xs uppercase tracking-wider opacity-70">
+                Polyfill Required
+              </span>
               <span
-                class="badge badge-sm"
+                class="badge badge-sm font-bold"
                 [class.badge-success]="!detectionResult()?.needsPolyfill"
                 [class.badge-warning]="detectionResult()?.needsPolyfill"
               >
-                {{ detectionResult()?.needsPolyfill ? 'Yes' : 'No' }}
+                {{ detectionResult()?.needsPolyfill ? 'YES' : 'NO' }}
               </span>
             </div>
-            <p class="text-xs text-base-content/70 mt-1">
+            <p
+              class="text-sm font-semibold"
+              [class.text-success]="!detectionResult()?.needsPolyfill"
+              [class.text-warning]="detectionResult()?.needsPolyfill"
+            >
               {{
                 detectionResult()?.needsPolyfill
                   ? 'Safari 16-17 detected — ponyfill needed'
@@ -62,22 +64,24 @@ interface StreamCapability {
           </div>
 
           <!-- User Agent -->
-          <div class="p-3 bg-base-300 rounded-lg">
-            <span class="text-xs font-semibold text-base-content/60 uppercase">User Agent</span>
-            <p class="text-xs font-mono break-all mt-1">{{ detectionResult()?.userAgent }}</p>
+          <div class="p-4 bg-base-content/5 rounded-2xl border border-base-content/5 shadow-inner">
+            <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-base-content/40">
+              User Agent
+            </span>
+            <p class="text-[11px] font-mono break-all mt-2 text-base-content/60 leading-relaxed">
+              {{ detectionResult()?.userAgent }}
+            </p>
           </div>
 
           <!-- Capabilities Grid -->
           <div class="grid grid-cols-2 gap-2">
             @for (cap of detectionResult()?.capabilities; track cap.name) {
               <div
-                class="p-2 rounded-lg text-xs flex items-center justify-between"
-                [class.bg-success/10]="cap.supported"
-                [class.bg-error/10]="!cap.supported"
+                class="p-3 rounded-xl text-xs flex items-center justify-between bg-base-content/5 border border-base-content/5"
               >
-                <span>{{ cap.name }}</span>
+                <span class="font-medium opacity-80">{{ cap.name }}</span>
                 <span
-                  class="badge badge-xs"
+                  class="badge badge-xs font-bold"
                   [class.badge-success]="cap.supported"
                   [class.badge-error]="!cap.supported"
                 >
@@ -89,12 +93,16 @@ interface StreamCapability {
 
           <!-- Safari Version Detection -->
           @if (detectionResult()?.safariVersion) {
-            <div class="p-2 bg-info/10 rounded-lg text-xs">
-              <span class="font-semibold">Safari Version:</span>
-              {{ detectionResult()?.safariVersion }}
-              @if (detectionResult()?.isLegacySafari) {
-                <span class="badge badge-warning badge-xs ml-2">Legacy (&lt; 18)</span>
-              }
+            <div
+              class="p-3 bg-info/10 border border-info/20 rounded-xl text-xs flex items-center justify-between"
+            >
+              <span class="text-info font-bold">Safari Version</span>
+              <div class="flex items-center gap-2">
+                <span class="font-mono">{{ detectionResult()?.safariVersion }}</span>
+                @if (detectionResult()?.isLegacySafari) {
+                  <span class="badge badge-warning badge-xs font-bold">LEGACY</span>
+                }
+              </div>
             </div>
           }
         </div>

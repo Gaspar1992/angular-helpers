@@ -1,36 +1,36 @@
-// @angular-helpers/openlayers/military — service implementation
-
-import { Injectable } from '@angular/core';
-import type { Coordinate, Feature } from '@angular-helpers/openlayers/core';
-import type {
-  DonutConfig,
-  EllipseConfig,
-  MilSymbolConfig,
-  MilSymbolStyleResult,
-  SectorConfig,
-} from '../models/military.types';
-
-/**
- * Meters per degree of latitude on a spherical Earth approximation.
- * Used by the local tangent-plane projection in the geometry helpers.
- */
-const METERS_PER_DEGREE_LAT = 111_320;
+import { inject, Injectable, resource } from '@angular/core';
+import type { Feature } from '@angular-helpers/openlayers/core';
+import { OlGeometryService } from '@angular-helpers/openlayers/core';
+import type { DonutConfig, EllipseConfig, SectorConfig } from '@angular-helpers/openlayers/core';
+import type { MilSymbolConfig, MilSymbolStyleResult } from '../models/military.types';
 
 /**
  * Service exposing geometry helpers and MIL-STD-2525 symbology rendering.
  *
  * - `createEllipse`, `createSector`, `createDonut` are **pure math** and
- *   have no runtime dependencies beyond the bundled types.
- * - `createMilSymbol` uses the milsymbol library via dynamic ESM import.
+ *   delegate to {@link OlGeometryService} in core.
+ * - `createMilSymbol` uses the milsymbol library via Angular resource loading.
  */
 @Injectable()
 export class OlMilitaryService {
   private idCounter = 0;
-  private mlLoader: Promise<typeof import('milsymbol')> | null = null;
-  private msModule: typeof import('milsymbol') | null = null;
+  private geometryService = inject(OlGeometryService);
+
+  /**
+   * Resource managing the lazy-loading of the milsymbol library.
+   * Angular resource provides native signals for value, loading state, and errors.
+   */
+  private readonly msResource = resource({
+    loader: () => import('milsymbol'),
+  });
+
+  /** Signal indicating if the milsymbol library is currently being loaded. */
+  readonly isLoading = this.msResource.isLoading;
+
+  constructor() {}
 
   // ---------------------------------------------------------------------------
-  // Geometry helpers (pure math, no deps)
+  // Geometry helpers (delegated to core)
   // ---------------------------------------------------------------------------
 
   /**
@@ -38,33 +38,7 @@ export class OlMilitaryService {
    * `config.center`. See {@link EllipseConfig} for parameter semantics.
    */
   createEllipse(config: EllipseConfig): Feature {
-    const { center, semiMajor, semiMinor, rotation = 0, segments = 64, properties } = config;
-    if (semiMajor <= 0 || semiMinor <= 0) {
-      throw new RangeError('semiMajor and semiMinor must be positive');
-    }
-    if (segments < 8) {
-      throw new RangeError('segments must be >= 8');
-    }
-
-    const cosR = Math.cos(rotation);
-    const sinR = Math.sin(rotation);
-    const ring: Coordinate[] = [];
-    for (let i = 0; i < segments; i++) {
-      const theta = (i / segments) * Math.PI * 2;
-      // Ellipse in local axis-aligned frame, then rotated by `rotation`.
-      const ax = Math.cos(theta) * semiMajor;
-      const ay = Math.sin(theta) * semiMinor;
-      const dx = ax * cosR - ay * sinR;
-      const dy = ax * sinR + ay * cosR;
-      ring.push(this.offsetMetersToLonLat(center, dx, dy));
-    }
-    ring.push(ring[0]); // close the ring
-
-    return {
-      id: this.nextId('ellipse'),
-      geometry: { type: 'Polygon', coordinates: [ring] },
-      properties,
-    };
+    return this.geometryService.createEllipse(config);
   }
 
   /**
@@ -72,75 +46,14 @@ export class OlMilitaryService {
    * See {@link SectorConfig} for parameter semantics.
    */
   createSector(config: SectorConfig): Feature {
-    const { center, radius, startAngle, endAngle, segments = 32, properties } = config;
-    if (radius <= 0) {
-      throw new RangeError('radius must be positive');
-    }
-    if (endAngle <= startAngle) {
-      throw new RangeError('endAngle must be greater than startAngle');
-    }
-    if (endAngle - startAngle > Math.PI * 2) {
-      throw new RangeError('sector cannot exceed full circle');
-    }
-    if (segments < 4) {
-      throw new RangeError('segments must be >= 4');
-    }
-
-    const ring: Coordinate[] = [center];
-    const span = endAngle - startAngle;
-    for (let i = 0; i <= segments; i++) {
-      const theta = startAngle + (i / segments) * span;
-      const dx = Math.cos(theta) * radius;
-      const dy = Math.sin(theta) * radius;
-      ring.push(this.offsetMetersToLonLat(center, dx, dy));
-    }
-    ring.push(center); // close back to apex
-
-    return {
-      id: this.nextId('sector'),
-      geometry: { type: 'Polygon', coordinates: [ring] },
-      properties,
-    };
+    return this.geometryService.createSector(config);
   }
 
   /**
-   * Build a `Feature<Polygon>` for a donut (annular ring). The output has
-   * two rings: an outer ring wound counter-clockwise and an inner ring
-   * wound clockwise so the GeoJSON right-hand rule renders the hole.
+   * Build a `Feature<Polygon>` for a donut (annular ring).
    */
   createDonut(config: DonutConfig): Feature {
-    const { center, outerRadius, innerRadius, segments = 64, properties } = config;
-    if (outerRadius <= 0 || innerRadius <= 0) {
-      throw new RangeError('radii must be positive');
-    }
-    if (outerRadius <= innerRadius) {
-      throw new RangeError('outerRadius must be greater than innerRadius');
-    }
-    if (segments < 8) {
-      throw new RangeError('segments must be >= 8');
-    }
-
-    const outer: Coordinate[] = [];
-    const inner: Coordinate[] = [];
-    for (let i = 0; i < segments; i++) {
-      const theta = (i / segments) * Math.PI * 2;
-      const cosT = Math.cos(theta);
-      const sinT = Math.sin(theta);
-      // Outer ring: CCW (theta increasing)
-      outer.push(this.offsetMetersToLonLat(center, cosT * outerRadius, sinT * outerRadius));
-      // Inner ring: CW — sample the SAME thetas but we'll reverse the
-      // accumulator below so the ring is traversed in the opposite sense.
-      inner.push(this.offsetMetersToLonLat(center, cosT * innerRadius, sinT * innerRadius));
-    }
-    inner.reverse();
-    outer.push(outer[0]);
-    inner.push(inner[0]);
-
-    return {
-      id: this.nextId('donut'),
-      geometry: { type: 'Polygon', coordinates: [outer, inner] },
-      properties,
-    };
+    return this.geometryService.createDonut(config);
   }
 
   // ---------------------------------------------------------------------------
@@ -148,89 +61,68 @@ export class OlMilitaryService {
   // ---------------------------------------------------------------------------
 
   /**
-   * Pre-load the optional `milsymbol` peer dependency so subsequent calls
-   * to `createMilSymbol` / `createMilSymbolSync` resolve immediately.
-   * Idempotent — multiple calls share the same promise.
+   * Pre-load the optional `milsymbol` peer dependency.
+   * Since resource() starts loading immediately, this simply returns a promise
+   * that resolves when the resource is ready.
    */
-  preloadMilsymbol(): Promise<void> {
+  async preloadMilsymbol(): Promise<void> {
     this.assertBrowser();
-    if (!this.mlLoader) {
-      this.mlLoader = import('milsymbol').then((m) => {
-        this.msModule = m;
-        return m;
-      });
-    }
-    return this.mlLoader.then(() => {
-      // Void return for the public API
-    });
+    // We can just await the dynamic import again; the browser/bundler will
+    // return the same module instantly if already loaded by the resource.
+    await import('milsymbol');
   }
 
   /**
    * Build a MIL-STD-2525 symbol feature asynchronously.
-   * Lazy-loads `milsymbol` on the first call.
+   * Waits for the milsymbol resource to resolve.
    */
   async createMilSymbol(config: MilSymbolConfig): Promise<Feature> {
     this.assertBrowser();
     this.assertSidc(config.sidc);
 
-    if (!this.msModule) {
-      await this.preloadMilsymbol();
-    }
-
-    return this.buildSymbolFeature(config);
+    // Dynamic import ensures we have the module reference even if called
+    // before the resource signal has propagated.
+    const msModule = await import('milsymbol');
+    return this.buildSymbolFeature(config, msModule);
   }
 
   /**
    * Build a MIL-STD-2525 symbol feature synchronously.
-   * Throws if `milsymbol` has not been preloaded via `preloadMilsymbol()`
-   * or a previous `createMilSymbol()` call.
+   * Throws if `milsymbol` resource is not ready.
    */
   createMilSymbolSync(config: MilSymbolConfig): Feature {
     this.assertBrowser();
     this.assertSidc(config.sidc);
 
-    if (!this.msModule) {
+    const msModule = this.msResource.value();
+    if (!msModule) {
       throw new Error(
         'milsymbol is not loaded yet. Call preloadMilsymbol() or use the async createMilSymbol().',
       );
     }
 
-    return this.buildSymbolFeature(config);
+    return this.buildSymbolFeature(config, msModule);
   }
 
   // ---------------------------------------------------------------------------
   // Internals
   // ---------------------------------------------------------------------------
 
-  /**
-   * Project an `(dx, dy)` meter offset from `center` to lon/lat using a
-   * local tangent-plane (equirectangular) approximation. Acceptable for
-   * the radii typical in military symbology (<100 km from center).
-   */
-  private offsetMetersToLonLat(center: Coordinate, dx: number, dy: number): Coordinate {
-    const [lon, lat] = center;
-    const latRad = (lat * Math.PI) / 180;
-    const dLat = dy / METERS_PER_DEGREE_LAT;
-    const dLon = dx / (METERS_PER_DEGREE_LAT * Math.cos(latRad));
-    return [lon + dLon, lat + dLat];
-  }
-
   private nextId(kind: string): string {
     return `${kind}-${++this.idCounter}`;
   }
 
-  private buildSymbolFeature(config: MilSymbolConfig): Feature {
+  private buildSymbolFeature(
+    config: MilSymbolConfig,
+    msModule: typeof import('milsymbol'),
+  ): Feature {
     const { sidc, position, properties, quantity, ...rest } = config;
-    // `milsymbol` types `quantity` as a string, but a number is the
-    // ergonomic shape; coerce here.
     const milOptions = {
       ...rest,
       ...(quantity !== undefined ? { quantity: String(quantity) } : {}),
     };
 
-    // We asserted this.msModule exists before calling this
-    const ms = this.msModule!;
-    // default import might be wrapped depending on bundler
+    const ms = msModule;
     const SymbolClass = (ms as any).default?.Symbol || ms.Symbol;
     const symbol = new SymbolClass(sidc, milOptions);
     const style = this.symbolToStyleResult(symbol);
@@ -260,9 +152,42 @@ export class OlMilitaryService {
   }
 
   private encodeBase64Utf8(input: string): string {
-    // `btoa` only handles Latin-1; this round-trip preserves non-ASCII
-    // characters (e.g. unit designators with accents).
     return btoa(unescape(encodeURIComponent(input)));
+  }
+
+  /**
+   * Generates a canvas and anchor for a MIL-STD-2525 symbol.
+   * Requires milsymbol to be loaded (synchronous).
+   */
+  createUnitStyle(
+    sidc: string,
+    selected = false,
+    size = 30,
+  ): {
+    image: { img: HTMLCanvasElement; size: [number, number]; anchor: [number, number] };
+    zIndex: number;
+  } | null {
+    const msModule = this.msResource.value();
+    if (!msModule) return null;
+
+    const ms = msModule;
+    const SymbolClass = (ms as any).default?.Symbol || ms.Symbol;
+    const symbol = new SymbolClass(sidc, {
+      size,
+      strokeWidth: selected ? 6 : 4,
+    });
+
+    const canvas = symbol.asCanvas();
+    const anchor = (symbol as any).getAnchor();
+
+    return {
+      image: {
+        img: canvas,
+        size: [canvas.width, canvas.height],
+        anchor: [anchor.x / canvas.width, anchor.y / canvas.height],
+      },
+      zIndex: selected ? 100 : 10,
+    };
   }
 
   private assertSidc(sidc: unknown): asserts sidc is string {

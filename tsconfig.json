@@ -16,6 +16,7 @@
     "module": "preserve",
     "baseUrl": ".",
     "paths": {
+      "@angular/*": ["node_modules/@angular/*"],
       "@angular-helpers/*": ["packages/*/src/index.ts"],
       "@angular-helpers/worker-http/transport": ["packages/worker-http/transport/src/index.ts"],
       "@angular-helpers/worker-http/serializer": ["packages/worker-http/serializer/src/index.ts"],

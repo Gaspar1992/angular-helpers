@@ -5,77 +5,117 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-camera-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule],
+  styleUrls: ['../demo.styles.css'],
   template: `
-    <section
-      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
-      aria-labelledby="cam-title"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="cam-title">Camera</h2>
+    <section class="svc-card" aria-labelledby="cam-title">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title" id="cam-title">
+          <span class="text-primary text-2xl">📸</span> Camera
+        </h2>
         <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-success badge-sm">supported</span>
+            <span class="badge badge-success font-black">supported</span>
           } @else {
-            <span class="badge badge-error badge-sm">unsupported</span>
+            <span class="badge badge-error font-black">unsupported</span>
           }
-          <span class="badge badge-info badge-sm">secure context</span>
+          <span class="badge badge-info font-black">secure context</span>
+          @if (videoStream()) {
+            <span class="badge badge-primary animate-pulse font-black text-[9px]">LIVE</span>
+          }
         </div>
       </div>
-      <div class="flex flex-wrap gap-2 items-center mb-4">
-        <select
-          [ngModel]="selectedCamera"
-          (ngModelChange)="selectedCamera = $event"
-          class="select select-bordered select-sm"
-          [disabled]="loading() || !!videoStream()"
-          aria-label="Select camera"
-        >
-          @for (cam of availableCameras(); track cam.deviceId) {
-            <option [value]="cam.deviceId">{{ cam.label || 'Camera ' + $index }}</option>
-          }
-          @if (availableCameras().length === 0) {
-            <option value="">No cameras detected</option>
-          }
-        </select>
-        <button
-          class="btn btn-primary btn-sm"
-          (click)="start()"
-          [disabled]="loading() || !!videoStream()"
-        >
-          Start
-        </button>
-        <button class="btn btn-error btn-sm" (click)="stop()" [disabled]="!videoStream()">
-          Stop
-        </button>
-        <button class="btn btn-secondary btn-sm" (click)="takePhoto()" [disabled]="!videoStream()">
-          Snapshot
-        </button>
-      </div>
-      @if (videoStream()) {
-        <video
-          class="max-w-full h-auto rounded-lg border border-base-300 mt-3"
-          [srcObject]="videoStream()"
-          autoplay
-          muted
-          playsinline
-          aria-label="Camera preview"
-        ></video>
-      }
-      @if (photoUrl()) {
-        <div class="relative inline-block mt-3">
-          <img
-            [src]="photoUrl()"
-            alt="Captured snapshot"
-            class="max-w-full h-auto rounded-lg border border-base-300"
-          />
-          <button
-            class="absolute top-2 right-2 w-8 h-8 rounded-full bg-error/80 text-white flex items-center justify-center hover:bg-error transition-colors"
-            (click)="photoUrl.set('')"
-            aria-label="Dismiss photo"
+
+      <p class="svc-desc">
+        High-performance media stream integration with device selection and instant snapshots.
+      </p>
+
+      <div class="svc-controls mb-8">
+        <div class="flex-1 min-w-[200px]">
+          <label>Select Device</label>
+          <select
+            [ngModel]="selectedCamera"
+            (ngModelChange)="selectedCamera = $event"
+            class="demo-select w-full"
+            [disabled]="loading() || !!videoStream()"
+            aria-label="Select camera"
           >
-            ✕
+            @for (cam of availableCameras(); track cam.deviceId) {
+              <option [value]="cam.deviceId">{{ cam.label || 'Camera ' + $index }}</option>
+            }
+            @if (availableCameras().length === 0) {
+              <option value="">No cameras detected</option>
+            }
+          </select>
+        </div>
+
+        <div class="flex items-end gap-3 flex-wrap sm:flex-nowrap">
+          <button
+            class="btn btn-primary font-black"
+            (click)="start()"
+            [disabled]="loading() || !!videoStream()"
+          >
+            Start Feed
+          </button>
+          <button class="btn btn-danger font-black" (click)="stop()" [disabled]="!videoStream()">
+            Stop
+          </button>
+          <button
+            class="btn btn-secondary font-black"
+            (click)="takePhoto()"
+            [disabled]="!videoStream()"
+          >
+            Snapshot
           </button>
         </div>
-      }
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
+        <!-- Live Feed -->
+        <div
+          class="relative bg-base-content/5 rounded-[2.5rem] border border-base-content/5 overflow-hidden shadow-inner aspect-video flex items-center justify-center"
+        >
+          @if (videoStream()) {
+            <video
+              class="w-full h-full object-cover animate-in fade-in duration-700"
+              [srcObject]="videoStream()"
+              autoplay
+              muted
+              playsinline
+              aria-label="Camera preview"
+            ></video>
+          } @else {
+            <div class="text-base-content/10 flex flex-col items-center gap-4">
+              <span class="text-6xl">📷</span>
+              <span class="text-[10px] font-black uppercase tracking-[0.3em]">No Signal</span>
+            </div>
+          }
+        </div>
+
+        <!-- Snapshot -->
+        <div
+          class="relative bg-base-content/5 rounded-[2.5rem] border border-base-content/5 overflow-hidden shadow-inner aspect-video flex items-center justify-center"
+        >
+          @if (photoUrl()) {
+            <img
+              [src]="photoUrl()"
+              alt="Captured snapshot"
+              class="w-full h-full object-cover animate-in zoom-in-95 duration-300"
+            />
+            <button
+              class="absolute top-4 right-4 w-10 h-10 rounded-full bg-error text-base-content flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-xl font-black z-10"
+              (click)="photoUrl.set('')"
+              aria-label="Dismiss photo"
+            >
+              ✕
+            </button>
+          } @else {
+            <div class="text-base-content/10 flex flex-col items-center gap-4">
+              <span class="text-6xl">🖼️</span>
+              <span class="text-[10px] font-black uppercase tracking-[0.3em]">Ready</span>
+            </div>
+          }
+        </div>
+      </div>
     </section>
   `,
 })

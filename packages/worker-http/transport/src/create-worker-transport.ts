@@ -139,6 +139,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
 
       if (streamsPolyfill && !polyfillLoaded) {
         loadStreamsPolyfill().catch((err) => {
+          // oxlint-disable-next-line no-console
           console.warn('[worker-http] Streams polyfill failed to load:', err);
         });
       }
@@ -250,6 +251,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
 
       polyfillLoaded = true;
     } catch (err) {
+      // oxlint-disable-next-line no-console
       console.warn('[worker-http] Failed to load streams polyfill:', err);
     }
   }

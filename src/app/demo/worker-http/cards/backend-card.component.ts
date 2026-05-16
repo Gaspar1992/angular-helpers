@@ -10,38 +10,36 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
   selector: 'app-worker-http-backend-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-base-200 border border-base-300 rounded-xl p-6 col-span-full">
-      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
-          🔀 HttpBackend
-        </h2>
-        <span class="badge badge-success">v0.3.0+</span>
+    <div class="bg-base-200 border border-base-content/5 rounded-3xl p-8 col-span-full">
+      <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
+        <h2 class="text-xl font-bold text-success m-0 flex items-center gap-2">🔀 HttpBackend</h2>
+        <span class="badge badge-success font-semibold tracking-wide">v0.3.0+</span>
       </div>
-      <p class="text-sm text-base-content/80 mb-4">
-        <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded">WorkerHttpBackend</code>
-        routes real HTTP requests off the main thread via
-        <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded"
-          >provideWorkerHttpClient()</code
-        >. The live demo calls JSONPlaceholder via the
-        <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded">http-api.worker.js</code>
-        using
-        <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded"
-          >createWorkerPipeline()</code
+      <p class="text-sm text-base-content/70 mb-8 max-w-3xl">
+        <code class="font-mono text-xs bg-base-content/5 text-success px-2 py-0.5 rounded-md"
+          >WorkerHttpBackend</code
         >
-        with retry + cache interceptors.
+        routes real HTTP requests off the main thread via
+        <code class="font-mono text-xs bg-base-content/5 text-success px-2 py-0.5 rounded-md"
+          >provideWorkerHttpClient()</code
+        >. This demo calls JSONPlaceholder via the
+        <code class="font-mono text-xs bg-base-content/5 text-success px-2 py-0.5 rounded-md"
+          >http-api.worker.js</code
+        >
+        using a worker pipeline with retry + cache interceptors.
       </p>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div>
-          <p class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="flex flex-col">
+          <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-base-content/40 mb-4">
             Live HTTP Call via Worker
           </p>
-          <div class="flex flex-wrap gap-2 mb-4">
+          <div class="flex flex-wrap gap-3 mb-6">
             <button
               type="button"
               (click)="fetch('https://jsonplaceholder.typicode.com/todos/1')"
               [disabled]="status() === 'running'"
-              class="btn btn-success btn-sm"
+              class="btn btn-success font-bold px-6"
             >
               @if (status() === 'running') {
                 <span class="loading loading-spinner loading-xs"></span>
@@ -52,37 +50,43 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
               type="button"
               (click)="fetch('https://jsonplaceholder.typicode.com/users/1')"
               [disabled]="status() === 'running'"
-              class="btn btn-ghost btn-sm"
+              class="btn btn-outline btn-success font-bold px-6 border-2"
             >
               GET /users/1
             </button>
           </div>
           @if (result()) {
-            <div class="p-3 bg-base-300 rounded-lg font-mono text-xs overflow-auto max-h-40">
-              <span class="text-success">Response ({{ elapsedMs() }}ms):</span>
-              <br />
-              {{ result() }}
+            <div
+              class="p-4 bg-base-content/5 rounded-2xl shadow-inner border border-base-content/5 font-mono text-xs overflow-auto max-h-60 mt-auto"
+            >
+              <div class="text-success font-bold mb-2 flex justify-between items-center">
+                <span>RESPONSE</span>
+                <span class="text-[10px] opacity-70">{{ elapsedMs() }}ms</span>
+              </div>
+              <pre class="text-success/90 whitespace-pre-wrap">{{ result() }}</pre>
             </div>
           }
         </div>
 
         <div>
-          <p class="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-2">
+          <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-base-content/40 mb-4">
             URL Routing Simulation
           </p>
-          <p class="text-xs text-base-content/60 mb-3">
-            <code class="font-mono">matchWorkerRoute()</code> resolves which worker handles each
-            URL.
+          <p class="text-xs text-base-content/60 mb-4">
+            <code class="font-mono text-primary">matchWorkerRoute()</code> resolves which worker
+            handles each URL based on configuration.
           </p>
-          <div class="space-y-1">
+          <div class="space-y-2">
             @for (entry of routingResults; track entry.url) {
-              <div class="flex items-center gap-2 text-xs font-mono p-2 bg-base-300 rounded">
-                <span class="text-base-content/60 flex-1 truncate">{{ entry.url }}</span>
-                <span class="text-xs">→</span>
+              <div
+                class="flex items-center gap-3 text-xs font-mono p-3 bg-base-content/5 border border-base-content/5 rounded-xl hover:bg-base-content/5 transition-colors"
+              >
+                <span class="text-base-content/70 flex-1 truncate">{{ entry.url }}</span>
+                <span class="text-base-content/30">→</span>
                 @if (entry.worker) {
-                  <span class="badge badge-xs badge-primary">{{ entry.worker }}</span>
+                  <span class="badge badge-primary badge-sm font-bold">{{ entry.worker }}</span>
                 } @else {
-                  <span class="badge badge-xs badge-ghost">main-thread</span>
+                  <span class="badge badge-ghost badge-sm opacity-50">main-thread</span>
                 }
               </div>
             }

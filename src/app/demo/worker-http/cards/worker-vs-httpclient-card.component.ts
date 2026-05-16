@@ -13,29 +13,32 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
   selector: 'app-worker-http-vs-httpclient-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-base-200 border border-base-300 rounded-xl p-6 col-span-full">
-      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
+    <div class="bg-base-200 border border-base-content/5 rounded-3xl p-8 col-span-full">
+      <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
+        <h2 class="text-xl font-bold text-primary m-0 flex items-center gap-2">
           🆚 Worker vs HttpClient
         </h2>
-        <span class="badge badge-warning">v21.2.0</span>
+        <span class="badge badge-warning font-semibold">v21.2.0</span>
       </div>
-      <p class="text-sm text-base-content/80 mb-4">
+      <p class="text-sm text-base-content/70 mb-8 max-w-4xl">
         Both buttons fetch
-        <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded">{{ url }}</code>
+        <code class="font-mono text-xs bg-base-content/5 text-primary px-2 py-0.5 rounded-md">{{
+          url
+        }}</code>
         while a CPU-burn loop runs on the main thread. The
         <strong>dropped frames</strong> counter is a proxy for visible jank:
-        <code class="font-mono text-xs">requestAnimationFrame</code> deltas above 25 ms. HttpClient
-        processes the response on the main thread and competes with the burn loop. The Worker path
-        leaves the main thread free.
+        <code class="font-mono text-xs bg-base-content/5 text-primary px-2 py-0.5 rounded-md"
+          >requestAnimationFrame</code
+        >
+        deltas above 25 ms.
       </p>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <button
           type="button"
           (click)="fetch('http-client')"
           [disabled]="status() === 'running'"
-          class="btn btn-sm btn-secondary"
+          class="btn btn-secondary font-bold px-6"
         >
           @if (status() === 'running') {
             <span class="loading loading-spinner loading-xs"></span>
@@ -46,41 +49,46 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
           type="button"
           (click)="fetch('worker-http')"
           [disabled]="status() === 'running'"
-          class="btn btn-sm btn-success"
+          class="btn btn-success font-bold px-6"
         >
+          @if (status() === 'running') {
+            <span class="loading loading-spinner loading-xs"></span>
+          }
           Fetch with WorkerHttpClient
         </button>
       </div>
 
       @if (results().length > 0) {
-        <div class="overflow-x-auto">
+        <div
+          class="overflow-x-auto bg-base-content/5 rounded-2xl border border-base-content/5 shadow-inner"
+        >
           <table class="table table-sm">
-            <thead>
+            <thead class="bg-base-content/5 text-base-content/60">
               <tr>
-                <th>Transport</th>
-                <th class="text-right">Status</th>
-                <th class="text-right">Items</th>
-                <th class="text-right">Wall time (ms)</th>
-                <th class="text-right">Dropped frames</th>
+                <th class="py-3">Transport</th>
+                <th class="text-right py-3">Status</th>
+                <th class="text-right py-3">Items</th>
+                <th class="text-right py-3">Wall time (ms)</th>
+                <th class="text-right py-3">Dropped frames</th>
               </tr>
             </thead>
             <tbody>
               @for (row of results(); track $index) {
-                <tr>
-                  <td>
+                <tr class="border-base-content/5 hover:bg-base-content/5 transition-colors">
+                  <td class="py-3">
                     <span
-                      class="badge badge-xs"
+                      class="badge badge-sm font-bold tracking-wide"
                       [class.badge-secondary]="row.transport === 'http-client'"
                       [class.badge-success]="row.transport === 'worker-http'"
                     >
                       {{ row.transport }}
                     </span>
                   </td>
-                  <td class="text-right font-mono">{{ row.status }}</td>
-                  <td class="text-right font-mono">{{ row.itemCount }}</td>
-                  <td class="text-right font-mono">{{ row.elapsedMs }}</td>
+                  <td class="text-right font-mono text-xs">{{ row.status }}</td>
+                  <td class="text-right font-mono text-xs">{{ row.itemCount }}</td>
+                  <td class="text-right font-mono text-xs">{{ row.elapsedMs }}</td>
                   <td
-                    class="text-right font-mono"
+                    class="text-right font-mono text-xs font-bold"
                     [class.text-error]="row.droppedFrames > 5"
                     [class.text-warning]="row.droppedFrames > 0 && row.droppedFrames <= 5"
                     [class.text-success]="row.droppedFrames === 0"

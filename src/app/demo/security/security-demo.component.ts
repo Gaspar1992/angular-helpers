@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, signal } from '@angular/core';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   RegexSecurityService,
@@ -21,567 +21,628 @@ interface LogEntry {
   selector: 'app-security-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DecimalPipe, FormsModule],
+  styleUrls: ['../services/demo.styles.css'],
   template: `
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <div class="max-width-container py-12 sm:py-20 animate-in fade-in duration-700">
       <!-- Header -->
-      <header class="mb-8 sm:mb-12">
-        <div class="flex flex-wrap items-center gap-3 mb-4">
-          <span class="text-4xl">🛡️</span>
+      <header class="mb-16 text-center sm:text-left">
+        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-5 mb-8">
+          <div
+            class="w-20 h-20 rounded-[2rem] bg-primary/10 flex items-center justify-center text-5xl shadow-2xl border border-primary/20 ring-1 ring-primary/10"
+          >
+            🛡️
+          </div>
           <div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-base-content m-0">Security Demo</h1>
-            <p class="text-sm sm:text-base text-base-content/80 m-0 mt-1">
-              Interactive demos for @angular-helpers/security
+            <h1 class="text-3xl sm:text-5xl font-black text-base-content m-0 tracking-tighter">
+              Security Engine
+            </h1>
+            <p class="text-lg text-base-content/50 m-0 mt-2 font-medium leading-relaxed">
+              Reactive defense-in-depth utilities for modern Angular applications.
             </p>
           </div>
         </div>
-        <div class="flex flex-wrap gap-2">
-          <span class="badge badge-primary badge-md">Regex Security</span>
-          <span class="badge badge-secondary badge-md">WebCrypto</span>
-          <span class="badge badge-accent badge-md">Secure Storage</span>
-          <span class="badge badge-info badge-md">Input Sanitizer</span>
-          <span class="badge badge-success badge-md">Password Strength</span>
+        <div class="flex flex-wrap gap-2.5 justify-center sm:justify-start">
+          <span class="badge badge-primary font-black">Regex Security</span>
+          <span class="badge badge-secondary font-black">WebCrypto</span>
+          <span class="badge badge-accent font-black">Secure Storage</span>
+          <span class="badge badge-info font-black">Input Sanitizer</span>
+          <span class="badge badge-success font-black">Password Strength</span>
         </div>
       </header>
 
       <!-- Demo Cards Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <!-- Regex Security -->
-        <div class="bg-base-200 border border-base-300 rounded-xl p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
-              🔒 RegexSecurityService
+        <section class="svc-card">
+          <div class="svc-card-head">
+            <h2 class="svc-card-title">
+              <span class="text-primary text-3xl">🔒</span> RegexSecurity
             </h2>
-            <span class="badge badge-primary">ReDoS Protection</span>
+            <span class="badge badge-outline border-primary/30 text-primary font-bold"
+              >ReDoS Protection</span
+            >
           </div>
-          <p class="text-sm text-base-content/80 mb-4">Safe regex execution in Web Workers</p>
+          <p class="svc-desc">
+            Safe regex execution in Web Workers to prevent main-thread freezing during complex
+            pattern matching.
+          </p>
 
-          <div class="space-y-3">
-            <div class="flex flex-col sm:flex-row gap-2">
-              <input
-                type="text"
-                [(ngModel)]="regexPattern"
-                placeholder="Pattern"
-                class="input input-bordered input-sm flex-1 font-mono text-xs"
-              />
-              <input
-                type="text"
-                [(ngModel)]="regexInput"
-                placeholder="Test input"
-                class="input input-bordered input-sm flex-1"
-              />
+          <div class="space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label>Pattern</label>
+                <input
+                  type="text"
+                  [(ngModel)]="regexPattern"
+                  placeholder="Pattern"
+                  class="demo-input w-full font-mono text-xs"
+                />
+              </div>
+              <div class="space-y-2">
+                <label>Test Input</label>
+                <input
+                  type="text"
+                  [(ngModel)]="regexInput"
+                  placeholder="Test input"
+                  class="demo-input w-full"
+                />
+              </div>
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-4">
               <button
                 (click)="testRegex()"
                 [disabled]="regexStatus() === 'running'"
-                class="btn btn-primary btn-sm"
+                class="btn btn-primary flex-1"
               >
                 @if (regexStatus() === 'running') {
-                  <span class="loading loading-spinner loading-xs"></span>
+                  <span class="spinner"></span>
                 }
-                Test Regex
+                Run Safe Test
               </button>
-              <button (click)="analyzePattern()" class="btn btn-secondary btn-sm">Analyze</button>
+              <button (click)="analyzePattern()" class="btn btn-secondary flex-1">
+                Analyze Pattern
+              </button>
             </div>
             @if (regexResult()) {
               <div
-                class="p-3 rounded-lg font-mono text-sm break-all"
-                [class.bg-success/10]="regexStatus() === 'done'"
+                class="svc-result animate-in fade-in duration-300 flex items-center justify-between font-black"
                 [class.text-success]="regexStatus() === 'done'"
-                [class.bg-error/10]="regexStatus() === 'error'"
                 [class.text-error]="regexStatus() === 'error'"
               >
-                {{ regexResult() }}
+                <span class="tracking-tight">{{ regexResult() }}</span>
                 @if (regexTime()) {
-                  <span class="text-xs opacity-60 ml-2">({{ regexTime() }}ms)</span>
+                  <span class="text-[10px] opacity-40 font-black uppercase tracking-[0.2em]"
+                    >{{ regexTime() }}ms</span
+                  >
                 }
               </div>
             }
           </div>
-        </div>
+        </section>
 
         <!-- WebCrypto -->
-        <div class="bg-base-200 border border-base-300 rounded-xl p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
-              🔐 WebCryptoService
+        <section class="svc-card">
+          <div class="svc-card-head">
+            <h2 class="svc-card-title">
+              <span class="text-secondary text-3xl">🔐</span> WebCrypto
             </h2>
-            <span class="badge badge-secondary">Native Crypto</span>
+            <span class="badge badge-outline border-secondary/30 text-secondary font-bold"
+              >Native Crypto</span
+            >
           </div>
-          <p class="text-sm text-base-content/80 mb-4">Hashing, HMAC, and AES encryption</p>
+          <p class="svc-desc">
+            Hardware-accelerated hashing, HMAC, and AES encryption using the browser's internal
+            crypto engine.
+          </p>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <button (click)="hashData()" class="btn btn-primary btn-sm">
-              <span class="text-lg">#</span> SHA-256
-            </button>
-            <button (click)="generateHmac()" class="btn btn-secondary btn-sm">
-              <span class="text-lg">✍️</span> HMAC
-            </button>
-            <button (click)="encryptAes()" class="btn btn-accent btn-sm">
-              <span class="text-lg">🔐</span> AES
-            </button>
+            <button (click)="hashData()" class="btn btn-primary">SHA-256</button>
+            <button (click)="generateHmac()" class="btn btn-secondary">HMAC</button>
+            <button (click)="encryptAes()" class="btn btn-secondary">AES-GCM</button>
           </div>
 
-          @if (hashResult()) {
-            <div class="mt-3 p-3 bg-base-300 rounded-lg font-mono text-xs break-all">
-              <span class="text-secondary">Hash:</span> {{ hashResult() }}
-            </div>
-          }
-          @if (hmacSignature()) {
-            <div class="mt-3 p-3 bg-base-300 rounded-lg font-mono text-xs break-all">
-              <span class="text-secondary">HMAC:</span> {{ hmacSignature() }}
-            </div>
-          }
-          @if (encryptedData()) {
-            <div class="mt-3 p-3 bg-base-300 rounded-lg font-mono text-xs break-all">
-              <span class="text-secondary">AES:</span> {{ encryptedData() }}
-            </div>
-          }
-        </div>
+          <div class="mt-8 space-y-4">
+            @if (hashResult()) {
+              <div class="svc-result animate-in slide-in-from-bottom-2 duration-300">
+                <span class="kv-key block mb-2">SHA-256 Result</span>
+                <code class="text-xs font-mono text-primary break-all font-bold tracking-tight">{{
+                  hashResult()
+                }}</code>
+              </div>
+            }
+            @if (hmacSignature()) {
+              <div class="svc-result animate-in slide-in-from-bottom-2 duration-300">
+                <span class="kv-key block mb-2">HMAC Signature</span>
+                <code class="text-xs font-mono text-secondary break-all font-bold tracking-tight">{{
+                  hmacSignature()
+                }}</code>
+              </div>
+            }
+            @if (encryptedData()) {
+              <div class="svc-result animate-in slide-in-from-bottom-2 duration-300">
+                <span class="kv-key block mb-2">AES Ciphertext</span>
+                <code class="text-xs font-mono text-accent break-all font-bold tracking-tight">{{
+                  encryptedData()
+                }}</code>
+              </div>
+            }
+          </div>
+        </section>
 
         <!-- SecureStorage -->
-        <div class="bg-base-200 border border-base-300 rounded-xl p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
-              🗄️ SecureStorageService
+        <section class="svc-card">
+          <div class="svc-card-head">
+            <h2 class="svc-card-title">
+              <span class="text-accent text-3xl">🗄️</span> SecureStorage
             </h2>
-            <span class="badge badge-accent">AES-GCM</span>
+            <span class="badge badge-outline border-accent/30 text-accent font-bold">AES-GCM</span>
           </div>
-          <p class="text-sm text-base-content/80 mb-4">Encrypted localStorage/sessionStorage</p>
+          <p class="svc-desc">
+            Authenticated encryption for localStorage and sessionStorage to protect sensitive user
+            preferences.
+          </p>
 
-          <div class="space-y-3">
-            <div class="flex flex-col sm:flex-row gap-2">
-              <input
-                type="text"
-                [(ngModel)]="storageKey"
-                placeholder="Key"
-                class="input input-bordered input-sm flex-1 font-mono"
-              />
-              <input
-                type="text"
-                [(ngModel)]="storageValue"
-                placeholder="Value (JSON)"
-                class="input input-bordered input-sm flex-1 font-mono"
-              />
+          <div class="space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label>Storage Key</label>
+                <input
+                  type="text"
+                  [(ngModel)]="storageKey"
+                  placeholder="Key"
+                  class="demo-input w-full font-mono"
+                />
+              </div>
+              <div class="space-y-2">
+                <label>Value (JSON)</label>
+                <input
+                  type="text"
+                  [(ngModel)]="storageValue"
+                  placeholder="Value (JSON)"
+                  class="demo-input w-full font-mono"
+                />
+              </div>
             </div>
-            <div class="flex flex-wrap gap-2">
-              <button (click)="storeData()" class="btn btn-primary btn-sm">Save</button>
-              <button (click)="retrieveData()" class="btn btn-secondary btn-sm">Load</button>
-              <button (click)="initWithPassphrase()" class="btn btn-info btn-sm">Init</button>
-              <button (click)="clearStorage()" class="btn btn-error btn-sm">Clear</button>
+            <div class="flex flex-wrap gap-4">
+              <button (click)="storeData()" class="btn btn-primary flex-1">Save Secure</button>
+              <button (click)="retrieveData()" class="btn btn-secondary flex-1">
+                Load & Decrypt
+              </button>
+            </div>
+            <div class="flex gap-4">
+              <button
+                (click)="initWithPassphrase()"
+                class="btn btn-ghost border border-base-content/10 flex-1"
+              >
+                Init with Pass
+              </button>
+              <button
+                (click)="clearStorage()"
+                class="btn btn-ghost text-error border border-error/10 hover:bg-error/10 flex-1"
+              >
+                Clear All
+              </button>
             </div>
             @if (storageResult()) {
               <div
-                class="p-3 rounded-lg text-sm"
-                [class.bg-success/10]="storageResult().startsWith('✅')"
+                class="svc-result animate-in fade-in duration-300 font-black text-sm"
                 [class.text-success]="storageResult().startsWith('✅')"
-                [class.bg-error/10]="storageResult().startsWith('❌')"
                 [class.text-error]="storageResult().startsWith('❌')"
               >
                 {{ storageResult() }}
               </div>
             }
           </div>
-        </div>
+        </section>
 
         <!-- Input Sanitizer -->
-        <div class="bg-base-200 border border-base-300 rounded-xl p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
-              🧹 InputSanitizerService
+        <section class="svc-card">
+          <div class="svc-card-head">
+            <h2 class="svc-card-title">
+              <span class="text-info text-3xl">🧹</span> InputSanitizer
             </h2>
-            <span class="badge badge-info">XSS Protection</span>
+            <span class="badge badge-outline border-info/30 text-info font-bold"
+              >XSS Protection</span
+            >
           </div>
-          <p class="text-sm text-base-content/80 mb-4">HTML sanitization and URL validation</p>
+          <p class="svc-desc">
+            Advanced HTML sanitization and strict URL validation to prevent Cross-Site Scripting
+            (XSS) attacks.
+          </p>
 
-          <div class="space-y-3">
-            <input
-              type="text"
-              [(ngModel)]="htmlInput"
-              placeholder="<b>Bold</b><script>alert(1)</script>"
-              class="input input-bordered input-sm w-full font-mono text-xs"
-            />
-            <div class="flex gap-2">
-              <button (click)="sanitizeHtml()" class="btn btn-primary btn-sm">Sanitize HTML</button>
-              <button (click)="escapeHtml()" class="btn btn-secondary btn-sm">Escape</button>
+          <div class="space-y-6">
+            <div class="space-y-2">
+              <label>Unsafe HTML Input</label>
+              <input
+                type="text"
+                [(ngModel)]="htmlInput"
+                placeholder="<b>Bold</b><script>alert(1)</script>"
+                class="demo-input w-full font-mono"
+              />
             </div>
-            <input
-              type="text"
-              [(ngModel)]="urlInput"
-              placeholder="https://example.com"
-              class="input input-bordered input-sm w-full font-mono"
-            />
-            <button (click)="sanitizeUrl()" class="btn btn-secondary btn-sm">Validate URL</button>
+            <div class="flex gap-4">
+              <button (click)="sanitizeHtml()" class="btn btn-primary flex-1">Sanitize</button>
+              <button (click)="escapeHtml()" class="btn btn-secondary flex-1">Escape HTML</button>
+            </div>
+
+            <div class="space-y-2 pt-4">
+              <label>URL to Validate</label>
+              <input
+                type="text"
+                [(ngModel)]="urlInput"
+                placeholder="https://example.com"
+                class="demo-input w-full font-mono"
+              />
+            </div>
+            <button (click)="sanitizeUrl()" class="btn btn-secondary w-full">
+              Validate & Clean URL
+            </button>
 
             @if (sanitizedHtml()) {
-              <div class="mt-2 p-3 bg-base-300 rounded-lg">
-                <p class="text-xs text-secondary m-0 mb-1">Result:</p>
-                <code class="text-sm font-mono break-all">{{ sanitizedHtml() }}</code>
+              <div class="svc-result animate-in slide-in-from-bottom-2 duration-300">
+                <span class="kv-key block mb-2">Sanitization Result</span>
+                <code
+                  class="text-xs font-mono text-info break-all leading-relaxed font-bold tracking-tight"
+                  >{{ sanitizedHtml() }}</code
+                >
               </div>
             }
             @if (sanitizedUrl() !== null) {
               <div
-                class="mt-2 p-3 rounded-lg text-sm"
-                [class.bg-success/10]="sanitizedUrl()"
+                class="svc-result animate-in fade-in duration-300 flex items-center justify-between font-black text-sm"
                 [class.text-success]="sanitizedUrl()"
-                [class.bg-error/10]="!sanitizedUrl()"
                 [class.text-error]="!sanitizedUrl()"
               >
-                {{ sanitizedUrl() ?? 'URL rejected' }}
-              </div>
-            }
-          </div>
-        </div>
-
-        <!-- Password Strength -->
-        <div class="bg-base-200 border border-base-300 rounded-xl p-6 lg:col-span-2">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
-              🔑 PasswordStrengthService
-            </h2>
-            <span class="badge badge-success">Entropy Analysis</span>
-          </div>
-          <p class="text-sm text-base-content/80 mb-4">
-            Password strength assessment with entropy calculation
-          </p>
-
-          <div class="space-y-4">
-            <div class="flex flex-col sm:flex-row gap-3">
-              <input
-                type="text"
-                [(ngModel)]="passwordInput"
-                placeholder="Enter password..."
-                class="input input-bordered input-sm flex-1 font-mono"
-              />
-              <button (click)="checkPassword()" class="btn btn-primary btn-sm">
-                Check Strength
-              </button>
-            </div>
-
-            @if (passwordScore() !== null) {
-              <div class="p-4 bg-base-300 rounded-lg">
-                <div class="flex items-center gap-3 mb-3">
-                  <div class="flex gap-1">
-                    @for (i of [0, 1, 2, 3, 4]; track i) {
-                      <div
-                        class="w-8 h-2 rounded-full"
-                        [class.bg-success]="i < passwordScore()"
-                        [class.bg-base-content/20]="i >= passwordScore()"
-                      ></div>
-                    }
-                  </div>
-                  <span
-                    class="font-bold text-sm"
-                    [class.text-success]="passwordScore() >= 3"
-                    [class.text-warning]="passwordScore() === 2"
-                    [class.text-error]="passwordScore() <= 1"
-                  >
-                    {{ passwordLabel() }} ({{ passwordScore() }}/4)
-                  </span>
-                </div>
-                <p class="text-sm text-secondary m-0">
-                  Entropy: {{ passwordEntropy() | number }} bits
-                </p>
-                @if (passwordFeedback().length > 0) {
-                  <ul class="mt-2 text-xs text-secondary space-y-1">
-                    @for (tip of passwordFeedback(); track tip) {
-                      <li>• {{ tip }}</li>
-                    }
-                  </ul>
+                <span>{{ sanitizedUrl() ?? 'URL rejected by policy' }}</span>
+                @if (sanitizedUrl()) {
+                  <span>✅</span>
+                } @else {
+                  <span>❌</span>
                 }
               </div>
             }
           </div>
-        </div>
+        </section>
+
+        <!-- Password Strength -->
+        <section class="svc-card lg:col-span-2">
+          <div class="svc-card-head">
+            <h2 class="svc-card-title">
+              <span class="text-success text-3xl">🔑</span> PasswordStrength
+            </h2>
+            <span class="badge badge-outline border-success/30 text-success font-bold"
+              >Entropy Analysis</span
+            >
+          </div>
+          <p class="svc-desc">
+            Information-theoretic security assessment with zxcvbn-inspired entropy calculation and
+            real-time security tips.
+          </p>
+
+          <div class="space-y-8">
+            <div class="flex flex-col sm:flex-row gap-4">
+              <input
+                type="text"
+                [(ngModel)]="passwordInput"
+                placeholder="Enter password to analyze..."
+                class="demo-input flex-1 font-mono text-xl py-10 shadow-2xl border-base-content/10"
+              />
+              <button (click)="checkPassword()" class="btn btn-primary px-12 text-sm">
+                Assess Strength
+              </button>
+            </div>
+
+            @if (passwordScore() !== null) {
+              <div class="svc-result animate-in zoom-in-95 duration-500">
+                <div class="flex flex-col md:flex-row md:items-center gap-12">
+                  <div class="flex-1 space-y-6">
+                    <div class="flex justify-between items-end">
+                      <span class="kv-key">Security Score</span>
+                      <span
+                        class="font-black text-2xl tracking-tighter"
+                        [class.text-success]="passwordScore() >= 3"
+                        [class.text-warning]="passwordScore() === 2"
+                        [class.text-error]="passwordScore() <= 1"
+                      >
+                        {{ passwordLabel() }}
+                        <span class="opacity-30 text-lg">({{ passwordScore() }}/4)</span>
+                      </span>
+                    </div>
+                    <div class="flex gap-3 h-5">
+                      @for (i of [0, 1, 2, 3, 4]; track i) {
+                        <div
+                          class="flex-1 rounded-full transition-all duration-700 shadow-lg shadow-black/40"
+                          [class.bg-success]="i < passwordScore() && passwordScore() >= 3"
+                          [class.bg-warning]="i < passwordScore() && passwordScore() === 2"
+                          [class.bg-error]="i < passwordScore() && passwordScore() <= 1"
+                          [class.bg-base-content/5]="i >= passwordScore()"
+                        ></div>
+                      }
+                    </div>
+                    <p class="text-base text-base-content/40 m-0 font-bold">
+                      Estimated Entropy:
+                      <span class="text-base-content tracking-tighter"
+                        >{{ passwordEntropy() | number: '1.0-2' }} bits</span
+                      >
+                    </p>
+                  </div>
+
+                  @if (passwordFeedback().length > 0) {
+                    <div
+                      class="md:w-1/2 p-8 bg-base-content/5 rounded-[2rem] border border-base-content/5 shadow-inner"
+                    >
+                      <span class="kv-key block mb-6">Security Recommendations</span>
+                      <ul class="list-none p-0 m-0 space-y-4">
+                        @for (tip of passwordFeedback(); track tip) {
+                          <li class="flex gap-4 text-sm font-bold text-base-content/80">
+                            <span class="text-primary font-black text-lg leading-none">•</span>
+                            <span>{{ tip }}</span>
+                          </li>
+                        }
+                      </ul>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </section>
       </div>
 
       <!-- Activity Log -->
-      <div class="mt-8 bg-base-200 border border-base-300 rounded-xl p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-bold text-base-content m-0">Activity Log</h2>
+      <section class="svc-card">
+        <div class="svc-card-head">
+          <h2 class="svc-card-title">Security Activity Log</h2>
           <button
             (click)="clearLogs()"
-            class="btn btn-ghost btn-sm"
+            class="btn btn-secondary btn-xs"
             [disabled]="logs().length === 0"
           >
-            Clear
+            Clear History
           </button>
         </div>
 
         @if (logs().length === 0) {
-          <p class="text-sm text-base-content/40 text-center py-8">
-            No activity yet. Try the demos above!
-          </p>
+          <div
+            class="py-20 text-center bg-base-content/5 rounded-[2.5rem] border border-dashed border-base-content/10 shadow-inner"
+          >
+            <p class="text-sm text-base-content/20 font-black uppercase tracking-[0.3em] italic">
+              No security events recorded
+            </p>
+          </div>
         } @else {
-          <div class="space-y-2 max-h-64 overflow-y-auto">
+          <div class="svc-result space-y-4 max-h-[500px] overflow-y-auto no-scrollbar pt-8">
             @for (log of logs(); track log.id) {
               <div
-                class="flex items-center gap-3 p-3 rounded-lg text-sm"
-                [class.bg-success/10]="log.type === 'success'"
-                [class.border-l-4]="true"
-                [class.border-success]="log.type === 'success'"
-                [class.border-error]="log.type === 'error'"
-                [class.border-info]="log.type === 'info'"
+                class="flex items-center gap-5 p-5 rounded-2xl text-sm transition-all hover:bg-base-content/5 group border border-transparent hover:border-base-content/5"
+                [class.text-success]="log.type === 'success'"
+                [class.text-error]="log.type === 'error'"
+                [class.text-base-content/70]="log.type === 'info'"
               >
-                <span class="text-xs font-mono text-base-content/40">{{ log.time }}</span>
-                <span class="badge badge-xs" [class.badge-primary]="true">{{ log.section }}</span>
-                <span class="flex-1 break-all">{{ log.message }}</span>
+                <span class="text-[10px] font-mono opacity-30 whitespace-nowrap tracking-tighter">{{
+                  log.time
+                }}</span>
+                <span class="badge badge-primary font-black px-4 min-w-[100px]">{{
+                  log.section
+                }}</span>
+                <span
+                  class="flex-1 break-all font-bold italic opacity-90 group-hover:opacity-100 transition-opacity"
+                  >{{ log.message }}</span
+                >
               </div>
             }
           </div>
         }
-      </div>
+      </section>
     </div>
   `,
 })
-export class SecurityDemoComponent implements OnDestroy {
-  // --- Regex Security state ---
-  protected readonly regexPattern = signal<string>(
-    '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',
-  );
-  protected readonly regexInput = signal<string>('test@example.com');
-  protected readonly regexResult = signal<string>('');
-  protected readonly regexTime = signal<number>(0);
-  protected readonly regexStatus = signal<'idle' | 'running' | 'done' | 'error'>('idle');
+export class SecurityDemoComponent {
+  // Services
+  private regexService = inject(RegexSecurityService);
+  private cryptoService = inject(WebCryptoService);
+  private storageService = inject(SecureStorageService);
+  private sanitizerService = inject(InputSanitizerService);
+  private passwordService = inject(PasswordStrengthService);
 
-  // --- WebCrypto state ---
-  protected readonly hashResult = signal<string>('');
-  protected readonly hmacSignature = signal<string>('');
-  protected readonly hmacVerified = signal<boolean | null>(null);
-  protected readonly encryptedData = signal<string>('');
-  protected readonly decryptedData = signal<string>('');
+  // Regex Signals
+  regexPattern = signal('^([a-z0-9_\\.-]+)@([\\da-z\\.-]+)\\.([a-z\\.]{2,6})$');
+  regexInput = signal('test@example.com');
+  regexStatus = signal<'idle' | 'running' | 'done' | 'error'>('idle');
+  regexResult = signal<string | null>(null);
+  regexTime = signal<number | null>(null);
 
-  // --- SecureStorage state ---
-  protected readonly storageKey = signal<string>('demo-key');
-  protected readonly storageValue = signal<string>('{"message": "Hello, World!"}');
-  protected readonly storageResult = signal<string>('');
-  protected readonly passphrase = signal<string>('my-secret-passphrase');
+  // Crypto Signals
+  hashResult = signal<string | null>(null);
+  hmacSignature = signal<string | null>(null);
+  encryptedData = signal<string | null>(null);
+  private aesKey: CryptoKey | null = null;
+  private hmacKey: CryptoKey | null = null;
 
-  // --- InputSanitizer state ---
-  protected readonly htmlInput = signal<string>('<b>Bold</b><script>alert(1)</script>');
-  protected readonly sanitizedHtml = signal<string>('');
-  protected readonly urlInput = signal<string>('https://example.com');
-  protected readonly sanitizedUrl = signal<string | null>(null);
+  // Storage Signals
+  storageKey = signal('user_preferences');
+  storageValue = signal('{"theme": "dark", "notifications": true}');
+  storageResult = signal<string | null>(null);
 
-  // --- PasswordStrength state ---
-  protected readonly passwordInput = signal<string>('P@ssw0rd123!');
-  protected readonly passwordScore = signal<number | null>(null);
-  protected readonly passwordLabel = signal<string>('');
-  protected readonly passwordEntropy = signal<number>(0);
-  protected readonly passwordFeedback = signal<string[]>([]);
+  // Sanitizer Signals
+  htmlInput = signal('<b>Hello</b><script>alert("XSS")</script><img src=x onerror=alert(1)>');
+  urlInput = signal('https://angular.dev');
+  sanitizedHtml = signal<string | null>(null);
+  sanitizedUrl = signal<string | null>(null);
 
-  // --- Shared log ---
-  protected readonly logs = signal<LogEntry[]>([]);
-  private logCounter = 0;
+  // Password Signals
+  passwordInput = signal('');
+  passwordScore = signal<number | null>(null);
+  passwordLabel = signal<string | null>(null);
+  passwordEntropy = signal<number | null>(null);
+  passwordFeedback = signal<string[]>([]);
 
-  constructor(
-    private regexSecurity: RegexSecurityService,
-    private webCrypto: WebCryptoService,
-    private secureStorage: SecureStorageService,
-    private inputSanitizer: InputSanitizerService,
-    private passwordStrength: PasswordStrengthService,
-  ) {}
+  // Activity Log
+  logs = signal<LogEntry[]>([]);
 
-  // ──────────────────────────────────────────────────────
-  // Regex Security tests
-  // ──────────────────────────────────────────────────────
+  private log(section: string, message: string, type: 'info' | 'success' | 'error' = 'info'): void {
+    const entry: LogEntry = {
+      id: Date.now() + Math.random(),
+      time: new Date().toLocaleTimeString(),
+      section,
+      message,
+      type,
+    };
+    this.logs.update((current) => [entry, ...current.slice(0, 49)]);
+  }
 
+  // Regex Methods
   async testRegex(): Promise<void> {
     this.regexStatus.set('running');
-    const start = performance.now();
+    this.regexResult.set(null);
+    this.regexTime.set(null);
+    this.log('Regex', `Testing pattern: ${this.regexPattern()}`);
 
-    try {
-      const result = await this.regexSecurity.testRegex(this.regexPattern(), this.regexInput(), {
-        timeout: 3000,
-        safeMode: true,
-      });
+    const result = await this.regexService.testRegex(this.regexPattern(), this.regexInput());
 
-      const elapsed = Math.round(performance.now() - start);
-      this.regexTime.set(elapsed);
+    this.regexTime.set(Math.round(result.executionTime * 100) / 100);
 
-      if (result.timeout) {
-        this.regexResult.set('⚠️ Timeout - possible ReDoS attack');
-        this.regexStatus.set('error');
-        this.log('Regex', 'Timeout - possible ReDoS', 'error');
-      } else {
-        this.regexResult.set(`Match: ${result.match ? '✅ YES' : '❌ NO'}`);
-        this.regexStatus.set('done');
-        this.log(
-          'Regex',
-          `Pattern ${result.match ? 'matched' : 'did not match'} in ${elapsed}ms`,
-          'success',
-        );
-      }
-    } catch (err) {
+    if (result.error) {
       this.regexStatus.set('error');
-      this.regexResult.set(`Error: ${err}`);
-      this.log('Regex', `Error: ${err}`, 'error');
+      this.regexResult.set(`Error: ${result.error}`);
+      this.log('Regex', `Test failed: ${result.error}`, 'error');
+    } else {
+      this.regexStatus.set('done');
+      this.regexResult.set(result.match ? '✅ Match found' : '❌ No match');
+      this.log('Regex', `Test complete: ${result.match ? 'Match' : 'No match'}`, 'success');
     }
   }
 
   async analyzePattern(): Promise<void> {
-    try {
-      const analysis = await this.regexSecurity.analyzePatternSecurity(this.regexPattern());
-      this.regexResult.set(`Risk: ${analysis.risk} | Safe: ${analysis.safe ? '✅' : '❌'}`);
-      this.log(
-        'Regex',
-        `Pattern analysis: ${analysis.risk} risk`,
-        analysis.safe ? 'success' : 'error',
-      );
-    } catch (err) {
-      this.log('Regex', `Analysis error: ${err}`, 'error');
+    this.log('Regex', `Analyzing pattern complexity...`);
+    const analysis = await this.regexService.analyzePatternSecurity(this.regexPattern());
+
+    this.regexResult.set(
+      `Complexity: ${analysis.complexity} | Risk: ${analysis.risk.toUpperCase()}`,
+    );
+    this.regexStatus.set('done');
+
+    if (analysis.warnings.length > 0) {
+      this.log('Regex', `Warnings found: ${analysis.warnings.join(', ')}`, 'error');
+    } else {
+      this.log('Regex', 'Pattern analysis: No immediate ReDoS risks detected.', 'success');
     }
   }
 
-  // ──────────────────────────────────────────────────────
-  // WebCrypto tests
-  // ──────────────────────────────────────────────────────
-
+  // WebCrypto Methods
   async hashData(): Promise<void> {
-    try {
-      const data = 'data-to-hash-' + Date.now();
-      const hash = await this.webCrypto.hash(data, 'SHA-256');
-      this.hashResult.set(hash.substring(0, 32) + '...');
-      this.log('Crypto', `SHA-256: ${hash.substring(0, 16)}...`, 'success');
-    } catch (err) {
-      this.log('Crypto', `Hash error: ${err}`, 'error');
-    }
+    const input = 'Sensitive project data';
+    const hash = await this.cryptoService.hash(input);
+    this.hashResult.set(hash);
+    this.log('WebCrypto', 'SHA-256 hash generated successfully.', 'success');
   }
 
   async generateHmac(): Promise<void> {
-    try {
-      const key = await this.webCrypto.generateHmacKey('HMAC-SHA-256');
-      const data = 'message-to-sign-' + Date.now();
-      const signature = await this.webCrypto.sign(key, data);
-      this.hmacSignature.set(signature.substring(0, 32) + '...');
-      this.hmacVerified.set(null);
-      this.log('Crypto', `HMAC signature: ${signature.substring(0, 16)}...`, 'success');
-    } catch (err) {
-      this.log('Crypto', `HMAC error: ${err}`, 'error');
+    if (!this.hmacKey) {
+      this.hmacKey = await this.cryptoService.generateHmacKey();
     }
+    const signature = await this.cryptoService.sign(this.hmacKey, 'Message to authenticate');
+    this.hmacSignature.set(signature);
+    this.log('WebCrypto', 'HMAC-SHA-256 signature generated.', 'success');
   }
 
   async encryptAes(): Promise<void> {
-    try {
-      const key = await this.webCrypto.generateAesKey(256);
-      const data = 'Sensitive data to encrypt';
-      const { ciphertext, iv: _iv } = await this.webCrypto.encryptAes(key, data);
-      const hex = Array.from(new Uint8Array(ciphertext))
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
-      this.encryptedData.set(hex.substring(0, 40) + '...');
-      this.decryptedData.set('');
-      this.log('Crypto', `AES encrypted: ${hex.substring(0, 20)}...`, 'success');
-    } catch (err) {
-      this.log('Crypto', `Encrypt error: ${err}`, 'error');
+    if (!this.aesKey) {
+      this.aesKey = await this.cryptoService.generateAesKey();
     }
+    const result = await this.cryptoService.encryptAes(this.aesKey, 'Ultra secret payload');
+    // For demo, we just hex encode the ciphertext
+    const hex = Array.from(new Uint8Array(result.ciphertext))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+    this.encryptedData.set(hex);
+    this.log('WebCrypto', 'Data encrypted using AES-256-GCM.', 'success');
   }
 
-  // ──────────────────────────────────────────────────────
-  // SecureStorage tests
-  // ──────────────────────────────────────────────────────
-
+  // SecureStorage Methods
   async storeData(): Promise<void> {
     try {
-      await this.secureStorage.set(this.storageKey(), JSON.parse(this.storageValue()));
-      this.storageResult.set('✅ Data stored successfully');
-      this.log('Storage', 'Data encrypted and stored', 'success');
-    } catch (err) {
-      this.storageResult.set(`❌ Error: ${err}`);
-      this.log('Storage', `Store error: ${err}`, 'error');
+      const value = JSON.parse(this.storageValue());
+      await this.storageService.set(this.storageKey(), value);
+      this.storageResult.set(`✅ Stored encrypted value for key: ${this.storageKey()}`);
+      this.log('Storage', `Encrypted and saved key: ${this.storageKey()}`, 'success');
+    } catch (e) {
+      this.storageResult.set('❌ Invalid JSON value');
+      this.log('Storage', 'Failed to store: Invalid JSON format', 'error');
     }
   }
 
   async retrieveData(): Promise<void> {
-    try {
-      const data = await this.secureStorage.get<unknown>(this.storageKey());
-      if (data) {
-        this.storageResult.set(`✅ Retrieved: ${JSON.stringify(data)}`);
-        this.log('Storage', 'Data retrieved and decrypted', 'success');
-      } else {
-        this.storageResult.set('❌ No data found');
-        this.log('Storage', 'No data found for key', 'error');
-      }
-    } catch (err) {
-      this.storageResult.set(`❌ Error: ${err}`);
-      this.log('Storage', `Retrieve error: ${err}`, 'error');
+    const data = await this.storageService.get<any>(this.storageKey());
+    if (data !== null) {
+      this.storageResult.set(`✅ Retrieved: ${JSON.stringify(data)}`);
+      this.log('Storage', `Successfully decrypted data for: ${this.storageKey()}`, 'success');
+    } else {
+      this.storageResult.set('❌ Key not found or decryption failed');
+      this.log('Storage', `Failed to retrieve or decrypt: ${this.storageKey()}`, 'error');
     }
   }
 
   async initWithPassphrase(): Promise<void> {
-    try {
-      await this.secureStorage.initWithPassphrase(this.passphrase());
-      this.storageResult.set('✅ Passphrase initialized - data will persist');
-      this.log('Storage', 'Passphrase key derivation complete', 'success');
-    } catch (err) {
-      this.storageResult.set(`❌ Error: ${err}`);
-      this.log('Storage', `Passphrase error: ${err}`, 'error');
+    const pass = prompt('Enter a passphrase for storage encryption:');
+    if (pass) {
+      await this.storageService.initWithPassphrase(pass);
+      this.storageResult.set('✅ Storage initialized with PBKDF2 derived key');
+      this.log('Storage', 'Derived stable encryption key from passphrase.', 'success');
     }
   }
 
   clearStorage(): void {
-    this.secureStorage.clear();
+    this.storageService.clear();
     this.storageResult.set('✅ Storage cleared');
-    this.log('Storage', 'All storage cleared', 'info');
+    this.log('Storage', 'All encrypted storage entries removed.', 'info');
   }
 
-  // ──────────────────────────────────────────────────────
-  // InputSanitizer tests
-  // ──────────────────────────────────────────────────────
-
+  // Sanitizer Methods
   sanitizeHtml(): void {
-    const result = this.inputSanitizer.sanitizeHtml(this.htmlInput());
-    this.sanitizedHtml.set(result);
-    this.log('Sanitizer', `HTML sanitized: ${result.length} chars`, 'success');
-  }
-
-  sanitizeUrl(): void {
-    const result = this.inputSanitizer.sanitizeUrl(this.urlInput());
-    this.sanitizedUrl.set(result);
-    this.log('Sanitizer', `URL: ${result ?? 'rejected'}`, result ? 'success' : 'error');
+    const clean = this.sanitizerService.sanitizeHtml(this.htmlInput());
+    this.sanitizedHtml.set(clean);
+    this.log('Sanitizer', 'HTML input sanitized (scripts/unsafe tags removed).', 'success');
   }
 
   escapeHtml(): void {
-    const result = this.inputSanitizer.escapeHtml(this.htmlInput());
-    this.sanitizedHtml.set(result);
-    this.log('Sanitizer', `HTML escaped: ${result.length} chars`, 'success');
+    const escaped = this.sanitizerService.escapeHtml(this.htmlInput());
+    this.sanitizedHtml.set(escaped);
+    this.log('Sanitizer', 'HTML input escaped for safe text rendering.', 'info');
   }
 
-  // ──────────────────────────────────────────────────────
-  // PasswordStrength tests
-  // ──────────────────────────────────────────────────────
+  sanitizeUrl(): void {
+    const clean = this.sanitizerService.sanitizeUrl(this.urlInput());
+    this.sanitizedUrl.set(clean);
+    if (clean) {
+      this.log('Sanitizer', `URL validated as safe: ${clean}`, 'success');
+    } else {
+      this.log('Sanitizer', 'URL rejected by security policy.', 'error');
+    }
+  }
 
+  // Password Methods
   checkPassword(): void {
-    const result = this.passwordStrength.assess(this.passwordInput());
-    this.passwordScore.set(result.score);
-    this.passwordLabel.set(result.label);
-    this.passwordEntropy.set(result.entropy);
-    this.passwordFeedback.set(result.feedback);
+    if (!this.passwordInput()) {
+      this.passwordScore.set(null);
+      return;
+    }
+
+    const assessment = this.passwordService.assess(this.passwordInput());
+    this.passwordScore.set(assessment.score);
+    this.passwordLabel.set(assessment.label);
+    this.passwordEntropy.set(assessment.entropy);
+    this.passwordFeedback.set(assessment.feedback);
+
+    const type = assessment.score >= 3 ? 'success' : assessment.score === 2 ? 'info' : 'error';
     this.log(
       'Password',
-      `Score: ${result.score}/4 (${result.label})`,
-      result.score >= 3 ? 'success' : 'info',
+      `Assessment complete. Score: ${assessment.score}/4 (${assessment.label})`,
+      type,
     );
   }
 
-  // ──────────────────────────────────────────────────────
-  // Utilities
-  // ──────────────────────────────────────────────────────
-
   clearLogs(): void {
     this.logs.set([]);
-  }
-
-  private log(section: string, message: string, type: LogEntry['type']): void {
-    const time = new Date().toLocaleTimeString('en-US', {
-      hour12: false,
-      fractionalSecondDigits: 3,
-    });
-    const id = this.logCounter++;
-    this.logs.update((prev) => [{ id, time, section, message, type }, ...prev]);
-  }
-
-  ngOnDestroy(): void {
-    // Cleanup if needed
   }
 }

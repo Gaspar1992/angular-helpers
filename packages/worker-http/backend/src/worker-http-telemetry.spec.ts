@@ -197,7 +197,7 @@ describe('withTelemetry', () => {
     const http = TestBed.inject(HttpClient);
     await expect(firstValueFrom(http.get('/api/fail'))).rejects.toBeDefined();
 
-    const kinds = events.map(([k]) => k);
+    const kinds = (events as any[]).map(([k]) => k);
     expect(kinds).toEqual(['req', 'err']); // no 'res'
 
     const [, errEvent] = events[1] as ['err', WorkerHttpErrorEvent];
@@ -227,7 +227,7 @@ describe('withTelemetry', () => {
     // 3 subscribers × 2 events (request + response) = 6 invocations
     expect(events).toHaveLength(6);
 
-    const order = events.map(([label, e]) => [label, (e as { kind: string }).kind]);
+    const order = (events as any[]).map(([label, e]) => [label, (e as { kind: string }).kind]);
     expect(order).toEqual([
       ['A', 'request'],
       ['B', 'request'],

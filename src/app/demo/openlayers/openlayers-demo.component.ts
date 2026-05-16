@@ -1,7 +1,9 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   input,
   inputBinding,
@@ -9,13 +11,11 @@ import {
   outputBinding,
   signal,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { OlMapComponent, OlMapService } from '@angular-helpers/openlayers/core';
+import { OlMapComponent, OlMapService, type MapClickEvent } from '@angular-helpers/openlayers/core';
 import { fromLonLat, transformExtent } from 'ol/proj';
 import {
   OlVectorLayerComponent,
-  OlClusterComponent,
   OlHeatmapLayerComponent,
   OlWebGLVectorLayerComponent,
   OlLayerService,
@@ -45,7 +45,6 @@ import {
   OlPopupService,
   OlTooltipDirective,
 } from '@angular-helpers/openlayers/overlays';
-import { OlMilitaryService } from '@angular-helpers/openlayers/military';
 import type { BasemapConfig, LayerSwitcherItem } from '@angular-helpers/openlayers/controls';
 import type { Feature } from '@angular-helpers/openlayers/core';
 
@@ -53,12 +52,29 @@ import type { Feature } from '@angular-helpers/openlayers/core';
   selector: 'app-demo-city-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-base-100 border border-base-300 rounded-lg shadow-md p-3 min-w-[180px] text-sm">
-      <div class="font-semibold text-base-content">{{ name() }}</div>
-      <div class="text-base-content/70 text-xs mt-1">
-        Population: {{ population().toLocaleString() }}
+    <div
+      class="bg-base-100 border border-base-content/10 rounded-2xl shadow-2xl p-5 min-w-[200px] text-sm"
+    >
+      <div class="flex items-center gap-3 mb-3 pb-3 border-b border-base-content/5">
+        <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+          🏙️
+        </div>
+        <div class="font-black text-base-content tracking-tight text-base">{{ name() }}</div>
       </div>
-      <button class="btn btn-xs btn-ghost mt-2" (click)="closed.emit()">Close</button>
+      <div class="space-y-3 mb-4">
+        <div class="flex justify-between">
+          <span class="text-base-content/40 font-bold uppercase text-[10px]">Population</span>
+          <span class="text-base-content font-mono font-bold">{{
+            population().toLocaleString()
+          }}</span>
+        </div>
+      </div>
+      <button
+        class="btn btn-xs btn-primary btn-outline w-full rounded-lg font-bold"
+        (click)="closed.emit()"
+      >
+        Close popup
+      </button>
     </div>
   `,
 })
@@ -66,12 +82,6 @@ export class DemoCityCardComponent {
   readonly name = input.required<string>();
   readonly population = input.required<number>();
   readonly closed = output<void>();
-}
-
-interface City {
-  name: string;
-  coords: [number, number];
-  population: number;
 }
 
 const BASEMAPS: BasemapConfig[] = [
@@ -101,7 +111,6 @@ const BASEMAPS: BasemapConfig[] = [
     CommonModule,
     OlMapComponent,
     OlVectorLayerComponent,
-    OlClusterComponent,
     OlZoomControlComponent,
     OlAttributionControlComponent,
     OlScaleLineControlComponent,
@@ -115,100 +124,118 @@ const BASEMAPS: BasemapConfig[] = [
     OlPopupComponent,
     OlTooltipDirective,
   ],
+  animations: [
+    trigger('subMenu', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(-10px)' }),
+        animate(
+          '200ms cubic-bezier(0.4, 0, 0.2, 1)',
+          style({ opacity: 1, transform: 'translateX(0)' }),
+        ),
+      ]),
+      transition(':leave', [
+        animate(
+          '150ms cubic-bezier(0.4, 0, 0.2, 1)',
+          style({ opacity: 0, transform: 'translateX(-10px)' }),
+        ),
+      ]),
+    ]),
+  ],
   styles: [
     `
+      .map-stage-container {
+        container: map-stage / inline-size;
+      }
+
       .ol-demo-toolbar {
         display: flex;
-        gap: 6px;
-        padding: 8px;
-        border-radius: 12px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        background: rgba(255, 255, 255, 0.85);
-        border: 1px solid rgba(255, 255, 255, 0.4);
+        gap: var(--spacing-1-5);
+        padding: var(--spacing-2);
+        border-radius: var(--radius-2xl);
+        font-family: var(--font-sans);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
 
-        @media (prefers-color-scheme: dark) {
-          background: rgba(30, 35, 42, 0.85);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        background-color: color-mix(in oklch, var(--c-bg-surface), transparent 20%);
+        border: 1px solid var(--c-border);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        z-index: 50;
+
+        /* Adaptive UI via Container Queries */
+        @container map-stage (inline-size < 550px) {
+          gap: var(--spacing-1);
+          padding: var(--spacing-1-5);
+
+          .ol-demo-toolbar__btn {
+            padding-inline: var(--spacing-2);
+            span {
+              display: none;
+            }
+          }
         }
 
         .ol-demo-toolbar__btn {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
+          gap: var(--spacing-2);
           justify-content: center;
-          min-width: 36px;
-          height: 40px;
-          padding: 0 16px;
-          background: transparent;
-          color: currentColor;
+          min-block-size: 40px;
+          padding-inline: var(--spacing-4);
+          background-color: transparent;
+          color: var(--c-text-secondary);
           border: 1px solid transparent;
-          border-radius: 8px;
-          font-weight: 600;
-          font-size: 14px;
+          border-radius: var(--radius-xl);
+          font-weight: 700;
+          font-size: var(--fs-sm);
           cursor: pointer;
-          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all var(--t-fast);
 
           &:hover {
-            background: rgba(0, 0, 0, 0.05);
-            @media (prefers-color-scheme: dark) {
-              background: rgba(255, 255, 255, 0.1);
-            }
+            background-color: var(--c-border-subtle);
+            color: white;
           }
 
           &:focus-visible {
-            outline: 2px solid #3b82f6;
+            outline: 2px solid var(--c-primary);
             outline-offset: 2px;
           }
-        }
 
-        .ol-demo-toolbar__btn--sm {
-          height: 36px;
-          padding: 0 12px;
-          font-size: 13px;
-        }
-
-        .ol-demo-toolbar__btn--active {
-          background: #3b82f6;
-          color: white;
-          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-
-          &:hover {
-            background: #2563eb;
-          }
-        }
-
-        .ol-demo-toolbar__btn--active-secondary {
-          background: rgba(59, 130, 246, 0.15);
-          color: #3b82f6;
-          border-color: rgba(59, 130, 246, 0.3);
-
-          @media (prefers-color-scheme: dark) {
-            background: rgba(59, 130, 246, 0.25);
-            color: #60a5fa;
+          &:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
           }
 
-          &:hover {
-            background: rgba(59, 130, 246, 0.25);
+          &.ol-demo-toolbar__btn--active {
+            background-color: var(--c-primary);
+            color: white;
+            box-shadow: 0 4px 20px color-mix(in oklch, var(--c-primary), transparent 60%);
+
+            &:hover {
+              background-color: var(--c-primary-active);
+            }
+          }
+
+          &.ol-demo-toolbar__btn--active-secondary {
+            background-color: var(--c-primary-dim);
+            color: var(--c-primary);
+            border-color: color-mix(in oklch, var(--c-primary), transparent 70%);
+
+            &:hover {
+              background-color: color-mix(in oklch, var(--c-primary), transparent 75%);
+            }
           }
         }
 
         .ol-demo-toolbar__divider {
-          width: 1px;
-          margin: 6px 4px;
-          background: rgba(150, 150, 150, 0.3);
+          inline-size: 1px;
+          margin-inline: var(--spacing-1);
+          margin-block: var(--spacing-2);
+          background-color: var(--c-border);
         }
       }
     `,
   ],
   providers: [
-    // Feature-specific services that should be provided globally or via their respective feature packages
-    // For demo purposes, we provide them here if they aren't globally provided.
-    // OlMapService, OlLayerService, OlInteractionService, etc. should ideally be loaded in app.config.ts
-    // but the demo isolates them to prevent polluting other routes.
     OlMapService,
     OlLayerService,
     OlInteractionService,
@@ -218,53 +245,44 @@ const BASEMAPS: BasemapConfig[] = [
     ModifyInteractionService,
     MeasurementInteractionService,
     OlPopupService,
-    OlMilitaryService,
-    // Provide the rotate control with access to map service
     { provide: ROTATE_CONTROL_MAP_SERVICE, useExisting: OlMapService },
   ],
   template: `
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10 min-h-screen bg-base-100/50">
+    <div class="max-width-container py-10 min-h-screen">
       <!-- Premium Header -->
       <header
         class="mb-10 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6"
       >
         <div class="flex items-center gap-4">
           <div
-            class="p-3 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl shadow-inner"
+            class="p-4 bg-gradient-to-br from-primary/10 to-secondary/10 border border-base-content/5 rounded-2xl shadow-inner"
           >
             <span class="text-4xl sm:text-5xl drop-shadow-md">🗺️</span>
           </div>
           <div>
-            <h1
-              class="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent m-0"
-            >
-              OpenLayers Demo
+            <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-base-content m-0">
+              OpenLayers <span class="text-base-content/40 font-medium">Demo</span>
             </h1>
-            <p class="text-base sm:text-lg text-base-content/70 m-0 mt-2 font-medium">
+            <p class="text-base sm:text-lg text-base-content/60 m-0 mt-2 font-medium">
               High-performance interactive maps with Angular Signals
             </p>
           </div>
         </div>
         <div class="flex flex-wrap justify-center sm:justify-end gap-2 max-w-[300px]">
-          <span class="badge badge-primary badge-outline badge-md font-semibold"
-            >Map Component</span
-          >
-          <span class="badge badge-secondary badge-outline badge-md font-semibold"
-            >Tile Layers</span
-          >
-          <span class="badge badge-accent badge-outline badge-md font-semibold">Vector Layers</span>
-          <span class="badge badge-info badge-outline badge-md font-semibold">Controls</span>
+          <span class="badge badge-primary font-black">Signals</span>
+          <span class="badge badge-secondary font-black">Standalone</span>
+          <span class="badge badge-accent font-black">WebGL</span>
         </div>
       </header>
 
       <!-- Main Map Stage -->
       <div
-        class="relative w-full h-[650px] rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-base-300/50 mb-8 bg-base-300"
+        class="map-stage-container relative w-full h-[650px] rounded-3xl overflow-hidden shadow-2xl border border-base-content/5 mb-8 bg-base-200"
       >
         <ol-map
           [center]="center()"
           [zoom]="zoom()"
-          (viewChange)="onViewChange($event)"
+          (viewChange)="center.set($event.center); zoom.set($event.zoom)"
           (mapClick)="onMapClick($event)"
           class="w-full h-full"
         >
@@ -312,8 +330,9 @@ const BASEMAPS: BasemapConfig[] = [
             [features]="cityFeatures()"
             [zIndex]="9"
             [visible]="layerVisibility()['heatmap']"
-            [blur]="15"
-            [radius]="25"
+            [blur]="40000"
+            [radius]="20000"
+            radiusUnit="meters"
             weight="population"
           >
           </ol-heatmap-layer>
@@ -327,13 +346,17 @@ const BASEMAPS: BasemapConfig[] = [
           >
             @if (selectedCityInfo(); as info) {
               <div
-                class="bg-base-100/95 backdrop-blur-md border border-base-300 rounded-xl shadow-xl p-4 min-w-[220px]"
+                class="bg-base-100/95 backdrop-blur-md border border-base-content/10 rounded-2xl shadow-xl p-5 min-w-[220px]"
               >
-                <div class="font-bold text-lg text-base-content">{{ info.name }}</div>
-                <div class="divider my-1"></div>
+                <div class="font-black text-lg text-base-content mb-1">{{ info.name }}</div>
+                <div class="divider my-2 opacity-10"></div>
                 <div class="flex justify-between items-center text-sm">
-                  <span class="text-base-content/60">Population</span>
-                  <span class="font-mono font-medium">{{ info.population.toLocaleString() }}</span>
+                  <span class="text-base-content/40 font-bold uppercase text-[10px]"
+                    >Population</span
+                  >
+                  <span class="font-mono font-bold text-primary">{{
+                    info.population.toLocaleString()
+                  }}</span>
                 </div>
               </div>
             }
@@ -345,16 +368,6 @@ const BASEMAPS: BasemapConfig[] = [
             [zIndex]="11"
             [visible]="layerVisibility()['drawn-features']"
           >
-          </ol-vector-layer>
-
-          <!-- Vector Layer: Military symbology (NATO symbols + ellipse / sector / donut) -->
-          <ol-vector-layer
-            id="military"
-            [features]="militaryFeatures()"
-            [zIndex]="12"
-            [visible]="layerVisibility()['military']"
-          >
-            <ol-cluster [distance]="40" [showCount]="true"></ol-cluster>
           </ol-vector-layer>
 
           <!-- WebGL Performance Layer vs Standard Vector Layer -->
@@ -372,20 +385,13 @@ const BASEMAPS: BasemapConfig[] = [
             >
             </ol-webgl-vector-layer>
           } @else if (webglFeatures().length > 0) {
-            <ol-vector-layer
-              id="webgl-perf-canvas"
-              [features]="webglFeatures()"
-              [zIndex]="15"
-              [style]="{
-                icon: { src: 'assets/marker.png', size: [32, 32] },
-              }"
-            >
+            <ol-vector-layer id="webgl-perf-canvas" [features]="webglFeatures()" [zIndex]="15">
             </ol-vector-layer>
           }
         </ol-map>
 
         <!-- Premium Glassmorphic Toolbar (floating over map) -->
-        <div class="ol-demo-toolbar absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000]">
+        <div class="ol-demo-toolbar absolute bottom-6 left-1/2 -translate-x-1/2">
           <!-- Select Toggle -->
           <button
             class="ol-demo-toolbar__btn"
@@ -401,7 +407,7 @@ const BASEMAPS: BasemapConfig[] = [
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
+              stroke-width="2.5"
               stroke-linecap="round"
               stroke-linejoin="round"
             >
@@ -425,7 +431,7 @@ const BASEMAPS: BasemapConfig[] = [
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
+              stroke-width="2.5"
               stroke-linecap="round"
               stroke-linejoin="round"
             >
@@ -449,7 +455,7 @@ const BASEMAPS: BasemapConfig[] = [
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
+              stroke-width="2.5"
               stroke-linecap="round"
               stroke-linejoin="round"
             >
@@ -473,7 +479,7 @@ const BASEMAPS: BasemapConfig[] = [
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
+              stroke-width="2.5"
               stroke-linecap="round"
               stroke-linejoin="round"
             >
@@ -487,7 +493,7 @@ const BASEMAPS: BasemapConfig[] = [
 
           @if (selectActive() && interactionService.hasSelection()) {
             <button
-              class="ol-demo-toolbar__btn text-error hover:bg-error/10 hover:text-error"
+              class="ol-demo-toolbar__btn text-error hover:bg-error/10"
               (click)="clearSelection()"
               aria-label="Clear selection"
             >
@@ -498,7 +504,7 @@ const BASEMAPS: BasemapConfig[] = [
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
+                stroke-width="3"
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
@@ -510,143 +516,184 @@ const BASEMAPS: BasemapConfig[] = [
 
           <!-- Draw Type Selector -->
           @if (drawActive()) {
-            <div class="ol-demo-toolbar__divider"></div>
-            <div class="flex flex-row gap-1 items-center px-1">
-              <button
-                class="ol-demo-toolbar__btn ol-demo-toolbar__btn--sm"
-                [class.ol-demo-toolbar__btn--active-secondary]="drawType() === 'Polygon'"
-                (click)="onDrawTypeClick('Polygon')"
-                title="Polygon"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
+            <div @subMenu class="flex items-center">
+              <div class="ol-demo-toolbar__divider"></div>
+              <div class="flex flex-row gap-1 items-center px-1">
+                <button
+                  class="ol-demo-toolbar__btn"
+                  [class.ol-demo-toolbar__btn--active-secondary]="drawType() === 'Polygon'"
+                  (click)="onDrawTypeClick('Polygon')"
+                  title="Polygon"
                 >
-                  <path d="M12 2l10 6v10l-10 6-10-6V8z" />
-                </svg>
-              </button>
-              <button
-                class="ol-demo-toolbar__btn ol-demo-toolbar__btn--sm"
-                [class.ol-demo-toolbar__btn--active-secondary]="drawType() === 'LineString'"
-                (click)="onDrawTypeClick('LineString')"
-                title="Line"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M12 2l10 6v10l-10 6-10-6V8z" />
+                  </svg>
+                </button>
+                <button
+                  class="ol-demo-toolbar__btn"
+                  [class.ol-demo-toolbar__btn--active-secondary]="drawType() === 'LineString'"
+                  (click)="onDrawTypeClick('LineString')"
+                  title="Line"
                 >
-                  <path d="M5 19L19 5" />
-                </svg>
-              </button>
-              <button
-                class="ol-demo-toolbar__btn ol-demo-toolbar__btn--sm"
-                [class.ol-demo-toolbar__btn--active-secondary]="drawType() === 'Point'"
-                (click)="onDrawTypeClick('Point')"
-                title="Point"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M5 19L19 5" />
+                  </svg>
+                </button>
+                <button
+                  class="ol-demo-toolbar__btn"
+                  [class.ol-demo-toolbar__btn--active-secondary]="drawType() === 'Point'"
+                  (click)="onDrawTypeClick('Point')"
+                  title="Point"
                 >
-                  <circle cx="12" cy="12" r="4" />
-                </svg>
-              </button>
-              <button
-                class="ol-demo-toolbar__btn ol-demo-toolbar__btn--sm"
-                [class.ol-demo-toolbar__btn--active-secondary]="drawType() === 'Circle'"
-                (click)="onDrawTypeClick('Circle')"
-                title="Circle"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                  >
+                    <circle cx="12" cy="12" r="4" />
+                  </svg>
+                </button>
+                <button
+                  class="ol-demo-toolbar__btn"
+                  [class.ol-demo-toolbar__btn--active-secondary]="drawType() === 'Circle'"
+                  (click)="onDrawTypeClick('Circle')"
+                  title="Circle"
                 >
-                  <circle cx="12" cy="12" r="10" />
-                </svg>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                  </svg>
+                </button>
+                <button
+                  class="ol-demo-toolbar__btn"
+                  [class.ol-demo-toolbar__btn--active-secondary]="drawType() === 'Ellipse'"
+                  (click)="onDrawTypeClick('Ellipse')"
+                  title="Ellipse"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <ellipse cx="12" cy="12" rx="9" ry="5" />
+                  </svg>
+                </button>
+                <button
+                  class="ol-demo-toolbar__btn"
+                  [class.ol-demo-toolbar__btn--active-secondary]="drawType() === 'Donut'"
+                  (click)="onDrawTypeClick('Donut')"
+                  title="Donut"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <circle cx="12" cy="12" r="4" />
+                  </svg>
+                </button>
+              </div>
             </div>
           }
 
           <!-- Measure Type Selector -->
           @if (measureActive()) {
-            <div class="ol-demo-toolbar__divider"></div>
-            <div class="flex flex-row gap-1 items-center px-1">
-              <button
-                class="ol-demo-toolbar__btn ol-demo-toolbar__btn--sm"
-                [class.ol-demo-toolbar__btn--active-secondary]="measureType() === 'Polygon'"
-                (click)="onMeasureTypeClick('Polygon')"
-                title="Area"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
+            <div @subMenu class="flex items-center">
+              <div class="ol-demo-toolbar__divider"></div>
+              <div class="flex flex-row gap-1 items-center px-1">
+                <button
+                  class="ol-demo-toolbar__btn font-bold px-4"
+                  [class.ol-demo-toolbar__btn--active-secondary]="measureType() === 'Polygon'"
+                  (click)="onMeasureTypeClick('Polygon')"
+                  title="Area"
                 >
-                  <path d="M12 2l10 6v10l-10 6-10-6V8z" />
-                </svg>
-                Area
-              </button>
-              <button
-                class="ol-demo-toolbar__btn ol-demo-toolbar__btn--sm"
-                [class.ol-demo-toolbar__btn--active-secondary]="measureType() === 'LineString'"
-                (click)="onMeasureTypeClick('LineString')"
-                title="Distance"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M12 2l10 6v10l-10 6-10-6V8z" />
+                  </svg>
+                  <span class="ml-1 text-[10px] uppercase">Area</span>
+                </button>
+                <button
+                  class="ol-demo-toolbar__btn font-bold px-4"
+                  [class.ol-demo-toolbar__btn--active-secondary]="measureType() === 'LineString'"
+                  (click)="onMeasureTypeClick('LineString')"
+                  title="Distance"
                 >
-                  <path d="M5 19L19 5" />
-                </svg>
-                Dist
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M5 19L19 5" />
+                  </svg>
+                  <span class="ml-1 text-[10px] uppercase">Dist</span>
+                </button>
+              </div>
             </div>
           }
         </div>
 
         <!-- Floating Status Badges -->
         @if (interactionService.selectionCount() > 0 || drawnCount() > 0) {
-          <div class="absolute top-4 left-4 z-[1000] flex flex-col gap-2">
+          <div class="absolute top-4 left-4 z-[50] flex flex-col gap-2">
             @if (interactionService.selectionCount() > 0) {
               <div
-                class="badge badge-primary shadow-md font-medium px-3 py-3 rounded-lg border-none backdrop-blur-md bg-primary/90 text-white"
+                class="badge badge-primary shadow-xl font-bold px-4 py-4 rounded-xl border-none backdrop-blur-md bg-primary/90 text-base-content"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="w-4 h-4 mr-1.5"
+                  class="w-4 h-4 mr-2"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
+                  stroke-width="2.5"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 >
@@ -658,15 +705,15 @@ const BASEMAPS: BasemapConfig[] = [
             }
             @if (drawnCount() > 0) {
               <div
-                class="flex items-center gap-1 badge badge-secondary shadow-md font-medium px-3 py-3 rounded-lg border-none backdrop-blur-md bg-secondary/90 text-white"
+                class="flex items-center gap-1 badge badge-secondary shadow-xl font-bold px-4 py-4 rounded-xl border-none backdrop-blur-md bg-secondary/90 text-base-content"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="w-4 h-4 mr-1.5"
+                  class="w-4 h-4 mr-2"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
+                  stroke-width="2.5"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                 >
@@ -675,7 +722,7 @@ const BASEMAPS: BasemapConfig[] = [
                 </svg>
                 {{ drawnCount() }} drawn
                 <button
-                  class="ml-2 btn btn-xs btn-circle btn-ghost min-h-0 h-5 w-5 bg-black/20 hover:bg-black/40 border-none text-white"
+                  class="ml-2 btn btn-xs btn-circle btn-ghost min-h-0 h-6 w-6 bg-base-content/5 hover:bg-base-content/5 border-none text-base-content transition-all flex items-center justify-center p-0"
                   (click)="clearDrawnFeatures()"
                   title="Clear drawings"
                 >
@@ -686,7 +733,7 @@ const BASEMAPS: BasemapConfig[] = [
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    stroke-width="2"
+                    stroke-width="2.5"
                     stroke-linecap="round"
                     stroke-linejoin="round"
                   >
@@ -701,20 +748,22 @@ const BASEMAPS: BasemapConfig[] = [
       </div>
 
       <!-- Dashboard Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Interactive Layers Panel -->
-        <div class="lg:col-span-2 flex flex-col gap-6">
-          <div class="card bg-base-100 shadow-xl border border-base-200/50">
-            <div class="card-body p-6">
-              <h2 class="card-title text-xl font-bold flex items-center gap-2 mb-4">
+        <div class="lg:col-span-2 flex flex-col gap-8">
+          <div
+            class="bg-base-200 border border-base-content/5 rounded-3xl overflow-hidden shadow-2xl"
+          >
+            <div class="p-8">
+              <h2 class="text-2xl font-black flex items-center gap-3 mb-8 text-base-content">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
+                  width="24"
+                  height="24"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
+                  stroke-width="2.5"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   class="text-primary"
@@ -726,46 +775,27 @@ const BASEMAPS: BasemapConfig[] = [
                 Layer Management
               </h2>
 
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <!-- Cities Layer Card -->
                 <div
-                  class="rounded-2xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[140px]"
-                  [class.shadow-[0_8px_30px_rgba(59,130,246,0.3)]]="activeLayerId() === 'cities'"
-                  [class.bg-gradient-to-br]="activeLayerId() === 'cities'"
-                  [class.from-primary]="activeLayerId() === 'cities'"
-                  [class.to-blue-600]="activeLayerId() === 'cities'"
-                  [class.text-primary-content]="activeLayerId() === 'cities'"
-                  [class.scale-105]="activeLayerId() === 'cities'"
-                  [class.border]="true"
-                  [class.border-transparent]="activeLayerId() === 'cities'"
-                  [class.border-base-300]="activeLayerId() !== 'cities'"
-                  [class.bg-base-100/50]="activeLayerId() !== 'cities'"
-                  [class.backdrop-blur-sm]="activeLayerId() !== 'cities'"
-                  [class.hover:border-primary/40]="activeLayerId() !== 'cities'"
-                  [class.hover:bg-base-100]="activeLayerId() !== 'cities'"
-                  [class.hover:-translate-y-1]="activeLayerId() !== 'cities'"
-                  [class.hover:shadow-lg]="activeLayerId() !== 'cities'"
+                  class="rounded-2xl p-6 cursor-pointer transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[180px] border border-base-content/5 bg-base-content/5 hover:border-primary/40 hover:bg-white/[0.08]"
+                  [class.ring-2]="activeLayerId() === 'cities'"
+                  [class.ring-primary]="activeLayerId() === 'cities'"
                   (click)="setActiveLayer('cities')"
                 >
-                  <div class="flex justify-between items-start mb-2">
-                    <div class="flex items-center gap-2">
-                      <div
-                        class="p-2 rounded-lg"
-                        [class.bg-white/20]="activeLayerId() === 'cities'"
-                        [class.bg-primary/10]="activeLayerId() !== 'cities'"
-                      >
+                  <div class="flex justify-between items-start mb-2 relative z-10">
+                    <div class="flex items-center gap-3">
+                      <div class="p-3 rounded-xl bg-primary/10 text-primary shadow-inner">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
+                          width="22"
+                          height="22"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
-                          stroke-width="2"
+                          stroke-width="2.5"
                           stroke-linecap="round"
                           stroke-linejoin="round"
-                          [class.text-white]="activeLayerId() === 'cities'"
-                          [class.text-primary]="activeLayerId() !== 'cities'"
                         >
                           <path
                             d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"
@@ -773,225 +803,165 @@ const BASEMAPS: BasemapConfig[] = [
                           <circle cx="12" cy="10" r="3" />
                         </svg>
                       </div>
-                      <span class="font-bold text-lg tracking-tight">Cities</span>
+                      <span class="font-bold text-xl text-base-content">Cities</span>
                     </div>
-                    <label
-                      class="swap swap-rotate z-10 btn btn-circle btn-sm btn-ghost"
-                      [class.hover:bg-white/20]="activeLayerId() === 'cities'"
-                      (click)="$event.stopPropagation()"
-                    >
+                    <label class="cursor-pointer">
                       <input
                         type="checkbox"
+                        class="checkbox checkbox-primary border-base-content/20"
                         [checked]="layerVisibility()['cities']"
                         (change)="toggleLayerVisibility('cities')"
+                        (click)="$event.stopPropagation()"
                       />
-                      <svg
-                        class="swap-on fill-current w-5 h-5 opacity-90"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"
-                        />
-                      </svg>
-                      <svg
-                        class="swap-off fill-current w-5 h-5 opacity-50"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.74,7.13 11.35,7 12,7Z"
-                        />
-                      </svg>
                     </label>
                   </div>
-                  <div class="mt-auto flex gap-2">
+
+                  <p
+                    class="text-sm text-base-content/50 m-0 mb-6 relative z-10 leading-relaxed font-medium"
+                  >
+                    Vector layer with hover tooltips and dynamic population weighting.
+                  </p>
+
+                  <div class="flex gap-3 relative z-10">
                     <button
-                      class="btn btn-sm flex-1 font-semibold rounded-lg shadow-sm"
-                      [class.btn-outline]="activeLayerId() !== 'cities'"
-                      [class.bg-white]="activeLayerId() === 'cities'"
-                      [class.text-primary]="activeLayerId() === 'cities'"
-                      [class.border-none]="activeLayerId() === 'cities'"
-                      [class.hover:bg-gray-100]="activeLayerId() === 'cities'"
+                      class="btn btn-sm btn-outline border-base-content/10 hover:bg-base-content/5 hover:border-base-content/20 text-base-content/70 font-bold px-4 rounded-xl transition-all"
                       (click)="fitToCities(); $event.stopPropagation()"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="mr-1"
-                      >
-                        <path d="M15 3h6v6"></path>
-                        <path d="M9 21H3v-6"></path>
-                        <path d="M21 3l-7 7"></path>
-                        <path d="M3 21l7-7"></path>
-                      </svg>
-                      Zoom
+                      Fit View
                     </button>
                     <button
-                      class="btn btn-sm flex-1 font-semibold rounded-lg shadow-sm"
-                      [class.btn-outline]="activeLayerId() !== 'cities'"
-                      [class.bg-white]="activeLayerId() === 'cities'"
-                      [class.text-primary]="activeLayerId() === 'cities'"
-                      [class.border-none]="activeLayerId() === 'cities'"
-                      [class.hover:bg-gray-100]="activeLayerId() === 'cities'"
+                      class="btn btn-sm transition-all font-bold px-4 rounded-xl shadow-lg"
+                      [class.btn-primary]="layerVisibility()['heatmap']"
+                      [class.btn-outline]="!layerVisibility()['heatmap']"
                       (click)="toggleLayerVisibility('heatmap'); $event.stopPropagation()"
                     >
-                      Heatmap {{ layerVisibility()['heatmap'] ? 'On' : 'Off' }}
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Military Layer Card -->
-                <div
-                  class="rounded-2xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[140px]"
-                  [class.shadow-[0_8px_30px_rgba(251,191,36,0.3)]]="activeLayerId() === 'military'"
-                  [class.bg-gradient-to-br]="activeLayerId() === 'military'"
-                  [class.from-warning]="activeLayerId() === 'military'"
-                  [class.to-amber-500]="activeLayerId() === 'military'"
-                  [class.text-warning-content]="activeLayerId() === 'military'"
-                  [class.scale-105]="activeLayerId() === 'military'"
-                  [class.border]="true"
-                  [class.border-transparent]="activeLayerId() === 'military'"
-                  [class.border-base-300]="activeLayerId() !== 'military'"
-                  [class.bg-base-100/50]="activeLayerId() !== 'military'"
-                  [class.backdrop-blur-sm]="activeLayerId() !== 'military'"
-                  [class.hover:border-warning/40]="activeLayerId() !== 'military'"
-                  [class.hover:bg-base-100]="activeLayerId() !== 'military'"
-                  [class.hover:-translate-y-1]="activeLayerId() !== 'military'"
-                  [class.hover:shadow-lg]="activeLayerId() !== 'military'"
-                  (click)="setActiveLayer('military')"
-                >
-                  <div class="flex justify-between items-start mb-2">
-                    <div class="flex items-center gap-2">
-                      <div
-                        class="p-2 rounded-lg"
-                        [class.bg-black/10]="activeLayerId() === 'military'"
-                        [class.bg-warning/10]="activeLayerId() !== 'military'"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          [class.text-amber-900]="activeLayerId() === 'military'"
-                          [class.text-warning]="activeLayerId() !== 'military'"
-                        >
-                          <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                          <path d="M2 17l10 5 10-5" />
-                          <path d="M2 12l10 5 10-5" />
-                        </svg>
-                      </div>
-                      <span class="font-bold text-lg tracking-tight"
-                        >Military
-                        <span
-                          class="opacity-70 text-sm ml-1 font-mono bg-black/10 px-1.5 py-0.5 rounded-md"
-                          >{{ militaryFeatures().length }}</span
-                        ></span
-                      >
-                    </div>
-                    <label
-                      class="swap swap-rotate z-10 btn btn-circle btn-sm btn-ghost"
-                      [class.hover:bg-black/10]="activeLayerId() === 'military'"
-                      (click)="$event.stopPropagation()"
-                    >
-                      <input
-                        type="checkbox"
-                        [checked]="layerVisibility()['military']"
-                        (change)="toggleLayerVisibility('military')"
-                      />
-                      <svg
-                        class="swap-on fill-current w-5 h-5 opacity-90"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"
-                        />
-                      </svg>
-                      <svg
-                        class="swap-off fill-current w-5 h-5 opacity-50"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.74,7.13 11.35,7 12,7Z"
-                        />
-                      </svg>
-                    </label>
-                  </div>
-                  <div class="mt-auto">
-                    <button
-                      class="btn btn-sm w-full font-semibold rounded-lg shadow-sm"
-                      [disabled]="militaryFeatures().length === 0"
-                      [class.btn-outline]="activeLayerId() !== 'military'"
-                      [class.bg-white]="activeLayerId() === 'military'"
-                      [class.text-amber-700]="activeLayerId() === 'military'"
-                      [class.border-none]="activeLayerId() === 'military'"
-                      [class.hover:bg-amber-50]="activeLayerId() === 'military'"
-                      (click)="clearMilitary(); $event.stopPropagation()"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="mr-1"
-                      >
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path
-                          d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                        ></path>
-                      </svg>
-                      Clear All
+                      Heatmap
                     </button>
                   </div>
                 </div>
 
                 <!-- Drawn Layer Card -->
                 <div
-                  class="rounded-2xl p-5 cursor-pointer transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[140px]"
-                  [class.shadow-[0_8px_30px_rgba(236,72,153,0.3)]]="
-                    activeLayerId() === 'drawn-features'
-                  "
-                  [class.bg-gradient-to-br]="activeLayerId() === 'drawn-features'"
-                  [class.from-secondary]="activeLayerId() === 'drawn-features'"
-                  [class.to-pink-600]="activeLayerId() === 'drawn-features'"
-                  [class.text-secondary-content]="activeLayerId() === 'drawn-features'"
-                  [class.scale-105]="activeLayerId() === 'drawn-features'"
-                  [class.border]="true"
-                  [class.border-transparent]="activeLayerId() === 'drawn-features'"
-                  [class.border-base-300]="activeLayerId() !== 'drawn-features'"
-                  [class.bg-base-100/50]="activeLayerId() !== 'drawn-features'"
-                  [class.backdrop-blur-sm]="activeLayerId() !== 'drawn-features'"
-                  [class.hover:border-secondary/40]="activeLayerId() !== 'drawn-features'"
-                  [class.hover:bg-base-100]="activeLayerId() !== 'drawn-features'"
-                  [class.hover:-translate-y-1]="activeLayerId() !== 'drawn-features'"
-                  [class.hover:shadow-lg]="activeLayerId() !== 'drawn-features'"
+                  class="rounded-2xl p-6 cursor-pointer transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[180px] border border-base-content/5 bg-base-content/5 hover:border-secondary/40 hover:bg-white/[0.08]"
+                  [class.ring-2]="activeLayerId() === 'drawn-features'"
+                  [class.ring-secondary]="activeLayerId() === 'drawn-features'"
                   (click)="setActiveLayer('drawn-features')"
                 >
-                  <div class="flex justify-between items-start mb-2">
-                    <div class="flex items-center gap-2">
-                      <div
-                        class="p-2 rounded-lg"
-                        [class.bg-white/20]="activeLayerId() === 'drawn-features'"
-                        [class.bg-secondary/10]="activeLayerId() !== 'drawn-features'"
+                  <div class="flex justify-between items-start mb-2 relative z-10">
+                    <div class="flex items-center gap-3">
+                      <div class="p-3 rounded-xl bg-secondary/10 text-secondary shadow-inner">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="22"
+                          height="22"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M12 20h9"></path>
+                          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                      </div>
+                      <span class="font-bold text-xl text-base-content"
+                        >Sketches
+                        <span class="text-xs ml-1 font-mono text-base-content/40 font-medium"
+                          >({{ drawnCount() }})</span
+                        >
+                      </span>
+                    </div>
+                    <label class="cursor-pointer">
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-secondary border-base-content/20"
+                        [checked]="layerVisibility()['drawn-features']"
+                        (change)="toggleLayerVisibility('drawn-features')"
+                        (click)="$event.stopPropagation()"
+                      />
+                    </label>
+                  </div>
+
+                  <p
+                    class="text-sm text-base-content/50 m-0 mb-6 relative z-10 leading-relaxed font-medium"
+                  >
+                    Programmatic interactions for drawing and modifying geometries.
+                  </p>
+
+                  <div class="flex gap-3 relative z-10">
+                    <button
+                      class="btn btn-sm btn-ghost text-error/70 hover:text-error hover:bg-error/10 font-bold px-4 rounded-xl transition-all"
+                      [disabled]="drawnCount() === 0"
+                      (click)="clearDrawnFeatures(); $event.stopPropagation()"
+                    >
+                      Clear all
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contextual Tools Panel -->
+            @if (activeLayerId(); as layerId) {
+              <div
+                class="bg-base-content/5 p-8 border-t border-base-content/5 min-h-[140px] flex flex-col justify-center animate-in fade-in slide-in-from-bottom-2 duration-300"
+              >
+                @if (layerId === 'cities') {
+                  <div>
+                    <h3
+                      class="text-xs font-black uppercase tracking-widest text-base-content/30 mb-4 flex items-center gap-2 px-1"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                      >
+                        <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
+                        <line x1="9" y1="3" x2="9" y2="18"></line>
+                        <line x1="15" y1="6" x2="15" y2="21"></line>
+                      </svg>
+                      Quick Navigation
+                    </h3>
+                    <div class="flex flex-wrap gap-3">
+                      <button
+                        class="btn btn-sm btn-outline border-base-content/5 hover:bg-base-content/5 text-base-content/70 font-bold px-5 rounded-xl transition-all"
+                        (click)="jumpTo([2.17, 41.38], 12)"
+                      >
+                        Barcelona
+                      </button>
+                      <button
+                        class="btn btn-sm btn-outline border-base-content/5 hover:bg-base-content/5 text-base-content/70 font-bold px-5 rounded-xl transition-all"
+                        (click)="jumpTo([-3.7, 40.42], 12)"
+                      >
+                        Madrid
+                      </button>
+                      <button
+                        class="btn btn-sm btn-outline border-base-content/5 hover:bg-base-content/5 text-base-content/70 font-bold px-5 rounded-xl transition-all"
+                        (click)="jumpTo([-0.38, 39.47], 12)"
+                      >
+                        Valencia
+                      </button>
+                      <div class="divider divider-horizontal mx-1 opacity-5"></div>
+                      <button
+                        class="btn btn-sm btn-primary font-black px-8 rounded-xl shadow-lg shadow-primary/20 transition-all"
+                        (click)="openRandomCityComponentPopup()"
+                      >
+                        Random Popup
+                      </button>
+                    </div>
+                  </div>
+                } @else if (layerId === 'drawn-features') {
+                  <div class="text-center">
+                    <p
+                      class="text-base-content/40 flex items-center justify-center gap-3 font-medium"
+                    >
+                      <span
+                        class="p-3 bg-secondary/10 rounded-2xl shadow-inner text-secondary border border-secondary/20"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -1000,313 +970,94 @@ const BASEMAPS: BasemapConfig[] = [
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
-                          stroke-width="2"
+                          stroke-width="2.5"
                           stroke-linecap="round"
                           stroke-linejoin="round"
-                          [class.text-white]="activeLayerId() === 'drawn-features'"
-                          [class.text-secondary]="activeLayerId() !== 'drawn-features'"
                         >
-                          <path d="M12 20h9"></path>
-                          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                          <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
                         </svg>
-                      </div>
-                      <span class="font-bold text-lg tracking-tight"
-                        >Drawn
-                        <span
-                          class="opacity-70 text-sm ml-1 font-mono bg-black/10 px-1.5 py-0.5 rounded-md text-white/90"
-                          >{{ drawnCount() }}</span
-                        ></span
-                      >
-                    </div>
-                    <label
-                      class="swap swap-rotate z-10 btn btn-circle btn-sm btn-ghost"
-                      [class.hover:bg-white/20]="activeLayerId() === 'drawn-features'"
-                      (click)="$event.stopPropagation()"
-                    >
-                      <input
-                        type="checkbox"
-                        [checked]="layerVisibility()['drawn-features']"
-                        (change)="toggleLayerVisibility('drawn-features')"
-                      />
-                      <svg
-                        class="swap-on fill-current w-5 h-5 opacity-90"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"
-                        />
-                      </svg>
-                      <svg
-                        class="swap-off fill-current w-5 h-5 opacity-50"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.74,7.13 11.35,7 12,7Z"
-                        />
-                      </svg>
-                    </label>
+                      </span>
+                      Use the floating toolbar on the map to start drawing sketches.
+                    </p>
                   </div>
-                  <div class="mt-auto">
-                    <button
-                      class="btn btn-sm w-full font-semibold rounded-lg shadow-sm"
-                      [disabled]="drawnCount() === 0"
-                      [class.btn-outline]="activeLayerId() !== 'drawn-features'"
-                      [class.bg-white]="activeLayerId() === 'drawn-features'"
-                      [class.text-secondary]="activeLayerId() === 'drawn-features'"
-                      [class.border-none]="activeLayerId() === 'drawn-features'"
-                      [class.hover:bg-pink-50]="activeLayerId() === 'drawn-features'"
-                      (click)="clearDrawnFeatures(); $event.stopPropagation()"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="mr-1"
-                      >
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path
-                          d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                        ></path>
-                      </svg>
-                      Clear All
-                    </button>
-                  </div>
-                </div>
+                }
               </div>
-            </div>
-
-            <!-- Contextual Tools Panel (Inside the Layer Management Card) -->
-            <div
-              class="bg-base-200/40 backdrop-blur-md p-6 border-t border-base-200/80 min-h-[140px] flex flex-col justify-center rounded-b-xl shadow-inner"
-            >
-              @if (activeLayerId() === 'military') {
-                <div class="animation-fade-in">
-                  <h3
-                    class="text-sm font-bold text-base-content/60 uppercase tracking-wider mb-4 flex items-center gap-2"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      class="text-warning"
-                    >
-                      <path
-                        d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
-                      />
-                    </svg>
-                    Tactical Tools
-                  </h3>
-                  <div class="flex flex-wrap gap-3">
-                    <button
-                      class="btn btn-warning shadow-md hover:shadow-lg transition-all"
-                      (click)="addRandomSymbol()"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="mr-1"
-                      >
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                      </svg>
-                      Symbol
-                    </button>
-                    <button
-                      class="btn btn-outline border-warning/50 hover:border-warning hover:bg-warning/10 text-base-content"
-                      (click)="addEllipse()"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="mr-1 text-warning"
-                      >
-                        <ellipse cx="12" cy="12" rx="10" ry="6"></ellipse>
-                      </svg>
-                      Ellipse
-                    </button>
-                    <button
-                      class="btn btn-outline border-warning/50 hover:border-warning hover:bg-warning/10 text-base-content"
-                      (click)="addSector()"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="mr-1 text-warning"
-                      >
-                        <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
-                        <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
-                      </svg>
-                      Sector
-                    </button>
-                    <button
-                      class="btn btn-outline border-warning/50 hover:border-warning hover:bg-warning/10 text-base-content"
-                      (click)="addDonut()"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="mr-1 text-warning"
-                      >
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <circle cx="12" cy="12" r="4"></circle>
-                      </svg>
-                      Donut
-                    </button>
-                  </div>
-                </div>
-              }
-
-              @if (activeLayerId() === 'cities') {
-                <div class="animation-fade-in">
-                  <h3
-                    class="text-sm font-bold text-base-content/60 uppercase tracking-wider mb-4 flex items-center gap-2"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      class="text-primary"
-                    >
-                      <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
-                      <line x1="9" y1="3" x2="9" y2="18"></line>
-                      <line x1="15" y1="6" x2="15" y2="21"></line>
-                    </svg>
-                    Quick Navigation
-                  </h3>
-                  <div class="flex flex-wrap gap-3">
-                    <button
-                      class="btn btn-outline border-primary/40 hover:border-primary hover:bg-primary/10 text-base-content shadow-sm"
-                      (click)="jumpTo([2.17, 41.38], 12)"
-                    >
-                      Barcelona
-                    </button>
-                    <button
-                      class="btn btn-outline border-primary/40 hover:border-primary hover:bg-primary/10 text-base-content shadow-sm"
-                      (click)="jumpTo([-3.7, 40.42], 12)"
-                    >
-                      Madrid
-                    </button>
-                    <button
-                      class="btn btn-outline border-primary/40 hover:border-primary hover:bg-primary/10 text-base-content shadow-sm"
-                      (click)="jumpTo([-0.38, 39.47], 12)"
-                    >
-                      Valencia
-                    </button>
-                    <button
-                      class="btn btn-outline border-primary/40 hover:border-primary hover:bg-primary/10 text-base-content shadow-sm"
-                      (click)="jumpTo([-5.98, 37.39], 12)"
-                    >
-                      Sevilla
-                    </button>
-                    <div class="divider divider-horizontal mx-1"></div>
-                    <button
-                      class="btn btn-primary shadow-md hover:shadow-lg"
-                      (click)="openRandomCityComponentPopup()"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="mr-1"
-                      >
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M12 16v-4"></path>
-                        <path d="M12 8h.01"></path>
-                      </svg>
-                      Random Popup
-                    </button>
-                  </div>
-                </div>
-              }
-
-              @if (activeLayerId() === 'drawn-features') {
-                <div class="animation-fade-in text-center py-6">
-                  <p
-                    class="text-base-content/70 flex items-center justify-center gap-3 font-medium"
-                  >
-                    <span class="p-2 bg-secondary/10 rounded-full">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="text-secondary"
-                      >
-                        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-                      </svg>
-                    </span>
-                    Use the floating toolbar on the map to start drawing sketches.
-                  </p>
-                </div>
-              }
-            </div>
+            }
           </div>
         </div>
 
         <!-- Telemetry Panel -->
-        <div class="flex flex-col gap-6">
-          <div class="card bg-base-100 shadow-xl border border-base-200/50 h-full">
-            <div class="card-body p-6">
-              <h2 class="card-title text-xl font-bold flex items-center gap-2 mb-4">
+        <div class="flex flex-col gap-8">
+          <!-- Property Inspector -->
+          @if (interactionService.selectedFeatures().length > 0) {
+            <div
+              class="bg-base-200 rounded-3xl overflow-hidden shadow-2xl border border-base-content/5 animate-in fade-in slide-in-from-right-4 duration-300"
+            >
+              <div class="p-8">
+                <h2 class="text-xl font-bold flex items-center gap-3 mb-6 text-base-content">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="text-primary"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                  Inspector
+                </h2>
+
+                @let feature = interactionService.selectedFeatures()[0];
+                <div class="space-y-6">
+                  <div
+                    class="bg-base-content/5 rounded-2xl p-5 shadow-inner border border-base-content/5"
+                  >
+                    <span
+                      class="text-[10px] font-black uppercase tracking-widest text-base-content/30 block mb-1"
+                      >Feature ID</span
+                    >
+                    <div class="font-mono text-xs break-all text-base-content/80">
+                      {{ feature.id }}
+                    </div>
+                  </div>
+
+                  @if (feature.properties?.['name']) {
+                    <div
+                      class="bg-base-content/5 rounded-2xl p-5 shadow-inner border border-base-content/5"
+                    >
+                      <span
+                        class="text-[10px] font-black uppercase tracking-widest text-base-content/30 block mb-1"
+                        >Name</span
+                      >
+                      <div class="text-lg font-black text-base-content tracking-tight">
+                        {{ feature.properties!['name'] }}
+                      </div>
+                    </div>
+                  }
+
+                  <button
+                    class="btn btn-sm btn-ghost w-full font-bold text-base-content/40 hover:text-error hover:bg-error/10 rounded-xl transition-all"
+                    (click)="clearSelection()"
+                  >
+                    Deselect Feature
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+
+          <div
+            class="bg-base-200 rounded-3xl overflow-hidden shadow-2xl border border-base-content/5 flex-grow"
+          >
+            <div class="p-8">
+              <h2 class="text-xl font-bold flex items-center gap-3 mb-6 text-base-content">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -1314,55 +1065,100 @@ const BASEMAPS: BasemapConfig[] = [
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
+                  stroke-width="2.5"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   class="text-info"
                 >
                   <path d="M2 12h4l2-9 5 18 3-10 5 3"></path>
                 </svg>
-                Telemetry
+                Map Telemetry
               </h2>
 
-              <div class="stats stats-vertical shadow-sm border border-base-200/50 w-full mb-4">
-                <div class="stat py-3">
-                  <div class="stat-title text-xs font-bold uppercase">Center Coord</div>
-                  <div class="stat-value text-lg font-mono tracking-tight mt-1">
-                    {{ center()?.[0]?.toFixed(4) ?? '-' }}, {{ center()?.[1]?.toFixed(4) ?? '-' }}
+              <div class="flex flex-col gap-4 mb-8">
+                <div
+                  class="bg-base-content/5 rounded-2xl p-5 shadow-inner border border-base-content/5"
+                >
+                  <div
+                    class="text-[10px] font-black uppercase tracking-widest text-base-content/30 mb-1"
+                  >
+                    Center Coordinates
+                  </div>
+                  <div class="text-xl font-mono tracking-tighter text-base-content font-black">
+                    {{ center()[0].toFixed(4) }}<span class="mx-1 opacity-20">,</span
+                    >{{ center()[1].toFixed(4) }}
                   </div>
                 </div>
-                <div class="stat py-3">
-                  <div class="stat-title text-xs font-bold uppercase">Zoom Level</div>
-                  <div class="stat-value text-lg font-mono tracking-tight text-info mt-1">
+                <div
+                  class="bg-base-content/5 rounded-2xl p-5 shadow-inner border border-base-content/5"
+                >
+                  <div
+                    class="text-[10px] font-black uppercase tracking-widest text-base-content/30 mb-1"
+                  >
+                    Zoom Level
+                  </div>
+                  <div class="text-2xl font-mono tracking-tighter text-info font-black">
                     {{ zoom() | number: '1.1-2' }}
                   </div>
                 </div>
               </div>
 
-              <h3 class="text-sm font-bold text-base-content/60 uppercase tracking-wider mb-2 mt-4">
-                Pointer Data
+              <h3
+                class="text-[10px] font-black uppercase tracking-widest text-base-content/30 mb-4 px-1"
+              >
+                Pointer Inspection
               </h3>
               <div
-                class="bg-base-200 rounded-xl p-4 border border-base-300 font-mono text-sm shadow-inner flex-grow"
+                class="bg-base-content/5 rounded-2xl p-6 border border-base-content/5 font-mono text-sm shadow-inner min-h-[140px] flex flex-col justify-center"
               >
                 @if (lastClick(); as click) {
-                  <div class="flex justify-between mb-2 pb-2 border-b border-base-300">
-                    <span class="text-base-content/60">Lon/Lat:</span>
-                    <span class="font-bold text-success"
-                      >{{ click.coordinate?.[0]?.toFixed(4) }},
-                      {{ click.coordinate?.[1]?.toFixed(4) }}</span
+                  <div class="space-y-4 animate-in fade-in duration-300">
+                    <div
+                      class="flex justify-between items-center pb-4 border-b border-base-content/5"
                     >
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-base-content/60">Screen X/Y:</span>
-                    <span class="font-bold"
-                      >{{ click.pixel?.[0] | number: '1.0-0' }}px,
-                      {{ click.pixel?.[1] | number: '1.0-0' }}px</span
-                    >
+                      <span class="text-[10px] font-bold uppercase text-base-content/30"
+                        >Coord</span
+                      >
+                      <span class="font-bold text-success"
+                        >{{ click.coordinate?.[0]?.toFixed(4)
+                        }}<span class="mx-1 opacity-40">,</span
+                        >{{ click.coordinate?.[1]?.toFixed(4) }}</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-[10px] font-bold uppercase text-base-content/30"
+                        >Viewport</span
+                      >
+                      <span class="font-bold text-base-content/80"
+                        >{{ click.pixel?.[0] | number: '1.0-0' }}px<span class="mx-1 opacity-40"
+                          >,</span
+                        >{{ click.pixel?.[1] | number: '1.0-0' }}px</span
+                      >
+                    </div>
                   </div>
                 } @else {
-                  <div class="flex items-center justify-center h-full text-base-content/40 italic">
-                    Waiting for map click...
+                  <div
+                    class="flex flex-col items-center justify-center h-full text-base-content/10 italic gap-4"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="40"
+                      height="40"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="opacity-10"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="2" y1="12" x2="22" y2="12" />
+                      <line x1="12" y1="2" x2="12" y2="22" />
+                    </svg>
+                    <span class="text-[10px] font-black uppercase tracking-[0.2em]"
+                      >Idle Inspection</span
+                    >
                   </div>
                 }
               </div>
@@ -1372,124 +1168,117 @@ const BASEMAPS: BasemapConfig[] = [
       </div>
 
       <!-- WebGL Performance Demo -->
-      <div class="mt-10">
-        <h2
-          class="text-sm font-bold text-base-content/60 uppercase tracking-wider mb-4 ml-2 flex items-center gap-2"
+      <div class="mt-16">
+        <div
+          class="bg-base-200 border border-base-content/5 rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-          </svg>
-          WebGL Performance Demo
-        </h2>
-        <div class="bg-base-100/50 border border-base-300 rounded-2xl p-6">
-          <div class="flex flex-wrap items-center gap-4 mb-4">
-            <button
-              class="btn btn-sm font-semibold rounded-lg shadow-sm"
-              [class.btn-primary]="!webglActive()"
-              [class.btn-outline]="webglActive()"
-              (click)="generateWebGLPoints()"
+          <div class="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="160"
+              height="160"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-              </svg>
-              Generate {{ webglPointCount() }} Points
-            </button>
-            <input
-              type="range"
-              min="500"
-              max="20000"
-              step="500"
-              [value]="webglPointCount()"
-              (input)="webglPointCount.set(+$any($event.target).value)"
-              class="range range-primary range-xs w-40"
-              aria-label="Point count"
-            />
-            <span class="text-xs text-base-content/50 font-mono">
-              {{ webglPointCount() | number }} pts
-            </span>
-            <label class="label cursor-pointer gap-2">
-              <span class="label-text text-xs">WebGL</span>
-              <input
-                type="checkbox"
-                class="toggle toggle-sm toggle-primary"
-                [checked]="webglActive()"
-                (change)="webglActive.set(!webglActive())"
-              />
-            </label>
-            @if (webglFeatures().length > 0) {
-              <span
-                class="badge badge-sm"
-                [class.badge-success]="webglActive()"
-                [class.badge-neutral]="!webglActive()"
-              >
-                {{ webglActive() ? 'GPU' : 'Canvas' }} ·
-                {{ webglFeatures().length | number }} features
-              </span>
-            }
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
           </div>
-          <p class="text-xs text-base-content/50">
-            Toggle between Canvas 2D and WebGL rendering to compare performance with large point
-            datasets. WebGL uses GPU acceleration with
-            <code class="text-primary">FlatStyleLike</code> for maximum throughput.
-          </p>
-        </div>
-      </div>
 
-      <!-- Package Info Footer -->
-      <div class="mt-12 opacity-80 hover:opacity-100 transition-opacity duration-300">
-        <h2 class="text-sm font-bold text-base-content/60 uppercase tracking-wider mb-4 ml-2">
-          Modular Architecture
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div
-            class="bg-gradient-to-r from-base-200 to-base-100 rounded-xl p-4 border-l-4 border-l-primary shadow-sm"
+            class="flex flex-col lg:flex-row lg:items-center justify-between gap-10 relative z-10"
           >
-            <code class="text-primary font-bold text-sm bg-primary/10 px-2 py-1 rounded"
-              >@angular-helpers/openlayers/core</code
+            <div class="max-w-xl">
+              <h2 class="text-2xl font-black text-base-content mb-4 flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-2xl bg-primary/20 flex items-center justify-center text-primary shadow-inner"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                  </svg>
+                </div>
+                Performance Benchmarking
+              </h2>
+              <p class="text-base-content/50 leading-relaxed font-medium">
+                Stress-test the rendering engine by switching between
+                <span class="text-base-content font-bold">Standard Canvas</span> and
+                <span class="text-primary font-bold">WebGL GPU</span> acceleration. WebGL vertex
+                shaders allow rendering 50,000+ features with zero main-thread lag.
+              </p>
+            </div>
+
+            <div
+              class="bg-base-content/5 p-8 rounded-[2rem] border border-base-content/5 shadow-inner flex flex-col sm:flex-row items-center gap-8"
             >
-            <p class="text-base-content/70 text-xs mt-2 font-medium">
-              Map component, services, base types
-            </p>
-          </div>
-          <div
-            class="bg-gradient-to-r from-base-200 to-base-100 rounded-xl p-4 border-l-4 border-l-secondary shadow-sm"
-          >
-            <code class="text-secondary font-bold text-sm bg-secondary/10 px-2 py-1 rounded"
-              >@angular-helpers/openlayers/layers</code
-            >
-            <p class="text-base-content/70 text-xs mt-2 font-medium">
-              Tile, vector, image layer components
-            </p>
-          </div>
-          <div
-            class="bg-gradient-to-r from-base-200 to-base-100 rounded-xl p-4 border-l-4 border-l-accent shadow-sm"
-          >
-            <code class="text-accent font-bold text-sm bg-accent/10 px-2 py-1 rounded"
-              >@angular-helpers/openlayers/controls</code
-            >
-            <p class="text-base-content/70 text-xs mt-2 font-medium">
-              Zoom, attribution, scale, fullscreen
-            </p>
+              <div class="space-y-4 min-w-[200px]">
+                <div
+                  class="flex justify-between text-[10px] font-black uppercase tracking-widest text-base-content/30"
+                >
+                  <span>Feature Density</span>
+                  <span class="text-base-content font-bold"
+                    >{{ webglPointCount() | number }} pts</span
+                  >
+                </div>
+                <input
+                  type="range"
+                  min="500"
+                  max="50000"
+                  step="500"
+                  [value]="webglPointCount()"
+                  (input)="webglPointCount.set(+$any($event.target).value)"
+                  class="range range-primary range-xs"
+                />
+              </div>
+
+              <div class="divider divider-horizontal opacity-5 hidden sm:flex"></div>
+
+              <div class="flex flex-col gap-4">
+                <button
+                  class="btn btn-primary font-black px-8 rounded-2xl shadow-xl shadow-primary/20 flex items-center gap-3 transition-all active:scale-95"
+                  (click)="generateWebGLPoints()"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                  </svg>
+                  Generate Data
+                </button>
+                <label
+                  class="flex items-center gap-4 cursor-pointer group px-3 py-2 bg-base-content/5 rounded-xl border border-base-content/5 transition-colors hover:bg-base-content/10 shadow-sm"
+                >
+                  <span
+                    class="text-[10px] font-black uppercase tracking-widest text-base-content/50 group-hover:text-base-content transition-colors"
+                    >GPU Active</span
+                  >
+                  <input
+                    type="checkbox"
+                    class="toggle toggle-primary"
+                    [checked]="webglActive()"
+                    (change)="webglActive.set(!webglActive())"
+                  />
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1500,9 +1289,9 @@ export class OpenLayersDemoComponent {
   private layerService = inject(OlLayerService);
   private mapService = inject(OlMapService);
   private popupService = inject(OlPopupService);
-  private militaryService = inject(OlMilitaryService);
   private measurementService = inject(MeasurementInteractionService);
   readonly interactionService = inject(OlInteractionService);
+
   protected basemaps = BASEMAPS;
 
   center = signal<[number, number]>([2.17, 41.38]);
@@ -1512,14 +1301,14 @@ export class OpenLayersDemoComponent {
   webglActive = signal<boolean>(false);
   webglPointCount = signal<number>(5000);
   webglFeatures = signal<Feature[]>([]);
-  lastClick = signal<{ coordinate: [number, number]; pixel: [number, number] } | null>(null);
+  lastClick = signal<MapClickEvent | null>(null);
   activeBasemap = signal<string>('osm');
 
   // Interaction state - derived from the InteractionService natively
   selectActive = computed(() => this.interactionService.isActive('demo-select'));
   drawActive = computed(() => this.interactionService.isActive('demo-draw'));
   modifyActive = computed(() => this.interactionService.isActive('demo-modify'));
-  drawType = signal<'Polygon' | 'LineString' | 'Point' | 'Circle'>('Polygon');
+  drawType = signal<'Polygon' | 'LineString' | 'Point' | 'Circle' | 'Ellipse' | 'Donut'>('Polygon');
 
   measureActive = signal(false);
   measureType = signal<'Polygon' | 'LineString'>('LineString');
@@ -1527,15 +1316,19 @@ export class OpenLayersDemoComponent {
   // Count of drawn features (OL Draw manages the actual source directly)
   drawnCount = signal<number>(0);
 
-  // Military features layer — driven by the military service helpers.
-  militaryFeatures = signal<Feature[]>([]);
-
-  // Layer visibility states (toggle with eye icon)
-  layerVisibility = signal<Record<string, boolean>>({
-    cities: true,
-    heatmap: false,
-    military: true,
-    'drawn-features': true,
+  // Layer visibility states (derived from service for 2-way sync)
+  layerVisibility = computed(() => {
+    const visibility: Record<string, boolean> = {};
+    this.layerService.layers().forEach((l) => {
+      visibility[l.id] = l.visible;
+    });
+    // Add defaults for layers that might not be registered yet
+    return {
+      cities: true,
+      heatmap: false,
+      'drawn-features': true,
+      ...visibility,
+    };
   });
 
   // Currently active/selected layer for visual feedback
@@ -1570,10 +1363,20 @@ export class OpenLayersDemoComponent {
     // Initialize default basemap on component creation
     this.createBasemapLayer('osm');
 
-    // Track draw count — Draw adds to the OL source directly, we only count
-    this.interactionService.drawEnd$
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => this.drawnCount.update((n) => n + 1));
+    // Track selection changes for tactical logging
+    effect(() => {
+      const selected = this.interactionService.selectedFeatures();
+      if (selected.length > 0) {
+        const first = selected[0];
+        const props = first.properties;
+        if (props?.['tacticalType']) {
+          // oxlint-disable-next-line no-console
+          console.log(
+            `[Tactical Selection] Type: ${props['tacticalType']}, Name: ${props['name'] || 'N/A'}, Faction: ${props['direction']}`,
+          );
+        }
+      }
+    });
   }
 
   // Layer switcher items derived from service state
@@ -1616,7 +1419,7 @@ export class OpenLayersDemoComponent {
     this.zoom.set(viewState.zoom);
   }
 
-  onMapClick(event: { coordinate: [number, number]; pixel: [number, number] }): void {
+  onMapClick(event: MapClickEvent): void {
     this.lastClick.set(event);
   }
 
@@ -1756,10 +1559,10 @@ export class OpenLayersDemoComponent {
   }
 
   onDrawTypeClick(type: string): void {
-    this.setDrawType(type as 'Polygon' | 'LineString' | 'Point' | 'Circle');
+    this.setDrawType(type as 'Polygon' | 'LineString' | 'Point' | 'Circle' | 'Ellipse' | 'Donut');
   }
 
-  setDrawType(type: 'Polygon' | 'LineString' | 'Point' | 'Circle'): void {
+  setDrawType(type: 'Polygon' | 'LineString' | 'Point' | 'Circle' | 'Ellipse' | 'Donut'): void {
     this.drawType.set(type);
     // If draw is active, restart with new type
     if (this.drawActive()) {
@@ -1784,74 +1587,9 @@ export class OpenLayersDemoComponent {
   // Military symbology demo
   // ---------------------------------------------------------------------------
 
-  /**
-   * Drop a random NATO friendly-infantry symbol on Madrid.
-   * Uses milsymbol via dynamic ESM import (lazy loaded).
-   */
-  async addRandomSymbol(): Promise<void> {
-    const symbol = await this.militaryService.createMilSymbol({
-      sidc: 'SFGPUCI-----',
-      position: [-3.7 + (Math.random() - 0.5) * 0.4, 40.42 + (Math.random() - 0.5) * 0.3],
-      size: 36,
-      uniqueDesignation: 'A1',
-    });
-    this.militaryFeatures.update((prev) => [...prev, symbol]);
-  }
-
-  /** Add a defensive ellipse near Barcelona with random jitter. */
-  addEllipse(): void {
-    const ellipse = this.militaryService.createEllipse({
-      center: this.jitter([2.17, 41.38]),
-      semiMajor: 6_000,
-      semiMinor: 3_000,
-      rotation: Math.PI / 6,
-    });
-    this.militaryFeatures.update((prev) => [...prev, ellipse]);
-  }
-
-  /** Add a 60° sector near Valencia with random jitter. */
-  addSector(): void {
-    const sector = this.militaryService.createSector({
-      center: this.jitter([-0.38, 39.47]),
-      radius: 8_000,
-      startAngle: Math.PI / 6,
-      endAngle: Math.PI / 2,
-    });
-    this.militaryFeatures.update((prev) => [...prev, sector]);
-  }
-
-  /** Add a range-ring donut (5–10 km) near Sevilla with random jitter. */
-  addDonut(): void {
-    const donut = this.militaryService.createDonut({
-      center: this.jitter([-5.99, 37.39]),
-      innerRadius: 5_000,
-      outerRadius: 10_000,
-    });
-    this.militaryFeatures.update((prev) => [...prev, donut]);
-  }
-
-  /**
-   * Apply a small random offset (~0.15°) to a coordinate so features
-   * created at the same base location don't share identical centroids,
-   * which would prevent the cluster source from ever splitting them.
-   */
-  private jitter(coords: [number, number]): [number, number] {
-    return [coords[0] + (Math.random() - 0.5) * 1.0, coords[1] + (Math.random() - 0.5) * 0.8];
-  }
-
-  /** Empty the military layer. */
-  clearMilitary(): void {
-    this.militaryFeatures.set([]);
-    // Also clear from OL source since updateFeatures doesn't remove existing
-    this.layerService.clearFeatures('military');
-  }
-
   /** Toggle layer visibility by ID. */
   toggleLayerVisibility(id: string): void {
-    this.layerVisibility.update((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+    this.layerService.toggleVisibility(id);
   }
 
   /** Generate random points for WebGL performance demonstration */

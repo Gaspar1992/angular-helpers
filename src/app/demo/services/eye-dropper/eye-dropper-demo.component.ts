@@ -6,61 +6,59 @@ import { EyeDropperService } from '@angular-helpers/browser-web-apis';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [],
+  styleUrls: ['../demo.styles.css'],
   template: `
-    <section
-      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
-      aria-labelledby="eye-title"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="eye-title">
-          EyeDropper API
+    <section class="svc-card" aria-labelledby="eye-title">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title" id="eye-title">
+          <span class="text-primary text-2xl">🧪</span> EyeDropper API
         </h2>
         <div class="flex gap-2 flex-wrap">
           @if (eyeDropper.isSupported()) {
-            <span class="badge badge-success badge-sm">supported</span>
+            <span class="badge badge-success font-black">supported</span>
           } @else {
-            <span class="badge badge-error badge-sm">unsupported</span>
+            <span class="badge badge-error font-black">unsupported</span>
           }
-          <span class="badge badge-info badge-sm">secure context</span>
+          <span class="badge badge-info font-black">secure context</span>
         </div>
       </div>
 
-      <p class="text-sm text-base-content/70 mb-4">
-        Pick any color from your screen using the system color picker.
+      <p class="svc-desc">
+        Pick any color from your screen using the system color picker. Sample colors from the
+        browser window or even outside of it.
       </p>
 
       @if (eyeDropper.isSupported()) {
-        <button class="btn btn-primary btn-sm" (click)="pickColor()">Open EyeDropper</button>
+        <div class="svc-controls mb-8">
+          <button class="btn btn-primary font-black" (click)="pickColor()">Open EyeDropper</button>
+        </div>
+
         @if (selectedColor()) {
-          <div
-            class="mt-4 flex items-center gap-3 p-3 bg-base-100 rounded-lg border border-base-300"
-          >
-            <div
-              class="w-10 h-10 rounded shadow-inner"
-              [style.backgroundColor]="selectedColor()"
-            ></div>
-            <div>
-              <div class="text-xs opacity-60 uppercase font-bold">Selected Color</div>
-              <code class="text-sm font-mono">{{ selectedColor() }}</code>
+          <div class="svc-result animate-in zoom-in-95 duration-500 shadow-2xl">
+            <div class="flex items-center gap-8">
+              <div
+                class="w-24 h-24 rounded-[2rem] shadow-2xl border-4 border-base-content/10 ring-8 ring-white/5"
+                [style.backgroundColor]="selectedColor()"
+              ></div>
+              <div class="flex-1">
+                <div class="kv-row">
+                  <span class="kv-key">Hex Value</span>
+                  <span class="kv-val text-2xl font-black tracking-tighter text-primary">{{
+                    selectedColor()
+                  }}</span>
+                </div>
+                <div class="kv-row border-none">
+                  <span class="kv-key">Status</span>
+                  <span class="badge badge-success font-black">Captured</span>
+                </div>
+              </div>
             </div>
           </div>
         }
       } @else {
-        <div class="alert alert-warning py-2 text-sm">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            class="stroke-current shrink-0 w-4 h-4"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
-          </svg>
-          <span>This browser does not support the EyeDropper API.</span>
+        <div class="feedback feedback-error mt-6">
+          <span class="text-2xl">⚠️</span>
+          <span>This browser does not support the EyeDropper API. Try Chrome or Edge.</span>
         </div>
       }
     </section>
@@ -75,7 +73,7 @@ export class EyeDropperDemoComponent {
       const result = await this.eyeDropper.open();
       this.selectedColor.set(result.sRGBHex);
     } catch (e) {
-      console.error('EyeDropper canceled or failed', e);
+      // ignore
     }
   }
 }

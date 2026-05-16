@@ -1,46 +1,52 @@
 import { Component, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { ScreenWakeLockService, PermissionsService } from '@angular-helpers/browser-web-apis';
+import { ScreenWakeLockService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-screen-wake-lock-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [PermissionsService, ScreenWakeLockService],
+  providers: [ScreenWakeLockService],
+  styleUrls: ['../demo.styles.css'],
   template: `
-    <section
-      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
-      aria-labelledby="wl-title"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="wl-title">
-          Screen Wake Lock
+    <section class="svc-card" aria-labelledby="wl-title">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title" id="wl-title">
+          <span class="text-primary text-2xl">🕯️</span> Screen Wake Lock
         </h2>
         <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-success badge-sm">supported</span>
+            <span class="badge badge-success font-black">supported</span>
           } @else {
-            <span class="badge badge-error badge-sm">unsupported</span>
+            <span class="badge badge-error font-black">unsupported</span>
           }
-          <span class="badge badge-info badge-sm">secure context</span>
+          @if (locked()) {
+            <span class="badge badge-primary animate-pulse font-black">ACTIVE</span>
+          }
         </div>
       </div>
-      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
-        Prevents the screen from dimming or locking.
+      <p class="svc-desc">
+        Prevent the screen from dimming or locking during important application tasks.
       </p>
-      <div class="flex flex-wrap gap-2 items-center mb-4">
+
+      <div class="svc-controls">
         <button
-          class="btn btn-sm"
-          [class.btn-error]="active()"
-          [class.btn-primary]="!active()"
-          (click)="toggle()"
-          [disabled]="!supported"
+          class="btn btn-primary font-black"
+          (click)="request()"
+          [disabled]="locked() || !supported"
         >
-          {{ active() ? '🔓 Release wake lock' : '🔒 Acquire wake lock' }}
+          Request Lock
         </button>
-        @if (active()) {
-          <span class="badge badge-success badge-sm">active</span>
-        } @else {
-          <span class="badge badge-ghost badge-sm">inactive</span>
-        }
+        <button class="btn btn-secondary font-black" (click)="release()" [disabled]="!locked()">
+          Release Lock
+        </button>
+      </div>
+
+      <div class="mt-8">
+        <div class="svc-result flex items-center justify-between">
+          <span class="kv-key">Status</span>
+          <span class="font-black text-sm" [class.text-primary]="locked()">
+            {{ locked() ? 'WAKE LOCK ACTIVE' : 'INACTIVE' }}
+          </span>
+        </div>
       </div>
     </section>
   `,
@@ -49,24 +55,23 @@ export class ScreenWakeLockDemoComponent implements OnDestroy {
   private readonly svc = inject(ScreenWakeLockService);
 
   readonly supported = this.svc.isSupported();
-  readonly active = signal(false);
+  readonly locked = signal(false);
 
-  async toggle(): Promise<void> {
-    if (!this.supported) return;
+  async request(): Promise<void> {
     try {
-      if (this.active()) {
-        await this.svc.release();
-        this.active.set(false);
-      } else {
-        await this.svc.request();
-        this.active.set(true);
-      }
+      await this.svc.request();
+      this.locked.set(true);
     } catch {
-      // unsupported or denied
+      // denied
     }
   }
 
+  async release(): Promise<void> {
+    await this.svc.release();
+    this.locked.set(false);
+  }
+
   ngOnDestroy(): void {
-    if (this.active()) void this.svc.release();
+    void this.release();
   }
 }

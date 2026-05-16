@@ -2,12 +2,13 @@ import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   effect,
   inject,
   input,
 } from '@angular/core';
-import type { Feature } from '@angular-helpers/openlayers/core';
+import { OlMapService, type Feature } from '@angular-helpers/openlayers/core';
 import { OlLayerService } from '../services/layer.service';
 import type { HeatmapLayerConfig } from '../models/layer.types';
 
@@ -18,6 +19,7 @@ import type { HeatmapLayerConfig } from '../models/layer.types';
 })
 export class OlHeatmapLayerComponent {
   private layerService = inject(OlLayerService);
+  private mapService = inject(OlMapService);
   private destroyRef = inject(DestroyRef);
 
   id = input.required<string>();
@@ -28,7 +30,23 @@ export class OlHeatmapLayerComponent {
 
   blur = input<number>(15);
   radius = input<number>(8);
+  /** Unit for radius and blur: 'pixels' (default) or 'meters' */
+  radiusUnit = input<'pixels' | 'meters'>('pixels');
   weight = input<string | ((feature: Feature) => number)>();
+
+  /** Computed radius in pixels based on current resolution if unit is 'meters' */
+  private scaledRadius = computed(() => {
+    const r = this.radius();
+    if (this.radiusUnit() === 'pixels') return r;
+    return r / this.mapService.resolution();
+  });
+
+  /** Computed blur in pixels based on current resolution if unit is 'meters' */
+  private scaledBlur = computed(() => {
+    const b = this.blur();
+    if (this.radiusUnit() === 'pixels') return b;
+    return b / this.mapService.resolution();
+  });
 
   constructor() {
     afterNextRender(() => {
@@ -39,8 +57,8 @@ export class OlHeatmapLayerComponent {
         zIndex: this.zIndex(),
         opacity: this.opacity(),
         visible: this.visible(),
-        blur: this.blur(),
-        radius: this.radius(),
+        blur: this.scaledBlur(),
+        radius: this.scaledRadius(),
         weight: this.weight(),
       } as HeatmapLayerConfig);
     });
@@ -66,8 +84,8 @@ export class OlHeatmapLayerComponent {
 
     effect(() => {
       this.layerService.setHeatmapProperties(this.id(), {
-        blur: this.blur(),
-        radius: this.radius(),
+        blur: this.scaledBlur(),
+        radius: this.scaledRadius(),
         weight: this.weight(),
       });
     });

@@ -7,26 +7,37 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
   selector: 'app-worker-http-hash-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-base-200 border border-base-300 rounded-xl p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
+    <div class="bg-base-200 border border-base-content/5 rounded-3xl p-8 h-full flex flex-col">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-accent m-0 flex items-center gap-2">
           #️⃣ Content Hashing
         </h2>
-        <span class="badge badge-accent">SHA-256</span>
+        <span class="badge badge-accent font-semibold">SHA-256</span>
       </div>
-      <p class="text-sm text-base-content/80 mb-4">
+      <p class="text-sm text-base-content/70 mb-8">
         Generate SHA-256 hashes of request bodies for integrity checks and caching
       </p>
 
-      <button type="button" (click)="hash()" class="btn btn-accent btn-sm w-full sm:w-auto">
+      <button
+        type="button"
+        (click)="hash()"
+        class="btn btn-accent font-bold px-8 w-full sm:w-auto mb-6"
+      >
         Hash Content
       </button>
 
-      @if (result()) {
-        <div class="mt-3 p-3 bg-base-300 rounded-lg font-mono text-xs break-all">
-          <span class="text-secondary">SHA-256:</span> {{ result() }}
-        </div>
-      }
+      <div class="mt-auto">
+        @if (result()) {
+          <div
+            class="p-4 bg-base-content/5 rounded-2xl shadow-inner border border-base-content/5 font-mono text-xs break-all"
+          >
+            <div class="text-accent font-bold mb-1 uppercase tracking-wider text-[10px] opacity-70">
+              SHA-256 Hash
+            </div>
+            {{ result() }}
+          </div>
+        }
+      </div>
     </div>
   `,
 })

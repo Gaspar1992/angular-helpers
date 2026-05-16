@@ -7,52 +7,70 @@ import { FileSystemAccessService, PermissionsService } from '@angular-helpers/br
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [PermissionsService, FileSystemAccessService],
   imports: [DecimalPipe],
+  styleUrls: ['../demo.styles.css'],
   template: `
-    <section
-      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
-      aria-labelledby="fs-acc-title"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="fs-acc-title">
-          File System Access
+    <section class="svc-card" aria-labelledby="fs-acc-title">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title" id="fs-acc-title">
+          <span class="text-primary text-2xl">📁</span> File System Access
         </h2>
         <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-success badge-sm">supported</span>
+            <span class="badge badge-success font-black">supported</span>
           } @else {
-            <span class="badge badge-warning badge-sm">Chrome/Edge only</span>
+            <span class="badge badge-warning font-black">Chrome/Edge only</span>
           }
-          <span class="badge badge-info badge-sm">secure context</span>
+          <span class="badge badge-info font-black">secure context</span>
         </div>
       </div>
-      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
-        Open local files and preview their contents via the native file picker.
+      <p class="svc-desc">
+        Interact with the local file system using native system dialogs for a high-performance,
+        OS-integrated experience.
       </p>
-      <div class="flex flex-wrap gap-2 items-center mb-4">
-        <button class="btn btn-primary btn-sm" (click)="openFiles()" [disabled]="!supported">
-          Open files…
+
+      <div class="svc-controls mb-8">
+        <button class="btn btn-primary font-black" (click)="openFiles()" [disabled]="!supported">
+          Select Local Files
         </button>
       </div>
-      @for (file of openedFiles(); track file.name) {
-        <div class="bg-base-300 border border-base-300 rounded-lg p-4 mb-3">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-medium text-base-content">{{ file.name }}</span>
-            <span class="text-xs text-base-content/80">{{ file.size | number }} bytes</span>
+
+      <div class="space-y-6">
+        @for (file of openedFiles(); track file.name) {
+          <div class="svc-result animate-in zoom-in-95 duration-500 shadow-xl">
+            <div class="kv-row">
+              <span class="kv-key">Resource Name</span>
+              <span class="kv-val text-primary">{{ file.name }}</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Binary Size</span>
+              <span class="kv-val text-secondary">{{ file.size | number }} bytes</span>
+            </div>
+
+            <label class="mt-6">Content Buffer Preview</label>
+            <div
+              class="mono-block font-black text-xs text-base-content/70 italic bg-base-content/5 p-5 rounded-xl border border-base-content/5 shadow-inner"
+            >
+              "{{ file.preview }}{{ file.preview.length >= 300 ? '...' : '' }}"
+            </div>
           </div>
+        }
+
+        @if (supported && openedFiles().length === 0) {
           <div
-            class="bg-base-200 border border-base-300 rounded p-2 font-mono text-xs text-base-content break-all"
+            class="py-12 text-center bg-base-content/5 rounded-3xl border border-dashed border-base-content/10 shadow-inner"
           >
-            {{ file.preview }}
-            @if (file.preview.length >= 300) {
-              …
-            }
+            <p class="text-[10px] font-black uppercase tracking-widest text-base-content/20 italic">
+              Awaiting file input
+            </p>
           </div>
-        </div>
-      }
+        }
+      </div>
+
       @if (!supported) {
-        <p class="text-xs text-base-content/80 italic">
-          File System Access API is available in Chrome/Edge on desktop.
-        </p>
+        <div class="feedback feedback-info mt-8">
+          <span class="text-2xl">ℹ️</span>
+          <span>Available in Chromium-based browsers on desktop platforms.</span>
+        </div>
       }
     </section>
   `,
