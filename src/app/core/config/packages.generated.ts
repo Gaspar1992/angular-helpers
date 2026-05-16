@@ -2,10 +2,10 @@
 // Do not edit manually - run: npx tsx scripts/generate-package-metadata.ts
 
 export const GENERATED_METADATA = {
-  version: '21.11.0',
+  version: '21.12.0',
   browserWebApis: {
     serviceCount: 40,
-    injectFnCount: 13,
+    injectFnCount: 14,
     experimentalServiceCount: 8,
     services: [
       'BatteryService',
@@ -14,10 +14,12 @@ export const GENERATED_METADATA = {
       'CameraService',
       'ClipboardService',
       'CompressionService',
+      'EyeDropperService',
       'FileSystemAccessService',
       'FullscreenService',
       'GamepadService',
       'GeolocationService',
+      'IdleDetectorService',
       'IntersectionObserverService',
       'MediaDevicesService',
       'MediaRecorderService',
@@ -44,8 +46,10 @@ export const GENERATED_METADATA = {
     injectFunctions: [
       'inject-battery',
       'inject-clipboard',
+      'inject-eye-dropper',
       'inject-gamepad',
       'inject-geolocation',
+      'inject-idle-detector',
       'inject-intersection-observer',
       'inject-mutation-observer',
       'inject-network-information',
@@ -54,7 +58,6 @@ export const GENERATED_METADATA = {
       'inject-resize-observer',
       'inject-screen-orientation',
       'inject-wake-lock',
-      'inject-idle-detector',
     ],
     experimentalServices: [
       'BarcodeDetectorService',

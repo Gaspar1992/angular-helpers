@@ -49,7 +49,6 @@ import { OlMapService } from '@angular-helpers/openlayers/core';
 
 @Component({
   selector: 'app-map',
-  standalone: true,
   imports: [
     OlMapComponent,
     OlTileLayerComponent,

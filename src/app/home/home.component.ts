@@ -33,7 +33,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
             <div class="badge badge-outline gap-2 p-4 rounded-full shadow-sm">
               <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
               <span class="text-[11px] font-black uppercase tracking-widest text-base-content/60"
-                >Version 1.41.0 is out</span
+                >Version 1.41.1 is out</span
               >
             </div>
 
@@ -131,7 +131,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
             <h2
               class="text-[2.5rem] sm:text-[3.5rem] font-black text-base-content tracking-tighter leading-none m-0 mb-16 text-center text-balance"
             >
-              Three tools. <br class="sm:hidden" />Zero bloat.
+              Four tools. <br class="sm:hidden" />Zero bloat.
             </h2>
 
             <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-8">

@@ -1964,7 +1964,7 @@ export class MetricsComponent {
         returns: 'boolean',
       },
     ],
-    example: `import { IdleDetectorService } from '@angular-helpers/browser-web-apis/experimental';
+    example: `import { IdleDetectorService } from '@angular-helpers/browser-web-apis';
 
 @Component({ providers: [IdleDetectorService] })
 export class PresenceComponent {
@@ -2022,7 +2022,7 @@ export class PresenceComponent {
     description:
       'Provides access to the EyeDropper API for picking colors from anywhere on the screen. Opens a system color picker that returns the selected color in sRGB hex format.',
     scope: 'provided',
-    importPath: '@angular-helpers/browser-web-apis/experimental',
+    importPath: '@angular-helpers/browser-web-apis',
     requiresSecureContext: true,
     browserSupport: 'Chrome ✓ · Firefox ✗ · Safari ✗ · Edge ✓',
     notes: ['Must be triggered by a user gesture.', 'Only available in Chromium-based browsers.'],
@@ -2041,7 +2041,7 @@ export class PresenceComponent {
         returns: 'boolean',
       },
     ],
-    example: `import { EyeDropperService } from '@angular-helpers/browser-web-apis/experimental';
+    example: `import { EyeDropperService } from '@angular-helpers/browser-web-apis';
 
 @Component({ providers: [EyeDropperService] })
 export class ColorPickerComponent {

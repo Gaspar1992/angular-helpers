@@ -39,7 +39,7 @@ import { RouterLink } from '@angular/router';
               <span class="text-4xl">🌐</span>
             </div>
             <div class="flex flex-wrap gap-2">
-              <span class="badge badge-primary font-bold">40 services</span>
+              <span class="badge badge-primary font-bold">42 services</span>
               <span class="badge font-bold">Signals</span>
             </div>
           </div>
@@ -56,7 +56,7 @@ import { RouterLink } from '@angular/router';
           </div>
           <div class="bg-base-content/5 border border-base-content/5 rounded-xl px-4 py-3 mt-auto">
             <code class="text-xs text-base-content/80 font-mono">
-              npm i
+              pnpm add
               <span class="text-primary font-bold">&#64;angular-helpers/browser-web-apis</span>
             </code>
           </div>
@@ -91,7 +91,7 @@ import { RouterLink } from '@angular/router';
           </div>
           <div class="bg-base-content/5 border border-base-content/5 rounded-xl px-4 py-3 mt-auto">
             <code class="text-xs text-base-content/80 font-mono">
-              npm i <span class="text-primary font-bold">&#64;angular-helpers/security</span>
+              pnpm add <span class="text-primary font-bold">&#64;angular-helpers/security</span>
             </code>
           </div>
         </a>
@@ -125,7 +125,7 @@ import { RouterLink } from '@angular/router';
           </div>
           <div class="bg-base-content/5 border border-base-content/5 rounded-xl px-4 py-3 mt-auto">
             <code class="text-xs text-base-content/80 font-mono">
-              npm i <span class="text-primary font-bold">&#64;angular-helpers/worker-http</span>
+              pnpm add <span class="text-primary font-bold">&#64;angular-helpers/worker-http</span>
             </code>
           </div>
         </a>
@@ -159,7 +159,7 @@ import { RouterLink } from '@angular/router';
           </div>
           <div class="bg-base-content/5 border border-base-content/5 rounded-xl px-4 py-3 mt-auto">
             <code class="text-xs text-base-content/80 font-mono">
-              npm i <span class="text-primary font-bold">&#64;angular-helpers/openlayers</span>
+              pnpm add <span class="text-primary font-bold">&#64;angular-helpers/openlayers</span>
             </code>
           </div>
         </a>

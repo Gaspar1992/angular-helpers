@@ -1,26 +1,40 @@
 # Angular Helpers Packages
 
-Este directorio contiene los packages publicables del monorepo Angular Helpers.
+This directory contains the publishable packages of the Angular Helpers monorepo.
 
-## Estructura
+## Available Packages
 
-Cada package debe tener su propia carpeta con:
+- **[@angular-helpers/security](./security)** — ReDoS prevention, WebCrypto HMAC signing, and secure storage.
+- **[@angular-helpers/browser-web-apis](./browser-web-apis)** — Unified, reactive wrappers for native Browser APIs with signals support.
+- **[@angular-helpers/worker-http](./worker-http)** — Off-main-thread HTTP pipelines using Web Workers.
+- **[@angular-helpers/openlayers](./openlayers)** — Declarative, modular Angular components for OpenLayers.
 
-- `package.json` (con nombre scoped como `@angular-helpers/package-name`)
-- `src/` (código fuente)
-- `dist/` (build output, generado automáticamente)
-- `README.md`
-- `tsconfig.json`
+## Package Structure
 
-## Scripts útiles
+Each package follows a standardized structure:
+
+- `package.json` — Scoped name (`@angular-helpers/*`) and metadata.
+- `src/` — TypeScript source code and public API.
+- `dist/` — Compiled output (ignored by git, generated during build).
+- `README.md` — Detailed package-specific documentation.
+- `tsconfig.json` — Package-specific TypeScript configuration.
+
+## Common Scripts
+
+These scripts should be run from the repository root:
 
 ```bash
-# Build todos los packages
-npm run build:packages
+# Build all packages
+pnpm run build:packages
 
-# Publicar un package específico
-npm run publish:package -- package-name
+# Run unit tests across all packages
+pnpm test
 
-# Test todos los packages
-npm run test:packages
+# Run browser-based tests
+pnpm run test:browser
+
+# Lint the entire workspace
+pnpm run lint
 ```
+
+For package publication and advanced CI/CD scripts, refer to the root `package.json` or internal documentation.
