@@ -272,7 +272,7 @@ angular-helpers/
 
 ### In Progress 🔄
 
-- **@angular-helpers/openlayers** — heatmap layers, clustering, draw interactions, and geodesic-correct geometry.
+- **@angular-helpers/openlayers** — heatmap layers, clustering, and draw interactions.
 - Runtime and bundle-size improvements across all packages.
 - More real-world examples and demos.
 
@@ -315,28 +315,28 @@ MIT License — see [LICENSE](./LICENSE) for details.
 Articles about library design decisions, Angular patterns, and the evolution of Angular Helpers.
 They live as Markdown files in [`public/content/blog/`](./public/content/blog/) and are rendered on the [web](https://gaspar1992.github.io/angular-helpers/blog).
 
-| Date       | Article                                                                                                                                                                  |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 2026-04-27 | [openlayers v0.4.0: Military symbology — Ellipse, Sector, Donut, and lazy-loaded MIL-STD-2525](./public/content/blog/openlayers-military.md)                             |
-| 2026-04-27 | [openlayers v0.3.0: Overlays — Popups, Tooltips, and Dynamic Angular Components on the Map](./public/content/blog/openlayers-overlays.md)                                |
-| 2026-04-27 | [openlayers v0.2.0: SRP-refactored interactions, Circle draw, and a native-style toolbar](./public/content/blog/openlayers-interactions-srp.md)                          |
-| 2026-04-26 | [worker-http v21.2.0: TOON serializer — 30–60% smaller postMessage payloads](./public/content/blog/worker-http-toon-serializer.md)                                       |
-| 2026-04-26 | [worker-http v21.1: per-request cancellation with AbortSignal and typed timeouts](./public/content/blog/worker-http-cancellation.md)                                     |
-| 2026-04-25 | [worker-http v1.0.0: The Journey from Proof-of-Concept to Production](./public/content/blog/worker-http-v1-0.md)                                                         |
-| 2026-04-24 | [OpenLayers for Angular — Phase 2 Complete](./public/content/blog/openlayers-phase2.md)                                                                                  |
-| 2026-04-21 | [worker-http v0.7.0: hardening — cancellation that actually cancels, real timeouts, and a latent AES bug](./public/content/blog/worker-http-hardening.md)                |
-| 2026-04-21 | [security v21.3: JWT, HIBP, rate limiter, and a two-paradigm forms bridge](./public/content/blog/security-utilities-expansion.md)                                        |
-| 2026-04-19 | [browser-web-apis v21.11: Signal-based Injection & Composition-First API](./public/content/blog/browser-web-apis-v21-11-signal-injection.md)                             |
-| 2026-04-19 | [browser-web-apis v21.11: log levels, experimental policy, and composition-first providers](./public/content/blog/log-levels-and-experimental-policy.md)                 |
-| 2026-04-18 | [browser-web-apis v21.9: signal primitives for clipboard, geolocation, battery, and wake-lock](./public/content/blog/signal-primitives-for-browser-apis.md)              |
-| 2026-04-18 | [browser-web-apis v21.8: WebWorker request/response with timeout, signals for status](./public/content/blog/web-worker-request-response.md)                              |
-| 2026-04-18 | [browser-web-apis v21.7: WebStorage that survives Safari private mode + a unified API](./public/content/blog/web-storage-safari-private-and-unified-api.md)              |
-| 2026-04-18 | [browser-web-apis v21.6: stateful WebSocket client with signals, request/response, and a real reconnect](./public/content/blog/websocket-stateful-client.md)             |
-| 2026-04-18 | [browser-web-apis v21.10: Web Locks, Storage Manager, Compression Streams](./public/content/blog/three-new-web-apis-locks-storage-compression.md)                        |
-| 2026-04-13 | [worker-http v0.3.0: Angular HttpBackend integration — HTTP off the main thread](./public/content/blog/worker-http-backend-phase3.md)                                    |
-| 2026-04-13 | [browser-web-apis v21.5: real tree-shaking, bug fixes, and signal consistency](./public/content/blog/browser-web-apis-v21-5-improvements.md)                             |
+| Date | Article |
+| 2026-05-16 | [openlayers v0.5.0: Proj4 projections, Geodesic precision, and WebGL MVT](./public/content/blog/openlayers-v0-5-0.md) |
+| 2026-04-27 | [openlayers v0.4.0: Military symbology — Ellipse, Sector, Donut, and lazy-loaded MIL-STD-2525](./public/content/blog/openlayers-military.md) |
+| 2026-04-27 | [openlayers v0.3.0: Overlays — Popups, Tooltips, and Dynamic Angular Components on the Map](./public/content/blog/openlayers-overlays.md) |
+| 2026-04-27 | [openlayers v0.2.0: SRP-refactored interactions, Circle draw, and a native-style toolbar](./public/content/blog/openlayers-interactions-srp.md) |
+| 2026-04-26 | [worker-http v21.2.0: TOON serializer — 30–60% smaller postMessage payloads](./public/content/blog/worker-http-toon-serializer.md) |
+| 2026-04-26 | [worker-http v21.1: per-request cancellation with AbortSignal and typed timeouts](./public/content/blog/worker-http-cancellation.md) |
+| 2026-04-25 | [worker-http v1.0.0: The Journey from Proof-of-Concept to Production](./public/content/blog/worker-http-v1-0.md) |
+| 2026-04-24 | [OpenLayers for Angular — Phase 2 Complete](./public/content/blog/openlayers-phase2.md) |
+| 2026-04-21 | [worker-http v0.7.0: hardening — cancellation that actually cancels, real timeouts, and a latent AES bug](./public/content/blog/worker-http-hardening.md) |
+| 2026-04-21 | [security v21.3: JWT, HIBP, rate limiter, and a two-paradigm forms bridge](./public/content/blog/security-utilities-expansion.md) |
+| 2026-04-19 | [browser-web-apis v21.11: Signal-based Injection & Composition-First API](./public/content/blog/browser-web-apis-v21-11-signal-injection.md) |
+| 2026-04-19 | [browser-web-apis v21.11: log levels, experimental policy, and composition-first providers](./public/content/blog/log-levels-and-experimental-policy.md) |
+| 2026-04-18 | [browser-web-apis v21.9: signal primitives for clipboard, geolocation, battery, and wake-lock](./public/content/blog/signal-primitives-for-browser-apis.md) |
+| 2026-04-18 | [browser-web-apis v21.8: WebWorker request/response with timeout, signals for status](./public/content/blog/web-worker-request-response.md) |
+| 2026-04-18 | [browser-web-apis v21.7: WebStorage that survives Safari private mode + a unified API](./public/content/blog/web-storage-safari-private-and-unified-api.md) |
+| 2026-04-18 | [browser-web-apis v21.6: stateful WebSocket client with signals, request/response, and a real reconnect](./public/content/blog/websocket-stateful-client.md) |
+| 2026-04-18 | [browser-web-apis v21.10: Web Locks, Storage Manager, Compression Streams](./public/content/blog/three-new-web-apis-locks-storage-compression.md) |
+| 2026-04-13 | [worker-http v0.3.0: Angular HttpBackend integration — HTTP off the main thread](./public/content/blog/worker-http-backend-phase3.md) |
+| 2026-04-13 | [browser-web-apis v21.5: real tree-shaking, bug fixes, and signal consistency](./public/content/blog/browser-web-apis-v21-5-improvements.md) |
 | 2026-04-13 | [browser-web-apis: robustness deep-dive — spec compliance, leak prevention, and unified architecture](./public/content/blog/browser-web-apis-robustness-improvements.md) |
-| 2026-04-12 | [Redesigning the web & our vision as a library ecosystem](./public/content/blog/web-redesign-and-library-vision.md)                                                      |
+| 2026-04-12 | [Redesigning the web & our vision as a library ecosystem](./public/content/blog/web-redesign-and-library-vision.md) |
 
 ---
 

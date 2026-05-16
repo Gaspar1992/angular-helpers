@@ -10,7 +10,9 @@ A modern Angular wrapper for OpenLayers with modular architecture, standalone co
 - **Dual API** - Template for UI, Inputs for data, Services for operations
 - **Tree-shaking** - Unused OpenLayers code is eliminated from your bundle
 - **TypeScript First** - Full type safety with strict mode support
-- **Military Features** - Ellipses, sectors, NATO symbology, and MGRS coordinates
+- **Military Features** - True geodesic precision for ellipses and sectors, NATO symbology, and MGRS coordinates
+- **Proj4 Integration** - Declarative registration of local coordinate systems (like UTM)
+- **WebGL Accelerated** - Mapbox Vector Tiles (MVT) and GPU raster expressions
 
 ## Installation
 
@@ -30,7 +32,14 @@ import { withLayers } from '@angular-helpers/openlayers/layers';
 import { withControls } from '@angular-helpers/openlayers/controls';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideOpenLayers(withLayers(), withControls())],
+  providers: [
+    provideOpenLayers(
+      withLayers(),
+      withControls(),
+      // Optional: Register custom coordinate systems with proj4
+      // withProjections(proj4, [{ code: 'EPSG:32630', proj4def: '...', extent: [...] }])
+    ),
+  ],
 };
 ```
 
@@ -236,7 +245,7 @@ export class MilDemo {
 | `createSector(config)`  | `Feature<Polygon>` | Pie-slice (apex-arc-apex). `startAngle < endAngle ≤ start + 2π`                                                        |
 | `createDonut(config)`   | `Feature<Polygon>` | Two rings: outer CCW, inner CW (right-hand rule). Renders as an annular band with the basemap visible through the hole |
 
-Coordinates are emitted in `EPSG:4326` (lon/lat) using a local tangent-plane projection. Accurate up to ~100 km from the center; for very large radii or polar regions, geodesic-correct math is on the Phase 3 roadmap.
+Coordinates are emitted in `EPSG:4326` (lon/lat) using true geodesic calculations (`Vincenty`'s formulae via `ol/sphere`). This means your shapes remain mathematically accurate and visually consistent (without scale distortion) across massive global distances, fulfilling military precision requirements.
 
 ### MIL-STD-2525 symbols
 
