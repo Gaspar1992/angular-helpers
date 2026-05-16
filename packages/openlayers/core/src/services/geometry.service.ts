@@ -4,11 +4,7 @@ import { Injectable } from '@angular/core';
 import type { Coordinate, Feature } from '../models/types';
 import type { DonutConfig, EllipseConfig, SectorConfig } from '../models/geometry.types';
 
-/**
- * Meters per degree of latitude on a spherical Earth approximation.
- * Used by the local tangent-plane projection in the geometry helpers.
- */
-const METERS_PER_DEGREE_LAT = 111_320;
+import { offset } from 'ol/sphere';
 
 /**
  * Service exposing general purpose geometry helpers for creating
@@ -131,15 +127,14 @@ export class OlGeometryService {
   }
 
   /**
-   * Project an `(dx, dy)` meter offset from `center` to lon/lat using a
-   * local tangent-plane (equirectangular) approximation.
+   * Project an `(dx, dy)` meter offset from `center` to lon/lat using true
+   * geodesic math (Vincenty's formulae) via ol/sphere.
    */
   offsetMetersToLonLat(center: Coordinate, dx: number, dy: number): Coordinate {
-    const [lon, lat] = center;
-    const latRad = (lat * Math.PI) / 180;
-    const dLat = dy / METERS_PER_DEGREE_LAT;
-    const dLon = dx / (METERS_PER_DEGREE_LAT * Math.cos(latRad));
-    return [lon + dLon, lat + dLat];
+    if (dx === 0 && dy === 0) return [...center];
+    const distance = Math.hypot(dx, dy);
+    const bearing = Math.atan2(dx, dy);
+    return offset(center, distance, bearing);
   }
 
   private nextId(kind: string): string {

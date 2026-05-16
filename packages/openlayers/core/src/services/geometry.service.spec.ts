@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { Coordinate } from '../models/types';
+import { getDistance } from 'ol/sphere';
 import { OlGeometryService } from './geometry.service';
 
 // ---------------------------------------------------------------------------
@@ -21,17 +22,11 @@ function signedArea(ring: Coordinate[]): number {
 }
 
 /**
- * Approximate distance in meters between two lon/lat points using the
- * same equirectangular projection the service uses internally.
+ * Exact distance in meters between two lon/lat points using the
+ * same geodesic calculation (Vincenty's formulae) the service uses internally via ol/sphere.
  */
 function distanceMeters(a: Coordinate, b: Coordinate): number {
-  const METERS_PER_DEGREE_LAT = 111_320;
-  const [lon1, lat1] = a;
-  const [lon2, lat2] = b;
-  const meanLat = ((lat1 + lat2) / 2) * (Math.PI / 180);
-  const dy = (lat2 - lat1) * METERS_PER_DEGREE_LAT;
-  const dx = (lon2 - lon1) * METERS_PER_DEGREE_LAT * Math.cos(meanLat);
-  return Math.hypot(dx, dy);
+  return getDistance(a, b);
 }
 
 describe('OlGeometryService', () => {
