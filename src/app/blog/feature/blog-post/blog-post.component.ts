@@ -72,7 +72,6 @@ import type { BlogPostData } from '../../services/blog-post.resolver';
       <app-site-footer />
     </main>
   `,
-  styleUrls: ['./blog-post.component.css'],
 })
 export class BlogPostComponent {
   private readonly route = inject(ActivatedRoute);

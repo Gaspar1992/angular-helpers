@@ -8,26 +8,22 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
   selector: 'app-worker-http-transport-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-base-200 border border-base-content/5 rounded-3xl p-8 h-full flex flex-col">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-bold text-primary m-0 flex items-center gap-2">
-          ⚡ WorkerTransport
-        </h2>
-        <span class="badge badge-primary font-semibold">Typed RPC</span>
+    <div class="svc-card h-full flex flex-col">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title"><span>⚡</span> WorkerTransport</h2>
+        <span class="badge badge-primary font-black">Typed RPC</span>
       </div>
-      <p class="text-sm text-base-content/70 mb-8">
-        Typed RPC bridge with request/response correlation and worker pool
-      </p>
+      <p class="svc-desc">Typed RPC bridge with request/response correlation and worker pool.</p>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <button
           type="button"
           (click)="sendEcho()"
           [disabled]="status() === 'running'"
-          class="btn btn-primary font-bold px-6"
+          class="btn btn-primary"
         >
           @if (status() === 'running') {
-            <span class="loading loading-spinner loading-xs"></span>
+            <span class="spinner w-4 h-4 mr-2"></span>
           }
           Send Echo
         </button>
@@ -35,7 +31,7 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
           type="button"
           (click)="sendPoolBurst()"
           [disabled]="status() === 'running'"
-          class="btn btn-secondary font-bold px-6"
+          class="btn btn-secondary"
         >
           Pool Burst (4 workers)
         </button>
@@ -43,23 +39,23 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
 
       <div class="mt-auto">
         @if (result()) {
-          <div
-            class="p-4 bg-base-content/5 rounded-2xl shadow-inner border border-base-content/5 font-mono text-xs break-all"
-          >
-            <div class="flex justify-between items-center mb-2">
-              <span
-                class="text-secondary font-bold uppercase tracking-wider text-[10px] opacity-70"
-              >
+          <div class="mono-block break-all">
+            <div class="flex justify-between items-center mb-4">
+              <span class="text-primary font-black uppercase tracking-widest text-[9px] opacity-70">
                 Result
               </span>
-              <span class="text-[10px] opacity-40 font-mono">{{ elapsedMs() }}ms</span>
+              <span class="text-[10px] opacity-45 font-mono">{{ elapsedMs() }}ms</span>
             </div>
-            <pre class="text-base-content/80 whitespace-pre-wrap">{{ result() }}</pre>
+            <pre
+              class="text-base-content/80 whitespace-pre-wrap font-mono text-[11px] leading-relaxed"
+              >{{ result() }}</pre
+            >
           </div>
         }
       </div>
     </div>
   `,
+  styleUrl: '../../services/demo.styles.css',
 })
 export class TransportCardComponent implements OnDestroy {
   private readonly log = inject(WorkerHttpDemoLogService);

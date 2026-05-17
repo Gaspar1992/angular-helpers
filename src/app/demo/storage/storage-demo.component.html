@@ -21,12 +21,16 @@
   <!-- Glass UI Metrics (Telemetry Bar) -->
   <section class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
     <!-- Metric 1: FPS -->
-    <div class="telemetry-card">
+    <div
+      class="p-6 bg-slate-950/35 backdrop-blur-md backdrop-saturate-150 border border-white/5 rounded-[18px] shadow-[0_4px_30px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-200 hover:border-white/10 hover:shadow-[0_8px_32px_rgba(0,0,0,0.25)]"
+    >
       <div class="flex items-center justify-between mb-2">
         <span class="text-xs font-black uppercase tracking-wider text-base-content/40"
           >UI Thread Fluency</span
         >
-        <span class="pulse-dot bg-green-500"></span>
+        <span
+          class="w-[7px] h-[7px] rounded-full shadow-[0_0_10px_currentColor] animate-pulse bg-green-500"
+        ></span>
       </div>
       <div class="flex items-baseline gap-1.5">
         <span class="text-3xl font-black text-green-400 font-mono">{{ fps() }}</span>
@@ -38,13 +42,15 @@
     </div>
 
     <!-- Metric 2: Latency -->
-    <div class="telemetry-card">
+    <div
+      class="p-6 bg-slate-950/35 backdrop-blur-md backdrop-saturate-150 border border-white/5 rounded-[18px] shadow-[0_4px_30px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-200 hover:border-white/10 hover:shadow-[0_8px_32px_rgba(0,0,0,0.25)]"
+    >
       <div class="flex items-center justify-between mb-2">
         <span class="text-xs font-black uppercase tracking-wider text-base-content/40"
           >Worker RPC Latency</span
         >
         <span
-          class="pulse-dot"
+          class="w-[7px] h-[7px] rounded-full shadow-[0_0_10px_currentColor] animate-pulse transition-colors duration-300"
           [class.bg-purple-500]="rpcLatency() !== null"
           [class.bg-base-content/20]="rpcLatency() === null"
         ></span>
@@ -61,12 +67,16 @@
     </div>
 
     <!-- Metric 3: Multi-Tab Status -->
-    <div class="telemetry-card col-span-1">
+    <div
+      class="p-6 bg-slate-950/35 backdrop-blur-md backdrop-saturate-150 border border-white/5 rounded-[18px] shadow-[0_4px_30px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-200 hover:border-white/10 hover:shadow-[0_8px_32px_rgba(0,0,0,0.25)]"
+    >
       <div class="flex items-center justify-between mb-2">
         <span class="text-xs font-black uppercase tracking-wider text-base-content/40"
           >Multi-Tab Sync</span
         >
-        <span class="pulse-dot bg-cyan-500"></span>
+        <span
+          class="w-[7px] h-[7px] rounded-full shadow-[0_0_10px_currentColor] animate-pulse bg-cyan-500"
+        ></span>
       </div>
       <div class="flex items-baseline gap-1.5">
         <span class="text-3xl font-black text-cyan-400 font-mono">Active</span>
@@ -84,32 +94,60 @@
   >
     <button
       type="button"
-      class="tab-btn"
-      [class.active]="activeTab() === 'crypto'"
+      class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold whitespace-nowrap transition-all duration-200 cursor-pointer"
+      [class.text-white]="activeTab() === 'crypto'"
+      [class.bg-primary]="activeTab() === 'crypto'"
+      [class.border-white\/10]="activeTab() === 'crypto'"
+      [class.shadow-lg]="activeTab() === 'crypto'"
+      [class.shadow-primary\/20]="activeTab() === 'crypto'"
+      [class.text-base-content\/60]="activeTab() !== 'crypto'"
+      [class.hover:text-base-content]="activeTab() !== 'crypto'"
+      [class.hover:bg-white\/5]="activeTab() !== 'crypto'"
       (click)="activeTab.set('crypto')"
     >
       🛡️ Crypto in Worker
     </button>
     <button
       type="button"
-      class="tab-btn"
-      [class.active]="activeTab() === 'sync'"
+      class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold whitespace-nowrap transition-all duration-200 cursor-pointer"
+      [class.text-white]="activeTab() === 'sync'"
+      [class.bg-primary]="activeTab() === 'sync'"
+      [class.border-white\/10]="activeTab() === 'sync'"
+      [class.shadow-lg]="activeTab() === 'sync'"
+      [class.shadow-primary\/20]="activeTab() === 'sync'"
+      [class.text-base-content\/60]="activeTab() !== 'sync'"
+      [class.hover:text-base-content]="activeTab() !== 'sync'"
+      [class.hover:bg-white\/5]="activeTab() !== 'sync'"
       (click)="activeTab.set('sync')"
     >
       👥 Multi-Tab Sync
     </button>
     <button
       type="button"
-      class="tab-btn"
-      [class.active]="activeTab() === 'toon'"
+      class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold whitespace-nowrap transition-all duration-200 cursor-pointer"
+      [class.text-white]="activeTab() === 'toon'"
+      [class.bg-primary]="activeTab() === 'toon'"
+      [class.border-white\/10]="activeTab() === 'toon'"
+      [class.shadow-lg]="activeTab() === 'toon'"
+      [class.shadow-primary\/20]="activeTab() === 'toon'"
+      [class.text-base-content\/60]="activeTab() !== 'toon'"
+      [class.hover:text-base-content]="activeTab() !== 'toon'"
+      [class.hover:bg-white\/5]="activeTab() !== 'toon'"
       (click)="activeTab.set('toon')"
     >
       ⚡ TOON vs JSON
     </button>
     <button
       type="button"
-      class="tab-btn"
-      [class.active]="activeTab() === 'benchmark'"
+      class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold whitespace-nowrap transition-all duration-200 cursor-pointer"
+      [class.text-white]="activeTab() === 'benchmark'"
+      [class.bg-primary]="activeTab() === 'benchmark'"
+      [class.border-white\/10]="activeTab() === 'benchmark'"
+      [class.shadow-lg]="activeTab() === 'benchmark'"
+      [class.shadow-primary\/20]="activeTab() === 'benchmark'"
+      [class.text-base-content\/60]="activeTab() !== 'benchmark'"
+      [class.hover:text-base-content]="activeTab() !== 'benchmark'"
+      [class.hover:bg-white\/5]="activeTab() !== 'benchmark'"
       (click)="activeTab.set('benchmark')"
     >
       📊 Engine Benchmark
@@ -118,9 +156,11 @@
 
   <!-- TAB 1: Crypto off-thread -->
   @if (activeTab() === 'crypto') {
-    <section class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 animation-fade">
+    <section class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in-up">
       <!-- Action Panel -->
-      <div class="glass-panel p-6 flex flex-col justify-between">
+      <div
+        class="bg-slate-950/35 backdrop-blur-xl backdrop-saturate-150 border border-white/5 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 hover:border-white/10 p-6 flex flex-col justify-between"
+      >
         <div>
           <h3
             class="text-lg font-black tracking-tight text-base-content mb-2 flex items-center gap-2"
@@ -150,7 +190,9 @@
           <div
             class="flex items-center gap-4 p-4 rounded-xl bg-base-content/5 border border-base-content/5 mb-6"
           >
-            <div class="spinner-demo"></div>
+            <div
+              class="w-11 h-11 rounded-full border-[4.5px] border-white/5 border-t-primary shadow-[0_0_16px_rgba(107,140,242,0.15)] animate-spin shrink-0"
+            ></div>
             <div class="flex-1">
               <span class="text-xs font-black text-base-content block">Fluency Demonstrator</span>
               <span class="text-[11px] text-base-content/50 block leading-tight">
@@ -182,7 +224,9 @@
       </div>
 
       <!-- RPC Logs / Telemetry -->
-      <div class="glass-panel p-6 flex flex-col justify-between h-[450px]">
+      <div
+        class="bg-slate-950/35 backdrop-blur-xl backdrop-saturate-150 border border-white/5 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 hover:border-white/10 p-6 flex flex-col justify-between h-[450px]"
+      >
         <div>
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-black tracking-tight text-base-content">
@@ -226,9 +270,11 @@
 
   <!-- TAB 2: Multi-tab Profile Sync -->
   @if (activeTab() === 'sync') {
-    <section class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 animation-fade">
+    <section class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 animation-fade-in-up">
       <!-- Profile Card Controls -->
-      <div class="glass-panel p-6">
+      <div
+        class="bg-slate-950/35 backdrop-blur-xl backdrop-saturate-150 border border-white/5 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 hover:border-white/10 p-6"
+      >
         <h3 class="text-lg font-black tracking-tight text-base-content mb-2">
           👥 Multi-Tab User Profile Sync
         </h3>
@@ -297,16 +343,24 @@
 
       <!-- Live Preview Profile Glass Card -->
       <div
-        class="glass-panel p-6 flex flex-col justify-center items-center relative overflow-hidden bg-cover bg-center"
+        class="bg-slate-950/35 backdrop-blur-xl backdrop-saturate-150 border border-white/5 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 hover:border-white/10 p-6 flex flex-col justify-center items-center relative overflow-hidden bg-cover bg-center"
       >
         <!-- Grid decorative backdrop -->
-        <div class="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
+        <div
+          class="absolute inset-0 opacity-10 pointer-events-none"
+          style="
+            background-size: 20px 20px;
+            background-image:
+              linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+          "
+        ></div>
 
         <div
-          class="profile-card-glass p-8 flex flex-col items-center max-w-sm text-center relative z-10"
+          class="w-full rounded-[20px] bg-white/2 backdrop-blur-3xl backdrop-saturate-150 border border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.02),inset_0_1px_0_rgba(255,255,255,0.08)] p-8 flex flex-col items-center max-w-sm text-center relative z-10"
         >
           <div
-            class="profile-avatar border-2 border-white/10 shadow-2xl flex items-center justify-center text-2xl font-black text-white"
+            class="w-[72px] h-[72px] rounded-[24px] transition-all duration-400 ease-out border-2 border-white/10 shadow-2xl flex items-center justify-center text-2xl font-black text-white"
             [style.background-color]="activeProfile().avatarColor"
           >
             {{ activeProfile().name ? activeProfile().name.charAt(0).toUpperCase() : '?' }}
@@ -320,7 +374,9 @@
           <div
             class="flex items-center gap-1.5 mt-6 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-wider text-white/50"
           >
-            <span class="pulse-dot bg-cyan-400"></span>
+            <span
+              class="w-[7px] h-[7px] rounded-full shadow-[0_0_10px_currentColor] animate-pulse bg-cyan-400"
+            ></span>
             <span>Reactive Entity Map</span>
           </div>
         </div>
@@ -330,9 +386,11 @@
 
   <!-- TAB 3: TOON vs JSON Comparator -->
   @if (activeTab() === 'toon') {
-    <section class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 animation-fade">
+    <section class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 animation-fade-in-up">
       <!-- Text Input -->
-      <div class="glass-panel p-6">
+      <div
+        class="bg-slate-950/35 backdrop-blur-xl backdrop-saturate-150 border border-white/5 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 hover:border-white/10 p-6"
+      >
         <h3 class="text-lg font-black tracking-tight text-base-content mb-2">
           ⚡ Advanced Serialization & Compression
         </h3>
@@ -357,7 +415,9 @@
       </div>
 
       <!-- Comparison Statistics -->
-      <div class="glass-panel p-6 flex flex-col justify-between">
+      <div
+        class="bg-slate-950/35 backdrop-blur-xl backdrop-saturate-150 border border-white/5 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 hover:border-white/10 p-6 flex flex-col justify-between"
+      >
         <div>
           <h3 class="text-lg font-black tracking-tight text-base-content mb-6">
             📊 Byte Size Comparison
@@ -440,9 +500,11 @@
 
   <!-- TAB 4: Storage Engine Benchmark -->
   @if (activeTab() === 'benchmark') {
-    <section class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 animation-fade">
+    <section class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 animation-fade-in-up">
       <!-- Description & Controls -->
-      <div class="glass-panel p-6 flex flex-col justify-between">
+      <div
+        class="bg-slate-950/35 backdrop-blur-xl backdrop-saturate-150 border border-white/5 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 hover:border-white/10 p-6 flex flex-col justify-between"
+      >
         <div>
           <h3 class="text-lg font-black tracking-tight text-base-content mb-2">
             📊 Native L2 Storage Engine Benchmark
@@ -484,7 +546,9 @@
       </div>
 
       <!-- Benchmark Visual Graph -->
-      <div class="glass-panel p-6 flex flex-col justify-between min-h-[350px]">
+      <div
+        class="bg-slate-950/35 backdrop-blur-xl backdrop-saturate-150 border border-white/5 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 hover:border-white/10 p-6 flex flex-col justify-between min-h-[350px]"
+      >
         <div>
           <h3 class="text-lg font-black tracking-tight text-base-content mb-6">
             📈 Execution Times (Lower is Better)
@@ -561,7 +625,9 @@
   <!-- Multi-tab esmerilado-glass float alert -->
   @if (toasterAlert(); as toast) {
     @if (toast.show) {
-      <div class="toast-floating-glass animation-toast">
+      <div
+        class="fixed bottom-6 right-6 flex items-center gap-3.5 p-[1.1rem_1.5rem] rounded-2xl bg-slate-950/70 backdrop-blur-xl backdrop-saturate-150 border border-purple-500/35 shadow-[0_12px_48px_rgba(168,85,247,0.25),0_0_0_1px_rgba(255,255,255,0.02)] z-[1000] animate-toast-enter"
+      >
         <span class="text-xl">🔔</span>
         <div class="flex flex-col gap-0.5">
           <span class="text-xs font-black uppercase tracking-wider text-white"

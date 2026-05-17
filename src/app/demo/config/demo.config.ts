@@ -62,4 +62,12 @@ export const PUBLIC_DEMO_SECTIONS: readonly DemoSection[] = [
     icon: '🗺️',
     packageName: '@angular-helpers/openlayers',
   },
+  {
+    path: '/demo/storage',
+    title: 'Storage & Entity Management',
+    description:
+      'High-performance reactive local storage with signal bindings, entity state selectors, and automated transaction queuing.',
+    icon: '💾',
+    packageName: '@angular-helpers/storage',
+  },
 ];

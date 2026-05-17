@@ -1,28 +1,28 @@
-/* ─── SHARED SERVICE DEMO STYLES (Ultra Premium & Technical) ─────── */
+/* ─── SHARED SERVICE DEMO STYLES (Ultra Premium Cyber-Glass) ─────── */
 
 :host {
   display: block;
-}
-
-/* Base Variable mapping */
-:root {
-  --svc-surface: var(--c-bg-surface);
-  --svc-border: var(--c-border);
-  --svc-border-subtle: var(--c-border-subtle);
-  --svc-primary: var(--c-primary);
+  --svc-surface: rgba(24, 24, 27, 0.35);
+  --svc-border: var(--color-border);
+  --svc-border-subtle: var(--color-border-subtle);
+  --svc-primary: var(--color-primary);
 }
 
 /* Service card container */
 .svc-card {
   background-color: var(--svc-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--svc-border-subtle);
-  border-radius: 2.5rem;
+  border-radius: 2rem;
   padding: 2rem;
-  margin-bottom: 3rem;
-  transition: all 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 2.5rem;
+  transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   position: relative;
-  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 15px 35px -15px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.02);
 }
 
 @media (min-width: 640px) {
@@ -38,13 +38,15 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent);
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.08), transparent);
 }
 
 .svc-card:hover {
-  border-color: color-mix(in oklch, var(--svc-primary), transparent 60%);
-  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
-  transform: translateY(-2px);
+  border-color: color-mix(in oklch, var(--svc-primary) 30%, transparent);
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.6),
+    0 0 25px color-mix(in oklch, var(--svc-primary) 8%, transparent);
+  transform: translateY(-3px);
 }
 
 .svc-card-head {
@@ -59,7 +61,7 @@
 .svc-card-title {
   font-size: 1.75rem;
   font-weight: 900;
-  color: white;
+  color: var(--color-text-main);
   margin: 0;
   letter-spacing: -0.04em;
   display: flex;
@@ -68,8 +70,8 @@
 }
 
 .svc-desc {
-  font-size: 1.05rem;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 1rem;
+  color: var(--color-text-secondary);
   line-height: 1.7;
   font-weight: 500;
   margin-bottom: 2.5rem;
@@ -81,16 +83,16 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1.25rem;
-  align-items: stretch; /* Match height of buttons and inputs */
+  align-items: stretch;
   margin-bottom: 2.5rem;
 }
 
 /* Premium Control Group (Joining related elements) */
 .control-group {
   display: inline-flex;
-  background-color: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1rem;
+  background-color: rgba(9, 9, 11, 0.4);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 1.25rem;
   padding: 0.35rem;
   gap: 0.35rem;
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -104,28 +106,33 @@ input[type='text'],
 input[type='number'],
 select,
 textarea {
-  background-color: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1rem;
+  background-color: rgba(9, 9, 11, 0.35);
+  border: 1px solid var(--color-border);
+  border-radius: 1.25rem;
   padding: 0.75rem 1.25rem;
-  color: white;
+  color: var(--color-text-main);
   font-weight: 700;
   font-size: 0.9rem;
   min-height: 3.25rem;
   transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
-  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
   font-family: inherit;
 }
 
 .demo-input:focus,
-.demo-select:focus {
-  background-color: rgba(0, 0, 0, 0.6);
-  border-color: color-mix(in oklch, var(--svc-primary), transparent 40%);
+.demo-select:focus,
+.demo-textarea:focus,
+input[type='text']:focus,
+input[type='number']:focus,
+select:focus,
+textarea:focus {
+  background-color: rgba(9, 9, 11, 0.55);
+  border-color: color-mix(in oklch, var(--svc-primary) 60%, transparent);
   box-shadow:
-    0 0 0 4px color-mix(in oklch, var(--svc-primary), transparent 92%),
-    inset 0 2px 10px rgba(0, 0, 0, 0.4);
-  transform: scale(1.01);
+    0 0 0 4px color-mix(in oklch, var(--svc-primary) 12%, transparent),
+    inset 0 2px 8px rgba(0, 0, 0, 0.4);
+  transform: scale(1.005);
 }
 
 .demo-select {
@@ -140,11 +147,11 @@ textarea {
 /* Labels */
 label {
   display: block;
-  font-size: 11px;
-  font-weight: 950;
+  font-size: 10px;
+  font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.25em;
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--color-text-muted);
   margin-bottom: 0.75rem;
   padding-left: 0.5rem;
   transition: color 0.3s ease;
@@ -159,12 +166,12 @@ label {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-weight: 950;
+  font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 11px;
   padding: 0.8rem 2rem;
-  border-radius: 1rem;
+  border-radius: 1.25rem;
   cursor: pointer;
   transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid transparent;
@@ -198,28 +205,29 @@ label {
 .btn-primary {
   background-color: var(--svc-primary);
   color: white;
-  border-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.05);
   box-shadow:
-    0 10px 20px -5px color-mix(in oklch, var(--svc-primary), transparent 60%),
-    0 4px 6px -2px color-mix(in oklch, var(--svc-primary), transparent 80%);
+    0 10px 20px -5px color-mix(in oklch, var(--svc-primary) 40%, transparent),
+    0 4px 6px -2px color-mix(in oklch, var(--svc-primary) 20%, transparent);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: var(--c-primary-active);
+  background-color: var(--color-primary-active);
   transform: translateY(-2px);
-  box-shadow: 0 20px 40px -10px color-mix(in oklch, var(--svc-primary), transparent 50%);
+  box-shadow: 0 20px 40px -10px color-mix(in oklch, var(--svc-primary) 50%, transparent);
 }
 
 .btn-secondary {
-  background-color: rgba(255, 255, 255, 0.04);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.03);
+  color: var(--color-text-main);
+  border: 1px solid var(--color-border);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: var(--color-text-secondary);
   transform: translateY(-2px);
 }
 
@@ -256,14 +264,14 @@ label {
 .svc-result,
 .mono-block,
 .demo-output {
-  background-color: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: rgba(9, 9, 11, 0.45);
+  border: 1px solid var(--color-border-subtle);
   border-radius: 1.5rem;
   padding: 2rem;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: monospace;
   font-size: 0.85rem;
   line-height: 1.8;
-  color: var(--c-text-main);
+  color: var(--color-text-main);
   box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.5);
   overflow-x: auto;
 }
@@ -273,7 +281,7 @@ label {
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 .kv-row:last-child {
   border-bottom: none;
@@ -281,15 +289,15 @@ label {
 .kv-key {
   font-size: 10px;
   font-weight: 900;
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.2em;
 }
 .kv-val {
   font-size: 0.9rem;
-  font-weight: 950;
-  color: white;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  font-weight: 900;
+  color: var(--color-text-main);
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
 }
 
 /* ─── FEEDBACK & STATUS ───────────────────── */
@@ -299,29 +307,30 @@ label {
   gap: 1.25rem;
   padding: 1.5rem;
   border-radius: 1.5rem;
-  font-weight: 950;
+  font-weight: 900;
   font-size: 0.9rem;
   margin-top: 2rem;
   border: 1px solid transparent;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .feedback-success {
-  background-color: rgba(34, 197, 94, 0.06);
+  background-color: rgba(74, 222, 128, 0.06);
   color: #4ade80;
-  border-color: rgba(34, 197, 94, 0.2);
-  box-shadow: 0 10px 30px -10px rgba(34, 197, 94, 0.2);
+  border-color: rgba(74, 222, 128, 0.15);
+  box-shadow: 0 10px 30px -10px rgba(74, 222, 128, 0.15);
 }
 .feedback-error {
   background-color: rgba(239, 68, 68, 0.06);
   color: #fca5a5;
-  border-color: rgba(239, 68, 68, 0.2);
-  box-shadow: 0 10px 30px -10px rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.15);
+  box-shadow: 0 10px 30px -10px rgba(239, 68, 68, 0.15);
 }
 .feedback-info {
   background-color: rgba(59, 130, 246, 0.06);
-  color: var(--svc-primary);
-  border-color: rgba(59, 130, 246, 0.2);
-  box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.2);
+  color: var(--color-info);
+  border-color: rgba(59, 130, 246, 0.15);
+  box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.15);
 }
 
 .spinner {
@@ -342,9 +351,9 @@ label {
 /* Segmented Control - Modern Switch */
 .segmented {
   display: inline-flex;
-  background-color: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1.25rem;
+  background-color: rgba(9, 9, 11, 0.4);
+  border: 1px solid var(--color-border);
+  border-radius: 1.5rem;
   padding: 0.4rem;
   gap: 0.4rem;
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
@@ -353,17 +362,17 @@ label {
 .segmented .btn {
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.25);
+  color: var(--color-text-muted);
   font-size: 10px;
-  font-weight: 950;
+  font-weight: 900;
   padding: 0.6rem 1.5rem;
-  border-radius: 0.85rem;
+  border-radius: 1.1rem;
   min-height: 2.75rem;
 }
 
 .segmented .btn:hover {
-  color: white;
-  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-main);
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 .segmented .btn.active {
@@ -371,5 +380,5 @@ label {
   color: white;
   box-shadow:
     0 8px 16px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
+    0 0 0 1px rgba(255, 255, 255, 0.05);
 }
