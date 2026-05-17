@@ -10,28 +10,28 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
   selector: 'app-worker-http-backend-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-base-200 border border-base-content/5 rounded-3xl p-8 col-span-full">
-      <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
-        <h2 class="text-xl font-bold text-success m-0 flex items-center gap-2">🔀 HttpBackend</h2>
-        <span class="badge badge-success font-semibold tracking-wide">v0.3.0+</span>
+    <div class="svc-card col-span-full">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title"><span>🔀</span> HttpBackend</h2>
+        <span class="badge badge-success font-black">v0.3.0+</span>
       </div>
-      <p class="text-sm text-base-content/70 mb-8 max-w-3xl">
-        <code class="font-mono text-xs bg-base-content/5 text-success px-2 py-0.5 rounded-md"
+      <p class="svc-desc max-w-3xl">
+        <code class="font-mono text-xs text-success px-2 py-0.5 bg-green-500/10 rounded-md"
           >WorkerHttpBackend</code
         >
         routes real HTTP requests off the main thread via
-        <code class="font-mono text-xs bg-base-content/5 text-success px-2 py-0.5 rounded-md"
+        <code class="font-mono text-xs text-success px-2 py-0.5 bg-green-500/10 rounded-md"
           >provideWorkerHttpClient()</code
         >. This demo calls JSONPlaceholder via the
-        <code class="font-mono text-xs bg-base-content/5 text-success px-2 py-0.5 rounded-md"
+        <code class="font-mono text-xs text-success px-2 py-0.5 bg-green-500/10 rounded-md"
           >http-api.worker.js</code
         >
         using a worker pipeline with retry + cache interceptors.
       </p>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
         <div class="flex flex-col">
-          <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-base-content/40 mb-4">
+          <p class="text-[9px] font-black uppercase tracking-widest text-primary opacity-60 mb-4">
             Live HTTP Call via Worker
           </p>
           <div class="flex flex-wrap gap-3 mb-6">
@@ -39,10 +39,10 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
               type="button"
               (click)="fetch('https://jsonplaceholder.typicode.com/todos/1')"
               [disabled]="status() === 'running'"
-              class="btn btn-success font-bold px-6"
+              class="btn btn-primary"
             >
               @if (status() === 'running') {
-                <span class="loading loading-spinner loading-xs"></span>
+                <span class="spinner w-4 h-4 mr-2"></span>
               }
               GET /todos/1
             </button>
@@ -50,43 +50,48 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
               type="button"
               (click)="fetch('https://jsonplaceholder.typicode.com/users/1')"
               [disabled]="status() === 'running'"
-              class="btn btn-outline btn-success font-bold px-6 border-2"
+              class="btn btn-secondary border border-green-500/30 text-green-400 hover:bg-green-500/10"
             >
               GET /users/1
             </button>
           </div>
           @if (result()) {
-            <div
-              class="p-4 bg-base-content/5 rounded-2xl shadow-inner border border-base-content/5 font-mono text-xs overflow-auto max-h-60 mt-auto"
-            >
-              <div class="text-success font-bold mb-2 flex justify-between items-center">
+            <div class="mono-block overflow-auto max-h-60 mt-auto">
+              <div
+                class="text-green-400 font-black mb-2 flex justify-between items-center text-[9px] uppercase tracking-widest"
+              >
                 <span>RESPONSE</span>
-                <span class="text-[10px] opacity-70">{{ elapsedMs() }}ms</span>
+                <span class="text-[10px] opacity-75 font-mono">{{ elapsedMs() }}ms</span>
               </div>
-              <pre class="text-success/90 whitespace-pre-wrap">{{ result() }}</pre>
+              <pre
+                class="text-green-400/90 whitespace-pre-wrap font-mono text-[11px] leading-relaxed"
+                >{{ result() }}</pre
+              >
             </div>
           }
         </div>
 
         <div>
-          <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-base-content/40 mb-4">
+          <p class="text-[9px] font-black uppercase tracking-widest text-primary opacity-60 mb-4">
             URL Routing Simulation
           </p>
-          <p class="text-xs text-base-content/60 mb-4">
-            <code class="font-mono text-primary">matchWorkerRoute()</code> resolves which worker
-            handles each URL based on configuration.
+          <p class="text-xs text-base-content/70 mb-4">
+            <code class="font-mono text-primary font-bold">matchWorkerRoute()</code> resolves which
+            worker handles each URL based on configuration.
           </p>
           <div class="space-y-2">
             @for (entry of routingResults; track entry.url) {
               <div
-                class="flex items-center gap-3 text-xs font-mono p-3 bg-base-content/5 border border-base-content/5 rounded-xl hover:bg-base-content/5 transition-colors"
+                class="flex items-center gap-3 text-xs font-mono p-3 bg-slate-950/35 border border-white/5 rounded-xl hover:bg-white/5 transition-colors"
               >
-                <span class="text-base-content/70 flex-1 truncate">{{ entry.url }}</span>
+                <span class="text-base-content/80 flex-1 truncate font-semibold">{{
+                  entry.url
+                }}</span>
                 <span class="text-base-content/30">→</span>
                 @if (entry.worker) {
-                  <span class="badge badge-primary badge-sm font-bold">{{ entry.worker }}</span>
+                  <span class="badge badge-primary badge-sm font-black">{{ entry.worker }}</span>
                 } @else {
-                  <span class="badge badge-ghost badge-sm opacity-50">main-thread</span>
+                  <span class="badge badge-ghost badge-sm opacity-50 font-black">main-thread</span>
                 }
               </div>
             }
@@ -95,6 +100,7 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
       </div>
     </div>
   `,
+  styleUrl: '../../services/demo.styles.css',
 })
 export class BackendCardComponent implements OnDestroy {
   private readonly log = inject(WorkerHttpDemoLogService);

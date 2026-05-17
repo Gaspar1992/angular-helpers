@@ -13,21 +13,19 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
   selector: 'app-worker-http-vs-httpclient-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-base-200 border border-base-content/5 rounded-3xl p-8 col-span-full">
-      <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
-        <h2 class="text-xl font-bold text-primary m-0 flex items-center gap-2">
-          🆚 Worker vs HttpClient
-        </h2>
-        <span class="badge badge-warning font-semibold">v21.2.0</span>
+    <div class="svc-card col-span-full animate-in fade-in duration-300">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title"><span>🆚</span> Worker vs HttpClient</h2>
+        <span class="badge badge-warning font-black">v21.2.0</span>
       </div>
-      <p class="text-sm text-base-content/70 mb-8 max-w-4xl">
+      <p class="svc-desc max-w-4xl">
         Both buttons fetch
-        <code class="font-mono text-xs bg-base-content/5 text-primary px-2 py-0.5 rounded-md">{{
+        <code class="font-mono text-xs text-primary px-2 py-0.5 bg-primary/10 rounded-md">{{
           url
         }}</code>
         while a CPU-burn loop runs on the main thread. The
         <strong>dropped frames</strong> counter is a proxy for visible jank:
-        <code class="font-mono text-xs bg-base-content/5 text-primary px-2 py-0.5 rounded-md"
+        <code class="font-mono text-xs text-primary px-2 py-0.5 bg-primary/10 rounded-md"
           >requestAnimationFrame</code
         >
         deltas above 25 ms.
@@ -38,10 +36,10 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
           type="button"
           (click)="fetch('http-client')"
           [disabled]="status() === 'running'"
-          class="btn btn-secondary font-bold px-6"
+          class="btn btn-secondary border border-primary/30 text-primary hover:bg-primary/10"
         >
           @if (status() === 'running') {
-            <span class="loading loading-spinner loading-xs"></span>
+            <span class="spinner w-4 h-4 mr-2"></span>
           }
           Fetch with HttpClient
         </button>
@@ -49,49 +47,53 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
           type="button"
           (click)="fetch('worker-http')"
           [disabled]="status() === 'running'"
-          class="btn btn-success font-bold px-6"
+          class="btn btn-primary"
         >
           @if (status() === 'running') {
-            <span class="loading loading-spinner loading-xs"></span>
+            <span class="spinner w-4 h-4 mr-2"></span>
           }
           Fetch with WorkerHttpClient
         </button>
       </div>
 
       @if (results().length > 0) {
-        <div
-          class="overflow-x-auto bg-base-content/5 rounded-2xl border border-base-content/5 shadow-inner"
-        >
-          <table class="table table-sm">
-            <thead class="bg-base-content/5 text-base-content/60">
-              <tr>
-                <th class="py-3">Transport</th>
-                <th class="text-right py-3">Status</th>
-                <th class="text-right py-3">Items</th>
-                <th class="text-right py-3">Wall time (ms)</th>
-                <th class="text-right py-3">Dropped frames</th>
+        <div class="overflow-x-auto bg-slate-950/35 rounded-2xl border border-white/5 shadow-inner">
+          <table class="table w-full border-collapse text-left">
+            <thead>
+              <tr
+                class="border-b border-white/10 text-base-content/60 text-xs font-black uppercase tracking-wider bg-slate-950/45"
+              >
+                <th class="p-4">Transport</th>
+                <th class="p-4 text-right">Status</th>
+                <th class="p-4 text-right">Items</th>
+                <th class="p-4 text-right">Wall time (ms)</th>
+                <th class="p-4 text-right">Dropped frames</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-white/5 font-semibold text-sm">
               @for (row of results(); track $index) {
-                <tr class="border-base-content/5 hover:bg-base-content/5 transition-colors">
-                  <td class="py-3">
+                <tr class="hover:bg-white/5 transition-colors">
+                  <td class="p-4">
                     <span
-                      class="badge badge-sm font-bold tracking-wide"
+                      class="badge badge-sm font-black tracking-wide"
                       [class.badge-secondary]="row.transport === 'http-client'"
                       [class.badge-success]="row.transport === 'worker-http'"
                     >
                       {{ row.transport }}
                     </span>
                   </td>
-                  <td class="text-right font-mono text-xs">{{ row.status }}</td>
-                  <td class="text-right font-mono text-xs">{{ row.itemCount }}</td>
-                  <td class="text-right font-mono text-xs">{{ row.elapsedMs }}</td>
+                  <td class="p-4 text-right font-mono text-xs text-base-content/80">
+                    {{ row.status }}
+                  </td>
+                  <td class="p-4 text-right font-mono text-xs text-base-content/80">
+                    {{ row.itemCount }}
+                  </td>
+                  <td class="p-4 text-right font-mono text-xs text-accent">{{ row.elapsedMs }}</td>
                   <td
-                    class="text-right font-mono text-xs font-bold"
-                    [class.text-error]="row.droppedFrames > 5"
-                    [class.text-warning]="row.droppedFrames > 0 && row.droppedFrames <= 5"
-                    [class.text-success]="row.droppedFrames === 0"
+                    class="p-4 text-right font-mono text-xs font-black"
+                    [class.text-red-400]="row.droppedFrames > 5"
+                    [class.text-yellow-400]="row.droppedFrames > 0 && row.droppedFrames <= 5"
+                    [class.text-green-400]="row.droppedFrames === 0"
                   >
                     {{ row.droppedFrames }}
                   </td>
@@ -103,6 +105,7 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
       }
     </div>
   `,
+  styleUrl: '../../services/demo.styles.css',
 })
 export class WorkerVsHttpClientCardComponent implements OnDestroy {
   private readonly http = inject(HttpClient);

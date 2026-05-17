@@ -31,7 +31,6 @@ interface RPCMessageLog {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, JsonPipe],
-  styleUrl: './storage-demo.component.css',
   templateUrl: './storage-demo.component.html',
   providers: [
     { provide: STORAGE_WORKER_FACTORY, useValue: storageWorkerFactory },

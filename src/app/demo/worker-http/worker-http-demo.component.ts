@@ -28,32 +28,30 @@ import { WorkerHttpDemoLogService } from './shared/log.service';
     StreamsPolyfillCardComponent,
   ],
   template: `
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-      <header class="mb-12">
-        <div class="flex flex-wrap items-center gap-4 mb-6">
-          <div
-            class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-4xl shadow-lg border border-primary/20"
-          >
-            🚀
-          </div>
-          <div>
-            <h1 class="text-3xl sm:text-4xl font-bold text-base-content m-0 tracking-tight">
-              Worker HTTP
-            </h1>
-            <p class="text-sm sm:text-base text-base-content/60 m-0 mt-1">
-              Off-main-thread HTTP with typed RPC bridge and pool orchestration
-            </p>
-          </div>
+    <div class="max-width-container py-12 sm:py-20 animate-in fade-in duration-700">
+      <header class="text-center mb-16">
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary mb-3"
+        >
+          🚀 <span>Off-Main-Thread Processing</span>
         </div>
-        <div class="flex flex-wrap gap-2">
-          <span class="badge badge-primary font-semibold">Worker Transport</span>
-          <span class="badge badge-secondary font-semibold">HMAC Crypto</span>
-          <span class="badge badge-accent font-semibold">Content Hashing</span>
-          <span class="badge badge-info font-semibold">AES Encryption</span>
-          <span class="badge badge-success font-semibold">HttpBackend</span>
-          <span class="badge badge-warning font-semibold">Cancellation</span>
-          <span class="badge badge-neutral font-semibold">TOON Serializer</span>
-          <span class="badge badge-info font-semibold">Streams Polyfill</span>
+        <h1
+          class="text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-r from-base-content via-primary to-accent bg-clip-text text-transparent pb-2 mb-4"
+        >
+          Worker HTTP
+        </h1>
+        <p class="text-base-content/60 max-w-2xl mx-auto text-sm leading-relaxed">
+          Off-main-thread HTTP with typed RPC bridge and pool orchestration.
+        </p>
+        <div class="flex flex-wrap gap-2.5 justify-center mt-6" aria-hidden="true">
+          <span class="badge badge-primary font-black">Worker Transport</span>
+          <span class="badge badge-secondary font-black">HMAC Crypto</span>
+          <span class="badge badge-accent font-black">Content Hashing</span>
+          <span class="badge badge-info font-black">AES Encryption</span>
+          <span class="badge badge-success font-black">HttpBackend</span>
+          <span class="badge badge-warning font-black">Cancellation</span>
+          <span class="badge badge-neutral font-black">TOON Serializer</span>
+          <span class="badge badge-info font-black">Streams Polyfill</span>
         </div>
       </header>
 
@@ -75,16 +73,13 @@ import { WorkerHttpDemoLogService } from './shared/log.service';
         <app-worker-http-vs-httpclient-card />
       </div>
 
-      <section
-        class="mt-12 bg-base-200 border border-base-content/5 rounded-3xl p-8 shadow-xl"
-        aria-label="Activity log"
-      >
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-bold text-base-content m-0">Activity Log</h2>
+      <section class="mt-16 svc-card bg-slate-950/35 backdrop-blur-md" aria-label="Activity log">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="svc-card-title text-xl font-black">Activity Log</h2>
           <button
             type="button"
             (click)="clearLogs()"
-            class="btn btn-ghost btn-xs font-bold border border-base-content/5"
+            class="btn btn-secondary btn-sm"
             [disabled]="logs().length === 0"
           >
             Clear Logs
@@ -101,22 +96,23 @@ import { WorkerHttpDemoLogService } from './shared/log.service';
           </div>
         } @else {
           <div
-            class="p-4 bg-base-content/5 rounded-2xl border border-base-content/5 shadow-inner space-y-2 max-h-80 overflow-y-auto"
+            class="p-6 bg-slate-950/35 border border-white/5 rounded-2xl shadow-inner space-y-3 max-h-80 overflow-y-auto"
           >
             @for (entry of logs(); track entry.id) {
               <div
-                class="flex items-center gap-3 p-3 rounded-xl text-sm transition-colors hover:bg-base-content/5"
+                class="flex items-center gap-4 p-3 rounded-xl text-sm transition-colors hover:bg-base-content/5"
                 [class.text-success]="entry.type === 'success'"
                 [class.text-error]="entry.type === 'error'"
-                [class.text-base-content/80]="entry.type === 'info'"
+                [class.text-base-content/85]="entry.type === 'info'"
               >
                 <span class="text-[10px] font-mono opacity-40 whitespace-nowrap">{{
                   entry.time
                 }}</span>
-                <span class="badge badge-xs badge-primary font-bold min-w-[80px]">{{
-                  entry.section
-                }}</span>
-                <span class="flex-1 break-all font-medium">{{ entry.message }}</span>
+                <span
+                  class="badge badge-sm badge-secondary font-black shrink-0 min-w-[90px] text-center"
+                  >{{ entry.section }}</span
+                >
+                <span class="flex-1 break-all font-semibold">{{ entry.message }}</span>
               </div>
             }
           </div>
@@ -124,6 +120,7 @@ import { WorkerHttpDemoLogService } from './shared/log.service';
       </section>
     </div>
   `,
+  styleUrl: '../services/demo.styles.css',
 })
 export class WorkerHttpDemoComponent {
   private readonly logService = inject(WorkerHttpDemoLogService);

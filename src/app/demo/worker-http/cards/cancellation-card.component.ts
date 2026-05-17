@@ -12,18 +12,18 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
   selector: 'app-worker-http-cancellation-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-base-200 border border-base-content/5 rounded-3xl p-8 h-full flex flex-col">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-bold text-error m-0 flex items-center gap-2">🛑 Cancellation</h2>
-        <span class="badge badge-warning font-semibold">New in v21.1.0</span>
+    <div class="svc-card h-full flex flex-col">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title"><span>🛑</span> Cancellation</h2>
+        <span class="badge badge-warning font-black">New in v21.1.0</span>
       </div>
-      <p class="text-sm text-base-content/70 mb-8">
+      <p class="svc-desc">
         Per-request
-        <code class="font-mono text-xs bg-base-content/5 text-error px-2 py-0.5 rounded-md"
+        <code class="font-mono text-xs text-error px-2 py-0.5 bg-red-500/10 rounded-md"
           >signal</code
         >
         and
-        <code class="font-mono text-xs bg-base-content/5 text-error px-2 py-0.5 rounded-md"
+        <code class="font-mono text-xs text-error px-2 py-0.5 bg-red-500/10 rounded-md"
           >timeout</code
         >
         flow to the worker. Observable rejects with typed errors.
@@ -34,10 +34,10 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
           type="button"
           (click)="startSlowRequest()"
           [disabled]="status() === 'running'"
-          class="btn btn-primary font-bold"
+          class="btn btn-primary"
         >
           @if (status() === 'running') {
-            <span class="loading loading-spinner loading-xs"></span>
+            <span class="spinner w-4 h-4 mr-2"></span>
           }
           Start 5s request
         </button>
@@ -45,7 +45,7 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
           type="button"
           (click)="abortCurrent()"
           [disabled]="status() !== 'running' || !currentAbortController"
-          class="btn btn-error font-bold"
+          class="btn btn-secondary border border-red-500/30 text-red-400 hover:bg-red-500/10"
         >
           Abort (signal)
         </button>
@@ -53,7 +53,7 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
           type="button"
           (click)="startWithTimeout(500)"
           [disabled]="status() === 'running'"
-          class="btn btn-warning font-bold"
+          class="btn btn-secondary"
         >
           500ms timeout
         </button>
@@ -61,7 +61,7 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
           type="button"
           (click)="failFastAlreadyAborted()"
           [disabled]="status() === 'running'"
-          class="btn btn-secondary font-bold"
+          class="btn btn-secondary"
         >
           Pre-aborted
         </button>
@@ -69,26 +69,24 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
 
       <div class="mt-auto">
         @if (result()) {
-          <div
-            class="p-4 rounded-2xl shadow-inner border font-mono text-xs break-all"
-            [class]="resultClass()"
-          >
-            <div class="font-bold mb-1 uppercase tracking-wider text-[10px] opacity-70">Status</div>
+          <div class="font-mono text-[11px] break-all" [class]="resultClass()">
+            <div class="font-black mb-2 uppercase tracking-widest text-[9px] opacity-70">
+              Status
+            </div>
             {{ result() }}
           </div>
         }
       </div>
     </div>
   `,
+  styleUrl: '../../services/demo.styles.css',
 })
 export class CancellationCardComponent implements OnDestroy {
   private readonly log = inject(WorkerHttpDemoLogService);
 
   protected readonly status = signal<'idle' | 'running' | 'done' | 'error'>('idle');
   protected readonly result = signal<string>('');
-  protected readonly resultClass = signal<string>(
-    'bg-base-content/5 border-base-content/5 text-base-content/80',
-  );
+  protected readonly resultClass = signal<string>('mono-block');
   protected currentAbortController: AbortController | null = null;
 
   private transport: WorkerTransport<unknown, unknown> | null = null;
@@ -116,7 +114,7 @@ export class CancellationCardComponent implements OnDestroy {
         next: () => {
           const elapsed = Math.round(performance.now() - start);
           this.status.set('done');
-          this.resultClass.set('bg-success/10 border-success/20 text-success');
+          this.resultClass.set('feedback feedback-success');
           this.result.set(`Completed in ${elapsed}ms (no abort)`);
           this.currentAbortController = null;
           this.log.log('Cancel', `Slow request completed in ${elapsed}ms`, 'success');
@@ -142,7 +140,7 @@ export class CancellationCardComponent implements OnDestroy {
       .subscribe({
         next: () => {
           this.status.set('done');
-          this.resultClass.set('bg-success/10 border-success/20 text-success');
+          this.resultClass.set('feedback feedback-success');
           this.result.set('Completed before timeout');
         },
         error: (err) => this.handleError(err, start),
@@ -174,18 +172,18 @@ export class CancellationCardComponent implements OnDestroy {
     this.status.set('error');
 
     if (err instanceof WorkerHttpAbortError) {
-      this.resultClass.set('bg-warning/10 border-warning/20 text-warning');
+      this.resultClass.set('feedback feedback-warning');
       this.result.set(`WorkerHttpAbortError after ${elapsed}ms — reason: ${String(err.reason)}`);
       this.log.log('Cancel', `Aborted via signal in ${elapsed}ms (${String(err.reason)})`, 'info');
       return;
     }
     if (err instanceof WorkerHttpTimeoutError) {
-      this.resultClass.set('bg-error/10 border-error/20 text-error');
+      this.resultClass.set('feedback feedback-error');
       this.result.set(`WorkerHttpTimeoutError after ${elapsed}ms (timeoutMs=${err.timeoutMs})`);
       this.log.log('Cancel', `Timed out after ${err.timeoutMs}ms`, 'error');
       return;
     }
-    this.resultClass.set('bg-error/10 border-error/20 text-error');
+    this.resultClass.set('feedback feedback-error');
     this.result.set(`Error: ${String(err)}`);
     this.log.log('Cancel', `Unexpected error: ${String(err)}`, 'error');
   }
