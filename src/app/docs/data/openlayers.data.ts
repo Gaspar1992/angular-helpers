@@ -354,4 +354,251 @@ export class MapComponent {}`,
 })
 export class MapComponent {}`,
   },
+  {
+    id: 'heatmap-layer',
+    name: 'OlHeatmapLayerComponent',
+    description:
+      'Component for GPU-accelerated heatmap rendering of vector points. Features zoom-aware radius and blur scaling.',
+    scope: 'component',
+    importPath: '@angular-helpers/openlayers/layers',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Supports reactive inputs for live property updates',
+      'Can define radius and blur in physical "meters" or screenspace "pixels"',
+      'Resolution-aware scaling automatically scales meters-based parameters with zoom',
+    ],
+    category: 'ol-layers',
+    inputs: [
+      { name: 'id', type: 'string', description: 'Unique identifier for the layer (required)' },
+      {
+        name: 'features',
+        type: 'Feature[]',
+        defaultValue: '[]',
+        description: 'Array of features to display',
+      },
+      { name: 'zIndex', type: 'number', defaultValue: '0', description: 'Layer stacking order' },
+      { name: 'opacity', type: 'number', defaultValue: '1', description: 'Layer opacity (0-1)' },
+      {
+        name: 'visible',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Whether the layer is visible',
+      },
+      { name: 'blur', type: 'number', defaultValue: '15', description: 'Blur size' },
+      { name: 'radius', type: 'number', defaultValue: '8', description: 'Radius size' },
+      {
+        name: 'radiusUnit',
+        type: "'pixels' | 'meters'",
+        defaultValue: 'pixels',
+        description: 'Unit system for radius and blur calculation',
+      },
+      {
+        name: 'weight',
+        type: 'string | ((f: Feature) => number)',
+        description: 'Feature weight property or evaluator function',
+      },
+    ],
+    outputs: [],
+    methods: [],
+    example: `import { OlHeatmapLayerComponent } from '@angular-helpers/openlayers/layers';
+
+@Component({
+  template: \`
+    <ol-map [center]="[2.17, 41.38]" [zoom]="12">
+      <ol-heatmap-layer
+        id="earthquakes"
+        [features]="earthquakes()"
+        [radius]="1000"
+        radiusUnit="meters"
+        [blur]="1500" />
+    </ol-map>
+  \`
+})
+export class MapComponent {}`,
+  },
+  {
+    id: 'cluster',
+    name: 'OlClusterComponent',
+    description:
+      'Sub-component for clustering vector features under a vector layer. Aggregates nearby points into styled cluster markers.',
+    scope: 'component',
+    importPath: '@angular-helpers/openlayers/layers',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Must be projected inside <ol-vector-layer>',
+      'Automatically collects points and calculates cluster sizes',
+      'Can display feature count text inside the cluster markers',
+    ],
+    category: 'ol-layers',
+    inputs: [
+      {
+        name: 'distance',
+        type: 'number',
+        defaultValue: '40',
+        description: 'Distance in pixels within which features will be clustered',
+      },
+      {
+        name: 'minDistance',
+        type: 'number',
+        defaultValue: '20',
+        description: 'Minimum distance in pixels between clusters',
+      },
+      {
+        name: 'showCount',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Whether to show the clustered feature count',
+      },
+      { name: 'featureStyle', type: 'Style', description: 'Custom style for the cluster markers' },
+    ],
+    outputs: [],
+    methods: [],
+    example: `import { OlVectorLayerComponent, OlClusterComponent } from '@angular-helpers/openlayers/layers';
+
+@Component({
+  template: \`
+    <ol-map>
+      <ol-vector-layer id="locations" [features]="locations()">
+        <ol-cluster [distance]="55" [minDistance]="20" [showCount]="true" />
+      </ol-vector-layer>
+    </ol-map>
+  \`
+})
+export class MapComponent {}`,
+  },
+  {
+    id: 'layer-switcher',
+    name: 'OlLayerSwitcherComponent',
+    description:
+      'Interactive overlay control allowing users to dynamically toggle the visibility and adjust the opacity of active layers.',
+    scope: 'component',
+    importPath: '@angular-helpers/openlayers/controls',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Can be positioned at any corner of the viewport',
+      'Supports layer type-badges (vector, tile, image)',
+      'Optional opacity slider for each active layer',
+    ],
+    category: 'ol-controls',
+    inputs: [
+      {
+        name: 'position',
+        type: "'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'",
+        defaultValue: 'top-right',
+        description: 'Placement on the map layout',
+      },
+      {
+        name: 'layers',
+        type: 'LayerSwitcherItem[]',
+        defaultValue: '[]',
+        description: 'List of manageable layers',
+      },
+      {
+        name: 'collapsible',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Whether the control panel can collapse',
+      },
+      {
+        name: 'showOpacity',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Whether to display layer opacity range inputs',
+      },
+      {
+        name: 'startCollapsed',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Whether switcher starts collapsed',
+      },
+    ],
+    outputs: [
+      {
+        name: 'visibilityChange',
+        type: '{ id: string; visible: boolean }',
+        description: 'Emitted when a layer visibility is toggled',
+      },
+      {
+        name: 'opacityChange',
+        type: '{ id: string; opacity: number }',
+        description: 'Emitted when a layer opacity is adjusted',
+      },
+    ],
+    methods: [],
+    example: `import { OlLayerSwitcherComponent } from '@angular-helpers/openlayers/controls';
+
+@Component({
+  template: \`
+    <ol-map>
+      <ol-layer-switcher
+        position="top-right"
+        [layers]="layersList()"
+        [showOpacity]="true"
+        (visibilityChange)="onVisibility($event)" />
+    </ol-map>
+  \`
+})
+export class MapComponent {}`,
+  },
+  {
+    id: 'basemap-switcher',
+    name: 'OlBasemapSwitcherComponent',
+    description:
+      'Interactive basemap switcher control allowing users to switch between different base tile providers dynamically.',
+    scope: 'component',
+    importPath: '@angular-helpers/openlayers/controls',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Swaps out the visible base layer dynamically without recreating the map component',
+      'Supports custom icons, names, and tile configurations',
+      'Positioning options support centering (top-center, bottom-center) for responsive mobile/desktop UX',
+    ],
+    category: 'ol-controls',
+    inputs: [
+      {
+        name: 'basemaps',
+        type: 'BasemapConfig[]',
+        defaultValue: "[{ id: 'osm', name: 'OpenStreetMap', type: 'osm' }]",
+        description: 'Available basemap configurations',
+      },
+      {
+        name: 'activeBasemap',
+        type: 'string',
+        defaultValue: 'osm',
+        description: 'Active basemap configuration ID',
+      },
+      {
+        name: 'position',
+        type: "'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'",
+        defaultValue: 'bottom-left',
+        description: 'Placement on the map layout',
+      },
+    ],
+    outputs: [
+      {
+        name: 'basemapChange',
+        type: 'string',
+        description: 'Emitted with the new active basemap ID when chosen',
+      },
+    ],
+    methods: [],
+    example: `import { OlBasemapSwitcherComponent } from '@angular-helpers/openlayers/controls';
+
+@Component({
+  template: \`
+    <ol-map>
+      <ol-basemap-switcher
+        position="bottom-left"
+        [basemaps]="baseLayers"
+        [activeBasemap]="activeBase"
+        (basemapChange)="onBaseChange($event)" />
+    </ol-map>
+  \`
+})
+export class MapComponent {}`,
+  },
 ];

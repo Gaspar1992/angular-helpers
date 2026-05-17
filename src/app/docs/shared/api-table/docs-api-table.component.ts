@@ -67,17 +67,16 @@ import { ApiColumn, ApiRow } from '../../models/doc-meta.model';
             vertical-align: top;
 
             code {
-              background-color: var(--c-primary-dim);
+              background-color: rgba(255, 255, 255, 0.04);
               color: var(--c-primary);
-              border: 1px solid color-mix(in oklch, var(--c-primary), transparent 75%);
-              padding-inline: 0.6rem;
-              padding-block: 0.25rem;
+              border: 1px solid rgba(255, 255, 255, 0.06);
+              padding-inline: 0.5rem;
+              padding-block: 0.2rem;
               border-radius: var(--r-md);
-              font-size: 0.65rem;
+              font-size: 0.8rem;
               font-family: var(--font-mono);
-              font-weight: 900;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
+              font-weight: 600;
+              letter-spacing: normal;
             }
 
             .docs-cell-desc {

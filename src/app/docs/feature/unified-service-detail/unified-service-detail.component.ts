@@ -45,13 +45,13 @@ export interface ServiceDetailConfig {
 
         @if (s.fnVersion) {
           <div
-            class="flex items-center gap-4 p-5 mb-10 bg-base-200 border border-base-300 rounded-3xl shadow-sm"
+            class="flex items-center gap-4 p-5 mb-10 bg-base-200 border border-border-subtle rounded-3xl shadow-sm"
           >
             <span class="text-xs font-black uppercase tracking-widest text-base-content/30 ml-2"
               >API Variant</span
             >
             <div
-              class="flex gap-1.5 p-1 bg-base-content/5 rounded-2xl border border-base-300 shadow-inner"
+              class="flex gap-1.5 p-1 bg-base-content/5 rounded-2xl border border-border-subtle shadow-inner"
             >
               <button
                 type="button"

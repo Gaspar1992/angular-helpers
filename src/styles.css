@@ -12,8 +12,8 @@
 /* ─── TAILWIND v4 THEME ───────────────────── */
 @theme {
   --color-primary: oklch(69% 0.18 254);
-  --color-primary-active: color-mix(in oklch, var(--color-primary), black 10%);
-  --color-primary-dim: color-mix(in oklch, var(--color-primary), transparent 90%);
+  --color-primary-active: color-mix(in oklch, var(--color-primary) 90%, black);
+  --color-primary-dim: color-mix(in oklch, var(--color-primary) 10%, transparent);
 
   --color-secondary: oklch(65% 0.2 285);
   --color-accent: oklch(75% 0.18 200);
@@ -32,8 +32,8 @@
   --color-text-secondary: rgba(255, 255, 255, 0.6);
   --color-text-muted: rgba(255, 255, 255, 0.4);
 
-  --color-border: color-mix(in oklch, var(--color-text-main), transparent 85%);
-  --color-border-subtle: color-mix(in oklch, var(--color-text-main), transparent 92%);
+  --color-border: color-mix(in oklch, white 15%, transparent);
+  --color-border-subtle: color-mix(in oklch, white 8%, transparent);
 
   /* Radius Scale */
   --radius-xs: 0.125rem;
@@ -117,6 +117,11 @@
     border-color: var(--c-border-subtle);
   }
 
+  /* Global override for bright DaisyUI borders to keep them premium and subtle */
+  .border-base-300 {
+    border-color: var(--c-border-subtle) !important;
+  }
+
   body {
     background-color: var(--c-bg-main);
     color: var(--c-text-main);
@@ -181,62 +186,107 @@
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    padding: 0.3rem 0.65rem;
-    font-size: 0.55rem;
-    font-weight: 800;
+    padding: 0.28rem 0.65rem !important;
+    margin: 0.15rem 0.25rem;
+    height: auto;
+    font-size: 0.5rem;
+    font-weight: 700;
     font-family: var(--font-mono, ui-monospace, monospace);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: normal;
     line-height: 1;
     white-space: nowrap;
     border-radius: 99px;
-    border: none;
+    border: 1px solid color-mix(in oklch, white 8%, transparent);
     border-inline-start: 3px solid var(--_badge-accent);
-    background: color-mix(in oklch, white, transparent 95%);
+    background: color-mix(in oklch, white 4%, transparent);
     color: var(--c-text-secondary);
-    backdrop-filter: blur(4px);
-    transition: all 180ms ease;
+    backdrop-filter: blur(8px);
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
     cursor: default;
 
     &:hover {
-      background: color-mix(in oklch, white, transparent 92%);
+      background: color-mix(in oklch, white 8%, transparent);
+      border-color: color-mix(in oklch, white 15%, transparent);
       color: var(--c-text-main);
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
     }
 
     &.badge-primary {
       --_badge-accent: var(--c-primary);
       color: var(--c-primary);
-      background: color-mix(in oklch, var(--c-primary), transparent 92%);
+      background: color-mix(in oklch, var(--c-primary) 8%, transparent);
+      border-color: color-mix(in oklch, var(--c-primary) 15%, transparent);
+      &:hover {
+        background: color-mix(in oklch, var(--c-primary) 15%, transparent);
+        border-color: color-mix(in oklch, var(--c-primary) 30%, transparent);
+        box-shadow: 0 0 12px color-mix(in oklch, var(--c-primary) 20%, transparent);
+      }
     }
     &.badge-secondary {
       --_badge-accent: var(--c-secondary);
       color: var(--c-secondary);
-      background: color-mix(in oklch, var(--c-secondary), transparent 92%);
+      background: color-mix(in oklch, var(--c-secondary) 8%, transparent);
+      border-color: color-mix(in oklch, var(--c-secondary) 15%, transparent);
+      &:hover {
+        background: color-mix(in oklch, var(--c-secondary) 15%, transparent);
+        border-color: color-mix(in oklch, var(--c-secondary) 30%, transparent);
+        box-shadow: 0 0 12px color-mix(in oklch, var(--c-secondary) 20%, transparent);
+      }
     }
     &.badge-accent {
       --_badge-accent: var(--c-accent);
       color: var(--c-accent);
-      background: color-mix(in oklch, var(--c-accent), transparent 92%);
+      background: color-mix(in oklch, var(--c-accent) 8%, transparent);
+      border-color: color-mix(in oklch, var(--c-accent) 15%, transparent);
+      &:hover {
+        background: color-mix(in oklch, var(--c-accent) 15%, transparent);
+        border-color: color-mix(in oklch, var(--c-accent) 30%, transparent);
+        box-shadow: 0 0 12px color-mix(in oklch, var(--c-accent) 20%, transparent);
+      }
     }
     &.badge-info {
       --_badge-accent: var(--color-info);
       color: var(--color-info);
-      background: color-mix(in oklch, var(--color-info), transparent 92%);
+      background: color-mix(in oklch, var(--color-info) 8%, transparent);
+      border-color: color-mix(in oklch, var(--color-info) 15%, transparent);
+      &:hover {
+        background: color-mix(in oklch, var(--color-info) 15%, transparent);
+        border-color: color-mix(in oklch, var(--color-info) 30%, transparent);
+        box-shadow: 0 0 12px color-mix(in oklch, var(--color-info) 20%, transparent);
+      }
     }
     &.badge-success {
       --_badge-accent: var(--color-success);
       color: var(--color-success);
-      background: color-mix(in oklch, var(--color-success), transparent 92%);
+      background: color-mix(in oklch, var(--color-success) 8%, transparent);
+      border-color: color-mix(in oklch, var(--color-success) 15%, transparent);
+      &:hover {
+        background: color-mix(in oklch, var(--color-success) 15%, transparent);
+        border-color: color-mix(in oklch, var(--color-success) 30%, transparent);
+        box-shadow: 0 0 12px color-mix(in oklch, var(--color-success) 20%, transparent);
+      }
     }
     &.badge-warning {
       --_badge-accent: var(--color-warning);
       color: var(--color-warning);
-      background: color-mix(in oklch, var(--color-warning), transparent 92%);
+      background: color-mix(in oklch, var(--color-warning) 8%, transparent);
+      border-color: color-mix(in oklch, var(--color-warning) 15%, transparent);
+      &:hover {
+        background: color-mix(in oklch, var(--color-warning) 15%, transparent);
+        border-color: color-mix(in oklch, var(--color-warning) 30%, transparent);
+        box-shadow: 0 0 12px color-mix(in oklch, var(--color-warning) 20%, transparent);
+      }
     }
     &.badge-error {
       --_badge-accent: var(--color-error);
       color: var(--color-error);
-      background: color-mix(in oklch, var(--color-error), transparent 92%);
+      background: color-mix(in oklch, var(--color-error) 8%, transparent);
+      border-color: color-mix(in oklch, var(--color-error) 15%, transparent);
+      &:hover {
+        background: color-mix(in oklch, var(--color-error) 15%, transparent);
+        border-color: color-mix(in oklch, var(--color-error) 30%, transparent);
+        box-shadow: 0 0 12px color-mix(in oklch, var(--color-error) 20%, transparent);
+      }
     }
     &.badge-outline {
       background: transparent;
@@ -252,7 +302,7 @@
       border-inline-start: none;
       color: var(--c-text-muted);
       &:hover {
-        background: color-mix(in oklch, white, transparent 95%);
+        background: color-mix(in oklch, white 5%, transparent);
       }
     }
   }

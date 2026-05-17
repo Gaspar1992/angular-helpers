@@ -55,14 +55,14 @@ const LANGUAGE_ALIASES: Record<string, string> = {
 
         /* Native Nesting */
         .code-header {
-          @apply flex justify-between items-center px-4 py-2 bg-base-200 border-b border-base-300;
+          @apply flex justify-between items-center px-4 py-2 bg-base-200 border-b border-border-subtle;
 
           .lang-badge {
             @apply text-[0.6rem] font-black text-primary uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full border border-primary/25 font-mono;
           }
 
           .copy-btn {
-            @apply text-[0.65rem] font-black px-4 py-1.5 bg-base-content/5 border border-base-300 rounded-full text-base-content/60 cursor-pointer uppercase tracking-wider transition-all duration-150;
+            @apply text-[0.65rem] font-black px-4 py-1.5 bg-base-content/5 border border-border-subtle rounded-full text-base-content/60 cursor-pointer uppercase tracking-wider transition-all duration-150;
 
             &:hover {
               @apply bg-base-content/10 text-base-content border-base-content/50;

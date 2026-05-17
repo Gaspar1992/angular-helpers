@@ -12,7 +12,7 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
         </h1>
 
         @if (badge()) {
-          <span class="docs-badge" [attr.data-variant]="badgeVariant()">
+          <span class="badge badge-primary font-mono ml-3 select-none">
             {{ badge() }}
           </span>
         }
@@ -21,12 +21,12 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
       <p class="docs-page-lead">{{ lead() }}</p>
 
       @if (scope() || requiresSecureContext()) {
-        <div class="header-meta">
+        <div class="header-meta flex gap-3 mt-6">
           @if (scope()) {
-            <span class="meta-chip scope">providedIn: {{ scope() }}</span>
+            <span class="badge badge-primary font-mono select-none">providedIn: {{ scope() }}</span>
           }
           @if (requiresSecureContext()) {
-            <span class="meta-chip secure">🔒 Requires HTTPS</span>
+            <span class="badge badge-warning font-mono select-none">🔒 Requires HTTPS</span>
           }
         </div>
       }
@@ -41,7 +41,7 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 
         .header-top {
           display: flex;
-          align-items: baseline;
+          align-items: center;
           gap: var(--spacing-4);
           flex-wrap: wrap;
         }
@@ -57,18 +57,6 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
           }
         }
 
-        .docs-badge {
-          @apply inline-block text-[0.7rem] font-bold px-3 py-1 rounded-md font-mono lowercase;
-
-          &[data-variant='npm'] {
-            @apply bg-primary/10 text-primary border border-primary/20;
-          }
-
-          &[data-variant='import'] {
-            @apply bg-success/10 text-success border border-success/20;
-          }
-        }
-
         .docs-page-lead {
           margin-block-start: var(--spacing-4);
           color: var(--c-text-secondary);
@@ -76,33 +64,6 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
           max-inline-size: 65ch;
           line-height: 1.6;
           text-wrap: pretty;
-        }
-
-        .header-meta {
-          display: flex;
-          gap: var(--spacing-2);
-          margin-block-start: var(--spacing-6);
-          flex-wrap: wrap;
-
-          .meta-chip {
-            font-size: var(--fs-xs);
-            font-weight: 700;
-            padding-inline: var(--spacing-2-5);
-            padding-block: var(--spacing-1);
-            border-radius: var(--r-sm);
-
-            &.scope {
-              background-color: var(--c-primary-dim);
-              color: var(--c-primary);
-              border: 1px solid color-mix(in oklch, var(--c-primary), transparent 80%);
-            }
-
-            &.secure {
-              background-color: color-mix(in oklch, #f59e0b, transparent 90%);
-              color: #f59e0b;
-              border: 1px solid color-mix(in oklch, #f59e0b, transparent 80%);
-            }
-          }
         }
       }
     `,

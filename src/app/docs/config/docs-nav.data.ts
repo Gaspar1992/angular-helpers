@@ -233,6 +233,8 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
         items: [
           { label: 'Tile Layer', route: '/docs/openlayers/tile-layer' },
           { label: 'Vector Layer', route: '/docs/openlayers/vector-layer' },
+          { label: 'Heatmap Layer', route: '/docs/openlayers/heatmap-layer' },
+          { label: 'Cluster', route: '/docs/openlayers/cluster' },
         ],
       },
       {
@@ -242,6 +244,8 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
           { label: 'Attribution', route: '/docs/openlayers/attribution-control' },
           { label: 'Scale Line', route: '/docs/openlayers/scale-line-control' },
           { label: 'Fullscreen', route: '/docs/openlayers/fullscreen-control' },
+          { label: 'Layer Switcher', route: '/docs/openlayers/layer-switcher' },
+          { label: 'Basemap Switcher', route: '/docs/openlayers/basemap-switcher' },
         ],
       },
     ],

@@ -28,13 +28,13 @@ import { DOCS_NAV_LIBRARIES } from '../config/docs-nav.data';
     >
       <!-- First Sidebar - Libraries -->
       <aside
-        class="fixed lg:sticky lg:top-0 h-full w-16 lg:w-56 z-50 bg-base-100 border-r border-base-300 flex flex-col overflow-y-auto transition-all duration-300 -left-72 lg:left-0 shadow-2xl lg:shadow-none"
+        class="fixed lg:sticky lg:top-0 h-full w-16 lg:w-56 z-50 bg-base-100 border-r border-border-subtle flex flex-col overflow-y-auto transition-all duration-300 -left-72 lg:left-0 shadow-2xl lg:shadow-none"
         [class.-left-72]="!sidebarOpen()"
         [class.left-0]="sidebarOpen()"
       >
         <!-- Header -->
         <div
-          class="flex items-center justify-between px-4 py-4 border-b border-base-300 bg-base-200/50"
+          class="flex-none flex items-center justify-between px-4 h-[57px] border-b border-border-subtle bg-base-200/50"
         >
           <a
             routerLink="/docs"
@@ -84,12 +84,14 @@ import { DOCS_NAV_LIBRARIES } from '../config/docs-nav.data';
       <!-- Second Sidebar - Library Sections -->
       @if (activeLibrary(); as lib) {
         <aside
-          class="fixed lg:sticky lg:top-0 h-full w-64 z-40 bg-base-200/50 backdrop-blur-md border-r border-base-300 flex flex-col overflow-y-auto transition-all duration-300 shadow-xl lg:shadow-none"
+          class="fixed lg:sticky lg:top-0 h-full w-64 z-40 bg-base-200/50 backdrop-blur-md border-r border-border-subtle flex flex-col overflow-y-auto transition-all duration-300 shadow-xl lg:shadow-none"
           [class.-left-72]="!sidebarOpen()"
           [class.left-16]="sidebarOpen()"
         >
           <!-- Library Header -->
-          <div class="flex items-center gap-3 px-5 py-5 border-b border-base-300 bg-base-200/80">
+          <div
+            class="flex-none flex items-center gap-3 px-5 h-[57px] border-b border-border-subtle bg-base-200/80"
+          >
             <span class="text-xl drop-shadow-md">{{ getLibraryIcon(lib.id) }}</span>
             <span class="font-black text-sm text-base-content tracking-tight">{{ lib.label }}</span>
           </div>
@@ -132,16 +134,12 @@ import { DOCS_NAV_LIBRARIES } from '../config/docs-nav.data';
                           >{{ item.label }}</span
                         >
                         @if (item.experimental) {
-                          <span
-                            class="text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded-md bg-warning/10 text-warning/80 ml-auto border border-warning/20"
+                          <span class="badge badge-warning text-[9px] ml-auto select-none"
                             >EXP</span
                           >
                         }
                         @if (item.hasFn) {
-                          <span
-                            class="text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded-md bg-info/10 text-info/80 ml-auto border border-info/20"
-                            >FN</span
-                          >
+                          <span class="badge badge-info text-[9px] ml-auto select-none">FN</span>
                         }
                       </a>
                     </li>
@@ -166,7 +164,7 @@ import { DOCS_NAV_LIBRARIES } from '../config/docs-nav.data';
       <div class="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-base-100">
         <!-- Topbar -->
         <header
-          class="flex-none flex items-center gap-3 px-5 py-3.5 bg-base-100/80 backdrop-blur-xl border-b border-base-300 sticky top-0 z-20"
+          class="flex-none flex items-center gap-3 px-5 h-[57px] bg-base-100/80 backdrop-blur-xl border-b border-border-subtle sticky top-0 z-20"
         >
           <button
             class="p-1.5 rounded-md text-base-content/60 hover:text-base-content hover:bg-base-content/10 transition-colors lg:hidden"
@@ -219,9 +217,7 @@ import { DOCS_NAV_LIBRARIES } from '../config/docs-nav.data';
           class="flex-1 overflow-y-auto no-scrollbar p-6 sm:p-10 lg:p-12"
           tabindex="-1"
         >
-          <div
-            class="max-w-4xl mx-auto prose prose-base-content prose-pre:m-0 prose-pre:bg-base-200 prose-pre:border prose-pre:border-base-300 prose-headings:font-black prose-a:text-primary"
-          >
+          <div class="max-w-4xl mx-auto w-full">
             <router-outlet />
           </div>
         </main>
