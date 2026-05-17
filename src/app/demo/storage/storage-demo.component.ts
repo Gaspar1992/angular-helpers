@@ -8,6 +8,7 @@ import {
   OnDestroy,
   NgZone,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { JsonPipe } from '@angular/common';
 import {
@@ -488,10 +489,11 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
   private readonly workerTransport = inject(WorkerStorageTransport);
   private readonly ngZone = inject(NgZone);
   private syncSubscription?: () => void;
+  private benchmarkTimeout?: any;
 
   constructor() {
-    // Serialization Dynamic Listener
-    this.toonControl.valueChanges.subscribe((val) => {
+    // Serialization Dynamic Listener with automatic injection-context lifecycle unsubscribe
+    this.toonControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((val) => {
       this.calculateSerializationWeights(val || '');
     });
 
@@ -519,6 +521,9 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
     }
     if (this.toastTimeout) {
       clearTimeout(this.toastTimeout);
+    }
+    if (this.benchmarkTimeout) {
+      clearTimeout(this.benchmarkTimeout);
     }
     if (this.syncSubscription) {
       this.syncSubscription();
@@ -705,8 +710,12 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
     this.isBenchmarking.set(true);
     this.benchmarkResults.set(null);
 
+    if (this.benchmarkTimeout) {
+      clearTimeout(this.benchmarkTimeout);
+    }
+
     // Dynamic latency testing simulated in batches
-    setTimeout(() => {
+    this.benchmarkTimeout = setTimeout(() => {
       // IndexedDB has fast transactional loops
       const idbTime = Math.round(15 + Math.random() * 8);
       // Cache API has standard async performance
