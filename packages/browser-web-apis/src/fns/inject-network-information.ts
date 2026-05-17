@@ -1,5 +1,6 @@
 import { computed, DestroyRef, inject, PLATFORM_ID, signal, type Signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { type Subscription } from 'rxjs';
 
 import {
   type ConnectionType,
@@ -21,13 +22,27 @@ export interface NetworkInformationRef {
 export function injectNetworkInformation(): NetworkInformationRef {
   const destroyRef = inject(DestroyRef);
   const platformId = inject(PLATFORM_ID);
+  const isBrowser = isPlatformBrowser(platformId);
 
-  const snapshot = signal<NetworkInformation>(
-    isPlatformBrowser(platformId) ? getNetworkSnapshot() : { online: true },
-  );
+  const snapshot = signal<NetworkInformation>({ online: true });
 
-  const sub = networkInformationStream().subscribe((n) => snapshot.set(n));
-  destroyRef.onDestroy(() => sub.unsubscribe());
+  if (isBrowser) {
+    let sub: Subscription | null = null;
+    let destroyed = false;
+
+    queueMicrotask(() => {
+      if (destroyed) return;
+      snapshot.set(getNetworkSnapshot());
+      sub = networkInformationStream().subscribe((n) => snapshot.set(n));
+    });
+
+    destroyRef.onDestroy(() => {
+      destroyed = true;
+      if (sub) {
+        sub.unsubscribe();
+      }
+    });
+  }
 
   return {
     snapshot: snapshot.asReadonly(),

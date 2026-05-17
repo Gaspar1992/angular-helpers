@@ -17,19 +17,30 @@ export interface ClipboardRef {
 export function injectClipboard(): ClipboardRef {
   const destroyRef = inject(DestroyRef);
   const platformId = inject(PLATFORM_ID);
-
   const isBrowser = isPlatformBrowser(platformId);
-  const supported = signal<boolean>(
-    isBrowser && typeof navigator !== 'undefined' && !!navigator.clipboard,
-  );
+
+  const supported = signal<boolean>(false);
   const text = signal<string | null>(null);
   const error = signal<string | null>(null);
   const busy = signal<boolean>(false);
   let disposed = false;
 
-  destroyRef.onDestroy(() => {
-    disposed = true;
-  });
+  if (isBrowser) {
+    let destroyed = false;
+    queueMicrotask(() => {
+      if (destroyed) return;
+      supported.set(typeof navigator !== 'undefined' && !!navigator.clipboard);
+    });
+
+    destroyRef.onDestroy(() => {
+      destroyed = true;
+      disposed = true;
+    });
+  } else {
+    destroyRef.onDestroy(() => {
+      disposed = true;
+    });
+  }
 
   const writeText = async (value: string): Promise<boolean> => {
     if (!supported() || disposed) {

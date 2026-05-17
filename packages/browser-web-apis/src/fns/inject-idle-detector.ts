@@ -21,9 +21,8 @@ export function injectIdleDetector(): IdleDetectorRef {
   const platformId = inject(PLATFORM_ID);
   const destroyRef = inject(DestroyRef);
   const isBrowser = isPlatformBrowser(platformId);
-  const hasDetector = isBrowser && typeof window !== 'undefined' && 'IdleDetector' in window;
 
-  const supported = signal<boolean>(hasDetector && window.isSecureContext);
+  const supported = signal<boolean>(false);
   const state = signal<IdleState | null>(null);
   const error = signal<Error | null>(null);
   const isTracking = signal<boolean>(false);
@@ -40,6 +39,26 @@ export function injectIdleDetector(): IdleDetectorRef {
     });
   };
 
+  if (isBrowser) {
+    let destroyed = false;
+    queueMicrotask(() => {
+      if (destroyed) return;
+      const hasDetector = typeof window !== 'undefined' && 'IdleDetector' in window;
+      supported.set(hasDetector && window.isSecureContext);
+    });
+
+    destroyRef.onDestroy(() => {
+      destroyed = true;
+      disposed = true;
+      stop();
+    });
+  } else {
+    destroyRef.onDestroy(() => {
+      disposed = true;
+      stop();
+    });
+  }
+
   const stop = () => {
     if (detector) {
       detector.removeEventListener('change', onStateChange);
@@ -53,11 +72,6 @@ export function injectIdleDetector(): IdleDetectorRef {
       isTracking.set(false);
     }
   };
-
-  destroyRef.onDestroy(() => {
-    disposed = true;
-    stop();
-  });
 
   const requestPermission = async (): Promise<PermissionState> => {
     if (!supported()) return 'denied';

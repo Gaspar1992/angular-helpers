@@ -125,6 +125,17 @@ export {
   type StorageQuotaEstimate,
 } from './services/storage-manager.service';
 export { CompressionService, type CompressionFormat } from './services/compression.service';
+export {
+  BarcodeDetectorService,
+  type DetectedBarcode,
+  type BarcodeFormat,
+} from './services/barcode-detector.service';
+export {
+  CredentialManagementService,
+  type PasswordCredentialData,
+  type PublicKeyCredentialOptions,
+  type CredentialResult,
+} from './services/credential-management.service';
 
 // Tokens
 export {
@@ -182,6 +193,7 @@ export { injectBattery, type BatteryRef, type BatteryInfo } from './fns/inject-b
 export { injectWakeLock, type WakeLockRef } from './fns/inject-wake-lock';
 export { injectEyeDropper, type EyeDropperRef } from './fns/inject-eye-dropper';
 export { injectIdleDetector, type IdleDetectorRef } from './fns/inject-idle-detector';
+export { injectBarcodeDetector, type BarcodeDetectorRef } from './fns/inject-barcode-detector';
 
 // Utils and Guards
 export * from './utils/browser-support.util';

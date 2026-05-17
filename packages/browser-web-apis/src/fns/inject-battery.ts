@@ -32,9 +32,7 @@ export function injectBattery(): BatteryRef {
   const platformId = inject(PLATFORM_ID);
 
   const isBrowser = isPlatformBrowser(platformId);
-  const supported = signal<boolean>(
-    isBrowser && typeof navigator !== 'undefined' && 'getBattery' in navigator,
-  );
+  const supported = signal<boolean>(false);
   const info = signal<BatteryInfo | null>(null);
   const error = signal<string | null>(null);
   let manager: BatteryManagerLike | null = null;
@@ -77,17 +75,31 @@ export function injectBattery(): BatteryRef {
     }
   };
 
-  destroyRef.onDestroy(() => {
-    disposed = true;
-    if (manager) {
-      for (const ev of events) {
-        manager.removeEventListener(ev, update);
+  if (isBrowser) {
+    let destroyed = false;
+    queueMicrotask(() => {
+      if (destroyed) return;
+      supported.set(typeof navigator !== 'undefined' && 'getBattery' in navigator);
+      if (supported()) {
+        void refresh();
       }
-      manager = null;
-    }
-  });
+    });
 
-  if (supported()) void refresh();
+    destroyRef.onDestroy(() => {
+      destroyed = true;
+      disposed = true;
+      if (manager) {
+        for (const ev of events) {
+          manager.removeEventListener(ev, update);
+        }
+        manager = null;
+      }
+    });
+  } else {
+    destroyRef.onDestroy(() => {
+      disposed = true;
+    });
+  }
 
   return {
     info: info.asReadonly(),
