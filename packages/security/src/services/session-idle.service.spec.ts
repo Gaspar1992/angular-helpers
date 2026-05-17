@@ -2,7 +2,7 @@ import '@angular/compiler';
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { SessionIdleService, SessionIdleConfig } from './session-idle.service';
+import { SessionIdleService } from './session-idle.service';
 import { SecureStorageService } from './secure-storage.service';
 import { SensitiveClipboardService } from './sensitive-clipboard.service';
 import { DOCUMENT } from '@angular/common';

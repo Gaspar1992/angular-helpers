@@ -32,12 +32,6 @@ function assert(condition: boolean, message: string, file?: string): void {
   }
 }
 
-function warn(condition: boolean, message: string, file?: string): void {
-  if (!condition) {
-    errors.push({ type: 'warning', message, file });
-  }
-}
-
 console.log('🔍 Checking documentation consistency...\n');
 
 // 1. Check package metadata
@@ -199,7 +193,7 @@ console.log('✅ Service category checks passed\n');
 
 // 6. Check for deprecated API patterns
 console.log('🚫 Checking for deprecated API patterns...');
-const deprecatedPatterns = ['enableCamera:', 'enableGeolocation:', 'enableWebStorage:'];
+const _deprecatedPatterns = ['enableCamera:', 'enableGeolocation:', 'enableWebStorage:'];
 
 // This would need file content checking - simplified version
 // In production, this would scan all .ts files in src/app

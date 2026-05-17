@@ -92,7 +92,7 @@ export class OlWebGLVectorLayerComponent {
         this.layer.set('id', this.id());
         map.addLayer(this.layer);
       } catch (err) {
-        console.warn(`[OlWebGLVectorLayer] Failed to initialize WebGL Vector Layer: ${err}`);
+        // WebGL Vector Layer failed to initialize (e.g., not supported by browser)
       }
     });
 
@@ -135,7 +135,7 @@ export class OlWebGLVectorLayerComponent {
         map.removeLayer(this.layer);
         try {
           this.layer.dispose();
-        } catch (e) {
+        } catch {
           // Ignore WebGL layer disposal errors (e.g., reading 'deleteBuffer' if renderer not fully initialized)
         }
       }

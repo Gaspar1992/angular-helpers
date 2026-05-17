@@ -1,7 +1,7 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import type { Coordinate } from '@angular-helpers/openlayers/core';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import type { Coordinate } from '../../../core/src/index';
 import { OlMilitaryService } from './military.service';
-import { OlGeometryService } from '@angular-helpers/openlayers/core';
+import { OlGeometryService } from '../../../core/src/index';
 import { TestBed } from '@angular/core/testing';
 
 // ---------------------------------------------------------------------------
@@ -34,40 +34,6 @@ vi.mock('milsymbol-esm', () => {
   };
   return { ms: { Symbol: MockSymbol } };
 });
-
-// ---------------------------------------------------------------------------
-// Test utilities
-// ---------------------------------------------------------------------------
-
-/**
- * Compute the signed shoelace area of a closed lon/lat ring. Sign indicates
- * winding: > 0 = counter-clockwise, < 0 = clockwise. Magnitude is in
- * (degrees)^2 — fine for sign-only comparisons.
- */
-function signedArea(ring: Coordinate[]): number {
-  let area = 0;
-  for (let i = 0; i < ring.length - 1; i++) {
-    const [x1, y1] = ring[i];
-    const [x2, y2] = ring[i + 1];
-    area += x1 * y2 - x2 * y1;
-  }
-  return area / 2;
-}
-
-/**
- * Approximate distance in meters between two lon/lat points using the
- * same equirectangular projection the service uses internally. Good
- * enough for the tolerance asserts we make below.
- */
-function distanceMeters(a: Coordinate, b: Coordinate): number {
-  const METERS_PER_DEGREE_LAT = 111_320;
-  const [lon1, lat1] = a;
-  const [lon2, lat2] = b;
-  const meanLat = ((lat1 + lat2) / 2) * (Math.PI / 180);
-  const dy = (lat2 - lat1) * METERS_PER_DEGREE_LAT;
-  const dx = (lon2 - lon1) * METERS_PER_DEGREE_LAT * Math.cos(meanLat);
-  return Math.hypot(dx, dy);
-}
 
 // ---------------------------------------------------------------------------
 // Suite
