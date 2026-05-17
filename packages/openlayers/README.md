@@ -17,7 +17,7 @@ A modern Angular wrapper for OpenLayers with modular architecture, standalone co
 ## Installation
 
 ```bash
-npm install @angular-helpers/openlayers ol
+pnpm add @angular-helpers/openlayers ol
 ```
 
 ## Quick Start
@@ -252,7 +252,7 @@ Coordinates are emitted in `EPSG:4326` (lon/lat) using true geodesic calculation
 `createMilSymbol` lazy-loads `milsymbol` on first use and returns a `Feature<Point>` with style metadata (`feature.style.icon`) so the vector layer renders it as an `ol/style/Icon`. The library is declared as an **optional peer dependency** — install it only if you use this helper:
 
 ```bash
-npm install milsymbol
+pnpm add milsymbol
 ```
 
 ```ts

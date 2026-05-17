@@ -98,7 +98,7 @@ Security package for Angular applications that prevents common attacks like ReDo
 ## 📦 Installation
 
 ```bash
-npm install @angular-helpers/security
+pnpm add @angular-helpers/security
 ```
 
 ## 🚀 Basic Usage

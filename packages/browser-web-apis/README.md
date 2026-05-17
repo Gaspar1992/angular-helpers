@@ -83,7 +83,7 @@ Angular services package for a structured and secure access layer over browser W
 ## Installation
 
 ```bash
-npm install @angular-helpers/browser-web-apis
+pnpm add @angular-helpers/browser-web-apis
 ```
 
 ## Quick Setup
