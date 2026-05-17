@@ -2,6 +2,14 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'storage-v21-12-0-reactive-l1-l2-indexeddb-cacheapi',
+    title: 'storage v21.12.0: L1/L2 reactive storage with Cache API, IndexedDB, and Entity Store',
+    publishedAt: '2026-05-17',
+    tags: ['storage', 'angular', 'signals', 'indexeddb', 'cache-api', 'toon', 'performance'],
+    excerpt:
+      'Introducing @angular-helpers/storage v21.12.0, a high-performance reactive storage system for Angular. It bridges a fast synchronous L1 memory Signal Cache with async L2 storage backends (Cache API, IndexedDB, Local/SessionStorage) with dynamic TOON compression, AES-GCM encryption, and surgical key-level reactive Entity management.',
+  },
+  {
     slug: 'openlayers-military',
     title:
       'openlayers v0.4.0: Military symbology — Ellipse, Sector, Donut, and lazy-loaded MIL-STD-2525',

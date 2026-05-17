@@ -7,26 +7,20 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
   selector: 'app-worker-http-hmac-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-base-200 border border-base-content/5 rounded-3xl p-8 h-full flex flex-col">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-bold text-secondary m-0 flex items-center gap-2">
-          ✍️ HMAC Signing
-        </h2>
-        <span class="badge badge-secondary font-semibold">HMAC-SHA256</span>
+    <div class="svc-card h-full flex flex-col">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title"><span>✍️</span> HMAC Signing</h2>
+        <span class="badge badge-secondary font-black">HMAC-SHA256</span>
       </div>
-      <p class="text-sm text-base-content/70 mb-8">
-        Sign and verify request payloads using HMAC via native Web Crypto API
-      </p>
+      <p class="svc-desc">Sign and verify request payloads using HMAC via native Web Crypto API.</p>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-        <button type="button" (click)="initAndSign()" class="btn btn-primary font-bold px-6">
-          Sign Payload
-        </button>
+        <button type="button" (click)="initAndSign()" class="btn btn-primary">Sign Payload</button>
         <button
           type="button"
           (click)="verify()"
           [disabled]="!signature()"
-          class="btn btn-secondary font-bold px-6"
+          class="btn btn-secondary"
         >
           Verify Signature
         </button>
@@ -34,11 +28,9 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
 
       <div class="space-y-4 mt-auto">
         @if (signature()) {
-          <div
-            class="p-4 bg-base-content/5 rounded-2xl shadow-inner border border-base-content/5 font-mono text-xs break-all"
-          >
+          <div class="mono-block break-all">
             <div
-              class="text-secondary font-bold mb-1 uppercase tracking-wider text-[10px] opacity-70"
+              class="text-secondary font-black mb-2 uppercase tracking-widest text-[9px] opacity-70"
             >
               Signature
             </div>
@@ -47,13 +39,9 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
         }
         @if (verified() !== null) {
           <div
-            class="p-4 rounded-2xl text-sm font-bold flex items-center gap-2 border"
-            [class.bg-success/10]="verified()"
-            [class.border-success/20]="verified()"
-            [class.text-success]="verified()"
-            [class.bg-error/10]="!verified()"
-            [class.border-error/20]="!verified()"
-            [class.text-error]="!verified()"
+            class="feedback font-black text-sm"
+            [class.feedback-success]="verified()"
+            [class.feedback-error]="!verified()"
           >
             @if (verified()) {
               <span>✅ Valid Signature</span>
@@ -65,6 +53,7 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
       </div>
     </div>
   `,
+  styleUrl: '../../services/demo.styles.css',
 })
 export class HmacCardComponent {
   private readonly log = inject(WorkerHttpDemoLogService);

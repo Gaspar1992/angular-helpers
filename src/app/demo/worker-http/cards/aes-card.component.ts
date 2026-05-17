@@ -7,26 +7,20 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
   selector: 'app-worker-http-aes-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-base-200 border border-base-content/5 rounded-3xl p-8 h-full flex flex-col">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-bold text-primary m-0 flex items-center gap-2">
-          🔐 AES Encryption
-        </h2>
-        <span class="badge badge-info font-semibold">AES-GCM</span>
+    <div class="svc-card h-full flex flex-col">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title"><span>🔐</span> AES Encryption</h2>
+        <span class="badge badge-info font-black">AES-GCM</span>
       </div>
-      <p class="text-sm text-base-content/70 mb-6">
-        Encrypt and decrypt sensitive payloads using AES-GCM
-      </p>
+      <p class="svc-desc">Encrypt and decrypt sensitive payloads using AES-GCM.</p>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <button type="button" (click)="encrypt()" class="btn btn-info font-bold px-6">
-          Encrypt
-        </button>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <button type="button" (click)="encrypt()" class="btn btn-primary">Encrypt</button>
         <button
           type="button"
           (click)="decrypt()"
           [disabled]="!encryptedHex()"
-          class="btn btn-secondary font-bold px-6"
+          class="btn btn-secondary"
         >
           Decrypt
         </button>
@@ -34,28 +28,25 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
 
       <div class="space-y-4 mt-auto">
         @if (encryptedHex()) {
-          <div
-            class="p-4 bg-base-content/5 rounded-2xl shadow-inner border border-base-content/5 font-mono text-xs break-all"
-          >
-            <div class="text-secondary font-bold mb-1 uppercase tracking-wider text-[10px]">
+          <div class="mono-block break-all">
+            <div class="text-primary font-black mb-2 uppercase tracking-widest text-[9px]">
               Encrypted Payload
             </div>
             {{ encryptedHex() }}
           </div>
         }
         @if (decryptedText()) {
-          <div
-            class="p-4 bg-base-content/5 rounded-2xl shadow-inner border border-base-content/5 font-mono text-sm break-all"
-          >
-            <div class="text-success font-bold mb-1 uppercase tracking-wider text-[10px]">
+          <div class="mono-block break-all border border-green-500/20 bg-green-500/5">
+            <div class="text-green-400 font-black mb-2 uppercase tracking-widest text-[9px]">
               Decrypted Content
             </div>
-            <span class="text-success">{{ decryptedText() }}</span>
+            <span class="text-green-400 font-bold">{{ decryptedText() }}</span>
           </div>
         }
       </div>
     </div>
   `,
+  styleUrl: '../../services/demo.styles.css',
 })
 export class AesCardComponent {
   private readonly log = inject(WorkerHttpDemoLogService);

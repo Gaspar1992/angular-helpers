@@ -12,20 +12,20 @@ interface StreamCapability {
   selector: 'app-worker-http-streams-polyfill-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-base-200 border border-base-content/5 rounded-3xl p-8 h-full flex flex-col">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-bold text-info m-0 flex items-center gap-2">🌊 Streams Polyfill</h2>
-        <span class="badge badge-info font-semibold">Safari Support</span>
+    <div class="svc-card h-full flex flex-col">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title">🌊 Streams Polyfill</h2>
+        <span class="badge badge-info font-black">Safari Support</span>
       </div>
-      <p class="text-sm text-base-content/70 mb-8">
-        Detects Safari 16-17 transferable streams limitation and provides ponyfill when needed
+      <p class="svc-desc">
+        Detects Safari 16-17 transferable streams limitation and provides ponyfill when needed.
       </p>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-        <button type="button" (click)="detectCapabilities()" class="btn btn-primary font-bold">
+        <button type="button" (click)="detectCapabilities()" class="btn btn-primary">
           Detect Capabilities
         </button>
-        <button type="button" (click)="simulateLegacySafari()" class="btn btn-secondary font-bold">
+        <button type="button" (click)="simulateLegacySafari()" class="btn btn-secondary">
           Simulate Safari 17
         </button>
       </div>
@@ -34,16 +34,16 @@ interface StreamCapability {
         <div class="space-y-4 mt-auto">
           <!-- Polyfill Needed -->
           <div
-            class="p-4 rounded-2xl border bg-base-content/5 shadow-inner"
-            [class.border-success/30]="!detectionResult()?.needsPolyfill"
-            [class.border-warning/30]="detectionResult()?.needsPolyfill"
+            class="p-5 rounded-2xl border bg-slate-950/35"
+            [class.border-green-500/20]="!detectionResult()?.needsPolyfill"
+            [class.border-yellow-500/20]="detectionResult()?.needsPolyfill"
           >
             <div class="flex items-center justify-between mb-2">
-              <span class="font-bold text-xs uppercase tracking-wider opacity-70">
+              <span class="font-black text-xs uppercase tracking-widest opacity-60">
                 Polyfill Required
               </span>
               <span
-                class="badge badge-sm font-bold"
+                class="badge badge-sm font-black"
                 [class.badge-success]="!detectionResult()?.needsPolyfill"
                 [class.badge-warning]="detectionResult()?.needsPolyfill"
               >
@@ -51,9 +51,9 @@ interface StreamCapability {
               </span>
             </div>
             <p
-              class="text-sm font-semibold"
-              [class.text-success]="!detectionResult()?.needsPolyfill"
-              [class.text-warning]="detectionResult()?.needsPolyfill"
+              class="text-sm font-bold"
+              [class.text-green-400]="!detectionResult()?.needsPolyfill"
+              [class.text-yellow-400]="detectionResult()?.needsPolyfill"
             >
               {{
                 detectionResult()?.needsPolyfill
@@ -64,11 +64,13 @@ interface StreamCapability {
           </div>
 
           <!-- User Agent -->
-          <div class="p-4 bg-base-content/5 rounded-2xl border border-base-content/5 shadow-inner">
-            <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-base-content/40">
+          <div class="mono-block">
+            <span class="text-[9px] font-black uppercase tracking-widest text-primary opacity-60">
               User Agent
             </span>
-            <p class="text-[11px] font-mono break-all mt-2 text-base-content/60 leading-relaxed">
+            <p
+              class="text-[11px] font-mono break-all mt-2 text-base-content/70 leading-relaxed m-0"
+            >
               {{ detectionResult()?.userAgent }}
             </p>
           </div>
@@ -77,11 +79,11 @@ interface StreamCapability {
           <div class="grid grid-cols-2 gap-2">
             @for (cap of detectionResult()?.capabilities; track cap.name) {
               <div
-                class="p-3 rounded-xl text-xs flex items-center justify-between bg-base-content/5 border border-base-content/5"
+                class="p-3 rounded-xl text-xs flex items-center justify-between bg-slate-950/35 border border-white/5"
               >
-                <span class="font-medium opacity-80">{{ cap.name }}</span>
+                <span class="font-bold opacity-80">{{ cap.name }}</span>
                 <span
-                  class="badge badge-xs font-bold"
+                  class="badge badge-xs font-black"
                   [class.badge-success]="cap.supported"
                   [class.badge-error]="!cap.supported"
                 >
@@ -94,13 +96,15 @@ interface StreamCapability {
           <!-- Safari Version Detection -->
           @if (detectionResult()?.safariVersion) {
             <div
-              class="p-3 bg-info/10 border border-info/20 rounded-xl text-xs flex items-center justify-between"
+              class="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs flex items-center justify-between"
             >
-              <span class="text-info font-bold">Safari Version</span>
+              <span class="text-blue-400 font-black">Safari Version</span>
               <div class="flex items-center gap-2">
-                <span class="font-mono">{{ detectionResult()?.safariVersion }}</span>
+                <span class="font-mono font-bold text-blue-400">{{
+                  detectionResult()?.safariVersion
+                }}</span>
                 @if (detectionResult()?.isLegacySafari) {
-                  <span class="badge badge-warning badge-xs font-bold">LEGACY</span>
+                  <span class="badge badge-warning badge-xs font-black">LEGACY</span>
                 }
               </div>
             </div>
@@ -109,6 +113,7 @@ interface StreamCapability {
       }
     </div>
   `,
+  styleUrl: '../../services/demo.styles.css',
 })
 export class StreamsPolyfillCardComponent {
   private readonly log = inject(WorkerHttpDemoLogService);
