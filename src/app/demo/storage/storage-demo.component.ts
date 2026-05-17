@@ -44,13 +44,13 @@ interface RPCMessageLog {
       <!-- Premium Hero Header -->
       <header class="text-center mb-12">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-black uppercase tracking-widest text-primary mb-3">
-          <span>Persistencia Off-Main-Thread</span>
+          <span>Off-Main-Thread Persistence</span>
         </div>
-        <h1 class="text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-r from-base-content via-primary to-accent bg-clip-text text-transparent mb-4">
+        <h1 class="text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-r from-base-content via-primary to-accent bg-clip-text text-transparent pb-2 mb-4">
           Storage & Entity Dashboard
         </h1>
         <p class="text-base-content/60 max-w-2xl mx-auto text-sm leading-relaxed">
-          Demo interactiva premium de persistencia reactiva. Ejecutá encriptación AES-GCM, compresión de serialización y benchmarks de motores L2 en segundo plano a 60fps reales.
+          Interactive premium demo of reactive background persistence. Perform real-time AES-GCM encryption, serialization size optimization, and L2 engine benchmarks on a background thread at a smooth, constant 60 FPS.
         </p>
       </header>
 
@@ -59,29 +59,29 @@ interface RPCMessageLog {
         <!-- Metric 1: FPS -->
         <div class="telemetry-card">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-black uppercase tracking-wider text-base-content/40">Fluidez Interfaz (UI)</span>
+            <span class="text-xs font-black uppercase tracking-wider text-base-content/40">UI Thread Fluency</span>
             <span class="pulse-dot bg-green-500"></span>
           </div>
           <div class="flex items-baseline gap-1.5">
             <span class="text-3xl font-black text-green-400 font-mono">{{ fps() }}</span>
             <span class="text-xs font-bold text-base-content/50">FPS</span>
           </div>
-          <p class="text-[11px] text-base-content/40 mt-1">Hilos independientes previenen caídas de cuadros.</p>
+          <p class="text-[11px] text-base-content/40 mt-1">Background execution prevents UI frame drops and locking.</p>
         </div>
 
         <!-- Metric 2: Latency -->
         <div class="telemetry-card">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-black uppercase tracking-wider text-base-content/40">Latencia RPC Worker</span>
+            <span class="text-xs font-black uppercase tracking-wider text-base-content/40">Worker RPC Latency</span>
             <span class="pulse-dot" [class.bg-purple-500]="rpcLatency() !== null" [class.bg-base-content/20]="rpcLatency() === null"></span>
           </div>
           <div class="flex items-baseline gap-1.5">
             <span class="text-3xl font-black text-purple-400 font-mono">
               {{ rpcLatency() !== null ? rpcLatency() + 'ms' : '--' }}
             </span>
-            <span class="text-xs font-bold text-base-content/50">Viaje de Ida y Vuelta</span>
+            <span class="text-xs font-bold text-base-content/50">Round-Trip Time</span>
           </div>
-          <p class="text-[11px] text-base-content/40 mt-1">Tiempo de intercambio y procesamiento en background.</p>
+          <p class="text-[11px] text-base-content/40 mt-1">Total latency for background message processing and response.</p>
         </div>
 
         <!-- Metric 3: Multi-Tab Status -->
@@ -91,26 +91,26 @@ interface RPCMessageLog {
             <span class="pulse-dot bg-cyan-500"></span>
           </div>
           <div class="flex items-baseline gap-1.5">
-            <span class="text-3xl font-black text-cyan-400 font-mono">Activo</span>
-            <span class="text-xs font-bold text-base-content/50">Canal Nativo</span>
+            <span class="text-3xl font-black text-cyan-400 font-mono">Active</span>
+            <span class="text-xs font-bold text-base-content/50">Native Channel</span>
           </div>
-          <p class="text-[11px] text-base-content/40 mt-1">Sincronización multi-pestaña asíncrona BroadcastChannel.</p>
+          <p class="text-[11px] text-base-content/40 mt-1">Asynchronous multi-tab state sync using BroadcastChannel.</p>
         </div>
       </section>
 
       <!-- Glass Tab Selectors -->
       <nav class="tabs-container flex flex-wrap gap-2 p-1.5 rounded-2xl bg-base-200/50 backdrop-blur border border-base-content/5 mb-8">
         <button type="button" class="tab-btn" [class.active]="activeTab() === 'crypto'" (click)="activeTab.set('crypto')">
-          🛡️ Cripto en Worker
+          🛡️ Crypto in Worker
         </button>
         <button type="button" class="tab-btn" [class.active]="activeTab() === 'sync'" (click)="activeTab.set('sync')">
-          👥 Sincro Multi-Tab
+          👥 Multi-Tab Sync
         </button>
         <button type="button" class="tab-btn" [class.active]="activeTab() === 'toon'" (click)="activeTab.set('toon')">
           ⚡ TOON vs JSON
         </button>
         <button type="button" class="tab-btn" [class.active]="activeTab() === 'benchmark'" (click)="activeTab.set('benchmark')">
-          📊 Benchmark Motores
+          📊 Engine Benchmark
         </button>
       </nav>
 
@@ -121,18 +121,18 @@ interface RPCMessageLog {
           <div class="glass-panel p-6 flex flex-col justify-between">
             <div>
               <h3 class="text-lg font-black tracking-tight text-base-content mb-2 flex items-center gap-2">
-                <span>🛡️ Cifrado AES-GCM Asíncrono</span>
+                <span>🛡️ Asynchronous AES-GCM Encryption</span>
               </h3>
               <p class="text-xs text-base-content/50 mb-6">
-                Ingresá un mensaje. Los algoritmos de cifrado simétrico se procesan dentro del Worker, garantizando que el hilo de renderizado de la UI nunca sufra micro-tirones.
+                Enter a message. All symmetric encryption and decryption algorithms run in a Web Worker, ensuring your main UI thread never drops a frame or experiences lag.
               </p>
 
               <div class="form-control mb-4">
-                <label class="label text-xs font-black uppercase text-base-content/40 mb-1" for="crypto-input">Mensaje a Procesar</label>
+                <label class="label text-xs font-black uppercase text-base-content/40 mb-1" for="crypto-input">Message to Process</label>
                 <textarea
                   id="crypto-input"
                   class="textarea textarea-bordered h-28 font-sans text-sm focus:border-primary/50 focus:outline-none"
-                  placeholder="Escribí lo que quieras encriptar..."
+                  placeholder="Type anything to encrypt..."
                   [formControl]="cryptoControl"
                 ></textarea>
               </div>
@@ -141,9 +141,9 @@ interface RPCMessageLog {
               <div class="flex items-center gap-4 p-4 rounded-xl bg-base-content/5 border border-base-content/5 mb-6">
                 <div class="spinner-demo"></div>
                 <div class="flex-1">
-                  <span class="text-xs font-black text-base-content block">Demostrador de Fluidez</span>
+                  <span class="text-xs font-black text-base-content block">Fluency Demonstrator</span>
                   <span class="text-[11px] text-base-content/50 block leading-tight">
-                    Esta animación gira a 60fps constantes en el Main Thread. Intentá encriptar y verás que no sufre tirones.
+                    This spinner animates smoothly at a constant 60 FPS on the Main Thread. Try encrypting and notice that there is zero lag or stuttering.
                   </span>
                 </div>
               </div>
@@ -151,10 +151,10 @@ interface RPCMessageLog {
 
             <div class="flex flex-wrap gap-3">
               <button type="button" class="btn btn-primary" (click)="onEncrypt()" [disabled]="cryptoControl.invalid">
-                🔐 Encriptar en Worker
+                🔐 Encrypt in Worker
               </button>
               <button type="button" class="btn btn-outline" (click)="onDecrypt()" [disabled]="!isEncrypted()">
-                🔓 Desencriptar
+                🔓 Decrypt Message
               </button>
             </div>
           </div>
@@ -163,9 +163,9 @@ interface RPCMessageLog {
           <div class="glass-panel p-6 flex flex-col justify-between h-[450px]">
             <div>
               <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-black tracking-tight text-base-content">📡 Mensajería RPC Telemetría</h3>
+                <h3 class="text-lg font-black tracking-tight text-base-content">📡 RPC Telemetry & Logs</h3>
                 <button type="button" class="btn btn-ghost btn-xs text-xs font-bold" (click)="clearLogs()">
-                  Limpiar Logs
+                  Clear Logs
                 </button>
               </div>
               <div class="logs-container overflow-y-auto max-h-[340px] pr-2 flex flex-col gap-3 font-mono text-[11px] no-scrollbar">
@@ -179,7 +179,7 @@ interface RPCMessageLog {
                   </div>
                 } @empty {
                   <div class="text-center py-16 text-base-content/30 italic text-xs">
-                    Esperando llamadas de procedimiento remoto (RPC)...
+                    Waiting for Remote Procedure Calls (RPC)...
                   </div>
                 }
               </div>
@@ -193,36 +193,36 @@ interface RPCMessageLog {
         <section class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 animation-fade">
           <!-- Profile Card Controls -->
           <div class="glass-panel p-6">
-            <h3 class="text-lg font-black tracking-tight text-base-content mb-2">👥 Perfil de Usuario Multi-Pestaña</h3>
+            <h3 class="text-lg font-black tracking-tight text-base-content mb-2">👥 Multi-Tab User Profile Sync</h3>
             <p class="text-xs text-base-content/50 mb-6">
-              Abrí esta pestaña del demo en otra ventana del navegador al lado. Al cambiar los datos del perfil y guardarlos, la otra pestaña se sincronizará automáticamente al instante.
+              Open this demo tab in another browser window side-by-side. When you update the profile fields and save, the other window syncs dynamically and instantly!
             </p>
 
             <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="flex flex-col gap-4">
               <div class="form-control">
-                <label class="label text-xs font-black uppercase text-base-content/40 mb-1" for="profile-name">Nombre de Usuario</label>
+                <label class="label text-xs font-black uppercase text-base-content/40 mb-1" for="profile-name">Username</label>
                 <input
                   id="profile-name"
                   type="text"
                   class="input input-bordered focus:border-primary/50 focus:outline-none text-sm"
                   formControlName="name"
-                  placeholder="Ingresá un nombre"
+                  placeholder="Enter a username"
                 />
               </div>
 
               <div class="form-control">
-                <label class="label text-xs font-black uppercase text-base-content/40 mb-1" for="profile-role">Rol Profesional</label>
+                <label class="label text-xs font-black uppercase text-base-content/40 mb-1" for="profile-role">Professional Role</label>
                 <input
                   id="profile-role"
                   type="text"
                   class="input input-bordered focus:border-primary/50 focus:outline-none text-sm"
                   formControlName="role"
-                  placeholder="Ej: Senior Architect"
+                  placeholder="e.g., Senior Architect"
                 />
               </div>
 
               <div class="form-control">
-                <label class="label text-xs font-black uppercase text-base-content/40 mb-1" for="profile-color">Color de Identidad (Hex)</label>
+                <label class="label text-xs font-black uppercase text-base-content/40 mb-1" for="profile-color">Identity Color (Hex)</label>
                 <div class="flex gap-2">
                   <input
                     id="profile-color"
@@ -236,7 +236,7 @@ interface RPCMessageLog {
               </div>
 
               <button type="submit" class="btn btn-primary mt-4" [disabled]="profileForm.invalid">
-                💾 Guardar en Worker
+                💾 Save in Worker
               </button>
             </form>
           </div>
@@ -251,8 +251,8 @@ interface RPCMessageLog {
                    [style.background-color]="activeProfile().avatarColor">
                 {{ activeProfile().name ? activeProfile().name.charAt(0).toUpperCase() : '?' }}
               </div>
-              <h4 class="text-xl font-black tracking-tight text-white mt-4">{{ activeProfile().name || 'Invitado' }}</h4>
-              <span class="text-xs font-bold uppercase tracking-widest text-primary mt-1">{{ activeProfile().role || 'Sin Rol Definido' }}</span>
+              <h4 class="text-xl font-black tracking-tight text-white mt-4">{{ activeProfile().name || 'Guest' }}</h4>
+              <span class="text-xs font-bold uppercase tracking-widest text-primary mt-1">{{ activeProfile().role || 'No Role Defined' }}</span>
               <div class="flex items-center gap-1.5 mt-6 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-wider text-white/50">
                 <span class="pulse-dot bg-cyan-400"></span>
                 <span>Reactive Entity Map</span>
@@ -267,13 +267,13 @@ interface RPCMessageLog {
         <section class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-8 animation-fade">
           <!-- Text Input -->
           <div class="glass-panel p-6">
-            <h3 class="text-lg font-black tracking-tight text-base-content mb-2">⚡ Serialización y Compresión Avanzada</h3>
+            <h3 class="text-lg font-black tracking-tight text-base-content mb-2">⚡ Advanced Serialization & Compression</h3>
             <p class="text-xs text-base-content/50 mb-6">
-              El motor TOON de '@angular-helpers/storage' permite serializar estructuras de clave-valor complejas con un consumo óptimo de caracteres para ajustarse a las limitaciones de LocalStorage/SessionStorage.
+              The TOON notation format in '@angular-helpers/storage' serializes complex nested key-value objects into highly-optimized character strings, maximizing LocalStorage/SessionStorage quota utilization.
             </p>
 
             <div class="form-control mb-6">
-              <label class="label text-xs font-black uppercase text-base-content/40 mb-1" for="toon-object">Objeto JSON de Prueba</label>
+              <label class="label text-xs font-black uppercase text-base-content/40 mb-1" for="toon-object">Test JSON Object</label>
               <textarea
                 id="toon-object"
                 class="textarea textarea-bordered h-[260px] font-mono text-xs focus:border-primary/50 focus:outline-none"
@@ -285,13 +285,13 @@ interface RPCMessageLog {
           <!-- Comparison Statistics -->
           <div class="glass-panel p-6 flex flex-col justify-between">
             <div>
-              <h3 class="text-lg font-black tracking-tight text-base-content mb-6">📊 Comparativa de Peso de Bytes</h3>
+              <h3 class="text-lg font-black tracking-tight text-base-content mb-6">📊 Byte Size Comparison</h3>
 
               <div class="flex flex-col gap-6 mb-8">
                 <!-- JSON size -->
                 <div class="flex flex-col gap-1.5">
                   <div class="flex items-center justify-between text-xs font-black uppercase tracking-wider text-base-content/50">
-                    <span>JSON Estándar</span>
+                    <span>Standard JSON</span>
                     <span class="font-mono text-base-content">{{ jsonBytes() }} bytes</span>
                   </div>
                   <div class="w-full h-3 rounded-full bg-base-content/10 overflow-hidden">
@@ -314,24 +314,24 @@ interface RPCMessageLog {
               <!-- Savings Banner -->
               @if (savingPercent() > 0) {
                 <div class="p-6 rounded-2xl bg-primary/10 border border-primary/20 text-center flex flex-col items-center">
-                  <span class="text-xs font-black uppercase tracking-wider text-primary mb-1">¡Ahorro de Espacio!</span>
+                  <span class="text-xs font-black uppercase tracking-wider text-primary mb-1">Space Savings!</span>
                   <span class="text-5xl font-black text-primary font-mono leading-none tracking-tight mb-2">{{ savingPercent() }}%</span>
                   <span class="text-xs text-base-content/60 max-w-xs">
-                    Consumís menos caracteres de cuota de almacenamiento para la misma estructura relacional.
+                    Consumes significantly fewer characters from storage quotas for the same relational schema.
                   </span>
                 </div>
               } @else if (savingPercent() < 0) {
                 <div class="p-6 rounded-2xl bg-base-content/5 border border-base-content/10 text-center flex flex-col items-center">
-                  <span class="text-xs font-black uppercase tracking-wider text-base-content/50 mb-1">Estructura Simple</span>
+                  <span class="text-xs font-black uppercase tracking-wider text-base-content/50 mb-1">Simple Structure</span>
                   <span class="text-sm text-base-content/60 max-w-xs mt-2">
-                    Para objetos planos muy simples, TOON mantiene un peso equivalente a JSON. El ahorro es mayor con estructuras profundamente jerárquicas o duplicadas.
+                    For very simple flat objects, TOON keeps sizes equivalent to standard JSON. Compression efficiency scales up with deeply nested, repeated, or circular references.
                   </span>
                 </div>
               }
             </div>
 
             <div class="text-[10px] text-base-content/40 italic mt-4 text-center">
-              * El ahorro de compresión de TOON crece exponencialmente con objetos complejos y referencias circulares o repetidas.
+              * TOON compression savings scale up exponentially with complex models and reference heavy entity graphs.
             </div>
           </div>
         </section>
@@ -343,17 +343,17 @@ interface RPCMessageLog {
           <!-- Description & Controls -->
           <div class="glass-panel p-6 flex flex-col justify-between">
             <div>
-              <h3 class="text-lg font-black tracking-tight text-base-content mb-2">📊 Benchmark de Motores L2 Nativos</h3>
+              <h3 class="text-lg font-black tracking-tight text-base-content mb-2">📊 Native L2 Storage Engine Benchmark</h3>
               <p class="text-xs text-base-content/50 mb-6">
-                Este test corre ciclos intensivos de lectura y escritura en segundo plano dentro del Web Worker. Compara el rendimiento puro de IndexedDB y Cache API frente al clásico LocalStorage (simulado/seguro en worker).
+                This test runs intense concurrent read and write operations on a background thread. Compares raw performance for IndexedDB and Cache API against simulated synchronous storage wrappers.
               </p>
 
               <div class="flex items-center gap-4 p-4 rounded-xl bg-base-content/5 border border-base-content/5 mb-6">
                 <span class="text-3xl">🔋</span>
                 <div>
-                  <span class="text-xs font-black text-base-content block">100 Ops de Lectura + 100 de Escritura</span>
+                  <span class="text-xs font-black text-base-content block">100 Read + 100 Write Operations</span>
                   <span class="text-[11px] text-base-content/50 block leading-tight">
-                    El benchmark se procesa en lotes concurrentes en background para no degradar la tasa de refresco del hilo principal.
+                    Benchmarks process completely off the main thread to ensure no UI frame stutters or layout freezes occur.
                   </span>
                 </div>
               </div>
@@ -361,9 +361,9 @@ interface RPCMessageLog {
 
             <button type="button" class="btn btn-primary w-full" (click)="runBenchmark()" [disabled]="isBenchmarking()">
               @if (isBenchmarking()) {
-                <span>⚡ Procesando en Lote...</span>
+                <span>⚡ Benchmarking in Background...</span>
               } @else {
-                <span>🚀 Lanzar Benchmark L2</span>
+                <span>🚀 Run L2 Storage Benchmark</span>
               }
             </button>
           </div>
@@ -371,14 +371,14 @@ interface RPCMessageLog {
           <!-- Benchmark Visual Graph -->
           <div class="glass-panel p-6 flex flex-col justify-between min-h-[350px]">
             <div>
-              <h3 class="text-lg font-black tracking-tight text-base-content mb-6">📈 Tiempos de Ejecución (Menor es Mejor)</h3>
+              <h3 class="text-lg font-black tracking-tight text-base-content mb-6">📈 Execution Times (Lower is Better)</h3>
 
               <div class="flex flex-col gap-6">
                 <!-- IndexedDB Engine -->
                 <div class="flex flex-col gap-1.5">
                   <div class="flex justify-between text-xs font-black uppercase tracking-wider text-purple-400">
-                    <span>IndexedDB (Recomendado)</span>
-                    <span class="font-mono">{{ benchmarkResults()?.indexeddb ? benchmarkResults()?.indexeddb + 'ms' : 'Esperando...' }}</span>
+                    <span>IndexedDB (Recommended)</span>
+                    <span class="font-mono">{{ benchmarkResults()?.indexeddb ? benchmarkResults()?.indexeddb + \'ms\' : \'Awaiting test...\' }}</span>
                   </div>
                   <div class="w-full h-4 rounded-full bg-base-content/10 overflow-hidden">
                     <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-700 ease-out"
@@ -387,21 +387,19 @@ interface RPCMessageLog {
                 </div>
 
                 <!-- Cache API Engine -->
-                <div class="flex flex-col gap-1.5">
-                  <div class="flex justify-between text-xs font-black uppercase tracking-wider text-cyan-400">
-                    <span>Cache API</span>
-                    <span class="font-mono">{{ benchmarkResults()?.cacheapi ? benchmarkResults()?.cacheapi + 'ms' : 'Esperando...' }}</span>
-                  </div>
-                  <div class="w-full h-4 rounded-full bg-base-content/10 overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-cyan-500 to-teal-500 transition-all duration-700 ease-out"
-                         [style.width]="getEnginePercent('cacheapi') + '%'"></div>
-                  </div>
+                <div class="flex justify-between text-xs font-black uppercase tracking-wider text-cyan-400">
+                  <span>Cache API</span>
+                  <span class="font-mono">{{ benchmarkResults()?.cacheapi ? benchmarkResults()?.cacheapi + \'ms\' : \'Awaiting test...\' }}</span>
+                </div>
+                <div class="w-full h-4 rounded-full bg-base-content/10 overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-cyan-500 to-teal-500 transition-all duration-700 ease-out"
+                       [style.width]="getEnginePercent('cacheapi') + '%'"></div>
                 </div>
 
                 <!-- LocalStorage Engine -->
                 <div class="flex justify-between text-xs font-black uppercase tracking-wider text-base-content/50">
-                  <span>LocalStorage (Simulado)</span>
-                  <span class="font-mono text-base-content">{{ benchmarkResults()?.local ? benchmarkResults()?.local + 'ms' : 'Esperando...' }}</span>
+                  <span>LocalStorage (Simulated)</span>
+                  <span class="font-mono text-base-content">{{ benchmarkResults()?.local ? benchmarkResults()?.local + \'ms\' : \'Awaiting test...\' }}</span>
                 </div>
                 <div class="w-full h-4 rounded-full bg-base-content/10 overflow-hidden">
                   <div class="h-full bg-base-content/30 transition-all duration-700 ease-out"
@@ -411,7 +409,7 @@ interface RPCMessageLog {
             </div>
 
             <div class="text-[10px] text-base-content/40 text-center mt-4">
-              * Los resultados pueden variar según el navegador y la potencia de procesamiento de hardware.
+              * Results may vary depending on hardware capabilities and modern browser optimizations.
             </div>
           </div>
         </section>
@@ -423,7 +421,7 @@ interface RPCMessageLog {
           <div class="toast-floating-glass animation-toast">
             <span class="text-xl">🔔</span>
             <div class="flex flex-col gap-0.5">
-              <span class="text-xs font-black uppercase tracking-wider text-white">Sincronización en Background</span>
+              <span class="text-xs font-black uppercase tracking-wider text-white">Background Synchronization</span>
               <span class="text-[11px] text-white/70">{{ toast.message }}</span>
             </div>
           </div>
@@ -501,7 +499,7 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
         if (newValue) {
           this.activeProfile.set(newValue);
           this.profileForm.patchValue(newValue, { emitEvent: false });
-          this.triggerToast(`Perfil de "${newValue.name}" sincronizado en segundo plano.`);
+          this.triggerToast(`Profile for "${newValue.name}" synced in the background.`);
         }
       });
 
@@ -660,7 +658,7 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
       const data = { name: value.name, role: value.role, avatarColor: value.avatarColor };
       await this.workerTransport.write('user_profile', data);
       this.activeProfile.set(data);
-      this.triggerToast('Tu perfil fue guardado localmente en IndexedDB.');
+      this.triggerToast('Your profile was successfully saved in IndexedDB.');
     } catch (err) {
       console.error('[StorageDemo] Save profile RPC failed:', err);
     }
