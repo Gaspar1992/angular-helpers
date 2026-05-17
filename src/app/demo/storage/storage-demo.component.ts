@@ -6,7 +6,7 @@ import {
   inject,
   OnInit,
   OnDestroy,
-  effect,
+  NgZone,
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { JsonPipe } from '@angular/common';
@@ -486,6 +486,8 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
 
   // Dependency Injections
   private readonly workerTransport = inject(WorkerStorageTransport);
+  private readonly ngZone = inject(NgZone);
+  private syncSubscription?: () => void;
 
   constructor() {
     // Serialization Dynamic Listener
@@ -494,18 +496,14 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
     });
 
     // Handle incoming Multi-Tab Sync changes from the Web Worker BroadcastChannel
-    effect(() => {
-      const unsubscribe = this.workerTransport.onChange('user_profile', (newValue: any) => {
+    this.syncSubscription = this.workerTransport.onChange('user_profile', (newValue: any) => {
+      this.ngZone.run(() => {
         if (newValue) {
           this.activeProfile.set(newValue);
           this.profileForm.patchValue(newValue, { emitEvent: false });
           this.triggerToast(`Profile for "${newValue.name}" synced in the background.`);
         }
       });
-
-      return () => {
-        unsubscribe();
-      };
     });
   }
 
@@ -521,6 +519,9 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
     }
     if (this.toastTimeout) {
       clearTimeout(this.toastTimeout);
+    }
+    if (this.syncSubscription) {
+      this.syncSubscription();
     }
   }
 
