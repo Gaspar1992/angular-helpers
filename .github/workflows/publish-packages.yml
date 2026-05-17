@@ -36,6 +36,9 @@ jobs:
           - name: '@angular-helpers/openlayers'
             workspace: packages/openlayers
             dist: dist/openlayers
+          - name: '@angular-helpers/storage'
+            workspace: packages/storage
+            dist: dist/storage
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

@@ -45,19 +45,26 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Verify build works
-        run: pnpm --filter @angular-helpers/browser-web-apis build:prod
+        run: pnpm --filter @angular-helpers/browser-web-apis --filter @angular-helpers/storage build:prod
 
-      - name: Semantic Release
+      - name: Semantic Release (Browser Web APIs)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm exec semantic-release
         working-directory: packages/browser-web-apis
 
+      - name: Semantic Release (Storage)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm exec semantic-release
+        working-directory: packages/storage
+
       - name: Detect release artifact changes
         id: release_changes
         run: |
-          if git diff --quiet -- packages/browser-web-apis/CHANGELOG.md packages/browser-web-apis/package.json pnpm-lock.yaml; then
+          if git diff --quiet -- packages/browser-web-apis/CHANGELOG.md packages/browser-web-apis/package.json packages/storage/CHANGELOG.md packages/storage/package.json pnpm-lock.yaml; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
@@ -84,4 +91,6 @@ jobs:
           add-paths: |
             packages/browser-web-apis/CHANGELOG.md
             packages/browser-web-apis/package.json
+            packages/storage/CHANGELOG.md
+            packages/storage/package.json
             pnpm-lock.yaml
