@@ -8,7 +8,7 @@
     [
       "@semantic-release/npm",
       {
-        "pkgRoot": "../../dist/storage"
+        "pkgRoot": "../../dist/worker-http"
       }
     ],
     [
