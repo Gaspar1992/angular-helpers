@@ -38,6 +38,7 @@ const DEMO_GROUPS: DemoGroup[] = [
     ],
   },
   { path: '/demo/openlayers', label: 'OpenLayers', icon: '🗺️' },
+  { path: '/demo/storage', label: 'Storage', icon: '💾' },
   { path: '/demo/library-services', label: 'Library', icon: '📦' },
 ];
 
