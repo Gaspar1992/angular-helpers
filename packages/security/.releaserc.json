@@ -1,6 +1,7 @@
 {
   "extends": "semantic-release-monorepo",
   "branches": ["main"],
+  "tagFormat": "@angular-helpers/security@${version}",
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
