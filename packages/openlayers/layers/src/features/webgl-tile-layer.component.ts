@@ -64,7 +64,7 @@ export class OlWebGLTileLayerComponent {
   /** Preload low-res tiles up to this many zoom levels */
   preload = input<number>(0);
 
-  private layer: WebGLTileLayer | WebGLVectorTileLayer | null = null;
+  private layer: WebGLTileLayer | WebGLVectorTileLayer<any, any> | null = null;
 
   constructor() {
     afterNextRender(() => {
@@ -80,12 +80,12 @@ export class OlWebGLTileLayerComponent {
             attributions: this.attributions(),
           });
           this.layer = new WebGLVectorTileLayer({
-            source: tileSource,
+            source: tileSource as any,
             visible: this.visible(),
             opacity: this.opacity(),
             zIndex: this.zIndex(),
             style: (this.tileStyle() as FlatStyleLike) || {},
-          } as any);
+          });
           break;
         case 'xyz':
           tileSource = new XYZ({
@@ -93,7 +93,7 @@ export class OlWebGLTileLayerComponent {
             attributions: this.attributions(),
           });
           this.layer = new WebGLTileLayer({
-            source: tileSource,
+            source: tileSource as any,
             visible: this.visible(),
             opacity: this.opacity(),
             zIndex: this.zIndex(),
@@ -107,7 +107,7 @@ export class OlWebGLTileLayerComponent {
             attributions: this.attributions(),
           });
           this.layer = new WebGLTileLayer({
-            source: tileSource,
+            source: tileSource as any,
             visible: this.visible(),
             opacity: this.opacity(),
             zIndex: this.zIndex(),
@@ -117,8 +117,10 @@ export class OlWebGLTileLayerComponent {
           break;
       }
 
-      this.layer.set('id', this.id());
-      map.addLayer(this.layer);
+      if (this.layer) {
+        this.layer.set('id', this.id());
+        map.addLayer(this.layer as any);
+      }
     });
 
     effect(() => {

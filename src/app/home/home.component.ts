@@ -98,180 +98,175 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
       </section>
 
       <!-- STATS -->
-      @defer (on viewport) {
-        <app-stats-bar [stats]="stats" />
-      } @placeholder {
-        <div class="h-24 w-full bg-base-200/50 animate-pulse"></div>
-      }
+      <app-stats-bar [stats]="stats" />
 
       <!-- FEATURES SECTION -->
-      @defer (on viewport) {
-        <section class="py-24 sm:py-32 px-6 border-b border-base-300 bg-base-100">
-          <div class="max-w-[1200px] mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 sm:gap-14">
-              @for (f of features; track f.title) {
-                <app-feature-card [feature]="f" />
-              }
-            </div>
+      <section
+        id="features-section"
+        aria-labelledby="features-title"
+        class="py-24 sm:py-32 px-6 border-b border-base-300 bg-base-100"
+      >
+        <div class="max-w-[1200px] mx-auto">
+          <h2 id="features-title" class="sr-only">Everything you need. Nothing you don't.</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-10 sm:gap-14">
+            @for (f of features; track f.title) {
+              <app-feature-card [feature]="f" />
+            }
           </div>
-        </section>
-      } @placeholder {
-        <div class="h-96 bg-base-200/50 animate-pulse"></div>
-      }
+        </div>
+      </section>
 
       <!-- PACKAGES BENTO BOX -->
-      @defer (on viewport) {
-        <section class="py-24 sm:py-32 px-6 border-b border-base-300 bg-base-100 @container">
-          <div class="max-w-[1000px] mx-auto">
-            <p
-              class="text-xs font-black uppercase tracking-[0.2em] text-primary m-0 mb-4 text-center"
-            >
-              Modular Architecture
-            </p>
-            <h2
-              class="text-[2.5rem] sm:text-[3.5rem] font-black text-base-content tracking-tighter leading-none m-0 mb-16 text-center text-balance"
-            >
-              Four tools. <br class="sm:hidden" />Zero bloat.
-            </h2>
+      <section
+        aria-labelledby="packages-title"
+        class="py-24 sm:py-32 px-6 border-b border-base-300 bg-base-100 @container"
+      >
+        <div class="max-w-[1000px] mx-auto">
+          <p
+            class="text-xs font-black uppercase tracking-[0.2em] text-primary m-0 mb-4 text-center"
+          >
+            Modular Architecture
+          </p>
+          <h2
+            id="packages-title"
+            class="text-[2.5rem] sm:text-[3.5rem] font-black text-base-content tracking-tighter leading-none m-0 mb-16 text-center text-balance"
+          >
+            Four tools. <br class="sm:hidden" />Zero bloat.
+          </h2>
 
-            <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-8">
-              @for (p of packages; track p.npmPackage; let i = $index) {
-                <div [class.@4xl:col-span-2]="i === 0" class="h-full">
-                  <div
-                    class="flex flex-col gap-8 bg-base-200 border border-base-300 rounded-[2rem] p-10 h-full transition-colors duration-300 hover:border-primary/50 group relative overflow-hidden shadow-xl"
-                  >
-                    @if (i === 0) {
+          <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-8">
+            @for (p of packages; track p.npmPackage; let i = $index) {
+              <div [class.@4xl:col-span-2]="i === 0" class="h-full">
+                <div
+                  class="flex flex-col gap-8 bg-base-200 border border-base-300 rounded-[2rem] p-10 h-full transition-colors duration-300 hover:border-primary/50 group relative overflow-hidden shadow-xl"
+                >
+                  @if (i === 0) {
+                    <div
+                      class="absolute right-0 top-0 bottom-0 w-1/2 opacity-20 group-hover:opacity-40 transition-opacity pointer-events-none hidden md:block overflow-hidden"
+                      aria-hidden="true"
+                    >
                       <div
-                        class="absolute right-0 top-0 bottom-0 w-1/2 opacity-20 group-hover:opacity-40 transition-opacity pointer-events-none hidden md:block overflow-hidden"
-                        aria-hidden="true"
-                      >
+                        class="absolute inset-0 bg-gradient-to-l from-transparent to-base-200 z-10"
+                      ></div>
+                      <div class="w-full h-full flex flex-col justify-center items-end pr-10 gap-8">
                         <div
-                          class="absolute inset-0 bg-gradient-to-l from-transparent to-base-200 z-10"
-                        ></div>
-                        <div
-                          class="w-full h-full flex flex-col justify-center items-end pr-10 gap-8"
+                          class="w-48 h-12 bg-base-100 rounded-xl border border-base-300 flex items-center px-4 shadow-sm"
                         >
-                          <div
-                            class="w-48 h-12 bg-base-100 rounded-xl border border-base-300 flex items-center px-4 shadow-sm"
-                          >
-                            <span class="text-xs font-mono text-base-content/50">UI Thread</span>
-                          </div>
-                          <div
-                            class="w-48 h-16 bg-primary/10 rounded-xl border border-primary/30 shadow-[0_0_30px_rgba(59,130,246,0.2)] flex items-center px-4 relative"
-                          >
-                            <div class="absolute -top-6 left-1/2 w-0.5 h-6 bg-primary/40"></div>
-                            <span class="text-xs font-mono text-primary font-bold">Web Worker</span>
-                          </div>
+                          <span class="text-xs font-mono text-base-content/50">UI Thread</span>
+                        </div>
+                        <div
+                          class="w-48 h-16 bg-primary/10 rounded-xl border border-primary/30 shadow-[0_0_30px_rgba(59,130,246,0.2)] flex items-center px-4 relative"
+                        >
+                          <div class="absolute -top-6 left-1/2 w-0.5 h-6 bg-primary/40"></div>
+                          <span class="text-xs font-mono text-primary font-bold">Web Worker</span>
                         </div>
                       </div>
-                    }
-
-                    <div class="flex items-start gap-5 relative z-10">
-                      <div class="p-4 bg-base-100 rounded-2xl border border-base-300 shadow-sm">
-                        <span class="text-4xl leading-none shrink-0" aria-hidden="true">{{
-                          p.icon
-                        }}</span>
-                      </div>
-                      <div>
-                        <h3
-                          class="text-2xl font-black text-base-content m-0 mb-2 flex items-center gap-3 tracking-tight"
-                        >
-                          {{ p.name }}
-                          @if (p.badge) {
-                            <span class="badge badge-primary font-black">{{ p.badge }}</span>
-                          }
-                        </h3>
-                        <code
-                          class="text-xs font-mono text-primary/90 bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-lg"
-                        >
-                          {{ p.npmPackage }}
-                        </code>
-                      </div>
                     </div>
+                  }
 
-                    <p
-                      class="text-base text-base-content/60 leading-relaxed max-w-[450px] relative z-10 font-medium m-0"
-                    >
-                      {{ p.description }}
-                    </p>
-
-                    <div class="flex flex-wrap gap-2.5 mt-2 relative z-10">
-                      @for (item of p.highlights; track item) {
-                        <span
-                          class="badge badge-outline border-base-content/20 hover:border-base-content/40 text-base-content/70"
-                        >
-                          {{ item }}
-                        </span>
-                      }
+                  <div class="flex items-start gap-5 relative z-10">
+                    <div class="p-4 bg-base-100 rounded-2xl border border-base-300 shadow-sm">
+                      <span class="text-4xl leading-none shrink-0" aria-hidden="true">{{
+                        p.icon
+                      }}</span>
                     </div>
-
-                    <div class="mt-auto pt-8 flex items-center justify-between relative z-10">
-                      @if (p.docsLink) {
-                        <a
-                          [routerLink]="p.docsLink"
-                          class="btn btn-ghost btn-sm text-base-content/60 hover:text-base-content hover:bg-base-content/5 rounded-xl font-bold px-4"
-                        >
-                          Explore documentation <span class="ml-1">→</span>
-                        </a>
-                      } @else {
-                        <span class="text-sm text-base-content/40 italic font-medium ml-4"
-                          >Documentation under construction</span
-                        >
-                      }
+                    <div>
+                      <h3
+                        class="text-2xl font-black text-base-content m-0 mb-2 flex items-center gap-3 tracking-tight"
+                      >
+                        {{ p.name }}
+                        @if (p.badge) {
+                          <span class="badge badge-primary font-black">{{ p.badge }}</span>
+                        }
+                      </h3>
+                      <code
+                        class="text-xs font-mono text-primary/90 bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-lg"
+                      >
+                        {{ p.npmPackage }}
+                      </code>
                     </div>
                   </div>
+
+                  <p
+                    class="text-base text-base-content/60 leading-relaxed max-w-[450px] relative z-10 font-medium m-0"
+                  >
+                    {{ p.description }}
+                  </p>
+
+                  <div class="flex flex-wrap gap-2.5 mt-2 relative z-10">
+                    @for (item of p.highlights; track item) {
+                      <span
+                        class="badge badge-outline border-base-content/20 hover:border-base-content/40 text-base-content/70"
+                      >
+                        {{ item }}
+                      </span>
+                    }
+                  </div>
+
+                  <div class="mt-auto pt-8 flex items-center justify-between relative z-10">
+                    @if (p.docsLink) {
+                      <a
+                        [routerLink]="p.docsLink"
+                        class="btn btn-ghost btn-sm text-base-content/60 hover:text-base-content hover:bg-base-content/5 rounded-xl font-bold px-4"
+                      >
+                        Explore documentation <span class="ml-1">→</span>
+                      </a>
+                    } @else {
+                      <span class="text-sm text-base-content/40 italic font-medium ml-4"
+                        >Documentation under construction</span
+                      >
+                    }
+                  </div>
                 </div>
-              }
-            </div>
+              </div>
+            }
           </div>
-        </section>
-      } @placeholder {
-        <div class="h-96 bg-base-200/50 animate-pulse"></div>
-      }
+        </div>
+      </section>
 
       <!-- CTA SECTION -->
-      @defer (on viewport) {
-        <section class="py-24 sm:py-32 px-6 border-b border-base-300 bg-base-200">
-          <div class="max-w-[560px] mx-auto text-center flex flex-col items-center gap-6">
-            <div class="p-5 bg-base-100 rounded-[2rem] border border-base-300 shadow-inner mb-2">
-              <img
-                ngSrc="icon.webp"
-                alt=""
-                width="64"
-                height="64"
-                aria-hidden="true"
-                class="drop-shadow-[0_0_20px_rgba(59,130,246,0.4)]"
-              />
-            </div>
-            <h2
-              class="text-[2.5rem] sm:text-[3.5rem] font-black text-base-content tracking-tighter leading-none m-0 text-balance"
-            >
-              Ready to scale?
-            </h2>
-            <p class="text-lg text-base-content/60 leading-relaxed font-medium m-0 text-balance">
-              Join hundreds of developers building robust, high-performance Angular applications
-              with our specialized helper suite.
-            </p>
-            <div class="flex flex-wrap gap-4 justify-center mt-4">
-              <a
-                routerLink="/docs"
-                class="btn btn-primary btn-lg px-10 rounded-2xl font-black shadow-xl shadow-primary/20 border-none"
-              >
-                Start building
-              </a>
-              <a
-                href="https://github.com/Gaspar1992/angular-helpers"
-                target="_blank"
-                class="btn btn-outline btn-lg border-base-300 hover:border-base-content/30 hover:bg-base-content/5 text-base-content font-bold px-10 rounded-2xl"
-              >
-                GitHub
-              </a>
-            </div>
+      <section
+        aria-labelledby="cta-title"
+        class="py-24 sm:py-32 px-6 border-b border-base-300 bg-base-200"
+      >
+        <div class="max-w-[560px] mx-auto text-center flex flex-col items-center gap-6">
+          <div class="p-5 bg-base-100 rounded-[2rem] border border-base-300 shadow-inner mb-2">
+            <img
+              ngSrc="icon.webp"
+              alt=""
+              width="64"
+              height="64"
+              aria-hidden="true"
+              class="drop-shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+            />
           </div>
-        </section>
-      } @placeholder {
-        <div class="h-64 bg-base-200/30 animate-pulse"></div>
-      }
+          <h2
+            id="cta-title"
+            class="text-[2.5rem] sm:text-[3.5rem] font-black text-base-content tracking-tighter leading-none m-0 text-balance"
+          >
+            Ready to scale?
+          </h2>
+          <p class="text-lg text-base-content/60 leading-relaxed font-medium m-0 text-balance">
+            Join hundreds of developers building robust, high-performance Angular applications with
+            our specialized helper suite.
+          </p>
+          <div class="flex flex-wrap gap-4 justify-center mt-4">
+            <a
+              routerLink="/docs"
+              class="btn btn-primary btn-lg px-10 rounded-2xl font-black shadow-xl shadow-primary/20 border-none"
+            >
+              Start building
+            </a>
+            <a
+              href="https://github.com/Gaspar1992/angular-helpers"
+              target="_blank"
+              class="btn btn-outline btn-lg border-base-300 hover:border-base-content/30 hover:bg-base-content/5 text-base-content font-bold px-10 rounded-2xl"
+            >
+              GitHub
+            </a>
+          </div>
+        </div>
+      </section>
 
       <app-site-footer />
     </main>

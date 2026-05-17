@@ -4,22 +4,22 @@ test.describe('Documentation pages', () => {
   test('docs landing page renders with package cards', async ({ page }) => {
     await page.goto('/docs');
 
-    await expect(page.getByRole('heading', { level: 1, name: /Angular Helpers/i })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /Documentation/i })).toBeVisible();
     // Use first() to avoid strict mode violations
     await expect(page.getByText(/browser-web-apis/i).first()).toBeVisible();
     await expect(page.getByText(/security/i).first()).toBeVisible();
     await expect(page.getByText(/worker-http/i).first()).toBeVisible();
     await expect(page.getByText(/openlayers/i).first()).toBeVisible();
 
-    // Count all "View documentation" links (4 packages)
-    const docLinks = page.getByRole('link', { name: /View documentation/i });
+    // Check that we have 4 main package links starting with /docs/
+    const docLinks = page.locator('a[routerLink^="/docs/"]');
     await expect(docLinks).toHaveCount(4);
   });
 
   test('docs landing page has quick start section', async ({ page }) => {
     await page.goto('/docs');
 
-    await expect(page.getByRole('heading', { level: 2, name: /Quick setup/i })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: /Modular by design/i })).toBeVisible();
     await expect(page.locator('pre code')).toContainText('provideBrowserWebApis');
   });
 });
@@ -35,10 +35,9 @@ test.describe('Documentation - browser-web-apis overview', () => {
 
   test('browser-web-apis overview has service navigation', async ({ page }) => {
     await page.goto('/docs/browser-web-apis');
-    await page.waitForLoadState('networkidle');
 
     // Wait for service cards to be visible
-    const serviceCards = page.locator('.service-card');
+    const serviceCards = page.locator('section a');
     await expect(serviceCards.first()).toBeVisible();
 
     // Count service cards - should have many (Camera, Geolocation, etc.)
@@ -134,10 +133,12 @@ test.describe('Documentation - layout sidebar', () => {
 
   test('topbar shows breadcrumb navigation', async ({ page }) => {
     await page.goto('/docs/browser-web-apis');
-    await page.waitForLoadState('networkidle');
 
     // Target the docs topbar specifically (not the main app header)
-    const topbar = page.locator('header.bg-base-200\\/80');
+    const topbar = page
+      .locator('header')
+      .filter({ has: page.getByRole('link', { name: 'docs' }) })
+      .first();
     await expect(topbar).toBeVisible();
 
     // Breadcrumb shows docs link

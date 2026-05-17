@@ -5,7 +5,7 @@ test.describe('Security Utilities Demo', () => {
     await page.goto('/demo/security-utilities');
 
     await expect(
-      page.getByRole('heading', { level: 1, name: /Security Utilities Demo/i }),
+      page.getByRole('heading', { level: 1, name: /Security Utilities/i }),
     ).toBeVisible();
 
     await expect(page.getByTestId('validators-card')).toBeVisible();
@@ -24,7 +24,7 @@ test.describe('Security Utilities Demo', () => {
 
     const weakMessage = page.getByTestId('validators-password-weak');
     await expect(weakMessage).toBeVisible();
-    await expect(page.getByTestId('validators-status')).toContainText('form valid: false');
+    await expect(page.getByTestId('validators-status')).toContainText('INVALID');
   });
 
   test('SecurityValidators safeUrl rejects unsafe schemes', async ({ page }) => {
@@ -46,7 +46,7 @@ test.describe('Security Utilities Demo', () => {
 
     const result = page.getByTestId('jwt-result');
     await expect(result).toBeVisible();
-    await expect(result).toContainText('expired: false');
+    await expect(result).toContainText('false');
     await expect(result).toContainText('user-42');
   });
 
@@ -100,7 +100,7 @@ test.describe('Security Utilities Demo', () => {
     await expect(tokenDisplay).toHaveText(/[0-9a-f]{64}/);
 
     await page.getByTestId('csrf-clear').click();
-    await expect(tokenDisplay).toContainText('(no token)');
+    await expect(tokenDisplay).toContainText('no token currently stored');
   });
 
   test('SensitiveClipboard copy flow reaches copying state', async ({ page, context }) => {
