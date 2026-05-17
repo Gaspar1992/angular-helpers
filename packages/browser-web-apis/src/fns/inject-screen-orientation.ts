@@ -1,5 +1,6 @@
 import { computed, DestroyRef, inject, PLATFORM_ID, signal, type Signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { type Subscription } from 'rxjs';
 
 import {
   type OrientationInfo,
@@ -25,15 +26,27 @@ interface ScreenOrientationWithLock extends ScreenOrientation {
 export function injectScreenOrientation(): ScreenOrientationRef {
   const destroyRef = inject(DestroyRef);
   const platformId = inject(PLATFORM_ID);
+  const isBrowser = isPlatformBrowser(platformId);
 
-  const orientation = signal<OrientationInfo>(
-    isPlatformBrowser(platformId)
-      ? getOrientationSnapshot()
-      : { type: 'portrait-primary', angle: 0 },
-  );
+  const orientation = signal<OrientationInfo>({ type: 'portrait-primary', angle: 0 });
 
-  const sub = screenOrientationStream().subscribe((o) => orientation.set(o));
-  destroyRef.onDestroy(() => sub.unsubscribe());
+  if (isBrowser) {
+    let sub: Subscription | null = null;
+    let destroyed = false;
+
+    queueMicrotask(() => {
+      if (destroyed) return;
+      orientation.set(getOrientationSnapshot());
+      sub = screenOrientationStream().subscribe((o) => orientation.set(o));
+    });
+
+    destroyRef.onDestroy(() => {
+      destroyed = true;
+      if (sub) {
+        sub.unsubscribe();
+      }
+    });
+  }
 
   return {
     orientation: orientation.asReadonly(),

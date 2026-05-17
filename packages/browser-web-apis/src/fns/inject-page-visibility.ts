@@ -1,5 +1,6 @@
 import { computed, DestroyRef, inject, PLATFORM_ID, signal, type Signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { type Subscription } from 'rxjs';
 
 import { type VisibilityState } from '../services/page-visibility.service';
 import { pageVisibilityStream } from '../utils/page-visibility.utils';
@@ -13,16 +14,29 @@ export interface PageVisibilityRef {
 export function injectPageVisibility(): PageVisibilityRef {
   const destroyRef = inject(DestroyRef);
   const platformId = inject(PLATFORM_ID);
+  const isBrowser = isPlatformBrowser(platformId);
 
-  const initial: VisibilityState =
-    isPlatformBrowser(platformId) && typeof document !== 'undefined'
-      ? (document.visibilityState as VisibilityState)
-      : 'visible';
+  const state = signal<VisibilityState>('visible');
 
-  const state = signal<VisibilityState>(initial);
+  if (isBrowser) {
+    let sub: Subscription | null = null;
+    let destroyed = false;
 
-  const sub = pageVisibilityStream().subscribe((s) => state.set(s));
-  destroyRef.onDestroy(() => sub.unsubscribe());
+    queueMicrotask(() => {
+      if (destroyed) return;
+      state.set(
+        typeof document !== 'undefined' ? (document.visibilityState as VisibilityState) : 'visible',
+      );
+      sub = pageVisibilityStream().subscribe((s) => state.set(s));
+    });
+
+    destroyRef.onDestroy(() => {
+      destroyed = true;
+      if (sub) {
+        sub.unsubscribe();
+      }
+    });
+  }
 
   return {
     state: state.asReadonly(),

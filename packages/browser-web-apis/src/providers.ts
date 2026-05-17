@@ -29,6 +29,8 @@ import { WebAudioService } from './services/web-audio.service';
 import { GamepadService } from './services/gamepad.service';
 import { EyeDropperService } from './services/eye-dropper.service';
 import { IdleDetectorService } from './services/idle-detector.service';
+import { BarcodeDetectorService } from './services/barcode-detector.service';
+import { CredentialManagementService } from './services/credential-management.service';
 
 export { providePermissions } from './providers/permissions';
 export { provideCamera } from './providers/camera';
@@ -63,6 +65,8 @@ export { provideStorageManager } from './providers/storage-manager';
 export { provideCompression } from './providers/compression';
 export { provideEyeDropper } from './providers/eye-dropper';
 export { provideIdleDetector } from './providers/idle-detector';
+export { provideBarcodeDetector } from './providers/barcode-detector';
+export { provideCredentialManagement } from './providers/credential-management';
 export {
   provideMediaApis,
   provideLocationApis,
@@ -114,6 +118,8 @@ export interface BrowserWebApisConfig extends BrowserWebApisCompositionConfig {
   enableGamepad?: boolean;
   enableEyeDropper?: boolean;
   enableIdleDetector?: boolean;
+  enableBarcodeDetector?: boolean;
+  enableCredentialManagement?: boolean;
 }
 
 export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
@@ -146,6 +152,8 @@ export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
   enableGamepad: false,
   enableEyeDropper: false,
   enableIdleDetector: false,
+  enableBarcodeDetector: false,
+  enableCredentialManagement: false,
 };
 
 let legacyFlagsDeprecationLogged = false;
@@ -213,6 +221,8 @@ export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): Enviro
     [mergedConfig.enableGamepad, GamepadService],
     [mergedConfig.enableEyeDropper, EyeDropperService],
     [mergedConfig.enableIdleDetector, IdleDetectorService],
+    [mergedConfig.enableBarcodeDetector, BarcodeDetectorService],
+    [mergedConfig.enableCredentialManagement, CredentialManagementService],
   ];
 
   for (const [enabled, provider] of conditionalProviders) {

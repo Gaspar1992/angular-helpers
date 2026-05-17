@@ -22,11 +22,9 @@ export interface GeolocationRef {
 export function injectGeolocation(opts: GeolocationOptions = {}): GeolocationRef {
   const destroyRef = inject(DestroyRef);
   const platformId = inject(PLATFORM_ID);
-
   const isBrowser = isPlatformBrowser(platformId);
-  const supported = signal<boolean>(
-    isBrowser && typeof navigator !== 'undefined' && 'geolocation' in navigator,
-  );
+
+  const supported = signal<boolean>(false);
   const position = signal<GeolocationPosition | null>(null);
   const error = signal<GeolocationPositionError | null>(null);
   const watching = signal<boolean>(false);
@@ -73,9 +71,21 @@ export function injectGeolocation(opts: GeolocationOptions = {}): GeolocationRef
     });
   };
 
-  destroyRef.onDestroy(() => stop());
+  if (isBrowser) {
+    let destroyed = false;
+    queueMicrotask(() => {
+      if (destroyed) return;
+      supported.set(typeof navigator !== 'undefined' && 'geolocation' in navigator);
+      if (opts.watch) {
+        watch(opts);
+      }
+    });
 
-  if (opts.watch) watch(opts);
+    destroyRef.onDestroy(() => {
+      destroyed = true;
+      stop();
+    });
+  }
 
   return {
     position: position.asReadonly(),

@@ -2,15 +2,21 @@ import { makeEnvironmentProviders, EnvironmentProviders, Provider } from '@angul
 
 import { IdleDetectorService } from './idle-detector.service';
 import { EyeDropperService } from './eye-dropper.service';
-import { BarcodeDetectorService } from './barcode-detector.service';
 import { WebBluetoothService } from './web-bluetooth.service';
 import { WebUsbService } from './web-usb.service';
 import { WebNfcService } from './web-nfc.service';
 import { PaymentRequestService } from './payment-request.service';
-import { CredentialManagementService } from './credential-management.service';
 
-// PermissionsService comes from the main entry point
-import { PermissionsService } from '@angular-helpers/browser-web-apis';
+// Main entry point imports
+import {
+  PermissionsService,
+  BarcodeDetectorService,
+  CredentialManagementService,
+  provideBarcodeDetector,
+  provideCredentialManagement,
+} from '@angular-helpers/browser-web-apis';
+
+export { provideBarcodeDetector, provideCredentialManagement };
 
 export function provideIdleDetector(): EnvironmentProviders {
   return makeEnvironmentProviders([PermissionsService, IdleDetectorService]);
@@ -18,10 +24,6 @@ export function provideIdleDetector(): EnvironmentProviders {
 
 export function provideEyeDropper(): EnvironmentProviders {
   return makeEnvironmentProviders([EyeDropperService]);
-}
-
-export function provideBarcodeDetector(): EnvironmentProviders {
-  return makeEnvironmentProviders([BarcodeDetectorService]);
 }
 
 export function provideWebBluetooth(): EnvironmentProviders {
@@ -38,10 +40,6 @@ export function provideWebNfc(): EnvironmentProviders {
 
 export function providePaymentRequest(): EnvironmentProviders {
   return makeEnvironmentProviders([PaymentRequestService]);
-}
-
-export function provideCredentialManagement(): EnvironmentProviders {
-  return makeEnvironmentProviders([CredentialManagementService]);
 }
 
 // --- Combo provider ---

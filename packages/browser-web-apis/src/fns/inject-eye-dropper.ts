@@ -1,4 +1,4 @@
-import { inject, PLATFORM_ID, signal, type Signal } from '@angular/core';
+import { DestroyRef, inject, PLATFORM_ID, signal, type Signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import type { EyeDropperResult } from '../services/eye-dropper.service';
 
@@ -16,13 +16,26 @@ interface WindowWithEyeDropper extends Window {
 
 export function injectEyeDropper(): EyeDropperRef {
   const platformId = inject(PLATFORM_ID);
+  const destroyRef = inject(DestroyRef);
   const isBrowser = isPlatformBrowser(platformId);
-  const hasDropper = isBrowser && typeof window !== 'undefined' && 'EyeDropper' in window;
 
-  const supported = signal<boolean>(hasDropper && window.isSecureContext);
+  const supported = signal<boolean>(false);
   const color = signal<string | null>(null);
   const error = signal<Error | null>(null);
   const isOpening = signal<boolean>(false);
+
+  if (isBrowser) {
+    let destroyed = false;
+    queueMicrotask(() => {
+      if (destroyed) return;
+      const hasDropper = typeof window !== 'undefined' && 'EyeDropper' in window;
+      supported.set(hasDropper && window.isSecureContext);
+    });
+
+    destroyRef.onDestroy(() => {
+      destroyed = true;
+    });
+  }
 
   const open = async (options?: { signal?: AbortSignal }): Promise<EyeDropperResult | null> => {
     if (!supported()) {

@@ -24,9 +24,7 @@ export function injectWakeLock(): WakeLockRef {
   const platformId = inject(PLATFORM_ID);
 
   const isBrowser = isPlatformBrowser(platformId);
-  const supported = signal<boolean>(
-    isBrowser && typeof navigator !== 'undefined' && 'wakeLock' in navigator,
-  );
+  const supported = signal<boolean>(false);
   const active = signal<boolean>(false);
   const error = signal<string | null>(null);
   let sentinel: WakeLockSentinelLike | null = null;
@@ -39,6 +37,31 @@ export function injectWakeLock(): WakeLockRef {
     if (!disposed) active.set(false);
     sentinel = null;
   };
+
+  if (isBrowser) {
+    let destroyed = false;
+    queueMicrotask(() => {
+      if (destroyed) return;
+      supported.set(typeof navigator !== 'undefined' && 'wakeLock' in navigator);
+    });
+
+    destroyRef.onDestroy(() => {
+      destroyed = true;
+      disposed = true;
+      if (sentinel) {
+        sentinel.removeEventListener('release', onRelease);
+        if (!sentinel.released) {
+          void sentinel.release();
+        }
+      }
+      sentinel = null;
+    });
+  } else {
+    destroyRef.onDestroy(() => {
+      disposed = true;
+      sentinel = null;
+    });
+  }
 
   const request = async (): Promise<boolean> => {
     if (!supported() || disposed) {
@@ -69,17 +92,6 @@ export function injectWakeLock(): WakeLockRef {
       onRelease();
     }
   };
-
-  destroyRef.onDestroy(() => {
-    disposed = true;
-    if (sentinel) {
-      sentinel.removeEventListener('release', onRelease);
-      if (!sentinel.released) {
-        void sentinel.release();
-      }
-    }
-    sentinel = null;
-  });
 
   return {
     active: active.asReadonly(),
