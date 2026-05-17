@@ -59,11 +59,8 @@ function makeBus() {
 }
 
 function setupWindow(localStore: Storage, sessionStore: Storage) {
-  Object.defineProperty(globalThis, 'window', {
-    value: { localStorage: localStore, sessionStorage: sessionStore },
-    writable: true,
-    configurable: true,
-  });
+  vi.stubGlobal('localStorage', localStore);
+  vi.stubGlobal('sessionStorage', sessionStore);
   Object.defineProperty(globalThis, 'Storage', {
     value: function Storage() {},
     writable: true,

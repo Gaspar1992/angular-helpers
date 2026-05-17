@@ -10,6 +10,7 @@ const createView = () => ({
   getCenter: vi.fn(() => [10, 20] as [number, number]),
   getZoom: vi.fn(() => 5),
   getRotation: vi.fn(() => 0),
+  getResolution: vi.fn(() => 1),
   setCenter: vi.fn(),
   setZoom: vi.fn(),
   fit: vi.fn(),
@@ -150,5 +151,16 @@ describe('OlMapService', () => {
     svc.setMap(createMap(view));
 
     expect(svc.getViewState()).toEqual({ center: [0, 0], zoom: 0, rotation: 0 });
+  });
+
+  it('updates resolution signal when setMap or setResolution is called', () => {
+    const view = { ...createView(), getResolution: vi.fn(() => 152.87) };
+    const map = createMap(view as any);
+
+    svc.setMap(map);
+    expect(svc.resolution()).toBe(152.87);
+
+    svc.setResolution(76.43);
+    expect(svc.resolution()).toBe(76.43);
   });
 });

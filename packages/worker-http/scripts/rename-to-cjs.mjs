@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* oxlint-disable no-console */
 import { readdir, rename, readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
 

@@ -39,26 +39,40 @@ export interface ServiceDetailConfig {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DocsPageHeaderComponent, DocsApiTableComponent, CodeBlockComponent, DocsTabsComponent],
   template: `
-    <div class="unified-service-detail">
+    <div class="max-width-container py-12 sm:py-16 max-w-[900px]">
       @if (service(); as s) {
         <app-docs-page-header [title]="s.name" [lead]="s.description" />
 
         @if (s.fnVersion) {
-          <div class="api-variant-toggle">
-            <span class="toggle-label">API Variant:</span>
-            <div class="toggle-buttons">
+          <div
+            class="flex items-center gap-4 p-5 mb-10 bg-base-200 border border-base-300 rounded-3xl shadow-sm"
+          >
+            <span class="text-xs font-black uppercase tracking-widest text-base-content/30 ml-2"
+              >API Variant</span
+            >
+            <div
+              class="flex gap-1.5 p-1 bg-base-content/5 rounded-2xl border border-base-300 shadow-inner"
+            >
               <button
                 type="button"
-                class="toggle-btn"
-                [class.toggle-btn--active]="apiVariant() === 'service'"
+                class="px-5 py-2 text-sm font-bold rounded-xl transition-all"
+                [class.bg-primary]="apiVariant() === 'service'"
+                [class.text-primary-content]="apiVariant() === 'service'"
+                [class.shadow-lg]="apiVariant() === 'service'"
+                [class.text-base-content/40]="apiVariant() !== 'service'"
+                [class.hover:text-base-content/70]="apiVariant() !== 'service'"
                 (click)="apiVariant.set('service')"
               >
                 Service
               </button>
               <button
                 type="button"
-                class="toggle-btn"
-                [class.toggle-btn--active]="apiVariant() === 'fn'"
+                class="px-5 py-2 text-sm font-bold rounded-xl transition-all"
+                [class.bg-primary]="apiVariant() === 'fn'"
+                [class.text-primary-content]="apiVariant() === 'fn'"
+                [class.shadow-lg]="apiVariant() === 'fn'"
+                [class.text-base-content/40]="apiVariant() !== 'fn'"
+                [class.hover:text-base-content/70]="apiVariant() !== 'fn'"
                 (click)="apiVariant.set('fn')"
               >
                 Function
@@ -75,34 +89,51 @@ export interface ServiceDetailConfig {
 
         @switch (activeTab()) {
           @case ('api') {
-            <div class="usd-tab-content">
+            <div class="mt-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
               <app-code-block language="ts" filename="example.ts" [code]="importExample()" />
 
               @if (hasInputs()) {
-                <h3 class="section-title">Inputs</h3>
+                <h3
+                  class="text-xl font-black text-base-content mt-16 mb-6 tracking-tight flex items-center gap-2"
+                >
+                  <span class="text-primary/60">#</span> Inputs
+                </h3>
                 <app-docs-api-table [columns]="INPUTS_COLUMNS" [rows]="inputRows()" />
               }
 
               @if (hasOutputs()) {
-                <h3 class="section-title">Outputs</h3>
+                <h3
+                  class="text-xl font-black text-base-content mt-16 mb-6 tracking-tight flex items-center gap-2"
+                >
+                  <span class="text-primary/60">#</span> Outputs
+                </h3>
                 <app-docs-api-table [columns]="OUTPUTS_COLUMNS" [rows]="outputRows()" />
               }
 
               @if (hasMethods()) {
-                <h3 class="section-title">Methods</h3>
+                <h3
+                  class="text-xl font-black text-base-content mt-16 mb-6 tracking-tight flex items-center gap-2"
+                >
+                  <span class="text-primary/60">#</span>
+                  {{ apiVariant() === 'fn' ? 'Properties' : 'Methods' }}
+                </h3>
                 <app-docs-api-table [columns]="currentColumns()" [rows]="methodRows()" />
               }
 
-              @if (config().interfaces; as interfaces) {
+              @if (config()?.interfaces; as interfaces) {
                 @for (iface of interfaces; track iface.name) {
-                  <div class="iface-block">
-                    <h4 class="iface-name">{{ iface.name }}</h4>
-                    <p class="iface-desc">{{ iface.description }}</p>
+                  <div class="mt-20">
+                    <h4 class="text-lg font-black text-base-content mb-3 tracking-tight">
+                      {{ iface.name }}
+                    </h4>
+                    <p class="text-base text-base-content/50 mb-6 font-medium leading-relaxed">
+                      {{ iface.description }}
+                    </p>
                     <app-docs-api-table
                       [columns]="[
                         { key: 'name', header: 'Property', cellClass: '' },
                         { key: 'type', header: 'Type', cellClass: '' },
-                        { key: 'description', header: 'Description', cellClass: '' },
+                        { key: 'description', header: 'Description', cellClass: 'docs-cell-desc' },
                       ]"
                       [rows]="iface.properties"
                     />
@@ -112,7 +143,7 @@ export interface ServiceDetailConfig {
             </div>
           }
           @case ('example') {
-            <div class="usd-tab-content">
+            <div class="mt-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
               <app-code-block language="ts" filename="usage.example.ts" [code]="exampleCode()" />
             </div>
           }
@@ -120,91 +151,7 @@ export interface ServiceDetailConfig {
       }
     </div>
   `,
-  styles: [
-    `
-      .unified-service-detail {
-        padding: var(--sp-6) 0;
-      }
-
-      .lead {
-        font-size: var(--text-lg);
-        color: var(--text-muted);
-        margin: var(--sp-4) 0 var(--sp-6);
-        line-height: 1.6;
-      }
-
-      .api-variant-toggle {
-        display: flex;
-        align-items: center;
-        gap: var(--sp-3);
-        margin-bottom: var(--sp-6);
-        padding: var(--sp-3) var(--sp-4);
-        background: var(--bg-elevated);
-        border-radius: var(--radius-lg);
-      }
-
-      .toggle-label {
-        font-size: var(--text-sm);
-        font-weight: 600;
-        color: var(--text-muted);
-      }
-
-      .toggle-buttons {
-        display: flex;
-        gap: var(--sp-1);
-      }
-
-      .toggle-btn {
-        padding: var(--sp-2) var(--sp-3);
-        border: none;
-        border-radius: var(--radius-field, 0.35rem);
-        background: transparent;
-        color: var(--text-muted);
-        font-size: var(--text-sm);
-        font-weight: 500;
-        cursor: pointer;
-        transition: all var(--transition);
-      }
-
-      .toggle-btn:hover {
-        background: var(--bg-hover);
-        color: var(--text);
-      }
-
-      .toggle-btn--active {
-        background: var(--accent);
-        color: white;
-      }
-
-      .usd-tab-content {
-        margin-top: var(--sp-6);
-      }
-
-      .section-title {
-        font-size: var(--text-lg);
-        font-weight: 700;
-        margin: var(--sp-6) 0 var(--sp-4);
-        color: var(--text);
-      }
-
-      .iface-block {
-        margin-bottom: var(--sp-6);
-      }
-
-      .iface-name {
-        font-size: var(--text-base);
-        font-weight: 600;
-        color: var(--text);
-        margin: 0 0 var(--sp-2);
-      }
-
-      .iface-desc {
-        font-size: var(--text-sm);
-        color: var(--text-muted);
-        margin: 0 0 var(--sp-3);
-      }
-    `,
-  ],
+  styles: [],
 })
 export class UnifiedServiceDetailComponent {
   /** Config provided by router resolver via withComponentInputBinding */

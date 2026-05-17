@@ -14,33 +14,36 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
   selector: 'app-worker-http-serializer-comparison-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-base-200 border border-base-300 rounded-xl p-6 col-span-full">
-      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
+    <div class="bg-base-200 border border-base-content/5 rounded-3xl p-8 col-span-full">
+      <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
+        <h2 class="text-xl font-bold text-warning m-0 flex items-center gap-2">
           🧬 Serializer Comparison
         </h2>
-        <span class="badge badge-warning">v21.2.0</span>
+        <span class="badge badge-warning font-semibold">v21.2.0</span>
       </div>
-      <p class="text-sm text-base-content/80 mb-4">
+      <p class="text-sm text-base-content/70 mb-8 max-w-4xl">
         Same payload, three serializers. The
-        <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded">auto</code> row shows
-        which strategy
-        <code class="font-mono text-xs bg-base-300 px-1.5 py-0.5 rounded"
+        <code class="font-mono text-xs bg-base-content/5 text-warning px-2 py-0.5 rounded-md"
+          >auto</code
+        >
+        row shows which strategy
+        <code class="font-mono text-xs bg-base-content/5 text-warning px-2 py-0.5 rounded-md"
           >createAutoSerializer()</code
         >
         picked. TOON wins on uniform arrays of objects with primitive values; seroval handles
         complex types; structured-clone is the zero-overhead default.
       </p>
 
-      <div class="flex flex-wrap gap-2 mb-4">
+      <div class="flex flex-wrap gap-3 mb-8">
         @for (sample of samples; track sample.id) {
           <button
             type="button"
             (click)="run(sample)"
             [disabled]="status() === 'running'"
-            class="btn btn-sm"
+            class="btn btn-sm font-bold px-4"
             [class.btn-primary]="selectedId() === sample.id"
             [class.btn-ghost]="selectedId() !== sample.id"
+            [class.bg-base-content/5]="selectedId() !== sample.id"
           >
             {{ sample.label }}
           </button>
@@ -48,33 +51,42 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
       </div>
 
       @if (selectedSample(); as s) {
-        <p class="text-xs text-base-content/60 mb-3 italic">{{ s.description }}</p>
+        <p class="text-xs text-base-content/40 mb-6 italic px-2 border-l-2 border-warning/30">
+          {{ s.description }}
+        </p>
       }
 
       @if (results().length > 0) {
-        <div class="overflow-x-auto">
+        <div
+          class="overflow-x-auto bg-base-content/5 rounded-2xl border border-base-content/5 shadow-inner"
+        >
           <table class="table table-sm">
-            <thead>
+            <thead class="bg-base-content/5 text-base-content/60">
               <tr>
-                <th>Serializer</th>
-                <th>Format</th>
-                <th class="text-right">Bytes</th>
-                <th class="text-right">vs JSON</th>
-                <th class="text-right">Time (ms)</th>
-                <th>Note</th>
+                <th class="py-3">Serializer</th>
+                <th class="py-3">Format</th>
+                <th class="text-right py-3">Bytes</th>
+                <th class="text-right py-3">vs JSON</th>
+                <th class="text-right py-3">Time (ms)</th>
+                <th class="py-3">Note</th>
               </tr>
             </thead>
             <tbody>
               @for (row of results(); track row.name) {
-                <tr>
-                  <td class="font-mono text-xs">{{ row.name }}</td>
+                <tr class="border-base-content/5 hover:bg-base-content/5 transition-colors">
+                  <td class="font-bold text-xs text-base-content/90">{{ row.name }}</td>
                   <td>
-                    <span class="badge badge-xs">{{ row.format }}</span>
+                    <span class="badge badge-xs font-mono opacity-70">{{ row.format }}</span>
                   </td>
-                  <td class="text-right font-mono">{{ row.bytes }}</td>
-                  <td class="text-right font-mono">{{ formatRatio(row.bytes) }}</td>
-                  <td class="text-right font-mono">{{ row.elapsedMs.toFixed(2) }}</td>
-                  <td class="text-xs text-base-content/70">{{ row.note ?? '' }}</td>
+                  <td class="text-right font-mono text-xs">{{ row.bytes }}</td>
+                  <td
+                    class="text-right font-mono text-xs"
+                    [class.text-success]="row.bytes < jsonReferenceBytes()"
+                  >
+                    {{ formatRatio(row.bytes) }}
+                  </td>
+                  <td class="text-right font-mono text-xs">{{ row.elapsedMs.toFixed(2) }}</td>
+                  <td class="text-xs text-base-content/50 italic">{{ row.note ?? '' }}</td>
                 </tr>
               }
             </tbody>

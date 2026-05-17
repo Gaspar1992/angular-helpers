@@ -23,7 +23,7 @@ test.describe('Security Signal Forms Demo', () => {
     await password.blur();
 
     await expect(page.getByTestId('sf-password-error').first()).toBeVisible();
-    await expect(page.getByTestId('sf-status')).toContainText('form valid: false');
+    await expect(page.getByTestId('sf-status')).toContainText('NO');
   });
 
   test('safeUrl rule flags blocked schemes', async ({ page }) => {

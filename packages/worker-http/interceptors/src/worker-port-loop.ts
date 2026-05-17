@@ -61,9 +61,11 @@ export function attachPortLoop(port: MessagePort | any, chain: RequestHandler): 
     const data = event.data ?? {};
     if (data.type === 'batch') {
       for (const msg of data.messages || []) {
+        // oxlint-disable-next-line no-console
         processMessage(msg).catch(console.error);
       }
     } else {
+      // oxlint-disable-next-line no-console
       processMessage(data).catch(console.error);
     }
   };

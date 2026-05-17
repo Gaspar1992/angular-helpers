@@ -5,7 +5,13 @@ import { EnvironmentProviders, makeEnvironmentProviders } from '@angular/core';
 import { OlMapService } from '../services/map.service';
 import { OlZoneHelper } from '../services/zone-helper.service';
 
-export type OlFeatureKind = 'layers' | 'controls' | 'interactions' | 'overlays' | 'military';
+export type OlFeatureKind =
+  | 'layers'
+  | 'controls'
+  | 'interactions'
+  | 'overlays'
+  | 'military'
+  | 'projections';
 
 export interface OlFeature<Kind extends OlFeatureKind> {
   kind: Kind;

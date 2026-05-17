@@ -2,10 +2,11 @@
 
 import { inject, Injectable } from '@angular/core';
 import type OLMap from 'ol/Map';
-import Draw from 'ol/interaction/Draw';
+import Draw, { createBox } from 'ol/interaction/Draw';
 import Snap from 'ol/interaction/Snap';
 import VectorSource from 'ol/source/Vector';
 import type VectorLayer from 'ol/layer/Vector';
+import { Polygon } from 'ol/geom';
 import type { Feature as OLFeature } from 'ol';
 import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import { OlLayerService } from '@angular-helpers/openlayers/layers';
@@ -48,9 +49,72 @@ export class DrawInteractionService {
     }
 
     this.zoneHelper.runOutsideAngular(() => {
+      let drawType = config.type as any;
+      let geometryFunction: any;
+
+      if (config.type === 'Ellipse') {
+        drawType = 'Circle';
+        geometryFunction = (coords: any, geom: any) => {
+          if (!geom) {
+            geom = new Polygon([]);
+          }
+          const center = coords[0];
+          const last = coords[1];
+          const dx = last[0] - center[0];
+          const dy = last[1] - center[1];
+          const semiMajor = Math.sqrt(dx * dx + dy * dy);
+          const semiMinor = semiMajor * 0.7; // Default ratio
+          const rotation = Math.atan2(dy, dx);
+
+          const ring = [];
+          const segments = 64;
+          for (let i = 0; i < segments; i++) {
+            const theta = (i / segments) * Math.PI * 2;
+            const ax = Math.cos(theta) * semiMajor;
+            const ay = Math.sin(theta) * semiMinor;
+            const rx = ax * Math.cos(rotation) - ay * Math.sin(rotation);
+            const ry = ax * Math.sin(rotation) + ay * Math.cos(rotation);
+            ring.push([center[0] + rx, center[1] + ry]);
+          }
+          ring.push(ring[0]);
+          geom.setCoordinates([ring]);
+          return geom;
+        };
+      } else if (config.type === 'Donut') {
+        drawType = 'Circle';
+        geometryFunction = (coords: any, geom: any) => {
+          if (!geom) {
+            geom = new Polygon([]);
+          }
+          const center = coords[0];
+          const last = coords[1];
+          const dx = last[0] - center[0];
+          const dy = last[1] - center[1];
+          const outerRadius = Math.sqrt(dx * dx + dy * dy);
+          const innerRadius = outerRadius * 0.6; // Default ratio
+
+          const outer = [];
+          const inner = [];
+          const segments = 64;
+          for (let i = 0; i < segments; i++) {
+            const theta = (i / segments) * Math.PI * 2;
+            const cosT = Math.cos(theta);
+            const sinT = Math.sin(theta);
+            outer.push([center[0] + cosT * outerRadius, center[1] + sinT * outerRadius]);
+            inner.push([center[0] + cosT * innerRadius, center[1] + sinT * innerRadius]);
+          }
+          inner.reverse();
+          outer.push(outer[0]);
+          inner.push(inner[0]);
+          geom.setCoordinates([outer, inner]);
+          return geom;
+        };
+      }
+
       const draw = new Draw({
         source,
-        type: config.type,
+        type: drawType,
+        geometryFunction,
         freehand: config.freehand ?? false,
         snapTolerance: config.snapTolerance ?? 12,
       });

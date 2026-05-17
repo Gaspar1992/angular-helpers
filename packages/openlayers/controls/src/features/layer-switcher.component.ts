@@ -1,6 +1,6 @@
 // OlLayerSwitcherComponent - UI control for managing layer visibility
 
-import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, OnInit, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { LayerSwitcherItem } from '../models/layer-switcher.types';
 
@@ -124,7 +124,7 @@ import type { LayerSwitcherItem } from '../models/layer-switcher.types';
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         font-size: 13px;
         min-width: 36px;
-        z-index: 100;
+        z-index: 10;
         transition: all 0.2s ease;
       }
 
@@ -287,17 +287,21 @@ import type { LayerSwitcherItem } from '../models/layer-switcher.types';
     `,
   ],
 })
-export class OlLayerSwitcherComponent {
+export class OlLayerSwitcherComponent implements OnInit {
   position = input<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'>('top-right');
   layers = input<LayerSwitcherItem[]>([]);
   collapsible = input<boolean>(true);
   showOpacity = input<boolean>(false);
-  startCollapsed = input<boolean>(false);
+  startCollapsed = input<boolean>(true);
 
   visibilityChange = output<{ id: string; visible: boolean }>();
   opacityChange = output<{ id: string; opacity: number }>();
 
-  protected isCollapsed = signal(false);
+  protected isCollapsed = signal(true);
+
+  ngOnInit(): void {
+    this.isCollapsed.set(this.startCollapsed());
+  }
 
   toggleCollapsed(): void {
     if (this.collapsible()) {

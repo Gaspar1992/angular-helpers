@@ -6,181 +6,201 @@ import { RouterLink } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink],
   template: `
-    <div class="pb-12">
-      <!-- Hero -->
-      <div class="mb-10">
+    <div class="max-width-container py-12 sm:py-20 animate-in fade-in duration-700">
+      <!-- Premium Hero Header -->
+      <div class="mb-16">
         <h1
-          class="text-2xl sm:text-3xl font-extrabold text-base-content mb-3 tracking-tight leading-tight"
+          class="text-[2.5rem] sm:text-[3.5rem] font-black text-base-content tracking-tighter leading-none m-0 mb-6"
         >
-          Angular Helpers — Documentation
+          Documentation
         </h1>
-        <p class="text-sm sm:text-base text-base-content/70 max-w-xl leading-relaxed">
-          A collection of Angular libraries providing secure, reactive access to Browser APIs and
-          security utilities.
+        <p class="text-lg sm:text-xl text-base-content/50 max-w-2xl font-medium leading-relaxed">
+          Explore the libraries, utilities, and architectural patterns that make Angular Helpers the
+          premier choice for modern, high-performance web applications.
         </p>
       </div>
 
-      <!-- Package Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-10">
-        <!-- Browser Web APIs -->
-        <div
-          class="bg-base-200 border border-base-300 rounded-xl p-6 flex flex-col gap-4 hover:border-primary/40 transition-colors"
+      <!-- Grid of Packages -->
+      <section
+        class="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 mt-16"
+        aria-labelledby="packages-title"
+      >
+        <h2 id="packages-title" class="sr-only">Available Packages</h2>
+
+        <!-- Browser APIs -->
+        <a
+          routerLink="/docs/browser-web-apis"
+          class="bg-base-200 border border-base-content/5 rounded-3xl p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
         >
-          <div class="flex items-start gap-3">
-            <span class="text-3xl leading-none mt-0.5">🌐</span>
-            <div>
-              <h2 class="text-lg font-bold text-base-content mb-1">browser-web-apis</h2>
-              <code class="text-xs text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono">
-                &#64;angular-helpers/browser-web-apis
-              </code>
+          <div class="flex items-center justify-between">
+            <div
+              class="p-4 bg-base-content/5 rounded-2xl border border-base-content/10 shadow-inner group-hover:scale-110 transition-transform"
+            >
+              <span class="text-4xl">🌐</span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="badge badge-primary font-bold">42 services</span>
+              <span class="badge font-bold">Signals</span>
             </div>
           </div>
-          <p class="text-sm text-base-content/70 leading-relaxed">
-            40 strongly typed Angular services + 13 signal-based inject functions for Camera,
-            Geolocation, Storage, WebSocket, Bluetooth, Battery, Gamepad, NFC, and more — all with
-            built-in browser support detection and reactive APIs.
-          </p>
-          <div class="flex flex-wrap gap-2">
-            <span class="badge badge-sm badge-ghost">40 services</span>
-            <span class="badge badge-sm badge-ghost">13 signal injectors</span>
-            <span class="badge badge-sm badge-ghost">Signals</span>
-            <span class="badge badge-sm badge-ghost">OnPush</span>
+          <div>
+            <h3
+              class="text-2xl font-black text-base-content m-0 mb-3 tracking-tight group-hover:text-primary transition-colors"
+            >
+              Browser Web APIs
+            </h3>
+            <p class="text-base text-base-content/50 leading-relaxed font-medium">
+              Seamlessly integrate native browser capabilities like Geolocation, Notifications, and
+              Storage into your Angular application with reactive, signal-based services.
+            </p>
           </div>
-          <div class="bg-base-300 border border-base-300 rounded-lg px-3 py-2">
-            <code class="text-xs text-success font-mono">
-              npm install &#64;angular-helpers/browser-web-apis
+          <div class="bg-base-content/5 border border-base-content/5 rounded-xl px-4 py-3 mt-auto">
+            <code class="text-xs text-base-content/80 font-mono">
+              pnpm add
+              <span class="text-primary font-bold">&#64;angular-helpers/browser-web-apis</span>
             </code>
           </div>
-          <a
-            routerLink="/docs/browser-web-apis"
-            class="text-primary font-semibold text-sm hover:underline mt-auto inline-flex items-center gap-1"
-          >
-            View documentation →
-          </a>
-        </div>
+        </a>
 
         <!-- Security -->
-        <div
-          class="bg-base-200 border border-base-300 rounded-xl p-6 flex flex-col gap-4 hover:border-primary/40 transition-colors"
+        <a
+          routerLink="/docs/security"
+          class="bg-base-200 border border-base-content/5 rounded-3xl p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
         >
-          <div class="flex items-start gap-3">
-            <span class="text-3xl leading-none mt-0.5">🛡️</span>
-            <div>
-              <h2 class="text-lg font-bold text-base-content mb-1">security</h2>
-              <code class="text-xs text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono">
-                &#64;angular-helpers/security
-              </code>
+          <div class="flex items-center justify-between">
+            <div
+              class="p-4 bg-base-content/5 rounded-2xl border border-base-content/10 shadow-inner group-hover:scale-110 transition-transform"
+            >
+              <span class="text-4xl">🛡️</span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="badge badge-primary font-bold">ReDoS Prevention</span>
+              <span class="badge font-bold">Crypto</span>
             </div>
           </div>
-          <p class="text-sm text-base-content/70 leading-relaxed">
-            ReDoS prevention via Web Worker-isolated regex execution. Includes a fluent builder API
-            and complexity analysis for safe regular expression usage in Angular apps.
-          </p>
-          <div class="flex flex-wrap gap-2">
-            <span class="badge badge-sm badge-ghost">ReDoS Prevention</span>
-            <span class="badge badge-sm badge-ghost">Web Workers</span>
-            <span class="badge badge-sm badge-ghost">Builder Pattern</span>
+          <div>
+            <h3
+              class="text-2xl font-black text-base-content m-0 mb-3 tracking-tight group-hover:text-primary transition-colors"
+            >
+              Security Utilities
+            </h3>
+            <p class="text-base text-base-content/50 leading-relaxed font-medium">
+              Hardened tools for cryptographic operations, secure password hashing, and input
+              validation designed to prevent common web vulnerabilities.
+            </p>
           </div>
-          <div class="bg-base-300 border border-base-300 rounded-lg px-3 py-2">
-            <code class="text-xs text-success font-mono">
-              npm install &#64;angular-helpers/security
+          <div class="bg-base-content/5 border border-base-content/5 rounded-xl px-4 py-3 mt-auto">
+            <code class="text-xs text-base-content/80 font-mono">
+              pnpm add <span class="text-primary font-bold">&#64;angular-helpers/security</span>
             </code>
           </div>
-          <a
-            routerLink="/docs/security"
-            class="text-primary font-semibold text-sm hover:underline mt-auto inline-flex items-center gap-1"
-          >
-            View documentation →
-          </a>
-        </div>
+        </a>
 
         <!-- Worker HTTP -->
-        <div
-          class="bg-base-200 border border-base-300 rounded-xl p-6 flex flex-col gap-4 hover:border-primary/40 transition-colors"
+        <a
+          routerLink="/docs/worker-http"
+          class="bg-base-200 border border-base-content/5 rounded-3xl p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
         >
-          <div class="flex items-start gap-3">
-            <span class="text-3xl leading-none mt-0.5">⚙️</span>
-            <div>
-              <h2 class="text-lg font-bold text-base-content mb-1">worker-http</h2>
-              <code class="text-xs text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono">
-                &#64;angular-helpers/worker-http
-              </code>
+          <div class="flex items-center justify-between">
+            <div
+              class="p-4 bg-base-content/5 rounded-2xl border border-base-content/10 shadow-inner group-hover:scale-110 transition-transform"
+            >
+              <span class="text-4xl">⚙️</span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="badge badge-primary font-bold">Web Workers</span>
+              <span class="badge font-bold">Performance</span>
             </div>
           </div>
-          <p class="text-sm text-base-content/70 leading-relaxed">
-            HTTP client for Web Workers with interceptors, retry logic, and caching. Offload network
-            operations to workers for improved main-thread performance.
-          </p>
-          <div class="flex flex-wrap gap-2">
-            <span class="badge badge-sm badge-ghost">Web Workers</span>
-            <span class="badge badge-sm badge-ghost">Interceptors</span>
-            <span class="badge badge-sm badge-ghost">Caching</span>
+          <div>
+            <h3
+              class="text-2xl font-black text-base-content m-0 mb-3 tracking-tight group-hover:text-primary transition-colors"
+            >
+              Worker HTTP
+            </h3>
+            <p class="text-base text-base-content/50 leading-relaxed font-medium">
+              Offload your heavy API communication and data processing to Web Workers, keeping your
+              UI thread responsive and smooth at 60fps.
+            </p>
           </div>
-          <div class="bg-base-300 border border-base-300 rounded-lg px-3 py-2">
-            <code class="text-xs text-success font-mono">
-              npm install &#64;angular-helpers/worker-http
+          <div class="bg-base-content/5 border border-base-content/5 rounded-xl px-4 py-3 mt-auto">
+            <code class="text-xs text-base-content/80 font-mono">
+              pnpm add <span class="text-primary font-bold">&#64;angular-helpers/worker-http</span>
             </code>
           </div>
-          <a
-            routerLink="/docs/worker-http"
-            class="text-primary font-semibold text-sm hover:underline mt-auto inline-flex items-center gap-1"
-          >
-            View documentation →
-          </a>
-        </div>
+        </a>
 
         <!-- OpenLayers -->
-        <div
-          class="bg-base-200 border border-base-300 rounded-xl p-6 flex flex-col gap-4 hover:border-primary/40 transition-colors"
+        <a
+          routerLink="/docs/openlayers"
+          class="bg-base-200 border border-base-content/5 rounded-3xl p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
         >
-          <div class="flex items-start gap-3">
-            <span class="text-3xl leading-none mt-0.5">🗺️</span>
-            <div>
-              <h2 class="text-lg font-bold text-base-content mb-1">openlayers</h2>
-              <code class="text-xs text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono">
-                &#64;angular-helpers/openlayers
-              </code>
+          <div class="flex items-center justify-between">
+            <div
+              class="p-4 bg-base-content/5 rounded-2xl border border-base-content/10 shadow-inner group-hover:scale-110 transition-transform"
+            >
+              <span class="text-4xl">🗺️</span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="badge badge-primary font-bold">GIS</span>
+              <span class="badge font-bold">Maps</span>
             </div>
           </div>
-          <p class="text-sm text-base-content/70 leading-relaxed">
-            Modern Angular wrapper for OpenLayers with modular architecture, standalone components,
-            and reactive signal-based APIs for maps, layers, and controls.
-          </p>
-          <div class="flex flex-wrap gap-2">
-            <span class="badge badge-sm badge-ghost">Maps</span>
-            <span class="badge badge-sm badge-ghost">Standalone</span>
-            <span class="badge badge-sm badge-ghost">Signals</span>
+          <div>
+            <h3
+              class="text-2xl font-black text-base-content m-0 mb-3 tracking-tight group-hover:text-primary transition-colors"
+            >
+              OpenLayers
+            </h3>
+            <p class="text-base text-base-content/50 leading-relaxed font-medium">
+              Modern Angular wrapper for OpenLayers with modular architecture, standalone
+              components, and reactive signal-based APIs.
+            </p>
           </div>
-          <div class="bg-base-300 border border-base-300 rounded-lg px-3 py-2">
-            <code class="text-xs text-success font-mono">
-              npm install &#64;angular-helpers/openlayers
+          <div class="bg-base-content/5 border border-base-content/5 rounded-xl px-4 py-3 mt-auto">
+            <code class="text-xs text-base-content/80 font-mono">
+              pnpm add <span class="text-primary font-bold">&#64;angular-helpers/openlayers</span>
             </code>
           </div>
-          <a
-            routerLink="/docs/openlayers"
-            class="text-primary font-semibold text-sm hover:underline mt-auto inline-flex items-center gap-1"
+        </a>
+      </section>
+
+      <!-- Advanced Integration Sample -->
+      <section class="mt-32" aria-labelledby="integration-title">
+        <div class="flex flex-col items-center text-center gap-6 mb-16">
+          <h2
+            id="integration-title"
+            class="text-[2.5rem] sm:text-[3.5rem] font-black text-base-content tracking-tighter leading-tight m-0"
           >
-            View documentation →
-          </a>
+            Modular by design.
+          </h2>
+          <p class="text-lg text-base-content/50 max-w-2xl font-medium leading-relaxed">
+            Pick only what you need. Our library is designed to be treeshakeable and lean, ensuring
+            your bundle stays small.
+          </p>
         </div>
-      </div>
 
-      <!-- Quick Start -->
-      <section>
-        <h2 class="text-xl font-bold text-base-content mb-2">Quick setup</h2>
-        <p class="text-sm text-base-content/70 mb-4">Register all providers at bootstrap:</p>
-        <div class="bg-base-200 border border-base-300 rounded-xl overflow-auto">
+        <div
+          class="bg-base-200 border border-base-content/5 rounded-[2rem] overflow-hidden shadow-2xl relative"
+        >
+          <div
+            class="flex items-center px-6 py-4 border-b border-base-content/10 bg-base-content/5"
+          >
+            <div class="flex gap-2">
+              <div class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/30"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/30"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/30"></div>
+            </div>
+            <span class="text-xs font-mono text-base-content/30 ml-6">app.config.ts</span>
+          </div>
           <pre
-            class="p-4 sm:p-6 text-xs sm:text-sm font-mono text-base-content leading-relaxed"
-          ><code>import &#123; provideBrowserWebApis, CameraService, GeolocationService &#125; from '&#64;angular-helpers/browser-web-apis';
-import &#123; provideSecurity &#125; from '&#64;angular-helpers/security';
-
-bootstrapApplication(AppComponent, &#123;
+            class="m-0 p-10 overflow-x-auto"
+          ><code class="font-mono text-sm leading-relaxed text-base-content/90">bootstrapApplication(AppComponent, &#123;
   providers: [
-    provideBrowserWebApis(&#123;
-      services: [CameraService, GeolocationService]
+    provideBrowserWebApis(),
+    provideWorkerHttp(&#123;
+      worker: <span class="text-primary font-bold">new</span> Worker(<span class="text-green-400">'./app.worker'</span>, &#123; type: <span class="text-green-400">'module'</span> &#125;),
     &#125;),
-    provideSecurity(&#123; enableRegexSecurity: true &#125;),
   ],
 &#125;);</code></pre>
         </div>

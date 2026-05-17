@@ -4,7 +4,7 @@ test.describe('Worker HTTP Demo', () => {
   test('renders the demo page with all sections', async ({ page }) => {
     await page.goto('/demo/worker-http');
 
-    await expect(page.getByRole('heading', { level: 1, name: /Worker HTTP Demo/i })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /Worker HTTP/i })).toBeVisible();
 
     await expect(page.getByRole('heading', { level: 2, name: /WorkerTransport/i })).toBeVisible();
 
@@ -33,10 +33,9 @@ test.describe('Worker HTTP Demo', () => {
     // Wait for success result in activity log (max 5 seconds for the 200ms delay + processing)
     await expect(page.getByText(/Echo response received.*ms/i)).toBeVisible({ timeout: 5000 });
 
-    // Verify the result contains the expected data in the transport result block
     const resultBlock = page
-      .locator('div.bg-base-300')
-      .filter({ hasText: /Result.*ms/i })
+      .locator('app-worker-http-transport-card')
+      .locator('div', { hasText: 'Result' })
       .first();
     await expect(resultBlock).toBeVisible();
     const resultText = await resultBlock.textContent();
@@ -76,14 +75,12 @@ test.describe('Worker HTTP Demo', () => {
     await page.getByRole('button', { name: /Sign Payload/i }).click();
 
     // Wait for signature to appear (look for the result div containing the signature hex)
-    const signatureBlock = page
-      .locator('div.bg-base-300', { hasText: /^Signature: [a-f0-9]+/i })
-      .first();
+    const signatureBlock = page.locator('app-worker-http-hmac-card').locator('div.font-mono');
     await expect(signatureBlock).toBeVisible({ timeout: 5000 });
 
     // Verify signature is a hex string (contains only hex characters)
     const signatureText = await signatureBlock.textContent();
-    expect(signatureText).toMatch(/Signature: [a-f0-9]{16,}/i);
+    expect(signatureText).toMatch(/Signature\s*[a-f0-9]{16,}/i);
 
     // Check activity log
     await expect(page.getByText(/Signed payload/i)).toBeVisible();
@@ -96,12 +93,12 @@ test.describe('Worker HTTP Demo', () => {
     await page.getByRole('button', { name: /Hash Content/i }).click();
 
     // Wait for hash result to appear (use the specific result block class)
-    const hashBlock = page.locator('div.bg-base-300', { hasText: /^SHA-256: [a-f0-9]+/i }).first();
+    const hashBlock = page.locator('app-worker-http-hash-card').locator('div.font-mono');
     await expect(hashBlock).toBeVisible({ timeout: 5000 });
 
     // Verify hash is a hex string
     const hashText = await hashBlock.textContent();
-    expect(hashText).toMatch(/SHA-256: [a-f0-9]{20,}/i);
+    expect(hashText).toMatch(/SHA-256.*[a-f0-9]{20,}/i);
 
     // Check activity log for hash entry (shortened form with ...)
     await expect(page.getByText(/SHA-256:.*\.\.\./i).first()).toBeVisible();
@@ -137,7 +134,7 @@ test.describe('Worker HTTP Demo', () => {
 
     // Verify the log entry structure (time badge, section badge, and message)
     const logEntry = page
-      .locator('div.flex.gap-3')
+      .locator('div.flex')
       .filter({ hasText: /SHA-256:/i })
       .first();
     await expect(logEntry).toBeVisible();

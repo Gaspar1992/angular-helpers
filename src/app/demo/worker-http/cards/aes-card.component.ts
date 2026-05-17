@@ -7,39 +7,53 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
   selector: 'app-worker-http-aes-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-base-200 border border-base-300 rounded-xl p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
+    <div class="bg-base-200 border border-base-content/5 rounded-3xl p-8 h-full flex flex-col">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-primary m-0 flex items-center gap-2">
           🔐 AES Encryption
         </h2>
-        <span class="badge badge-info">AES-GCM</span>
+        <span class="badge badge-info font-semibold">AES-GCM</span>
       </div>
-      <p class="text-sm text-base-content/80 mb-4">
+      <p class="text-sm text-base-content/70 mb-6">
         Encrypt and decrypt sensitive payloads using AES-GCM
       </p>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        <button type="button" (click)="encrypt()" class="btn btn-info btn-sm">Encrypt</button>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <button type="button" (click)="encrypt()" class="btn btn-info font-bold px-6">
+          Encrypt
+        </button>
         <button
           type="button"
           (click)="decrypt()"
           [disabled]="!encryptedHex()"
-          class="btn btn-secondary btn-sm"
+          class="btn btn-secondary font-bold px-6"
         >
           Decrypt
         </button>
       </div>
 
-      @if (encryptedHex()) {
-        <div class="p-3 bg-base-300 rounded-lg font-mono text-xs break-all mb-2">
-          <span class="text-secondary">Encrypted:</span> {{ encryptedHex() }}
-        </div>
-      }
-      @if (decryptedText()) {
-        <div class="p-3 bg-success/10 text-success rounded-lg font-mono text-sm break-all">
-          <span>Decrypted:</span> {{ decryptedText() }}
-        </div>
-      }
+      <div class="space-y-4 mt-auto">
+        @if (encryptedHex()) {
+          <div
+            class="p-4 bg-base-content/5 rounded-2xl shadow-inner border border-base-content/5 font-mono text-xs break-all"
+          >
+            <div class="text-secondary font-bold mb-1 uppercase tracking-wider text-[10px]">
+              Encrypted Payload
+            </div>
+            {{ encryptedHex() }}
+          </div>
+        }
+        @if (decryptedText()) {
+          <div
+            class="p-4 bg-base-content/5 rounded-2xl shadow-inner border border-base-content/5 font-mono text-sm break-all"
+          >
+            <div class="text-success font-bold mb-1 uppercase tracking-wider text-[10px]">
+              Decrypted Content
+            </div>
+            <span class="text-success">{{ decryptedText() }}</span>
+          </div>
+        }
+      </div>
     </div>
   `,
 })

@@ -3,41 +3,45 @@ import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 @Component({
   selector: 'app-clipboard-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrls: ['../demo.styles.css'],
   template: `
-    <section
-      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
-      aria-labelledby="clip-title"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="clip-title">
-          Clipboard API
+    <section class="svc-card" aria-labelledby="clip-title">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title" id="clip-title">
+          <span class="text-primary text-2xl">📋</span> Clipboard API
         </h2>
         <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-success badge-sm">supported</span>
+            <span class="badge badge-success font-black">supported</span>
           } @else {
-            <span class="badge badge-error badge-sm">unsupported</span>
+            <span class="badge badge-error font-black">unsupported</span>
           }
-          <span class="badge badge-info badge-sm">secure context</span>
+          <span class="badge badge-info font-black">secure context</span>
         </div>
       </div>
-      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
-        Async read/write to the system clipboard.
+      <p class="svc-desc">
+        Securely interact with the system clipboard using asynchronous operations.
       </p>
-      <div class="flex flex-wrap gap-2 items-center mb-4">
-        <button class="btn btn-primary btn-sm" (click)="copy()" [disabled]="!supported">
-          Copy timestamp
+
+      <div class="svc-controls">
+        <button class="btn btn-primary font-black" (click)="copy()" [disabled]="!supported">
+          Copy Timestamp
         </button>
-        <button class="btn btn-secondary btn-sm" (click)="paste()" [disabled]="!supported">
-          Paste
+        <button class="btn btn-secondary font-black" (click)="paste()" [disabled]="!supported">
+          Read Clipboard
         </button>
       </div>
+
       @if (clipboardText()) {
-        <div
-          class="bg-base-300 border border-base-300 rounded-lg p-3 font-mono text-sm text-base-content break-all"
-          aria-live="polite"
-        >
-          {{ clipboardText() }}
+        <div class="svc-result animate-in slide-in-from-bottom-2 duration-300">
+          <span
+            class="text-[10px] font-black uppercase tracking-[0.2em] text-base-content/20 mb-3 block"
+          >
+            Buffer Content
+          </span>
+          <div class="mono-block font-black text-primary italic" aria-live="polite">
+            "{{ clipboardText() }}"
+          </div>
         </div>
       }
     </section>
@@ -48,7 +52,7 @@ export class ClipboardDemoComponent {
   readonly clipboardText = signal('');
 
   async copy(): Promise<void> {
-    const text = `Copied at ${new Date().toISOString()}`;
+    const text = `Angular Helpers — Copied at ${new Date().toLocaleTimeString()}`;
     try {
       await navigator.clipboard.writeText(text);
       this.clipboardText.set(text);

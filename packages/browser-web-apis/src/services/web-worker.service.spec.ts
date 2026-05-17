@@ -31,12 +31,7 @@ describe('WebWorkerService', () => {
   beforeEach(() => {
     FakeWorker.instances = [];
     vi.useFakeTimers();
-    (globalThis as unknown as { Worker: typeof FakeWorker }).Worker = FakeWorker;
-    Object.defineProperty(globalThis, 'window', {
-      value: globalThis,
-      writable: true,
-      configurable: true,
-    });
+    vi.stubGlobal('Worker', FakeWorker);
     TestBed.configureTestingModule({ providers: [WebWorkerService] });
   });
 

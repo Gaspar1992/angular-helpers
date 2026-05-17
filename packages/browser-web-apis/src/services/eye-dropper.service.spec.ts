@@ -12,13 +12,14 @@ describe('EyeDropperService', () => {
     });
     service = TestBed.inject(EyeDropperService);
 
-    // Mock window environment
-    vi.stubGlobal('window', {
-      isSecureContext: true,
-      EyeDropper: class MockEyeDropper {
+    // Mock window environment properties
+    vi.stubGlobal(
+      'EyeDropper',
+      class MockEyeDropper {
         open = vi.fn().mockResolvedValue({ sRGBHex: '#ff0000' });
       },
-    });
+    );
+    vi.stubGlobal('isSecureContext', true);
   });
 
   afterEach(() => {
@@ -39,7 +40,8 @@ describe('EyeDropperService', () => {
   });
 
   it('should throw error if not in secure context', async () => {
-    vi.stubGlobal('window', { isSecureContext: false, EyeDropper: class {} });
+    vi.stubGlobal('isSecureContext', false);
+    vi.stubGlobal('EyeDropper', class {});
     expect(service.isSupported()).toBe(false);
     await expect(service.open()).rejects.toThrow(/secure context/);
   });

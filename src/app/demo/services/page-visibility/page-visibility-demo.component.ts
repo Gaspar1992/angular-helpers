@@ -8,42 +8,40 @@ import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.c
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [PageVisibilityService],
   imports: [CodeBlockComponent],
+  styleUrls: ['../demo.styles.css'],
   template: `
-    <section
-      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
-      aria-labelledby="vis-title"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="vis-title">
-          Page Visibility
+    <section class="svc-card" aria-labelledby="vis-title">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title" id="vis-title">
+          <span class="text-primary text-2xl">👁️</span> Page Visibility
         </h2>
         <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-success badge-sm">supported</span>
+            <span class="badge badge-success font-black">supported</span>
           } @else {
-            <span class="badge badge-error badge-sm">unsupported</span>
+            <span class="badge badge-error font-black">unsupported</span>
           }
-          <span class="badge badge-info badge-sm">{{ apiMode() }}</span>
+          <span class="badge badge-info font-black">{{ apiMode() }}</span>
         </div>
       </div>
 
-      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
+      <p class="svc-desc">
         Tracks whether this tab is visible or hidden. Switch to another tab and watch the state
-        change.
+        change in real-time.
       </p>
 
-      <div class="flex flex-wrap gap-2 items-center mb-4">
-        <div class="join" role="group" aria-label="API mode">
+      <div class="svc-controls mb-8">
+        <div class="segmented" role="group" aria-label="API mode">
           <button
-            class="btn btn-sm join-item"
-            [class.btn-active]="apiMode() === 'Service'"
+            class="btn btn-sm font-black"
+            [class.active]="apiMode() === 'Service'"
             (click)="setMode('Service')"
           >
-            Service (RxJS)
+            Service
           </button>
           <button
-            class="btn btn-sm join-item"
-            [class.btn-active]="apiMode() === 'Signal Fn'"
+            class="btn btn-sm font-black"
+            [class.active]="apiMode() === 'Signal Fn'"
             (click)="setMode('Signal Fn')"
           >
             Signal Fn
@@ -51,98 +49,80 @@ import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.c
         </div>
       </div>
 
-      <div class="bg-base-300 border border-base-300 rounded-lg p-4">
+      <div class="svc-result">
         @if (apiMode() === 'Service') {
-          <div
-            class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
-          >
-            <span class="text-sm text-base-content/80 font-medium">State</span>
-            <span class="text-sm text-base-content font-semibold">
+          <div class="kv-row">
+            <span class="kv-key">Visibility State</span>
+            <span class="kv-val">
               @if (visibilityState() === 'visible') {
-                <span class="badge badge-success badge-sm">{{ visibilityState() }}</span>
+                <span class="badge badge-success font-black">{{ visibilityState() }}</span>
               } @else {
-                <span class="badge badge-ghost badge-sm">{{ visibilityState() }}</span>
+                <span class="badge badge-ghost font-black opacity-50">{{ visibilityState() }}</span>
               }
             </span>
           </div>
-          <div
-            class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
-          >
-            <span class="text-sm text-base-content/80 font-medium">Visible</span>
-            <span class="text-sm text-base-content font-semibold">{{
-              pageVisible() ? 'yes' : 'no'
-            }}</span>
+          <div class="kv-row">
+            <span class="kv-key">Is Page Visible?</span>
+            <span class="kv-val text-primary">{{ pageVisible() ? 'YES' : 'NO' }}</span>
           </div>
         } @else {
-          <div
-            class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
-          >
-            <span class="text-sm text-base-content/80 font-medium">State</span>
-            <span class="text-sm text-base-content font-semibold">
+          <div class="kv-row">
+            <span class="kv-key">Signal State</span>
+            <span class="kv-val">
               @if (fnRef.state() === 'visible') {
-                <span class="badge badge-success badge-sm">{{ fnRef.state() }}</span>
+                <span class="badge badge-success font-black">{{ fnRef.state() }}</span>
               } @else {
-                <span class="badge badge-ghost badge-sm">{{ fnRef.state() }}</span>
+                <span class="badge badge-ghost font-black opacity-50">{{ fnRef.state() }}</span>
               }
             </span>
           </div>
-          <div
-            class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
-          >
-            <span class="text-sm text-base-content/80 font-medium">isVisible</span>
-            <span class="text-sm text-base-content font-semibold">{{
-              fnRef.isVisible() ? 'yes' : 'no'
-            }}</span>
+          <div class="kv-row">
+            <span class="kv-key">isVisible()</span>
+            <span class="kv-val text-primary">{{ fnRef.isVisible() ? 'YES' : 'NO' }}</span>
           </div>
-          <div
-            class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0"
-          >
-            <span class="text-sm text-base-content/80 font-medium">isHidden</span>
-            <span class="text-sm text-base-content font-semibold">{{
-              fnRef.isHidden() ? 'yes' : 'no'
-            }}</span>
+          <div class="kv-row">
+            <span class="kv-key">isHidden()</span>
+            <span class="kv-val text-secondary">{{ fnRef.isHidden() ? 'YES' : 'NO' }}</span>
           </div>
         }
       </div>
 
       @if (apiMode() === 'Signal Fn') {
-        <div class="mt-4">
-          <p class="text-xs text-base-content/80 mb-2">
-            Zero-boilerplate reactive state - auto-cleanup on destroy:
+        <div class="mt-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-base-content/20 mb-3">
+            Reactive State Example
           </p>
           <app-code-block
             code="import { injectPageVisibility } from '@angular-helpers/browser-web-apis';
 
 readonly visibility = injectPageVisibility();
 
-// Direct signal access in template:
-// visibility.isVisible() or visibility.isHidden()
-// visibility.state() for raw value ('visible' | 'hidden')"
+// Reactive signals:
+// visibility.isVisible()
+// visibility.state() // 'visible' | 'hidden'"
           />
-          <p class="text-xs text-base-content/80 mt-2">
-            <strong>When to use:</strong> Simple reactive read-only state, templates, computed
-            signals.
+          <p class="text-xs text-base-content/40 mt-4 font-medium leading-relaxed">
+            <strong class="text-base-content">Best for:</strong> UI states, pausing animations or
+            auto-refresh loops when the user leaves the tab.
           </p>
         </div>
       } @else {
-        <div class="mt-4">
-          <p class="text-xs text-base-content/80 mb-2">
-            Manual subscription with explicit cleanup:
+        <div class="mt-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-base-content/20 mb-3">
+            Service Implementation
           </p>
           <app-code-block
             code="import { PageVisibilityService } from '@angular-helpers/browser-web-apis';
 
 readonly svc = inject(PageVisibilityService);
 
-ngOnInit() {
-  this.svc.watch().subscribe(state => {
-    // handle visibility change
-  });
-}"
+this.svc.watch().subscribe(state => {
+  console.log('Visibility changed:', state);
+});"
           />
-          <p class="text-xs text-base-content/80 mt-2">
-            <strong>When to use:</strong> Complex async flows, combining with other streams,
-            explicit control.
+          <p class="text-xs text-base-content/40 mt-4 font-medium leading-relaxed">
+            <strong class="text-base-content">Best for:</strong> Side effects that need to trigger
+            outside of the template, global logging, or legacy RxJS architectures.
           </p>
         </div>
       }

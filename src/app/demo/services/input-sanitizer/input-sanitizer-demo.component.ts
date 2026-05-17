@@ -6,17 +6,12 @@ import { InputSanitizerService } from '@angular-helpers/security';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [InputSanitizerService],
   template: `
-    <section
-      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
-      aria-labelledby="sanitizer-title"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="sanitizer-title">
-          InputSanitizer Service
-        </h2>
+    <section class="svc-card" aria-labelledby="sanitizer-title">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title" id="sanitizer-title">InputSanitizer Service</h2>
         <div class="flex gap-2 flex-wrap">
-          <span class="badge badge-success badge-sm">xss-safe</span>
-          <span class="badge badge-info badge-sm">html escape</span>
+          <span class="badge badge-success">xss-safe</span>
+          <span class="badge badge-info">html escape</span>
         </div>
       </div>
       <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
@@ -24,34 +19,48 @@ import { InputSanitizerService } from '@angular-helpers/security';
         content.
       </p>
 
-      <div class="flex flex-col gap-2 mb-4">
-        <label for="html-input" class="text-sm font-medium text-base-content/70">HTML Input</label>
-        <input
-          id="html-input"
-          class="input input-sm input-bordered w-full font-mono text-xs"
-          [value]="htmlInput()"
-          (input)="htmlInput.set($any($event.target).value)"
-          placeholder="<b>Bold</b><script>alert(1)</script>"
-        />
-        <label for="url-input" class="text-sm font-medium text-base-content/70">URL Input</label>
-        <input
-          id="url-input"
-          class="input input-sm input-bordered w-full"
-          [value]="urlInput()"
-          (input)="urlInput.set($any($event.target).value)"
-          placeholder="https://example.com or javascript:alert(1)"
-        />
+      <div class="flex flex-col gap-3 mb-4">
+        <div class="flex flex-col gap-1">
+          <label for="html-input" class="text-xs font-bold uppercase opacity-50 ml-1"
+            >HTML Input</label
+          >
+          <input
+            id="html-input"
+            class="demo-input font-mono text-xs"
+            [value]="htmlInput()"
+            (input)="htmlInput.set($any($event.target).value)"
+            placeholder="<b>Bold</b><script>alert(1)</script>"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="url-input" class="text-xs font-bold uppercase opacity-50 ml-1"
+            >URL Input</label
+          >
+          <input
+            id="url-input"
+            class="demo-input"
+            [value]="urlInput()"
+            (input)="urlInput.set($any($event.target).value)"
+            placeholder="https://example.com or javascript:alert(1)"
+          />
+        </div>
       </div>
 
-      <div class="flex flex-wrap gap-2 mb-4">
-        <button class="btn btn-primary btn-sm" (click)="sanitizeHtml()">Sanitize HTML</button>
-        <button class="btn btn-secondary btn-sm" (click)="escapeHtml()">Escape HTML</button>
-        <button class="btn btn-secondary btn-sm" (click)="sanitizeUrl()">Validate URL</button>
+      <div class="svc-controls">
+        <button class="btn btn-primary btn-sm font-bold" (click)="sanitizeHtml()">
+          Sanitize HTML
+        </button>
+        <button class="btn btn-secondary btn-sm font-bold" (click)="escapeHtml()">
+          Escape HTML
+        </button>
+        <button class="btn btn-secondary btn-sm font-bold" (click)="sanitizeUrl()">
+          Validate URL
+        </button>
       </div>
 
       @if (sanitizedHtml()) {
-        <div class="bg-base-300 border border-base-300 rounded-lg p-3 mt-3">
-          <div class="flex items-center justify-between gap-3 py-2">
+        <div class="svc-result mt-4">
+          <div class="kv-row">
             <span class="text-sm text-base-content/60 font-medium">Result</span>
             <span class="text-sm text-base-content font-semibold font-mono break-all">{{
               sanitizedHtml()
@@ -61,8 +70,8 @@ import { InputSanitizerService } from '@angular-helpers/security';
       }
 
       @if (sanitizedUrl() !== null) {
-        <div class="bg-base-300 border border-base-300 rounded-lg p-3 mt-3">
-          <div class="flex items-center justify-between gap-3 py-2">
+        <div class="svc-result mt-4">
+          <div class="kv-row">
             <span class="text-sm text-base-content/60 font-medium">URL Validation</span>
             <span class="text-sm text-base-content font-semibold font-mono">{{
               sanitizedUrl() ?? '❌ Rejected'

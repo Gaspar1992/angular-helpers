@@ -10,12 +10,11 @@ let cachedSeroval: SerovalModule | null = null;
 async function loadSeroval(): Promise<SerovalModule> {
   if (!cachedSeroval) {
     try {
-      // Dynamic import via variable — keeps seroval as optional peer dep (no static reference)
-      const id = 'seroval';
-      cachedSeroval = (await import(/* @vite-ignore */ id)) as SerovalModule;
+      // Dynamic import — allows seroval to be an optional peer dep
+      cachedSeroval = (await import('seroval')) as unknown as SerovalModule;
     } catch {
       throw new Error(
-        'seroval is required as a peer dependency. Install it with: npm install seroval',
+        'seroval is required to serialize complex types (Date, Map, Set, RegExp). Install it with: npm install seroval',
       );
     }
   }

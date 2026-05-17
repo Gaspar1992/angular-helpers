@@ -7,6 +7,7 @@ import {
   ChangeDetectionStrategy,
   effect,
   computed,
+  signal,
 } from '@angular/core';
 import hljs from 'highlight.js/lib/core';
 import typescript from 'highlight.js/lib/languages/typescript';
@@ -27,90 +28,72 @@ const LANGUAGE_ALIASES: Record<string, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="code-block-wrapper">
-      <div class="code-header">
+      <header class="code-header">
         <span class="lang-badge">{{ displayLanguage() }}</span>
         <button
           class="copy-btn"
           (click)="copy()"
           [attr.aria-label]="'Copy ' + displayLanguage() + ' code'"
         >
-          {{ copied ? 'Copied!' : 'Copy' }}
+          {{ copied() ? 'Copied!' : 'Copy' }}
         </button>
-      </div>
+      </header>
       <pre><code #codeEl class="language-{{ normalizedLanguage() }}">{{ code() }}</code></pre>
     </div>
   `,
   styles: [
     `
+      @reference "../../../../styles.css";
+
       .code-block-wrapper {
-        background: var(--bg-elevated);
-        border-radius: var(--radius-lg);
+        background: var(--c-bg-surface);
+        border-radius: 12px;
         overflow: hidden;
-        margin: var(--sp-4) 0;
-        border: 1px solid var(--border-color);
-      }
+        margin-block: var(--space-4);
+        border: 1px solid var(--c-border);
+        box-shadow: 0 4px 20px light-dark(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.3));
 
-      .code-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: var(--sp-2) var(--sp-4);
-        background: rgba(255, 255, 255, 0.04);
-        border-bottom: 1px solid var(--border-subtle);
-      }
+        /* Native Nesting */
+        .code-header {
+          @apply flex justify-between items-center px-4 py-2 bg-base-200 border-b border-base-300;
 
-      .lang-badge {
-        font-size: var(--text-xs);
-        font-weight: 600;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.07em;
-      }
+          .lang-badge {
+            @apply text-[0.6rem] font-black text-primary uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full border border-primary/25 font-mono;
+          }
 
-      .copy-btn {
-        font-size: var(--text-xs);
-        padding: 0.2rem 0.6rem;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-sm);
-        color: #c0c8e0;
-        cursor: pointer;
-        transition:
-          background var(--transition),
-          color var(--transition);
-      }
+          .copy-btn {
+            @apply text-[0.65rem] font-black px-4 py-1.5 bg-base-content/5 border border-base-300 rounded-full text-base-content/60 cursor-pointer uppercase tracking-wider transition-all duration-150;
 
-      .copy-btn:hover {
-        background: rgba(255, 255, 255, 0.15);
-        color: var(--text-white);
-      }
+            &:hover {
+              @apply bg-base-content/10 text-base-content border-base-content/50;
+            }
 
-      .copy-btn:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 2px;
-      }
+            &:focus-visible {
+              @apply outline-2 outline-primary outline-offset-2;
+            }
+          }
+        }
 
-      pre {
-        margin: 0;
-        padding: var(--sp-5) var(--sp-6);
-        overflow-x: auto;
-      }
+        pre {
+          margin: 0;
+          padding: var(--space-4) var(--space-6);
+          overflow-x: auto;
+          background: transparent;
+        }
 
-      code {
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        line-height: 1.65;
-        background: transparent !important;
-        white-space: pre-wrap;
-        word-break: break-word;
-        overflow-wrap: anywhere;
-      }
-
-      @media (min-width: 640px) {
         code {
-          font-size: var(--text-base);
-          white-space: pre;
-          word-break: normal;
+          font-family: var(--font-mono);
+          font-size: var(--fs-sm);
+          line-height: 1.7;
+          white-space: pre-wrap;
+          word-break: break-word;
+
+          /* Fluid typography adaptation */
+          @container (width > 600px) {
+            font-size: var(--fs-base);
+            white-space: pre;
+            word-break: normal;
+          }
         }
       }
     `,
@@ -133,7 +116,7 @@ export class CodeBlockComponent implements AfterViewInit {
   });
 
   protected codeEl = viewChild.required<ElementRef<HTMLElement>>('codeEl');
-  protected copied = false;
+  protected copied = signal(false);
 
   constructor() {
     effect(() => {
@@ -152,8 +135,8 @@ export class CodeBlockComponent implements AfterViewInit {
 
   protected copy() {
     navigator.clipboard.writeText(this.code()).then(() => {
-      this.copied = true;
-      setTimeout(() => (this.copied = false), 2000);
+      this.copied.set(true);
+      setTimeout(() => this.copied.set(false), 2000);
     });
   }
 }

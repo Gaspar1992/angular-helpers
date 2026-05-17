@@ -10,9 +10,8 @@ let cachedToon: ToonModule | null = null;
 async function loadToon(): Promise<ToonModule> {
   if (!cachedToon) {
     try {
-      // Dynamic import via variable — keeps @toon-format/toon as optional peer dep (no static reference)
-      const id = '@toon-format/toon';
-      cachedToon = (await import(/* @vite-ignore */ id)) as ToonModule;
+      // Dynamic import — allows @toon-format/toon to be an optional peer dep
+      cachedToon = (await import('@toon-format/toon')) as unknown as ToonModule;
     } catch {
       throw new Error(
         '@toon-format/toon is required as a peer dependency. ' +

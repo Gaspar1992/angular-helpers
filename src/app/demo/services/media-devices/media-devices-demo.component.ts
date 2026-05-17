@@ -1,90 +1,98 @@
-import { Component, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 
 @Component({
   selector: 'app-media-devices-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrls: ['../demo.styles.css'],
   template: `
-    <section
-      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
-      aria-labelledby="mdev-title"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="mdev-title">
-          Media Devices
+    <section class="svc-card" aria-labelledby="mdev-title">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title" id="mdev-title">
+          <span class="text-primary text-2xl">🎙️</span> Media Devices
         </h2>
         <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-success badge-sm">supported</span>
+            <span class="badge badge-success font-black">supported</span>
           } @else {
-            <span class="badge badge-error badge-sm">unsupported</span>
+            <span class="badge badge-error font-black">unsupported</span>
           }
         </div>
       </div>
-      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
-        Enumerate connected audio/video input devices.
+      <p class="svc-desc">
+        Enumerate and monitor all connected audio and video input/output devices.
       </p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="bg-base-300 border border-base-300 rounded-lg p-4">
-          <h3 class="text-xs font-bold text-base-content/80 uppercase tracking-wider mb-3">
-            Video inputs ({{ cameras().length }})
-          </h3>
-          @for (d of cameras(); track d.deviceId) {
+
+      <div class="svc-controls">
+        <button class="btn btn-primary font-black" (click)="enumerate()" [disabled]="!supported">
+          Scan Devices
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 mt-4">
+        <div class="space-y-4">
+          <label>Audio Inputs</label>
+          @if (audioInputs().length === 0) {
             <div
-              class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0 last:mb-0 mb-2"
+              class="p-5 bg-base-content/5 rounded-2xl border border-base-content/5 shadow-inner italic text-xs text-base-content/20"
             >
-              <span class="text-sm text-base-content font-medium">{{
-                d.label || 'Unnamed device'
-              }}</span>
-              <span class="text-xs text-base-content/80 font-mono"
-                >{{ d.deviceId.substring(0, 8) }}…</span
-              >
+              No scan results
             </div>
-          }
-          @if (cameras().length === 0) {
-            <p class="text-sm text-base-content/80 italic">None detected</p>
+          } @else {
+            <div class="svc-result space-y-2 max-h-48 overflow-y-auto no-scrollbar">
+              @for (d of audioInputs(); track d.deviceId) {
+                <div
+                  class="flex items-center gap-3 p-3 rounded-xl bg-base-content/5 border border-base-content/5 animate-in slide-in-from-left-2 duration-300"
+                >
+                  <span class="text-lg">🎤</span>
+                  <span class="font-bold text-xs flex-1 truncate">{{
+                    d.label || 'Default Audio'
+                  }}</span>
+                </div>
+              }
+            </div>
           }
         </div>
-        <div class="bg-base-300 border border-base-300 rounded-lg p-4">
-          <h3 class="text-xs font-bold text-base-content/80 uppercase tracking-wider mb-3">
-            Audio inputs ({{ audioDevices().length }})
-          </h3>
-          @for (d of audioDevices(); track d.deviceId) {
+
+        <div class="space-y-4">
+          <label>Video Inputs</label>
+          @if (videoInputs().length === 0) {
             <div
-              class="flex items-center justify-between py-2 border-b border-base-300 last:border-b-0 last:mb-0 mb-2"
+              class="p-5 bg-base-content/5 rounded-2xl border border-base-content/5 shadow-inner italic text-xs text-base-content/20"
             >
-              <span class="text-sm text-base-content font-medium">{{
-                d.label || 'Unnamed device'
-              }}</span>
-              <span class="text-xs text-base-content/80 font-mono"
-                >{{ d.deviceId.substring(0, 8) }}…</span
-              >
+              No scan results
             </div>
-          }
-          @if (audioDevices().length === 0) {
-            <p class="text-sm text-base-content/80 italic">None detected</p>
+          } @else {
+            <div class="svc-result space-y-2 max-h-48 overflow-y-auto no-scrollbar">
+              @for (d of videoInputs(); track d.deviceId) {
+                <div
+                  class="flex items-center gap-3 p-3 rounded-xl bg-base-content/5 border border-base-content/5 animate-in slide-in-from-right-2 duration-300"
+                >
+                  <span class="text-lg">📷</span>
+                  <span class="font-bold text-xs flex-1 truncate">{{
+                    d.label || 'Default Camera'
+                  }}</span>
+                </div>
+              }
+            </div>
           }
         </div>
       </div>
     </section>
   `,
 })
-export class MediaDevicesDemoComponent implements OnInit {
+export class MediaDevicesDemoComponent {
   readonly supported = typeof navigator !== 'undefined' && 'mediaDevices' in navigator;
-  readonly cameras = signal<MediaDeviceInfo[]>([]);
-  readonly audioDevices = signal<MediaDeviceInfo[]>([]);
+  readonly audioInputs = signal<MediaDeviceInfo[]>([]);
+  readonly videoInputs = signal<MediaDeviceInfo[]>([]);
 
-  ngOnInit(): void {
-    void this.loadDevices();
-  }
-
-  private async loadDevices(): Promise<void> {
+  async enumerate(): Promise<void> {
     if (!this.supported) return;
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
-      this.cameras.set(devices.filter((d) => d.kind === 'videoinput'));
-      this.audioDevices.set(devices.filter((d) => d.kind === 'audioinput'));
+      this.audioInputs.set(devices.filter((d) => d.kind === 'audioinput'));
+      this.videoInputs.set(devices.filter((d) => d.kind === 'videoinput'));
     } catch {
-      // no permission yet
+      // denied
     }
   }
 }

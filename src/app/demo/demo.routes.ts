@@ -3,6 +3,8 @@ import { provideSecurity } from '@angular-helpers/security';
 import { provideOpenLayers } from '@angular-helpers/openlayers/core';
 import { withLayers } from '@angular-helpers/openlayers/layers';
 import { withControls } from '@angular-helpers/openlayers/controls';
+import { withMilitary } from '@angular-helpers/openlayers/military';
+import { provideBrowserWebApis } from '@angular-helpers/browser-web-apis';
 
 export const DEMO_ROUTES: Routes = [
   {
@@ -20,6 +22,39 @@ export const DEMO_ROUTES: Routes = [
         path: 'browser-apis',
         loadComponent: () =>
           import('./browser-apis/browser-apis').then((m) => m.BrowserApisComponent),
+        providers: [
+          provideBrowserWebApis({
+            enableCamera: true,
+            enableGeolocation: true,
+            enableNotifications: true,
+            enableClipboard: true,
+            enableMediaDevices: true,
+            enableBattery: true,
+            enableWebShare: true,
+            enableWebStorage: true,
+            enableWebSocket: true,
+            enableWebWorker: true,
+            enableIntersectionObserver: true,
+            enableResizeObserver: true,
+            enablePageVisibility: true,
+            enableBroadcastChannel: true,
+            enableNetworkInformation: true,
+            enableScreenWakeLock: true,
+            enableScreenOrientation: true,
+            enableFullscreen: true,
+            enableFileSystemAccess: true,
+            enableMediaRecorder: true,
+            enableServerSentEvents: true,
+            enableVibration: true,
+            enableSpeechSynthesis: true,
+            enableMutationObserver: true,
+            enablePerformanceObserver: true,
+            enableWebAudio: true,
+            enableGamepad: true,
+            enableEyeDropper: true,
+            enableIdleDetector: true,
+          }),
+        ],
         title: 'Browser APIs — Demo',
       },
       {
@@ -85,7 +120,7 @@ export const DEMO_ROUTES: Routes = [
         path: 'openlayers',
         loadComponent: () =>
           import('./openlayers/openlayers-demo.component').then((m) => m.OpenLayersDemoComponent),
-        providers: [provideOpenLayers(withLayers(), withControls())],
+        providers: [provideOpenLayers(withLayers(), withControls(), withMilitary())],
         title: 'OpenLayers — Demo',
       },
       {

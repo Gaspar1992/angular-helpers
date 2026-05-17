@@ -96,7 +96,7 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         font-size: 13px;
         color: #333;
-        z-index: 100;
+        z-index: 10;
       }
 
       .ol-basemap-switcher--top-left {

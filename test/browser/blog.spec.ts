@@ -5,8 +5,8 @@ test.describe('Blog', () => {
   test('blog list page renders with page heading', async ({ page }) => {
     await page.goto('/blog');
 
-    await expect(page.getByRole('heading', { level: 1, name: /blog/i })).toBeVisible();
-    await expect(page.getByText(/Angular development/i)).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /insights/i })).toBeVisible();
+    await expect(page.getByText(/Angular architecture/i)).toBeVisible();
   });
 
   test('first article link is visible in blog list', async ({ page }) => {
@@ -22,7 +22,7 @@ test.describe('Blog', () => {
     await page.goto('/blog/web-redesign-and-library-vision');
 
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Redesigning the web');
-    await expect(page.getByRole('link', { name: /← blog/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /back to blog/i })).toBeVisible();
   });
 
   test('unknown slug shows not found', async ({ page }) => {

@@ -139,6 +139,21 @@ describe('OlLayerService', () => {
     expect(svc.layers().find((l) => l.id === 'v1')?.type).toBe('vector');
   });
 
+  it('adds a vector layer with url and format for native decoding', () => {
+    const geoJsonConfig: VectorLayerConfig = {
+      id: 'v2',
+      type: 'vector',
+      url: 'https://example.com/data.geojson',
+      format: 'geojson',
+    };
+
+    svc.addLayer(geoJsonConfig);
+
+    expect(svc.hasLayer('v2')).toBe(true);
+    const layerInfo = svc.layers().find((l) => l.id === 'v2');
+    expect(layerInfo?.type).toBe('vector');
+  });
+
   it('adds an image layer with static and wms sources', () => {
     const stat: ImageLayerConfig = {
       id: 'static',

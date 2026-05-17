@@ -32,12 +32,6 @@ function assert(condition: boolean, message: string, file?: string): void {
   }
 }
 
-function warn(condition: boolean, message: string, file?: string): void {
-  if (!condition) {
-    errors.push({ type: 'warning', message, file });
-  }
-}
-
 console.log('🔍 Checking documentation consistency...\n');
 
 // 1. Check package metadata
@@ -51,8 +45,8 @@ assert(
 
 const signalStats = HOME_STATS.find((s) => s.label === 'Signal primitives');
 assert(
-  signalStats?.value === '13',
-  `Signal primitives count should be 13, got ${signalStats?.value ?? 'undefined'}`,
+  signalStats?.value === '14',
+  `Signal primitives count should be 14, got ${signalStats?.value ?? 'undefined'}`,
   'src/app/home/config/home.config.ts',
 );
 
@@ -70,8 +64,8 @@ assert(
   'src/app/core/config/packages.data.ts',
 );
 assert(
-  browserPackage?.description?.includes('13') ?? false,
-  'browser-web-apis description should mention "13 inject() primitives"',
+  browserPackage?.description?.includes('14') ?? false,
+  'browser-web-apis description should mention "14 inject() primitives"',
   'src/app/core/config/packages.data.ts',
 );
 
@@ -199,7 +193,7 @@ console.log('✅ Service category checks passed\n');
 
 // 6. Check for deprecated API patterns
 console.log('🚫 Checking for deprecated API patterns...');
-const deprecatedPatterns = ['enableCamera:', 'enableGeolocation:', 'enableWebStorage:'];
+const _deprecatedPatterns = ['enableCamera:', 'enableGeolocation:', 'enableWebStorage:'];
 
 // This would need file content checking - simplified version
 // In production, this would scan all .ts files in src/app

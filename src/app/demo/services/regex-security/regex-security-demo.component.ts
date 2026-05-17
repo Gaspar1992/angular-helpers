@@ -6,45 +6,48 @@ import { RegexSecurityService } from '@angular-helpers/security';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RegexSecurityService],
   template: `
-    <section
-      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
-      aria-labelledby="regex-title"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="regex-title">
-          Regex Security Service
-        </h2>
+    <section class="svc-card" aria-labelledby="regex-title">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title" id="regex-title">Regex Security Service</h2>
         <div class="flex gap-2 flex-wrap">
-          <span class="badge badge-success badge-sm">safe execution</span>
-          <span class="badge badge-info badge-sm">web worker</span>
+          <span class="badge badge-success">safe execution</span>
+          <span class="badge badge-info">web worker</span>
         </div>
       </div>
       <p class="text-sm text-base-content/70 mb-4 leading-relaxed">
         Test regular expressions safely with ReDoS protection using Web Workers.
       </p>
 
-      <div class="flex flex-col gap-2 mb-4">
-        <label for="regex-pattern" class="text-sm font-medium text-base-content/70">Pattern</label>
-        <input
-          id="regex-pattern"
-          class="input input-sm input-bordered w-full font-mono text-xs"
-          [value]="regexPattern()"
-          (input)="regexPattern.set($any($event.target).value)"
-          placeholder="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
-        />
-        <label for="regex-input" class="text-sm font-medium text-base-content/70">Test Input</label>
-        <input
-          id="regex-input"
-          class="input input-sm input-bordered w-full"
-          [value]="regexInput()"
-          (input)="regexInput.set($any($event.target).value)"
-          placeholder="test@example.com"
-        />
+      <div class="flex flex-col gap-3 mb-4">
+        <div class="flex flex-col gap-1">
+          <label for="regex-pattern" class="text-xs font-bold uppercase opacity-50 ml-1"
+            >Pattern</label
+          >
+          <input
+            id="regex-pattern"
+            class="demo-input font-mono text-xs"
+            [value]="regexPattern()"
+            (input)="regexPattern.set($any($event.target).value)"
+            placeholder="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="regex-input" class="text-xs font-bold uppercase opacity-50 ml-1"
+            >Test Input</label
+          >
+          <input
+            id="regex-input"
+            class="demo-input"
+            [value]="regexInput()"
+            (input)="regexInput.set($any($event.target).value)"
+            placeholder="test@example.com"
+          />
+        </div>
       </div>
 
-      <div class="flex flex-wrap gap-2 mb-4">
+      <div class="svc-controls">
         <button
-          class="btn btn-primary btn-sm"
+          class="btn btn-primary btn-sm font-bold"
           (click)="testRegex()"
           [disabled]="regexStatus() === 'running'"
         >
@@ -53,23 +56,24 @@ import { RegexSecurityService } from '@angular-helpers/security';
           }
           Test Regex
         </button>
-        <button class="btn btn-secondary btn-sm" (click)="analyzePattern()">Analyze Pattern</button>
+        <button class="btn btn-secondary btn-sm font-bold" (click)="analyzePattern()">
+          Analyze Pattern
+        </button>
       </div>
 
       @if (regexResult()) {
-        <div
-          class="p-3 rounded-lg font-mono text-sm break-all mt-2"
-          [class.bg-success/10]="regexStatus() === 'done' && !regexResult()?.includes('❌')"
-          [class.text-success]="regexStatus() === 'done' && !regexResult()?.includes('❌')"
-          [class.bg-error/10]="regexStatus() === 'error' || regexResult()?.includes('❌')"
-          [class.text-error]="regexStatus() === 'error' || regexResult()?.includes('❌')"
-          [class.bg-info/10]="regexStatus() === 'idle'"
-          [class.text-info]="regexStatus() === 'idle'"
-        >
-          {{ regexResult() }}
-          @if (regexTime() > 0) {
-            <span class="text-xs opacity-60 ml-2">({{ regexTime() }}ms)</span>
-          }
+        <div class="svc-result mt-4">
+          <div
+            class="font-mono text-sm break-all"
+            [class.text-success]="regexStatus() === 'done' && !regexResult()?.includes('❌')"
+            [class.text-error]="regexStatus() === 'error' || regexResult()?.includes('❌')"
+            [class.text-info]="regexStatus() === 'idle'"
+          >
+            {{ regexResult() }}
+            @if (regexTime() > 0) {
+              <span class="text-xs opacity-60 ml-2">({{ regexTime() }}ms)</span>
+            }
+          </div>
         </div>
       }
     </section>

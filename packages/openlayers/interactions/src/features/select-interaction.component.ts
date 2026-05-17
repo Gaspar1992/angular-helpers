@@ -27,6 +27,7 @@ export class OlSelectInteractionComponent {
   layers = input<string[]>();
   multi = input<boolean>();
   hitTolerance = input<number>();
+  condition = input<'click' | 'pointerMove'>();
   active = input<boolean>(true);
 
   private selectFiltered$ = this.interactionService.select$.pipe(
@@ -42,6 +43,7 @@ export class OlSelectInteractionComponent {
           layers: this.layers(),
           multi: this.multi(),
           hitTolerance: this.hitTolerance(),
+          condition: this.condition(),
         });
       } else {
         this.interactionService.disableInteraction(this.id());

@@ -75,7 +75,7 @@ ng add @angular-helpers/worker-http --installEsbuildPlugin=true
 ### Manual installation
 
 ```bash
-npm install @angular-helpers/worker-http
+pnpm add @angular-helpers/worker-http
 ```
 
 Then follow the setup in the `/backend` section below.
@@ -320,7 +320,7 @@ import { structuredCloneSerializer } from '@angular-helpers/worker-http/serializ
 
 #### `createSerovalSerializer()` — Full type fidelity
 
-Requires `seroval` as an optional peer dependency (`npm install seroval`).
+Requires `seroval` as an optional peer dependency (`pnpm add seroval`).
 
 Supports: `Date`, `Map`, `Set`, `BigInt`, `RegExp`, circular references, and more.
 
@@ -338,7 +338,7 @@ const original = serializer.deserialize(payload);
 
 #### `createToonSerializer()` — Token-Oriented Object Notation
 
-Requires `@toon-format/toon` as an optional peer dependency (`npm install @toon-format/toon`).
+Requires `@toon-format/toon` as an optional peer dependency (`pnpm add @toon-format/toon`).
 
 [TOON](https://toonformat.dev) declares object keys once and emits values as CSV-like rows. For uniform arrays of objects (the most common API response shape — `User[]`, `Product[]`, paginated lists), it cuts payload size by **30–60%** compared to JSON, with negligible parsing overhead.
 
@@ -821,8 +821,8 @@ generation), so the only variable being compared is **where** the work runs.
 To run locally:
 
 ```bash
-npm run build:workers
-npm start
+pnpm run build:workers
+pnpm start
 # open https://localhost:4200/demo/worker-http-benchmark
 ```
 

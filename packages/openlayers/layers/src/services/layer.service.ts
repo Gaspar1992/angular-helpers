@@ -7,23 +7,25 @@ import TileLayer from 'ol/layer/Tile';
 import ImageLayer from 'ol/layer/Image';
 import VectorSource from 'ol/source/Vector';
 import OLFeature from 'ol/Feature';
-import { Circle as CircleGeom, LineString, Point, Polygon, type Geometry } from 'ol/geom';
+import { Circle as CircleGeom, LineString, Point, Polygon } from 'ol/geom';
 import { fromLonLat } from 'ol/proj';
 import { getCenter } from 'ol/extent';
 import { Style, Circle as CircleStyle, Fill, Icon, Stroke } from 'ol/style';
 import Text from 'ol/style/Text';
 import ClusterSource from 'ol/source/Cluster';
-import type { Style as AbstractStyle } from '@angular-helpers/openlayers/core';
+import type { Style as AbstractStyle, Feature } from '@angular-helpers/openlayers/core';
 import OSM from 'ol/source/OSM';
 import XYZ from 'ol/source/XYZ';
 import TileWMS from 'ol/source/TileWMS';
 import ImageWMS from 'ol/source/ImageWMS';
 import ImageStatic from 'ol/source/ImageStatic';
+import GeoJSON from 'ol/format/GeoJSON';
+import TopoJSON from 'ol/format/TopoJSON';
+import KML from 'ol/format/KML';
 import type BaseLayer from 'ol/layer/Base';
 import type OLMap from 'ol/Map';
 import { OlMapService } from '@angular-helpers/openlayers/core';
 import type {
-  LayerConfig,
   VectorLayerConfig,
   TileLayerConfig,
   ImageLayerConfig,
@@ -253,24 +255,34 @@ export class OlLayerService {
 
     if (!(vectorSource instanceof VectorSource)) return;
 
-    // Get existing feature IDs from source
-    const existingIds = new Set(
-      vectorSource
-        .getFeatures()
-        .map((f) => f.getId())
-        .filter((id): id is string | number => id !== undefined),
-    );
+    // Sync features: remove old ones, update existing ones, add new ones
+    if (features) {
+      const newFeatureIds = new Set<string | number>(features.map((f) => f.id));
+      const sourceFeatures = vectorSource.getFeatures();
 
-    // Only add features that don't already exist in the source
-    if (features && features.length > 0) {
-      const newFeatures = features.filter((f) => !existingIds.has(f.id));
+      // 1. Remove features that are no longer in the input
+      sourceFeatures.forEach((f) => {
+        const id = f.getId();
+        if (id !== undefined && !newFeatureIds.has(id)) {
+          vectorSource.removeFeature(f);
+        }
+      });
 
-      if (newFeatures.length > 0) {
-        const olFeatures = newFeatures.map((feature) => {
+      // 2. Only add features that don't already exist in the source
+      const existingIds = new Set(
+        vectorSource
+          .getFeatures()
+          .map((f) => f.getId())
+          .filter((id): id is string | number => id !== undefined),
+      );
+
+      const featuresToAdd = features.filter((f) => !existingIds.has(f.id));
+
+      if (featuresToAdd.length > 0) {
+        const olFeatures = featuresToAdd.map((feature) => {
           const geom = feature.geometry;
           let geometry;
 
-          // Validate coordinates exist before processing
           if (!geom.coordinates) {
             geometry = new Point([0, 0]);
           } else if (geom.type === 'Point') {
@@ -286,7 +298,6 @@ export class OlLayerService {
             geometry = new Polygon(rings);
           } else if (geom.type === 'Circle') {
             const center = fromLonLat(geom.coordinates as [number, number]);
-            // Approximate radius in meters - use 1000m as default if not specified
             geometry = new CircleGeom(center, (geom as { radius?: number }).radius ?? 1000);
           } else {
             geometry = new Point([0, 0]);
@@ -328,7 +339,14 @@ export class OlLayerService {
   }
 
   private createVectorLayer(config: VectorLayerConfig, map: OLMap): { id: string } {
-    const vectorSource = new VectorSource();
+    const sourceOptions: any = {};
+    if (config.url && config.format) {
+      sourceOptions.url = config.url;
+      if (config.format === 'geojson') sourceOptions.format = new GeoJSON();
+      else if (config.format === 'topojson') sourceOptions.format = new TopoJSON();
+      else if (config.format === 'kml') sourceOptions.format = new KML();
+    }
+    const vectorSource = new VectorSource(sourceOptions);
 
     // Add features if provided
     if (config.features && config.features.length > 0) {
@@ -405,78 +423,10 @@ export class OlLayerService {
       }),
     });
 
-    // Cluster style: shows count badge when features are clustered
-    const clusterStyleFn = (olFeature: { get(key: string): unknown }): Style => {
-      const features = olFeature.get('features') as unknown[] | undefined;
-      const size = features?.length ?? 1;
-
-      if (size > 1) {
-        const showCount = clusterCfg?.showCount ?? true;
-        return new Style({
-          image: new CircleStyle({
-            radius: 15 + Math.min(size * 2, 15),
-            fill: new Fill({ color: 'rgba(255, 100, 100, 0.8)' }),
-            stroke: new Stroke({ color: '#fff', width: 2 }),
-          }),
-          text: showCount
-            ? new Text({
-                text: String(size),
-                fill: new Fill({ color: '#fff' }),
-              })
-            : undefined,
-        });
-      }
-
-      // Single feature: get the original feature from the cluster and use its style
-      const originalFeatures = olFeature.get('features') as
-        | Array<{ get(key: string): unknown; getGeometry?(): Geometry | undefined }>
-        | undefined;
-      const originalFeature = originalFeatures?.[0];
-      if (originalFeature) {
-        let styleToUse: Style | undefined;
-        const abstractStyle = originalFeature.get(STYLE_PROP) as AbstractStyle | undefined;
-        if (abstractStyle) {
-          const style = new Style();
-          const { icon, fill, stroke } = abstractStyle;
-          if (icon?.src) {
-            style.setImage(
-              new Icon({
-                src: icon.src,
-                ...(icon.size ? { size: icon.size } : {}),
-                ...(icon.anchor ? { anchor: icon.anchor } : {}),
-              }),
-            );
-          }
-          if (fill) {
-            style.setFill(new Fill({ color: fill.color }));
-          }
-          if (stroke) {
-            style.setStroke(new Stroke({ color: stroke.color, width: stroke.width }));
-          }
-          // If we mapped at least one property, return it, otherwise fallback
-          if (icon?.src || fill || stroke) {
-            styleToUse = style;
-          }
-        }
-
-        if (!styleToUse) {
-          styleToUse = defaultStyle.clone();
-        }
-
-        const origGeom = originalFeature.getGeometry?.();
-        if (origGeom) {
-          styleToUse.setGeometry(origGeom);
-        }
-
-        return styleToUse;
-      }
-      return defaultStyle;
-    };
-
-    // Per-feature style resolver: features carrying `style` render it.
-    // Structural type avoids importing `FeatureLike` from `ol/Feature`;
-    // tooling has been observed to auto-remove the unused-looking import.
-    const styleFn = (olFeature: { get(key: string): unknown }): Style => {
+    // Resolved style: priority to stashed metadata, then config-level style, then default.
+    const userStyle = config.style;
+    const styleFn = (olFeature: any, resolution: number): any => {
+      // 1. Per-feature style metadata (stashed via STYLE_PROP)
       const abstractStyle = olFeature.get(STYLE_PROP) as AbstractStyle | undefined;
       if (abstractStyle) {
         const style = new Style();
@@ -498,7 +448,63 @@ export class OlLayerService {
         }
         if (icon?.src || fill || stroke) return style;
       }
+
+      // 2. Layer-level style from config (supports functions or static styles)
+      if (userStyle) {
+        if (typeof userStyle === 'function') {
+          // Check if it's already an OL native feature or wrap if needed
+          // For simplicity in the demo, we pass the feature as-is or mapped
+          const feature: Feature = {
+            id: String(olFeature.getId() ?? ''),
+            geometry: {
+              type: olFeature.getGeometry()?.getType() as any,
+              coordinates: [], // coordinates not easily reversible without extra work
+            },
+            properties: olFeature.getProperties(),
+          };
+          return (userStyle as any)(feature, resolution);
+        }
+        return userStyle;
+      }
+
       return defaultStyle;
+    };
+
+    // Cluster style: shows count badge when features are clustered, else delegates to styleFn
+    const clusterStyleFn = (olFeature: any, resolution: number): any => {
+      const features = olFeature.get('features') as any[] | undefined;
+      const size = features?.length ?? 1;
+
+      if (size > 1) {
+        const showCount = clusterCfg?.showCount ?? true;
+        return new Style({
+          image: new CircleStyle({
+            radius: 15 + Math.min(size * 2, 15),
+            fill: new Fill({ color: 'rgba(255, 100, 100, 0.8)' }),
+            stroke: new Stroke({ color: '#fff', width: 2 }),
+          }),
+          text: showCount
+            ? new Text({
+                text: String(size),
+                fill: new Fill({ color: '#fff' }),
+              })
+            : undefined,
+        });
+      }
+
+      // Single feature in cluster: unwrap and call styleFn
+      const originalFeature = features?.[0];
+      if (originalFeature) {
+        // We MUST preserve the original geometry if it's a non-point ( spiderfication etc)
+        const style = styleFn(originalFeature, resolution);
+        if (style instanceof Style) {
+          const origGeom = originalFeature.getGeometry();
+          if (origGeom) style.setGeometry(origGeom);
+        }
+        return style;
+      }
+
+      return styleFn(olFeature, resolution);
     };
 
     const layer = new VectorLayer({

@@ -42,7 +42,9 @@ const DEFAULT_ENDPOINT = 'https://api.pwnedpasswords.com/range/';
  * const { leaked, count } = await hibp.isPasswordLeaked(password);
  * if (leaked) alert(`This password has appeared in ${count} breaches`);
  */
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class HibpService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly webCrypto = inject(WebCryptoService);

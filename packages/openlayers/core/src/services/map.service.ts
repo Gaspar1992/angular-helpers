@@ -1,6 +1,6 @@
 // OlMapService
 
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import type OLMap from 'ol/Map';
 import type { View } from 'ol';
 import type { Coordinate as OLCoordinate } from 'ol/coordinate';
@@ -17,12 +17,23 @@ export class OlMapService {
   private map: OLMap | null = null;
   private readyCallbacks: Array<(map: OLMap) => void> = [];
 
-  setMap(map: OLMap): void {
+  private _resolution = signal<number>(1);
+  /** Signal that emits the current map resolution in meters per pixel */
+  readonly resolution = this._resolution.asReadonly();
+
+  setMap(map: OLMap | null): void {
     this.map = map;
-    const callbacks = this.readyCallbacks.splice(0);
-    for (const cb of callbacks) {
-      cb(map);
+    if (map) {
+      this._resolution.set(map.getView()?.getResolution() ?? 1);
+      const callbacks = this.readyCallbacks.splice(0);
+      for (const cb of callbacks) {
+        cb(map);
+      }
     }
+  }
+
+  setResolution(resolution: number): void {
+    this._resolution.set(resolution);
   }
 
   getMap(): OLMap | null {

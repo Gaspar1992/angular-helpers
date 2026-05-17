@@ -1,12 +1,11 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
+import { HOME_FEATURES, HOME_STATS, HOME_PACKAGES, HOME_CODE_TABS } from './config/home.config';
 import { CodeWindowComponent } from '../shared/components/code-window/code-window.component';
-import { SiteFooterComponent } from '../shared/components/site-footer/site-footer.component';
-import { FeatureCardComponent } from './ui/feature-card/feature-card.component';
-import { PackageCardComponent } from './ui/package-card/package-card.component';
 import { StatsBarComponent } from './ui/stats-bar/stats-bar.component';
-import { HOME_FEATURES, HOME_STATS, HOME_PACKAGES, HOME_CODE_EXAMPLES } from './config/home.config';
+import { FeatureCardComponent } from './ui/feature-card/feature-card.component';
+import { SiteFooterComponent } from '../shared/components/site-footer/site-footer.component';
 
 @Component({
   selector: 'app-home',
@@ -16,115 +15,100 @@ import { HOME_FEATURES, HOME_STATS, HOME_PACKAGES, HOME_CODE_EXAMPLES } from './
     NgOptimizedImage,
     CodeWindowComponent,
     FeatureCardComponent,
-    PackageCardComponent,
     StatsBarComponent,
     SiteFooterComponent,
   ],
   template: `
-    <div class="min-h-screen">
-      <!-- ── Hero ──────────────────────────────────────── -->
-      <section
-        class="relative overflow-hidden pt-16 sm:pt-20 border-b border-base-300"
-        aria-labelledby="hero-title"
-      >
-        <!-- Background decoration -->
-        <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <div
-            class="absolute inset-0 [background-image:radial-gradient(oklch(69%_0.18_254_/_0.12)_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_80%_100%_at_50%_0%,black_40%,transparent_100%)]"
-          ></div>
-          <div
-            class="absolute inset-0 [background:radial-gradient(ellipse_70%_60%_at_60%_0%,oklch(69%_0.18_254_/_0.14)_0%,transparent_65%),radial-gradient(ellipse_50%_40%_at_10%_80%,oklch(72%_0.16_292_/_0.07)_0%,transparent_60%)]"
-          ></div>
-        </div>
+    <!-- MAIN WRAPPER -->
+    <main class="min-h-screen">
+      <!-- HERO SECTION -->
+      <section class="hero-section @container">
+        <!-- Ambient Background -->
+        <div class="ambient-glow glow-primary"></div>
+        <div class="ambient-glow glow-secondary"></div>
 
-        <div
-          class="relative max-w-[1160px] mx-auto px-4 sm:px-6 pb-16 sm:pb-20 flex flex-col gap-10 md:flex-row md:items-center md:gap-16"
-        >
-          <!-- Text -->
-          <div class="flex-1 flex flex-col gap-6">
-            <div
-              class="inline-block w-fit text-xs font-semibold text-primary bg-primary/10 border border-primary/20 px-3 py-1 rounded-full tracking-widest"
-              aria-label="Angular 20 plus, Signals, TypeScript"
-            >
-              Angular 20+ &nbsp;·&nbsp; Signals &nbsp;·&nbsp; TypeScript
+        <div class="max-width-container grid place-items-center gap-12 @3xl:gap-16">
+          <header class="text-center max-w-3xl flex flex-col items-center gap-6 z-10">
+            <!-- Badge -->
+            <div class="badge badge-outline gap-2 p-4 rounded-full shadow-sm">
+              <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+              <span class="text-[11px] font-black uppercase tracking-widest text-base-content/60"
+                >Version 1.41.1 is out</span
+              >
             </div>
 
+            <!-- Título Directo y Claro -->
             <h1
-              id="hero-title"
-              class="text-[2.6rem] sm:text-[3.4rem] md:text-[4rem] font-black text-base-content leading-[1.08] tracking-[-0.04em] m-0"
+              class="text-5xl @3xl:text-[5rem] font-black leading-[1.1] tracking-tight text-balance text-base-content m-0"
             >
-              Every Angular app<br />solves the same<br />browser problems.<br />
-              <span
-                class="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent"
+              Master Web APIs in <br />
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-primary"
+                >Angular.</span
               >
-                We solved them once.
-              </span>
             </h1>
 
-            <p class="text-base sm:text-lg text-base-content/60 leading-relaxed max-w-[480px] m-0">
-              Typed, tested, tree-shakable. Three focused libraries for the browser work Angular
-              developers keep rebuilding from scratch.
+            <p
+              class="text-lg @xl:text-xl text-base-content/70 font-medium text-balance max-w-2xl m-0"
+            >
+              Signal-based utilities to seamlessly integrate Browser APIs, Security, and Web
+              Workers. Zero boilerplate.
             </p>
 
-            <div class="flex flex-wrap gap-3 items-center">
-              <a routerLink="/docs" class="btn btn-primary">
-                Get started <span aria-hidden="true">→</span>
-              </a>
-              <a routerLink="/demo" class="btn btn-outline btn-primary">Live demo</a>
+            <!-- Actions -->
+            <div class="flex flex-wrap items-center justify-center gap-4 mt-4">
               <a
-                href="https://github.com/Gaspar1992/angular-helpers"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn btn-ghost"
-                aria-label="GitHub repository (opens in new tab)"
+                routerLink="/docs"
+                class="btn btn-primary btn-lg shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all font-bold px-8 border-none"
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"
-                  />
-                </svg>
-                GitHub
+                Get started
               </a>
+              <!-- Snippet interactivo -->
+              <div
+                class="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2 shadow-inner"
+              >
+                <code class="font-mono text-sm text-base-content/80">pnpm add angular-helpers</code>
+                <button
+                  class="btn btn-square btn-sm btn-ghost text-base-content/60 hover:text-base-content"
+                  aria-label="Copy command"
+                  (click)="copyInstallCommand()"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
+          </header>
 
-          <!-- Code windows -->
+          <!-- Code Window -->
           <div
-            class="flex-1 flex flex-col gap-3 min-w-0 md:flex-none md:w-[440px]"
-            aria-label="Code example"
+            class="w-full max-w-4xl z-10 shadow-2xl rounded-box overflow-hidden border border-base-300"
           >
-            @for (ex of codeExamples; track ex.title) {
-              <app-code-window [title]="ex.title" [code]="ex.html" />
-            }
+            <app-code-window [tabs]="codeTabs" />
           </div>
         </div>
       </section>
 
-      <!-- ── Stats bar ──────────────────────────────────── -->
+      <!-- STATS -->
       <app-stats-bar [stats]="stats" />
 
-      <!-- ── Why section ───────────────────────────────── -->
+      <!-- FEATURES SECTION -->
       <section
-        class="py-20 sm:py-24 px-4 sm:px-6 border-b border-base-300"
+        id="features-section"
         aria-labelledby="features-title"
+        class="py-24 sm:py-32 px-6 border-b border-base-300 bg-base-100"
       >
-        <div class="max-w-[1100px] mx-auto">
-          <p class="text-xs font-bold uppercase tracking-[0.1em] text-primary m-0 mb-3">
-            Why Angular Helpers?
-          </p>
-          <h2
-            id="features-title"
-            class="text-[1.75rem] sm:text-[2.25rem] font-extrabold text-base-content tracking-tight leading-snug m-0 mb-10"
-          >
-            Everything you need.<br class="hidden sm:block" />Nothing you don't.
-          </h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="max-w-[1200px] mx-auto">
+          <h2 id="features-title" class="sr-only">Everything you need. Nothing you don't.</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-10 sm:gap-14">
             @for (f of features; track f.title) {
               <app-feature-card [feature]="f" />
             }
@@ -132,66 +116,184 @@ import { HOME_FEATURES, HOME_STATS, HOME_PACKAGES, HOME_CODE_EXAMPLES } from './
         </div>
       </section>
 
-      <!-- ── Packages section ──────────────────────────── -->
+      <!-- PACKAGES BENTO BOX -->
       <section
-        class="py-20 sm:py-24 px-4 sm:px-6 border-b border-base-300 bg-base-200/50"
         aria-labelledby="packages-title"
+        class="py-24 sm:py-32 px-6 border-b border-base-300 bg-base-100 @container"
       >
-        <div class="max-w-[1100px] mx-auto">
-          <p class="text-xs font-bold uppercase tracking-[0.1em] text-primary m-0 mb-3">
-            Three focused libraries
+        <div class="max-w-[1000px] mx-auto">
+          <p
+            class="text-xs font-black uppercase tracking-[0.2em] text-primary m-0 mb-4 text-center"
+          >
+            Modular Architecture
           </p>
           <h2
             id="packages-title"
-            class="text-[1.75rem] sm:text-[2.25rem] font-extrabold text-base-content tracking-tight leading-snug m-0 mb-10"
+            class="text-[2.5rem] sm:text-[3.5rem] font-black text-base-content tracking-tighter leading-none m-0 mb-16 text-center text-balance"
           >
-            Pick what you need.
+            Four tools. <br class="sm:hidden" />Zero bloat.
           </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            @for (p of packages; track p.npmPackage) {
-              <app-package-card [pkg]="p" />
+
+          <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-8">
+            @for (p of packages; track p.npmPackage; let i = $index) {
+              <div [class.@4xl:col-span-2]="i === 0" class="h-full">
+                <div
+                  class="flex flex-col gap-8 bg-base-200 border border-base-300 rounded-[2rem] p-10 h-full transition-colors duration-300 hover:border-primary/50 group relative overflow-hidden shadow-xl"
+                >
+                  @if (i === 0) {
+                    <div
+                      class="absolute right-0 top-0 bottom-0 w-1/2 opacity-20 group-hover:opacity-40 transition-opacity pointer-events-none hidden md:block overflow-hidden"
+                      aria-hidden="true"
+                    >
+                      <div
+                        class="absolute inset-0 bg-gradient-to-l from-transparent to-base-200 z-10"
+                      ></div>
+                      <div class="w-full h-full flex flex-col justify-center items-end pr-10 gap-8">
+                        <div
+                          class="w-48 h-12 bg-base-100 rounded-xl border border-base-300 flex items-center px-4 shadow-sm"
+                        >
+                          <span class="text-xs font-mono text-base-content/50">UI Thread</span>
+                        </div>
+                        <div
+                          class="w-48 h-16 bg-primary/10 rounded-xl border border-primary/30 shadow-[0_0_30px_rgba(59,130,246,0.2)] flex items-center px-4 relative"
+                        >
+                          <div class="absolute -top-6 left-1/2 w-0.5 h-6 bg-primary/40"></div>
+                          <span class="text-xs font-mono text-primary font-bold">Web Worker</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+
+                  <div class="flex items-start gap-5 relative z-10">
+                    <div class="p-4 bg-base-100 rounded-2xl border border-base-300 shadow-sm">
+                      <span class="text-4xl leading-none shrink-0" aria-hidden="true">{{
+                        p.icon
+                      }}</span>
+                    </div>
+                    <div>
+                      <h3
+                        class="text-2xl font-black text-base-content m-0 mb-2 flex items-center gap-3 tracking-tight"
+                      >
+                        {{ p.name }}
+                        @if (p.badge) {
+                          <span class="badge badge-primary font-black">{{ p.badge }}</span>
+                        }
+                      </h3>
+                      <code
+                        class="text-xs font-mono text-primary/90 bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-lg"
+                      >
+                        {{ p.npmPackage }}
+                      </code>
+                    </div>
+                  </div>
+
+                  <p
+                    class="text-base text-base-content/60 leading-relaxed max-w-[450px] relative z-10 font-medium m-0"
+                  >
+                    {{ p.description }}
+                  </p>
+
+                  <div class="flex flex-wrap gap-2.5 mt-2 relative z-10">
+                    @for (item of p.highlights; track item) {
+                      <span
+                        class="badge badge-outline border-base-content/20 hover:border-base-content/40 text-base-content/70"
+                      >
+                        {{ item }}
+                      </span>
+                    }
+                  </div>
+
+                  <div class="mt-auto pt-8 flex items-center justify-between relative z-10">
+                    @if (p.docsLink) {
+                      <a
+                        [routerLink]="p.docsLink"
+                        class="btn btn-ghost btn-sm text-base-content/60 hover:text-base-content hover:bg-base-content/5 rounded-xl font-bold px-4"
+                      >
+                        Explore documentation <span class="ml-1">→</span>
+                      </a>
+                    } @else {
+                      <span class="text-sm text-base-content/40 italic font-medium ml-4"
+                        >Documentation under construction</span
+                      >
+                    }
+                  </div>
+                </div>
+              </div>
             }
           </div>
         </div>
       </section>
 
-      <!-- ── CTA section ───────────────────────────────── -->
+      <!-- CTA SECTION -->
       <section
-        class="py-20 sm:py-24 px-4 border-b border-base-300 bg-base-300/60"
         aria-labelledby="cta-title"
+        class="py-24 sm:py-32 px-6 border-b border-base-300 bg-base-200"
       >
-        <div class="max-w-[560px] mx-auto text-center flex flex-col items-center gap-5">
-          <img
-            ngSrc="icon.webp"
-            alt=""
-            width="52"
-            height="52"
-            aria-hidden="true"
-            class="drop-shadow-[0_0_20px_oklch(69%_0.18_254_/_0.5)]"
-          />
+        <div class="max-w-[560px] mx-auto text-center flex flex-col items-center gap-6">
+          <div class="p-5 bg-base-100 rounded-[2rem] border border-base-300 shadow-inner mb-2">
+            <img
+              ngSrc="icon.webp"
+              alt=""
+              width="64"
+              height="64"
+              aria-hidden="true"
+              class="drop-shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+            />
+          </div>
           <h2
             id="cta-title"
-            class="text-[2rem] sm:text-[2.5rem] font-extrabold text-base-content tracking-tight m-0"
+            class="text-[2.5rem] sm:text-[3.5rem] font-black text-base-content tracking-tighter leading-none m-0 text-balance"
           >
-            Ready to start?
+            Ready to scale?
           </h2>
-          <p class="text-base text-base-content/60 m-0">
-            Read the docs or explore the live interactive demo.
+          <p class="text-lg text-base-content/60 leading-relaxed font-medium m-0 text-balance">
+            Join hundreds of developers building robust, high-performance Angular applications with
+            our specialized helper suite.
           </p>
-          <div class="flex flex-wrap gap-3 justify-center">
-            <a routerLink="/docs" class="btn btn-primary">Read the docs</a>
-            <a routerLink="/demo" class="btn btn-outline btn-primary">Open demo</a>
+          <div class="flex flex-wrap gap-4 justify-center mt-4">
+            <a
+              routerLink="/docs"
+              class="btn btn-primary btn-lg px-10 rounded-2xl font-black shadow-xl shadow-primary/20 border-none"
+            >
+              Start building
+            </a>
+            <a
+              href="https://github.com/Gaspar1992/angular-helpers"
+              target="_blank"
+              class="btn btn-outline btn-lg border-base-300 hover:border-base-content/30 hover:bg-base-content/5 text-base-content font-bold px-10 rounded-2xl"
+            >
+              GitHub
+            </a>
           </div>
         </div>
       </section>
 
       <app-site-footer />
-    </div>
+    </main>
+  `,
+  styles: `
+    @reference "../../styles.css";
+    .hero-section {
+      @apply relative overflow-hidden pt-24 pb-32 border-b border-base-300 bg-base-100;
+    }
+    .ambient-glow {
+      @apply absolute rounded-full blur-[120px] pointer-events-none opacity-50;
+    }
+    .glow-primary {
+      @apply -top-24 -left-20 w-96 h-96 bg-primary/20;
+    }
+    .glow-secondary {
+      @apply top-1/2 -right-20 w-80 h-80 bg-secondary/10;
+    }
   `,
 })
 export class HomeComponent {
   protected readonly features = HOME_FEATURES;
   protected readonly stats = HOME_STATS;
   protected readonly packages = HOME_PACKAGES;
-  protected readonly codeExamples = HOME_CODE_EXAMPLES;
+  protected readonly codeTabs = HOME_CODE_TABS;
+
+  copyInstallCommand() {
+    navigator.clipboard.writeText('pnpm add angular-helpers');
+  }
 }

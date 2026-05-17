@@ -67,21 +67,9 @@ Angular services package for a structured and secure access layer over browser W
 
 - `WebWorkerService` - Web Worker management
 
-### Device APIs
-
-- `WebBluetoothService` - Bluetooth Low Energy device communication
-- `WebUsbService` - USB device I/O from the browser
-- `WebNfcService` - NFC tag reading and writing
-
 ### Detection APIs
 
 - `EyeDropperService` - Screen color picker
-- `BarcodeDetectorService` - QR code and barcode scanning
-
-### Commerce & Identity APIs
-
-- `PaymentRequestService` - Native payment flows
-- `CredentialManagementService` - Passwords, passkeys (WebAuthn)
 
 ### Security & Capabilities
 
@@ -95,7 +83,7 @@ Angular services package for a structured and secure access layer over browser W
 ## Installation
 
 ```bash
-npm install @angular-helpers/browser-web-apis
+pnpm add @angular-helpers/browser-web-apis
 ```
 
 ## Quick Setup
@@ -157,28 +145,49 @@ Every service has a matching `provideX()` function:
 | `provideWebSocket()`            | `WebSocketService`                          |
 | `provideWebWorker()`            | `WebWorkerService`                          |
 | `provideBattery()`              | `BatteryService`                            |
+| `provideWebShare()`             | `WebShareService`                           |
 | `provideIntersectionObserver()` | `IntersectionObserverService`               |
 | `provideResizeObserver()`       | `ResizeObserverService`                     |
 | `provideMutationObserver()`     | `MutationObserverService`                   |
 | `providePerformanceObserver()`  | `PerformanceObserverService`                |
 | `providePageVisibility()`       | `PageVisibilityService`                     |
 | `provideNetworkInformation()`   | `NetworkInformationService`                 |
+| `provideScreenWakeLock()`       | `ScreenWakeLockService`                     |
+| `provideScreenOrientation()`    | `ScreenOrientationService`                  |
+| `provideFullscreen()`           | `FullscreenService`                         |
+| `provideFileSystemAccess()`     | `FileSystemAccessService`                   |
+| `provideMediaRecorder()`        | `MediaRecorderService`                      |
+| `provideBroadcastChannel()`     | `BroadcastChannelService`                   |
+| `provideServerSentEvents()`     | `ServerSentEventsService`                   |
+| `provideVibration()`            | `VibrationService`                          |
+| `provideSpeechSynthesis()`      | `SpeechSynthesisService`                    |
+| `provideWebAudio()`             | `WebAudioService`                           |
+| `provideGamepad()`              | `GamepadService`                            |
 | `provideWebLocks()`             | `WebLocksService`                           |
 | `provideStorageManager()`       | `StorageManagerService`                     |
 | `provideCompression()`          | `CompressionService`                        |
-| …and 22 more                    | See `src/providers/`                        |
+| `provideEyeDropper()`           | `EyeDropperService`                         |
+| `provideIdleDetector()`         | `IdleDetectorService`                       |
+| `providePermissions()`          | `PermissionsService`                        |
 
 ### Combo providers
 
 Convenience functions that bundle related services:
 
 ```typescript
-import { provideMediaApis, provideStorageApis } from '@angular-helpers/browser-web-apis';
+import {
+  provideMediaApis,
+  provideLocationApis,
+  provideStorageApis,
+  provideCommunicationApis,
+} from '@angular-helpers/browser-web-apis';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideMediaApis(), // Camera + MediaDevices + Permissions
+    provideLocationApis(), // Geolocation + Permissions
     provideStorageApis(), // Clipboard + WebStorage + Permissions
+    provideCommunicationApis(), // Notification + WebShare + WebSocket + Permissions
   ],
 });
 ```
@@ -846,6 +855,29 @@ export class MyComponent {
       await this.wakeLock.release();
     } else {
       await this.wakeLock.request();
+    }
+  }
+}
+```
+
+### injectEyeDropper
+
+```typescript
+import { injectEyeDropper } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class MyComponent {
+  readonly dropper = injectEyeDropper();
+
+  // dropper.color()       → Signal<string | null> (sRGBHex)
+  // dropper.isOpening()   → Signal<boolean>
+  // dropper.error()       → Signal<Error | null>
+  // dropper.isSupported() → Signal<boolean>
+
+  async pickColor() {
+    const result = await this.dropper.open();
+    if (result) {
+      console.log('Selected color:', result.sRGBHex);
     }
   }
 }

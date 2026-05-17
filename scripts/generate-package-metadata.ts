@@ -100,13 +100,14 @@ function generateMetadata(): PackageMetadata {
   // Count services (main + experimental)
   const mainServices = countServicesInDirectory(`${browserWebApisDir}/services`);
   const experimentalServices = getExperimentalServices();
-  const totalServices = mainServices.count + experimentalServices.length;
+  const allServices = [...new Set([...mainServices.services, ...experimentalServices])];
 
   // Count inject functions (main + experimental)
   const mainInjectFns = countInjectFunctionsInDirectory(`${browserWebApisDir}/fns`);
   const experimentalInjectFns = countInjectFunctionsInDirectory(experimentalDir);
-  const totalInjectFns = mainInjectFns.count + experimentalInjectFns.count;
-  const allInjectFns = [...mainInjectFns.functions, ...experimentalInjectFns.functions];
+  const allInjectFns = [
+    ...new Set([...mainInjectFns.functions, ...experimentalInjectFns.functions]),
+  ];
 
   // Get version from package.json
   const packageJson = JSON.parse(
@@ -114,8 +115,8 @@ function generateMetadata(): PackageMetadata {
   );
 
   return {
-    serviceCount: totalServices,
-    injectFnCount: totalInjectFns,
+    serviceCount: allServices.length,
+    injectFnCount: allInjectFns.length,
     experimentalServiceCount: experimentalServices.length,
     services: mainServices.services,
     injectFunctions: allInjectFns,

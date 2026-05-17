@@ -108,9 +108,12 @@ export class OlMapComponent {
       }
 
       view.on('change:center', () => this.zoneHelper.runInsideAngular(() => this.emitViewChange()));
-      view.on('change:resolution', () =>
-        this.zoneHelper.runInsideAngular(() => this.emitViewChange()),
-      );
+      view.on('change:resolution', () => {
+        this.zoneHelper.runInsideAngular(() => {
+          this.mapService.setResolution(view.getResolution() ?? 1);
+          this.emitViewChange();
+        });
+      });
 
       this.map.on('click', (e) =>
         this.zoneHelper.runInsideAngular(() =>
@@ -143,7 +146,7 @@ export class OlMapComponent {
         this.map!.dispose();
       });
       this.map = undefined;
-      this.mapService.setMap(null as unknown as OLMap);
+      this.mapService.setMap(null);
     }
   }
 

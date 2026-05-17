@@ -23,7 +23,7 @@ test.describe('Docs nav coverage', () => {
         await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
         // And an API reference table with at least one row.
-        const firstCell = page.locator('table.docs-table tbody tr td').first();
+        const firstCell = page.locator('.api-table-container table tbody tr td').first();
         await expect(firstCell).toBeVisible();
       });
     }

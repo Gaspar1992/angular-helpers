@@ -1,78 +1,84 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { NotificationService, PermissionsService } from '@angular-helpers/browser-web-apis';
+import { NotificationService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-notification-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [PermissionsService, NotificationService],
+  providers: [NotificationService],
+  styleUrls: ['../demo.styles.css'],
   template: `
-    <section
-      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
-      aria-labelledby="notif-title"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="notif-title">
-          Notifications
+    <section class="svc-card" aria-labelledby="notif-title">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title" id="notif-title">
+          <span class="text-primary text-2xl">🔔</span> Notifications
         </h2>
         <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-success badge-sm">supported</span>
+            <span class="badge badge-success font-black">supported</span>
           } @else {
-            <span class="badge badge-error badge-sm">unsupported</span>
+            <span class="badge badge-error font-black">unsupported</span>
           }
-          <span class="badge badge-info badge-sm">secure context</span>
-          @if (permission() === 'granted') {
-            <span class="badge badge-success badge-sm">{{ permission() }}</span>
-          } @else if (permission() === 'denied') {
-            <span class="badge badge-error badge-sm">{{ permission() }}</span>
-          } @else {
-            <span class="badge badge-warning badge-sm">{{ permission() }}</span>
-          }
+          <span
+            class="badge font-black uppercase tracking-widest text-[9px]"
+            [class.badge-success]="permission() === 'granted'"
+            [class.badge-warning]="permission() === 'default'"
+            [class.badge-error]="permission() === 'denied'"
+          >
+            {{ permission() }}
+          </span>
         </div>
       </div>
-      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
-        Request permission and show browser notifications.
+      <p class="svc-desc">
+        Display system-level notifications to the user. Requires explicit permission.
       </p>
-      <div class="flex flex-wrap gap-2 items-center mb-4">
+
+      <div class="svc-controls">
         <button
-          class="btn btn-secondary btn-sm"
+          class="btn btn-secondary font-black"
           (click)="requestPermission()"
-          [disabled]="!supported || permission() === 'granted'"
+          [disabled]="permission() === 'granted' || !supported"
         >
-          Request permission
+          Request Permission
         </button>
         <button
-          class="btn btn-primary btn-sm"
-          (click)="showNotification()"
-          [disabled]="!supported || permission() !== 'granted'"
+          class="btn btn-primary font-black"
+          (click)="show()"
+          [disabled]="permission() !== 'granted'"
         >
-          Show notification
+          Push Notification
         </button>
       </div>
+
+      @if (permission() === 'default') {
+        <div class="feedback feedback-info mt-8">
+          <span class="text-2xl">ℹ️</span>
+          <span>Please allow notifications in your browser to test this demo.</span>
+        </div>
+      }
     </section>
   `,
 })
 export class NotificationDemoComponent {
   private readonly svc = inject(NotificationService);
 
-  readonly supported = typeof window !== 'undefined' && 'Notification' in window;
-  readonly permission = signal<string>(
-    typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default',
-  );
+  readonly supported = this.svc.isSupported();
+  readonly permission = signal<NotificationPermission>('default');
 
-  async requestPermission(): Promise<void> {
-    const perm = await this.svc.requestNotificationPermission();
-    this.permission.set(perm);
+  constructor() {
+    if (this.supported) {
+      this.permission.set(this.svc.permission);
+    }
   }
 
-  async showNotification(): Promise<void> {
-    try {
-      await this.svc.showNotification('Angular Helpers', {
-        body: 'Browser APIs done right.',
-        tag: 'demo',
-      });
-    } catch {
-      // unsupported or denied
-    }
+  async requestPermission(): Promise<void> {
+    const p = await this.svc.requestNotificationPermission();
+    this.permission.set(p);
+  }
+
+  show(): void {
+    this.svc.showNotification('Angular Helpers', {
+      body: 'Premium technical utilities for elite developers.',
+      icon: 'icon.png',
+    });
   }
 }

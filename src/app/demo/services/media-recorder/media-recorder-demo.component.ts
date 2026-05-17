@@ -1,94 +1,106 @@
-import { Component, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { MediaRecorderService, PermissionsService } from '@angular-helpers/browser-web-apis';
+import { Component, OnDestroy, ChangeDetectionStrategy, signal } from '@angular/core';
+import { MediaRecorderService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-media-recorder-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [PermissionsService, MediaRecorderService],
+  providers: [MediaRecorderService],
+  styleUrls: ['../demo.styles.css'],
   template: `
-    <section
-      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
-      aria-labelledby="rec-title"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="rec-title">
-          Media Recorder
+    <section class="svc-card" aria-labelledby="rec-title">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title" id="rec-title">
+          <span class="text-primary text-2xl">⏺️</span> Media Recorder
         </h2>
         <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-success badge-sm">supported</span>
+            <span class="badge badge-success font-black">supported</span>
           } @else {
-            <span class="badge badge-error badge-sm">unsupported</span>
+            <span class="badge badge-error font-black">unsupported</span>
           }
-          <span class="badge badge-info badge-sm">secure context</span>
+          @if (recording()) {
+            <span class="badge badge-primary animate-pulse font-black">REC</span>
+          }
         </div>
       </div>
-      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
-        Record audio from the microphone. Requires microphone permission.
+      <p class="svc-desc">
+        Capture and record audio/video streams from the device or application elements.
       </p>
-      <div class="flex flex-wrap gap-2 items-center mb-4">
+
+      <div class="svc-controls mb-8">
         <button
-          class="btn btn-error btn-sm"
-          (click)="startRecording()"
-          [disabled]="!supported || recordingState() === 'recording'"
+          class="btn btn-primary font-black"
+          (click)="start()"
+          [disabled]="recording() || !supported"
         >
-          <span
-            class="w-2 h-2 rounded-full bg-white animate-pulse inline-block mr-1"
-            aria-hidden="true"
-          ></span>
-          Record
+          Start Recording
         </button>
-        <button
-          class="btn btn-secondary btn-sm"
-          (click)="stopRecording()"
-          [disabled]="recordingState() !== 'recording'"
-        >
-          Stop
+        <button class="btn btn-danger font-black" (click)="stop()" [disabled]="!recording()">
+          Stop & Save
         </button>
-        @if (recordingState() === 'recording') {
-          <span class="badge badge-error badge-sm animate-pulse">recording</span>
-        } @else {
-          <span class="badge badge-ghost badge-sm">inactive</span>
+      </div>
+
+      <div class="space-y-6">
+        @if (recording()) {
+          <div class="feedback feedback-info animate-pulse">
+            <span class="w-3 h-3 rounded-full bg-primary animate-ping"></span>
+            <span>Recording in progress... chunks are being buffered.</span>
+          </div>
+        }
+
+        @if (videoUrl()) {
+          <div class="svc-result space-y-4 animate-in zoom-in-95 duration-500">
+            <label class="m-0">Recording Preview</label>
+            <video
+              [src]="videoUrl()"
+              controls
+              class="w-full rounded-2xl border border-base-content/10 shadow-2xl bg-black"
+            ></video>
+            <div class="flex justify-end">
+              <a
+                [href]="videoUrl()"
+                download="recording.webm"
+                class="btn btn-secondary btn-sm font-black"
+                >Download File</a
+              >
+            </div>
+          </div>
         }
       </div>
-      @if (recordedUrl()) {
-        <div class="bg-base-300 border border-base-300 rounded-lg p-4">
-          <p class="text-xs text-base-content/80 mb-2">Recording: {{ recordedDuration() }}s</p>
-          <audio [src]="recordedUrl()" controls class="w-full" aria-label="Recorded audio"></audio>
-        </div>
-      }
     </section>
   `,
 })
 export class MediaRecorderDemoComponent implements OnDestroy {
-  private readonly svc = inject(MediaRecorderService);
+  readonly supported = typeof navigator !== 'undefined' && 'MediaRecorder' in window;
+  readonly recording = signal(false);
+  readonly videoUrl = signal<string | null>(null);
+  private stream: MediaStream | null = null;
+  private recorder: MediaRecorder | null = null;
+  private chunks: Blob[] = [];
 
-  readonly supported = this.svc.isSupported();
-  readonly recordingState = signal<'inactive' | 'recording'>('inactive');
-  readonly recordedUrl = signal('');
-  readonly recordedDuration = signal(0);
+  async start(): Promise<void> {
+    if (!this.supported) return;
+    this.stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    this.recorder = new MediaRecorder(this.stream);
+    this.chunks = [];
 
-  async startRecording(): Promise<void> {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      await this.svc.start(stream, { timeslice: 250 });
-      this.recordingState.set('recording');
-      this.recordedUrl.set('');
-    } catch {
-      // permission denied or unsupported
-    }
+    this.recorder.ondataavailable = (e) => this.chunks.push(e.data);
+    this.recorder.onstop = () => {
+      const blob = new Blob(this.chunks, { type: 'video/webm' });
+      this.videoUrl.set(URL.createObjectURL(blob));
+    };
+
+    this.recorder.start();
+    this.recording.set(true);
   }
 
-  stopRecording(): void {
-    const result = this.svc.stop();
-    if (result) {
-      this.recordedUrl.set(result.url);
-      this.recordedDuration.set(Math.round(result.duration / 1000));
-    }
-    this.recordingState.set('inactive');
+  stop(): void {
+    this.recorder?.stop();
+    this.stream?.getTracks().forEach((t) => t.stop());
+    this.recording.set(false);
   }
 
   ngOnDestroy(): void {
-    if (this.recordingState() === 'recording') this.svc.stop();
+    this.stop();
   }
 }

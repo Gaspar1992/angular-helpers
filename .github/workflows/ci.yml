@@ -35,16 +35,16 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Check formatting
-        run: npm run format:check
+        run: pnpm run format:check
 
       - name: Run linter
-        run: npm run lint
+        run: pnpm run lint
 
-      - name: Run unit tests (browser-web-apis)
-        run: npm run test --workspace=@angular-helpers/browser-web-apis -- run
+      - name: Run unit tests
+        run: pnpm test
 
       - name: Build packages
-        run: npm run build:packages
+        run: pnpm run build:packages
 
   docs-consistency:
     name: Documentation consistency
@@ -60,7 +60,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Verify docs consistency
-        run: npx tsx scripts/verify-docs-consistency.ts
+        run: pnpm exec tsx scripts/verify-docs-consistency.ts
 
   browser-tests:
     name: Browser tests (chromium)
@@ -78,16 +78,16 @@ jobs:
           playwright-cache: 'true'
 
       - name: Generate SSL certificates
-        run: npm run ssl:generate
+        run: pnpm run ssl:generate
 
       - name: Build worker files
-        run: npm run build:workers
+        run: pnpm run build:workers
 
       - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Run browser CI suite
-        run: npm run test:browser:ci
+        run: pnpm run test:browser:ci
 
   cross-browser-smoke:
     name: Cross-browser smoke (firefox + webkit)
@@ -107,13 +107,13 @@ jobs:
           playwright-cache: 'true'
 
       - name: Generate SSL certificates
-        run: npm run ssl:generate
+        run: pnpm run ssl:generate
 
       - name: Build worker files
-        run: npm run build:workers
+        run: pnpm run build:workers
 
       - name: Install Playwright Firefox and WebKit
-        run: npx playwright install --with-deps firefox webkit
+        run: pnpm exec playwright install --with-deps firefox webkit
 
       - name: Run cross-browser smoke suite
-        run: npm run test:browser:cross
+        run: pnpm run test:browser:cross

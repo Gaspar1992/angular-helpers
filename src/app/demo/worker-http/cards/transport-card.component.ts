@@ -8,23 +8,23 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
   selector: 'app-worker-http-transport-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-base-200 border border-base-300 rounded-xl p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold text-base-content m-0 flex items-center gap-2">
+    <div class="bg-base-200 border border-base-content/5 rounded-3xl p-8 h-full flex flex-col">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-primary m-0 flex items-center gap-2">
           ⚡ WorkerTransport
         </h2>
-        <span class="badge badge-primary">Typed RPC</span>
+        <span class="badge badge-primary font-semibold">Typed RPC</span>
       </div>
-      <p class="text-sm text-base-content/80 mb-4">
+      <p class="text-sm text-base-content/70 mb-8">
         Typed RPC bridge with request/response correlation and worker pool
       </p>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <button
           type="button"
           (click)="sendEcho()"
           [disabled]="status() === 'running'"
-          class="btn btn-primary btn-sm"
+          class="btn btn-primary font-bold px-6"
         >
           @if (status() === 'running') {
             <span class="loading loading-spinner loading-xs"></span>
@@ -35,19 +35,29 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
           type="button"
           (click)="sendPoolBurst()"
           [disabled]="status() === 'running'"
-          class="btn btn-secondary btn-sm"
+          class="btn btn-secondary font-bold px-6"
         >
           Pool Burst (4 workers)
         </button>
       </div>
 
-      @if (result()) {
-        <div class="p-3 bg-base-300 rounded-lg font-mono text-xs break-all">
-          <span class="text-secondary">Result ({{ elapsedMs() }}ms):</span>
-          <br />
-          {{ result() }}
-        </div>
-      }
+      <div class="mt-auto">
+        @if (result()) {
+          <div
+            class="p-4 bg-base-content/5 rounded-2xl shadow-inner border border-base-content/5 font-mono text-xs break-all"
+          >
+            <div class="flex justify-between items-center mb-2">
+              <span
+                class="text-secondary font-bold uppercase tracking-wider text-[10px] opacity-70"
+              >
+                Result
+              </span>
+              <span class="text-[10px] opacity-40 font-mono">{{ elapsedMs() }}ms</span>
+            </div>
+            <pre class="text-base-content/80 whitespace-pre-wrap">{{ result() }}</pre>
+          </div>
+        }
+      </div>
     </div>
   `,
 })

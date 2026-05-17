@@ -1,6 +1,4 @@
 import '@angular/compiler';
-import { setupTestBed } from '@analogjs/vitest-angular/setup-testbed';
-setupTestBed();
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
@@ -23,7 +21,12 @@ function makeMockDocument() {
   };
 }
 
+import { webcrypto } from 'node:crypto';
+
 describe('SecureMessageService', () => {
+  beforeAll(() => {
+    vi.stubGlobal('crypto', webcrypto);
+  });
   let service: SecureMessageService;
   let cryptoSpy: {
     generateHmacKey: ReturnType<typeof vi.fn>;

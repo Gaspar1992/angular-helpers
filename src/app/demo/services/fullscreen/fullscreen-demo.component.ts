@@ -6,34 +6,29 @@ import { FullscreenService } from '@angular-helpers/browser-web-apis';
   selector: 'app-fullscreen-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [FullscreenService],
+  styleUrls: ['../demo.styles.css'],
   template: `
-    <section
-      class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5"
-      aria-labelledby="fs-title"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
-        <h2 class="text-lg sm:text-xl font-bold text-base-content m-0" id="fs-title">
-          Fullscreen API
+    <section class="svc-card" aria-labelledby="fs-title">
+      <div class="svc-card-head">
+        <h2 class="svc-card-title" id="fs-title">
+          <span class="text-primary text-2xl">🖥️</span> Fullscreen API
         </h2>
         <div class="flex gap-2 flex-wrap">
           @if (supported) {
-            <span class="badge badge-success badge-sm">supported</span>
+            <span class="badge badge-success font-black">supported</span>
           } @else {
-            <span class="badge badge-error badge-sm">unsupported</span>
+            <span class="badge badge-error font-black">unsupported</span>
           }
-          @if (isFullscreen()) {
-            <span class="badge badge-success badge-sm">fullscreen</span>
-          } @else {
-            <span class="badge badge-ghost badge-sm">windowed</span>
-          }
+          <span class="badge font-black" [class.badge-primary]="isFullscreen()">
+            {{ isFullscreen() ? 'FULLSCREEN' : 'WINDOWED' }}
+          </span>
         </div>
       </div>
-      <p class="text-sm text-base-content/80 mb-4 leading-relaxed">
-        Request or exit fullscreen mode for the page.
-      </p>
-      <div class="flex flex-wrap gap-2 items-center mb-4">
-        <button class="btn btn-primary btn-sm" (click)="toggle()" [disabled]="!supported">
-          {{ isFullscreen() ? '↙ Exit fullscreen' : '↗ Enter fullscreen' }}
+      <p class="svc-desc">Request or exit immersive fullscreen mode for the entire application.</p>
+
+      <div class="svc-controls">
+        <button class="btn btn-primary font-black" (click)="toggle()" [disabled]="!supported">
+          {{ isFullscreen() ? '↙ Exit Fullscreen' : '↗ Enter Fullscreen' }}
         </button>
       </div>
     </section>
@@ -56,7 +51,7 @@ export class FullscreenDemoComponent implements OnDestroy {
     try {
       await this.svc.toggle();
     } catch {
-      // unsupported or denied
+      // ignore
     }
   }
 

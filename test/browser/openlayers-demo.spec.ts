@@ -54,7 +54,7 @@ test.describe('OpenLayers Demo', () => {
     await expect(page.getByText(/Telemetry/i)).toBeVisible();
     await expect(page.getByText(/Center Coord/i)).toBeVisible();
     await expect(page.getByText(/Zoom Level/i)).toBeVisible();
-    await expect(page.getByText(/Pointer Data/i)).toBeVisible();
+    await expect(page.getByText(/Pointer Inspection/i)).toBeVisible();
   });
 
   test('city markers are displayed on the map', async ({ page }) => {

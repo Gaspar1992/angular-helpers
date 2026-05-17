@@ -5,8 +5,8 @@ import { ApiColumn, ApiRow } from '../../models/doc-meta.model';
   selector: 'app-docs-api-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="docs-table-wrapper" role="region" [attr.aria-label]="ariaLabel()">
-      <table class="docs-table">
+    <div class="api-table-container no-scrollbar" role="region" [attr.aria-label]="ariaLabel()">
+      <table>
         <thead>
           <tr>
             @for (col of columns(); track col.key) {
@@ -32,6 +32,71 @@ import { ApiColumn, ApiRow } from '../../models/doc-meta.model';
       </table>
     </div>
   `,
+  styles: [
+    `
+      .api-table-container {
+        overflow-x: auto;
+        border: 1px solid var(--c-border);
+        border-radius: var(--r-xl);
+        background-color: var(--c-bg-surface);
+
+        table {
+          inline-size: 100%;
+          border-collapse: collapse;
+          font-size: var(--fs-base);
+
+          thead {
+            background-color: color-mix(in oklch, var(--c-bg-surface), white 3%);
+
+            th {
+              padding-inline: var(--spacing-4);
+              padding-block: var(--spacing-3);
+              text-align: start;
+              font-size: var(--fs-xs);
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.1em;
+              color: var(--c-text-muted);
+              border-block-end: 1px solid var(--c-border);
+            }
+          }
+
+          tbody td {
+            padding: var(--spacing-4);
+            border-block-end: 1px solid var(--c-border-subtle);
+            vertical-align: top;
+
+            code {
+              background-color: var(--c-primary-dim);
+              color: var(--c-primary);
+              border: 1px solid color-mix(in oklch, var(--c-primary), transparent 75%);
+              padding-inline: 0.6rem;
+              padding-block: 0.25rem;
+              border-radius: var(--r-md);
+              font-size: 0.65rem;
+              font-family: var(--font-mono);
+              font-weight: 900;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+
+            .docs-cell-desc {
+              font-size: var(--fs-sm);
+              color: var(--c-text-secondary);
+              line-height: 1.6;
+            }
+          }
+
+          tr:last-child td {
+            border-block-end: none;
+          }
+          tr:hover td {
+            background-color: color-mix(in oklch, var(--c-text-main), transparent 97%);
+          }
+        }
+      }
+    `,
+  ],
 })
 export class DocsApiTableComponent {
   readonly columns = input.required<ApiColumn[]>();

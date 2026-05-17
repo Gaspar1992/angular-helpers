@@ -16,10 +16,11 @@ export interface SelectConfig extends InteractionConfig {
   layers?: string[];
   multi?: boolean;
   hitTolerance?: number;
+  condition?: 'click' | 'pointerMove';
 }
 
 export interface DrawConfig extends InteractionConfig {
-  type: 'Point' | 'LineString' | 'Polygon' | 'Circle';
+  type: 'Point' | 'LineString' | 'Polygon' | 'Circle' | 'Ellipse' | 'Donut';
   source?: string;
   freehand?: boolean;
   snapTolerance?: number;
