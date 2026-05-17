@@ -19,10 +19,9 @@ export class EntityStore<Id, Entity> {
   private _isRestoring = false;
 
   constructor(private readonly options: EntityStoreOptions<Id, Entity>) {
+    const idKey = options.idKey;
     this._idResolver =
-      typeof options.idKey === 'function'
-        ? options.idKey
-        : (entity: Entity) => entity[options.idKey] as unknown as Id;
+      typeof idKey === 'function' ? idKey : (entity: Entity) => entity[idKey] as unknown as Id;
 
     if (options.persistKey) {
       this.initPersistence(options.persistKey);
