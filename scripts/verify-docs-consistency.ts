@@ -51,8 +51,8 @@ assert(
 
 const signalStats = HOME_STATS.find((s) => s.label === 'Signal primitives');
 assert(
-  signalStats?.value === '13',
-  `Signal primitives count should be 13, got ${signalStats?.value ?? 'undefined'}`,
+  signalStats?.value === '14',
+  `Signal primitives count should be 14, got ${signalStats?.value ?? 'undefined'}`,
   'src/app/home/config/home.config.ts',
 );
 
@@ -70,8 +70,8 @@ assert(
   'src/app/core/config/packages.data.ts',
 );
 assert(
-  browserPackage?.description?.includes('13') ?? false,
-  'browser-web-apis description should mention "13 inject() primitives"',
+  browserPackage?.description?.includes('14') ?? false,
+  'browser-web-apis description should mention "14 inject() primitives"',
   'src/app/core/config/packages.data.ts',
 );
 
