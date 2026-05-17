@@ -131,6 +131,12 @@ export const DEMO_ROUTES: Routes = [
           ),
         title: 'Library Services — Demo',
       },
+      {
+        path: 'storage',
+        loadComponent: () =>
+          import('./storage/storage-demo.component').then((m) => m.StorageDemoComponent),
+        title: 'Storage & Entity Management — Demo',
+      },
     ],
   },
 ];
