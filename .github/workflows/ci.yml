@@ -40,8 +40,8 @@ jobs:
       - name: Run linter
         run: pnpm run lint
 
-      - name: Run unit tests (browser-web-apis)
-        run: pnpm run test --workspace=@angular-helpers/browser-web-apis -- run
+      - name: Run unit tests
+        run: pnpm test
 
       - name: Build packages
         run: pnpm run build:packages
