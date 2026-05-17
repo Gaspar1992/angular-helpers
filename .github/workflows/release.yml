@@ -45,7 +45,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Verify build works
-        run: pnpm run build:prod --workspace=@angular-helpers/browser-web-apis
+        run: pnpm --filter @angular-helpers/browser-web-apis build:prod
 
       - name: Semantic Release
         env:

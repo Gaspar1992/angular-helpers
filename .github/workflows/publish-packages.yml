@@ -46,7 +46,7 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Build ${{ matrix.package.name }} (production)
-        run: pnpm run build:prod --workspace ${{ matrix.package.workspace }}
+        run: pnpm --filter ${{ matrix.package.name }} build:prod
 
       - name: Publish ${{ matrix.package.name }}
         id: publish

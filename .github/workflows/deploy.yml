@@ -30,14 +30,11 @@ jobs:
       - name: Setup workspace
         uses: ./.github/actions/setup
 
-      - name: Generate SSL certificates
-        run: pnpm run ssl:generate
+      - name: Build Web Workers
+        run: pnpm run build:workers
 
-      - name: Build web application
-        run: pnpm run build
-
-      - name: Build docs
-        run: pnpm run build:docs
+      - name: Build for GitHub Pages
+        run: pnpm run build:gh-pages
 
       - name: Copy index.html → 404.html (SPA routing fallback)
         run: cp dist/angular-helpers/browser/index.html dist/angular-helpers/browser/404.html
