@@ -1,0 +1,30 @@
+import { resolve } from 'path';
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  cacheDir: '../../node_modules/.vitest-cache/storage',
+  resolve: {
+    alias: {
+      '@angular-helpers/storage': resolve(__dirname, 'src/public-api.ts'),
+    },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./vitest.setup.ts'],
+    include: ['src/**/*.spec.ts'],
+    exclude: ['**/node_modules/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.spec.ts', 'src/public-api.ts'],
+      thresholds: {
+        statements: 30,
+        branches: 30,
+        functions: 30,
+        lines: 30,
+      },
+    },
+  },
+});
