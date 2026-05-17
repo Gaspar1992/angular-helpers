@@ -3,16 +3,34 @@ import { StorageTransport } from './storage-transport';
 
 const ENCRYPTION_SALT = new Uint8Array([7, 21, 14, 9, 3, 18, 5, 12, 1, 20, 16, 2, 8, 15, 6, 11]);
 
+function getCrypto(): Crypto | null {
+  if (typeof crypto !== 'undefined') return crypto;
+  if (typeof window !== 'undefined' && window.crypto) return window.crypto;
+  return null;
+}
+
+function getCaches(): CacheStorage | null {
+  if (typeof caches !== 'undefined') return caches;
+  if (typeof window !== 'undefined' && window.caches) return window.caches;
+  return null;
+}
+
 async function getCryptoKey(password: string): Promise<CryptoKey> {
   const enc = new TextEncoder();
-  const keyMaterial = await window.crypto.subtle.importKey(
+  const cryptoContext = getCrypto();
+  if (!cryptoContext) {
+    throw new Error('WebCrypto API is not supported in this environment');
+  }
+
+  const keyMaterial = await cryptoContext.subtle.importKey(
     'raw',
     enc.encode(password),
     'PBKDF2',
     false,
     ['deriveKey'],
   );
-  return window.crypto.subtle.deriveKey(
+
+  return cryptoContext.subtle.deriveKey(
     {
       name: 'PBKDF2',
       salt: ENCRYPTION_SALT,
@@ -29,8 +47,13 @@ async function getCryptoKey(password: string): Promise<CryptoKey> {
 async function encrypt(text: string, secret: string): Promise<string> {
   const enc = new TextEncoder();
   const key = await getCryptoKey(secret);
-  const iv = window.crypto.getRandomValues(new Uint8Array(12));
-  const encrypted = await window.crypto.subtle.encrypt(
+  const cryptoContext = getCrypto();
+  if (!cryptoContext) {
+    throw new Error('WebCrypto API is not supported in this environment');
+  }
+
+  const iv = cryptoContext.getRandomValues(new Uint8Array(12));
+  const encrypted = await cryptoContext.subtle.encrypt(
     { name: 'AES-GCM', iv },
     key,
     enc.encode(text),
@@ -57,7 +80,12 @@ async function decrypt(base64: string, secret: string): Promise<string> {
   const iv = bytes.slice(0, 12);
   const ciphertext = bytes.slice(12);
 
-  const decrypted = await window.crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+  const cryptoContext = getCrypto();
+  if (!cryptoContext) {
+    throw new Error('WebCrypto API is not supported in this environment');
+  }
+
+  const decrypted = await cryptoContext.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
   return dec.decode(decrypted);
 }
 
@@ -67,7 +95,7 @@ async function getToon() {
     try {
       toonModule = await import('@toon-format/toon');
     } catch {
-      // Silencioso fallback a JSON
+      // Silent JSON fallback
     }
   }
   return toonModule;
@@ -98,14 +126,19 @@ export class LocalStorageTransport implements StorageTransport {
   private readonly VIRTUAL_BASE_URL = 'https://angular-helpers.local/storage-cache/';
   private readonly SECRET_PASSPHRASE = 'angular-helpers-secure-storage-passphrase';
 
-  // Configuración dinámica por instancia
   public storageType: 'local' | 'session' | 'indexeddb' | 'cacheapi' = 'local';
   public encrypt = false;
   public dbName = 'ah_db';
   public storeName = 'kv';
   public cacheName = 'ah_cache';
 
-  // IndexedDB Helper
+  constructor() {
+    // If running in worker context, fall back to indexeddb as default L2
+    if (typeof window === 'undefined') {
+      this.storageType = 'indexeddb';
+    }
+  }
+
   private async openDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, 1);
@@ -123,7 +156,11 @@ export class LocalStorageTransport implements StorageTransport {
   async read<T>(key: string, useToon?: boolean): Promise<T | undefined> {
     try {
       if (this.storageType === 'cacheapi') {
-        const cache = await window.caches.open(this.cacheName);
+        const cacheContext = getCaches();
+        if (!cacheContext) {
+          throw new Error('Cache API is not supported in this environment');
+        }
+        const cache = await cacheContext.open(this.cacheName);
         const url = `${this.VIRTUAL_BASE_URL}${key}`;
         const response = await cache.match(url);
         if (!response) return undefined;
@@ -172,7 +209,10 @@ export class LocalStorageTransport implements StorageTransport {
         });
       }
 
-      // Local o Session
+      // Local or Session Storage (Main Thread Only)
+      if (typeof window === 'undefined') {
+        throw new Error(`Storage type '${this.storageType}' is not supported in Worker context`);
+      }
       const storage = this.storageType === 'session' ? window.sessionStorage : window.localStorage;
       const raw = storage.getItem(key);
       if (raw === null) return undefined;
@@ -197,7 +237,11 @@ export class LocalStorageTransport implements StorageTransport {
       }
 
       if (this.storageType === 'cacheapi') {
-        const cache = await window.caches.open(this.cacheName);
+        const cacheContext = getCaches();
+        if (!cacheContext) {
+          throw new Error('Cache API is not supported in this environment');
+        }
+        const cache = await cacheContext.open(this.cacheName);
         const url = `${this.VIRTUAL_BASE_URL}${key}`;
         const response = new Response(payload, {
           headers: {
@@ -221,7 +265,10 @@ export class LocalStorageTransport implements StorageTransport {
         });
       }
 
-      // Local o Session
+      // Local or Session Storage (Main Thread Only)
+      if (typeof window === 'undefined') {
+        throw new Error(`Storage type '${this.storageType}' is not supported in Worker context`);
+      }
       const storage = this.storageType === 'session' ? window.sessionStorage : window.localStorage;
       storage.setItem(key, payload);
     } catch (error) {
@@ -232,7 +279,11 @@ export class LocalStorageTransport implements StorageTransport {
   async delete(key: string): Promise<void> {
     try {
       if (this.storageType === 'cacheapi') {
-        const cache = await window.caches.open(this.cacheName);
+        const cacheContext = getCaches();
+        if (!cacheContext) {
+          throw new Error('Cache API is not supported in this environment');
+        }
+        const cache = await cacheContext.open(this.cacheName);
         const url = `${this.VIRTUAL_BASE_URL}${key}`;
         await cache.delete(url);
         return;
@@ -250,6 +301,10 @@ export class LocalStorageTransport implements StorageTransport {
         });
       }
 
+      // Local or Session Storage (Main Thread Only)
+      if (typeof window === 'undefined') {
+        throw new Error(`Storage type '${this.storageType}' is not supported in Worker context`);
+      }
       const storage = this.storageType === 'session' ? window.sessionStorage : window.localStorage;
       storage.removeItem(key);
     } catch (error) {
@@ -258,12 +313,15 @@ export class LocalStorageTransport implements StorageTransport {
   }
 
   onChange<T>(key: string, callback: (value: T) => void): () => void {
+    if (typeof window === 'undefined') {
+      return () => {};
+    }
     const listener = (event: StorageEvent) => {
       if (event.key === key && event.newValue !== null) {
         try {
           deserializeData<T>(event.newValue).then((val) => callback(val));
         } catch {
-          // Ignorar payloads fallidos
+          // Ignore failed parsing
         }
       }
     };

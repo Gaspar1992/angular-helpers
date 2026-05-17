@@ -8,3 +8,6 @@ export * from './services/local-transport';
 export * from './utils/safe-readonly-map';
 export * from './fns/inject-storage-signal';
 export * from './services/entity-store';
+export * from './interfaces/worker-storage.types';
+export * from './tokens/worker.tokens';
+export * from './services/worker-transport';
