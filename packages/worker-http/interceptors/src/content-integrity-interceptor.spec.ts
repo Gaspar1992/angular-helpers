@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { contentIntegrityInterceptor } from './content-integrity-interceptor';
 import type { SerializableRequest, SerializableResponse } from './worker-interceptor.types';
 
@@ -28,7 +28,12 @@ function makeResponse(body: unknown, hashHeader?: string): SerializableResponse 
   };
 }
 
+import { webcrypto } from 'node:crypto';
+
 describe('contentIntegrityInterceptor', () => {
+  beforeAll(() => {
+    vi.stubGlobal('crypto', webcrypto);
+  });
   it('passes through when no hash header is present and requireHash is false (default)', async () => {
     const interceptor = contentIntegrityInterceptor();
     const response = makeResponse({ id: 1 });

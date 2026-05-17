@@ -84,8 +84,8 @@ export class OlWebGLTileLayerComponent {
             visible: this.visible(),
             opacity: this.opacity(),
             zIndex: this.zIndex(),
-            ...(this.tileStyle() ? { style: this.tileStyle() as FlatStyleLike } : {}),
-          });
+            style: (this.tileStyle() as FlatStyleLike) || {},
+          } as any);
           break;
         case 'xyz':
           tileSource = new XYZ({

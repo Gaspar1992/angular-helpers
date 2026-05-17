@@ -17,7 +17,12 @@ const baseReq: SerializableRequest = {
 
 const okResponse = { status: 200, statusText: 'OK', headers: {}, body: null, url: baseReq.url };
 
+import { webcrypto } from 'node:crypto';
+
 describe('hmacSigningInterceptor', () => {
+  beforeAll(() => {
+    vi.stubGlobal('crypto', webcrypto);
+  });
   it('adds HMAC signature header to outgoing request', async () => {
     let capturedReq: SerializableRequest | null = null;
     const next = (r: SerializableRequest) => {

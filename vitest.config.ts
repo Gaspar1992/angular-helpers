@@ -5,7 +5,7 @@ import angular from '@analogjs/vite-plugin-angular';
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
 export default defineConfig({
-  plugins: [angular()],
+  plugins: [angular({ tsconfig: './tsconfig.spec.json' })],
   test: {
     globals: true,
     environment: 'jsdom',
@@ -15,9 +15,17 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
     },
+    server: {
+      deps: {
+        inline: ['ora'],
+      },
+    },
   },
   resolve: {
     alias: {
+      '@analogjs/vitest-angular/setup-vitest': here(
+        './node_modules/@analogjs/vitest-angular/setup-vitest.js',
+      ),
       '@angular-helpers/worker-http/transport': here(
         './packages/worker-http/transport/src/index.ts',
       ),

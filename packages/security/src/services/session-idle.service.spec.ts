@@ -1,6 +1,4 @@
 import '@angular/compiler';
-import { setupTestBed } from '@analogjs/vitest-angular/setup-testbed';
-setupTestBed();
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';

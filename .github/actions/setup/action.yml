@@ -19,16 +19,21 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version-file: .nvmrc
-        cache: npm
+        cache: pnpm
         registry-url: ${{ inputs.registry-url }}
 
     - name: Install dependencies
       shell: bash
-      run: npm ci
+      run: pnpm install --frozen-lockfile
 
     - name: Cache Playwright browsers
       id: playwright-cache
@@ -36,6 +41,6 @@ runs:
       uses: actions/cache@v4
       with:
         path: ~/.cache/ms-playwright
-        key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+        key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
         restore-keys: |
           playwright-${{ runner.os }}-

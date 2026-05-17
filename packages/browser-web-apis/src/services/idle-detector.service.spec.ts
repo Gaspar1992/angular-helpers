@@ -21,9 +21,10 @@ describe('IdleDetectorService', () => {
     mockAddEventListener = vi.fn();
     mockRemoveEventListener = vi.fn();
 
-    vi.stubGlobal('window', {
-      isSecureContext: true,
-      IdleDetector: class MockIdleDetector {
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal(
+      'IdleDetector',
+      class MockIdleDetector {
         static requestPermission = mockRequestPermission;
         userState = 'idle';
         screenState = 'unlocked';
@@ -31,7 +32,7 @@ describe('IdleDetectorService', () => {
         addEventListener = mockAddEventListener;
         removeEventListener = mockRemoveEventListener;
       },
-    });
+    );
   });
 
   afterEach(() => {

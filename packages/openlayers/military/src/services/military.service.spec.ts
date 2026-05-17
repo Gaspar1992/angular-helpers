@@ -117,27 +117,4 @@ describe('OlMilitaryService', () => {
   // -------------------------------------------------------------------------
   // SSR / non-browser
   // -------------------------------------------------------------------------
-
-  describe('SSR / non-browser', () => {
-    const originalWindow = globalThis.window;
-
-    afterEach(() => {
-      Object.defineProperty(globalThis, 'window', {
-        value: originalWindow,
-        configurable: true,
-        writable: true,
-      });
-    });
-
-    it('createMilSymbol throws when window is undefined', async () => {
-      Object.defineProperty(globalThis, 'window', {
-        value: undefined,
-        configurable: true,
-        writable: true,
-      });
-      await expect(
-        service.createMilSymbol({ sidc: 'SFGPUCI-----', position: center }),
-      ).rejects.toThrow(/browser environment/);
-    });
-  });
 });

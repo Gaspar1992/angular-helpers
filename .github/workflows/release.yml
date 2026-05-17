@@ -44,11 +44,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: Run Release
-        run: npx semantic-release
+      - name: Verify build works
+        run: pnpm run build:prod --workspace=@angular-helpers/browser-web-apis
+
+      - name: Semantic Release
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: pnpm exec semantic-release
+        working-directory: packages/browser-web-apis
 
       - name: Detect release artifact changes
         id: release_changes

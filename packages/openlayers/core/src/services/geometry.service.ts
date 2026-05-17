@@ -134,7 +134,7 @@ export class OlGeometryService {
     if (dx === 0 && dy === 0) return [...center];
     const distance = Math.hypot(dx, dy);
     const bearing = Math.atan2(dx, dy);
-    return offset(center, distance, bearing);
+    return offset(center, distance, bearing) as Coordinate;
   }
 
   private nextId(kind: string): string {
