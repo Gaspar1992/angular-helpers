@@ -45,7 +45,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Verify build works
-        run: pnpm --filter @angular-helpers/browser-web-apis --filter @angular-helpers/storage build:prod
+        run: pnpm --filter @angular-helpers/browser-web-apis --filter @angular-helpers/storage --filter @angular-helpers/security --filter @angular-helpers/worker-http --filter @angular-helpers/openlayers build:prod
 
       - name: Semantic Release (Browser Web APIs)
         env:
@@ -61,10 +61,37 @@ jobs:
         run: pnpm exec semantic-release
         working-directory: packages/storage
 
+      - name: Semantic Release (Security)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm exec semantic-release
+        working-directory: packages/security
+
+      - name: Semantic Release (Worker HTTP)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm exec semantic-release
+        working-directory: packages/worker-http
+
+      - name: Semantic Release (OpenLayers)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm exec semantic-release
+        working-directory: packages/openlayers
+
       - name: Detect release artifact changes
         id: release_changes
         run: |
-          if git diff --quiet -- packages/browser-web-apis/CHANGELOG.md packages/browser-web-apis/package.json packages/storage/CHANGELOG.md packages/storage/package.json pnpm-lock.yaml; then
+          if git diff --quiet -- \
+            packages/browser-web-apis/CHANGELOG.md packages/browser-web-apis/package.json \
+            packages/storage/CHANGELOG.md packages/storage/package.json \
+            packages/security/CHANGELOG.md packages/security/package.json \
+            packages/worker-http/CHANGELOG.md packages/worker-http/package.json \
+            packages/openlayers/CHANGELOG.md packages/openlayers/package.json \
+            pnpm-lock.yaml; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
@@ -93,4 +120,10 @@ jobs:
             packages/browser-web-apis/package.json
             packages/storage/CHANGELOG.md
             packages/storage/package.json
+            packages/security/CHANGELOG.md
+            packages/security/package.json
+            packages/worker-http/CHANGELOG.md
+            packages/worker-http/package.json
+            packages/openlayers/CHANGELOG.md
+            packages/openlayers/package.json
             pnpm-lock.yaml
