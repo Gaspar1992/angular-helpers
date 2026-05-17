@@ -6,8 +6,8 @@ const port = Number(process.env['BROWSER_TEST_PORT'] ?? '4200');
 const protocol = useHttps ? 'https' : 'http';
 const baseUrl = `${protocol}://${host}:${port}`;
 const startCommand = useHttps
-  ? `npm run start:https -- --host ${host} --port ${port}`
-  : 'npm run start:test';
+  ? `pnpm run start:https --host ${host} --port ${port}`
+  : 'pnpm run start:test';
 
 export default defineConfig({
   testDir: './test/browser',

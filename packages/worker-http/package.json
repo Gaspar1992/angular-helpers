@@ -55,7 +55,7 @@
     "test:coverage": "vitest --coverage",
     "clean": "rm -rf dist",
     "lint": "oxlint src",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "pnpm run build"
   },
   "keywords": [
     "angular",

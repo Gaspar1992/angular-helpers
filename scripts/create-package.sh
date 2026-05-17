@@ -51,8 +51,8 @@ cat > "$PACKAGE_DIR/package.json" << EOF
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
     "clean": "rm -rf dist",
-    "lint": "eslint src/**/*.ts",
-    "prepublishOnly": "npm run build"
+    "lint": "oxlint src",
+    "prepublishOnly": "pnpm run build"
   },
   "keywords": [
     "angular",
@@ -178,7 +178,7 @@ Descripción del package $PACKAGE_NAME.
 ## Instalación
 
 \`\`\`bash
-npm install $PACKAGE_JSON_NAME
+pnpm add $PACKAGE_JSON_NAME
 \`\`\`
 
 ## Uso
@@ -191,13 +191,13 @@ import { YourService } from '$PACKAGE_JSON_NAME';
 
 \`\`\`bash
 # Build
-npm run build
+pnpm run build
 
 # Test
-npm run test
+pnpm test
 
 # Watch mode
-npm run build:watch
+pnpm run build:watch
 \`\`\`
 
 ## Licencia
@@ -208,7 +208,7 @@ EOF
 # Instalar dependencias del workspace
 echo "📦 Instalando dependencias del workspace..."
 cd ..
-npm install
+pnpm install
 
 echo ""
 echo "✅ Package '$PACKAGE_JSON_NAME' creado exitosamente!"
@@ -219,8 +219,8 @@ echo "🚀 Próximos pasos:"
 echo "   1. Agrega tus servicios en: $PACKAGE_DIR/src/services/"
 echo "   2. Exporta tus APIs en: $PACKAGE_DIR/src/public-api.ts"
 echo "   3. Escribe tests en: $PACKAGE_DIR/src/**/*.spec.ts"
-echo "   4. Build con: npm run build (desde root o desde package)"
-echo "   5. Test con: npm run test (desde root o desde package)"
+echo "   4. Build con: pnpm run build (desde root o desde package)"
+echo "   5. Test con: pnpm test (desde root o desde package)"
 echo ""
 echo "📚 El package está listo para desarrollarse!"
 echo "💡 Las dependencias se comparten desde el workspace root"

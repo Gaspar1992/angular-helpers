@@ -1,10 +1,16 @@
 {
   "branches": ["main"],
+  "tagFormat": "@angular-helpers/browser-web-apis@${version}",
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
     "@semantic-release/changelog",
-    "@semantic-release/npm",
+    [
+      "@semantic-release/npm",
+      {
+        "pkgRoot": "../../dist/browser-web-apis"
+      }
+    ],
     [
       "@semantic-release/github",
       {
