@@ -24,7 +24,7 @@ export function toSerializableRequest(req: HttpRequest<unknown>): SerializableRe
 
   return {
     method: req.method,
-    url: req.urlWithParams,
+    url: req.url,
     headers,
     params,
     body: req.body,
