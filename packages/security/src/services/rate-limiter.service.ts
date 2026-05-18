@@ -44,6 +44,7 @@ interface BucketState {
   timestamps: number[];
   // Reactive signal — current remaining units
   remaining: ReturnType<typeof signal<number>>;
+  timerId?: any;
 }
 
 /**
@@ -82,7 +83,12 @@ export class RateLimiterService {
         this.configure(key, policy);
       }
     }
-    this.destroyRef.onDestroy(() => this.buckets.clear());
+    this.destroyRef.onDestroy(() => {
+      for (const bucket of this.buckets.values()) {
+        if (bucket.timerId) clearTimeout(bucket.timerId);
+      }
+      this.buckets.clear();
+    });
   }
 
   /**
@@ -90,6 +96,11 @@ export class RateLimiterService {
    */
   configure(key: string, policy: RateLimitPolicy): void {
     validatePolicy(policy);
+
+    const existing = this.buckets.get(key);
+    if (existing && existing.timerId) {
+      clearTimeout(existing.timerId);
+    }
 
     const now = Date.now();
     const initialRemaining = policy.type === 'token-bucket' ? policy.capacity : policy.max;
@@ -128,6 +139,8 @@ export class RateLimiterService {
       }
       bucket.tokens -= tokens;
       bucket.remaining.set(Math.floor(bucket.tokens));
+
+      this.scheduleAutoRefill(key, bucket);
       return;
     }
 
@@ -141,6 +154,8 @@ export class RateLimiterService {
     }
     for (let i = 0; i < tokens; i++) bucket.timestamps.push(now);
     bucket.remaining.set(bucket.policy.max - bucket.timestamps.length);
+
+    this.scheduleAutoRefill(key, bucket);
   }
 
   /**
@@ -170,6 +185,11 @@ export class RateLimiterService {
     const bucket = this.buckets.get(key);
     if (!bucket) return;
 
+    if (bucket.timerId) {
+      clearTimeout(bucket.timerId);
+      bucket.timerId = undefined;
+    }
+
     bucket.timestamps = [];
     if (bucket.policy.type === 'token-bucket') {
       bucket.tokens = bucket.policy.capacity;
@@ -190,6 +210,51 @@ export class RateLimiterService {
     bucket.tokens = Math.min(bucket.policy.capacity, bucket.tokens + refilled);
     bucket.lastRefillAt = now;
     bucket.remaining.set(Math.floor(bucket.tokens));
+  }
+
+  private scheduleAutoRefill(key: string, bucket: BucketState): void {
+    if (bucket.timerId) {
+      clearTimeout(bucket.timerId);
+      bucket.timerId = undefined;
+    }
+
+    const now = Date.now();
+
+    if (bucket.policy.type === 'token-bucket') {
+      if (bucket.tokens >= bucket.policy.capacity) {
+        return;
+      }
+
+      const currentFloor = Math.floor(bucket.tokens);
+      const nextInteger = currentFloor + 1;
+      const deficit = nextInteger - bucket.tokens;
+      const timeToNextTokenMs = Math.max(
+        10,
+        Math.ceil((deficit / bucket.policy.refillPerSecond) * 1000),
+      );
+
+      bucket.timerId = setTimeout(() => {
+        const tNow = Date.now();
+        this.refillTokenBucket(bucket, tNow);
+        this.scheduleAutoRefill(key, bucket);
+      }, timeToNextTokenMs);
+    } else {
+      // sliding-window
+      const windowStart = now - bucket.policy.windowMs;
+      bucket.timestamps = bucket.timestamps.filter((t) => t > windowStart);
+      bucket.remaining.set(bucket.policy.max - bucket.timestamps.length);
+
+      if (bucket.timestamps.length === 0) {
+        return;
+      }
+
+      const oldest = bucket.timestamps[0];
+      const timeToExpiryMs = Math.max(10, oldest + bucket.policy.windowMs - now);
+
+      bucket.timerId = setTimeout(() => {
+        this.scheduleAutoRefill(key, bucket);
+      }, timeToExpiryMs);
+    }
   }
 }
 
