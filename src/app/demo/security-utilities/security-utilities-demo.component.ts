@@ -290,7 +290,7 @@ interface DemoLog {
               class="text-info font-bold bg-info/10 px-1.5 py-0.5 rounded-lg border border-info/10"
               >demo</code
             >
-            (3 tokens, 0.5/s refill).
+            (3 tokens, 0.05/s refill).
           </p>
 
           <div class="flex items-center gap-4 mb-8">
@@ -540,7 +540,7 @@ export class SecurityUtilitiesDemoComponent {
     this.rateLimiter.configure('demo', {
       type: 'token-bucket',
       capacity: 3,
-      refillPerSecond: 0.5,
+      refillPerSecond: 0.05,
     });
     this.csrfToken.set(this.csrf.getToken());
   }
