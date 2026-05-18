@@ -32,13 +32,14 @@ describe('toSerializableRequest', () => {
     expect(result.url).toBe(baseUrl);
   });
 
-  it('includes url with params when HttpParams are set', () => {
+  it('keeps url clean and maps HttpParams to params record when set', () => {
     const params = new HttpParams({ fromObject: { page: '1', limit: '20' } });
     const req = new HttpRequest('GET', baseUrl, { params });
     const result = toSerializableRequest(req);
 
-    expect(result.url).toContain('page=1');
-    expect(result.url).toContain('limit=20');
+    expect(result.url).toBe(baseUrl);
+    expect(result.params['page']).toStrictEqual(['1']);
+    expect(result.params['limit']).toStrictEqual(['20']);
   });
 
   it('converts headers to Record<string, string[]>', () => {

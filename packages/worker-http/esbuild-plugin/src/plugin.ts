@@ -133,10 +133,8 @@ function scanDirectory(dir: string, interceptors: string[], rootDir: string): vo
  * Converts relative paths to valid import specifiers.
  */
 function generateInterceptorImports(interceptorPaths: string[], workerFilePath: string): string[] {
-  return interceptorPaths.map((interceptorPath, index) => {
-    // Create a valid identifier from the path
-    const identifier = `interceptor_${index}_${interceptorPath.replace(/[^a-zA-Z0-9]/g, '_')}`;
-    return `import ${identifier} from '${interceptorPath}';`;
+  return interceptorPaths.map((interceptorPath) => {
+    return `import '${interceptorPath}';`;
   });
 }
 

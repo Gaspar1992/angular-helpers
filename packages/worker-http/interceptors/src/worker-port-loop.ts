@@ -1,3 +1,5 @@
+import { detectTransferables } from '@angular-helpers/worker-http/transport';
+
 import type { RequestHandler } from './worker-fetch-executor';
 
 /**
@@ -17,7 +19,16 @@ export function attachPortLoop(port: MessagePort | any, chain: RequestHandler): 
       if (!responseBuffer.length) return;
       const responses = responseBuffer;
       responseBuffer = [];
-      port.postMessage({ type: 'batch-response', responses });
+
+      const transferables = [
+        ...new Set(
+          responses.flatMap((res) =>
+            res.type === 'response' && res.result ? detectTransferables(res.result.body) : [],
+          ),
+        ),
+      ];
+
+      port.postMessage({ type: 'batch-response', responses }, transferables);
     });
   }
 

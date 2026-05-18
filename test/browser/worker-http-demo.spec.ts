@@ -75,7 +75,7 @@ test.describe('Worker HTTP Demo', () => {
     await page.getByRole('button', { name: /Sign Payload/i }).click();
 
     // Wait for signature to appear (look for the result div containing the signature hex)
-    const signatureBlock = page.locator('app-worker-http-hmac-card').locator('div.font-mono');
+    const signatureBlock = page.locator('app-worker-http-hmac-card').locator('div.mono-block');
     await expect(signatureBlock).toBeVisible({ timeout: 5000 });
 
     // Verify signature is a hex string (contains only hex characters)
@@ -93,7 +93,7 @@ test.describe('Worker HTTP Demo', () => {
     await page.getByRole('button', { name: /Hash Content/i }).click();
 
     // Wait for hash result to appear (use the specific result block class)
-    const hashBlock = page.locator('app-worker-http-hash-card').locator('div.font-mono');
+    const hashBlock = page.locator('app-worker-http-hash-card').locator('div.mono-block');
     await expect(hashBlock).toBeVisible({ timeout: 5000 });
 
     // Verify hash is a hex string

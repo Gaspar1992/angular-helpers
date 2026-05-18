@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -102,5 +102,53 @@ createWorkerMessageLoop();`,
     });
 
     expect(plugin.name).toBe('worker-http');
+  });
+
+  it('should inject side-effect-only imports into the worker file', async () => {
+    // Create test directory structure
+    const srcDir = path.join(tempDir, 'src');
+    const interceptorsDir = path.join(srcDir, 'interceptors');
+    fs.mkdirSync(interceptorsDir, { recursive: true });
+
+    // Create interceptor files
+    const authPath = path.join(interceptorsDir, 'auth.interceptor.ts');
+    fs.writeFileSync(authPath, 'export default function authInterceptor() {}');
+
+    // Create a worker file
+    const workerFile = path.join(srcDir, 'http-api.worker.ts');
+    fs.writeFileSync(
+      workerFile,
+      `import { createWorkerMessageLoop } from '@angular-helpers/worker-http/backend';
+createWorkerMessageLoop();`,
+    );
+
+    const plugin = workerHttpPlugin({ autoDiscover: true });
+
+    // Mock build object to capture onLoad callback
+    let onLoadFilter: RegExp | undefined;
+    let onLoadCallback: Function | undefined;
+
+    const mockBuild = {
+      initialOptions: {
+        absWorkingDir: tempDir,
+      },
+      onLoad: vi.fn((options, callback) => {
+        onLoadFilter = options.filter;
+        onLoadCallback = callback;
+      }),
+    } as unknown as PluginBuild;
+
+    plugin.setup(mockBuild);
+
+    expect(mockBuild.onLoad).toHaveBeenCalled();
+    expect(onLoadFilter).toBeDefined();
+    expect(onLoadCallback).toBeDefined();
+
+    // Call the onLoad callback
+    const result = await onLoadCallback!({ path: workerFile });
+
+    expect(result).toBeDefined();
+    expect(result.contents).toContain("import './src/interceptors/auth.interceptor.ts';");
+    expect(result.contents).not.toContain('import interceptor_');
   });
 });
