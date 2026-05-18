@@ -20,14 +20,12 @@ describe('injectStorageSignal', () => {
 
   it('debe inicializarse con el valor por defecto si el transporte no tiene datos persistidos', async () => {
     await TestBed.runInInjectionContext(async () => {
-      const sig = injectStorageSignal('user-pref', 'light-mode', {
-        storageType: 'local',
-        serializer: 'json',
-      });
+      const opts = { storageType: 'local', serializer: 'json' } as const;
+      const sig = injectStorageSignal('user-pref', 'light-mode', opts);
 
       // Al inicio, carga asíncronamente
       expect(sig().data).toBe('light-mode');
-      expect(mockTransport.read).toHaveBeenCalledWith('user-pref', false);
+      expect(mockTransport.read).toHaveBeenCalledWith('user-pref', opts);
     });
   });
 
@@ -51,15 +49,13 @@ describe('injectStorageSignal', () => {
 
   it('debe persistir los cambios reactivamente al escribir en el Signal', async () => {
     await TestBed.runInInjectionContext(async () => {
-      const sig = injectStorageSignal('user-pref', 'light-mode', {
-        storageType: 'local',
-        serializer: 'json',
-      });
+      const opts = { storageType: 'local', serializer: 'json' } as const;
+      const sig = injectStorageSignal('user-pref', 'light-mode', opts);
 
       sig.set({ data: 'dark-mode', loading: false, error: null });
 
       expect(sig().data).toBe('dark-mode');
-      expect(mockTransport.write).toHaveBeenCalledWith('user-pref', 'dark-mode', false);
+      expect(mockTransport.write).toHaveBeenCalledWith('user-pref', 'dark-mode', opts);
     });
   });
 

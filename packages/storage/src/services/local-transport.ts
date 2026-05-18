@@ -1,5 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { StorageTransport } from './storage-transport';
+import { SECURE_STORAGE_PASSPHRASE } from '../tokens/storage.tokens';
+import { StorageSignalOptions } from '../interfaces/storage.types';
 
 const ENCRYPTION_SALT = new Uint8Array([7, 21, 14, 9, 3, 18, 5, 12, 1, 20, 16, 2, 8, 15, 6, 11]);
 
@@ -124,7 +126,6 @@ async function deserializeData<T>(text: string, useToon = false): Promise<T> {
 @Injectable({ providedIn: 'root' })
 export class LocalStorageTransport implements StorageTransport {
   private readonly VIRTUAL_BASE_URL = 'https://angular-helpers.local/storage-cache/';
-  private readonly SECRET_PASSPHRASE = 'angular-helpers-secure-storage-passphrase';
 
   public storageType: 'local' | 'session' | 'indexeddb' | 'cacheapi' = 'local';
   public encrypt = false;
@@ -132,20 +133,23 @@ export class LocalStorageTransport implements StorageTransport {
   public storeName = 'kv';
   public cacheName = 'ah_cache';
 
-  constructor() {
+  constructor(
+    @Inject(SECURE_STORAGE_PASSPHRASE)
+    private readonly secretPassphrase: string = 'fallback-passphrase-angular-helpers-default-key-sec',
+  ) {
     // If running in worker context, fall back to indexeddb as default L2
     if (typeof window === 'undefined') {
       this.storageType = 'indexeddb';
     }
   }
 
-  private async openDB(): Promise<IDBDatabase> {
+  private async openDB(dbName: string, storeName: string): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName, 1);
+      const request = indexedDB.open(dbName, 1);
       request.onupgradeneeded = () => {
         const db = request.result;
-        if (!db.objectStoreNames.contains(this.storeName)) {
-          db.createObjectStore(this.storeName);
+        if (!db.objectStoreNames.contains(storeName)) {
+          db.createObjectStore(storeName);
         }
       };
       request.onsuccess = () => resolve(request.result);
@@ -153,21 +157,28 @@ export class LocalStorageTransport implements StorageTransport {
     });
   }
 
-  async read<T>(key: string, useToon?: boolean): Promise<T | undefined> {
+  async read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined> {
     try {
-      if (this.storageType === 'cacheapi') {
+      const storageType = options?.storageType ?? this.storageType;
+      const encryptData = options?.encrypt ?? this.encrypt;
+      const dbName = options?.dbName ?? this.dbName;
+      const storeName = options?.storeName ?? this.storeName;
+      const cacheName = options?.cacheName ?? this.cacheName;
+      const useToon = options?.serializer === 'toon';
+
+      if (storageType === 'cacheapi') {
         const cacheContext = getCaches();
         if (!cacheContext) {
           throw new Error('Cache API is not supported in this environment');
         }
-        const cache = await cacheContext.open(this.cacheName);
+        const cache = await cacheContext.open(cacheName);
         const url = `${this.VIRTUAL_BASE_URL}${key}`;
         const response = await cache.match(url);
         if (!response) return undefined;
 
-        if (this.encrypt) {
+        if (encryptData) {
           const cipherText = await response.text();
-          const plainText = await decrypt(cipherText, this.SECRET_PASSPHRASE);
+          const plainText = await decrypt(cipherText, this.secretPassphrase);
           return await deserializeData<T>(plainText, useToon);
         }
 
@@ -179,11 +190,11 @@ export class LocalStorageTransport implements StorageTransport {
         }
       }
 
-      if (this.storageType === 'indexeddb') {
-        const db = await this.openDB();
+      if (storageType === 'indexeddb') {
+        const db = await this.openDB(dbName, storeName);
         return new Promise<T | undefined>((resolve, reject) => {
-          const transaction = db.transaction(this.storeName, 'readonly');
-          const store = transaction.objectStore(this.storeName);
+          const transaction = db.transaction(storeName, 'readonly');
+          const store = transaction.objectStore(storeName);
           const request = store.get(key);
 
           request.onsuccess = async () => {
@@ -194,8 +205,8 @@ export class LocalStorageTransport implements StorageTransport {
             }
 
             try {
-              if (this.encrypt) {
-                const plainText = await decrypt(rawVal, this.SECRET_PASSPHRASE);
+              if (encryptData) {
+                const plainText = await decrypt(rawVal, this.secretPassphrase);
                 resolve(await deserializeData<T>(plainText, useToon));
               } else {
                 resolve(await deserializeData<T>(rawVal, useToon));
@@ -211,14 +222,14 @@ export class LocalStorageTransport implements StorageTransport {
 
       // Local or Session Storage (Main Thread Only)
       if (typeof window === 'undefined') {
-        throw new Error(`Storage type '${this.storageType}' is not supported in Worker context`);
+        throw new Error(`Storage type '${storageType}' is not supported in Worker context`);
       }
-      const storage = this.storageType === 'session' ? window.sessionStorage : window.localStorage;
+      const storage = storageType === 'session' ? window.sessionStorage : window.localStorage;
       const raw = storage.getItem(key);
       if (raw === null) return undefined;
 
-      if (this.encrypt) {
-        const plainText = await decrypt(raw, this.SECRET_PASSPHRASE);
+      if (encryptData) {
+        const plainText = await decrypt(raw, this.secretPassphrase);
         return await deserializeData<T>(plainText, useToon);
       }
       return await deserializeData<T>(raw, useToon);
@@ -228,24 +239,31 @@ export class LocalStorageTransport implements StorageTransport {
     }
   }
 
-  async write<T>(key: string, data: T, useToon?: boolean): Promise<void> {
+  async write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void> {
     try {
+      const storageType = options?.storageType ?? this.storageType;
+      const encryptData = options?.encrypt ?? this.encrypt;
+      const dbName = options?.dbName ?? this.dbName;
+      const storeName = options?.storeName ?? this.storeName;
+      const cacheName = options?.cacheName ?? this.cacheName;
+      const useToon = options?.serializer === 'toon';
+
       let payload = await serializeData(data, useToon);
 
-      if (this.encrypt) {
-        payload = await encrypt(payload, this.SECRET_PASSPHRASE);
+      if (encryptData) {
+        payload = await encrypt(payload, this.secretPassphrase);
       }
 
-      if (this.storageType === 'cacheapi') {
+      if (storageType === 'cacheapi') {
         const cacheContext = getCaches();
         if (!cacheContext) {
           throw new Error('Cache API is not supported in this environment');
         }
-        const cache = await cacheContext.open(this.cacheName);
+        const cache = await cacheContext.open(cacheName);
         const url = `${this.VIRTUAL_BASE_URL}${key}`;
         const response = new Response(payload, {
           headers: {
-            'Content-Type': useToon && !this.encrypt ? 'application/toon' : 'application/json',
+            'Content-Type': useToon && !encryptData ? 'application/toon' : 'application/json',
             'X-Storage-Date': new Date().toISOString(),
           },
         });
@@ -253,11 +271,11 @@ export class LocalStorageTransport implements StorageTransport {
         return;
       }
 
-      if (this.storageType === 'indexeddb') {
-        const db = await this.openDB();
+      if (storageType === 'indexeddb') {
+        const db = await this.openDB(dbName, storeName);
         return new Promise<void>((resolve, reject) => {
-          const transaction = db.transaction(this.storeName, 'readwrite');
-          const store = transaction.objectStore(this.storeName);
+          const transaction = db.transaction(storeName, 'readwrite');
+          const store = transaction.objectStore(storeName);
           const request = store.put(payload, key);
 
           request.onsuccess = () => resolve();
@@ -267,33 +285,38 @@ export class LocalStorageTransport implements StorageTransport {
 
       // Local or Session Storage (Main Thread Only)
       if (typeof window === 'undefined') {
-        throw new Error(`Storage type '${this.storageType}' is not supported in Worker context`);
+        throw new Error(`Storage type '${storageType}' is not supported in Worker context`);
       }
-      const storage = this.storageType === 'session' ? window.sessionStorage : window.localStorage;
+      const storage = storageType === 'session' ? window.sessionStorage : window.localStorage;
       storage.setItem(key, payload);
     } catch (error) {
       console.error(`[LocalStorageTransport] Error al escribir clave: ${key}`, error);
     }
   }
 
-  async delete(key: string): Promise<void> {
+  async delete(key: string, options?: StorageSignalOptions): Promise<void> {
     try {
-      if (this.storageType === 'cacheapi') {
+      const storageType = options?.storageType ?? this.storageType;
+      const dbName = options?.dbName ?? this.dbName;
+      const storeName = options?.storeName ?? this.storeName;
+      const cacheName = options?.cacheName ?? this.cacheName;
+
+      if (storageType === 'cacheapi') {
         const cacheContext = getCaches();
         if (!cacheContext) {
           throw new Error('Cache API is not supported in this environment');
         }
-        const cache = await cacheContext.open(this.cacheName);
+        const cache = await cacheContext.open(cacheName);
         const url = `${this.VIRTUAL_BASE_URL}${key}`;
         await cache.delete(url);
         return;
       }
 
-      if (this.storageType === 'indexeddb') {
-        const db = await this.openDB();
+      if (storageType === 'indexeddb') {
+        const db = await this.openDB(dbName, storeName);
         return new Promise<void>((resolve, reject) => {
-          const transaction = db.transaction(this.storeName, 'readwrite');
-          const store = transaction.objectStore(this.storeName);
+          const transaction = db.transaction(storeName, 'readwrite');
+          const store = transaction.objectStore(storeName);
           const request = store.delete(key);
 
           request.onsuccess = () => resolve();
@@ -303,9 +326,9 @@ export class LocalStorageTransport implements StorageTransport {
 
       // Local or Session Storage (Main Thread Only)
       if (typeof window === 'undefined') {
-        throw new Error(`Storage type '${this.storageType}' is not supported in Worker context`);
+        throw new Error(`Storage type '${storageType}' is not supported in Worker context`);
       }
-      const storage = this.storageType === 'session' ? window.sessionStorage : window.localStorage;
+      const storage = storageType === 'session' ? window.sessionStorage : window.localStorage;
       storage.removeItem(key);
     } catch (error) {
       console.error(`[LocalStorageTransport] Error al eliminar clave: ${key}`, error);

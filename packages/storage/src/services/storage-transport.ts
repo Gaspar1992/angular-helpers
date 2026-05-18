@@ -1,20 +1,21 @@
 import { InjectionToken } from '@angular/core';
+import { StorageSignalOptions } from '../interfaces/storage.types';
 
 export interface StorageTransport {
   /**
    * Lee un valor persistido asíncronamente
    */
-  read<T>(key: string, useToon?: boolean): Promise<T | undefined>;
+  read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined>;
 
   /**
    * Escribe un valor persistido asíncronamente
    */
-  write<T>(key: string, data: T, useToon?: boolean): Promise<void>;
+  write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void>;
 
   /**
    * Elimina un valor persistido
    */
-  delete(key: string): Promise<void>;
+  delete(key: string, options?: StorageSignalOptions): Promise<void>;
 
   /**
    * Suscribe un callback para cambios externos (sincronización multi-pestaña)

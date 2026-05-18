@@ -22,20 +22,9 @@ export function injectStorageSignal<T>(
     transport = inject(LocalStorageTransport);
   }
 
-  // Configurar las propiedades de persistencia si es transporte local
-  if (transport instanceof LocalStorageTransport) {
-    transport.storageType = options.storageType;
-    transport.encrypt = !!options.encrypt;
-    if (options.dbName) transport.dbName = options.dbName;
-    if (options.storeName) transport.storeName = options.storeName;
-    if (options.cacheName) transport.cacheName = options.cacheName;
-  }
-
-  const useToon = options.serializer === 'toon';
-
   // 1. Cargar valor inicial de L2
   transport
-    .read<T>(key, useToon)
+    .read<T>(key, options)
     .then((value) => {
       state.set({
         data: value !== undefined ? value : defaultValue,
@@ -57,7 +46,7 @@ export function injectStorageSignal<T>(
 
   const persist = (newData: T) => {
     transport!
-      .write(key, newData, useToon)
+      .write(key, newData, options)
       .catch((err) => console.error(`[injectStorageSignal] Error escribiendo clave: ${key}`, err));
   };
 

@@ -2,7 +2,7 @@ import { inject, signal, computed, Signal, WritableSignal } from '@angular/core'
 import { STORAGE_TRANSPORT } from './storage-transport';
 import { LocalStorageTransport } from './local-transport';
 import { SafeReadonlyMap } from '../utils/safe-readonly-map';
-import { EntityStoreOptions } from '../interfaces/storage.types';
+import { EntityStoreOptions, StorageSignalOptions } from '../interfaces/storage.types';
 
 export class EntityStore<Id, Entity> {
   private readonly _rawMap = new Map<Id, Entity>();
@@ -123,20 +123,10 @@ export class EntityStore<Id, Entity> {
 
   private initPersistence(key: string): void {
     const transport = this._resolveTransport();
-    const useToon = this.options.storageOptions?.serializer === 'toon';
-
-    if (transport instanceof LocalStorageTransport && this.options.storageOptions) {
-      const opts = this.options.storageOptions;
-      transport.storageType = opts.storageType;
-      transport.encrypt = !!opts.encrypt;
-      if (opts.dbName) transport.dbName = opts.dbName;
-      if (opts.storeName) transport.storeName = opts.storeName;
-      if (opts.cacheName) transport.cacheName = opts.cacheName;
-    }
 
     this._isRestoring = true;
     transport
-      .read<Entity[]>(key, useToon)
+      .read<Entity[]>(key, this.options.storageOptions as StorageSignalOptions)
       .then((data) => {
         if (data && Array.isArray(data)) {
           this.setMany(data);
@@ -151,19 +141,13 @@ export class EntityStore<Id, Entity> {
   private triggerPersist(): void {
     if (this._isRestoring || !this.options.persistKey) return;
     const transport = this._resolveTransport();
-    const useToon = this.options.storageOptions?.serializer === 'toon';
-
-    if (transport instanceof LocalStorageTransport && this.options.storageOptions) {
-      const opts = this.options.storageOptions;
-      transport.storageType = opts.storageType;
-      transport.encrypt = !!opts.encrypt;
-      if (opts.dbName) transport.dbName = opts.dbName;
-      if (opts.storeName) transport.storeName = opts.storeName;
-      if (opts.cacheName) transport.cacheName = opts.cacheName;
-    }
 
     transport
-      .write(this.options.persistKey, this.list(), useToon)
+      .write(
+        this.options.persistKey,
+        this.list(),
+        this.options.storageOptions as StorageSignalOptions,
+      )
       .catch((err) => console.error(`[EntityStore] Error guardando entidades persistidas:`, err));
   }
 }

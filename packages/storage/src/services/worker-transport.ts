@@ -2,6 +2,7 @@ import { Inject, Injectable, Optional } from '@angular/core';
 import { StorageTransport } from './storage-transport';
 import { STORAGE_WORKER_FACTORY } from '../tokens/worker.tokens';
 import { WorkerStorageAction, WorkerStorageResponse } from '../interfaces/worker-storage.types';
+import { StorageSignalOptions } from '../interfaces/storage.types';
 
 @Injectable()
 export class WorkerStorageTransport implements StorageTransport {
@@ -60,19 +61,21 @@ export class WorkerStorageTransport implements StorageTransport {
     };
   }
 
-  read<T>(key: string, useToon?: boolean): Promise<T | undefined> {
+  read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined> {
     this.ensureWorker();
-    return this.postRequest<T | undefined>('read', key, undefined, { useToon });
+    const useToon = options?.serializer === 'toon';
+    return this.postRequest<T | undefined>('read', key, undefined, { ...options, useToon });
   }
 
-  write<T>(key: string, data: T, useToon?: boolean): Promise<void> {
+  write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void> {
     this.ensureWorker();
-    return this.postRequest<void>('write', key, data, { useToon });
+    const useToon = options?.serializer === 'toon';
+    return this.postRequest<void>('write', key, data, { ...options, useToon });
   }
 
-  delete(key: string): Promise<void> {
+  delete(key: string, options?: StorageSignalOptions): Promise<void> {
     this.ensureWorker();
-    return this.postRequest<void>('delete', key);
+    return this.postRequest<void>('delete', key, undefined, options);
   }
 
   onChange<T>(key: string, callback: (value: T) => void): () => void {

@@ -37,12 +37,18 @@ self.onmessage = async (event: MessageEvent<WorkerStorageRequest>) => {
   try {
     switch (type) {
       case 'read': {
-        const result = await storageEngine.read(key!, options?.useToon);
+        const result = await storageEngine.read(key!, {
+          storageType: 'indexeddb',
+          serializer: options?.useToon ? 'toon' : 'json',
+        });
         self.postMessage({ type: 'response', requestId, payload: result });
         break;
       }
       case 'write': {
-        await storageEngine.write(key!, payload, options?.useToon);
+        await storageEngine.write(key!, payload, {
+          storageType: 'indexeddb',
+          serializer: options?.useToon ? 'toon' : 'json',
+        });
         self.postMessage({ type: 'response', requestId });
         broadcastChange(key!, payload);
         break;
