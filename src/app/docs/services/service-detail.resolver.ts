@@ -4,6 +4,7 @@ import { BROWSER_WEB_APIS_SERVICES } from '../data/browser-web-apis.data';
 import { SECURITY_SERVICES, SECURITY_INTERFACES } from '../data/security.data';
 import { WORKER_HTTP_ENTRIES, WORKER_HTTP_INTERFACES } from '../data/worker-http.data';
 import { OPENLAYERS_SERVICES } from '../data/openlayers.data';
+import { STORAGE_SERVICES, STORAGE_INTERFACES } from '../data/storage.data';
 import {
   ServiceDetailConfig,
   InterfaceDoc,
@@ -25,6 +26,11 @@ const SECTION_DATA = {
     backRoute: '/docs/worker-http',
     backLabel: 'worker-http',
   },
+  storage: {
+    dataSource: STORAGE_SERVICES,
+    backRoute: '/docs/storage',
+    backLabel: 'storage',
+  },
   openlayers: {
     dataSource: OPENLAYERS_SERVICES,
     backRoute: '/docs/openlayers',
@@ -38,6 +44,9 @@ function getInterfaces(section: string, itemId: string): InterfaceDoc[] | undefi
   }
   if (section === 'worker-http') {
     return WORKER_HTTP_INTERFACES[itemId];
+  }
+  if (section === 'storage') {
+    return STORAGE_INTERFACES[itemId];
   }
   return undefined;
 }

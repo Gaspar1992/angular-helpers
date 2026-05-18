@@ -22,7 +22,7 @@ import { RouterLink } from '@angular/router';
 
       <!-- Grid of Packages -->
       <section
-        class="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 mt-16"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 mt-16"
         aria-labelledby="packages-title"
       >
         <h2 id="packages-title" class="sr-only">Available Packages</h2>
@@ -30,9 +30,9 @@ import { RouterLink } from '@angular/router';
         <!-- Browser APIs -->
         <a
           routerLink="/docs/browser-web-apis"
-          class="bg-base-200 border border-base-content/5 rounded-3xl p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
+          class="bg-base-200 border border-base-content/5 rounded-3xl p-6 sm:p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
         >
-          <div class="flex items-center justify-between">
+          <div class="flex flex-col gap-4 items-start">
             <div
               class="p-4 bg-base-content/5 rounded-2xl border border-base-content/10 shadow-inner group-hover:scale-110 transition-transform"
             >
@@ -65,9 +65,9 @@ import { RouterLink } from '@angular/router';
         <!-- Security -->
         <a
           routerLink="/docs/security"
-          class="bg-base-200 border border-base-content/5 rounded-3xl p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
+          class="bg-base-200 border border-base-content/5 rounded-3xl p-6 sm:p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
         >
-          <div class="flex items-center justify-between">
+          <div class="flex flex-col gap-4 items-start">
             <div
               class="p-4 bg-base-content/5 rounded-2xl border border-base-content/10 shadow-inner group-hover:scale-110 transition-transform"
             >
@@ -99,9 +99,9 @@ import { RouterLink } from '@angular/router';
         <!-- Worker HTTP -->
         <a
           routerLink="/docs/worker-http"
-          class="bg-base-200 border border-base-content/5 rounded-3xl p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
+          class="bg-base-200 border border-base-content/5 rounded-3xl p-6 sm:p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
         >
-          <div class="flex items-center justify-between">
+          <div class="flex flex-col gap-4 items-start">
             <div
               class="p-4 bg-base-content/5 rounded-2xl border border-base-content/10 shadow-inner group-hover:scale-110 transition-transform"
             >
@@ -133,9 +133,9 @@ import { RouterLink } from '@angular/router';
         <!-- OpenLayers -->
         <a
           routerLink="/docs/openlayers"
-          class="bg-base-200 border border-base-content/5 rounded-3xl p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
+          class="bg-base-200 border border-base-content/5 rounded-3xl p-6 sm:p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
         >
-          <div class="flex items-center justify-between">
+          <div class="flex flex-col gap-4 items-start">
             <div
               class="p-4 bg-base-content/5 rounded-2xl border border-base-content/10 shadow-inner group-hover:scale-110 transition-transform"
             >
@@ -160,6 +160,40 @@ import { RouterLink } from '@angular/router';
           <div class="bg-base-content/5 border border-base-content/5 rounded-xl px-4 py-3 mt-auto">
             <code class="text-xs text-base-content/80 font-mono">
               pnpm add <span class="text-primary font-bold">&#64;angular-helpers/openlayers</span>
+            </code>
+          </div>
+        </a>
+
+        <!-- Storage & Persistence -->
+        <a
+          routerLink="/docs/storage"
+          class="bg-base-200 border border-base-content/5 rounded-3xl p-6 sm:p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
+        >
+          <div class="flex flex-col gap-4 items-start">
+            <div
+              class="p-4 bg-base-content/5 rounded-2xl border border-base-content/10 shadow-inner group-hover:scale-110 transition-transform"
+            >
+              <span class="text-4xl">💾</span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span class="badge badge-primary font-bold">Offline First</span>
+              <span class="badge font-bold">AES-GCM</span>
+            </div>
+          </div>
+          <div>
+            <h3
+              class="text-2xl font-black text-base-content m-0 mb-3 tracking-tight group-hover:text-primary transition-colors"
+            >
+              Storage & Persistence
+            </h3>
+            <p class="text-base text-base-content/50 leading-relaxed font-medium">
+              High-performance, reactive L1 Signals backed by async L2 transports, client-side
+              encryption, TOON compression, and surgically reactive Entity State management.
+            </p>
+          </div>
+          <div class="bg-base-content/5 border border-base-content/5 rounded-xl px-4 py-3 mt-auto">
+            <code class="text-xs text-base-content/80 font-mono">
+              pnpm add <span class="text-primary font-bold">&#64;angular-helpers/storage</span>
             </code>
           </div>
         </a>

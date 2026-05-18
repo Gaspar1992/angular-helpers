@@ -149,4 +149,57 @@ client.get<HeavyData>('/api/analytics').subscribe({
   <span class="c-com">// Serialized with TOON or Seroval automatically</span>
 <span class="c-punc">});</span>`,
   },
+  {
+    title: 'storage.ts',
+    raw: `import { injectStorageSignal } from '@angular-helpers/storage';
+
+@Component({
+  template: \`
+    @if (prefs().loading) {
+      <p>Loading...</p>
+    } @else {
+      <div [class.dark]="prefs().data.theme === 'dark'">
+        <button (click)="toggle()">Toggle Theme</button>
+      </div>
+    }
+  \`
+})
+export class PrefsComponent {
+  // Persisted in async L2 storage & synced across tabs!
+  prefs = injectStorageSignal('user_prefs', { theme: 'light' }, {
+    crossTabSync: true
+  });
+
+  toggle() {
+    this.prefs.update(state => ({
+      ...state,
+      data: { theme: state.data.theme === 'light' ? 'dark' : 'light' }
+    }));
+  }
+}`,
+    html: `<span class="c-kw">import</span> <span class="c-brace">{</span> injectStorageSignal <span class="c-brace">}</span> <span class="c-kw">from</span> <span class="c-str">'@angular-helpers/storage'</span><span class="c-punc">;</span>
+
+<span class="c-kw">@Component</span><span class="c-punc">({</span>
+  template<span class="c-punc">:</span> <span class="c-str">\`
+    @if (prefs().loading) {
+      &lt;p&gt;Loading...&lt;/p&gt;
+    } @else {
+      &lt;div [class.dark]="prefs().data.theme === 'dark'"&gt;
+        &lt;button (click)="toggle()"&gt;Toggle Theme&lt;/button&gt;
+      &lt;/div&gt;
+    }
+  \`</span>
+<span class="c-punc">})</span>
+<span class="c-kw">export class</span> <span class="c-type">PrefsComponent</span> <span class="c-brace">{</span>
+  <span class="c-com">// Persisted in async L2 storage & synced across tabs!</span>
+  <span class="c-var bg-base-content/5 px-1 rounded">prefs <span class="c-punc">=</span> injectStorageSignal<span class="c-punc">(</span><span class="c-str">'user_prefs'</span><span class="c-punc">,</span> <span class="c-brace">{</span> theme<span class="c-punc">:</span> <span class="c-str">'light'</span> <span class="c-brace">}</span><span class="c-punc">,</span> <span class="c-brace">{</span> crossTabSync<span class="c-punc">:</span> <span class="c-kw">true</span> <span class="c-brace">}</span><span class="c-punc">);</span></span>
+
+  <span class="c-fn">toggle</span><span class="c-punc">() {</span>
+    <span class="c-kw">this</span><span class="c-punc">.</span>prefs<span class="c-punc">.</span>update<span class="c-punc">(</span>state <span class="c-punc">=&gt;</span> <span class="c-punc">({</span>
+      <span class="c-punc">...</span>state<span class="c-punc">,</span>
+      data<span class="c-punc">:</span> <span class="c-brace">{</span> theme<span class="c-punc">:</span> state<span class="c-punc">.</span>data<span class="c-punc">.</span>theme <span class="c-punc">===</span> <span class="c-str">'light'</span> <span class="c-punc">?</span> <span class="c-str">'dark'</span> <span class="c-punc">:</span> <span class="c-str">'light'</span> <span class="c-brace">}</span>
+    <span class="c-punc">})));</span>
+  <span class="c-punc">}</span>
+<span class="c-brace">}</span>`,
+  },
 ];

@@ -79,6 +79,28 @@ export const PACKAGES: readonly PackageInfo[] = [
     promise: 'performance',
   },
   {
+    icon: '💾',
+    name: 'storage',
+    npmPackage: '@angular-helpers/storage',
+    tagline: 'High-performance, reactive, secure, and compressed storage primitives.',
+    description:
+      'Dynamic multi-transport storage (WebStorage, IndexedDB, CacheAPI) with dynamic AES-GCM client-side encryption and dynamic binary compression. Surgically reactive Freeze-on-Write Entity management.',
+    highlights: [
+      'injectStorageSignal: Reactive Signal backed by async L2 storage',
+      'injectEntityStore: Surgical Freeze-on-Write reactive Entity management',
+      'Dynamic PBKDF2/AES-GCM client-side encryption',
+      'Binary compression using high-performance TOON format',
+      'Worker-isolated storage: offload serialization & crypt off main thread',
+    ],
+    highlightsLabel: 'Storage features',
+    installCmd: 'pnpm add @angular-helpers/storage',
+    docsLink: '/docs/storage',
+    demoLink: '/demo/storage',
+    badge: null,
+    promise: 'performance',
+    serviceCount: 5,
+  },
+  {
     icon: '🗺️',
     name: 'openlayers',
     npmPackage: '@angular-helpers/openlayers',

@@ -217,7 +217,7 @@ import { DOCS_NAV_LIBRARIES } from '../config/docs-nav.data';
           class="flex-1 overflow-y-auto no-scrollbar p-6 sm:p-10 lg:p-12"
           tabindex="-1"
         >
-          <div class="max-w-4xl mx-auto w-full">
+          <div class="w-full">
             <router-outlet />
           </div>
         </main>

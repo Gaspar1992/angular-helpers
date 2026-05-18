@@ -50,8 +50,8 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
             <p
               class="text-lg @xl:text-xl text-base-content/70 font-medium text-balance max-w-2xl m-0"
             >
-              Signal-based utilities to seamlessly integrate Browser APIs, Security, and Web
-              Workers. Zero boilerplate.
+              Signal-based utilities to seamlessly integrate Browser APIs, Security, Storage, and
+              Web Workers. Zero boilerplate.
             </p>
 
             <!-- Actions -->
@@ -106,7 +106,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
         aria-labelledby="features-title"
         class="py-24 sm:py-32 px-6 border-b border-base-300 bg-base-100"
       >
-        <div class="max-w-[1200px] mx-auto">
+        <div class="max-width-container">
           <h2 id="features-title" class="sr-only">Everything you need. Nothing you don't.</h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-10 sm:gap-14">
             @for (f of features; track f.title) {
@@ -121,7 +121,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
         aria-labelledby="packages-title"
         class="py-24 sm:py-32 px-6 border-b border-base-300 bg-base-100 @container"
       >
-        <div class="max-w-[1000px] mx-auto">
+        <div class="max-width-container">
           <p
             class="text-xs font-black uppercase tracking-[0.2em] text-primary m-0 mb-4 text-center"
           >
@@ -131,14 +131,14 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
             id="packages-title"
             class="text-[2.5rem] sm:text-[3.5rem] font-black text-base-content tracking-tighter leading-none m-0 mb-16 text-center text-balance"
           >
-            Four tools. <br class="sm:hidden" />Zero bloat.
+            Five tools. <br class="sm:hidden" />Zero bloat.
           </h2>
 
           <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-8">
             @for (p of packages; track p.npmPackage; let i = $index) {
               <div [class.@4xl:col-span-2]="i === 0" class="h-full">
                 <div
-                  class="flex flex-col gap-8 bg-base-200 border border-base-300 rounded-[2rem] p-10 h-full transition-colors duration-300 hover:border-primary/50 group relative overflow-hidden shadow-xl"
+                  class="flex flex-col gap-8 bg-base-200 border border-base-300 rounded-[2rem] p-6 sm:p-10 h-full transition-colors duration-300 hover:border-primary/50 group relative overflow-hidden shadow-xl"
                 >
                   @if (i === 0) {
                     <div
@@ -196,7 +196,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
                   <div class="flex flex-wrap gap-2.5 mt-2 relative z-10">
                     @for (item of p.highlights; track item) {
                       <span
-                        class="badge badge-outline border-base-content/20 hover:border-base-content/40 text-base-content/70"
+                        class="badge badge-outline border-base-content/20 hover:border-base-content/40 text-base-content/70 h-auto py-1.5 whitespace-normal text-left"
                       >
                         {{ item }}
                       </span>

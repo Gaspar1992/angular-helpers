@@ -4,6 +4,7 @@ import { BROWSER_WEB_APIS_SERVICES } from '../data/browser-web-apis.data';
 import { SECURITY_SERVICES } from '../data/security.data';
 import { WORKER_HTTP_ENTRIES } from '../data/worker-http.data';
 import { OPENLAYERS_SERVICES } from '../data/openlayers.data';
+import { STORAGE_SERVICES } from '../data/storage.data';
 import { generateServiceGroups } from './overview.utils';
 
 const OVERVIEW_CONFIGS: Record<string, OverviewConfig> = {
@@ -62,6 +63,31 @@ bootstrapApplication(AppComponent, {
         label: 'Entry Points',
         icon: '⚙',
         items: WORKER_HTTP_ENTRIES,
+      },
+    ],
+  },
+  storage: {
+    packageName: 'storage',
+    npmPackage: '@angular-helpers/storage',
+    lead: 'High-performance, client-side, encrypted, and dynamically compressed reactive state and storage utilities.',
+    providerExample: `import { STORAGE_TRANSPORT, LocalStorageTransport } from '@angular-helpers/storage';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    // Proveemos el transporte de almacenamiento por defecto
+    { provide: STORAGE_TRANSPORT, useClass: LocalStorageTransport }
+  ],
+});`,
+    serviceGroups: [
+      {
+        label: 'Core Primitives',
+        icon: '💾',
+        items: STORAGE_SERVICES.filter((s) => s.id.startsWith('inject-')),
+      },
+      {
+        label: 'Transports & Protocols',
+        icon: '⚙',
+        items: STORAGE_SERVICES.filter((s) => !s.id.startsWith('inject-')),
       },
     ],
   },

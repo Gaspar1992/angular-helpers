@@ -220,6 +220,32 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
     ],
   },
   {
+    id: 'storage',
+    label: 'Storage',
+    overviewRoute: '/docs/storage',
+    sections: [
+      {
+        title: 'Core primitives',
+        items: [
+          {
+            label: 'injectStorageSignal',
+            route: '/docs/storage/inject-storage-signal',
+            hasFn: true,
+          },
+          { label: 'injectEntityStore', route: '/docs/storage/inject-entity-store', hasFn: true },
+        ],
+      },
+      {
+        title: 'Transports & Tokens',
+        items: [
+          { label: 'LocalStorageTransport', route: '/docs/storage/local-transport' },
+          { label: 'WorkerStorageTransport', route: '/docs/storage/worker-transport' },
+          { label: 'StorageTransport', route: '/docs/storage/storage-transport' },
+        ],
+      },
+    ],
+  },
+  {
     id: 'openlayers',
     label: 'OpenLayers',
     overviewRoute: '/docs/openlayers',

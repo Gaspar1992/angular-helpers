@@ -71,6 +71,24 @@ export const DOCS_ROUTES: Routes = [
         title: 'Entry Point — Angular Helpers',
       },
       {
+        path: 'storage',
+        loadComponent: () =>
+          import('./feature/unified-overview/unified-overview.component').then(
+            (m) => m.UnifiedOverviewComponent,
+          ),
+        resolve: { config: overviewResolver },
+        title: 'storage — Angular Helpers',
+      },
+      {
+        path: 'storage/:service',
+        loadComponent: () =>
+          import('./feature/unified-service-detail/unified-service-detail.component').then(
+            (m) => m.UnifiedServiceDetailComponent,
+          ),
+        resolve: { config: serviceDetailResolver },
+        title: 'Service — Angular Helpers',
+      },
+      {
         path: 'openlayers',
         loadComponent: () =>
           import('./feature/unified-overview/unified-overview.component').then(
