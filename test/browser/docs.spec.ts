@@ -10,10 +10,11 @@ test.describe('Documentation pages', () => {
     await expect(page.getByText(/security/i).first()).toBeVisible();
     await expect(page.getByText(/worker-http/i).first()).toBeVisible();
     await expect(page.getByText(/openlayers/i).first()).toBeVisible();
+    await expect(page.getByText(/storage/i).first()).toBeVisible();
 
-    // Check that we have 4 main package links starting with /docs/
+    // Check that we have 5 main package links starting with /docs/
     const docLinks = page.locator('a[routerLink^="/docs/"]');
-    await expect(docLinks).toHaveCount(4);
+    await expect(docLinks).toHaveCount(5);
   });
 
   test('docs landing page has quick start section', async ({ page }) => {

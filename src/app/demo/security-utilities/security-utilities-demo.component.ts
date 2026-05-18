@@ -297,7 +297,6 @@ interface DemoLog {
             <button
               class="btn btn-primary font-black flex-1 shadow-lg shadow-primary/20"
               (click)="consumeRate()"
-              [disabled]="!rateCanExecute()"
               data-testid="rate-consume"
             >
               Consume 1 Token
