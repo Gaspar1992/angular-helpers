@@ -5,6 +5,8 @@ import {
   containsSqlInjectionHints,
   isUrlSafe,
   sanitizeUrlString,
+  sanitizeHtmlString,
+  isHtmlSafe,
 } from './validators-core';
 
 describe('validators-core (shared between Reactive Forms and Signal Forms)', () => {
@@ -84,6 +86,48 @@ describe('validators-core (shared between Reactive Forms and Signal Forms)', () 
       ['normal text', false],
     ])('containsSqlInjectionHints(%j) === %j', (input, expected) => {
       expect(containsSqlInjectionHints(input)).toBe(expected);
+    });
+  });
+
+  describe('sanitizeHtmlString / isHtmlSafe', () => {
+    it('debe limpiar scripts y on-handlers dejando etiquetas seguras', () => {
+      const input = '<p>Hola <b>mundo</b><script>alert(1)</script></p>';
+      expect(sanitizeHtmlString(input)).toBe('<p>Hola <b>mundo</b>alert(1)</p>');
+    });
+
+    it('debe remover atributos no permitidos', () => {
+      const input = '<a href="https://example.com" class="btn" title="link">Link</a>';
+      // Por defecto solo se permite href en tag 'a'
+      expect(sanitizeHtmlString(input)).toBe('<a href="https://example.com">Link</a>');
+    });
+
+    it('debe sanitizar atributos href maliciosos', () => {
+      const input = '<a href="javascript:alert(1)">Hack</a>';
+      expect(sanitizeHtmlString(input)).toBe('<a>Hack</a>');
+    });
+
+    it('debe sanitizar atributos de URL en tags personalizados para evitar bypass XSS', () => {
+      const options = {
+        allowedTags: ['iframe', 'form'],
+        allowedAttributes: {
+          iframe: ['src'],
+          form: ['action'],
+        },
+      };
+
+      // 1. Tag personalizado iframe con javascript: URL en src
+      const maliciousIframe = '<iframe src="javascript:alert(\'XSS\')"></iframe>';
+      expect(sanitizeHtmlString(maliciousIframe, options)).toBe('<iframe></iframe>');
+
+      // 2. Tag personalizado iframe con URL segura en src
+      const safeIframe = '<iframe src="https://example.com/embed"></iframe>';
+      expect(sanitizeHtmlString(safeIframe, options)).toBe(
+        '<iframe src="https://example.com/embed"></iframe>',
+      );
+
+      // 3. Tag personalizado form con javascript: URL en action
+      const maliciousForm = '<form action="javascript:alert(1)"></form>';
+      expect(sanitizeHtmlString(maliciousForm, options)).toBe('<form></form>');
     });
   });
 });

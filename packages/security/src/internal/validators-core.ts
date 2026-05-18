@@ -221,6 +221,8 @@ export const DEFAULT_ALLOWED_ATTRIBUTES: Readonly<Record<string, readonly string
   a: ['href'],
 };
 
+const URL_ATTRIBUTES = new Set(['href', 'src', 'action', 'formaction', 'data', 'poster']);
+
 export interface HtmlSanitizerOptions {
   allowedTags?: readonly string[];
   allowedAttributes?: Readonly<Record<string, readonly string[]>>;
@@ -304,7 +306,7 @@ function sanitizeElementAttributes(
       continue;
     }
 
-    if (attr.name === 'href' && sanitizeUrlString(attr.value) === null) {
+    if (URL_ATTRIBUTES.has(attr.name) && sanitizeUrlString(attr.value) === null) {
       attrsToRemove.push(attr.name);
     }
   }
