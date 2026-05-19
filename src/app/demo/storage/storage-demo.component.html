@@ -152,6 +152,21 @@
     >
       📊 Engine Benchmark
     </button>
+    <button
+      type="button"
+      class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-bold whitespace-nowrap transition-all duration-200 cursor-pointer"
+      [class.text-white]="activeTab() === 'entities'"
+      [class.bg-primary]="activeTab() === 'entities'"
+      [class.border-white\/10]="activeTab() === 'entities'"
+      [class.shadow-lg]="activeTab() === 'entities'"
+      [class.shadow-primary\/20]="activeTab() === 'entities'"
+      [class.text-base-content\/60]="activeTab() !== 'entities'"
+      [class.hover:text-base-content]="activeTab() !== 'entities'"
+      [class.hover:bg-white\/5]="activeTab() !== 'entities'"
+      (click)="activeTab.set('entities')"
+    >
+      📦 Entity Store (IndexedDB)
+    </button>
   </nav>
 
   <!-- TAB 1: Crypto off-thread -->
@@ -427,14 +442,16 @@
             <!-- JSON size -->
             <div class="flex flex-col gap-1.5">
               <div
-                class="flex items-center justify-between text-xs font-black uppercase tracking-wider text-base-content/50"
+                class="flex items-center justify-between text-xs font-black uppercase tracking-wider text-slate-400"
               >
                 <span>Standard JSON</span>
-                <span class="font-mono text-base-content">{{ jsonBytes() }} bytes</span>
+                <span class="font-mono text-slate-300">{{ jsonBytes() }} bytes</span>
               </div>
-              <div class="w-full h-3 rounded-full bg-base-content/10 overflow-hidden">
+              <div
+                class="w-full h-3 rounded-full bg-slate-900/50 border border-white/5 overflow-hidden"
+              >
                 <div
-                  class="h-full bg-base-content/40 transition-all duration-300"
+                  class="h-full bg-gradient-to-r from-slate-400 to-slate-500 transition-all duration-300"
                   [style.width]="'100%'"
                 ></div>
               </div>
@@ -598,16 +615,18 @@
             <!-- LocalStorage Engine -->
             <div class="flex flex-col gap-1.5">
               <div
-                class="flex justify-between text-xs font-black uppercase tracking-wider text-base-content/50"
+                class="flex justify-between text-xs font-black uppercase tracking-wider text-amber-500"
               >
                 <span>LocalStorage (Simulated)</span>
-                <span class="font-mono text-base-content">{{
+                <span class="font-mono text-amber-400 font-bold">{{
                   benchmarkResults()?.local ? benchmarkResults()?.local + 'ms' : 'Awaiting test...'
                 }}</span>
               </div>
-              <div class="w-full h-4 rounded-full bg-base-content/10 overflow-hidden">
+              <div
+                class="w-full h-4 rounded-full bg-amber-950/20 border border-amber-500/10 overflow-hidden"
+              >
                 <div
-                  class="h-full bg-base-content/30 transition-all duration-700 ease-out"
+                  class="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-700 ease-out"
                   [style.width]="getEnginePercent('local') + '%'"
                 ></div>
               </div>
@@ -617,6 +636,331 @@
 
         <div class="text-[10px] text-base-content/40 text-center mt-4">
           * Results may vary depending on hardware capabilities and modern browser optimizations.
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 5: Entity Store & IndexedDB -->
+  @if (activeTab() === 'entities') {
+    <section class="tab-content grid grid-cols-1 xl:grid-cols-3 gap-8 animate-fade-in-up">
+      <!-- COLUMN 1: Add Task Form & Controls -->
+      <div
+        class="bg-slate-950/35 backdrop-blur-xl backdrop-saturate-150 border border-white/5 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 hover:border-white/10 p-6 flex flex-col justify-between"
+      >
+        <div>
+          <h3
+            class="text-lg font-black tracking-tight text-base-content mb-2 flex items-center gap-2"
+          >
+            <span>📦 Entity Store Management</span>
+          </h3>
+          <p class="text-xs text-base-content/50 mb-6">
+            Add individual entities reactively. <code>EntityStore</code> encapsulates a Map signal,
+            freeze-on-write integrity, and handles auto-persistence to IndexedDB.
+          </p>
+
+          <form [formGroup]="taskForm" (ngSubmit)="addTask()" class="flex flex-col gap-4">
+            <div class="form-control">
+              <label
+                class="label text-xs font-black uppercase text-base-content/40 mb-1"
+                for="task-id"
+                >Entity ID</label
+              >
+              <div class="flex gap-2">
+                <input
+                  id="task-id"
+                  type="text"
+                  class="input input-bordered focus:border-primary/50 focus:outline-none text-sm font-mono flex-1 bg-black/10"
+                  formControlName="id"
+                  placeholder="task_123"
+                  readonly
+                />
+                <button
+                  type="button"
+                  class="btn btn-outline btn-sm font-bold text-xs"
+                  (click)="generateNewTaskId()"
+                >
+                  🔄 New
+                </button>
+              </div>
+            </div>
+
+            <div class="form-control">
+              <label
+                class="label text-xs font-black uppercase text-base-content/40 mb-1"
+                for="task-title"
+                >Title / Name</label
+              >
+              <input
+                id="task-title"
+                type="text"
+                class="input input-bordered focus:border-primary/50 focus:outline-none text-sm"
+                formControlName="title"
+                placeholder="Finish coding Storage Package"
+              />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="form-control">
+                <label
+                  class="label text-xs font-black uppercase text-base-content/40 mb-1"
+                  for="task-category"
+                  >Category</label
+                >
+                <input
+                  id="task-category"
+                  type="text"
+                  class="input input-bordered focus:border-primary/50 focus:outline-none text-sm"
+                  formControlName="category"
+                  placeholder="e.g. Work, Perf"
+                />
+              </div>
+
+              <div class="form-control">
+                <label
+                  class="label text-xs font-black uppercase text-base-content/40 mb-1"
+                  for="task-priority"
+                  >Priority</label
+                >
+                <select
+                  id="task-priority"
+                  class="select select-bordered text-sm focus:border-primary/50 focus:outline-none"
+                  formControlName="priority"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-control mt-2 flex flex-row items-center gap-2 cursor-pointer">
+              <input
+                id="task-completed"
+                type="checkbox"
+                class="checkbox checkbox-primary"
+                formControlName="completed"
+              />
+              <label
+                class="text-xs font-black uppercase text-base-content/60 cursor-pointer"
+                for="task-completed"
+              >
+                Mark as Completed
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-4" [disabled]="taskForm.invalid">
+              ➕ Add Reactive Entity
+            </button>
+          </form>
+        </div>
+
+        <div class="border-t border-white/5 mt-6 pt-6 flex flex-col gap-2">
+          <span class="text-xs font-black uppercase tracking-wider text-base-content/40"
+            >Batch operations</span
+          >
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              class="btn btn-outline btn-sm font-bold text-xs"
+              (click)="addSampleTasks()"
+            >
+              📥 Load Sample Tasks
+            </button>
+            <button
+              type="button"
+              class="btn btn-ghost btn-sm font-bold text-xs text-red-400 hover:bg-red-500/10"
+              (click)="taskStore.clear()"
+            >
+              🗑️ Clear Store
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN 2: Reactive List & Granular Telemetry -->
+      <div
+        class="bg-slate-950/35 backdrop-blur-xl backdrop-saturate-150 border border-white/5 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 hover:border-white/10 p-6 flex flex-col"
+      >
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-black tracking-tight text-base-content">
+              📋 Live Entity List ({{ taskStore.size() }})
+            </h3>
+            <p class="text-xs text-base-content/50">
+              Click a task card to attach a live granular signal subscription.
+            </p>
+          </div>
+        </div>
+
+        <!-- Task Scroll Container -->
+        <div
+          class="flex-1 overflow-y-auto max-h-[380px] pr-2 flex flex-col gap-3 no-scrollbar mb-6"
+        >
+          @for (task of taskStore.list(); track task.id) {
+            <div
+              class="p-4 rounded-2xl border transition-all duration-300 cursor-pointer relative overflow-hidden flex items-center justify-between"
+              [class.bg-purple-500\/5]="selectedTaskId() === task.id"
+              [class.border-purple-500\/40]="selectedTaskId() === task.id"
+              [class.bg-white\/2]="selectedTaskId() !== task.id"
+              [class.border-white\/5]="selectedTaskId() !== task.id"
+              (click)="selectTaskForTelemetry(task.id)"
+            >
+              <div class="flex items-center gap-3.5">
+                <input
+                  type="checkbox"
+                  class="checkbox checkbox-sm checkbox-primary"
+                  [checked]="task.completed"
+                  (click)="$event.stopPropagation(); toggleTaskCompletion(task)"
+                />
+                <div>
+                  <span
+                    class="text-xs font-bold block"
+                    [class.line-through]="task.completed"
+                    [class.text-base-content/50]="task.completed"
+                    [class.text-white]="!task.completed"
+                  >
+                    {{ task.title }}
+                  </span>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span
+                      class="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-base-content/60 font-mono"
+                    >
+                      {{ task.category }}
+                    </span>
+                    <span
+                      class="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded"
+                      [class.bg-red-500\/10]="task.priority === 'high'"
+                      [class.text-red-400]="task.priority === 'high'"
+                      [class.bg-amber-500\/10]="task.priority === 'medium'"
+                      [class.text-amber-400]="task.priority === 'medium'"
+                      [class.bg-blue-500\/10]="task.priority === 'low'"
+                      [class.text-blue-400]="task.priority === 'low'"
+                    >
+                      {{ task.priority }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="btn btn-ghost btn-xs btn-circle text-base-content/40 hover:text-red-400"
+                (click)="$event.stopPropagation(); deleteTask(task.id)"
+              >
+                ✕
+              </button>
+            </div>
+          } @empty {
+            <div class="text-center py-20 text-base-content/30 italic text-xs">
+              No tasks currently in the Entity Store.
+            </div>
+          }
+        </div>
+
+        <!-- Granular Telemetry Card -->
+        @if (selectedTaskId(); as activeId) {
+          <div class="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 animate-fade-in">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-black uppercase tracking-wider text-purple-300">
+                📡 Live Granular Signal Telemetry
+              </span>
+              <span
+                class="text-[10px] font-mono text-purple-400 font-bold bg-purple-500/10 px-2 py-0.5 rounded-full"
+              >
+                entitySignal('{{ activeId }}')
+              </span>
+            </div>
+            <pre
+              class="text-[11px] font-mono text-purple-200 bg-black/40 p-3 rounded-xl overflow-x-auto leading-relaxed max-h-36 no-scrollbar"
+              >{{ selectedTaskSignal() | json }}</pre
+            >
+            <p class="text-[10px] text-purple-300/60 mt-2 leading-tight">
+              Only this specific signal fires when you mutate this task! The parent list signal is
+              not re-evaluated, maintaining premium UX performance.
+            </p>
+          </div>
+        }
+      </div>
+
+      <!-- COLUMN 3: Direct IndexedDB Storage & Verification -->
+      <div
+        class="bg-slate-950/35 backdrop-blur-xl backdrop-saturate-150 border border-white/5 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-300 hover:border-white/10 p-6 flex flex-col justify-between"
+      >
+        <div>
+          <h3
+            class="text-lg font-black tracking-tight text-base-content mb-2 flex items-center gap-2"
+          >
+            <span>💾 Direct Multi-Entry IndexedDB</span>
+          </h3>
+          <p class="text-xs text-base-content/50 mb-6">
+            Verify independent multi-row database writes. Generate separate key-value entries inside
+            IndexedDB and verify them in DevTools side-by-side.
+          </p>
+
+          <!-- Instructions Block -->
+          <div class="p-4 rounded-2xl bg-slate-900/60 border border-white/5 mb-6">
+            <span class="text-xs font-black uppercase text-accent tracking-wide block mb-1"
+              >How to inspect:</span
+            >
+            <ol class="text-[11px] text-base-content/65 list-decimal pl-4 space-y-1">
+              <li>Open <strong>DevTools</strong> (F12 or Ctrl+Shift+I).</li>
+              <li>Go to the <strong>Application</strong> (or <strong>Storage</strong>) tab.</li>
+              <li>Select <strong>IndexedDB</strong> -> <code>ah_db</code> -> <code>kv</code>.</li>
+              <li>Click <strong>Refresh</strong> in DevTools to see the entries list!</li>
+            </ol>
+          </div>
+
+          <!-- Entries Container -->
+          <div class="flex-1 flex flex-col gap-3 font-mono text-[11px] mb-6">
+            <span class="text-xs font-black uppercase text-base-content/40 tracking-wider"
+              >IndexedDB Live Entries</span
+            >
+
+            <div class="max-h-[220px] overflow-y-auto pr-1 flex flex-col gap-2 no-scrollbar">
+              @for (entry of directEntries(); track entry.key) {
+                <div
+                  class="p-3 rounded-xl bg-cyan-500/5 border border-cyan-500/25 flex flex-col gap-1.5 animate-fade-in"
+                >
+                  <div
+                    class="flex items-center justify-between font-black text-cyan-300 text-[10px]"
+                  >
+                    <span class="uppercase">KEY: {{ entry.key }}</span>
+                    <span class="opacity-50">IndexedDB</span>
+                  </div>
+                  <pre
+                    class="overflow-x-auto p-2 rounded bg-black/40 text-[10px] leading-snug no-scrollbar select-all text-cyan-200"
+                    >{{ entry.value | json }}</pre
+                  >
+                </div>
+              } @empty {
+                <div
+                  class="text-center py-12 border border-dashed border-white/5 rounded-2xl text-base-content/30 italic text-[11px]"
+                >
+                  No independent entries detected.<br />Click "Write Independent Entries" below.
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2.5">
+          <button
+            type="button"
+            class="btn btn-primary flex-1 font-bold text-xs"
+            (click)="generateDirectEntries()"
+            [disabled]="isDirectLoading()"
+          >
+            🚀 Write 5 Independent Rows
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline text-xs"
+            (click)="clearDirectEntries()"
+            [disabled]="isDirectLoading() || directEntries().length === 0"
+          >
+            🗑️ Clear Rows
+          </button>
         </div>
       </div>
     </section>

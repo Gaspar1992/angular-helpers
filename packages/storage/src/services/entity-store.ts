@@ -17,6 +17,7 @@ export class EntityStore<Id, Entity> {
   private readonly _entitySignals = new Map<Id, WritableSignal<Entity | undefined>>();
   private readonly _idResolver: (entity: Entity) => Id;
   private _isRestoring = false;
+  private readonly _transport = this._resolveTransport();
 
   constructor(private readonly options: EntityStoreOptions<Id, Entity>) {
     const idKey = options.idKey;
@@ -122,10 +123,8 @@ export class EntityStore<Id, Entity> {
   }
 
   private initPersistence(key: string): void {
-    const transport = this._resolveTransport();
-
     this._isRestoring = true;
-    transport
+    this._transport
       .read<Entity[]>(key, this.options.storageOptions as StorageSignalOptions)
       .then((data) => {
         if (data && Array.isArray(data)) {
@@ -140,9 +139,8 @@ export class EntityStore<Id, Entity> {
 
   private triggerPersist(): void {
     if (this._isRestoring || !this.options.persistKey) return;
-    const transport = this._resolveTransport();
 
-    transport
+    this._transport
       .write(
         this.options.persistKey,
         this.list(),

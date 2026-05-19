@@ -11,7 +11,12 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { JsonPipe } from '@angular/common';
-import { STORAGE_WORKER_FACTORY, WorkerStorageTransport } from '@angular-helpers/storage';
+import {
+  STORAGE_WORKER_FACTORY,
+  WorkerStorageTransport,
+  injectEntityStore,
+  LocalStorageTransport,
+} from '@angular-helpers/storage';
 
 // Native factory to load our background app storage worker in Vite/Esbuild
 export function storageWorkerFactory(): Worker {
@@ -26,6 +31,14 @@ interface RPCMessageLog {
   payload: any;
 }
 
+interface TaskEntity {
+  id: string;
+  title: string;
+  category: string;
+  priority: 'low' | 'medium' | 'high';
+  completed: boolean;
+}
+
 @Component({
   selector: 'app-storage-demo',
   standalone: true,
@@ -38,7 +51,38 @@ interface RPCMessageLog {
   ],
 })
 export class StorageDemoComponent implements OnInit, OnDestroy {
-  protected readonly activeTab = signal<'crypto' | 'sync' | 'toon' | 'benchmark'>('crypto');
+  protected readonly activeTab = signal<'crypto' | 'sync' | 'toon' | 'benchmark' | 'entities'>(
+    'crypto',
+  );
+
+  // Entity Store Tab
+  protected readonly taskStore = injectEntityStore<string, TaskEntity>({
+    idKey: 'id',
+    persistKey: 'tasks_list',
+    storageOptions: {
+      storageType: 'indexeddb',
+      dbName: 'ah_db',
+      storeName: 'kv',
+    },
+  });
+
+  protected readonly taskForm = new FormGroup({
+    id: new FormControl('', [Validators.required]),
+    title: new FormControl('', [Validators.required]),
+    category: new FormControl('Work', [Validators.required]),
+    priority: new FormControl<'low' | 'medium' | 'high'>('medium', [Validators.required]),
+    completed: new FormControl(false),
+  });
+
+  protected readonly selectedTaskId = signal<string | null>(null);
+  protected readonly selectedTaskSignal = computed(() => {
+    const id = this.selectedTaskId();
+    return id ? this.taskStore.entitySignal(id)() : undefined;
+  });
+
+  // Direct Multi-Entry Tab properties
+  protected readonly directEntries = signal<{ key: string; value: any }[]>([]);
+  protected readonly isDirectLoading = signal<boolean>(false);
 
   // RPC Telemetry Signals
   protected readonly rpcLatency = signal<number | null>(null);
@@ -93,6 +137,7 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
 
   // Dependency Injections
   private readonly workerTransport = inject(WorkerStorageTransport);
+  private readonly localTransport = inject(LocalStorageTransport);
   private readonly ngZone = inject(NgZone);
   private syncSubscription?: () => void;
   private benchmarkTimeout?: any;
@@ -119,6 +164,8 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
     this.runFpsTracker();
     this.setupToonDefaults();
     this.loadInitialProfile();
+    this.generateNewTaskId();
+    this.readDirectEntries();
   }
 
   ngOnDestroy(): void {
@@ -369,6 +416,186 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
         return 'bg-cyan-500/10 border-cyan-500/20 text-cyan-300';
       case 'error':
         return 'bg-red-500/10 border-red-500/20 text-red-300';
+    }
+  }
+
+  // EntityStore & Direct DB Methods
+  protected generateNewTaskId() {
+    this.taskForm.patchValue({
+      id: 'task_' + Math.random().toString(36).substring(2, 7),
+    });
+  }
+
+  protected addTask() {
+    const val = this.taskForm.value;
+    if (!val.id || !val.title || !val.category || !val.priority) return;
+
+    const task: TaskEntity = {
+      id: val.id,
+      title: val.title,
+      category: val.category,
+      priority: val.priority,
+      completed: !!val.completed,
+    };
+
+    this.taskStore.setOne(task);
+    this.triggerToast(`Task "${task.title}" saved reactively in EntityStore!`);
+
+    // Reset and generate new ID
+    this.taskForm.reset({
+      category: 'Work',
+      priority: 'medium',
+      completed: false,
+    });
+    this.generateNewTaskId();
+  }
+
+  protected addSampleTasks() {
+    const samples: TaskEntity[] = [
+      {
+        id: 'task_sample_1',
+        title: 'Implement Hexagonal Architecture',
+        category: 'Dev',
+        priority: 'high',
+        completed: true,
+      },
+      {
+        id: 'task_sample_2',
+        title: 'Optimize Web Workers Latency',
+        category: 'Perf',
+        priority: 'high',
+        completed: false,
+      },
+      {
+        id: 'task_sample_3',
+        title: 'Refactor standalone UI Components',
+        category: 'Design',
+        priority: 'medium',
+        completed: false,
+      },
+      {
+        id: 'task_sample_4',
+        title: 'Verify WCAG AA Compliance',
+        category: 'QA',
+        priority: 'low',
+        completed: true,
+      },
+    ];
+    this.taskStore.setMany(samples);
+    this.triggerToast('Loaded 4 sample entities into the Reactive Store!');
+  }
+
+  protected deleteTask(id: string) {
+    this.taskStore.deleteOne(id);
+    if (this.selectedTaskId() === id) {
+      this.selectedTaskId.set(null);
+    }
+    this.triggerToast(`Task "${id}" deleted.`);
+  }
+
+  protected toggleTaskCompletion(task: TaskEntity) {
+    const updated = { ...task, completed: !task.completed };
+    this.taskStore.setOne(updated);
+  }
+
+  protected selectTaskForTelemetry(id: string) {
+    this.selectedTaskId.set(this.selectedTaskId() === id ? null : id);
+  }
+
+  protected async generateDirectEntries() {
+    this.isDirectLoading.set(true);
+    try {
+      const sampleTasks = [
+        {
+          id: 'direct_task_1',
+          title: 'Direct DB Task Alpha',
+          priority: 'high',
+          date: new Date().toISOString(),
+        },
+        {
+          id: 'direct_task_2',
+          title: 'Direct DB Task Beta',
+          priority: 'medium',
+          date: new Date().toISOString(),
+        },
+        {
+          id: 'direct_task_3',
+          title: 'Direct DB Task Gamma',
+          priority: 'low',
+          date: new Date().toISOString(),
+        },
+        {
+          id: 'direct_task_4',
+          title: 'Direct DB Task Delta',
+          priority: 'high',
+          date: new Date().toISOString(),
+        },
+        {
+          id: 'direct_task_5',
+          title: 'Direct DB Task Epsilon',
+          priority: 'medium',
+          date: new Date().toISOString(),
+        },
+      ];
+
+      for (const t of sampleTasks) {
+        await this.localTransport.write(t.id, t, {
+          storageType: 'indexeddb',
+          dbName: 'ah_db',
+          storeName: 'kv',
+          serializer: 'json',
+        });
+      }
+
+      this.triggerToast('Successfully wrote 5 individual entries directly to IndexedDB!');
+      await this.readDirectEntries();
+    } catch (e) {
+      console.error(e);
+      this.triggerToast('Error writing directly to IndexedDB.');
+    } finally {
+      this.isDirectLoading.set(false);
+    }
+  }
+
+  protected async readDirectEntries() {
+    const list: { key: string; value: any }[] = [];
+    for (let i = 1; i <= 5; i++) {
+      const key = `direct_task_${i}`;
+      try {
+        const val = await this.localTransport.read<any>(key, {
+          storageType: 'indexeddb',
+          dbName: 'ah_db',
+          storeName: 'kv',
+          serializer: 'json',
+        });
+        if (val) {
+          list.push({ key, value: val });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    this.directEntries.set(list);
+  }
+
+  protected async clearDirectEntries() {
+    this.isDirectLoading.set(true);
+    try {
+      for (let i = 1; i <= 5; i++) {
+        const key = `direct_task_${i}`;
+        await this.localTransport.delete(key, {
+          storageType: 'indexeddb',
+          dbName: 'ah_db',
+          storeName: 'kv',
+          serializer: 'json',
+        });
+      }
+      this.triggerToast('Cleared independent entries from IndexedDB.');
+      await this.readDirectEntries();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.isDirectLoading.set(false);
     }
   }
 }
