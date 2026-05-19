@@ -12,3 +12,4 @@ export * from './interfaces/worker-storage.types';
 export * from './tokens/worker.tokens';
 export * from './tokens/storage.tokens';
 export * from './services/worker-transport';
+export * from './services/offline-sync.service';

@@ -291,6 +291,7 @@ export class DocsLayoutComponent {
       security: '🛡️',
       'worker-http': '🚀',
       openlayers: '🗺️',
+      storage: '💾',
     };
     return icons[id] ?? '📦';
   }

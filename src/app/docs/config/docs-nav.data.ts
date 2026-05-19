@@ -233,6 +233,7 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
             hasFn: true,
           },
           { label: 'injectEntityStore', route: '/docs/storage/inject-entity-store', hasFn: true },
+          { label: 'OfflineSyncService', route: '/docs/storage/offline-sync' },
         ],
       },
       {

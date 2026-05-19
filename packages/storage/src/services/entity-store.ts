@@ -113,13 +113,18 @@ export class EntityStore<Id, Entity> {
   // --- Auxiliares de Persistencia L2 ---
 
   private _resolveTransport() {
-    // Como se llama dentro de la inicialización de la clase (inyectores),
-    // inject() resolverá de forma nativa e impecable.
-    let transport = inject(STORAGE_TRANSPORT, { optional: true });
-    if (!transport) {
-      transport = inject(LocalStorageTransport);
+    try {
+      // Como se llama dentro de la inicialización de la clase (inyectores),
+      // inject() resolverá de forma nativa e impecable.
+      let transport = inject(STORAGE_TRANSPORT, { optional: true });
+      if (!transport) {
+        transport = inject(LocalStorageTransport);
+      }
+      return transport;
+    } catch {
+      // Graceful fallback when executed outside Angular injection context (e.g. unit tests)
+      return new LocalStorageTransport();
     }
-    return transport;
   }
 
   private initPersistence(key: string): void {

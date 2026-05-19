@@ -1,0 +1,18 @@
+export const OFFLINE_SYNC_DEFAULTS = Object.freeze({
+  DB_NAME: 'ah_offline_sync',
+  BYPASS_HEADER: 'X-Bypass-Offline-Sync',
+  STORE_NAME: 'requests',
+  DB_VERSION: 1,
+  MUTATION_METHODS: Object.freeze(['POST', 'PUT', 'PATCH', 'DELETE']),
+  URL_STATUS: 'https://angular-helpers.local/offline-sync-status',
+  URL_DRAIN: 'https://angular-helpers.local/offline-sync-drain',
+  TX_READWRITE: 'readwrite',
+  TX_READONLY: 'readonly',
+  STATUS_OK: 200,
+  STATUS_ACCEPTED: 202,
+  STATUS_ERROR: 500,
+  STATUS_UNAVAILABLE: 503,
+  HEADER_CONTENT_TYPE: 'content-type',
+  HEADER_QUEUED_ID: 'x-offline-queued-id',
+  CONTENT_TYPE_JSON: 'application/json',
+});

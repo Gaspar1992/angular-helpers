@@ -345,6 +345,64 @@ export class CustomMemoryTransport implements StorageTransport {
 // In your application bootstrap or global providers:
 // { provide: STORAGE_TRANSPORT, useClass: CustomMemoryTransport }`,
   },
+  {
+    id: 'offline-sync',
+    name: 'OfflineSyncService',
+    description:
+      'A reactive main-thread service that bridges network status changes to the background Http Web Worker. Monitors navigator.onLine reactively using Angular Signals, counts pending queued offline mutations, and triggers background synchronization on network recovery.',
+    scope: 'provided',
+    importPath: '@angular-helpers/storage',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers supporting window.onLine and IndexedDB',
+    category: 'storage-io',
+    notes: [
+      'Uses Angular Signals (isOnline and pendingSyncsCount) to expose reactive network and queue state.',
+      'Listens to native window "online" and "offline" events to automatically trigger synchronization.',
+      'Triggers background queue draining by calling the virtual route "/offline-sync-drain" through Angular HttpBackend.',
+      'Zero compile-time coupling with the worker interceptors: relies purely on shared IndexedDB and synthetic HTTP endpoints.',
+      'Contains a manual triggerSync() method and a checkPendingCount() method returning a Promise<number>.',
+    ],
+    methods: [
+      {
+        name: 'triggerSync',
+        signature: 'triggerSync(): void',
+        description:
+          'Triggers the offline sync queue draining pipeline in the worker. Checks network status first.',
+        returns: 'void',
+      },
+      {
+        name: 'checkPendingCount',
+        signature: 'checkPendingCount(): Promise<number>',
+        description:
+          'Manually inspects the shared IndexedDB store and updates the pendingSyncsCount signal.',
+        returns: 'Promise<number>',
+      },
+    ],
+    example: `import { Component, inject } from '@angular/core';
+import { OfflineSyncService } from '@angular-helpers/storage';
+
+@Component({
+  selector: 'app-offline-status',
+  standalone: true,
+  template: \`
+    <div class="network-badge" [class.online]="syncService.isOnline()">
+      Status: {{ syncService.isOnline() ? 'Online' : 'Offline' }}
+    </div>
+
+    @if (syncService.pendingSyncsCount() > 0) {
+      <div class="sync-alert">
+        <p>You have {{ syncService.pendingSyncsCount() }} unsaved mutations enqueued.</p>
+        <button [disabled]="!syncService.isOnline()" (click)="syncService.triggerSync()">
+          Sync Now
+        </button>
+      </div>
+    }
+  \`
+})
+export class OfflineStatusComponent {
+  protected syncService = inject(OfflineSyncService);
+}`,
+  },
 ];
 
 export const STORAGE_INTERFACES: Record<string, InterfaceDoc[]> = {
