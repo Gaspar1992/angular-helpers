@@ -126,23 +126,39 @@ transport.terminate();`,
         description: 'Composes multiple interceptors into a single interceptor function.',
         returns: 'WorkerInterceptorFn',
       },
+      {
+        name: 'offlineCacheInterceptor',
+        signature: 'offlineCacheInterceptor(config?: OfflineCacheConfig): WorkerInterceptorFn',
+        description:
+          'Offline Cache interceptor using native Cache API in the Web Worker. Supports "network-first" and "cache-first" (stale-while-revalidate) strategies. Caches only GET requests and supports cache bypass headers.',
+        returns: 'WorkerInterceptorFn',
+      },
+      {
+        name: 'offlineSyncQueueInterceptor',
+        signature: 'offlineSyncQueueInterceptor(config?: OfflineSyncConfig): WorkerInterceptorFn',
+        description:
+          'Chronological (FIFO) mutation sync queue. Intercepts POST, PUT, PATCH, and DELETE requests when offline, stores them in IndexedDB, and returns a synthetic 202 Accepted. Replays them on reconnection.',
+        returns: 'WorkerInterceptorFn',
+      },
     ],
-    example: `// workers/secure.worker.ts
+    example: `// workers/offline.worker.ts
 import { createWorkerPipeline } from '@angular-helpers/worker-http/interceptors';
 import {
   loggingInterceptor,
-  retryInterceptor,
-  hmacSigningInterceptor,
-  rateLimitInterceptor,
+  offlineCacheInterceptor,
+  offlineSyncQueueInterceptor,
 } from '@angular-helpers/worker-http/interceptors';
 
 createWorkerPipeline([
   loggingInterceptor(),
-  retryInterceptor({ maxRetries: 3, initialDelay: 500 }),
-  rateLimitInterceptor({ maxRequests: 100, windowMs: 60000 }),
-  hmacSigningInterceptor({
-    keyMaterial: new TextEncoder().encode(self.HMAC_SECRET),
-    headerName: 'X-HMAC-Signature',
+  // Cache GET requests using network-first strategy
+  offlineCacheInterceptor({
+    strategy: 'network-first',
+    ttl: 86400000, // 24 hours
+  }),
+  // Queue mutations when offline, and auto-drain chronologically when online
+  offlineSyncQueueInterceptor({
+    dbName: 'ah_offline_sync',
   }),
 ]);`,
   },
@@ -666,6 +682,53 @@ export const WORKER_HTTP_INTERFACES = [
         name: 'worker?',
         type: 'string',
         description: 'Explicit worker id to use for this request. Overrides URL routing.',
+      },
+    ],
+  },
+  {
+    name: 'OfflineCacheConfig',
+    description: 'Configuration options for offlineCacheInterceptor.',
+    fields: [
+      {
+        name: 'strategy?',
+        type: "'network-first' | 'cache-first'",
+        description:
+          'Caching strategy: "network-first" (default) or "cache-first" (stale-while-revalidate).',
+      },
+      {
+        name: 'cacheName?',
+        type: 'string',
+        description: 'Name of the Cache API storage bucket (default: "ah-http-offline-cache").',
+      },
+      {
+        name: 'ttl?',
+        type: 'number',
+        description:
+          'Time-to-live for cached responses in milliseconds (default: 86400000 ms = 24h).',
+      },
+      {
+        name: 'bypassHeader?',
+        type: 'string',
+        description:
+          'Custom header key to bypass the cache entirely (default: "X-Bypass-Offline-Cache").',
+      },
+    ],
+  },
+  {
+    name: 'OfflineSyncConfig',
+    description: 'Configuration options for offlineSyncQueueInterceptor.',
+    fields: [
+      {
+        name: 'dbName?',
+        type: 'string',
+        description:
+          'Name of the IndexedDB database to persist offline mutations (default: "ah_offline_sync").',
+      },
+      {
+        name: 'bypassHeader?',
+        type: 'string',
+        description:
+          'Custom header key to bypass mutation enqueuing (default: "X-Bypass-Offline-Sync").',
       },
     ],
   },

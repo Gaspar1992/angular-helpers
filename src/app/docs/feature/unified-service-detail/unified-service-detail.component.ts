@@ -61,6 +61,7 @@ export interface ServiceDetailConfig {
                 [class.shadow-lg]="apiVariant() === 'service'"
                 [class.text-base-content/40]="apiVariant() !== 'service'"
                 [class.hover:text-base-content/70]="apiVariant() !== 'service'"
+                [attr.aria-pressed]="apiVariant() === 'service'"
                 (click)="apiVariant.set('service')"
               >
                 Service
@@ -73,6 +74,7 @@ export interface ServiceDetailConfig {
                 [class.shadow-lg]="apiVariant() === 'fn'"
                 [class.text-base-content/40]="apiVariant() !== 'fn'"
                 [class.hover:text-base-content/70]="apiVariant() !== 'fn'"
+                [attr.aria-pressed]="apiVariant() === 'fn'"
                 (click)="apiVariant.set('fn')"
               >
                 Function
@@ -89,7 +91,12 @@ export interface ServiceDetailConfig {
 
         @switch (activeTab()) {
           @case ('api') {
-            <div class="mt-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div
+              id="panel-api"
+              role="tabpanel"
+              aria-labelledby="tab-api"
+              class="mt-10 animate-in fade-in slide-in-from-bottom-2 duration-500"
+            >
               <app-code-block language="ts" filename="example.ts" [code]="importExample()" />
 
               @if (hasInputs()) {
@@ -143,7 +150,12 @@ export interface ServiceDetailConfig {
             </div>
           }
           @case ('example') {
-            <div class="mt-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div
+              id="panel-example"
+              role="tabpanel"
+              aria-labelledby="tab-example"
+              class="mt-10 animate-in fade-in slide-in-from-bottom-2 duration-500"
+            >
               <app-code-block language="ts" filename="usage.example.ts" [code]="exampleCode()" />
             </div>
           }

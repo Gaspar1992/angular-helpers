@@ -33,6 +33,10 @@ export type {
   LoggingConfig,
   ContentIntegrityConfig,
 } from './worker-interceptor.types';
+export { offlineCacheInterceptor } from './offline-cache-interceptor';
+export { offlineSyncQueueInterceptor } from './offline-sync-queue';
+export type { OfflineCacheConfig } from './offline-cache.types';
+export type { OfflineSyncConfig } from './offline-sync-queue.types';
 export type {
   WorkerInterceptorSpec,
   WorkerInterceptorInitMessage,
