@@ -184,60 +184,95 @@ const handle = popups.openComponent({
 
 `open` is idempotent by `id` and updates the existing overlay in place. `openComponent` always recreates the `ComponentRef` on a repeated id and disposes the previous one (`appRef.detachView` + `ref.destroy`) to avoid CD leaks. Calls made before the map is ready are queued and replayed on `OlMapService.onReady`.
 
-## Military symbology
+## WebGL Layers — GPU-accelerated rendering
 
-Available since `0.4.0` from `@angular-helpers/openlayers/military`.
+Available since `0.3.0` from `@angular-helpers/openlayers/layers`.
 
-Three pure-math geometry helpers (no extra deps) plus a NATO MIL-STD-2525 symbol helper backed by the optional [`milsymbol`](https://github.com/spatialillusions/milsymbol) peer dependency.
+WebGL layers render directly on the GPU, making them perfect for extremely heavy tile configurations (with real-time styling expressions) and massive coordinate datasets (10,000+ vector points).
+
+### `<ol-webgl-tile-layer>` — Raster style manipulation
+
+Renders tile layers (OSM, XYZ, MVT) via WebGL. Supports the dynamic application of WebGL tile styles (raster expressions) for dynamic, GPU-powered adjustments like brightness, contrast, saturation, and gamma.
+
+```html
+<ol-webgl-tile-layer
+  id="satellite-webgl"
+  source="xyz"
+  [url]="'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'"
+  [tileStyle]="{
+    brightness: 0.1,
+    contrast: 0.2,
+    saturation: -0.5
+  }"
+/>
+```
+
+### `<ol-webgl-vector-layer>` — Smooth massive datasets (10k+ features)
+
+Renders points, lines, and polygons using WebGL 2. For peak performance, hit detection is disabled by default, and styling must be declared using `FlatStyleLike` expressions rather than standard `ol/style/Style` instances.
+
+```html
+<ol-webgl-vector-layer
+  id="massive-points"
+  [features]="densePoints()"
+  [flatStyle]="{
+    'circle-radius': 6,
+    'circle-fill-color': '#10b981',
+    'stroke-color': '#334155',
+    'stroke-width': 1
+  }"
+  [disableHitDetection]="true"
+/>
+```
+
+Rigorous cleanup guarantees that WebGL contexts, framebuffers, and active buffers are fully released on destroy (`layer.dispose()`), preventing GPU leaks.
+
+## Geodesic Geometry Helpers
+
+Available from `@angular-helpers/openlayers/core` via `OlGeometryService`.
+
+Approximates standard shapes in metric space using true geodesic calculations (`Vincenty`'s formulae via `ol/sphere`). This means your shapes remain mathematically accurate and visually consistent (without map projection scale distortion) across massive global distances.
 
 ```typescript
-import { inject, signal } from '@angular/core';
-import { OlMilitaryService } from '@angular-helpers/openlayers/military';
+import { inject, Component, signal } from '@angular/core';
+import { OlGeometryService } from '@angular-helpers/openlayers/core';
 import type { Feature } from '@angular-helpers/openlayers/core';
 
 @Component({
-  // …
   imports: [OlMapComponent, OlVectorLayerComponent],
   template: `
     <ol-map [center]="[2.17, 41.38]" [zoom]="8">
       <ol-tile-layer id="osm" source="osm" />
-      <ol-vector-layer id="military" [features]="features()" [zIndex]="10" />
+      <ol-vector-layer id="shapes" [features]="features()" />
     </ol-map>
   `,
 })
-export class MilDemo {
-  private ml = inject(OlMilitaryService);
+export class GeodesicDemo {
+  private geomSvc = inject(OlGeometryService);
   features = signal<Feature[]>([]);
 
-  async ngOnInit() {
-    const ellipse = this.ml.createEllipse({
+  ngOnInit() {
+    const ellipse = this.geomSvc.createEllipse({
       center: [2.17, 41.38],
       semiMajor: 6_000,
       semiMinor: 3_000,
       rotation: Math.PI / 6,
     });
-    const sector = this.ml.createSector({
+    const sector = this.geomSvc.createSector({
       center: [-0.38, 39.47],
       radius: 8_000,
       startAngle: Math.PI / 6,
       endAngle: Math.PI / 2,
     });
-    const donut = this.ml.createDonut({
+    const donut = this.geomSvc.createDonut({
       center: [-5.99, 37.39],
       innerRadius: 5_000,
       outerRadius: 10_000,
     });
-    const symbol = await this.ml.createMilSymbol({
-      sidc: 'SFGPUCI-----',
-      position: [-3.7, 40.42],
-      size: 36,
-    });
-    this.features.set([ellipse, sector, donut, symbol]);
+    this.features.set([ellipse, sector, donut]);
   }
 }
 ```
-
-### Geometry helpers
 
 | Method                  | Output             | Notes                                                                                                                  |
 | ----------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
@@ -245,32 +280,82 @@ export class MilDemo {
 | `createSector(config)`  | `Feature<Polygon>` | Pie-slice (apex-arc-apex). `startAngle < endAngle ≤ start + 2π`                                                        |
 | `createDonut(config)`   | `Feature<Polygon>` | Two rings: outer CCW, inner CW (right-hand rule). Renders as an annular band with the basemap visible through the hole |
 
-Coordinates are emitted in `EPSG:4326` (lon/lat) using true geodesic calculations (`Vincenty`'s formulae via `ol/sphere`). This means your shapes remain mathematically accurate and visually consistent (without scale distortion) across massive global distances, fulfilling military precision requirements.
+---
 
-### MIL-STD-2525 symbols
+## Military Symbology & Tactical Graphics
 
-`createMilSymbol` lazy-loads `milsymbol` on first use and returns a `Feature<Point>` with style metadata (`feature.style.icon`) so the vector layer renders it as an `ol/style/Icon`. The library is declared as an **optional peer dependency** — install it only if you use this helper:
+Available since `0.4.0` from `@angular-helpers/openlayers/military`.
+
+Exposes NATO MIL-STD-2525 symbol rendering backed by the optional [`milsymbol`](https://github.com/spatialillusions/milsymbol) peer dependency, plus tactical military graphic components (frontlines, attack vectors).
+
+### MIL-STD-2525 Point Symbology (`OlMilitaryService`)
+
+Lazy-loads the heavy `milsymbol` package dynamically on demand, returning a styled `Feature<Point>` so the vector layer renders it natively.
+
+```typescript
+import { inject, Component, signal } from '@angular/core';
+import { OlMilitaryService } from '@angular-helpers/openlayers/military';
+import type { Feature } from '@angular-helpers/openlayers/core';
+
+@Component({
+  imports: [OlMapComponent, OlVectorLayerComponent],
+  providers: [OlMilitaryService],
+  template: `
+    <ol-map [center]="[-3.7, 40.42]" [zoom]="8">
+      <ol-vector-layer id="military" [features]="features()" />
+    </ol-map>
+  `,
+})
+export class MilDemo {
+  private milSvc = inject(OlMilitaryService);
+  features = signal<Feature[]>([]);
+
+  async ngOnInit() {
+    const symbol = await this.milSvc.createMilSymbol({
+      sidc: 'SFGPUCI-----', // Friendly Infantry Unit
+      position: [-3.7, 40.42],
+      size: 36,
+    });
+    this.features.set([symbol]);
+  }
+}
+```
+
+Install the optional peer dependency if utilizing NATO symbology:
 
 ```bash
 pnpm add milsymbol
 ```
 
-```ts
-const symbol = await ml.createMilSymbol({
-  sidc: 'SFGPUCI-----', // friendly infantry, ground unit
-  position: [-3.7, 40.42],
-  size: 36,
-  uniqueDesignation: 'A1',
-});
-```
-
-Three flavors:
+Three execution strategies:
 
 - **`createMilSymbol(config)`** — async; lazy-loads on first call.
 - **`createMilSymbolSync(config)`** — sync; throws if `milsymbol` is not loaded yet.
 - **`preloadMilsymbol()`** — fire-and-forget on app init to make the first symbol render synchronous.
 
 The service throws clearly on non-browser environments (`createMilSymbol` requires `window`).
+
+### Tactical Graphics (`OlTacticalGraphicsService`)
+
+Builds advanced multi-point military tactical graphic features (frontlines with directional teeth, attack arrow coordinates) and provides custom styles.
+
+```typescript
+import { OlTacticalGraphicsService } from '@angular-helpers/openlayers/military';
+
+const tacticalSvc = inject(OlTacticalGraphicsService);
+
+// Create a frontline graphic
+const frontline = tacticalSvc.createFrontLine(
+  [
+    [2.1, 41.3],
+    [2.2, 41.4],
+  ],
+  'friendly',
+);
+
+// Apply specialized style for frontline teeth
+const frontlineStyle = tacticalSvc.createFrontLineStyle('#4f46e5', 'friendly');
+```
 
 ## Architecture
 

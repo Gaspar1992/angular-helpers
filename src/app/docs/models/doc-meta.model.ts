@@ -117,7 +117,9 @@ export type ServiceCategory =
   | 'security'
   | 'ol-core'
   | 'ol-layers'
-  | 'ol-controls';
+  | 'ol-overlays'
+  | 'ol-controls'
+  | 'ol-military';
 
 export interface PackageDoc {
   id: string;

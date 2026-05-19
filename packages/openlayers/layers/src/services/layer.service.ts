@@ -123,6 +123,7 @@ export class OlLayerService {
     const layer = this.layerCache.get(id);
     if (map && layer) {
       map.removeLayer(layer);
+      layer.dispose();
       this.layerCache.delete(id);
       this.updateLayerState();
     }

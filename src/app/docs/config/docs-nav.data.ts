@@ -259,8 +259,17 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
         items: [
           { label: 'Tile Layer', route: '/docs/openlayers/tile-layer' },
           { label: 'Vector Layer', route: '/docs/openlayers/vector-layer' },
+          { label: 'WebGL Tile Layer', route: '/docs/openlayers/webgl-tile-layer' },
+          { label: 'WebGL Vector Layer', route: '/docs/openlayers/webgl-vector-layer' },
           { label: 'Heatmap Layer', route: '/docs/openlayers/heatmap-layer' },
           { label: 'Cluster', route: '/docs/openlayers/cluster' },
+        ],
+      },
+      {
+        title: 'Overlays',
+        items: [
+          { label: 'Popup', route: '/docs/openlayers/popup' },
+          { label: 'Tooltip', route: '/docs/openlayers/tooltip' },
         ],
       },
       {
@@ -272,6 +281,13 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
           { label: 'Fullscreen', route: '/docs/openlayers/fullscreen-control' },
           { label: 'Layer Switcher', route: '/docs/openlayers/layer-switcher' },
           { label: 'Basemap Switcher', route: '/docs/openlayers/basemap-switcher' },
+        ],
+      },
+      {
+        title: 'Military',
+        items: [
+          { label: 'Military Service', route: '/docs/openlayers/military' },
+          { label: 'Tactical Graphics', route: '/docs/openlayers/tactical-graphics' },
         ],
       },
     ],

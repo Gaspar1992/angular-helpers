@@ -24,7 +24,9 @@ const CATEGORY_ICONS: Record<ServiceCategory, string> = {
   security: '🔐',
   'ol-core': '🗺️',
   'ol-layers': '📐',
+  'ol-overlays': '📍',
   'ol-controls': '🎮',
+  'ol-military': '🎖️',
 };
 
 const CATEGORY_LABELS: Record<ServiceCategory, string> = {
@@ -38,7 +40,9 @@ const CATEGORY_LABELS: Record<ServiceCategory, string> = {
   security: 'Security & Permissions',
   'ol-core': 'Core',
   'ol-layers': 'Layers',
+  'ol-overlays': 'Overlays',
   'ol-controls': 'Controls',
+  'ol-military': 'Military',
 };
 
 /**
@@ -96,7 +100,9 @@ export function generateServiceGroups(
     'experimental',
     'ol-core',
     'ol-layers',
+    'ol-overlays',
     'ol-controls',
+    'ol-military',
   ];
 
   return categoryOrder

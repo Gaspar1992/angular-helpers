@@ -132,7 +132,30 @@ export class DrawInteractionService {
       // Handle draw end event
       draw.on('drawend', (e: { feature: OLFeature }) => {
         this.zoneHelper.runInsideAngular(() => {
+          const uniqueId = `drawn-${Date.now()}`;
+          e.feature.setId(uniqueId);
+
+          // Set default properties and styling on raw OL feature
+          e.feature.set('name', 'Sketch');
+          const defaultStyle = {
+            fill: { color: 'rgba(59, 130, 246, 0.2)' },
+            stroke: { color: '#3b82f6', width: 2 },
+          };
+          e.feature.set('__angular_helpers_style__', defaultStyle);
+
+          // Convert to internal Feature representation
           const feature = olFeatureToFeature(e.feature);
+          feature.id = uniqueId;
+          feature.properties = {
+            ...feature.properties,
+            name: 'Sketch',
+            strokeColor: '#3b82f6',
+            strokeWidth: 2,
+            fillColor: '#3b82f6',
+            fillOpacity: 0.2,
+          };
+          feature.style = defaultStyle;
+
           const event: DrawEndEvent = { interactionId: id, feature, type: config.type };
           this.stateService.emitDrawEnd(event);
         });

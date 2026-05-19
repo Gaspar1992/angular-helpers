@@ -30,7 +30,7 @@ import type { BlogPostData } from '../../services/blog-post.resolver';
             <div class="flex flex-wrap gap-2.5 mb-8">
               @for (tag of d.meta.tags; track tag) {
                 @if (tag && tag.trim() !== '') {
-                  <span class="badge badge-outline border-primary/20 text-primary">{{ tag }}</span>
+                  <span class="badge badge-primary">{{ tag }}</span>
                 }
               }
             </div>

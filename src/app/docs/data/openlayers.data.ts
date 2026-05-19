@@ -601,4 +601,445 @@ export class MapComponent {}`,
 })
 export class MapComponent {}`,
   },
+  {
+    id: 'webgl-tile-layer',
+    name: 'OlWebGLTileLayerComponent',
+    description:
+      'GPU-accelerated tile layer supporting standard XYZ, OSM, and MVT sources with dynamic style expressions for real-time color manipulation.',
+    scope: 'component',
+    importPath: '@angular-helpers/openlayers/layers',
+    requiresSecureContext: false,
+    browserSupport: 'All WebGL-compatible browsers',
+    notes: [
+      'Executes all raster rendering operations directly on the GPU.',
+      'Supports the dynamic application of WebGL tile styles (raster expressions) for color manipulation (brightness, contrast, saturation, gamma).',
+      'Provides high performance rendering for heavy tile configurations.',
+    ],
+    category: 'ol-layers',
+    inputs: [
+      { name: 'id', type: 'string', description: 'Unique identifier for the layer (required)' },
+      { name: 'source', type: "'osm' | 'xyz' | 'mvt'", description: 'Tile source type (required)' },
+      { name: 'url', type: 'string', description: 'URL template for custom tile sources' },
+      {
+        name: 'attributions',
+        type: 'string | string[]',
+        description: 'Attribution texts for this layer',
+      },
+      {
+        name: 'tileStyle',
+        type: 'WebGLTileStyle | FlatStyleLike',
+        description: 'Raster style expressions or MVT flat styles',
+      },
+      { name: 'zIndex', type: 'number', defaultValue: '0', description: 'Layer stack order' },
+      { name: 'opacity', type: 'number', defaultValue: '1', description: 'Layer opacity (0-1)' },
+      { name: 'visible', type: 'boolean', defaultValue: 'true', description: 'Layer visibility' },
+      {
+        name: 'preload',
+        type: 'number',
+        defaultValue: '0',
+        description: 'Preload low-res tiles zoom level',
+      },
+    ],
+    outputs: [],
+    methods: [],
+    example: `import { OlWebGLTileLayerComponent } from '@angular-helpers/openlayers/layers';
+
+@Component({
+  template: \`
+    <ol-map>
+      <ol-webgl-tile-layer
+        id="satellite"
+        source="xyz"
+        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        [tileStyle]="{ brightness: 0.1, contrast: 0.2 }" />
+    </ol-map>
+  \`
+})
+export class MapComponent {}`,
+  },
+  {
+    id: 'webgl-vector-layer',
+    name: 'OlWebGLVectorLayerComponent',
+    description:
+      'GPU-accelerated vector layer engineered to display massive datasets (10,000+ features) smoothly using WebGL 2.',
+    scope: 'component',
+    importPath: '@angular-helpers/openlayers/layers',
+    requiresSecureContext: false,
+    browserSupport: 'All WebGL-compatible browsers',
+    notes: [
+      'Engineered specifically to render huge coordinate datasets without lagging the browser thread.',
+      'Must use FlatStyleLike configurations for styling (instead of standard ol/style/Style objects).',
+      'Memory is fully released on destroy by executing rigorous WebGL buffer cleanup.',
+    ],
+    category: 'ol-layers',
+    inputs: [
+      { name: 'id', type: 'string', description: 'Unique identifier for the layer (required)' },
+      {
+        name: 'features',
+        type: 'Feature[]',
+        defaultValue: '[]',
+        description: 'Array of coordinates/shapes to render',
+      },
+      {
+        name: 'flatStyle',
+        type: 'FlatStyleLike',
+        description: 'WebGL flat style declaration (required)',
+      },
+      { name: 'zIndex', type: 'number', defaultValue: '0', description: 'Layer stack order' },
+      { name: 'opacity', type: 'number', defaultValue: '1', description: 'Layer opacity (0-1)' },
+      { name: 'visible', type: 'boolean', defaultValue: 'true', description: 'Layer visibility' },
+      {
+        name: 'disableHitDetection',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Disable mouse hit testing for peak performance',
+      },
+      {
+        name: 'variables',
+        type: 'Record<string, unknown>',
+        description: 'Style variables for real-time dynamic rendering updates',
+      },
+    ],
+    outputs: [],
+    methods: [],
+    example: `import { OlWebGLVectorLayerComponent } from '@angular-helpers/openlayers/layers';
+
+@Component({
+  template: \`
+    <ol-map>
+      <ol-webgl-vector-layer
+        id="large-data"
+        [features]="densePoints()"
+        [flatStyle]="pointStyle"
+        [disableHitDetection]="true" />
+    </ol-map>
+  \`
+})
+export class MapComponent {
+  pointStyle = {
+    'circle-radius': 6,
+    'circle-fill-color': '#10b981',
+    'stroke-color': '#334155',
+    'stroke-width': 1
+  };
+}`,
+  },
+  {
+    id: 'popup',
+    name: 'OlPopupComponent',
+    description:
+      'Declarative popup overlay component displaying custom Angular templates projected over specific coordinates on the map.',
+    scope: 'component',
+    importPath: '@angular-helpers/openlayers/overlays',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      "Appends directly into the OpenLayers Overlay viewport while remaining completely connected to Angular's component tree.",
+      'Supports auto-pan, customizable offsets, and programmatic closure with leak-free component destruction.',
+    ],
+    category: 'ol-overlays',
+    inputs: [
+      {
+        name: 'position',
+        type: 'Coordinate | null',
+        defaultValue: 'null',
+        description: 'Map coordinate to anchor popup. Set null to hide.',
+      },
+      {
+        name: 'offset',
+        type: '[number, number]',
+        defaultValue: '[0, 0]',
+        description: 'Pixel offset relative to coordinate',
+      },
+      {
+        name: 'positioning',
+        type: 'OverlayPositioning',
+        defaultValue: "'bottom-center'",
+        description: 'Anchor point of popup box',
+      },
+      {
+        name: 'autoPan',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Auto-pan map view to keep popup visible',
+      },
+      {
+        name: 'closeButton',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Render default top-right close cross icon',
+      },
+    ],
+    outputs: [
+      {
+        name: 'closed',
+        type: 'void',
+        description:
+          'Emitted when popup transitions from visible to hidden or close button clicked',
+      },
+    ],
+    methods: [],
+    example: `import { OlPopupComponent } from '@angular-helpers/openlayers/overlays';
+
+@Component({
+  template: \`
+    <ol-map>
+      <ol-popup
+        [position]="selectedCoord()"
+        [closeButton]="true"
+        [autoPan]="true"
+        (closed)="onPopupClosed()">
+        <h3>Feature Details</h3>
+        <p>Dynamic data is reactively rendered inside the map container.</p>
+      </ol-popup>
+    </ol-map>
+  \`
+})
+export class MapComponent {}`,
+  },
+  {
+    id: 'tooltip',
+    name: 'OlTooltipDirective',
+    description:
+      'Declarative hover directive displaying floating text tooltips when the cursor points to vector layer features.',
+    scope: 'component',
+    importPath: '@angular-helpers/openlayers/overlays',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Runs internally outside Angular zone (runOutsideAngular) to avoid performance impacts on mouse pointer moves.',
+      'Customizable styles can override the .ol-tooltip class hook in your global styling rules.',
+    ],
+    category: 'ol-overlays',
+    inputs: [
+      {
+        name: 'olTooltip',
+        type: 'string',
+        description: 'Feature property key to read and render in the tooltip (required)',
+      },
+      {
+        name: 'olTooltipLayer',
+        type: 'string | null',
+        defaultValue: 'null',
+        description: 'Limit tooltip detection to a single layer by id',
+      },
+    ],
+    outputs: [],
+    methods: [],
+    example: `import { OlTooltipDirective } from '@angular-helpers/openlayers/overlays';
+
+@Component({
+  template: \`
+    <ol-map>
+      <ol-vector-layer
+        id="pois"
+        [features]="poisList()"
+        olTooltip="name"
+        olTooltipLayer="pois" />
+    </ol-map>
+  \`
+})
+export class MapComponent {}`,
+  },
+  {
+    id: 'military',
+    name: 'OlMilitaryService',
+    description:
+      'Service providing dynamic military symbology (MIL-STD-2525 / APP-6) rendering utilizing the OpenLayers framework.',
+    scope: 'provided',
+    importPath: '@angular-helpers/openlayers/military',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Uses dynamic Angular resources (resource API) to lazy-load the heavy milsymbol package asynchronously.',
+      'Acts as a pure symbol renderer, delegating geographic calculations to specialized services.',
+    ],
+    category: 'ol-military',
+    inputs: [],
+    outputs: [],
+    methods: [
+      {
+        name: 'preloadMilsymbol',
+        signature: '(): Promise<void>',
+        description: 'Triggers preloading of the milsymbol JS bundle',
+        returns: 'Promise<void>',
+      },
+      {
+        name: 'createMilSymbol',
+        signature: '(config: MilSymbolConfig): Promise<Feature>',
+        description: 'Creates a point MIL-STD-2525 symbol asynchronously',
+        returns: 'Promise<Feature>',
+      },
+      {
+        name: 'createMilSymbolSync',
+        signature: '(config: MilSymbolConfig): Feature',
+        description: 'Creates a symbol synchronously (throws if bundle not loaded yet)',
+        returns: 'Feature',
+      },
+    ],
+    example: `import { OlMilitaryService } from '@angular-helpers/openlayers/military';
+
+@Component({
+  providers: [OlMilitaryService],
+  template: \`
+    <ol-map>
+      <ol-vector-layer id="mil-graphics" [features]="militarySymbols()" />
+    </ol-map>
+  \`
+})
+export class MapComponent {
+  private milSvc = inject(OlMilitaryService);
+  militarySymbols = signal<Feature[]>([]);
+
+  constructor() {
+    this.milSvc.createMilSymbol({
+      sidc: 'SFGPUCI---*****', // Friendly Infantry Unit
+      position: [2.17, 41.38]
+    }).then(sym => {
+      this.militarySymbols.set([sym]);
+    });
+  }
+}`,
+  },
+  {
+    id: 'geometry',
+    name: 'OlGeometryService',
+    description:
+      'Service providing geodesic precision mathematical helpers to build approximated polygons (ellipses, circular sectors, donuts) using true geodesic calculations.',
+    scope: 'provided',
+    importPath: '@angular-helpers/openlayers/core',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Approximates standard shapes in metric spaces while preventing map projection scale distortions.',
+      "Computes ring vertices using Vincenty's formulae geodesic math via ol/sphere.",
+      'Highly optimized to compute coordinates outside the standard Angular zone when required.',
+    ],
+    category: 'ol-core',
+    inputs: [],
+    outputs: [],
+    methods: [
+      {
+        name: 'createEllipse',
+        signature: '(config: EllipseConfig): Feature',
+        description: 'Generates an ellipsoid polygon shape with geodesic math',
+        returns: 'Feature',
+      },
+      {
+        name: 'createSector',
+        signature: '(config: SectorConfig): Feature',
+        description: 'Generates a pie sector polygon with geodesic math',
+        returns: 'Feature',
+      },
+      {
+        name: 'createDonut',
+        signature: '(config: DonutConfig): Feature',
+        description: 'Generates a donut polygon shape with geodesic math',
+        returns: 'Feature',
+      },
+      {
+        name: 'offsetMetersToLonLat',
+        signature: '(center: Coordinate, dx: number, dy: number): Coordinate',
+        description:
+          'Projects a meter offset from a coordinate into lon/lat using true geodesic math',
+        returns: 'Coordinate',
+      },
+    ],
+    example: `import { OlGeometryService } from '@angular-helpers/openlayers/core';
+
+@Component({
+  template: \`
+    <ol-map>
+      <ol-vector-layer [features]="shapes()" />
+    </ol-map>
+  \`
+})
+export class MapComponent {
+  private geomSvc = inject(OlGeometryService);
+  shapes = signal<Feature[]>([]);
+
+  constructor() {
+    const ellipse = this.geomSvc.createEllipse({
+      center: [2.17, 41.38],
+      semiMajor: 6000,
+      semiMinor: 3000,
+      rotation: Math.PI / 6
+    });
+    this.shapes.set([ellipse]);
+  }
+}`,
+  },
+  {
+    id: 'tactical-graphics',
+    name: 'OlTacticalGraphicsService',
+    description:
+      'Service providing styling engines and geometry builders for military tactical graphics (frontlines, attack vectors, control zones).',
+    scope: 'provided',
+    importPath: '@angular-helpers/openlayers/military',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Delegates point symbology to OlMilitaryService.',
+      'Generates styled frontlines with "teeth", movement direction arrows, and bounded control zones.',
+    ],
+    category: 'ol-military',
+    inputs: [],
+    outputs: [],
+    methods: [
+      {
+        name: 'createFrontLine',
+        signature: '(coordinates: Coordinate[], direction?: "friendly" | "hostile"): Feature',
+        description: 'Generates a tactical frontline feature',
+        returns: 'Feature',
+      },
+      {
+        name: 'createAttackArrow',
+        signature: '(coordinates: Coordinate[], direction?: "friendly" | "hostile"): Feature',
+        description: 'Generates an attack vector arrow shape',
+        returns: 'Feature',
+      },
+      {
+        name: 'createControlZone',
+        signature: '(coordinates: Coordinate[][], direction?: "friendly" | "hostile"): Feature',
+        description: 'Generates a control zone polygon feature',
+        returns: 'Feature',
+      },
+      {
+        name: 'createFrontLineStyle',
+        signature:
+          '(color: string, direction?: "friendly" | "hostile"): (feature: OLFeature) => Style[]',
+        description: 'Builds OpenLayers complex style for frontline teeth rendering',
+        returns: 'StyleFunction',
+      },
+      {
+        name: 'createAttackArrowStyle',
+        signature: '(color: string): (feature: OLFeature) => Style[]',
+        description: 'Builds style for attack directional arrows',
+        returns: 'StyleFunction',
+      },
+    ],
+    example: `import { OlTacticalGraphicsService } from '@angular-helpers/openlayers/military';
+
+@Component({
+  providers: [OlTacticalGraphicsService],
+  template: \`
+    <ol-map>
+      <ol-vector-layer id="tactical" [features]="graphics()" [style]="tacticalStyle" />
+    </ol-map>
+  \`
+})
+export class MapComponent {
+  private tacticalSvc = inject(OlTacticalGraphicsService);
+  graphics = signal<Feature[]>([]);
+
+  constructor() {
+    const frontline = this.tacticalSvc.createFrontLine([
+      [2.1, 41.3], [2.2, 41.4]
+    ], 'friendly');
+    this.graphics.set([frontline]);
+  }
+
+  tacticalStyle = this.tacticalSvc.createFrontLineStyle('#4f46e5', 'friendly');
+}`,
+  },
 ];

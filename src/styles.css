@@ -209,124 +209,222 @@
     --_badge-accent: var(--c-text-muted);
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    padding: 0.28rem 0.65rem !important;
+    gap: 0.35rem;
+    padding: 0.32rem 0.75rem !important;
     margin: 0.15rem 0.25rem;
     height: auto;
-    font-size: 0.5rem;
-    font-weight: 700;
-    font-family: var(--font-mono, ui-monospace, monospace);
-    letter-spacing: normal;
+    font-size: 0.65rem;
+    font-weight: 800;
+    font-family: 'Inter', system-ui, sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     line-height: 1;
     white-space: nowrap;
-    border-radius: 99px;
-    border: 1px solid color-mix(in oklch, white 8%, transparent);
-    border-inline-start: 3px solid var(--_badge-accent);
-    background: color-mix(in oklch, white 4%, transparent);
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.03) 0%,
+      rgba(255, 255, 255, 0.01) 100%
+    );
     color: var(--c-text-secondary);
-    backdrop-filter: blur(8px);
-    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(12px);
+    transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
     cursor: default;
 
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background-color: var(--_badge-accent);
+      box-shadow: 0 0 5px var(--_badge-accent);
+      transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
     &:hover {
-      background: color-mix(in oklch, white 8%, transparent);
-      border-color: color-mix(in oklch, white 15%, transparent);
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.06) 0%,
+        rgba(255, 255, 255, 0.02) 100%
+      );
+      border-color: rgba(255, 255, 255, 0.15);
       color: var(--c-text-main);
-      box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.04);
+      transform: translateY(-0.5px);
+
+      &::before {
+        box-shadow: 0 0 8px 1px var(--_badge-accent);
+      }
     }
 
     &.badge-primary {
       --_badge-accent: var(--c-primary);
       color: var(--c-primary);
-      background: color-mix(in oklch, var(--c-primary) 8%, transparent);
-      border-color: color-mix(in oklch, var(--c-primary) 15%, transparent);
+      background: linear-gradient(
+        135deg,
+        color-mix(in oklch, var(--c-primary) 6%, transparent) 0%,
+        color-mix(in oklch, var(--c-primary) 1.5%, transparent) 100%
+      );
+      border-color: color-mix(in oklch, var(--c-primary) 12%, transparent);
       &:hover {
-        background: color-mix(in oklch, var(--c-primary) 15%, transparent);
-        border-color: color-mix(in oklch, var(--c-primary) 30%, transparent);
-        box-shadow: 0 0 12px color-mix(in oklch, var(--c-primary) 20%, transparent);
+        background: linear-gradient(
+          135deg,
+          color-mix(in oklch, var(--c-primary) 12%, transparent) 0%,
+          color-mix(in oklch, var(--c-primary) 3%, transparent) 100%
+        );
+        border-color: color-mix(in oklch, var(--c-primary) 35%, transparent);
+        color: white;
+        box-shadow: 0 0 16px color-mix(in oklch, var(--c-primary) 22%, transparent);
       }
     }
     &.badge-secondary {
       --_badge-accent: var(--c-secondary);
       color: var(--c-secondary);
-      background: color-mix(in oklch, var(--c-secondary) 8%, transparent);
-      border-color: color-mix(in oklch, var(--c-secondary) 15%, transparent);
+      background: linear-gradient(
+        135deg,
+        color-mix(in oklch, var(--c-secondary) 6%, transparent) 0%,
+        color-mix(in oklch, var(--c-secondary) 1.5%, transparent) 100%
+      );
+      border-color: color-mix(in oklch, var(--c-secondary) 12%, transparent);
       &:hover {
-        background: color-mix(in oklch, var(--c-secondary) 15%, transparent);
-        border-color: color-mix(in oklch, var(--c-secondary) 30%, transparent);
-        box-shadow: 0 0 12px color-mix(in oklch, var(--c-secondary) 20%, transparent);
+        background: linear-gradient(
+          135deg,
+          color-mix(in oklch, var(--c-secondary) 12%, transparent) 0%,
+          color-mix(in oklch, var(--c-secondary) 3%, transparent) 100%
+        );
+        border-color: color-mix(in oklch, var(--c-secondary) 35%, transparent);
+        color: white;
+        box-shadow: 0 0 16px color-mix(in oklch, var(--c-secondary) 22%, transparent);
       }
     }
     &.badge-accent {
       --_badge-accent: var(--c-accent);
       color: var(--c-accent);
-      background: color-mix(in oklch, var(--c-accent) 8%, transparent);
-      border-color: color-mix(in oklch, var(--c-accent) 15%, transparent);
+      background: linear-gradient(
+        135deg,
+        color-mix(in oklch, var(--c-accent) 6%, transparent) 0%,
+        color-mix(in oklch, var(--c-accent) 1.5%, transparent) 100%
+      );
+      border-color: color-mix(in oklch, var(--c-accent) 12%, transparent);
       &:hover {
-        background: color-mix(in oklch, var(--c-accent) 15%, transparent);
-        border-color: color-mix(in oklch, var(--c-accent) 30%, transparent);
-        box-shadow: 0 0 12px color-mix(in oklch, var(--c-accent) 20%, transparent);
+        background: linear-gradient(
+          135deg,
+          color-mix(in oklch, var(--c-accent) 12%, transparent) 0%,
+          color-mix(in oklch, var(--c-accent) 3%, transparent) 100%
+        );
+        border-color: color-mix(in oklch, var(--c-accent) 35%, transparent);
+        color: white;
+        box-shadow: 0 0 16px color-mix(in oklch, var(--c-accent) 22%, transparent);
       }
     }
     &.badge-info {
       --_badge-accent: var(--color-info);
       color: var(--color-info);
-      background: color-mix(in oklch, var(--color-info) 8%, transparent);
-      border-color: color-mix(in oklch, var(--color-info) 15%, transparent);
+      background: linear-gradient(
+        135deg,
+        color-mix(in oklch, var(--color-info) 6%, transparent) 0%,
+        color-mix(in oklch, var(--color-info) 1.5%, transparent) 100%
+      );
+      border-color: color-mix(in oklch, var(--color-info) 12%, transparent);
       &:hover {
-        background: color-mix(in oklch, var(--color-info) 15%, transparent);
-        border-color: color-mix(in oklch, var(--color-info) 30%, transparent);
-        box-shadow: 0 0 12px color-mix(in oklch, var(--color-info) 20%, transparent);
+        background: linear-gradient(
+          135deg,
+          color-mix(in oklch, var(--color-info) 12%, transparent) 0%,
+          color-mix(in oklch, var(--color-info) 3%, transparent) 100%
+        );
+        border-color: color-mix(in oklch, var(--color-info) 35%, transparent);
+        color: white;
+        box-shadow: 0 0 16px color-mix(in oklch, var(--color-info) 22%, transparent);
       }
     }
     &.badge-success {
       --_badge-accent: var(--color-success);
       color: var(--color-success);
-      background: color-mix(in oklch, var(--color-success) 8%, transparent);
-      border-color: color-mix(in oklch, var(--color-success) 15%, transparent);
+      background: linear-gradient(
+        135deg,
+        color-mix(in oklch, var(--color-success) 6%, transparent) 0%,
+        color-mix(in oklch, var(--color-success) 1.5%, transparent) 100%
+      );
+      border-color: color-mix(in oklch, var(--color-success) 12%, transparent);
       &:hover {
-        background: color-mix(in oklch, var(--color-success) 15%, transparent);
-        border-color: color-mix(in oklch, var(--color-success) 30%, transparent);
-        box-shadow: 0 0 12px color-mix(in oklch, var(--color-success) 20%, transparent);
+        background: linear-gradient(
+          135deg,
+          color-mix(in oklch, var(--color-success) 12%, transparent) 0%,
+          color-mix(in oklch, var(--color-success) 3%, transparent) 100%
+        );
+        border-color: color-mix(in oklch, var(--color-success) 35%, transparent);
+        color: white;
+        box-shadow: 0 0 16px color-mix(in oklch, var(--color-success) 22%, transparent);
       }
     }
     &.badge-warning {
       --_badge-accent: var(--color-warning);
       color: var(--color-warning);
-      background: color-mix(in oklch, var(--color-warning) 8%, transparent);
-      border-color: color-mix(in oklch, var(--color-warning) 15%, transparent);
+      background: linear-gradient(
+        135deg,
+        color-mix(in oklch, var(--color-warning) 6%, transparent) 0%,
+        color-mix(in oklch, var(--color-warning) 1.5%, transparent) 100%
+      );
+      border-color: color-mix(in oklch, var(--color-warning) 12%, transparent);
       &:hover {
-        background: color-mix(in oklch, var(--color-warning) 15%, transparent);
-        border-color: color-mix(in oklch, var(--color-warning) 30%, transparent);
-        box-shadow: 0 0 12px color-mix(in oklch, var(--color-warning) 20%, transparent);
+        background: linear-gradient(
+          135deg,
+          color-mix(in oklch, var(--color-warning) 12%, transparent) 0%,
+          color-mix(in oklch, var(--color-warning) 3%, transparent) 100%
+        );
+        border-color: color-mix(in oklch, var(--color-warning) 35%, transparent);
+        color: white;
+        box-shadow: 0 0 16px color-mix(in oklch, var(--color-warning) 22%, transparent);
       }
     }
     &.badge-error {
       --_badge-accent: var(--color-error);
       color: var(--color-error);
-      background: color-mix(in oklch, var(--color-error) 8%, transparent);
-      border-color: color-mix(in oklch, var(--color-error) 15%, transparent);
+      background: linear-gradient(
+        135deg,
+        color-mix(in oklch, var(--color-error) 6%, transparent) 0%,
+        color-mix(in oklch, var(--color-error) 1.5%, transparent) 100%
+      );
+      border-color: color-mix(in oklch, var(--color-error) 12%, transparent);
       &:hover {
-        background: color-mix(in oklch, var(--color-error) 15%, transparent);
-        border-color: color-mix(in oklch, var(--color-error) 30%, transparent);
-        box-shadow: 0 0 12px color-mix(in oklch, var(--color-error) 20%, transparent);
+        background: linear-gradient(
+          135deg,
+          color-mix(in oklch, var(--color-error) 12%, transparent) 0%,
+          color-mix(in oklch, var(--color-error) 3%, transparent) 100%
+        );
+        border-color: color-mix(in oklch, var(--color-error) 35%, transparent);
+        color: white;
+        box-shadow: 0 0 16px color-mix(in oklch, var(--color-error) 22%, transparent);
       }
     }
     &.badge-outline {
-      background: transparent;
-      border: 1px solid currentColor;
-      border-inline-start: 1px solid currentColor;
-      opacity: 0.5;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid color-mix(in oklch, var(--_badge-accent) 25%, transparent);
+      color: var(--_badge-accent);
+      backdrop-filter: blur(8px);
+      &::before {
+        display: none;
+      }
       &:hover {
-        opacity: 1;
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--_badge-accent);
+        color: white;
+        box-shadow: 0 0 14px color-mix(in oklch, var(--_badge-accent) 20%, transparent);
       }
     }
     &.badge-ghost {
       background: transparent;
-      border-inline-start: none;
+      border: 1px solid transparent;
       color: var(--c-text-muted);
+      &::before {
+        display: none;
+      }
       &:hover {
-        background: color-mix(in oklch, white 5%, transparent);
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.06);
+        color: var(--c-text-secondary);
       }
     }
   }

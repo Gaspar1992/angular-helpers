@@ -48,41 +48,9 @@ import {
 import type { BasemapConfig, LayerSwitcherItem } from '@angular-helpers/openlayers/controls';
 import type { Feature } from '@angular-helpers/openlayers/core';
 
-@Component({
-  selector: 'app-demo-city-card',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div
-      class="bg-base-100 border border-base-content/10 rounded-2xl shadow-2xl p-5 min-w-[200px] text-sm"
-    >
-      <div class="flex items-center gap-3 mb-3 pb-3 border-b border-base-content/5">
-        <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-          🏙️
-        </div>
-        <div class="font-black text-base-content tracking-tight text-base">{{ name() }}</div>
-      </div>
-      <div class="space-y-3 mb-4">
-        <div class="flex justify-between">
-          <span class="text-base-content/40 font-bold uppercase text-[10px]">Population</span>
-          <span class="text-base-content font-mono font-bold">{{
-            population().toLocaleString()
-          }}</span>
-        </div>
-      </div>
-      <button
-        class="btn btn-xs btn-primary btn-outline w-full rounded-lg font-bold"
-        (click)="closed.emit()"
-      >
-        Close popup
-      </button>
-    </div>
-  `,
-})
-export class DemoCityCardComponent {
-  readonly name = input.required<string>();
-  readonly population = input.required<number>();
-  readonly closed = output<void>();
-}
+import { DemoCityCardComponent } from './components/demo-city-card.component';
+import { FeatureInspectorComponent } from './components/feature-inspector.component';
+import { MapTelemetryComponent } from './components/map-telemetry.component';
 
 const BASEMAPS: BasemapConfig[] = [
   { id: 'osm', name: 'OpenStreetMap', type: 'osm', icon: '🗺️' },
@@ -123,6 +91,8 @@ const BASEMAPS: BasemapConfig[] = [
     OlWebGLVectorLayerComponent,
     OlPopupComponent,
     OlTooltipDirective,
+    FeatureInspectorComponent,
+    MapTelemetryComponent,
   ],
   animations: [
     trigger('subMenu', [
@@ -346,7 +316,7 @@ const BASEMAPS: BasemapConfig[] = [
           >
             @if (selectedCityInfo(); as info) {
               <div
-                class="bg-base-100/95 backdrop-blur-md border border-base-content/10 rounded-2xl shadow-xl p-5 min-w-[220px]"
+                class="bg-transparent backdrop-blur-md border border-base-content/10 rounded-2xl shadow-xl p-5 min-w-[220px]"
               >
                 <div class="font-black text-lg text-base-content mb-1">{{ info.name }}</div>
                 <div class="divider my-2 opacity-10"></div>
@@ -989,181 +959,18 @@ const BASEMAPS: BasemapConfig[] = [
         <!-- Telemetry Panel -->
         <div class="flex flex-col gap-8">
           <!-- Property Inspector -->
-          @if (interactionService.selectedFeatures().length > 0) {
-            <div
-              class="bg-base-200 rounded-3xl overflow-hidden shadow-2xl border border-base-content/5 animate-in fade-in slide-in-from-right-4 duration-300"
-            >
-              <div class="p-8">
-                <h2 class="text-xl font-bold flex items-center gap-3 mb-6 text-base-content">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="text-primary"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="16" x2="12" y2="12" />
-                    <line x1="12" y1="8" x2="12.01" y2="8" />
-                  </svg>
-                  Inspector
-                </h2>
+          <app-feature-inspector
+            [selectedFeatures]="interactionService.selectedFeatures()"
+            (updateStyle)="updateSelectedFeatureStyle($event.id, $event.updates)"
+            (deselect)="clearSelection()"
+          ></app-feature-inspector>
 
-                @let feature = interactionService.selectedFeatures()[0];
-                <div class="space-y-6">
-                  <div
-                    class="bg-base-content/5 rounded-2xl p-5 shadow-inner border border-base-content/5"
-                  >
-                    <span
-                      class="text-[10px] font-black uppercase tracking-widest text-base-content/30 block mb-1"
-                      >Feature ID</span
-                    >
-                    <div class="font-mono text-xs break-all text-base-content/80">
-                      {{ feature.id }}
-                    </div>
-                  </div>
-
-                  @if (feature.properties?.['name']) {
-                    <div
-                      class="bg-base-content/5 rounded-2xl p-5 shadow-inner border border-base-content/5"
-                    >
-                      <span
-                        class="text-[10px] font-black uppercase tracking-widest text-base-content/30 block mb-1"
-                        >Name</span
-                      >
-                      <div class="text-lg font-black text-base-content tracking-tight">
-                        {{ feature.properties!['name'] }}
-                      </div>
-                    </div>
-                  }
-
-                  <button
-                    class="btn btn-sm btn-ghost w-full font-bold text-base-content/40 hover:text-error hover:bg-error/10 rounded-xl transition-all"
-                    (click)="clearSelection()"
-                  >
-                    Deselect Feature
-                  </button>
-                </div>
-              </div>
-            </div>
-          }
-
-          <div
-            class="bg-base-200 rounded-3xl overflow-hidden shadow-2xl border border-base-content/5 flex-grow"
-          >
-            <div class="p-8">
-              <h2 class="text-xl font-bold flex items-center gap-3 mb-6 text-base-content">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="text-info"
-                >
-                  <path d="M2 12h4l2-9 5 18 3-10 5 3"></path>
-                </svg>
-                Map Telemetry
-              </h2>
-
-              <div class="flex flex-col gap-4 mb-8">
-                <div
-                  class="bg-base-content/5 rounded-2xl p-5 shadow-inner border border-base-content/5"
-                >
-                  <div
-                    class="text-[10px] font-black uppercase tracking-widest text-base-content/30 mb-1"
-                  >
-                    Center Coordinates
-                  </div>
-                  <div class="text-xl font-mono tracking-tighter text-base-content font-black">
-                    {{ center()[0].toFixed(4) }}<span class="mx-1 opacity-20">,</span
-                    >{{ center()[1].toFixed(4) }}
-                  </div>
-                </div>
-                <div
-                  class="bg-base-content/5 rounded-2xl p-5 shadow-inner border border-base-content/5"
-                >
-                  <div
-                    class="text-[10px] font-black uppercase tracking-widest text-base-content/30 mb-1"
-                  >
-                    Zoom Level
-                  </div>
-                  <div class="text-2xl font-mono tracking-tighter text-info font-black">
-                    {{ zoom() | number: '1.1-2' }}
-                  </div>
-                </div>
-              </div>
-
-              <h3
-                class="text-[10px] font-black uppercase tracking-widest text-base-content/30 mb-4 px-1"
-              >
-                Pointer Inspection
-              </h3>
-              <div
-                class="bg-base-content/5 rounded-2xl p-6 border border-base-content/5 font-mono text-sm shadow-inner min-h-[140px] flex flex-col justify-center"
-              >
-                @if (lastClick(); as click) {
-                  <div class="space-y-4 animate-in fade-in duration-300">
-                    <div
-                      class="flex justify-between items-center pb-4 border-b border-base-content/5"
-                    >
-                      <span class="text-[10px] font-bold uppercase text-base-content/30"
-                        >Coord</span
-                      >
-                      <span class="font-bold text-success"
-                        >{{ click.coordinate?.[0]?.toFixed(4)
-                        }}<span class="mx-1 opacity-40">,</span
-                        >{{ click.coordinate?.[1]?.toFixed(4) }}</span
-                      >
-                    </div>
-                    <div class="flex justify-between items-center">
-                      <span class="text-[10px] font-bold uppercase text-base-content/30"
-                        >Viewport</span
-                      >
-                      <span class="font-bold text-base-content/80"
-                        >{{ click.pixel?.[0] | number: '1.0-0' }}px<span class="mx-1 opacity-40"
-                          >,</span
-                        >{{ click.pixel?.[1] | number: '1.0-0' }}px</span
-                      >
-                    </div>
-                  </div>
-                } @else {
-                  <div
-                    class="flex flex-col items-center justify-center h-full text-base-content/10 italic gap-4"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="40"
-                      height="40"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      class="opacity-10"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="2" y1="12" x2="22" y2="12" />
-                      <line x1="12" y1="2" x2="12" y2="22" />
-                    </svg>
-                    <span class="text-[10px] font-black uppercase tracking-[0.2em]"
-                      >Idle Inspection</span
-                    >
-                  </div>
-                }
-              </div>
-            </div>
-          </div>
+          <!-- Telemetry Panel -->
+          <app-map-telemetry
+            [center]="center()"
+            [zoom]="zoom()"
+            [lastClick]="lastClick()"
+          ></app-map-telemetry>
         </div>
       </div>
 
@@ -1264,12 +1071,24 @@ const BASEMAPS: BasemapConfig[] = [
                   Generate Data
                 </button>
                 <label
-                  class="flex items-center gap-4 cursor-pointer group px-3 py-2 bg-base-content/5 rounded-xl border border-base-content/5 transition-colors hover:bg-base-content/10 shadow-sm"
+                  class="flex items-center gap-4 cursor-pointer group px-4 py-2.5 rounded-xl border transition-all shadow-sm duration-300"
+                  [class.bg-primary/10]="webglActive()"
+                  [class.border-primary/30]="webglActive()"
+                  [class.shadow-lg]="webglActive()"
+                  [class.shadow-primary/5]="webglActive()"
+                  [class.bg-base-content/5]="!webglActive()"
+                  [class.border-base-content/5]="!webglActive()"
                 >
                   <span
-                    class="text-[10px] font-black uppercase tracking-widest text-base-content/50 group-hover:text-base-content transition-colors"
-                    >GPU Active</span
+                    class="text-[10px] font-black uppercase tracking-widest transition-colors flex items-center gap-2"
+                    [class.text-primary]="webglActive()"
+                    [class.text-base-content/50]="!webglActive()"
                   >
+                    @if (webglActive()) {
+                      <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                    }
+                    GPU Active
+                  </span>
                   <input
                     type="checkbox"
                     class="toggle toggle-primary"
@@ -1291,6 +1110,7 @@ export class OpenLayersDemoComponent {
   private popupService = inject(OlPopupService);
   private measurementService = inject(MeasurementInteractionService);
   readonly interactionService = inject(OlInteractionService);
+  private stateService = inject(InteractionStateService);
 
   protected basemaps = BASEMAPS;
 
@@ -1375,6 +1195,44 @@ export class OpenLayersDemoComponent {
             `[Tactical Selection] Type: ${props['tacticalType']}, Name: ${props['name'] || 'N/A'}, Faction: ${props['direction']}`,
           );
         }
+      }
+    });
+
+    // Track drawn features count and apply default properties/styling on drawEnd
+    this.interactionService.drawEnd$.subscribe((event) => {
+      if (event.interactionId === 'demo-draw') {
+        this.drawnCount.update((c) => c + 1);
+
+        const feature = event.feature;
+        feature.properties = {
+          ...feature.properties,
+          name: `Sketch #${this.drawnCount()}`,
+          strokeColor: '#3b82f6',
+          strokeWidth: 2,
+          fillColor: '#3b82f6',
+          fillOpacity: 0.2,
+        };
+
+        feature.style = {
+          fill: { color: 'rgba(59, 130, 246, 0.2)' },
+          stroke: { color: '#3b82f6', width: 2 },
+        };
+
+        // Update the underlying OpenLayers feature name and style once added to the source
+        setTimeout(() => {
+          const layer = this.layerService.getLayer('drawn-features') as any;
+          if (layer) {
+            const source = layer.getSource();
+            if (source) {
+              const olFeature = source.getFeatureById(feature.id);
+              if (olFeature) {
+                olFeature.set('name', feature.properties['name']);
+                olFeature.set('__angular_helpers_style__', feature.style);
+                olFeature.changed();
+              }
+            }
+          }
+        });
       }
     });
   }
@@ -1571,6 +1429,106 @@ export class OpenLayersDemoComponent {
         type,
         source: 'drawn-features',
       });
+    }
+  }
+
+  updateSelectedFeatureStyle(
+    featureId: string | number,
+    updates: {
+      name?: string;
+      strokeColor?: string;
+      strokeWidth?: number;
+      fillColor?: string;
+      fillOpacity?: number;
+    },
+  ): void {
+    const layer = this.layerService.getLayer('drawn-features') as any;
+    if (!layer) return;
+    const source = layer.getSource();
+    if (!source) return;
+
+    const olFeature = source.getFeatureById(featureId);
+    if (!olFeature) return;
+
+    // Get current abstract style or initialize default
+    const currentStyle = olFeature.get('__angular_helpers_style__') || {};
+    const currentProps = olFeature.getProperties();
+
+    const newName = updates.name !== undefined ? updates.name : currentProps['name'];
+    const strokeColor =
+      updates.strokeColor !== undefined
+        ? updates.strokeColor
+        : currentProps['strokeColor'] || '#3b82f6';
+    const strokeWidth =
+      updates.strokeWidth !== undefined
+        ? updates.strokeWidth
+        : currentProps['strokeWidth'] !== undefined
+          ? currentProps['strokeWidth']
+          : 2;
+    const fillColor =
+      updates.fillColor !== undefined ? updates.fillColor : currentProps['fillColor'] || '#3b82f6';
+    const fillOpacity =
+      updates.fillOpacity !== undefined
+        ? updates.fillOpacity
+        : currentProps['fillOpacity'] !== undefined
+          ? currentProps['fillOpacity']
+          : 0.2;
+
+    // Parse Hex or RGB/RGBA to a clean RGBA for the OpenLayers fill color
+    let finalFillColor = fillColor;
+    if (fillColor.startsWith('rgb')) {
+      const match = fillColor.match(/\d+/g);
+      if (match && match.length >= 3) {
+        finalFillColor = `rgba(${match[0]}, ${match[1]}, ${match[2]}, ${fillOpacity})`;
+      }
+    } else {
+      let hex = fillColor.replace('#', '');
+      if (hex.length === 3) {
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+      }
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+        finalFillColor = `rgba(${r}, ${g}, ${b}, ${fillOpacity})`;
+      } else {
+        finalFillColor = `rgba(59, 130, 246, ${fillOpacity})`;
+      }
+    }
+
+    if (updates.name !== undefined) {
+      olFeature.set('name', updates.name);
+    }
+    olFeature.set('strokeColor', strokeColor);
+    olFeature.set('strokeWidth', strokeWidth);
+    olFeature.set('fillColor', fillColor);
+    olFeature.set('fillOpacity', fillOpacity);
+
+    const updatedStyle = {
+      fill: { color: finalFillColor },
+      stroke: { color: strokeColor, width: strokeWidth },
+    };
+
+    olFeature.set('__angular_helpers_style__', updatedStyle);
+    olFeature.changed(); // Trigger style redraw
+
+    // Update selection state reactively in stateService so Inspector updates
+    const selected = [...this.interactionService.selectedFeatures()];
+    const index = selected.findIndex((f) => f.id === featureId);
+    if (index !== -1) {
+      selected[index] = {
+        ...selected[index],
+        properties: {
+          ...selected[index].properties,
+          name: newName,
+          strokeColor,
+          strokeWidth,
+          fillColor,
+          fillOpacity,
+        },
+        style: updatedStyle,
+      };
+      this.stateService.setSelectedFeatures(selected);
     }
   }
 
