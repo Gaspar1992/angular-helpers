@@ -22,11 +22,14 @@ const userPref = injectStorageSignal('user-pref', 'light-mode', {
 });
 
 // Lectura directa (maneja automáticamente estados de carga asíncronos)
-console.log(userPref().data); // 'light-mode'
-console.log(userPref().loading); // true | false
+console.log(userPref()); // 'light-mode'
+
+// Consultar metadatos mediante sub-signals
+console.log(userPref.loading()); // true | false
+console.log(userPref.error()); // Error | null
 
 // Escritura reactiva - persiste automáticamente en background
-userPref.set({ data: 'dark-mode', loading: false, error: null });
+userPref.set('dark-mode');
 ```
 
 ### 3. Store de Entidades de Alta Performance
@@ -50,11 +53,17 @@ const productStore = injectEntityStore<string, Product>({
 // 1. Escritura optimizada con congelamiento inmediato (Write-Once, Freeze-Once)
 productStore.setOne({ id: 'P1', name: 'Laptop', price: 999 });
 
-// 2. Lectura 100% inmutable y segura
+// 2. Actualización Parcial (Patch)
+productStore.patch('P1', { price: 899 });
+
+// 3. Actualización mediante función (Update)
+productStore.update('P1', (p) => ({ ...p, price: p.price * 1.1 }));
+
+// 4. Lectura 100% inmutable y segura
 const laptop = productStore.entities().get('P1');
 // laptop.price = 1000; // ❌ Explota en runtime y arroja error en el compilador de TS!
 
-// 3. Reactividad Quirúrgica / Granular
+// 5. Reactividad Quirúrgica / Granular
 // Este computed SOLO se re-evalúa si cambia el producto 'P1'.
 // Modificaciones sobre el producto 'P2' NO dispararán re-evaluaciones aquí.
 const productSignal = productStore.entitySignal('P1');

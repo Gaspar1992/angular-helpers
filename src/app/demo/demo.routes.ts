@@ -129,7 +129,7 @@ export const DEMO_ROUTES: Routes = [
           import('./library-services-harness/library-services-harness').then(
             (m) => m.LibraryServicesHarnessComponent,
           ),
-        title: 'Library Services — Demo',
+        title: 'QA System Harness — Demo',
       },
       {
         path: 'storage',

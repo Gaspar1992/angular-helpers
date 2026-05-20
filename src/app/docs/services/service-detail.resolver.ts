@@ -9,6 +9,7 @@ import {
   ServiceDetailConfig,
   InterfaceDoc,
 } from '../feature/unified-service-detail/unified-service-detail.component';
+import { SeoService } from '../../core/services/seo.service';
 
 const SECTION_DATA = {
   'browser-web-apis': {
@@ -53,6 +54,7 @@ function getInterfaces(section: string, itemId: string): InterfaceDoc[] | undefi
 
 export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (route) => {
   const router = inject(Router);
+  const seo = inject(SeoService);
   const section = route.url[0]?.path as keyof typeof SECTION_DATA;
   const paramName =
     section === 'worker-http' ? 'entry' : section === 'openlayers' ? 'component' : 'service';
@@ -72,6 +74,13 @@ export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (rout
     await router.navigate([sectionData.backRoute]);
     return null as unknown as ServiceDetailConfig;
   }
+
+  // Update SEO Metadata dynamically
+  seo.updateMetadata({
+    title: item.name,
+    description: item.description,
+    url: `${sectionData.backRoute}/${itemId}`,
+  });
 
   return {
     service: item,

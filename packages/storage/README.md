@@ -21,12 +21,15 @@ const userPref = injectStorageSignal('user-pref', 'light-mode', {
   serializer: 'json',
 });
 
-// Read value (automatically handles async loading states)
-console.log(userPref().data); // 'light-mode'
-console.log(userPref().loading); // true | false
+// Read value directly (automatically handles async loading states)
+console.log(userPref()); // 'light-mode'
+
+// Check metadata via sub-signals
+console.log(userPref.loading()); // true | false
+console.log(userPref.error()); // Error | null
 
 // Reactive write - auto-persists to Cache API
-userPref.set({ data: 'dark-mode', loading: false, error: null });
+userPref.set('dark-mode');
 ```
 
 ### 3. High-Performance Entity Store
@@ -50,11 +53,17 @@ const productStore = injectEntityStore<string, Product>({
 // 1. Write-Once, Freeze-Once O(1) insertion
 productStore.setOne({ id: 'P1', name: 'Laptop', price: 999 });
 
-// 2. Read entities safely (frozen in runtime, compile-time ReadonlyMap)
+// 2. Partial Update (Patch)
+productStore.patch('P1', { price: 899 });
+
+// 3. Function-based update
+productStore.update('P1', (p) => ({ ...p, price: p.price * 1.1 }));
+
+// 4. Read entities safely (frozen in runtime, compile-time ReadonlyMap)
 const laptop = productStore.entities().get('P1');
 // laptop.price = 1000; // ❌ Throws TypeError in runtime, compile error in TS!
 
-// 3. Surgical Granular Reactivity
+// 5. Surgical Granular Reactivity
 // This computed signal ONLY evaluates when product 'P1' changes.
 // Updates to product 'P2' will NOT trigger re-evaluation!
 const productSignal = productStore.entitySignal('P1');

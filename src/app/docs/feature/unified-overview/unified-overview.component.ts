@@ -65,9 +65,10 @@ export interface OverviewConfig {
                 >
                   {{ service.name }}
                 </h3>
-                <p class="text-sm text-base-content/50 leading-relaxed m-0 flex-1 font-medium">
-                  {{ service.description }}
-                </p>
+                <p
+                  class="text-sm text-base-content/50 leading-relaxed m-0 flex-1 font-medium"
+                  [innerHTML]="service.description"
+                ></p>
                 <div
                   class="flex items-center gap-1.5 text-primary text-sm font-bold mt-6 group-hover:translate-x-1 transition-transform"
                 >

@@ -16,7 +16,7 @@ excerpt: >-
 
 # openlayers v0.4.0 — Military symbology
 
-This is the last Phase 2 slice. The `military` entry point of `@angular-helpers/openlayers` was previously a **stub**: `OlMilitaryService` returned fabricated `Feature` objects with empty geometry, `milsymbol` wasn't installed, no tests. v0.4.0 makes it real.
+This is the last Phase 2 slice. The `military` entry point of `@angular-helpers/openlayers` was previously a **stub**: `OlMilitaryService` returned fabricated `Feature` objects with empty geometry, [`milsymbol`](https://github.com/spatialillusions/milsymbol) wasn't installed, no tests. v0.4.0 makes it real, providing a first-class integration with [OpenLayers](https://openlayers.org/).
 
 ## What's in v0.4.0
 

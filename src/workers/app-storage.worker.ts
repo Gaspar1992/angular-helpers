@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-import { LocalStorageTransport } from '@angular-helpers/storage';
+import { LocalStorageTransport, detectTransferables } from '@angular-helpers/storage';
 import { WorkerStorageRequest } from '@angular-helpers/storage';
 
 // Instantiate our environment-agnostic local transport driver inside the Worker context
@@ -15,11 +15,15 @@ storageEngine.storeName = 'kv';
 const syncChannel = new BroadcastChannel('ah-storage-sync-channel');
 
 syncChannel.onmessage = (event: MessageEvent<{ key: string; payload: any }>) => {
-  self.postMessage({
-    type: 'change',
-    key: event.data.key,
-    payload: event.data.payload,
-  });
+  const transferables = detectTransferables(event.data.payload);
+  self.postMessage(
+    {
+      type: 'change',
+      key: event.data.key,
+      payload: event.data.payload,
+    },
+    transferables,
+  );
 };
 
 function broadcastChange(key: string, payload: any) {
@@ -41,7 +45,8 @@ self.onmessage = async (event: MessageEvent<WorkerStorageRequest>) => {
           storageType: 'indexeddb',
           serializer: options?.useToon ? 'toon' : 'json',
         });
-        self.postMessage({ type: 'response', requestId, payload: result });
+        const transferables = detectTransferables(result);
+        self.postMessage({ type: 'response', requestId, payload: result }, transferables);
         break;
       }
       case 'write': {

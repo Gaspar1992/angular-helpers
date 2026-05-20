@@ -256,6 +256,29 @@ contentIntegrityInterceptor({
 });
 ```
 
+##### `offlineCacheInterceptor(config?)`
+
+Caché Offline usando el Cache API nativo en el Web Worker. Protege tu aplicación ante conexiones inestables.
+
+```typescript
+offlineCacheInterceptor({
+  strategy: 'network-first', // 'network-first' (default) o 'cache-first' (stale-while-revalidate)
+  cacheName: 'ah-http-offline-cache',
+  ttl: 86400000, // 24 horas
+});
+```
+
+##### `offlineSyncQueueInterceptor(config?)`
+
+Cola de sincronización de mutaciones cronológica (FIFO). Intercepta requests POST, PUT, PATCH y DELETE cuando estás offline, los guarda en IndexedDB y los re-ejecuta automáticamente al recuperar la conexión.
+
+```typescript
+offlineSyncQueueInterceptor({
+  dbName: 'ah_offline_sync', // Nombre de la base de datos IndexedDB
+  bypassHeader: 'X-Bypass-Offline-Sync',
+});
+```
+
 ##### `composeInterceptors(...fns)`
 
 Compone múltiples interceptors en un solo `WorkerInterceptorFn`. Los interceptors corren de izquierda a derecha.

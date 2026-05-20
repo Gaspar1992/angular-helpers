@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { SafeReadonlyMap } from './safe-readonly-map';
 
 describe('SafeReadonlyMap', () => {
-  it('debe permitir operaciones de lectura estándar', () => {
+  it('should allow standard read operations', () => {
     const rawMap = new Map<string, { id: number; name: string }>();
     rawMap.set('1', { id: 1, name: 'Alice' });
 
@@ -14,7 +14,7 @@ describe('SafeReadonlyMap', () => {
     expect(safeMap.get('1')).toEqual({ id: 1, name: 'Alice' });
   });
 
-  it('debe arrojar error en tiempo de ejecución al intentar mutar el mapa mediante cast a any', () => {
+  it('should throw runtime error when attempting to mutate the map via any cast', () => {
     const rawMap = new Map<string, string>();
     rawMap.set('key', 'value');
 
@@ -26,7 +26,7 @@ describe('SafeReadonlyMap', () => {
     expect(() => untypedMap.clear()).toThrow();
   });
 
-  it('debe soportar iteraciones de forma correcta', () => {
+  it('should support iterations correctly', () => {
     const rawMap = new Map<string, string>();
     rawMap.set('k1', 'v1');
     rawMap.set('k2', 'v2');

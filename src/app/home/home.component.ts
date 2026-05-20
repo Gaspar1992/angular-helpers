@@ -189,9 +189,8 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
 
                   <p
                     class="text-base text-base-content/60 leading-relaxed max-w-[450px] relative z-10 font-medium m-0"
-                  >
-                    {{ p.description }}
-                  </p>
+                    [innerHTML]="p.description"
+                  ></p>
 
                   <div class="flex flex-wrap gap-2.5 mt-2 relative z-10">
                     @for (item of p.highlights; track item) {

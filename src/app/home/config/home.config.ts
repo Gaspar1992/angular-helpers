@@ -99,14 +99,9 @@ import { strongPassword, hibpPassword, safeHtml } from '@angular-helpers/securit
 export class SecurityDemoComponent {
   model = { password: '', bio: '' };
 
-  f = form(this.model, (p) => {
-    // Sync UI rules
-    required(p.password);
-    strongPassword(p.password, { minScore: 3 });
-    safeHtml(p.bio);
-    
-    // Async network rules (HaveIBeenPwned)
-    hibpPassword(p.password);
+  login = form({
+    password: ['', [required, strongPassword(), hibpPassword()]],
+    bio: ['', [safeHtml()]]
   });
 }`,
     html: `<span class="c-kw">import</span> <span class="c-brace">{</span> Component, computed <span class="c-brace">}</span> <span class="c-kw">from</span> <span class="c-str">'@angular/core'</span><span class="c-punc">;</span>
@@ -117,37 +112,11 @@ export class SecurityDemoComponent {
 <span class="c-kw">export class</span> <span class="c-type">SecurityDemoComponent</span> <span class="c-brace">{</span>
   model <span class="c-punc">=</span> <span class="c-brace">{</span> password<span class="c-punc">:</span> <span class="c-str">''</span><span class="c-punc">,</span> bio<span class="c-punc">:</span> <span class="c-str">''</span> <span class="c-brace">}</span><span class="c-punc">;</span>
 
-  <span class="c-var">f</span> <span class="c-punc">=</span> form<span class="c-punc">(</span><span class="c-kw">this</span><span class="c-punc">.</span>model<span class="c-punc">, (</span>p<span class="c-punc">) =&gt; {</span>
-    <span class="c-com">// Sync UI rules</span>
-    <span class="c-fn">required</span><span class="c-punc">(</span>p<span class="c-punc">.</span>password<span class="c-punc">);</span>
-    <span class="c-fn bg-base-content/5 px-1 rounded">strongPassword</span><span class="c-punc">(</span>p<span class="c-punc">.</span>password<span class="c-punc">, {</span> minScore<span class="c-punc">:</span> <span class="c-num">3</span> <span class="c-punc">});</span>
-    <span class="c-fn bg-base-content/5 px-1 rounded">safeHtml</span><span class="c-punc">(</span>p<span class="c-punc">.</span>bio<span class="c-punc">);</span>
-    
-    <span class="c-com">// Async network rules (HaveIBeenPwned)</span>
-    <span class="c-fn bg-base-content/5 px-1 rounded">hibpPassword</span><span class="c-punc">(</span>p<span class="c-punc">.</span>password<span class="c-punc">);</span>
-  <span class="c-punc">});</span>
+  <span class="c-var bg-base-content/5 px-1 rounded">login <span class="c-punc">=</span> form<span class="c-punc">({</span>
+    password<span class="c-punc">:</span> <span class="c-punc">[</span><span class="c-str">''</span><span class="c-punc">,</span> <span class="c-punc">[</span>required<span class="c-punc">,</span> strongPassword<span class="c-punc">(),</span> hibpPassword<span class="c-punc">()]],</span>
+    bio<span class="c-punc">:</span> <span class="c-punc">[</span><span class="c-str">''</span><span class="c-punc">,</span> <span class="c-punc">[</span>safeHtml<span class="c-punc">()]]</span>
+  <span class="c-punc">});</span></span>
 <span class="c-brace">}</span>`,
-  },
-  {
-    title: 'worker.ts',
-    raw: `import { WorkerHttpClient } from '@angular-helpers/worker-http';
-
-// Look mom, no main-thread blocking!
-const client = inject(WorkerHttpClient);
-
-client.get<HeavyData>('/api/analytics').subscribe({
-  next: (data) => this.render(data),
-  // Serialized with TOON or Seroval automatically
-});`,
-    html: `<span class="c-kw">import</span> <span class="c-brace">{</span> WorkerHttpClient <span class="c-brace">}</span> <span class="c-kw">from</span> <span class="c-str">'@angular-helpers/worker-http'</span><span class="c-punc">;</span>
-
-<span class="c-com">// Look mom, no main-thread blocking!</span>
-<span class="c-kw">const</span> client <span class="c-punc">=</span> inject<span class="c-punc">(</span>WorkerHttpClient<span class="c-punc">);</span>
-
-<span class="c-var bg-base-content/5 px-1 rounded">client<span class="c-punc">.</span>get</span><span class="c-punc">&lt;</span><span class="c-type">HeavyData</span><span class="c-punc">&gt;(</span><span class="c-str">'/api/analytics'</span><span class="c-punc">).</span>subscribe<span class="c-punc">({</span>
-  next<span class="c-punc">: (</span>data<span class="c-punc">) =&gt;</span> <span class="c-kw">this</span><span class="c-punc">.</span>render<span class="c-punc">(</span>data<span class="c-punc">),</span>
-  <span class="c-com">// Serialized with TOON or Seroval automatically</span>
-<span class="c-punc">});</span>`,
   },
   {
     title: 'storage.ts',
@@ -155,10 +124,10 @@ client.get<HeavyData>('/api/analytics').subscribe({
 
 @Component({
   template: \`
-    @if (prefs().loading) {
+    @if (prefs.loading()) {
       <p>Loading...</p>
     } @else {
-      <div [class.dark]="prefs().data.theme === 'dark'">
+      <div [class.dark]="prefs().theme === 'dark'">
         <button (click)="toggle()">Toggle Theme</button>
       </div>
     }
@@ -166,14 +135,11 @@ client.get<HeavyData>('/api/analytics').subscribe({
 })
 export class PrefsComponent {
   // Persisted in async L2 storage & synced across tabs!
-  prefs = injectStorageSignal('user_prefs', { theme: 'light' }, {
-    crossTabSync: true
-  });
+  prefs = injectStorageSignal('user_prefs', { theme: 'light' }, { crossTabSync: true });
 
   toggle() {
     this.prefs.update(state => ({
-      ...state,
-      data: { theme: state.data.theme === 'light' ? 'dark' : 'light' }
+      theme: state.theme === 'light' ? 'dark' : 'light'
     }));
   }
 }`,
@@ -181,10 +147,10 @@ export class PrefsComponent {
 
 <span class="c-kw">@Component</span><span class="c-punc">({</span>
   template<span class="c-punc">:</span> <span class="c-str">\`
-    @if (prefs().loading) {
+    @if (prefs.loading()) {
       &lt;p&gt;Loading...&lt;/p&gt;
     } @else {
-      &lt;div [class.dark]="prefs().data.theme === 'dark'"&gt;
+      &lt;div [class.dark]="prefs().theme === 'dark'"&gt;
         &lt;button (click)="toggle()"&gt;Toggle Theme&lt;/button&gt;
       &lt;/div&gt;
     }
@@ -196,9 +162,8 @@ export class PrefsComponent {
 
   <span class="c-fn">toggle</span><span class="c-punc">() {</span>
     <span class="c-kw">this</span><span class="c-punc">.</span>prefs<span class="c-punc">.</span>update<span class="c-punc">(</span>state <span class="c-punc">=&gt;</span> <span class="c-punc">({</span>
-      <span class="c-punc">...</span>state<span class="c-punc">,</span>
-      data<span class="c-punc">:</span> <span class="c-brace">{</span> theme<span class="c-punc">:</span> state<span class="c-punc">.</span>data<span class="c-punc">.</span>theme <span class="c-punc">===</span> <span class="c-str">'light'</span> <span class="c-punc">?</span> <span class="c-str">'dark'</span> <span class="c-punc">:</span> <span class="c-str">'light'</span> <span class="c-brace">}</span>
-    <span class="c-punc">})));</span>
+      theme<span class="c-punc">:</span> state<span class="c-punc">.</span>theme <span class="c-punc">===</span> <span class="c-str">'light'</span> <span class="c-punc">?</span> <span class="c-str">'dark'</span> <span class="c-punc">:</span> <span class="c-str">'light'</span>
+    <span class="c-punc">}));</span>
   <span class="c-punc">}</span>
 <span class="c-brace">}</span>`,
   },

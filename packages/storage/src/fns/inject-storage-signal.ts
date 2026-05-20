@@ -1,77 +1,87 @@
-import { inject, signal, DestroyRef, WritableSignal } from '@angular/core';
+import { inject, signal, DestroyRef, Signal } from '@angular/core';
 import { STORAGE_TRANSPORT } from '../services/storage-transport';
 import { LocalStorageTransport } from '../services/local-transport';
-import { StorageSignalOptions, StorageSignalState } from '../interfaces/storage.types';
+import { StorageSignalOptions, StorageSignal } from '../interfaces/storage.types';
 
+/**
+ * Injects a Signal that automatically synchronizes with a storage medium (L2).
+ *
+ * @param key Unique storage key.
+ * @param defaultValue Initial default value.
+ * @param options Storage options (type, encryption, synchronization).
+ * @returns A `StorageSignal<T>` that allows reading/writing data directly and querying metadata.
+ */
 export function injectStorageSignal<T>(
   key: string,
   defaultValue: T,
   options: StorageSignalOptions,
-): WritableSignal<StorageSignalState<T>> {
+): StorageSignal<T> {
   const isAsync = options.storageType === 'indexeddb' || options.storageType === 'cacheapi';
 
-  const state = signal<StorageSignalState<T>>({
-    data: defaultValue,
-    loading: isAsync,
-    error: null,
+  const dataSignal = signal<T>(defaultValue, {
+    equal: (a, b) => JSON.stringify(a) === JSON.stringify(b),
   });
+  const loadingSignal = signal<boolean>(isAsync);
+  const errorSignal = signal<Error | null>(null);
 
-  // Resolverse del transporte inyectado o instanciar por defecto el LocalStorageTransport
+  // Resolve injected transport or instantiate LocalStorageTransport
   let transport = inject(STORAGE_TRANSPORT, { optional: true });
   if (!transport) {
     transport = inject(LocalStorageTransport);
   }
 
-  // 1. Cargar valor inicial de L2
+  // 1. Load initial value from L2
   transport
     .read<T>(key, options)
     .then((value) => {
-      state.set({
-        data: value !== undefined ? value : defaultValue,
-        loading: false,
-        error: null,
-      });
+      if (value !== undefined) {
+        dataSignal.set(value);
+      }
+      loadingSignal.set(false);
     })
     .catch((error) => {
-      state.set({
-        data: defaultValue,
-        loading: false,
-        error: error instanceof Error ? error : new Error(String(error)),
-      });
+      errorSignal.set(error instanceof Error ? error : new Error(String(error)));
+      loadingSignal.set(false);
     });
 
-  // 2. Encapsular la persistencia reactiva en escrituras
-  const originalSet = state.set.bind(state);
-  const originalUpdate = state.update.bind(state);
+  // 2. Encapsulate reactive persistence in writes
+  const originalSet = dataSignal.set.bind(dataSignal);
+  const originalUpdate = dataSignal.update.bind(dataSignal);
 
   const persist = (newData: T) => {
     transport!
       .write(key, newData, options)
-      .catch((err) => console.error(`[injectStorageSignal] Error escribiendo clave: ${key}`, err));
+      .catch((err) => console.error(`[injectStorageSignal] Error writing key: ${key}`, err));
   };
 
-  const customSignal = state as any;
+  const customSignal = dataSignal as any;
 
-  customSignal.set = (newValue: StorageSignalState<T>) => {
-    persist(newValue.data);
+  customSignal.set = (newValue: T) => {
+    persist(newValue);
     originalSet(newValue);
+    errorSignal.set(null); // Clear errors on manual writes
   };
 
-  customSignal.update = (updater: (value: StorageSignalState<T>) => StorageSignalState<T>) => {
+  customSignal.update = (updater: (value: T) => T) => {
     originalUpdate((current) => {
       const next = updater(current);
-      persist(next.data);
+      persist(next);
       return next;
     });
+    errorSignal.set(null);
   };
 
-  // 3. Sincronización multi-pestaña (solo si está configurada y el transporte la soporta)
+  // Expose metadata as read-only Signals
+  customSignal.loading = loadingSignal.asReadonly();
+  customSignal.error = errorSignal.asReadonly();
+
+  // 3. Multi-tab synchronization (only if configured and transport supports it)
   if (options.crossTabSync && transport.onChange) {
     const unsubscribe = transport.onChange<T>(key, (newValue) => {
-      state.update((curr) => ({ ...curr, data: newValue }));
+      dataSignal.set(newValue);
     });
     inject(DestroyRef).onDestroy(() => unsubscribe());
   }
 
-  return state;
+  return customSignal as StorageSignal<T>;
 }

@@ -83,9 +83,8 @@ import { BLOG_POSTS } from './config/posts.data';
 
                   <p
                     class="text-base sm:text-lg text-white/50 leading-relaxed m-0 mb-10 max-w-3xl font-medium line-clamp-3"
-                  >
-                    {{ post.excerpt }}
-                  </p>
+                    [innerHTML]="post.excerpt"
+                  ></p>
 
                   <div
                     class="flex items-center justify-between w-full mt-auto pt-8 border-t border-white/5"
