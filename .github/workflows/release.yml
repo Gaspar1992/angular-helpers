@@ -21,6 +21,7 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: write
+      id-token: write
       issues: write
       pull-requests: write
     steps:
@@ -50,35 +51,30 @@ jobs:
       - name: Semantic Release (Browser Web APIs)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm exec semantic-release
         working-directory: packages/browser-web-apis
 
       - name: Semantic Release (Storage)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm exec semantic-release
         working-directory: packages/storage
 
       - name: Semantic Release (Security)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm exec semantic-release
         working-directory: packages/security
 
       - name: Semantic Release (Worker HTTP)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm exec semantic-release
         working-directory: packages/worker-http
 
       - name: Semantic Release (OpenLayers)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm exec semantic-release
         working-directory: packages/openlayers
 

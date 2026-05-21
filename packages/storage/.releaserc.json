@@ -9,7 +9,8 @@
     [
       "@semantic-release/npm",
       {
-        "pkgRoot": "../../dist/storage"
+        "pkgRoot": "../../dist/storage",
+        "tarballDir": "release"
       }
     ],
     [

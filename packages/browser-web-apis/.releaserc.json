@@ -9,7 +9,8 @@
     [
       "@semantic-release/npm",
       {
-        "pkgRoot": "../../dist/browser-web-apis"
+        "pkgRoot": "../../dist/browser-web-apis",
+        "tarballDir": "release"
       }
     ],
     [
