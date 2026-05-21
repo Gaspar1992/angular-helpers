@@ -36,12 +36,12 @@ self.onmessage = async (event: MessageEvent<WorkerStorageRequest>) => {
   try {
     switch (type) {
       case 'read': {
-        const result = await storageEngine.read(key!, options?.useToon);
+        const result = await storageEngine.read(key!, options);
         self.postMessage({ type: 'response', requestId, payload: result });
         break;
       }
       case 'write': {
-        await storageEngine.write(key!, payload, options?.useToon);
+        await storageEngine.write(key!, payload, options);
         self.postMessage({ type: 'response', requestId });
         // Synchronize all other open tabs/windows
         broadcastChange(key!, payload);

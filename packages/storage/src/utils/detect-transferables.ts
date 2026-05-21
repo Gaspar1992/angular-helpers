@@ -1,38 +1,34 @@
 /**
  * Scans a payload and collects every `Transferable` instance found.
  * Used for zero-copy postMessage calls.
+ * Performs a deep scan for nested Transferables.
  */
 export function detectTransferables(payload: unknown): Transferable[] {
   if (payload === null || payload === undefined) return [];
-  if (typeof payload !== 'object') return [];
 
   const found: Transferable[] = [];
-  const seen = new Set<Transferable>();
+  const seen = new Set<any>();
 
-  const collect = (value: unknown): void => {
-    if (value === null || value === undefined) return;
+  const scan = (value: unknown): void => {
+    if (value === null || value === undefined || typeof value !== 'object') return;
+    if (seen.has(value)) return;
+    seen.add(value);
+
     if (isTransferable(value)) {
-      if (!seen.has(value)) {
-        seen.add(value);
-        found.push(value);
+      found.push(value);
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value as unknown[]) scan(item);
+    } else {
+      for (const key of Object.keys(value as Record<string, unknown>)) {
+        scan((value as Record<string, unknown>)[key]);
       }
     }
   };
 
-  if (isTransferable(payload)) {
-    collect(payload);
-    return found;
-  }
-
-  if (Array.isArray(payload)) {
-    for (const item of payload as unknown[]) collect(item);
-    return found;
-  }
-
-  for (const key of Object.keys(payload as Record<string, unknown>)) {
-    collect((payload as Record<string, unknown>)[key]);
-  }
-
+  scan(payload);
   return found;
 }
 
