@@ -7,6 +7,11 @@ import {
   signal,
 } from '@angular/core';
 import {
+  injectEntityStore,
+  injectStorageSignal,
+  OfflineSyncService,
+} from '@angular-helpers/storage';
+import {
   BroadcastChannelService,
   BrowserCapabilityService,
   BatteryService,
@@ -76,6 +81,7 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
     MutationObserverService,
     PerformanceObserverService,
     IdleDetectorService,
+    OfflineSyncService,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -107,7 +113,16 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   private readonly performanceObserverService = inject(PerformanceObserverService);
   private readonly idleDetectorService = inject(IdleDetectorService);
   private readonly screenWakeLockService = inject(ScreenWakeLockService);
+  private readonly offlineSyncService = inject(OfflineSyncService);
   private readonly harnessWorkerName = 'library-services-harness-worker';
+
+  protected readonly advancedStorage = injectStorageSignal('harness_advanced_storage', 'default', {
+    storageType: 'local',
+    serializer: 'json',
+  });
+  protected readonly entityStore = injectEntityStore<string, { id: string; val: number }>({
+    idKey: 'id',
+  });
 
   readonly capabilityOverview = signal<HarnessCapabilityOverview>(
     this.browserCapabilityService.getAllStatuses(),
@@ -262,6 +277,8 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   );
   readonly idleDetectorPermission = signal<HarnessPermissionState>('unknown');
   readonly wakeLockState = signal<'idle' | 'requested' | 'active' | 'released' | 'error'>('idle');
+  readonly isOnline = this.offlineSyncService.isOnline;
+  readonly pendingSyncs = this.offlineSyncService.pendingSyncsCount;
   readonly errorMessage = signal<string>('');
   readonly lastAction = signal<string>('idle');
 
@@ -885,6 +902,24 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
     } catch (error: unknown) {
       this.setError(error);
     }
+  }
+
+  exerciseAdvancedStorage(): void {
+    this.resetError();
+    this.lastAction.set('exercise-advanced-storage');
+    this.advancedStorage.set('updated-via-harness-' + Date.now());
+  }
+
+  exerciseEntityStore(): void {
+    this.resetError();
+    this.lastAction.set('exercise-entity-store');
+    this.entityStore.setOne({ id: 'harness-1', val: Math.random() });
+  }
+
+  triggerSyncDrain(): void {
+    this.resetError();
+    this.lastAction.set('trigger-sync-drain');
+    this.offlineSyncService.triggerSync();
   }
 
   vibrateSuccess(): void {

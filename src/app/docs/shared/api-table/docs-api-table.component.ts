@@ -22,7 +22,7 @@ import { ApiColumn, ApiRow } from '../../models/doc-meta.model';
                   @if (col.cellClass !== 'docs-cell-desc') {
                     <code [class]="col.cellClass">{{ row[col.key] }}</code>
                   } @else {
-                    <span class="docs-cell-desc">{{ row[col.key] }}</span>
+                    <span class="docs-cell-desc" [innerHTML]="row[col.key]"></span>
                   }
                 </td>
               }

@@ -3,28 +3,28 @@ import { StorageSignalOptions } from '../interfaces/storage.types';
 
 export interface StorageTransport {
   /**
-   * Lee un valor persistido asíncronamente
+   * Reads a persisted value asynchronously
    */
   read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined>;
 
   /**
-   * Escribe un valor persistido asíncronamente
+   * Writes a persisted value asynchronously
    */
   write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void>;
 
   /**
-   * Elimina un valor persistido
+   * Deletes a persisted value asynchronously
    */
   delete(key: string, options?: StorageSignalOptions): Promise<void>;
 
   /**
-   * Suscribe un callback para cambios externos (sincronización multi-pestaña)
-   * Devuelve una función para des-suscribirse.
+   * Subscribes a callback for external changes (multi-tab synchronization)
+   * Returns an unsubscribe function.
    */
   onChange?<T>(key: string, callback: (value: T) => void): () => void;
 }
 
 /**
- * Token de inyección para el Transporte de Almacenamiento activo
+ * Injection Token for the active Storage Transport
  */
 export const STORAGE_TRANSPORT = new InjectionToken<StorageTransport>('STORAGE_TRANSPORT');

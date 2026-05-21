@@ -8,7 +8,7 @@ export class EntityStore<Id, Entity> {
   private readonly _rawMap = new Map<Id, Entity>();
   private readonly _entities = signal<ReadonlyMap<Id, Entity>>(new SafeReadonlyMap(this._rawMap));
 
-  // APIs Públicas Reactivas
+  // Public Reactive APIs
   readonly entities = this._entities.asReadonly();
   readonly list = computed(() => Array.from(this.entities().values()));
   readonly ids = computed(() => Array.from(this.entities().keys()));
@@ -17,6 +17,7 @@ export class EntityStore<Id, Entity> {
   private readonly _entitySignals = new Map<Id, WritableSignal<Entity | undefined>>();
   private readonly _idResolver: (entity: Entity) => Id;
   private _isRestoring = false;
+  private _persistTimer: any = null;
   private readonly _transport = this._resolveTransport();
 
   constructor(private readonly options: EntityStoreOptions<Id, Entity>) {
@@ -30,7 +31,7 @@ export class EntityStore<Id, Entity> {
   }
 
   /**
-   * Retorna un Signal granular que SOLO se dispara si cambia la entidad de este ID
+   * Returns a granular Signal that ONLY triggers if the entity with this ID changes
    */
   entitySignal(id: Id): Signal<Entity | undefined> {
     let sig = this._entitySignals.get(id);
@@ -42,7 +43,7 @@ export class EntityStore<Id, Entity> {
   }
 
   /**
-   * Guarda o actualiza una entidad clonándola y congelándola al escribir (Freeze-on-Write)
+   * Saves or updates an entity by cloning and freezing it on write (Freeze-on-Write)
    */
   setOne(entity: Entity): void {
     const id = this._idResolver(entity);
@@ -60,7 +61,7 @@ export class EntityStore<Id, Entity> {
   }
 
   /**
-   * Guarda o actualiza múltiples entidades a la vez de forma atómica y congelada
+   * Saves or updates multiple entities at once atomically and frozen
    */
   setMany(entities: Entity[]): void {
     for (const entity of entities) {
@@ -80,7 +81,28 @@ export class EntityStore<Id, Entity> {
   }
 
   /**
-   * Elimina una entidad por su ID y limpia su signal granular
+   * Updates an existing entity using a transformation function
+   */
+  update(id: Id, updater: (entity: Entity) => Entity): void {
+    const current = this._rawMap.get(id);
+    if (!current) return;
+
+    const next = updater(current);
+    this.setOne(next);
+  }
+
+  /**
+   * Applies a partial patch to an existing entity
+   */
+  patch(id: Id, partial: Partial<Entity>): void {
+    const current = this._rawMap.get(id);
+    if (!current) return;
+
+    this.setOne({ ...current, ...partial });
+  }
+
+  /**
+   * Deletes an entity by its ID and cleans up its granular signal
    */
   deleteOne(id: Id): void {
     if (!this._rawMap.has(id)) return;
@@ -91,13 +113,14 @@ export class EntityStore<Id, Entity> {
     const sig = this._entitySignals.get(id);
     if (sig) {
       sig.set(undefined);
+      this._entitySignals.delete(id);
     }
 
     this.triggerPersist();
   }
 
   /**
-   * Limpia por completo el Store y todos sus signals asociados
+   * Completely clears the Store and all its associated signals
    */
   clear(): void {
     this._rawMap.clear();
@@ -106,16 +129,17 @@ export class EntityStore<Id, Entity> {
     for (const sig of this._entitySignals.values()) {
       sig.set(undefined);
     }
+    this._entitySignals.clear();
 
     this.triggerPersist();
   }
 
-  // --- Auxiliares de Persistencia L2 ---
+  // --- L2 Persistence Auxiliaries ---
 
   private _resolveTransport() {
     try {
-      // Como se llama dentro de la inicialización de la clase (inyectores),
-      // inject() resolverá de forma nativa e impecable.
+      // Since it's called during class initialization (injectors),
+      // inject() will resolve natively and flawlessly.
       let transport = inject(STORAGE_TRANSPORT, { optional: true });
       if (!transport) {
         transport = inject(LocalStorageTransport);
@@ -136,22 +160,28 @@ export class EntityStore<Id, Entity> {
           this.setMany(data);
         }
       })
-      .catch((err) => console.error(`[EntityStore] Error cargando entidades persistidas:`, err))
+      .catch((err) => console.error(`[EntityStore] Error loading persisted entities:`, err))
       .finally(() => {
         this._isRestoring = false;
       });
   }
 
   private triggerPersist(): void {
-    if (this._isRestoring || !this.options.persistKey) return;
+    if (this._isRestoring || !this.options.persistKey || this._persistTimer) return;
 
-    this._transport
-      .write(
-        this.options.persistKey,
-        this.list(),
-        this.options.storageOptions as StorageSignalOptions,
-      )
-      .catch((err) => console.error(`[EntityStore] Error guardando entidades persistidas:`, err));
+    // Debounce persistence to the next microtask to batch multiple sync writes
+    this._persistTimer = Promise.resolve().then(() => {
+      this._persistTimer = null;
+      if (!this.options.persistKey) return;
+
+      this._transport
+        .write(
+          this.options.persistKey,
+          this.list(),
+          this.options.storageOptions as StorageSignalOptions,
+        )
+        .catch((err) => console.error(`[EntityStore] Error saving persisted entities:`, err));
+    });
   }
 }
 

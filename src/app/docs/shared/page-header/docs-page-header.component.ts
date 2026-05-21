@@ -18,7 +18,7 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
         }
       </div>
 
-      <p class="docs-page-lead">{{ lead() }}</p>
+      <p class="docs-page-lead" [innerHTML]="lead()"></p>
 
       @if (scope() || requiresSecureContext()) {
         <div class="header-meta flex gap-3 mt-6">

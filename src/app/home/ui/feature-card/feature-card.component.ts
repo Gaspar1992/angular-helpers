@@ -17,9 +17,10 @@ import type { Feature } from '../../models/feature.model';
         <h3 class="text-lg font-black text-base-content m-0 mb-3 tracking-tight">
           {{ feature().title }}
         </h3>
-        <p class="text-sm text-base-content/50 leading-relaxed m-0 font-medium">
-          {{ feature().desc }}
-        </p>
+        <p
+          class="text-sm text-base-content/50 leading-relaxed m-0 font-medium"
+          [innerHTML]="feature().desc"
+        ></p>
       </div>
     </div>
   `,

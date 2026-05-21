@@ -21,7 +21,7 @@ test.describe('Demo section nav', () => {
   test('library-services route is accessible by direct URL', async ({ page }) => {
     await page.goto('/demo/library-services');
 
-    await expect(page.getByRole('heading', { name: /library services harness/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /system integrity harness/i })).toBeVisible();
   });
 
   test('library-services page shows internal notice', async ({ page }) => {

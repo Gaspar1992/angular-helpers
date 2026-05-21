@@ -1,22 +1,27 @@
 import { ServiceDoc } from '../models/doc-meta.model';
-import { InterfaceDoc } from '../feature/unified-service-detail/unified-service-detail.component';
+
+export interface InterfaceDoc {
+  name: string;
+  description: string;
+  properties: { name: string; type: string; description: string }[];
+}
 
 export const STORAGE_SERVICES: ServiceDoc[] = [
   {
     id: 'inject-storage-signal',
     name: 'injectStorageSignal',
     description:
-      'An advanced reactive L1 Signal backed by asynchronous L2 storage transport. Supports client-side AES-GCM encryption, TOON compression, loading states, error handling, and optional cross-tab/window synchronization.',
+      'An advanced reactive L1 Signal backed by asynchronous L2 storage transport. Now featuring direct data access and separate loading/error sub-signals.',
     scope: 'provided',
     importPath: '@angular-helpers/storage',
     requiresSecureContext: false,
     browserSupport: 'All modern browsers (WebCrypto + CacheAPI / IndexedDB / WebStorage)',
     category: 'storage-io',
     notes: [
-      'Returns a WritableSignal emitting a StorageSignalState<T> object containing data, loading, and error properties.',
-      'For main thread storage operations, LocalStorageTransport is used by default.',
-      'If serializer is set to "toon", it attempts to import @toon-format/toon dynamically for high-performance binary-like compression.',
-      'Cross-tab synchronization uses storage events (for localStorage) or worker-level messages (for worker storage).',
+      'Returns a WritableSignal emitting the data directly (no more .data access needed).',
+      'Exposes .loading() and .error() read-only sub-signals for state monitoring.',
+      'Includes smart diffing to prevent unnecessary UI updates if data is deep-equal.',
+      'Supports automatic off-main-thread serialization/encryption if a worker is provided.',
     ],
     methods: [],
     example: `import { Component } from '@angular/core';
@@ -26,11 +31,11 @@ import { injectStorageSignal } from '@angular-helpers/storage';
   selector: 'app-user-preferences',
   standalone: true,
   template: \`
-    @if (prefs().loading) {
+    @if (prefs.loading()) {
       <div class="loading-spinner">Loading preferences...</div>
     } @else {
-      <div [class.dark-theme]="prefs().data.theme === 'dark'">
-        <p>Current Theme: {{ prefs().data.theme }}</p>
+      <div [class.dark-theme]="prefs()?.theme === 'dark'">
+        <p>Current Theme: {{ prefs()?.theme }}</p>
         <button (click)="toggleTheme()">Toggle Theme</button>
       </div>
     }
@@ -38,6 +43,7 @@ import { injectStorageSignal } from '@angular-helpers/storage';
 })
 export class UserPreferencesComponent {
   // Define reactive signal persisted in localStorage with cross-tab synchronization
+  // Direct access: prefs() returns the data object
   protected prefs = injectStorageSignal('user_prefs', { theme: 'light', zoom: 1 }, {
     storageType: 'local',
     serializer: 'json',
@@ -45,12 +51,10 @@ export class UserPreferencesComponent {
   });
 
   toggleTheme() {
+    // Easy functional update
     this.prefs.update(state => ({
       ...state,
-      data: {
-        ...state.data,
-        theme: state.data.theme === 'light' ? 'dark' : 'light'
-      }
+      theme: state.theme === 'light' ? 'dark' : 'light'
     }));
   }
 }`,
@@ -59,7 +63,7 @@ export class UserPreferencesComponent {
     id: 'inject-entity-store',
     name: 'injectEntityStore',
     description:
-      'Surgical, reactive entity management store with strict immutability (Freeze-on-Write) and optional L2 storage persistence. Emits granular, performance-optimized updates that only trigger changes when the queried entity actually changes.',
+      'Surgical, reactive entity management store with strict immutability (Freeze-on-Write) and optional L2 storage persistence. Now with batch write debouncing and easy patch/update API.',
     scope: 'provided',
     importPath: '@angular-helpers/storage',
     requiresSecureContext: false,
@@ -68,8 +72,8 @@ export class UserPreferencesComponent {
     notes: [
       'Enforces immutability by applying Object.freeze on all stored entities (Freeze-on-Write).',
       'Exposes reactive derived signals: list(), ids(), size(), and entities().',
-      'Allows creating highly granular signals via entitySignal(id) which only emit if that specific entity is mutated.',
-      'If persistKey is provided, it automatically restores and saves changes to the configured storage transport.',
+      'Includes automatic persistence debouncing to microtasks to batch I/O operations.',
+      'Automatically cleans up granular signals when entities are deleted to prevent memory leaks.',
     ],
     methods: [
       {
@@ -86,6 +90,18 @@ export class UserPreferencesComponent {
         returns: 'void',
       },
       {
+        name: 'patch',
+        signature: 'patch(id: Id, partial: Partial<Entity>): void',
+        description: 'Applies a partial update to an existing entity.',
+        returns: 'void',
+      },
+      {
+        name: 'update',
+        signature: 'update(id: Id, updater: (entity: Entity) => Entity): void',
+        description: 'Updates an entity using a transformation function.',
+        returns: 'void',
+      },
+      {
         name: 'setMany',
         signature: 'setMany(entities: Entity[]): void',
         description: 'Saves or updates multiple entities atomically and freezes them on write.',
@@ -94,13 +110,7 @@ export class UserPreferencesComponent {
       {
         name: 'deleteOne',
         signature: 'deleteOne(id: Id): void',
-        description: 'Deletes a single entity by its unique ID and cleans up its granular signal.',
-        returns: 'void',
-      },
-      {
-        name: 'clear',
-        signature: 'clear(): void',
-        description: 'Wipes all entities from the store and nullifies all granular signals.',
+        description: 'Deletes an entity and cleans up its granular signal.',
         returns: 'void',
       },
     ],
@@ -151,199 +161,40 @@ export class UsersAdminComponent {
     id: 'local-transport',
     name: 'LocalStorageTransport',
     description:
-      'Standard main-thread storage transport implementation for the STORAGE_TRANSPORT token. Supports local/session storage, CacheAPI, IndexedDB, dynamic data compression using TOON, and client-side PBKDF2/AES-GCM encryption.',
+      'Strategy-based storage transport implementation. Supports LocalStorage, SessionStorage, CacheAPI, and IndexedDB with automatic worker delegation support.',
     scope: 'provided',
     importPath: '@angular-helpers/storage',
     requiresSecureContext: false,
     browserSupport: 'All modern browsers',
     category: 'storage-io',
     notes: [
-      'Implements the StorageTransport interface.',
-      'If running in Web Worker contexts, automatically falls back to IndexedDB for L2 persistence since localStorage is main-thread only.',
-      'Encryption uses PBKDF2 with 100,000 iterations for key derivation and AES-GCM (256-bit) for data encryption.',
+      'Implements the StorageTransport interface using a Strategy router pattern.',
+      'Automatically delegates to Web Workers if STORAGE_WORKER_FACTORY is provided.',
+      'Supports AES-GCM encryption and TOON serialization across all backends.',
     ],
     methods: [
       {
         name: 'read',
-        signature: 'read<T>(key: string, useToon?: boolean): Promise<T | undefined>',
+        signature: 'read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined>',
         description: 'Reads and deserializes a value from the configured storage mechanism.',
         returns: 'Promise<T | undefined>',
       },
       {
         name: 'write',
-        signature: 'write<T>(key: string, data: T, useToon?: boolean): Promise<void>',
+        signature: 'write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void>',
         description: 'Serializes, optionally encrypts, and writes a value to storage.',
         returns: 'Promise<void>',
       },
-      {
-        name: 'delete',
-        signature: 'delete(key: string): Promise<void>',
-        description: 'Deletes a key from the storage mechanism.',
-        returns: 'Promise<void>',
-      },
-      {
-        name: 'onChange',
-        signature: 'onChange<T>(key: string, callback: (value: T) => void): () => void',
-        description:
-          'Subscribes a callback to receive updates from storage events (cross-tab sync). Returns an unsubscribe function.',
-        returns: '() => void',
-      },
     ],
-    example: `import { Component, inject } from '@angular/core';
-import { LocalStorageTransport, STORAGE_TRANSPORT } from '@angular-helpers/storage';
+    example: `// Worker-aware transport setup
+import { LocalStorageTransport, STORAGE_WORKER_FACTORY, STORAGE_TRANSPORT } from '@angular-helpers/storage';
 
-@Component({
-  selector: 'app-custom-storage',
-  standalone: true,
+export const appConfig = {
   providers: [
-    // Explicitly provide LocalStorageTransport
+    { provide: STORAGE_WORKER_FACTORY, useValue: () => new Worker(new URL('./storage.worker', import.meta.url)) },
     { provide: STORAGE_TRANSPORT, useClass: LocalStorageTransport }
-  ],
-  template: \`<button (click)="saveData()">Save Data</button>\`
-})
-export class CustomStorageComponent {
-  private transport = inject(STORAGE_TRANSPORT);
-
-  async saveData() {
-    await this.transport.write('custom_key', { foo: 'bar' });
-    const val = await this.transport.read('custom_key');
-    console.log('Retrieved value:', val);
-  }
-}`,
-  },
-  {
-    id: 'worker-transport',
-    name: 'WorkerStorageTransport',
-    description:
-      'High-performance, off-main-thread storage transport. Offloads all serialization, PBKDF2/AES-GCM encryption/decryption, and I/O tasks to a Web Worker or Shared Worker. Prevents main-thread stuttering and UI blocking on intensive storage operations.',
-    scope: 'provided',
-    importPath: '@angular-helpers/storage',
-    requiresSecureContext: true,
-    browserSupport: 'All modern browsers supporting Web Workers',
-    category: 'storage-io',
-    notes: [
-      'Implements the StorageTransport interface.',
-      'Requires the STORAGE_WORKER_FACTORY InjectionToken to supply the Worker instance.',
-      'Maintains a pending requests map to resolve/reject Promises as messages arrive from the background worker.',
-      'Broadcasting and reactivity are handled transparently through the worker bridge.',
-    ],
-    methods: [
-      {
-        name: 'read',
-        signature: 'read<T>(key: string, useToon?: boolean): Promise<T | undefined>',
-        description:
-          'Asynchronously reads a key off the main thread by querying the storage worker.',
-        returns: 'Promise<T | undefined>',
-      },
-      {
-        name: 'write',
-        signature: 'write<T>(key: string, data: T, useToon?: boolean): Promise<void>',
-        description: 'Asynchronously writes a key and payload to the storage worker.',
-        returns: 'Promise<void>',
-      },
-      {
-        name: 'delete',
-        signature: 'delete(key: string): Promise<void>',
-        description: 'Deletes a key via the storage worker.',
-        returns: 'Promise<void>',
-      },
-      {
-        name: 'onChange',
-        signature: 'onChange<T>(key: string, callback: (value: T) => void): () => void',
-        description: 'Subscribes a callback to change events broadcasted by the storage worker.',
-        returns: '() => void',
-      },
-    ],
-    example: `import { Component, inject } from '@angular/core';
-import { WorkerStorageTransport, STORAGE_TRANSPORT, STORAGE_WORKER_FACTORY } from '@angular-helpers/storage';
-
-// Factory function to create the storage Web Worker
-export function storageWorkerFactory(): Worker {
-  return new Worker(new URL('./storage.worker', import.meta.url), { type: 'module' });
-}
-
-@Component({
-  selector: 'app-worker-storage',
-  standalone: true,
-  providers: [
-    { provide: STORAGE_WORKER_FACTORY, useValue: storageWorkerFactory },
-    { provide: STORAGE_TRANSPORT, useClass: WorkerStorageTransport }
-  ],
-  template: \`<button (click)="performHeavyStorage()">Perform Heavy Storage</button>\`
-})
-export class AppWorkerStorageComponent {
-  private transport = inject(STORAGE_TRANSPORT);
-
-  async performHeavyStorage() {
-    const largeDataset = Array.from({ length: 10000 }, (_, i) => ({ id: i, data: Math.random() }));
-    
-    // Encryption and TOON compression will be performed in the background Web Worker!
-    await this.transport.write('heavy_payload', largeDataset, true);
-    console.log('Successfully saved off-main-thread!');
-  }
-}`,
-  },
-  {
-    id: 'storage-transport',
-    name: 'StorageTransport',
-    description:
-      'Core interface and injection token defining the contract for storage transport providers. Allows swapping storage mechanisms seamlessly (e.g. main thread vs. Web Worker) without modifying the consumption layer.',
-    scope: 'provided',
-    importPath: '@angular-helpers/storage',
-    requiresSecureContext: false,
-    browserSupport: 'All modern browsers',
-    category: 'storage-io',
-    notes: [
-      'Define read, write, delete, and optionally onChange methods.',
-      'Exported as an interface and a concrete InjectionToken (STORAGE_TRANSPORT).',
-    ],
-    methods: [
-      {
-        name: 'read',
-        signature: 'read<T>(key: string, useToon?: boolean): Promise<T | undefined>',
-        description: 'Asynchronously reads a value.',
-        returns: 'Promise<T | undefined>',
-      },
-      {
-        name: 'write',
-        signature: 'write<T>(key: string, data: T, useToon?: boolean): Promise<void>',
-        description: 'Asynchronously writes a value.',
-        returns: 'Promise<void>',
-      },
-      {
-        name: 'delete',
-        signature: 'delete(key: string): Promise<void>',
-        description: 'Asynchronously deletes a value.',
-        returns: 'Promise<void>',
-      },
-      {
-        name: 'onChange',
-        signature: 'onChange?<T>(key: string, callback: (value: T) => void): () => void',
-        description:
-          'Optional callback subscription for cross-tab or worker-driven reactive state changes.',
-        returns: '() => void',
-      },
-    ],
-    example: `import { Injectable } from '@angular/core';
-import { STORAGE_TRANSPORT, StorageTransport } from '@angular-helpers/storage';
-
-@Injectable({ providedIn: 'root' })
-export class CustomMemoryTransport implements StorageTransport {
-  private cache = new Map<string, any>();
-
-  async read<T>(key: string): Promise<T | undefined> {
-    return this.cache.get(key);
-  }
-  async write<T>(key: string, data: T): Promise<void> {
-    this.cache.set(key, data);
-  }
-  async delete(key: string): Promise<void> {
-    this.cache.delete(key);
-  }
-}
-
-// In your application bootstrap or global providers:
-// { provide: STORAGE_TRANSPORT, useClass: CustomMemoryTransport }`,
+  ]
+};`,
   },
   {
     id: 'offline-sync',
@@ -359,23 +210,13 @@ export class CustomMemoryTransport implements StorageTransport {
       'Uses Angular Signals (isOnline and pendingSyncsCount) to expose reactive network and queue state.',
       'Listens to native window "online" and "offline" events to automatically trigger synchronization.',
       'Triggers background queue draining by calling the virtual route "/offline-sync-drain" through Angular HttpBackend.',
-      'Zero compile-time coupling with the worker interceptors: relies purely on shared IndexedDB and synthetic HTTP endpoints.',
-      'Contains a manual triggerSync() method and a checkPendingCount() method returning a Promise<number>.',
     ],
     methods: [
       {
         name: 'triggerSync',
         signature: 'triggerSync(): void',
-        description:
-          'Triggers the offline sync queue draining pipeline in the worker. Checks network status first.',
+        description: 'Triggers the offline sync queue draining pipeline in the worker.',
         returns: 'void',
-      },
-      {
-        name: 'checkPendingCount',
-        signature: 'checkPendingCount(): Promise<number>',
-        description:
-          'Manually inspects the shared IndexedDB store and updates the pendingSyncsCount signal.',
-        returns: 'Promise<number>',
       },
     ],
     example: `import { Component, inject } from '@angular/core';
@@ -388,25 +229,115 @@ import { OfflineSyncService } from '@angular-helpers/storage';
     <div class="network-badge" [class.online]="syncService.isOnline()">
       Status: {{ syncService.isOnline() ? 'Online' : 'Offline' }}
     </div>
-
-    @if (syncService.pendingSyncsCount() > 0) {
-      <div class="sync-alert">
-        <p>You have {{ syncService.pendingSyncsCount() }} unsaved mutations enqueued.</p>
-        <button [disabled]="!syncService.isOnline()" (click)="syncService.triggerSync()">
-          Sync Now
-        </button>
-      </div>
-    }
   \`
 })
 export class OfflineStatusComponent {
   protected syncService = inject(OfflineSyncService);
 }`,
   },
+  {
+    id: 'worker-transport',
+    name: 'WorkerStorageTransport',
+    description:
+      'Web Worker based storage transport. Proxies storage operations to a dedicated worker thread for high performance and isolation.',
+    scope: 'provided',
+    importPath: '@angular-helpers/storage',
+    requiresSecureContext: false,
+    browserSupport: 'All browsers with Web Workers support',
+    category: 'storage-io',
+    notes: [
+      'Automatically used by LocalStorageTransport when a worker factory is provided.',
+      'Supports zero-copy transfer for large ArrayBuffer payloads.',
+      'Ensures that main thread remains responsive during heavy crypto or serialization tasks.',
+    ],
+    methods: [
+      {
+        name: 'read',
+        signature: 'read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined>',
+        description: 'Sends a RPC read request to the background storage worker.',
+        returns: 'Promise<T | undefined>',
+      },
+      {
+        name: 'write',
+        signature: 'write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void>',
+        description:
+          'Sends a RPC write request to the background storage worker with zero-copy support.',
+        returns: 'Promise<void>',
+      },
+      {
+        name: 'delete',
+        signature: 'delete(key: string, options?: StorageSignalOptions): Promise<void>',
+        description: 'Sends a RPC delete request to the background storage worker.',
+        returns: 'Promise<void>',
+      },
+    ],
+    example: `import { WorkerStorageTransport } from '@angular-helpers/storage';
+
+// Manually instantiating a worker-based transport
+const transport = new WorkerStorageTransport(() => new Worker(new URL('./app.worker', import.meta.url)));`,
+  },
+  {
+    id: 'storage-transport',
+    name: 'StorageTransport',
+    description:
+      'Interface definition for pluggable storage backends. Enables the Strategy pattern used by LocalStorageTransport.',
+    scope: 'provided',
+    importPath: '@angular-helpers/storage',
+    requiresSecureContext: false,
+    browserSupport: 'N/A (Interface)',
+    category: 'storage-io',
+    notes: [
+      'Define custom storage logic by implementing this interface.',
+      'Core interface for WebStorage, IndexedDB, and CacheAPI specialized transports.',
+    ],
+    methods: [
+      {
+        name: 'read',
+        signature: 'read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined>',
+        description: 'Reads a value from the storage medium.',
+        returns: 'Promise<T | undefined>',
+      },
+      {
+        name: 'write',
+        signature: 'write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void>',
+        description: 'Writes a value to the storage medium.',
+        returns: 'Promise<void>',
+      },
+      {
+        name: 'delete',
+        signature: 'delete(key: string, options?: StorageSignalOptions): Promise<void>',
+        description: 'Removes a value from the storage medium.',
+        returns: 'Promise<void>',
+      },
+    ],
+    example: `import { StorageTransport, StorageSignalOptions } from '@angular-helpers/storage';
+
+export class MyCustomTransport implements StorageTransport {
+  async read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined> {
+    // Custom read logic
+    return undefined;
+  }
+  async write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void> {
+    // Custom write logic
+  }
+  async delete(key: string, options?: StorageSignalOptions): Promise<void> {
+    // Custom delete logic
+  }
+}`,
+  },
 ];
 
 export const STORAGE_INTERFACES: Record<string, InterfaceDoc[]> = {
   'inject-storage-signal': [
+    {
+      name: 'StorageSignal<T>',
+      description: 'The reactively updated signal object with metadata properties.',
+      properties: [
+        { name: '()', type: 'T', description: 'Returns the current deserialized data.' },
+        { name: 'loading()', type: 'Signal<boolean>', description: 'Reactive loading state.' },
+        { name: 'error()', type: 'Signal<Error | null>', description: 'Reactive error state.' },
+      ],
+    },
     {
       name: 'StorageSignalOptions',
       description: 'Configuration options for injectStorageSignal.',
@@ -419,43 +350,14 @@ export const STORAGE_INTERFACES: Record<string, InterfaceDoc[]> = {
         {
           name: 'serializer',
           type: "'json' | 'toon'",
-          description:
-            'Data serialization format (standard JSON or high-performance TOON binary format).',
+          description: 'Data serialization format.',
         },
         {
           name: 'encrypt?',
           type: 'boolean',
-          description: 'Enable secure AES-GCM client-side encryption (requires secure context).',
+          description: 'Enable secure AES-GCM encryption.',
         },
-        { name: 'dbName?', type: 'string', description: 'Database name (IndexedDB only).' },
-        { name: 'storeName?', type: 'string', description: 'Object store name (IndexedDB only).' },
-        {
-          name: 'cacheName?',
-          type: 'string',
-          description: 'Cache storage bucket name (CacheAPI only).',
-        },
-        {
-          name: 'crossTabSync?',
-          type: 'boolean',
-          description: 'Synchronize reactive signal value across browser tabs/windows.',
-        },
-      ],
-    },
-    {
-      name: 'StorageSignalState<T>',
-      description: 'The reactively updated state wrapper object returned by the storage signal.',
-      properties: [
-        { name: 'data', type: 'T', description: 'The current deserialized value.' },
-        {
-          name: 'loading',
-          type: 'boolean',
-          description: 'True when performing asynchronous load operations.',
-        },
-        {
-          name: 'error',
-          type: 'Error | null',
-          description: 'Contains any initialization/read error or null.',
-        },
+        { name: 'crossTabSync?', type: 'boolean', description: 'Synchronize across tabs.' },
       ],
     },
   ],
@@ -474,47 +376,6 @@ export const STORAGE_INTERFACES: Record<string, InterfaceDoc[]> = {
           type: 'string',
           description: 'If provided, synchronizes the collection to this L2 storage key.',
         },
-        {
-          name: 'storageOptions?',
-          type: "Omit<StorageSignalOptions, 'serializer'> & { serializer?: 'json' | 'toon' }",
-          description: 'Custom storage options for collection persistence.',
-        },
-      ],
-    },
-  ],
-  'worker-transport': [
-    {
-      name: 'WorkerStorageRequest',
-      description: 'Structure of the message sent from main thread to the storage worker.',
-      properties: [
-        {
-          name: 'type',
-          type: "'read' | 'write' | 'delete'",
-          description: 'Action type requested.',
-        },
-        { name: 'requestId', type: 'string', description: 'Unique identifier for correlation.' },
-        { name: 'key?', type: 'string', description: 'Storage key.' },
-        { name: 'payload?', type: 'any', description: 'Value payload for write operations.' },
-        {
-          name: 'options?',
-          type: '{ useToon?: boolean }',
-          description: 'Optional serializer parameters.',
-        },
-      ],
-    },
-    {
-      name: 'WorkerStorageResponse',
-      description: 'Structure of the message received by the main thread from the storage worker.',
-      properties: [
-        {
-          name: 'type',
-          type: "'response' | 'change' | 'error'",
-          description: 'Response message type.',
-        },
-        { name: 'requestId?', type: 'string', description: 'Correlated request ID.' },
-        { name: 'key?', type: 'string', description: 'Storage key affected.' },
-        { name: 'payload?', type: 'any', description: 'Returned data payload.' },
-        { name: 'error?', type: 'string', description: 'Error message if failed.' },
       ],
     },
   ],

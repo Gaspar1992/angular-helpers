@@ -5,7 +5,7 @@ export const OPENLAYERS_SERVICES: ServiceDoc[] = [
     id: 'map',
     name: 'OlMapComponent',
     description:
-      'Root component for OpenLayers maps. Manages the map instance, view state, and provides dependency injection context for all child components.',
+      'Root component for <a href="https://openlayers.org/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">OpenLayers</a> maps. Manages the map instance, view state, and provides dependency injection context for all child components.',
     scope: 'component',
     importPath: '@angular-helpers/openlayers',
     requiresSecureContext: false,
@@ -734,7 +734,7 @@ export class MapComponent {
     requiresSecureContext: false,
     browserSupport: 'All modern browsers',
     notes: [
-      "Appends directly into the OpenLayers Overlay viewport while remaining completely connected to Angular's component tree.",
+      'Appends directly into the <a href="https://openlayers.org/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">OpenLayers</a> Overlay viewport while remaining completely connected to Angular\'s component tree.',
       'Supports auto-pan, customizable offsets, and programmatic closure with leak-free component destruction.',
     ],
     category: 'ol-overlays',
@@ -845,7 +845,7 @@ export class MapComponent {}`,
     id: 'military',
     name: 'OlMilitaryService',
     description:
-      'Service providing dynamic military symbology (MIL-STD-2525 / APP-6) rendering utilizing the OpenLayers framework.',
+      'Service providing dynamic military symbology (MIL-STD-2525 / APP-6) rendering utilizing the <a href="https://openlayers.org/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">OpenLayers</a> framework and the <a href="https://github.com/spatialillusions/milsymbol" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">milsymbol</a> library.',
     scope: 'provided',
     importPath: '@angular-helpers/openlayers/military',
     requiresSecureContext: false,
@@ -1008,7 +1008,8 @@ export class MapComponent {
         name: 'createFrontLineStyle',
         signature:
           '(color: string, direction?: "friendly" | "hostile"): (feature: OLFeature) => Style[]',
-        description: 'Builds OpenLayers complex style for frontline teeth rendering',
+        description:
+          'Builds <a href="https://openlayers.org/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">OpenLayers</a> complex style for frontline teeth rendering',
         returns: 'StyleFunction',
       },
       {

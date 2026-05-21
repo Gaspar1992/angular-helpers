@@ -5,7 +5,7 @@ test.describe('Library services harness', () => {
     await page.goto('/demo/library-services');
 
     await expect(
-      page.getByRole('heading', { level: 1, name: /Library Services Harness/i }),
+      page.getByRole('heading', { level: 1, name: /System Integrity Harness/i }),
     ).toBeVisible();
     await expect(page.getByTestId('secure-context-value')).toHaveText('yes');
     await expect(page.getByTestId('permissions-supported')).toHaveText('yes');

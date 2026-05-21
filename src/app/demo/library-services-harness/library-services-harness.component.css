@@ -1,4 +1,4 @@
-/* ─── LIBRARY SERVICES HARNESS STYLES ───────────────────── */
+/* ─── SYSTEM INTEGRITY HARNESS STYLES ───────────────────── */
 
 .harness-container {
   max-width: 1400px;
@@ -8,81 +8,98 @@
 
 /* Header */
 .harness-header {
-  margin-bottom: var(--space-8);
-  padding-bottom: var(--space-6);
+  margin-bottom: var(--space-12);
+  padding-bottom: var(--space-8);
   border-bottom: 1px solid var(--c-border);
 }
 
 .harness-title {
-  font-size: var(--fs-xl);
-  font-weight: 800;
+  font-size: 3.5rem;
+  font-weight: 900;
   color: white;
-  margin: 0 0 var(--space-2);
-  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-3);
+  letter-spacing: -0.04em;
+  line-height: 1;
 }
 
 .harness-subtitle {
   color: var(--c-text-secondary);
-  font-size: var(--fs-sm);
-  margin: 0 0 var(--space-4);
+  font-size: var(--fs-lg);
+  margin: 0 0 var(--space-6);
   font-weight: 500;
+  max-width: 600px;
 }
 
 .harness-meta {
   display: flex;
-  gap: var(--space-6);
+  gap: var(--space-8);
   flex-wrap: wrap;
 }
 
 .harness-meta-item {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  font-size: var(--fs-xs);
+  gap: var(--space-3);
 }
 
 .harness-meta-label {
   color: var(--c-text-muted);
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
 }
 
 .harness-meta-value {
   font-weight: 800;
   color: white;
   font-family: var(--font-mono);
-  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+  padding: 0.3rem 0.75rem;
   background-color: var(--c-bg-surface);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-md);
   border: 1px solid var(--c-border);
-  box-shadow: shadow-inner;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .harness-meta-value.success {
   color: #4ade80;
-  border-color: color-mix(in oklch, #22c55e, transparent 80%);
-  background-color: color-mix(in oklch, #22c55e, transparent 92%);
+  border-color: color-mix(in oklch, #22c55e, transparent 70%);
+  background-color: color-mix(in oklch, #22c55e, transparent 90%);
 }
 
-/* Section Title */
+/* Section Container & Titles */
 .harness-section {
-  margin-bottom: var(--space-10);
+  margin-bottom: 6rem;
+  margin-top: 2rem;
+  display: block;
+  clear: both;
 }
 
 .harness-section-title {
-  font-size: var(--fs-lg);
-  font-weight: 800;
+  font-size: 1.75rem;
+  font-weight: 900;
   color: white;
-  margin: 0 0 var(--space-4);
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--c-border);
-  letter-spacing: -0.01em;
+  margin: 0 0 2.5rem;
+  padding-bottom: var(--space-3);
+  border-bottom: 2px solid var(--c-border);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.harness-section-title::before {
+  content: '';
+  width: 8px;
+  height: 24px;
+  background: var(--c-primary);
+  border-radius: 4px;
 }
 
 /* Status Grid */
 .harness-status-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: var(--space-4);
 }
 
@@ -91,19 +108,20 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-4);
+  padding: var(--space-5);
   background-color: var(--c-bg-surface);
   border: 1px solid var(--c-border-subtle);
-  border-radius: var(--r-lg);
+  border-radius: var(--r-xl);
   text-align: center;
-  transition: all var(--t-fast);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all var(--t-normal);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .harness-status-card:hover {
-  border-color: color-mix(in oklch, var(--c-primary), transparent 70%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  border-color: color-mix(in oklch, var(--c-primary), transparent 60%);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  background-color: color-mix(in oklch, var(--c-bg-surface), white 1%);
 }
 
 .harness-status-icon {
@@ -113,19 +131,19 @@
 
 .harness-status-icon.supported {
   color: #4ade80;
-  text-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+  text-shadow: 0 0 12px rgba(34, 197, 94, 0.6);
 }
 
 .harness-status-name {
-  font-size: var(--fs-xs);
+  font-size: 0.65rem;
   color: var(--c-text-secondary);
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
 .harness-status-value {
-  font-size: var(--fs-xs);
+  font-size: 0.75rem;
   font-family: var(--font-mono);
   color: white;
   font-weight: 800;
@@ -134,10 +152,10 @@
 /* Table */
 .harness-table-wrapper {
   overflow-x: auto;
-  border-radius: var(--r-xl);
+  border-radius: var(--r-2xl);
   border: 1px solid var(--c-border);
   background-color: var(--c-bg-surface);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .harness-table {
@@ -148,65 +166,39 @@
 
 .harness-table th {
   text-align: left;
-  padding: 1rem 1.25rem;
-  font-size: var(--fs-xs);
-  font-weight: 800;
+  padding: 1.25rem 1.5rem;
+  font-size: 0.7rem;
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   color: var(--c-text-muted);
-  background-color: color-mix(in oklch, var(--c-bg-surface), black 2%);
-  border-bottom: 1px solid var(--c-border);
+  background-color: color-mix(in oklch, var(--c-bg-surface), black 4%);
+  border-bottom: 2px solid var(--c-border);
   white-space: nowrap;
 }
 
 .harness-table td {
-  padding: 0.75rem 1.25rem;
+  padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--c-border-subtle);
   vertical-align: middle;
   color: var(--c-text-secondary);
+  font-weight: 500;
 }
 
 .harness-table tr:last-child td {
   border-bottom: none;
 }
 .harness-table tr:hover td {
-  background-color: color-mix(in oklch, white, transparent 98%);
-}
-
-.harness-badge {
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  font-size: var(--fs-xs);
-  font-family: var(--font-mono);
-  font-weight: 800;
-  border-radius: var(--r-sm);
-  background-color: color-mix(in oklch, black, transparent 80%);
-  color: var(--c-text-secondary);
-  border: 1px solid var(--c-border);
-}
-
-.harness-badge.success {
-  color: #4ade80;
-  border-color: color-mix(in oklch, #22c55e, transparent 80%);
-  background-color: color-mix(in oklch, #22c55e, transparent 95%);
-}
-.harness-badge.error {
-  color: #f87171;
-  border-color: color-mix(in oklch, #ef4444, transparent 80%);
-  background-color: color-mix(in oklch, #ef4444, transparent 95%);
-}
-.harness-badge.warning {
-  color: #fbbf24;
-  border-color: color-mix(in oklch, #f59e0b, transparent 80%);
-  background-color: color-mix(in oklch, #f59e0b, transparent 95%);
+  background-color: color-mix(in oklch, white, transparent 97%);
+  color: white;
 }
 
 /* Cards Grid */
 .harness-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   gap: var(--space-8);
-  margin-bottom: var(--space-10);
+  margin-top: var(--space-12);
 }
 
 .harness-card {
@@ -216,24 +208,38 @@
   padding: var(--space-8);
   background-color: var(--c-bg-surface);
   border: 1px solid var(--c-border-subtle);
-  border-radius: var(--r-2xl);
-  transition: all var(--t-fast);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  border-radius: var(--r-3xl);
+  transition: all var(--t-normal);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.harness-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle at top right, var(--c-primary-dim), transparent 70%);
+  opacity: 0.5;
 }
 
 .harness-card:hover {
-  border-color: color-mix(in oklch, var(--c-primary), transparent 70%);
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+  border-color: color-mix(in oklch, var(--c-primary), transparent 50%);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  transform: translateY(-6px);
 }
 
 .harness-card-title {
-  font-size: var(--fs-lg);
-  font-weight: 800;
+  font-size: 1.25rem;
+  font-weight: 900;
   color: white;
   margin: 0;
-  padding-bottom: var(--space-3);
+  padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--c-border-subtle);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 .harness-card-actions {
@@ -243,23 +249,26 @@
 }
 
 .harness-card-actions button {
-  padding: 0.6rem 1.25rem;
-  font-size: var(--fs-sm);
-  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 800;
   color: white;
-  background-color: color-mix(in oklch, white, transparent 92%);
+  background-color: color-mix(in oklch, white, transparent 94%);
   border: 1px solid var(--c-border);
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
   cursor: pointer;
   transition: all var(--t-fast);
   text-transform: uppercase;
-  letter-spacing: 0.025em;
+  letter-spacing: 0.05em;
 }
 
 .harness-card-actions button:hover {
-  background-color: var(--c-border-subtle);
-  transform: translateY(-1px);
+  background-color: var(--c-primary);
+  border-color: var(--c-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px color-mix(in oklch, var(--c-primary), transparent 60%);
 }
+
 .harness-card-actions button:active {
   transform: translateY(1px);
 }
@@ -267,37 +276,39 @@
 .harness-card-results {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-5);
-  background-color: color-mix(in oklch, black, transparent 80%);
-  border-radius: var(--r-lg);
+  gap: var(--space-4);
+  padding: var(--space-6);
+  background-color: color-mix(in oklch, black, transparent 70%);
+  border-radius: var(--r-2xl);
   border: 1px solid var(--c-border-subtle);
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 .harness-result-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: var(--fs-sm);
-  padding: 0.25rem 0;
+  font-size: 0.85rem;
+  padding: 0.4rem 0;
 }
 
 .harness-result-row:not(:last-child) {
-  border-bottom: 1px solid var(--c-border-subtle);
-  padding-bottom: var(--space-2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
+
 .harness-result-label {
   color: var(--c-text-muted);
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  font-size: var(--fs-xs);
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
 }
+
 .harness-result-value {
   font-family: var(--font-mono);
   color: white;
-  font-weight: 800;
-  font-size: var(--fs-xs);
+  font-weight: 900;
+  font-size: 0.75rem;
 }
 
 /* Footer */
@@ -305,31 +316,45 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-6);
+  padding: var(--space-8);
   background-color: var(--c-bg-surface);
   border: 1px solid var(--c-border);
-  border-radius: var(--r-xl);
-  margin-top: var(--space-12);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  border-radius: var(--r-3xl);
+  margin-top: var(--space-16);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .harness-footer-item {
   display: flex;
-  align-items: center;
-  gap: var(--space-4);
+  align-items: flex-start;
+  gap: var(--space-6);
   font-size: var(--fs-sm);
 }
 .harness-footer-label {
   color: var(--c-text-muted);
-  font-weight: 800;
-  min-width: 120px;
+  font-weight: 900;
+  min-width: 140px;
   flex-shrink: 0;
   text-transform: uppercase;
-  font-size: var(--fs-xs);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  padding-top: 0.2rem;
 }
 .harness-footer-value {
   font-family: var(--font-mono);
   color: var(--c-text-secondary);
   word-break: break-word;
   font-weight: 600;
+  line-height: 1.5;
+  background: color-mix(in oklch, black, transparent 80%);
+  padding: 0.5rem 1rem;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--c-border-subtle);
+  width: 100%;
+}
+
+.harness-footer-item.has-error .harness-footer-value {
+  color: #f87171;
+  background-color: color-mix(in oklch, #ef4444, transparent 90%);
+  border-color: color-mix(in oklch, #ef4444, transparent 70%);
 }

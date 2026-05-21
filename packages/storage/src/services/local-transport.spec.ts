@@ -19,70 +19,68 @@ describe('LocalStorageTransport', () => {
     sessionStorage.clear();
   });
 
-  it('debe resolverse con la frase de encriptacion por defecto', () => {
+  it('should resolve with the default encryption passphrase', () => {
     TestBed.configureTestingModule({});
     const transport = TestBed.inject(LocalStorageTransport);
     expect((transport as any).secretPassphrase).toBe('angular-helpers-secure-storage-passphrase');
   });
 
-  it('debe permitir configurar una frase de encriptacion personalizada', () => {
+  it('should allow configuring a custom encryption passphrase', () => {
     TestBed.configureTestingModule({
-      providers: [
-        { provide: SECURE_STORAGE_PASSPHRASE, useValue: 'mi-frase-secreta-personalizada' },
-      ],
+      providers: [{ provide: SECURE_STORAGE_PASSPHRASE, useValue: 'my-custom-secret-passphrase' }],
     });
     const transport = TestBed.inject(LocalStorageTransport);
-    expect((transport as any).secretPassphrase).toBe('mi-frase-secreta-personalizada');
+    expect((transport as any).secretPassphrase).toBe('my-custom-secret-passphrase');
   });
 
-  it('debe leer y escribir de forma stateless con opciones variables', async () => {
+  it('should read and write in a stateless way with variable options', async () => {
     TestBed.configureTestingModule({});
     const transport = TestBed.inject(LocalStorageTransport);
 
-    // Escribir un valor con encriptación
+    // Write an encrypted value
     await transport.write(
-      'confidencial',
+      'confidential',
       { topSecret: true },
       { storageType: 'local', serializer: 'json', encrypt: true },
     );
-    // Escribir otro valor sin encriptación
+    // Write another value without encryption
     await transport.write(
-      'publico',
+      'public',
       { topSecret: false },
       { storageType: 'local', serializer: 'json', encrypt: false },
     );
 
-    // Leer el valor encriptado
-    const conf = await transport.read<any>('confidencial', {
+    // Read encrypted value
+    const conf = await transport.read<any>('confidential', {
       storageType: 'local',
       serializer: 'json',
       encrypt: true,
     });
     expect(conf).toEqual({ topSecret: true });
 
-    // Leer el valor público
-    const pub = await transport.read<any>('publico', {
+    // Read public value
+    const pub = await transport.read<any>('public', {
       storageType: 'local',
       serializer: 'json',
       encrypt: false,
     });
     expect(pub).toEqual({ topSecret: false });
 
-    // Verificar que el dato confidencial en localStorage está encriptado (no es texto plano visible)
-    const rawConf = localStorage.getItem('confidencial');
+    // Verify that confidential data in localStorage is encrypted (not visible plain text)
+    const rawConf = localStorage.getItem('confidential');
     expect(rawConf).toBeDefined();
     expect(rawConf).not.toContain('topSecret');
 
-    // Verificar que el dato público en localStorage es JSON visible
-    const rawPub = localStorage.getItem('publico');
+    // Verify that public data in localStorage is visible JSON
+    const rawPub = localStorage.getItem('public');
     expect(rawPub).toContain('"topSecret":false');
   });
 
-  it('debe admitir lecturas y escrituras asincronicas concurrentes sin pisar estados', async () => {
+  it('should support concurrent asynchronous reads and writes without state clashing', async () => {
     TestBed.configureTestingModule({});
     const transport = TestBed.inject(LocalStorageTransport);
 
-    // Lanzar escrituras concurrentes con opciones cruzadas en paralelo
+    // Launch concurrent writes with cross options in parallel
     const op1 = transport.write('keyA', 'dataA', {
       storageType: 'local',
       serializer: 'json',
@@ -96,7 +94,7 @@ describe('LocalStorageTransport', () => {
 
     await Promise.all([op1, op2]);
 
-    // Leer en paralelo
+    // Read in parallel
     const resA = await transport.read<string>('keyA', {
       storageType: 'local',
       serializer: 'json',
@@ -111,7 +109,7 @@ describe('LocalStorageTransport', () => {
     expect(resA).toBe('dataA');
     expect(resB).toBe('dataB');
 
-    // Confirmar que el tipo de storage por defecto de la instancia no cambió
+    // Confirm that the instance's default storage type didn't change
     expect(transport.storageType).toBe('local');
     expect(transport.encrypt).toBe(false);
   });

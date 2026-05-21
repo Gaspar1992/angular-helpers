@@ -2,6 +2,15 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'storage-performance-overhaul-zero-copy-worker',
+    title:
+      'Elevating Angular Storage: Zero-Copy, Off-Main-Thread Serialization, and Unergonomic APIs',
+    publishedAt: '2026-05-20',
+    tags: ['storage', 'performance', 'web-workers', 'signals', 'architecture'],
+    excerpt:
+      'A deep dive into the massive performance overhaul of @angular-helpers/storage. Learn how we eliminated UI jank using off-main-thread serialization, implemented zero-copy data movement with Transferable Objects, and refactored our APIs for maximum ergonomics.',
+  },
+  {
     slug: 'storage-v21-12-0-reactive-l1-l2-indexeddb-cacheapi',
     title: 'storage v21.12.0: L1/L2 reactive storage with Cache API, IndexedDB, and Entity Store',
     publishedAt: '2026-05-17',

@@ -6,6 +6,8 @@ import { map, catchError } from 'rxjs/operators';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import type { BlogPost } from '../models/blog-post.model';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { SeoService } from '../../core/services/seo.service';
 
 // Configure marked to use highlight.js for syntax highlighting
 const renderer = new marked.Renderer();
@@ -26,8 +28,6 @@ renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
 };
 
 marked.use({ renderer });
-
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 export interface BlogPostData {
   meta: BlogPost;
@@ -64,15 +64,15 @@ export const blogPostResolver: ResolveFn<BlogPostData | null> = (route: Activate
   if (!slug) return of(null);
 
   const http = inject(HttpClient);
-
   const sanitizer = inject(DomSanitizer);
+  const seo = inject(SeoService);
 
   // Use relative path to work with subdirectory deployments (GitHub Pages)
   return http.get(`content/blog/${slug}.md`, { responseType: 'text' }).pipe(
     map((raw) => {
       const { meta, body } = parseFrontmatter(raw);
       const html = marked.parse(body, { async: false }) as string;
-      return {
+      const data = {
         meta: {
           slug,
           title: meta.title ?? slug,
@@ -82,6 +82,17 @@ export const blogPostResolver: ResolveFn<BlogPostData | null> = (route: Activate
         } satisfies BlogPost,
         html: sanitizer.bypassSecurityTrustHtml(html),
       };
+
+      // Update SEO Metadata dynamically
+      seo.updateMetadata({
+        title: data.meta.title,
+        description: data.meta.excerpt,
+        keywords: data.meta.tags.join(', '),
+        url: `/blog/${slug}`,
+        type: 'article',
+      });
+
+      return data;
     }),
     catchError(() => of(null)),
   );

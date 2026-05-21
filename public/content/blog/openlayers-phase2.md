@@ -7,7 +7,7 @@ excerpt: A modern Angular wrapper for OpenLayers with standalone components, sig
 
 # OpenLayers for Angular — Phase 2 Complete
 
-We're excited to announce that `@angular-helpers/openlayers` has reached a major milestone with **Phase 2** — a fully functional, modern Angular wrapper for OpenLayers that's ready for real-world applications.
+We're excited to announce that `@angular-helpers/openlayers` has reached a major milestone with **Phase 2** — a fully functional, modern Angular wrapper for [OpenLayers](https://openlayers.org/) that's ready for real-world applications.
 
 ## The Problem
 

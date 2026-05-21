@@ -18,18 +18,18 @@ describe('injectStorageSignal', () => {
     });
   });
 
-  it('debe inicializarse con el valor por defecto si el transporte no tiene datos persistidos', async () => {
+  it('should initialize with default value if transport has no persisted data', async () => {
     await TestBed.runInInjectionContext(async () => {
       const opts = { storageType: 'local', serializer: 'json' } as const;
       const sig = injectStorageSignal('user-pref', 'light-mode', opts);
 
-      // Al inicio, carga asíncronamente
-      expect(sig().data).toBe('light-mode');
+      // Initially, returns data directly
+      expect(sig()).toBe('light-mode');
       expect(mockTransport.read).toHaveBeenCalledWith('user-pref', opts);
     });
   });
 
-  it('debe restaurar el valor persistido asíncronamente desde el transporte L2', async () => {
+  it('should restore persisted value asynchronously from L2 transport', async () => {
     mockTransport.read = vi.fn().mockResolvedValue('dark-mode');
 
     await TestBed.runInInjectionContext(async () => {
@@ -38,29 +38,30 @@ describe('injectStorageSignal', () => {
         serializer: 'json',
       });
 
-      // Esperar a que se resuelva la microtarea del Promise de lectura
+      // Wait for the read promise microtask to resolve
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(sig().data).toBe('dark-mode');
-      expect(sig().loading).toBe(false);
-      expect(sig().error).toBeNull();
+      expect(sig()).toBe('dark-mode');
+      expect(sig.loading()).toBe(false);
+      expect(sig.error()).toBeNull();
     });
   });
 
-  it('debe persistir los cambios reactivamente al escribir en el Signal', async () => {
+  it('should persist changes reactively when writing to the Signal', async () => {
     await TestBed.runInInjectionContext(async () => {
       const opts = { storageType: 'local', serializer: 'json' } as const;
       const sig = injectStorageSignal('user-pref', 'light-mode', opts);
 
-      sig.set({ data: 'dark-mode', loading: false, error: null });
+      // Direct data set
+      sig.set('dark-mode');
 
-      expect(sig().data).toBe('dark-mode');
+      expect(sig()).toBe('dark-mode');
       expect(mockTransport.write).toHaveBeenCalledWith('user-pref', 'dark-mode', opts);
     });
   });
 
-  it('debe manejar fallos del transporte elegantemente y mantener el fallback', async () => {
-    const error = new Error('IndexedDB bloqueado');
+  it('should handle transport failures gracefully and maintain fallback', async () => {
+    const error = new Error('IndexedDB blocked');
     mockTransport.read = vi.fn().mockRejectedValue(error);
 
     await TestBed.runInInjectionContext(async () => {
@@ -71,9 +72,9 @@ describe('injectStorageSignal', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(sig().data).toBe('default-value');
-      expect(sig().loading).toBe(false);
-      expect(sig().error).toEqual(error);
+      expect(sig()).toBe('default-value');
+      expect(sig.loading()).toBe(false);
+      expect(sig.error()).toEqual(error);
     });
   });
 });
