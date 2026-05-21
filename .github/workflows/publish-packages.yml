@@ -1,100 +1,77 @@
 name: Publish Packages
 
 on:
-  workflow_dispatch:
   release:
     types:
       - published
 
-permissions: {}
+# Core security configuration for OIDC and Provenance
+permissions:
+  id-token: write # Required for OIDC identity federation
+  contents: read # Required for source checkout
 
 concurrency:
-  # Allow only one publish run at a time to avoid racy npm publishes.
+  # Allow only one publish run at a time
   group: publish-packages
   cancel-in-progress: false
 
 jobs:
   publish:
-    name: Publish ${{ matrix.package.name }}
+    name: Publish to npm
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: write
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         package:
-          - name: '@angular-helpers/browser-web-apis'
-            workspace: packages/browser-web-apis
-            dist: dist/browser-web-apis
-          - name: '@angular-helpers/security'
-            workspace: packages/security
-            dist: dist/security
-          - name: '@angular-helpers/worker-http'
-            workspace: packages/worker-http
-            dist: dist/worker-http
-          - name: '@angular-helpers/openlayers'
-            workspace: packages/openlayers
-            dist: dist/openlayers
           - name: '@angular-helpers/storage'
-            workspace: packages/storage
-            dist: dist/storage
+            path: packages/storage
+          - name: '@angular-helpers/worker-http'
+            path: packages/worker-http
+          - name: '@angular-helpers/browser-web-apis'
+            path: packages/browser-web-apis
+          - name: '@angular-helpers/security'
+            path: packages/security
+          - name: '@angular-helpers/openlayers'
+            path: packages/openlayers
+
     steps:
-      - name: Checkout repository
+      - name: Checkout Source
         uses: actions/checkout@v4
 
-      - name: Setup workspace
-        uses: ./.github/actions/setup
+      - name: Setup Node.js (LTS)
+        uses: actions/setup-node@v4
         with:
-          registry-url: https://registry.npmjs.org
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
 
-      - name: Build ${{ matrix.package.name }} (production)
-        run: pnpm --filter ${{ matrix.package.name }} build:prod
+      - name: Setup Pnpm
+        uses: pnpm/action-setup@v4
 
-      - name: Publish ${{ matrix.package.name }}
-        id: publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          PACKAGE_WORKSPACE: ${{ matrix.package.workspace }}
-          PACKAGE_DIST: ${{ matrix.package.dist }}
+      - name: Get pnpm store directory
+        shell: bash
         run: |
-          PACKAGE_NAME=$(node -p "require('./${PACKAGE_WORKSPACE}/package.json').name")
-          PACKAGE_VERSION=$(node -p "require('./${PACKAGE_WORKSPACE}/package.json').version")
-          RELEASE_TAG="${PACKAGE_NAME}@${PACKAGE_VERSION}"
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-          if pnpm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version > /dev/null 2>&1; then
-            echo "${RELEASE_TAG} is already published. Skipping."
-            echo "published=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
-          pnpm publish "./${PACKAGE_DIST}" --access public --no-git-checks
-          {
-            echo "published=true"
-            echo "release_tag=${RELEASE_TAG}"
-            echo "package_name=${PACKAGE_NAME}"
-            echo "package_version=${PACKAGE_VERSION}"
-          } >> "$GITHUB_OUTPUT"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Create GitHub release for ${{ matrix.package.name }}
-        if: steps.publish.outputs.published == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          RELEASE_TAG: ${{ steps.publish.outputs.release_tag }}
-          PACKAGE_NAME: ${{ steps.publish.outputs.package_name }}
-          PACKAGE_VERSION: ${{ steps.publish.outputs.package_version }}
+      - name: Build All Packages
+        run: pnpm -r build
+
+      - name: Publish Package with Provenance
         run: |
-          gh release create "${RELEASE_TAG}" \
-            --title "${PACKAGE_NAME} v${PACKAGE_VERSION}" \
-            --notes "## ${PACKAGE_NAME}@${PACKAGE_VERSION}
-
-          📦 Published to npm: https://www.npmjs.com/package/${PACKAGE_NAME}/v/${PACKAGE_VERSION}
-
-          ### Install
-
-          \`\`\`bash
-          pnpm add ${PACKAGE_NAME}@${PACKAGE_VERSION}
-          \`\`\`
-
-          See [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details." \
-            --latest=false
+          cd ${{ matrix.package.path }}
+          # npm publish with OIDC trust and provenance generation
+          # Note: No manual tokens required if OIDC is configured in npm
+          npm publish --provenance --access public
+        env:
+          # Required by npm to detect CI environment
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
