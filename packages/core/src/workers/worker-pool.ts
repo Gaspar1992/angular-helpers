@@ -1,4 +1,21 @@
-import { isPlatformBrowser } from '../utils/platform';
+import { injectPlatform } from '../utils/platform';
+
+export function injectWorkerPool(
+  workerUrl: URL,
+  options?: Omit<WorkerPoolOptions, 'workerFactory'>,
+): WorkerPool {
+  const { isBrowser } = injectPlatform();
+
+  return new WorkerPool({
+    ...options,
+    workerFactory: () => {
+      if (!isBrowser || typeof Worker === 'undefined') {
+        throw new Error('Web Workers are not available in this environment');
+      }
+      return new Worker(workerUrl, { type: 'module' });
+    },
+  });
+}
 
 export interface WorkerTaskConfig<T> {
   id: string;

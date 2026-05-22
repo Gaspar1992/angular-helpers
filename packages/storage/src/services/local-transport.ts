@@ -1,4 +1,5 @@
 import { Inject, Injectable, Optional } from '@angular/core';
+import { injectPlatform } from '@angular-helpers/core';
 import { StorageTransport } from './storage-transport';
 import { SECURE_STORAGE_PASSPHRASE } from '../tokens/storage.tokens';
 import { STORAGE_WORKER_FACTORY } from '../tokens/worker.tokens';
@@ -49,7 +50,10 @@ export class LocalStorageTransport implements StorageTransport {
       this.storageType = 'indexeddb';
     }
 
-    if (isMainThread && 'BroadcastChannel' in window) {
+    // We can use injectPlatform because LocalStorageTransport is created via DI
+    const { isBrowser, window: globalWindow } = injectPlatform();
+
+    if (isBrowser && globalWindow && 'BroadcastChannel' in globalWindow) {
       this.broadcastChannel = new BroadcastChannel('ah_storage_sync');
     }
   }
@@ -101,7 +105,7 @@ export class LocalStorageTransport implements StorageTransport {
       storeName: this.storeName,
       cacheName: this.cacheName,
       ...options,
-    };
+    } as StorageSignalOptions;
     const transport = this.resolveTransport(mergedOptions.storageType);
     await transport.delete(key, mergedOptions);
     this.broadcastChannel?.postMessage({ type: 'delete', key });

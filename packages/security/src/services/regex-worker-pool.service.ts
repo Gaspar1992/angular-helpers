@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { WorkerPool } from '@angular-helpers/core';
+import { WorkerPool, injectWorkerPool } from '@angular-helpers/core';
 import type { RegexSecurityConfig, RegexTestResult } from './regex-types';
 
 /**

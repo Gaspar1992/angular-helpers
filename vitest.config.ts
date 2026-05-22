@@ -24,6 +24,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@angular-helpers/core': here('./packages/core/src/index.ts'),
       '@analogjs/vitest-angular/setup-vitest': here(
         './node_modules/@analogjs/vitest-angular/setup-vitest.js',
       ),
