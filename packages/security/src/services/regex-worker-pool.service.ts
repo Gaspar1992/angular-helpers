@@ -24,6 +24,11 @@ export class RegexWorkerPoolService implements OnDestroy {
   }
 
   private initWorker() {
+    if (typeof Worker === 'undefined') {
+      // In SSR environments (Node.js), Web Workers are not available globally.
+      return;
+    }
+
     // In Angular, we can use the modern worker constructor with import.meta.url
     // Note: ensure your build system is configured to handle this (e.g., Vite/Webpack)
     this.worker = new Worker(new URL('../workers/regex.worker', import.meta.url), {
@@ -92,6 +97,30 @@ export class RegexWorkerPoolService implements OnDestroy {
     return new Promise((resolve) => {
       if (!this.worker) {
         this.initWorker();
+      }
+
+      if (!this.worker) {
+        // Fallback for SSR where Web Workers are not available.
+        // We execute synchronously on the main thread since SSR shouldn't
+        // be doing heavy regex processing anyway.
+        try {
+          const start = Date.now();
+          const regex = new RegExp(pattern);
+          const match = regex.test(text);
+          resolve({
+            match,
+            executionTime: Date.now() - start,
+            timeout: false,
+          });
+        } catch (e: any) {
+          resolve({
+            match: false,
+            executionTime: 0,
+            timeout: false,
+            error: e.message,
+          });
+        }
+        return;
       }
 
       const taskId = `regex_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
