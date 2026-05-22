@@ -74,8 +74,7 @@ export class WorkerPool {
         this.failAllTasks(`Worker crashed: ${error.message || 'Unknown error'}`);
         this.restartWorker();
       };
-    } catch (e) {
-      console.warn('Failed to initialize Worker', e);
+    } catch {
       this.worker = null;
     }
   }
@@ -151,7 +150,7 @@ export class WorkerPool {
           this.pendingTasks.delete(taskId);
 
           reject(new Error('Execution timeout'));
-          // A timeout might mean the worker is stuck in an infinite loop (e.g. ReDoS)
+
           this.restartWorker();
         }, activeTimeout);
 

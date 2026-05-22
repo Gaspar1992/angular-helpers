@@ -11,9 +11,7 @@ export class RegexWorkerPoolService implements OnDestroy {
   private pool: WorkerPool;
 
   constructor() {
-    this.pool = new WorkerPool({
-      workerFactory: () =>
-        new Worker(new URL('../workers/regex.worker', import.meta.url), { type: 'module' }),
+    this.pool = injectWorkerPool(new URL('../workers/regex.worker', import.meta.url), {
       defaultTimeout: 5000,
       fallbackExecutor: async (type, data) => {
         if (type !== 'regex-test') throw new Error(`Unknown task type: ${type}`);

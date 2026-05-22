@@ -57,7 +57,7 @@ export class IndexedDBTransport implements StorageTransport {
 
         request.onerror = () => reject(request.error);
       });
-    } catch (err) {
+    } catch {
       return undefined;
     }
   }
@@ -86,7 +86,7 @@ export class IndexedDBTransport implements StorageTransport {
         request.onsuccess = () => resolve();
         request.onerror = () => reject(request.error);
       });
-    } catch (err) {
+    } catch {
       // Intentionally suppressed
     }
   }
@@ -107,7 +107,7 @@ export class IndexedDBTransport implements StorageTransport {
         request.onsuccess = () => resolve();
         request.onerror = () => reject(request.error);
       });
-    } catch (err) {
+    } catch {
       // Intentionally suppressed
     }
   }
