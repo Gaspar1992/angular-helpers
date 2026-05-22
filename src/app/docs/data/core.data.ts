@@ -17,7 +17,15 @@ export const CORE_SERVICES: ServiceDoc[] = [
       'Returns null for window/document when running in SSR — always guard before accessing.',
       'Prefer this over raw PLATFORM_ID + isPlatformBrowser() to avoid import duplication across packages.',
     ],
-    methods: [],
+    methods: [
+      {
+        name: 'injectPlatform',
+        signature: 'injectPlatform(): PlatformInfo',
+        description:
+          'Returns a <code>PlatformInfo</code> object with <code>isBrowser</code>, <code>isServer</code>, <code>window</code>, and <code>document</code> fields. Must be called within an Angular injection context.',
+        returns: 'PlatformInfo',
+      },
+    ],
     example: `import { Component } from '@angular/core';
 import { injectPlatform } from '@angular-helpers/core';
 
@@ -52,7 +60,15 @@ export class PlatformAwareComponent {
       'Used internally by @angular-helpers/storage and @angular-helpers/worker-http to build zero-copy postMessage calls.',
       'Each global is guarded with typeof so the predicate is safe in environments where some globals are missing.',
     ],
-    methods: [],
+    methods: [
+      {
+        name: 'isTransferable',
+        signature: 'isTransferable(value: unknown): value is Transferable',
+        description:
+          'Returns <code>true</code> if the value is a <code>Transferable</code> (ArrayBuffer, MessagePort, ImageBitmap, OffscreenCanvas, ReadableStream, WritableStream, or TransformStream).',
+        returns: 'value is Transferable',
+      },
+    ],
     example: `import { isTransferable } from '@angular-helpers/core';
 
 function buildTransferList(payload: unknown): Transferable[] {
