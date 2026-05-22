@@ -8,7 +8,10 @@ import {
   effect,
   computed,
   signal,
+  inject,
+  PLATFORM_ID,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import hljs from 'highlight.js/lib/core';
 import typescript from 'highlight.js/lib/languages/typescript';
 import bash from 'highlight.js/lib/languages/bash';
@@ -117,12 +120,13 @@ export class CodeBlockComponent implements AfterViewInit {
 
   protected codeEl = viewChild.required<ElementRef<HTMLElement>>('codeEl');
   protected copied = signal(false);
+  private readonly platformId = inject(PLATFORM_ID);
 
   constructor() {
     effect(() => {
       const codeValue = this.code();
       const el = this.codeEl();
-      if (el) {
+      if (el && isPlatformBrowser(this.platformId)) {
         el.nativeElement.textContent = codeValue;
         hljs.highlightElement(el.nativeElement);
       }
@@ -130,7 +134,9 @@ export class CodeBlockComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    hljs.highlightElement(this.codeEl().nativeElement);
+    if (isPlatformBrowser(this.platformId)) {
+      hljs.highlightElement(this.codeEl().nativeElement);
+    }
   }
 
   protected copy() {

@@ -17,6 +17,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, filter } from 'rxjs/operators';
 import { DOCS_NAV_LIBRARIES } from '../config/docs-nav.data';
+import { WINDOW } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-docs-layout',
@@ -228,6 +229,7 @@ import { DOCS_NAV_LIBRARIES } from '../config/docs-nav.data';
 export class DocsLayoutComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly window = inject(WINDOW);
 
   readonly libraries = DOCS_NAV_LIBRARIES;
 
@@ -270,7 +272,7 @@ export class DocsLayoutComponent {
   }
 
   private scrollToActiveItem(): void {
-    const sidebars = document.querySelectorAll('aside');
+    const sidebars = this.window.document.querySelectorAll('aside');
     for (const sidebar of sidebars) {
       const activeItem = sidebar.querySelector('a.active');
       if (sidebar && activeItem) {
