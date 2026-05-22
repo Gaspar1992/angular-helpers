@@ -1,12 +1,4 @@
-import {
-  Component,
-  inject,
-  ElementRef,
-  viewChild,
-  AfterViewInit,
-  effect,
-  signal,
-} from '@angular/core';
+import { Component, inject, ElementRef, viewChild, effect, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -16,6 +8,9 @@ import { SearchService, SearchResult } from '../../../core/services/search.servi
   selector: 'app-search-modal',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule],
+  host: {
+    '(window:keydown)': 'onWindowKeydown($event)',
+  },
   template: `
     @if (search.isOpen()) {
       <div
@@ -197,7 +192,7 @@ import { SearchService, SearchResult } from '../../../core/services/search.servi
     `,
   ],
 })
-export class SearchModalComponent implements AfterViewInit {
+export class SearchModalComponent {
   protected readonly search = inject(SearchService);
   private readonly router = inject(Router);
 
@@ -220,20 +215,18 @@ export class SearchModalComponent implements AfterViewInit {
     });
   }
 
-  ngAfterViewInit() {
-    window.addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+  onWindowKeydown(e: KeyboardEvent) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      this.search.toggle();
+    }
+    if (e.key === '/' && !this.search.isOpen()) {
+      const target = e.target as HTMLElement;
+      if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
         e.preventDefault();
-        this.search.toggle();
+        this.search.open();
       }
-      if (e.key === '/' && !this.search.isOpen()) {
-        const target = e.target as HTMLElement;
-        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-          e.preventDefault();
-          this.search.open();
-        }
-      }
-    });
+    }
   }
 
   close() {
