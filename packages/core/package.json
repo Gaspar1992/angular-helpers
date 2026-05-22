@@ -1,0 +1,14 @@
+{
+  "name": "@angular-helpers/core",
+  "version": "0.1.0",
+  "description": "Shared internal utilities and core logic for Angular Helpers packages",
+  "private": true,
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json",
+    "test": "vitest run",
+    "lint": "oxlint src"
+  },
+  "peerDependencies": {
+    "@angular/core": "^21.0.0"
+  }
+}
