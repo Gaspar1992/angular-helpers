@@ -1,30 +1,18 @@
-// OlLayerService
-
 import { inject, Injectable, signal, computed } from '@angular/core';
 import VectorLayer from 'ol/layer/Vector';
 import HeatmapLayer from 'ol/layer/Heatmap';
 import TileLayer from 'ol/layer/Tile';
 import ImageLayer from 'ol/layer/Image';
 import VectorSource from 'ol/source/Vector';
-import OLFeature from 'ol/Feature';
-import { Circle as CircleGeom, LineString, Point, Polygon } from 'ol/geom';
-import { fromLonLat } from 'ol/proj';
-import { getCenter } from 'ol/extent';
-import { Style, Circle as CircleStyle, Fill, Icon, Stroke } from 'ol/style';
-import Text from 'ol/style/Text';
 import ClusterSource from 'ol/source/Cluster';
-import type { Style as AbstractStyle, Feature } from '@angular-helpers/openlayers/core';
-import OSM from 'ol/source/OSM';
-import XYZ from 'ol/source/XYZ';
-import TileWMS from 'ol/source/TileWMS';
-import ImageWMS from 'ol/source/ImageWMS';
-import ImageStatic from 'ol/source/ImageStatic';
 import GeoJSON from 'ol/format/GeoJSON';
 import TopoJSON from 'ol/format/TopoJSON';
 import KML from 'ol/format/KML';
+import { getCenter } from 'ol/extent';
+import { Point } from 'ol/geom';
 import type BaseLayer from 'ol/layer/Base';
 import type OLMap from 'ol/Map';
-import { OlMapService } from '@angular-helpers/openlayers/core';
+import { OlMapService, featureToOlFeature } from '@angular-helpers/openlayers/core';
 import type {
   VectorLayerConfig,
   TileLayerConfig,
@@ -33,11 +21,15 @@ import type {
   AnyLayerConfig,
 } from '../models/layer.types';
 
-/**
- * Internal property key used to stash the abstract style metadata on the
- * underlying `ol/Feature` so the layer style function can resolve a
- * per-feature visual without colliding with user `properties`.
- */
+import { buildTileSource, buildImageSource } from '../utils/source-builders.util';
+import {
+  buildVectorLayer,
+  buildHeatmapLayer,
+  buildTileLayer,
+  buildImageLayer,
+} from '../utils/layer-builders.util';
+import { SpiderficationManager } from '../utils/spiderfication.manager';
+
 const STYLE_PROP = '__angular_helpers_style__';
 
 export interface LayerInfo {
@@ -53,15 +45,12 @@ export class OlLayerService {
   private mapService = inject(OlMapService);
   private layerCache = new Map<string, BaseLayer>();
   private pendingConfigs: AnyLayerConfig[] = [];
-
   private layerState = signal<LayerInfo[]>([]);
+  private spiderManager = new SpiderficationManager(this.layerCache);
 
   readonly layers = computed(() => this.layerState());
-
   readonly visibleLayers = computed(() => this.layerState().filter((l) => l.visible));
-
   readonly tileLayers = computed(() => this.layerState().filter((l) => l.type === 'tile'));
-
   readonly vectorLayers = computed(() => this.layerState().filter((l) => l.type === 'vector'));
 
   addLayer(config: AnyLayerConfig): { id: string } {
@@ -89,18 +78,73 @@ export class OlLayerService {
   }
 
   private createLayer(config: AnyLayerConfig, map: OLMap): { id: string } {
+    let layer: BaseLayer;
+
     switch (config.type) {
-      case 'vector':
-        return this.createVectorLayer(config as VectorLayerConfig, map);
+      case 'vector': {
+        const vConfig = config as VectorLayerConfig;
+        const sourceOptions: any = {};
+        if (vConfig.url && vConfig.format) {
+          sourceOptions.url = vConfig.url;
+          if (vConfig.format === 'geojson') sourceOptions.format = new GeoJSON();
+          else if (vConfig.format === 'topojson') sourceOptions.format = new TopoJSON();
+          else if (vConfig.format === 'kml') sourceOptions.format = new KML();
+        }
+        const vectorSource = new VectorSource(sourceOptions);
+
+        if (vConfig.features && vConfig.features.length > 0) {
+          const olFeatures = vConfig.features.map((f) => {
+            const olf = featureToOlFeature(f);
+            if (f.style) olf.set(STYLE_PROP, f.style);
+            return olf;
+          });
+          vectorSource.addFeatures(olFeatures);
+        }
+
+        const clusterCfg = vConfig.cluster;
+        const source = clusterCfg?.enabled
+          ? new ClusterSource({
+              source: vectorSource,
+              distance: clusterCfg.distance ?? 40,
+              minDistance: clusterCfg.minDistance ?? 20,
+              geometryFunction: (feature) => {
+                const geometry = feature.getGeometry();
+                if (!geometry) return null;
+                if (geometry.getType() === 'Point') return geometry as Point;
+                return new Point(getCenter(geometry.getExtent()));
+              },
+            })
+          : vectorSource;
+
+        layer = buildVectorLayer(vConfig, source);
+        if (clusterCfg?.spiderfyOnSelect) {
+          this.spiderManager.register(map);
+        }
+        break;
+      }
       case 'heatmap':
-        return this.createHeatmapLayer(config as HeatmapLayerConfig, map);
-      case 'tile':
-        return this.createTileLayer(config as TileLayerConfig, map);
-      case 'image':
-        return this.createImageLayer(config as ImageLayerConfig, map);
+        layer = buildHeatmapLayer(config as HeatmapLayerConfig);
+        break;
+      case 'tile': {
+        const tConfig = config as TileLayerConfig;
+        const source = buildTileSource(tConfig.source);
+        layer = buildTileLayer(tConfig, source);
+        break;
+      }
+      case 'image': {
+        const iConfig = config as ImageLayerConfig;
+        const source = buildImageSource(iConfig.source);
+        layer = buildImageLayer(iConfig, source);
+        break;
+      }
       default:
         return { id: (config as AnyLayerConfig).id };
     }
+
+    map.addLayer(layer);
+    this.layerCache.set(config.id, layer);
+    this.updateLayerState();
+    return { id: config.id };
   }
 
   getLayer(id: string): BaseLayer | undefined {
@@ -112,7 +156,6 @@ export class OlLayerService {
   }
 
   removeLayer(id: string): void {
-    // Cancel if it's still pending (map not ready yet)
     const pendingIdx = this.pendingConfigs.findIndex((c) => c.id === id);
     if (pendingIdx !== -1) {
       this.pendingConfigs.splice(pendingIdx, 1);
@@ -136,9 +179,7 @@ export class OlLayerService {
       this.updateLayerState();
     } else {
       const pending = this.pendingConfigs.find((c) => c.id === id);
-      if (pending) {
-        pending.visible = visible;
-      }
+      if (pending) pending.visible = visible;
     }
   }
 
@@ -160,9 +201,7 @@ export class OlLayerService {
       this.updateLayerState();
     } else {
       const pending = this.pendingConfigs.find((c) => c.id === id);
-      if (pending) {
-        pending.opacity = opacity;
-      }
+      if (pending) pending.opacity = opacity;
     }
   }
 
@@ -173,19 +212,33 @@ export class OlLayerService {
       this.updateLayerState();
     } else {
       const pending = this.pendingConfigs.find((c) => c.id === id);
-      if (pending) {
-        pending.zIndex = zIndex;
+      if (pending) pending.zIndex = zIndex;
+    }
+  }
+
+  setClusterDistance(id: string, distance: number): void {
+    const layer = this.layerCache.get(id);
+    if (layer instanceof VectorLayer) {
+      const source = layer.getSource();
+      if (source && 'setDistance' in source) {
+        (source as ClusterSource).setDistance(distance);
+      }
+    }
+  }
+
+  setClusterMinDistance(id: string, minDistance: number): void {
+    const layer = this.layerCache.get(id);
+    if (layer instanceof VectorLayer) {
+      const source = layer.getSource();
+      if (source && 'setMinDistance' in source) {
+        (source as ClusterSource).setMinDistance(minDistance);
       }
     }
   }
 
   setHeatmapProperties(
     id: string,
-    props: {
-      blur?: number;
-      radius?: number;
-      weight?: string | ((feature: any) => number);
-    },
+    props: { blur?: number; radius?: number; weight?: string | ((feature: any) => number) },
   ): void {
     const layer = this.layerCache.get(id);
     if (layer instanceof HeatmapLayer) {
@@ -215,18 +268,12 @@ export class OlLayerService {
     return this.layerCache.get(id)?.getZIndex() ?? 0;
   }
 
-  /**
-   * Clears all features from a vector layer's source.
-   * Does not remove the layer itself.
-   * @param id - Layer identifier
-   */
   clearFeatures(id: string): void {
     const layer = this.layerCache.get(id);
     if (!(layer instanceof VectorLayer)) return;
     const source = layer.getSource();
     if (!source) return;
 
-    // Handle Cluster source: clear the underlying VectorSource
     const clusterSource = source as unknown as { getSource?: () => VectorSource };
     const vectorSource = clusterSource.getSource
       ? clusterSource.getSource()
@@ -235,12 +282,6 @@ export class OlLayerService {
     vectorSource?.clear();
   }
 
-  /**
-   * Updates the features of a vector layer.
-   * Syncs new features without clearing existing ones (preserves OL modifications).
-   * @param id - Layer identifier
-   * @param features - New features to sync
-   */
   updateFeatures(id: string, features: VectorLayerConfig['features']): void {
     const layer = this.layerCache.get(id);
     if (!(layer instanceof VectorLayer)) return;
@@ -248,7 +289,6 @@ export class OlLayerService {
     const source = layer.getSource();
     if (!source) return;
 
-    // Handle Cluster source: get the underlying VectorSource
     const clusterSource = source as unknown as { getSource?: () => VectorSource };
     const vectorSource = clusterSource.getSource
       ? clusterSource.getSource()
@@ -256,65 +296,32 @@ export class OlLayerService {
 
     if (!(vectorSource instanceof VectorSource)) return;
 
-    // Sync features: remove old ones, update existing ones, add new ones
     if (features) {
       const newFeatureIds = new Set<string | number>(features.map((f) => f.id));
       const sourceFeatures = vectorSource.getFeatures();
 
-      // 1. Remove features that are no longer in the input
       sourceFeatures.forEach((f) => {
-        const id = f.getId();
-        if (id !== undefined && !newFeatureIds.has(id)) {
+        const fId = f.getId();
+        if (fId !== undefined && !newFeatureIds.has(fId)) {
           vectorSource.removeFeature(f);
         }
       });
 
-      // 2. Only add features that don't already exist in the source
       const existingIds = new Set(
         vectorSource
           .getFeatures()
           .map((f) => f.getId())
-          .filter((id): id is string | number => id !== undefined),
+          .filter((fId): fId is string | number => fId !== undefined),
       );
 
       const featuresToAdd = features.filter((f) => !existingIds.has(f.id));
 
       if (featuresToAdd.length > 0) {
-        const olFeatures = featuresToAdd.map((feature) => {
-          const geom = feature.geometry;
-          let geometry;
-
-          if (!geom.coordinates) {
-            geometry = new Point([0, 0]);
-          } else if (geom.type === 'Point') {
-            const coords = geom.coordinates as [number, number];
-            geometry = new Point(fromLonLat(coords));
-          } else if (geom.type === 'LineString') {
-            const coords = (geom.coordinates as [number, number][]).map((c) => fromLonLat(c));
-            geometry = new LineString(coords);
-          } else if (geom.type === 'Polygon') {
-            const rings = (geom.coordinates as [number, number][][]).map((ring) =>
-              ring.map((c) => fromLonLat(c)),
-            );
-            geometry = new Polygon(rings);
-          } else if (geom.type === 'Circle') {
-            const center = fromLonLat(geom.coordinates as [number, number]);
-            geometry = new CircleGeom(center, (geom as { radius?: number }).radius ?? 1000);
-          } else {
-            geometry = new Point([0, 0]);
-          }
-
-          const olFeature = new OLFeature({
-            geometry,
-            ...feature.properties,
-          });
-          if (feature.style) {
-            olFeature.set(STYLE_PROP, feature.style);
-          }
-          olFeature.setId(feature.id);
-          return olFeature;
+        const olFeatures = featuresToAdd.map((f) => {
+          const olf = featureToOlFeature(f);
+          if (f.style) olf.set(STYLE_PROP, f.style);
+          return olf;
         });
-
         vectorSource.addFeatures(olFeatures);
       }
     }
@@ -337,298 +344,5 @@ export class OlLayerService {
       });
     });
     this.layerState.set(layers.sort((a, b) => a.zIndex - b.zIndex));
-  }
-
-  private createVectorLayer(config: VectorLayerConfig, map: OLMap): { id: string } {
-    const sourceOptions: any = {};
-    if (config.url && config.format) {
-      sourceOptions.url = config.url;
-      if (config.format === 'geojson') sourceOptions.format = new GeoJSON();
-      else if (config.format === 'topojson') sourceOptions.format = new TopoJSON();
-      else if (config.format === 'kml') sourceOptions.format = new KML();
-    }
-    const vectorSource = new VectorSource(sourceOptions);
-
-    // Add features if provided
-    if (config.features && config.features.length > 0) {
-      const olFeatures = config.features.map((feature) => {
-        const geom = feature.geometry;
-        let geometry;
-
-        // Validate coordinates exist before processing
-        if (!geom.coordinates) {
-          geometry = new Point([0, 0]);
-        } else if (geom.type === 'Point') {
-          // Transform from EPSG:4326 (lon/lat) to EPSG:3857 (map projection)
-          const coords = geom.coordinates as [number, number];
-          geometry = new Point(fromLonLat(coords));
-        } else if (geom.type === 'LineString') {
-          const coords = (geom.coordinates as [number, number][]).map((c) => fromLonLat(c));
-          geometry = new LineString(coords);
-        } else if (geom.type === 'Polygon') {
-          const rings = (geom.coordinates as [number, number][][]).map((ring) =>
-            ring.map((c) => fromLonLat(c)),
-          );
-          geometry = new Polygon(rings);
-        } else if (geom.type === 'Circle') {
-          const center = fromLonLat(geom.coordinates as [number, number]);
-          geometry = new CircleGeom(center, (geom as { radius?: number }).radius ?? 1000);
-        } else {
-          geometry = new Point([0, 0]);
-        }
-
-        const olFeature = new OLFeature({
-          geometry,
-          ...feature.properties,
-        });
-        if (feature.style) {
-          olFeature.set(STYLE_PROP, feature.style);
-        }
-        olFeature.setId(feature.id);
-        return olFeature;
-      });
-
-      vectorSource.addFeatures(olFeatures);
-    }
-
-    // Wrap in cluster source if enabled
-    const clusterCfg = config.cluster;
-    const source = clusterCfg?.enabled
-      ? new ClusterSource({
-          source: vectorSource,
-          distance: clusterCfg.distance ?? 40,
-          minDistance: clusterCfg.minDistance ?? 20,
-          geometryFunction: (feature) => {
-            const geometry = feature.getGeometry();
-            if (!geometry) return null;
-            // For Point geometries, use as-is
-            if (geometry.getType() === 'Point') {
-              return geometry as Point;
-            }
-            // For other geometries (Polygon, Circle, etc.), use center point
-            const extent = geometry.getExtent();
-            const center = getCenter(extent);
-            return new Point(center);
-          },
-        })
-      : vectorSource;
-
-    // Default style for all geometry types (points, lines, polygons)
-    const defaultStyle = new Style({
-      fill: new Fill({ color: 'rgba(25, 118, 210, 0.3)' }),
-      stroke: new Stroke({ color: '#1976d2', width: 2 }),
-      image: new CircleStyle({
-        radius: 8,
-        fill: new Fill({ color: '#1976d2' }),
-        stroke: new Stroke({ color: '#d32f2f', width: 2 }),
-      }),
-    });
-
-    // Resolved style: priority to stashed metadata, then config-level style, then default.
-    const userStyle = config.style;
-    const styleFn = (olFeature: any, resolution: number): any => {
-      // 1. Per-feature style metadata (stashed via STYLE_PROP)
-      const abstractStyle = olFeature.get(STYLE_PROP) as AbstractStyle | undefined;
-      if (abstractStyle) {
-        const style = new Style();
-        const { icon, fill, stroke } = abstractStyle;
-        if (icon?.src) {
-          style.setImage(
-            new Icon({
-              src: icon.src,
-              ...(icon.size ? { size: icon.size } : {}),
-              ...(icon.anchor ? { anchor: icon.anchor } : {}),
-            }),
-          );
-        }
-        if (fill) {
-          style.setFill(new Fill({ color: fill.color }));
-        }
-        if (stroke) {
-          style.setStroke(new Stroke({ color: stroke.color, width: stroke.width }));
-        }
-        if (icon?.src || fill || stroke) return style;
-      }
-
-      // 2. Layer-level style from config (supports functions or static styles)
-      if (userStyle) {
-        if (typeof userStyle === 'function') {
-          // Check if it's already an OL native feature or wrap if needed
-          // For simplicity in the demo, we pass the feature as-is or mapped
-          const feature: Feature = {
-            id: String(olFeature.getId() ?? ''),
-            geometry: {
-              type: olFeature.getGeometry()?.getType() as any,
-              coordinates: [], // coordinates not easily reversible without extra work
-            },
-            properties: olFeature.getProperties(),
-          };
-          return (userStyle as any)(feature, resolution);
-        }
-        return userStyle;
-      }
-
-      return defaultStyle;
-    };
-
-    // Cluster style: shows count badge when features are clustered, else delegates to styleFn
-    const clusterStyleFn = (olFeature: any, resolution: number): any => {
-      const features = olFeature.get('features') as any[] | undefined;
-      const size = features?.length ?? 1;
-
-      if (size > 1) {
-        const showCount = clusterCfg?.showCount ?? true;
-        return new Style({
-          image: new CircleStyle({
-            radius: 15 + Math.min(size * 2, 15),
-            fill: new Fill({ color: 'rgba(255, 100, 100, 0.8)' }),
-            stroke: new Stroke({ color: '#fff', width: 2 }),
-          }),
-          text: showCount
-            ? new Text({
-                text: String(size),
-                fill: new Fill({ color: '#fff' }),
-              })
-            : undefined,
-        });
-      }
-
-      // Single feature in cluster: unwrap and call styleFn
-      const originalFeature = features?.[0];
-      if (originalFeature) {
-        // We MUST preserve the original geometry if it's a non-point ( spiderfication etc)
-        const style = styleFn(originalFeature, resolution);
-        if (style instanceof Style) {
-          const origGeom = originalFeature.getGeometry();
-          if (origGeom) style.setGeometry(origGeom);
-        }
-        return style;
-      }
-
-      return styleFn(olFeature, resolution);
-    };
-
-    const layer = new VectorLayer({
-      source,
-      visible: config.visible ?? true,
-      opacity: config.opacity ?? 1,
-      zIndex: config.zIndex,
-      style: clusterCfg?.enabled ? clusterStyleFn : styleFn,
-    });
-    layer.set('id', config.id);
-    map.addLayer(layer);
-    this.layerCache.set(config.id, layer);
-    this.updateLayerState();
-    return { id: config.id };
-  }
-
-  private createHeatmapLayer(config: HeatmapLayerConfig, map: OLMap): { id: string } {
-    const vectorSource = new VectorSource();
-
-    if (config.features && config.features.length > 0) {
-      const olFeatures = config.features.map((feature) => {
-        const geom = feature.geometry;
-        let geometry;
-
-        if (!geom.coordinates) {
-          geometry = new Point([0, 0]);
-        } else if (geom.type === 'Point') {
-          const coords = geom.coordinates as [number, number];
-          geometry = new Point(fromLonLat(coords));
-        } else if (geom.type === 'LineString') {
-          const coords = (geom.coordinates as [number, number][]).map((c) => fromLonLat(c));
-          geometry = new LineString(coords);
-        } else if (geom.type === 'Polygon') {
-          const rings = (geom.coordinates as [number, number][][]).map((ring) =>
-            ring.map((c) => fromLonLat(c)),
-          );
-          geometry = new Polygon(rings);
-        } else {
-          geometry = new Point([0, 0]);
-        }
-
-        const olFeature = new OLFeature({
-          geometry,
-          ...feature.properties,
-        });
-        olFeature.setId(feature.id);
-        return olFeature;
-      });
-
-      vectorSource.addFeatures(olFeatures);
-    }
-
-    const layer = new HeatmapLayer({
-      source: vectorSource,
-      visible: config.visible ?? true,
-      opacity: config.opacity ?? 1,
-      zIndex: config.zIndex,
-      ...(config.blur !== undefined && { blur: config.blur }),
-      ...(config.radius !== undefined && { radius: config.radius }),
-      ...(config.weight !== undefined && {
-        weight: config.weight as string | ((feature: OLFeature) => number),
-      }),
-    });
-
-    layer.set('id', config.id);
-    map.addLayer(layer);
-    this.layerCache.set(config.id, layer);
-    this.updateLayerState();
-    return { id: config.id };
-  }
-
-  private createTileLayer(config: TileLayerConfig, map: OLMap): { id: string } {
-    let source;
-    switch (config.source.type) {
-      case 'osm':
-        source = new OSM({ attributions: config.source.attributions });
-        break;
-      case 'xyz':
-        source = new XYZ({ url: config.source.url, attributions: config.source.attributions });
-        break;
-      case 'wms':
-        source = new TileWMS({
-          url: config.source.url,
-          params: config.source.params ?? {},
-          attributions: config.source.attributions,
-        });
-        break;
-      default:
-        source = new OSM();
-    }
-    const layer = new TileLayer({
-      source,
-      visible: config.visible ?? true,
-      opacity: config.opacity ?? 1,
-      zIndex: config.zIndex,
-    });
-    layer.set('id', config.id);
-    map.addLayer(layer);
-    this.layerCache.set(config.id, layer);
-    this.updateLayerState();
-    return { id: config.id };
-  }
-
-  private createImageLayer(config: ImageLayerConfig, map: OLMap): { id: string } {
-    let source;
-    if (config.source.type === 'static') {
-      source = new ImageStatic({
-        url: config.source.url,
-        imageExtent: config.source.imageExtent ?? [0, 0, 1, 1],
-      });
-    } else {
-      source = new ImageWMS({ url: config.source.url, params: config.source.params });
-    }
-    const layer = new ImageLayer({
-      source,
-      visible: config.visible ?? true,
-      opacity: config.opacity ?? 1,
-      zIndex: config.zIndex,
-    });
-    layer.set('id', config.id);
-    map.addLayer(layer);
-    this.layerCache.set(config.id, layer);
-    this.updateLayerState();
-    return { id: config.id };
   }
 }

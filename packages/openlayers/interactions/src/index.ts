@@ -12,9 +12,6 @@ export { DrawInteractionService } from './services/draw-interaction.service';
 export { ModifyInteractionService } from './services/modify-interaction.service';
 export { MeasurementInteractionService } from './services/measurement-interaction.service';
 
-// Feature utilities
-export { olFeatureToFeature } from './services/feature-utils';
-
 // Declarative components
 export { OlDrawInteractionComponent } from './features/draw-interaction.component';
 export { OlModifyInteractionComponent } from './features/modify-interaction.component';

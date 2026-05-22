@@ -21,6 +21,7 @@ export class InteractionStateService {
   // Internal signals
   private interactions = signal<ManagedInteraction[]>([]);
   private selectedFeaturesInternal = signal<Feature[]>([]);
+  private hoveredFeatureInternal = signal<Feature | null>(null);
 
   // Event subjects
   private drawStartSubject = new Subject<DrawStartEvent>();
@@ -30,6 +31,7 @@ export class InteractionStateService {
 
   // Public readonly signals
   readonly selectedFeatures = computed(() => this.selectedFeaturesInternal());
+  readonly hoveredFeature = computed(() => this.hoveredFeatureInternal());
   readonly selectionCount = computed(() => this.selectedFeaturesInternal().length);
   readonly hasSelection = computed(() => this.selectedFeaturesInternal().length > 0);
   readonly activeInteractions = computed(() =>
@@ -102,6 +104,14 @@ export class InteractionStateService {
   }
 
   /**
+   * Sets the currently hovered feature.
+   * @param feature - The hovered feature or null
+   */
+  setHoveredFeature(feature: Feature | null): void {
+    this.hoveredFeatureInternal.set(feature);
+  }
+
+  /**
    * Emits a draw start event.
    * @param event - The draw start event data
    */
@@ -162,5 +172,6 @@ export class InteractionStateService {
   clearAll(): void {
     this.interactions.set([]);
     this.selectedFeaturesInternal.set([]);
+    this.hoveredFeatureInternal.set(null);
   }
 }

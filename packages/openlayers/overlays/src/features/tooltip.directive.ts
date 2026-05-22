@@ -101,7 +101,9 @@ export class OlTooltipDirective {
         return true;
       },
       {
-        layerFilter: layerId ? (layer: BaseLayer) => layer.get('id') === layerId : undefined,
+        layerFilter: layerId
+          ? (layer: BaseLayer) => layer.get('id') === layerId || !!layer.get('is-spider-layer')
+          : undefined,
       },
     );
 
@@ -110,7 +112,26 @@ export class OlTooltipDirective {
       return;
     }
 
-    const value = (matched as OLFeature).get(propKey);
+    let value = (matched as OLFeature).get(propKey);
+
+    if (value === undefined || value === null) {
+      // 1. Check if it's a clustered feature
+      const features = (matched as OLFeature).get('features');
+      if (Array.isArray(features) && features.length > 0) {
+        if (features.length === 1) {
+          value = features[0].get(propKey);
+        } else {
+          value = `${features.length} elementos`;
+        }
+      } else {
+        // 2. Check if it's a spider feature
+        const spiderFeature = (matched as OLFeature).get('spider-feature');
+        if (spiderFeature) {
+          value = spiderFeature.get(propKey);
+        }
+      }
+    }
+
     if (value === undefined || value === null) {
       tooltip.style.display = 'none';
       return;

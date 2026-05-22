@@ -124,6 +124,7 @@ export class OlPopupService {
 
   private flushPending(map: OLMap): void {
     const pending = this.pending.splice(0);
+    this.flushSubscribed = false;
     for (const call of pending) {
       if (call.kind === 'open') {
         this.createOrUpdate(
@@ -196,6 +197,8 @@ export class OlPopupService {
         environmentInjector: this.envInjector,
         elementInjector: options.injector,
         hostElement,
+        // Actually, let's see if createComponent supports bindings. If it does, we pass it.
+        // Wait, the original code passed bindings! I will revert to the exact original code for createComponent options!
         bindings: options.bindings,
         directives: options.directives?.map((d) =>
           typeof d === 'function' ? d : { type: d.type, bindings: d.bindings ?? [] },

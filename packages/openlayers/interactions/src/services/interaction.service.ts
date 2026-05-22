@@ -2,7 +2,7 @@
 
 import { inject, Injectable } from '@angular/core';
 import type OLMap from 'ol/Map';
-import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
+import { OlMapService, OlZoneHelper, type Feature } from '@angular-helpers/openlayers/core';
 import type { SelectConfig, DrawConfig, ModifyConfig } from '../models/interaction.types';
 import { InteractionStateService } from './interaction-state.service';
 import { SelectInteractionService } from './select-interaction.service';
@@ -40,6 +40,7 @@ export class OlInteractionService {
 
   // Public signals and observables delegated to state service
   readonly selectedFeatures = this.stateService.selectedFeatures;
+  readonly hoveredFeature = this.stateService.hoveredFeature;
   readonly selectionCount = this.stateService.selectionCount;
   readonly hasSelection = this.stateService.hasSelection;
   readonly activeInteractions = this.stateService.activeInteractions;

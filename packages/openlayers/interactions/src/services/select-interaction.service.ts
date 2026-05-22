@@ -15,7 +15,7 @@ import {
 import type { SelectConfig } from '../models/interaction.types';
 import type { ManagedInteraction } from './types';
 import { InteractionStateService } from './interaction-state.service';
-import { olFeatureToFeature } from './feature-utils';
+import { olFeatureToFeature } from '@angular-helpers/openlayers/core';
 
 /**
  * Service responsible for creating and managing Select interactions.
@@ -134,20 +134,25 @@ export class SelectInteractionService {
       // Listen to selection changes — use getFeatures().getArray() for the full
       // accumulated collection, not e.selected which only contains newly added ones
       select.on('select', (e: { selected: OLFeature[]; deselected: OLFeature[] }) => {
-        this.zoneHelper.runInsideAngular(() => {
-          const allSelected = select
-            .getFeatures()
-            .getArray()
-            .map((f) => olFeatureToFeature(f));
+        const allFeatures = select
+          .getFeatures()
+          .getArray()
+          .map((f) => olFeatureToFeature(f));
 
-          this.stateService.setSelectedFeatures(allSelected);
-
-          this.stateService.emitSelect({
-            interactionId: id,
-            selected: e.selected.map((f) => olFeatureToFeature(f)),
-            deselected: e.deselected.map((f) => olFeatureToFeature(f)),
+        if (config.condition === 'pointerMove') {
+          // Update signal outside Angular zone. Consumers of this signal will schedule
+          // targeted change detection automatically.
+          this.stateService.setHoveredFeature(allFeatures.length > 0 ? allFeatures[0] : null);
+        } else {
+          this.zoneHelper.runInsideAngular(() => {
+            this.stateService.setSelectedFeatures(allFeatures);
+            this.stateService.emitSelect({
+              interactionId: id,
+              selected: e.selected.map((f) => olFeatureToFeature(f)),
+              deselected: e.deselected.map((f) => olFeatureToFeature(f)),
+            });
           });
-        });
+        }
       });
 
       map.addInteraction(select);

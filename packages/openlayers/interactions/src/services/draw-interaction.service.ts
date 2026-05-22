@@ -13,7 +13,7 @@ import { OlLayerService } from '@angular-helpers/openlayers/layers';
 import type { DrawConfig, DrawEndEvent } from '../models/interaction.types';
 import type { ManagedInteraction } from './types';
 import { InteractionStateService } from './interaction-state.service';
-import { olFeatureToFeature } from './feature-utils';
+import { olFeatureToFeature } from '@angular-helpers/openlayers/core';
 
 /**
  * Service responsible for creating and managing Draw interactions.

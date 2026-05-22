@@ -1,4 +1,3 @@
-import { animate, style, transition, trigger } from '@angular/animations';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -8,12 +7,19 @@ import {
   inputBinding,
   outputBinding,
   signal,
+  viewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { OlMapComponent, OlMapService, type MapClickEvent } from '@angular-helpers/openlayers/core';
+import {
+  OlMapComponent,
+  OlMapService,
+  OlTimeService,
+  type MapClickEvent,
+} from '@angular-helpers/openlayers/core';
 import { fromLonLat, transformExtent } from 'ol/proj';
 import {
   OlVectorLayerComponent,
+  OlClusterComponent,
   OlHeatmapLayerComponent,
   OlWebGLVectorLayerComponent,
   OlLayerService,
@@ -77,6 +83,7 @@ const BASEMAPS: BasemapConfig[] = [
     CommonModule,
     OlMapComponent,
     OlVectorLayerComponent,
+    OlClusterComponent,
     OlZoomControlComponent,
     OlAttributionControlComponent,
     OlScaleLineControlComponent,
@@ -92,25 +99,23 @@ const BASEMAPS: BasemapConfig[] = [
     FeatureInspectorComponent,
     MapTelemetryComponent,
   ],
-  animations: [
-    trigger('subMenu', [
-      transition(':enter', [
-        style({ opacity: 0, transform: 'translateX(-10px)' }),
-        animate(
-          '200ms cubic-bezier(0.4, 0, 0.2, 1)',
-          style({ opacity: 1, transform: 'translateX(0)' }),
-        ),
-      ]),
-      transition(':leave', [
-        animate(
-          '150ms cubic-bezier(0.4, 0, 0.2, 1)',
-          style({ opacity: 0, transform: 'translateX(-10px)' }),
-        ),
-      ]),
-    ]),
-  ],
   styles: [
     `
+      @keyframes subMenuEnter {
+        from {
+          opacity: 0;
+          transform: translateX(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .animate-sub-menu {
+        animation: subMenuEnter 200ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
       .map-stage-container {
         container: map-stage / inline-size;
       }
@@ -214,6 +219,7 @@ const BASEMAPS: BasemapConfig[] = [
     MeasurementInteractionService,
     OlPopupService,
     { provide: ROTATE_CONTROL_MAP_SERVICE, useExisting: OlMapService },
+    OlTimeService,
   ],
   template: `
     <div class="max-width-container py-10 min-h-screen">
@@ -291,6 +297,11 @@ const BASEMAPS: BasemapConfig[] = [
             [olTooltip]="'name'"
             [olTooltipLayer]="'cities'"
           >
+            <ol-cluster
+              [distance]="40"
+              [spiderfyOnSelect]="true"
+              (spiderfyClick)="onSpiderfyClick($event)"
+            ></ol-cluster>
           </ol-vector-layer>
 
           <ol-heatmap-layer
@@ -341,12 +352,18 @@ const BASEMAPS: BasemapConfig[] = [
           <!-- WebGL Performance Layer vs Standard Vector Layer -->
           @if (webglActive()) {
             <ol-webgl-vector-layer
+              #webglLayer
               id="webgl-perf"
               [features]="webglFeatures()"
               [zIndex]="15"
               [flatStyle]="{
-                'circle-radius': 5,
-                'circle-fill-color': '#ff5252',
+                'circle-radius': ['+', 5, ['*', 3, ['sin', ['/', ['var', 'time'], 200]]]],
+                'circle-fill-color': [
+                  'case',
+                  ['==', ['get', 'type'], 'alert'],
+                  '#ff5252',
+                  '#3b82f6',
+                ],
                 'circle-stroke-color': '#ffffff',
                 'circle-stroke-width': 1,
               }"
@@ -484,7 +501,7 @@ const BASEMAPS: BasemapConfig[] = [
 
           <!-- Draw Type Selector -->
           @if (drawActive()) {
-            <div @subMenu class="flex items-center">
+            <div class="flex items-center animate-sub-menu">
               <div class="ol-demo-toolbar__divider"></div>
               <div class="flex flex-row gap-1 items-center px-1">
                 <button
@@ -602,7 +619,7 @@ const BASEMAPS: BasemapConfig[] = [
 
           <!-- Measure Type Selector -->
           @if (measureActive()) {
-            <div @subMenu class="flex items-center">
+            <div class="flex items-center animate-sub-menu">
               <div class="ol-demo-toolbar__divider"></div>
               <div class="flex flex-row gap-1 items-center px-1">
                 <button
@@ -1094,6 +1111,27 @@ const BASEMAPS: BasemapConfig[] = [
                     (change)="webglActive.set(!webglActive())"
                   />
                 </label>
+
+                @if (webglActive()) {
+                  <label
+                    class="flex items-center gap-4 cursor-pointer group px-4 py-2.5 rounded-xl border transition-all shadow-sm duration-300"
+                    [class.bg-secondary/10]="timeAnimationActive()"
+                    [class.border-secondary/30]="timeAnimationActive()"
+                    [class.bg-base-content/5]="!timeAnimationActive()"
+                  >
+                    <span
+                      class="text-[10px] font-black uppercase tracking-widest transition-colors flex items-center gap-2"
+                    >
+                      Animate Shader
+                    </span>
+                    <input
+                      type="checkbox"
+                      class="toggle toggle-secondary"
+                      [checked]="timeAnimationActive()"
+                      (change)="timeAnimationActive.set(!timeAnimationActive())"
+                    />
+                  </label>
+                }
               </div>
             </div>
           </div>
@@ -1119,6 +1157,10 @@ export class OpenLayersDemoComponent {
   webglActive = signal<boolean>(false);
   webglPointCount = signal<number>(5000);
   webglFeatures = signal<Feature[]>([]);
+  timeAnimationActive = signal<boolean>(false);
+  timeSvc = inject(OlTimeService);
+  webglLayer = viewChild<OlWebGLVectorLayerComponent>('webglLayer');
+
   lastClick = signal<MapClickEvent | null>(null);
   activeBasemap = signal<string>('osm');
 
@@ -1196,6 +1238,23 @@ export class OpenLayersDemoComponent {
       }
     });
 
+    // Time effect for WebGL animation
+    effect(() => {
+      const layer = this.webglLayer();
+      if (layer) {
+        layer.updateVariables({ time: this.timeSvc.currentTime() });
+      }
+    });
+
+    // Start/Stop animation
+    effect(() => {
+      if (this.timeAnimationActive() && this.webglActive()) {
+        this.timeSvc.play();
+      } else {
+        this.timeSvc.pause();
+      }
+    });
+
     // Track drawn features count and apply default properties/styling on drawEnd
     this.interactionService.drawEnd$.subscribe((event) => {
       if (event.interactionId === 'demo-draw') {
@@ -1249,9 +1308,14 @@ export class OpenLayersDemoComponent {
   // Sample city features for the vector layer
   cityFeatures = signal<Feature[]>([
     {
-      id: 'barcelona',
+      id: 'barcelona-1',
       geometry: { type: 'Point', coordinates: [2.17, 41.38] },
-      properties: { name: 'Barcelona', population: 1600000 },
+      properties: { name: 'Barcelona Centro', population: 1600000 },
+    },
+    {
+      id: 'barcelona-2',
+      geometry: { type: 'Point', coordinates: [2.17, 41.38] },
+      properties: { name: 'Barcelona Norte', population: 500000 },
     },
     {
       id: 'madrid',
@@ -1277,6 +1341,26 @@ export class OpenLayersDemoComponent {
 
   onMapClick(event: MapClickEvent): void {
     this.lastClick.set(event);
+
+    // If the user clicked on an empty area, clear the selection explicitly
+    // This is necessary to clear manual selections (like spider legs) which are not
+    // tracked by the internal OpenLayers SelectInteraction collection.
+    const map = this.mapService.getMap();
+    if (map) {
+      let hit = false;
+      map.forEachFeatureAtPixel(event.pixel, () => {
+        hit = true;
+        return true;
+      });
+      if (!hit) {
+        this.interactionService.clearSelection();
+      }
+    }
+  }
+
+  onSpiderfyClick(feature: Feature): void {
+    // Select the feature to show its popup and tooltip
+    this.stateService.setSelectedFeatures([feature]);
   }
 
   onBasemapChange(basemapId: string): void {

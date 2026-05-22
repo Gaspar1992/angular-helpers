@@ -47,6 +47,8 @@ export class OlVectorLayerComponent {
               minDistance: clusterCmp.minDistance(),
               showCount: clusterCmp.showCount(),
               featureStyle: clusterCmp.featureStyle(),
+              spiderfyOnSelect: clusterCmp.spiderfyOnSelect(),
+              onSpiderfyClick: (f) => clusterCmp.spiderfyClick.emit(f),
             }
           : undefined);
 
@@ -83,6 +85,18 @@ export class OlVectorLayerComponent {
 
     effect(() => {
       this.layerService.setZIndex(this.id(), this.zIndex());
+    });
+
+    // Reactive cluster distance updates
+    effect(() => {
+      const clusterCmp = this.clusterComponent();
+      if (clusterCmp) {
+        const dist = clusterCmp.distance();
+        const minDst = clusterCmp.minDistance();
+        // Since we are inside effect, these will trigger when distance changes
+        this.layerService.setClusterDistance(this.id(), dist);
+        this.layerService.setClusterMinDistance(this.id(), minDst);
+      }
     });
 
     // Cleanup when component is destroyed
