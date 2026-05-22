@@ -29,8 +29,6 @@ export class IndexedDBTransport implements StorageTransport {
 
     const dbName = options?.dbName ?? 'ah_db';
     const storeName = options?.storeName ?? 'kv';
-    const encryptData = options?.encrypt ?? false;
-    const useToon = options?.serializer === 'toon';
 
     try {
       const db = await this.openDB(dbName, storeName);
@@ -40,33 +38,29 @@ export class IndexedDBTransport implements StorageTransport {
         const request = store.get(key);
 
         request.onsuccess = async () => {
-          const rawVal = request.result;
-          if (rawVal === undefined) {
-            resolve(undefined);
-            return;
-          }
-
-          try {
-            if (encryptData) {
+          if (request.result) {
+            if (options?.encrypt) {
               if (!this.secretPassphrase) throw new Error('Encryption passphrase not provided');
-              const plainText = await decrypt(rawVal, this.secretPassphrase);
-              resolve(await deserializeData<T>(plainText, useToon));
+              try {
+                const decrypted = await decrypt(request.result, this.secretPassphrase);
+                resolve(deserializeData<T>(decrypted, options?.serializer === 'toon'));
+              } catch (e) {
+                reject(e);
+              }
             } else {
-              resolve(await deserializeData<T>(rawVal, useToon));
+              resolve(deserializeData<T>(request.result, options?.serializer === 'toon'));
             }
-          } catch (err) {
-            reject(err);
+          } else {
+            resolve(undefined);
           }
         };
 
         request.onerror = () => reject(request.error);
       });
     } catch (err) {
-      console.error(`[IndexedDBTransport] Error reading key:`, key, err);
       return undefined;
     }
   }
-
   async write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void> {
     if (typeof indexedDB === 'undefined') return;
 
@@ -93,7 +87,7 @@ export class IndexedDBTransport implements StorageTransport {
         request.onerror = () => reject(request.error);
       });
     } catch (err) {
-      console.error(`[IndexedDBTransport] Error writing key:`, key, err);
+      // Intentionally suppressed
     }
   }
 
@@ -114,7 +108,7 @@ export class IndexedDBTransport implements StorageTransport {
         request.onerror = () => reject(request.error);
       });
     } catch (err) {
-      console.error(`[IndexedDBTransport] Error deleting key:`, key, err);
+      // Intentionally suppressed
     }
   }
 }

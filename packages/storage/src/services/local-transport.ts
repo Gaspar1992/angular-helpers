@@ -65,7 +65,7 @@ export class LocalStorageTransport implements StorageTransport {
       cacheName: this.cacheName,
       encrypt: this.encrypt,
       ...options,
-    };
+    } as StorageSignalOptions;
     const transport = this.resolveTransport(mergedOptions.storageType);
     return transport.read<T>(key, mergedOptions);
   }
@@ -83,7 +83,7 @@ export class LocalStorageTransport implements StorageTransport {
       cacheName: this.cacheName,
       encrypt: this.encrypt,
       ...options,
-    };
+    } as StorageSignalOptions;
     const transport = this.resolveTransport(mergedOptions.storageType);
     await transport.write<T>(key, data, mergedOptions);
     this.broadcastChannel?.postMessage({ type: 'write', key });
