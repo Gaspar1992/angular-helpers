@@ -40,7 +40,8 @@
     "dev": "concurrently \"pnpm start:https\" \"pnpm dev:packages\"",
     "dev:packages": "pnpm -r --parallel dev",
     "ssl:generate": "mkdir -p ssl && openssl req -x509 -newkey rsa:2048 -sha256 -nodes -keyout ssl/localhost.key -out ssl/localhost.crt -days 365 -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'",
-    "prepare": "husky"
+    "prepare": "husky",
+    "serve:ssr:angular-helpers": "node dist/angular-helpers/server/server.mjs"
   },
   "private": true,
   "lint-staged": {
@@ -66,9 +67,11 @@
     "@angular/core": "^21.2.0",
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
+    "@angular/platform-server": "^21.2.0",
     "@angular/router": "^21.2.0",
-    "@angular/ssr": "^21.2.3",
+    "@angular/ssr": "^21.2.11",
     "@toon-format/toon": "^2.2.0",
+    "express": "^5.1.0",
     "highlight.js": "^11.11.1",
     "marked": "^18.0.2",
     "rxjs": "~7.8.0",
@@ -97,7 +100,8 @@
     "@semantic-release/release-notes-generator": "^14.1.0",
     "@tailwindcss/postcss": "^4.2.4",
     "@tailwindcss/typography": "^0.5.19",
-    "@types/node": "^20.0.0",
+    "@types/express": "^5.0.1",
+    "@types/node": "^20.17.19",
     "@typescript-eslint/eslint-plugin": "^8.59.0",
     "@typescript-eslint/parser": "^8.59.0",
     "@vitest/browser": "^4.1.5",
