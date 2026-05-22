@@ -4,5 +4,8 @@
     "paths": {
       "@angular-helpers/*": ["dist/*"]
     }
+  },
+  "angularCompilerOptions": {
+    "compilationMode": "partial"
   }
 }
