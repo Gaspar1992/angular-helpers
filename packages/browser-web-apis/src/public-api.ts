@@ -150,6 +150,7 @@ export {
   warnExperimental,
   type ExperimentalWarnContext,
 } from './tokens/experimental.token';
+export { WINDOW, NAVIGATOR, createBrowserSignal } from './tokens/ssr.token';
 
 // Base classes
 export { BrowserApiBaseService } from './services/base/browser-api-base.service';
