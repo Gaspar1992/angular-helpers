@@ -51,7 +51,7 @@ export class WorkerPool {
   }
 
   private initWorker(): void {
-    if (!isPlatformBrowser() || typeof Worker === 'undefined') {
+    if (typeof Worker === 'undefined') {
       return;
     }
 
