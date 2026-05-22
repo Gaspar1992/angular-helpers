@@ -22,6 +22,8 @@ const CATEGORY_ICONS: Record<ServiceCategory, string> = {
   'worker-compute': '⚙',
   experimental: '🧪',
   security: '🔐',
+  platform: '🖥️',
+  workers: '⚙️',
   'ol-core': '🗺️',
   'ol-layers': '📐',
   'ol-overlays': '📍',
@@ -38,6 +40,8 @@ const CATEGORY_LABELS: Record<ServiceCategory, string> = {
   'worker-compute': 'Web Worker & Compute',
   experimental: 'Experimental APIs',
   security: 'Security & Permissions',
+  platform: 'Platform',
+  workers: 'Workers & Transferables',
   'ol-core': 'Core',
   'ol-layers': 'Layers',
   'ol-overlays': 'Overlays',
@@ -90,6 +94,8 @@ export function generateServiceGroups(
 
   // Convert to ServiceGroup array with deterministic order
   const categoryOrder: ServiceCategory[] = [
+    'platform',
+    'workers',
     'media-device',
     'observer',
     'system',
