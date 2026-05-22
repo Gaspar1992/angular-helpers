@@ -5,9 +5,7 @@ import {
   computed,
   effect,
   inject,
-  input,
   inputBinding,
-  output,
   outputBinding,
   signal,
 } from '@angular/core';
@@ -1451,7 +1449,6 @@ export class OpenLayersDemoComponent {
     if (!olFeature) return;
 
     // Get current abstract style or initialize default
-    const currentStyle = olFeature.get('__angular_helpers_style__') || {};
     const currentProps = olFeature.getProperties();
 
     const newName = updates.name !== undefined ? updates.name : currentProps['name'];

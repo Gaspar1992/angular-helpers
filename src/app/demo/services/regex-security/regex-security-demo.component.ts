@@ -4,7 +4,6 @@ import { RegexSecurityService } from '@angular-helpers/security';
 @Component({
   selector: 'app-regex-security-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RegexSecurityService],
   template: `
     <section class="svc-card" aria-labelledby="regex-title">
       <div class="svc-card-head">

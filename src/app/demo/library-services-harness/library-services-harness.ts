@@ -38,6 +38,7 @@ import {
   WebSocketService,
   WebStorageService,
   WebWorkerService,
+  createBrowserSignal,
   type WorkerMessage,
   type WorkerTask,
 } from '@angular-helpers/browser-web-apis';
@@ -63,7 +64,6 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
     BatteryService,
     WebSocketService,
     WebWorkerService,
-    RegexSecurityService,
     WebStorageService,
     WebShareService,
     IntersectionObserverService,
@@ -208,13 +208,15 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   readonly idleDetectorSupported = signal<boolean>(
     this.browserCapabilityService.isSupported('idleDetector'),
   );
-  readonly pageVisibilityState = signal<string>(
-    typeof document !== 'undefined' ? document.visibilityState : 'visible',
+  readonly pageVisibilityState = createBrowserSignal<string>(
+    () => document.visibilityState,
+    'visible',
   );
-  readonly pageVisible = signal<boolean>(
-    typeof document !== 'undefined' ? document.visibilityState === 'visible' : true,
+  readonly pageVisible = createBrowserSignal<boolean>(
+    () => document.visibilityState === 'visible',
+    true,
   );
-  readonly onlineStatus = signal<boolean>(navigator.onLine);
+  readonly onlineStatus = createBrowserSignal<boolean>(() => navigator.onLine, true);
   readonly intersectionIsIntersecting = signal<boolean>(false);
   readonly intersectionObserving = signal<boolean>(false);
   readonly resizeWidth = signal<number>(0);

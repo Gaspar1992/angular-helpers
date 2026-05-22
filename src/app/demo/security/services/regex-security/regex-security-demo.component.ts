@@ -4,7 +4,6 @@ import { RegexSecurityService } from '@angular-helpers/security';
 @Component({
   selector: 'app-regex-security-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RegexSecurityService],
   template: `
     <section class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5">
       <div class="flex items-center justify-between gap-3 flex-wrap mb-3">

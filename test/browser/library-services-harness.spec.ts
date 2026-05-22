@@ -49,12 +49,12 @@ test.describe('Library services harness battery and websocket services', () => {
   test('handles battery snapshot according to browser support', async ({ page }) => {
     await page.goto('/demo/library-services');
 
-    const batterySupported =
-      (await page.getByTestId('battery-supported').textContent())?.trim() ?? 'no';
-
     await page.getByTestId('battery-refresh').click();
 
     await expect(page.getByTestId('last-action')).toHaveText('refresh-battery-snapshot');
+
+    const batterySupported =
+      (await page.getByTestId('battery-supported').textContent())?.trim() ?? 'no';
 
     if (batterySupported === 'no') {
       await expect(page.getByTestId('battery-state')).toHaveText('unsupported');
@@ -113,12 +113,13 @@ test.describe('Library services harness storage and share services', () => {
 
     await page.goto('/demo/library-services');
 
-    const webShareSupported =
-      (await page.getByTestId('web-share-supported').textContent())?.trim() ?? 'no';
-
     await page.getByTestId('share-text').click();
 
     await expect(page.getByTestId('last-action')).toHaveText('share-web-text');
+
+    const webShareSupported =
+      (await page.getByTestId('web-share-supported').textContent())?.trim() ?? 'no';
+
     await expect
       .poll(async () => (await page.getByTestId('web-share-state').textContent())?.trim() ?? '')
       .toMatch(/success|error/);
@@ -479,16 +480,11 @@ test.describe('Library services harness - Tier 1 System APIs', () => {
   test('handles wake lock lifecycle according to browser support', async ({ page }) => {
     await page.goto('/demo/library-services');
 
-    const wakeLockSupported =
-      (await page.getByTestId('wake-lock-supported').textContent())?.trim() ?? 'no';
-
-    // Skip wake lock tests if not supported
-    if (wakeLockSupported === 'no') {
-      test.skip(true, 'Wake Lock API not supported in this environment');
-    }
-
     await page.getByTestId('wake-lock-request').click();
     await expect(page.getByTestId('last-action')).toHaveText('request-wake-lock');
+
+    const wakeLockSupported =
+      (await page.getByTestId('wake-lock-supported').textContent())?.trim() ?? 'no';
 
     if (wakeLockSupported === 'no') {
       await expect(page.getByTestId('wake-lock-state')).toHaveText('error');
@@ -570,11 +566,11 @@ test.describe('Library services harness - Tier 1 Network APIs', () => {
   test('opens and sends messages through BroadcastChannel', async ({ page }) => {
     await page.goto('/demo/library-services');
 
-    const broadcastSupported =
-      (await page.getByTestId('broadcast-channel-supported').textContent())?.trim() ?? 'no';
-
     await page.getByTestId('broadcast-open').click();
     await expect(page.getByTestId('last-action')).toHaveText('open-broadcast-channel');
+
+    const broadcastSupported =
+      (await page.getByTestId('broadcast-channel-supported').textContent())?.trim() ?? 'no';
 
     if (broadcastSupported === 'no') {
       await expect(page.getByTestId('broadcast-state')).toHaveText('unsupported');
@@ -632,11 +628,12 @@ test.describe('Library services harness - Tier 1 Hardware APIs', () => {
   test('triggers vibration patterns through service', async ({ page }) => {
     await page.goto('/demo/library-services');
 
+    await page.getByTestId('vibrate-success').click();
+    await expect(page.getByTestId('last-action')).toHaveText('vibrate-success');
+
     const vibrationSupported =
       (await page.getByTestId('vibration-supported').textContent())?.trim() ?? 'no';
 
-    await page.getByTestId('vibrate-success').click();
-    await expect(page.getByTestId('last-action')).toHaveText('vibrate-success');
     await expect(page.getByTestId('vibration-triggered')).toHaveText(
       vibrationSupported === 'yes' ? 'yes' : 'no',
     );
@@ -646,11 +643,11 @@ test.describe('Library services harness - Tier 1 Hardware APIs', () => {
   test('lists speech synthesis voices', async ({ page }) => {
     await page.goto('/demo/library-services');
 
-    const speechSupported =
-      (await page.getByTestId('speech-synthesis-supported').textContent())?.trim() ?? 'no';
-
     await page.getByTestId('speech-get-voices').click();
     await expect(page.getByTestId('last-action')).toHaveText('get-speech-voices');
+
+    const speechSupported =
+      (await page.getByTestId('speech-synthesis-supported').textContent())?.trim() ?? 'no';
 
     if (speechSupported === 'yes') {
       await expect
@@ -683,11 +680,11 @@ test.describe('Library services harness - Tier 1 File and Recording APIs', () =>
   test('handles file system access according to browser support', async ({ page }) => {
     await page.goto('/demo/library-services');
 
-    const fileSystemSupported =
-      (await page.getByTestId('file-system-access-supported').textContent())?.trim() ?? 'no';
-
     await page.getByTestId('file-system-open').click();
     await expect(page.getByTestId('last-action')).toHaveText('open-file-system');
+
+    const fileSystemSupported =
+      (await page.getByTestId('file-system-access-supported').textContent())?.trim() ?? 'no';
 
     if (fileSystemSupported === 'no' || fileSystemSupported === 'chrome-only') {
       await expect(page.getByTestId('file-system-state')).toHaveText('unsupported');
@@ -700,11 +697,11 @@ test.describe('Library services harness - Tier 1 File and Recording APIs', () =>
   test('handles media recorder lifecycle', async ({ page }) => {
     await page.goto('/demo/library-services');
 
-    const mediaRecorderSupported =
-      (await page.getByTestId('media-recorder-supported').textContent())?.trim() ?? 'no';
-
     await page.getByTestId('recorder-start').click();
     await expect(page.getByTestId('last-action')).toHaveText('start-recording');
+
+    const mediaRecorderSupported =
+      (await page.getByTestId('media-recorder-supported').textContent())?.trim() ?? 'no';
 
     if (mediaRecorderSupported === 'no') {
       await expect(page.getByTestId('recorder-state')).toHaveText('unsupported');

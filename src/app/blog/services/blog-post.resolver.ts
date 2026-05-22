@@ -70,6 +70,13 @@ export const blogPostResolver: ResolveFn<BlogPostData | null> = (route: Activate
   // Use relative path to work with subdirectory deployments (GitHub Pages)
   return http.get(`content/blog/${slug}.md`, { responseType: 'text' }).pipe(
     map((raw) => {
+      if (
+        raw.trim().toLowerCase().startsWith('<!doctype html>') ||
+        raw.trim().toLowerCase().startsWith('<html')
+      ) {
+        throw new Error('Not found');
+      }
+
       const { meta, body } = parseFrontmatter(raw);
       const html = marked.parse(body, { async: false }) as string;
       const data = {
