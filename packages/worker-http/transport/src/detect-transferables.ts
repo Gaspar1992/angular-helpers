@@ -1,3 +1,5 @@
+import { isTransferable } from '@angular-helpers/core';
+
 /**
  * Scans a payload one level deep and collects every `Transferable` instance
  * (ArrayBuffer, MessagePort, ImageBitmap, OffscreenCanvas, ReadableStream,
@@ -48,21 +50,4 @@ export function detectTransferables(payload: unknown): Transferable[] {
   }
 
   return found;
-}
-
-function isTransferable(value: unknown): value is Transferable {
-  if (value === null || value === undefined) return false;
-  if (typeof value !== 'object') return false;
-
-  // ArrayBuffer is the common case; check first.
-  if (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) return true;
-  // Typed-array views carry an underlying buffer but are NOT Transferable —
-  // only the buffer is. Caller must pass `.buffer` explicitly if they want it.
-  if (typeof MessagePort !== 'undefined' && value instanceof MessagePort) return true;
-  if (typeof ImageBitmap !== 'undefined' && value instanceof ImageBitmap) return true;
-  if (typeof OffscreenCanvas !== 'undefined' && value instanceof OffscreenCanvas) return true;
-  if (typeof ReadableStream !== 'undefined' && value instanceof ReadableStream) return true;
-  if (typeof WritableStream !== 'undefined' && value instanceof WritableStream) return true;
-  if (typeof TransformStream !== 'undefined' && value instanceof TransformStream) return true;
-  return false;
 }

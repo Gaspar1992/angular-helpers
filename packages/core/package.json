@@ -2,7 +2,10 @@
   "name": "@angular-helpers/core",
   "version": "0.1.0",
   "description": "Shared internal utilities and core logic for Angular Helpers packages",
-  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
     "test": "vitest run",

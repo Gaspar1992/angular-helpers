@@ -33,6 +33,8 @@ jobs:
             path: packages/security
           - name: '@angular-helpers/openlayers'
             path: packages/openlayers
+          - name: '@angular-helpers/core'
+            path: packages/core
 
     steps:
       - name: Checkout Source

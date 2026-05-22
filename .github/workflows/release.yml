@@ -46,7 +46,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Verify build works
-        run: pnpm --filter @angular-helpers/browser-web-apis --filter @angular-helpers/storage --filter @angular-helpers/security --filter @angular-helpers/worker-http --filter @angular-helpers/openlayers build:prod
+        run: pnpm --filter @angular-helpers/core --filter @angular-helpers/browser-web-apis --filter @angular-helpers/storage --filter @angular-helpers/security --filter @angular-helpers/worker-http --filter @angular-helpers/openlayers build:prod
+
+      - name: Semantic Release (Core)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm exec semantic-release
+        working-directory: packages/core
 
       - name: Semantic Release (Browser Web APIs)
         env:
@@ -82,6 +88,7 @@ jobs:
         id: release_changes
         run: |
           if git diff --quiet -- \
+            packages/core/CHANGELOG.md packages/core/package.json \
             packages/browser-web-apis/CHANGELOG.md packages/browser-web-apis/package.json \
             packages/storage/CHANGELOG.md packages/storage/package.json \
             packages/security/CHANGELOG.md packages/security/package.json \
@@ -112,6 +119,8 @@ jobs:
             ## Notes
             - Required because `main` is protected and disallows direct pushes.
           add-paths: |
+            packages/core/CHANGELOG.md
+            packages/core/package.json
             packages/browser-web-apis/CHANGELOG.md
             packages/browser-web-apis/package.json
             packages/storage/CHANGELOG.md

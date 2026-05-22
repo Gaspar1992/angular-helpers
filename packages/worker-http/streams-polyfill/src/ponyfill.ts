@@ -29,10 +29,10 @@ export async function ponyfillStreams(): Promise<StreamPonyfillExports> {
   const { ReadableStream, TransformStream, WritableStream } = await import('web-streams-polyfill');
 
   cachedPonyfill = {
-    ReadableStream,
+    ReadableStream: ReadableStream as typeof globalThis.ReadableStream,
     TransformStream,
     WritableStream,
   };
 
-  return cachedPonyfill;
+  return cachedPonyfill!;
 }
