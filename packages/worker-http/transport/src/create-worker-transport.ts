@@ -87,7 +87,10 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
     } else if (config.workerUrl) {
       const url =
         typeof config.workerUrl === 'string'
-          ? new URL(config.workerUrl, document.baseURI)
+          ? new URL(
+              config.workerUrl,
+              typeof document !== 'undefined' ? document.baseURI : 'http://localhost',
+            )
           : config.workerUrl;
 
       if (mode === 'shared') {
