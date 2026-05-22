@@ -63,7 +63,7 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
     BatteryService,
     WebSocketService,
     WebWorkerService,
-    RegexSecurityService,
+    // RegexSecurityService is provided globally in app.config.ts
     WebStorageService,
     WebShareService,
     IntersectionObserverService,

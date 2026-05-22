@@ -1,5 +1,7 @@
 import { makeEnvironmentProviders, EnvironmentProviders, Provider } from '@angular/core';
 import { RegexSecurityService } from './services/regex-security.service';
+import { RegexAnalyzerService } from './services/regex-analyzer.service';
+import { RegexWorkerPoolService } from './services/regex-worker-pool.service';
 import { WebCryptoService } from './services/web-crypto.service';
 import {
   SecureStorageService,
@@ -62,7 +64,8 @@ export function provideSecurity(config: SecurityConfig = {}): EnvironmentProvide
   const mergedConfig = { ...defaultSecurityConfig, ...config };
   const providers: Provider[] = [];
 
-  if (mergedConfig.enableRegexSecurity) providers.push(RegexSecurityService);
+  if (mergedConfig.enableRegexSecurity)
+    providers.push(RegexAnalyzerService, RegexWorkerPoolService, RegexSecurityService);
   if (mergedConfig.enableWebCrypto) providers.push(WebCryptoService);
   if (mergedConfig.enableSecureStorage) providers.push(SecureStorageService);
   if (mergedConfig.enableInputSanitizer) providers.push(InputSanitizerService);
@@ -83,7 +86,11 @@ export function provideSecurity(config: SecurityConfig = {}): EnvironmentProvide
 }
 
 export function provideRegexSecurity(): EnvironmentProviders {
-  return makeEnvironmentProviders([RegexSecurityService]);
+  return makeEnvironmentProviders([
+    RegexAnalyzerService,
+    RegexWorkerPoolService,
+    RegexSecurityService,
+  ]);
 }
 
 export function provideWebCrypto(): EnvironmentProviders {
