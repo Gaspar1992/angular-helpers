@@ -197,12 +197,12 @@ export function hibpPassword<TPathKind extends PathKind = PathKind.Root>(
   validateAsync(path, {
     params: ({ value }) => {
       const raw = value();
-      return raw && raw.length >= 8 ? raw : undefined;
+      return { password: raw && raw.length >= 8 ? raw : '' };
     },
-    factory: (passwordSignal: Signal<string | undefined>) => {
+    factory: (paramsSignal: Signal<{ password: string } | undefined>) => {
       const hibp = inject(HibpService);
       return resource({
-        params: () => passwordSignal(),
+        params: () => paramsSignal()?.password,
         loader: async ({ params: password, abortSignal }) => {
           if (!password) return undefined;
 
