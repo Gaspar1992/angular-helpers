@@ -452,8 +452,21 @@ export class MapComponent {}`,
         description: 'Whether to show the clustered feature count',
       },
       { name: 'featureStyle', type: 'Style', description: 'Custom style for the cluster markers' },
+      {
+        name: 'spiderfyOnSelect',
+        type: 'boolean',
+        defaultValue: 'false',
+        description:
+          'Whether to spiderfy the cluster on click (expanding overlapping features radially)',
+      },
     ],
-    outputs: [],
+    outputs: [
+      {
+        name: 'spiderfyClick',
+        type: 'Feature',
+        description: 'Emitted when an individual feature within a spiderfied cluster is clicked',
+      },
+    ],
     methods: [],
     example: `import { OlVectorLayerComponent, OlClusterComponent } from '@angular-helpers/openlayers/layers';
 
@@ -461,7 +474,12 @@ export class MapComponent {}`,
   template: \`
     <ol-map>
       <ol-vector-layer id="locations" [features]="locations()">
-        <ol-cluster [distance]="55" [minDistance]="20" [showCount]="true" />
+        <ol-cluster 
+          [distance]="55" 
+          [minDistance]="20" 
+          [showCount]="true"
+          [spiderfyOnSelect]="true"
+          (spiderfyClick)="onFeatureClick($event)" />
       </ol-vector-layer>
     </ol-map>
   \`

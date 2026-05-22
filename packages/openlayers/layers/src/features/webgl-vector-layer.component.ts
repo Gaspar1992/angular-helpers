@@ -142,6 +142,17 @@ export class OlWebGLVectorLayerComponent {
     });
   }
 
+  /**
+   * Imperatively update style variables without triggering Angular change detection.
+   * Ideal for 60FPS animations (e.g., linked to OlTimeService) where you don't want
+   * to use the declarative [variables] input.
+   */
+  updateVariables(vars: Record<string, string | number | boolean | number[]>): void {
+    if (this.layer) {
+      this.layer.updateStyleVariables(vars);
+    }
+  }
+
   private syncFeatures(features: Feature[]): void {
     this.vectorSource.clear();
     if (!features?.length) return;

@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import type { Style } from '@angular-helpers/openlayers/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import type { Feature, Style } from '@angular-helpers/openlayers/core';
 
 @Component({
   selector: 'ol-cluster',
@@ -11,4 +11,6 @@ export class OlClusterComponent {
   minDistance = input<number>(20);
   showCount = input<boolean>(true);
   featureStyle = input<Style>();
+  spiderfyOnSelect = input<boolean>(false);
+  spiderfyClick = output<Feature>();
 }

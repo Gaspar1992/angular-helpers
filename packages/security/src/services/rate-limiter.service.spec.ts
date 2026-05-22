@@ -18,12 +18,12 @@ describe('RateLimiterService', () => {
     vi.useRealTimers();
   });
 
-  it('debe crearse correctamente', () => {
+  it('should create correctly', () => {
     expect(service).toBeTruthy();
   });
 
   describe('Token Bucket Policy', () => {
-    it('debe consumir tokens y actualizar señales de forma reactiva', async () => {
+    it('should consume tokens and update signals reactively', async () => {
       service.configure('tb-key', { type: 'token-bucket', capacity: 3, refillPerSecond: 1 });
 
       const canExec = service.canExecute('tb-key');
@@ -41,7 +41,7 @@ describe('RateLimiterService', () => {
       expect(canExec()).toBe(false);
     });
 
-    it('debe recargar tokens automaticamente con el paso del tiempo y revivir la reactividad', async () => {
+    it('should reload tokens automatically over time and revive reactivity', async () => {
       service.configure('tb-key', { type: 'token-bucket', capacity: 3, refillPerSecond: 1 });
 
       const canExec = service.canExecute('tb-key');
@@ -55,7 +55,7 @@ describe('RateLimiterService', () => {
       // Avanzar el tiempo 1050ms para permitir que se rellene 1 token completo (tasa = 1 por segundo)
       vi.advanceTimersByTime(1050);
 
-      // El token bucket debe haberse recargado y el signal debe haberse actualizado a 1 automáticamente
+      // The token bucket should have reloaded and the signal should have updated to 1 automatically
       expect(remaining()).toBe(1);
       expect(canExec()).toBe(true);
 
@@ -67,7 +67,7 @@ describe('RateLimiterService', () => {
   });
 
   describe('Sliding Window Policy', () => {
-    it('debe consumir unidades y actualizar señales de forma reactiva', async () => {
+    it('should consume units and update signals reactively', async () => {
       service.configure('sw-key', { type: 'sliding-window', max: 2, windowMs: 2000 });
 
       const canExec = service.canExecute('sw-key');
@@ -85,7 +85,7 @@ describe('RateLimiterService', () => {
       expect(canExec()).toBe(false);
     });
 
-    it('debe autoliberar el bloqueo del sliding window al expirar el cooldown de forma reactiva', async () => {
+    it('should auto-release the sliding window lock when cooldown expires reactively', async () => {
       service.configure('sw-key', { type: 'sliding-window', max: 2, windowMs: 2000 });
 
       const canExec = service.canExecute('sw-key');

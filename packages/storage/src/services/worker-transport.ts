@@ -26,6 +26,8 @@ export class WorkerStorageTransport implements StorageTransport {
     if (this.worker || !this.workerFactory) return;
 
     this.worker = this.workerFactory();
+    if (!this.worker) return;
+
     this.worker.onmessage = (event: MessageEvent<WorkerStorageResponse>) => {
       const { type, requestId, payload, key, error } = event.data;
 
@@ -103,6 +105,9 @@ export class WorkerStorageTransport implements StorageTransport {
         );
       }
       this.initWorker();
+      if (!this.worker) {
+        throw new Error('Worker environment is not available (e.g. SSR)');
+      }
     }
   }
 

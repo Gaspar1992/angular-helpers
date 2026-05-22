@@ -90,23 +90,23 @@ describe('validators-core (shared between Reactive Forms and Signal Forms)', () 
   });
 
   describe('sanitizeHtmlString / isHtmlSafe', () => {
-    it('debe limpiar scripts y on-handlers dejando etiquetas seguras', () => {
+    it('should clean scripts and on-handlers leaving safe tags', () => {
       const input = '<p>Hola <b>mundo</b><script>alert(1)</script></p>';
       expect(sanitizeHtmlString(input)).toBe('<p>Hola <b>mundo</b>alert(1)</p>');
     });
 
-    it('debe remover atributos no permitidos', () => {
+    it('should remove disallowed attributes', () => {
       const input = '<a href="https://example.com" class="btn" title="link">Link</a>';
       // Por defecto solo se permite href en tag 'a'
       expect(sanitizeHtmlString(input)).toBe('<a href="https://example.com">Link</a>');
     });
 
-    it('debe sanitizar atributos href maliciosos', () => {
+    it('should sanitize malicious href attributes', () => {
       const input = '<a href="javascript:alert(1)">Hack</a>';
       expect(sanitizeHtmlString(input)).toBe('<a>Hack</a>');
     });
 
-    it('debe sanitizar atributos de URL en tags personalizados para evitar bypass XSS', () => {
+    it('should sanitize URL attributes in custom tags to prevent XSS bypass', () => {
       const options = {
         allowedTags: ['iframe', 'form'],
         allowedAttributes: {

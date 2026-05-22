@@ -20,6 +20,10 @@ export interface ClusterConfig {
   showCount?: boolean;
   /** Style for individual features when clustering */
   featureStyle?: Style;
+  /** Automatically spiderfy overlapping points on click (default: false) */
+  spiderfyOnSelect?: boolean;
+  /** Callback when a spider leg feature is clicked */
+  onSpiderfyClick?: (feature: Feature) => void;
 }
 
 export interface VectorLayerConfig extends LayerConfig {

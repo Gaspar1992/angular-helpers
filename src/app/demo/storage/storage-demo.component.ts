@@ -19,10 +19,13 @@ import {
 } from '@angular-helpers/storage';
 
 // Native factory to load our background app storage worker in Vite/Esbuild
-export function storageWorkerFactory(): Worker {
-  return new Worker(new URL('../../../workers/app-storage.worker.ts', import.meta.url), {
-    type: 'module',
-  });
+export function storageWorkerFactory(): Worker | undefined {
+  if (typeof Worker !== 'undefined') {
+    return new Worker(new URL('../../../workers/app-storage.worker.ts', import.meta.url), {
+      type: 'module',
+    });
+  }
+  return undefined;
 }
 
 interface RPCMessageLog {
@@ -185,6 +188,8 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
 
   // FPS requestAnimationFrame Loop
   private runFpsTracker(): void {
+    if (typeof requestAnimationFrame === 'undefined' || typeof performance === 'undefined') return;
+
     const tick = () => {
       this.frames++;
       const now = performance.now();
