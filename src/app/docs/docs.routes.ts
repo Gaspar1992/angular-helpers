@@ -17,6 +17,24 @@ export const DOCS_ROUTES: Routes = [
         title: 'Documentation — Angular Helpers',
       },
       {
+        path: 'core',
+        loadComponent: () =>
+          import('./feature/unified-overview/unified-overview.component').then(
+            (m) => m.UnifiedOverviewComponent,
+          ),
+        resolve: { config: overviewResolver },
+        title: 'core — Angular Helpers',
+      },
+      {
+        path: 'core/:entry',
+        loadComponent: () =>
+          import('./feature/unified-service-detail/unified-service-detail.component').then(
+            (m) => m.UnifiedServiceDetailComponent,
+          ),
+        resolve: { config: serviceDetailResolver },
+        title: 'Utility — Angular Helpers',
+      },
+      {
         path: 'browser-web-apis',
         loadComponent: () =>
           import('./feature/unified-overview/unified-overview.component').then(

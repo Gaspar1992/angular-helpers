@@ -1,6 +1,7 @@
 import { ResolveFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { BROWSER_WEB_APIS_SERVICES } from '../data/browser-web-apis.data';
+import { CORE_SERVICES } from '../data/core.data';
 import { SECURITY_SERVICES, SECURITY_INTERFACES } from '../data/security.data';
 import { WORKER_HTTP_ENTRIES, WORKER_HTTP_INTERFACES } from '../data/worker-http.data';
 import { OPENLAYERS_SERVICES } from '../data/openlayers.data';
@@ -12,6 +13,11 @@ import {
 import { SeoService } from '../../core/services/seo.service';
 
 const SECTION_DATA = {
+  core: {
+    dataSource: CORE_SERVICES,
+    backRoute: '/docs/core',
+    backLabel: 'core',
+  },
   'browser-web-apis': {
     dataSource: BROWSER_WEB_APIS_SERVICES,
     backRoute: '/docs/browser-web-apis',
@@ -57,7 +63,13 @@ export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (rout
   const seo = inject(SeoService);
   const section = route.url[0]?.path as keyof typeof SECTION_DATA;
   const paramName =
-    section === 'worker-http' ? 'entry' : section === 'openlayers' ? 'component' : 'service';
+    section === 'worker-http'
+      ? 'entry'
+      : section === 'openlayers'
+        ? 'component'
+        : section === 'core'
+          ? 'entry'
+          : 'service';
   const itemId = route.paramMap.get(paramName) ?? '';
 
   // Safety check for invalid section - redirect to docs

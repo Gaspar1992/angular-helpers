@@ -115,6 +115,8 @@ export type ServiceCategory =
   | 'worker-compute'
   | 'experimental'
   | 'security'
+  | 'platform'
+  | 'workers'
   | 'ol-core'
   | 'ol-layers'
   | 'ol-overlays'

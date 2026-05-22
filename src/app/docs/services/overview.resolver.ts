@@ -1,6 +1,7 @@
 import { ResolveFn } from '@angular/router';
 import { OverviewConfig } from '../feature/unified-overview/unified-overview.component';
 import { BROWSER_WEB_APIS_SERVICES } from '../data/browser-web-apis.data';
+import { CORE_SERVICES } from '../data/core.data';
 import { SECURITY_SERVICES } from '../data/security.data';
 import { WORKER_HTTP_ENTRIES } from '../data/worker-http.data';
 import { OPENLAYERS_SERVICES } from '../data/openlayers.data';
@@ -8,6 +9,27 @@ import { STORAGE_SERVICES } from '../data/storage.data';
 import { generateServiceGroups } from './overview.utils';
 
 const OVERVIEW_CONFIGS: Record<string, OverviewConfig> = {
+  core: {
+    packageName: 'core',
+    npmPackage: '@angular-helpers/core',
+    lead: 'Shared primitives used across all Angular Helpers packages — platform detection, Transferable helpers, and Worker pooling.',
+    providerExample: `import { injectPlatform, injectWorkerPool, isTransferable } from '@angular-helpers/core';
+
+// No provider setup required — all utilities are standalone inject() functions.
+// pnpm add @angular-helpers/core`,
+    serviceGroups: [
+      {
+        label: 'Platform',
+        icon: '🖥️',
+        items: CORE_SERVICES.filter((s) => s.category === 'platform'),
+      },
+      {
+        label: 'Workers & Transferables',
+        icon: '⚙️',
+        items: CORE_SERVICES.filter((s) => s.category === 'workers'),
+      },
+    ],
+  },
   'browser-web-apis': {
     packageName: 'browser-web-apis',
     npmPackage: '@angular-helpers/browser-web-apis',

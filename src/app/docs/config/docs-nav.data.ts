@@ -19,6 +19,24 @@ export interface LibraryNav {
 
 export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
   {
+    id: 'core',
+    label: 'Core',
+    overviewRoute: '/docs/core',
+    sections: [
+      {
+        title: 'Platform',
+        items: [{ label: 'injectPlatform', route: '/docs/core/inject-platform', hasFn: true }],
+      },
+      {
+        title: 'Workers',
+        items: [
+          { label: 'isTransferable', route: '/docs/core/is-transferable', hasFn: true },
+          { label: 'WorkerPool', route: '/docs/core/worker-pool' },
+        ],
+      },
+    ],
+  },
+  {
     id: 'browser-web-apis',
     label: 'Browser Web APIs',
     overviewRoute: '/docs/browser-web-apis',
