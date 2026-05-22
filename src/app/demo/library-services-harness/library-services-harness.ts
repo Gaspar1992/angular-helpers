@@ -213,7 +213,9 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   readonly pageVisible = signal<boolean>(
     typeof document !== 'undefined' ? document.visibilityState === 'visible' : true,
   );
-  readonly onlineStatus = signal<boolean>(navigator.onLine);
+  readonly onlineStatus = signal<boolean>(
+    typeof navigator !== 'undefined' ? navigator.onLine : true,
+  );
   readonly intersectionIsIntersecting = signal<boolean>(false);
   readonly intersectionObserving = signal<boolean>(false);
   readonly resizeWidth = signal<number>(0);
