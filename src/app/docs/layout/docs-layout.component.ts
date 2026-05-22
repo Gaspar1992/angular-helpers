@@ -272,6 +272,7 @@ export class DocsLayoutComponent {
   }
 
   private scrollToActiveItem(): void {
+    if (!this.window.document) return;
     const sidebars = this.window.document.querySelectorAll('aside');
     for (const sidebar of sidebars) {
       const activeItem = sidebar.querySelector('a.active');

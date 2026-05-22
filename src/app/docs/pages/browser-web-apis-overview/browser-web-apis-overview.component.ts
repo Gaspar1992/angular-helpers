@@ -6,19 +6,19 @@ import { BreadcrumbItem } from '../../models/doc-meta.model';
 
 const PROVIDER_ALL_IN_ONE = `import { provideBrowserWebApis } from '@angular-helpers/browser-web-apis';
 import {
-  CameraService, GeolocationService, WebStorageService,
-  WebSocketService, WebWorkerService
+  provideCamera, provideGeolocation, provideWebStorage,
+  provideWebSocket, provideWebWorker
 } from '@angular-helpers/browser-web-apis';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideBrowserWebApis({
       services: [
-        CameraService,
-        GeolocationService,
-        WebStorageService,
-        WebSocketService,
-        WebWorkerService,
+        provideCamera(),
+        provideGeolocation(),
+        provideWebStorage(),
+        provideWebSocket(),
+        provideWebWorker(),
         // ...add more as needed
       ],
     }),

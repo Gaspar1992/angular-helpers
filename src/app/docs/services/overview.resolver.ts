@@ -12,12 +12,12 @@ const OVERVIEW_CONFIGS: Record<string, OverviewConfig> = {
     packageName: 'browser-web-apis',
     npmPackage: '@angular-helpers/browser-web-apis',
     lead: 'Angular services for structured, secure, and reactive access to Browser Web APIs.',
-    providerExample: `import { provideBrowserWebApis, CameraService, GeolocationService } from '@angular-helpers/browser-web-apis';
+    providerExample: `import { provideBrowserWebApis, provideCamera, provideGeolocation } from '@angular-helpers/browser-web-apis';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideBrowserWebApis({
-      services: [CameraService, GeolocationService],
+      services: [provideCamera(), provideGeolocation()],
     }),
   ],
 });`,
