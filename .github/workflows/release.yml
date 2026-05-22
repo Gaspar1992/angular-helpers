@@ -51,6 +51,9 @@ jobs:
       - name: Build remaining packages
         run: pnpm --filter @angular-helpers/browser-web-apis --filter @angular-helpers/storage --filter @angular-helpers/security --filter @angular-helpers/worker-http --filter @angular-helpers/openlayers build:prod
 
+      - name: Strip workspace protocol from built packages
+        run: find dist -name "package.json" -exec sed -i 's/"workspace:\*"/"^1.0.0"/g' {} +
+
       - name: Semantic Release (Core)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
