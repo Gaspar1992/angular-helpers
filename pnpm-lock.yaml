@@ -4,6 +4,16 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@angular/core': ^21.2.0
+  '@angular/common': ^21.2.0
+  '@angular/compiler': ^21.2.0
+  '@angular/forms': ^21.2.0
+  '@angular/platform-browser': ^21.2.0
+  '@angular/router': ^21.2.0
+  uuid: ^11.1.1
+  webpack-dev-server: ^5.2.4
+
 importers:
 
   .:
@@ -211,13 +221,13 @@ importers:
   packages/browser-web-apis:
     dependencies:
       '@angular/common':
-        specifier: ^21.0.0
+        specifier: ^21.2.0
         version: 21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2)
       '@angular/core':
-        specifier: ^21.0.0
+        specifier: ^21.2.0
         version: 21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2)
       '@angular/platform-browser':
-        specifier: ^21.0.0
+        specifier: ^21.2.0
         version: 21.2.13(@angular/animations@21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2)))(@angular/common@21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))
       '@angular/ssr':
         specifier: ^21.0.0
@@ -236,10 +246,10 @@ importers:
   packages/openlayers:
     dependencies:
       '@angular/common':
-        specifier: ^21.0.0
+        specifier: ^21.2.0
         version: 21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2)
       '@angular/core':
-        specifier: ^21.0.0
+        specifier: ^21.2.0
         version: 21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2)
       milsymbol:
         specifier: ^3.0.0
@@ -273,13 +283,13 @@ importers:
   packages/security:
     dependencies:
       '@angular/common':
-        specifier: ^21.0.0
+        specifier: ^21.2.0
         version: 21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2)
       '@angular/core':
-        specifier: ^21.0.0
+        specifier: ^21.2.0
         version: 21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2)
       '@angular/forms':
-        specifier: ^21.0.0
+        specifier: ^21.2.0
         version: 21.2.13(@angular/common@21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(@angular/platform-browser@21.2.13(@angular/animations@21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2)))(@angular/common@21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2)))(rxjs@7.8.2)
       rxjs:
         specifier: ^7.0.0 || ^8.0.0
@@ -291,13 +301,13 @@ importers:
   packages/storage:
     dependencies:
       '@angular/common':
-        specifier: ^21.0.0
+        specifier: ^21.2.0
         version: 21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2)
       '@angular/core':
-        specifier: ^21.0.0
+        specifier: ^21.2.0
         version: 21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2)
       '@angular/platform-browser':
-        specifier: ^21.0.0
+        specifier: ^21.2.0
         version: 21.2.13(@angular/animations@21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2)))(@angular/common@21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))
       rxjs:
         specifier: ^7.0.0
@@ -313,10 +323,10 @@ importers:
   packages/worker-http:
     dependencies:
       '@angular/common':
-        specifier: ^21.0.0
+        specifier: ^21.2.0
         version: 21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2)
       '@angular/core':
-        specifier: ^21.0.0
+        specifier: ^21.2.0
         version: 21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2)
       '@toon-format/toon':
         specifier: ^2.0.0
@@ -455,9 +465,9 @@ packages:
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0, npm: ^6.11.0 || ^7.5.6 || >=8.0.0, yarn: '>= 1.13.0'}
     peerDependencies:
       '@angular/compiler-cli': ^21.0.0
-      '@angular/core': ^21.0.0
+      '@angular/core': ^21.2.0
       '@angular/localize': ^21.0.0
-      '@angular/platform-browser': ^21.0.0
+      '@angular/platform-browser': ^21.2.0
       '@angular/platform-server': ^21.0.0
       '@angular/service-worker': ^21.0.0
       '@angular/ssr': ^21.2.11
@@ -505,7 +515,7 @@ packages:
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0, npm: ^6.11.0 || ^7.5.6 || >=8.0.0, yarn: '>= 1.13.0'}
     peerDependencies:
       webpack: ^5.30.0
-      webpack-dev-server: ^5.0.2
+      webpack-dev-server: ^5.2.4
 
   '@angular-devkit/core@21.2.11':
     resolution: {integrity: sha512-kfMNh5X2hOdyr0uNFaaHUJR3OVr4oH2+UhI+FsTu7gqogdgYlHAVHhHAFulfDgtAEOiqpeSQF9RhQnCJl+/LXA==}
@@ -563,17 +573,17 @@ packages:
     resolution: {integrity: sha512-bOztfduqo6PPgWTJcmZ402mPZEXCaeODZcNUqkSz76LibS7uyiT2kuvk2duw7EOFi3LIptxCLQe0ofnB+njiOw==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
     peerDependencies:
-      '@angular/core': 21.2.13
+      '@angular/core': ^21.2.0
 
   '@angular/build@21.2.11':
     resolution: {integrity: sha512-2afR6VKkP0HH2u6OuijSMgSHsL5tU4CBCixgQtY677mlvS8TOZg/kOksJIUlz0EvDVCJZBK8WLH9cPJ6mC/Qdg==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0, npm: ^6.11.0 || ^7.5.6 || >=8.0.0, yarn: '>= 1.13.0'}
     peerDependencies:
-      '@angular/compiler': ^21.0.0
+      '@angular/compiler': ^21.2.0
       '@angular/compiler-cli': ^21.0.0
-      '@angular/core': ^21.0.0
+      '@angular/core': ^21.2.0
       '@angular/localize': ^21.0.0
-      '@angular/platform-browser': ^21.0.0
+      '@angular/platform-browser': ^21.2.0
       '@angular/platform-server': ^21.0.0
       '@angular/service-worker': ^21.0.0
       '@angular/ssr': ^21.2.11
@@ -620,7 +630,7 @@ packages:
     resolution: {integrity: sha512-fNvRmGAX0zbsLX/kJjgb6l8HAuGTpfYRNc06taTCIvED2RsRpfwrh79IxYlPBspr+hpFbHa0/kxU6Q5I8V0jKQ==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
     peerDependencies:
-      '@angular/core': 21.2.13
+      '@angular/core': ^21.2.0
       rxjs: ^6.5.3 || ^7.4.0
 
   '@angular/compiler-cli@21.2.13':
@@ -628,7 +638,7 @@ packages:
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
     hasBin: true
     peerDependencies:
-      '@angular/compiler': 21.2.13
+      '@angular/compiler': ^21.2.0
       typescript: '>=5.9 <6.1'
     peerDependenciesMeta:
       typescript:
@@ -642,7 +652,7 @@ packages:
     resolution: {integrity: sha512-23tS4oNL8nvkHcI4l9rbruQs2WS4yqQmBVQxWakqS9cmRpArLGgveR+hKNU5tPXm5EAi8oLO34/Zy7z70jUpCg==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
     peerDependencies:
-      '@angular/compiler': 21.2.13
+      '@angular/compiler': ^21.2.0
       rxjs: ^6.5.3 || ^7.4.0
       zone.js: ~0.15.0 || ~0.16.0
     peerDependenciesMeta:
@@ -655,27 +665,27 @@ packages:
     resolution: {integrity: sha512-efAKdL8eVRlGvcJWrUFcYyRE/togWfopUTw2D5TIkDAndnmmRaWA70wD4n/E1FFV5UdxSBxoyEYE0qVlPiewtQ==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
     peerDependencies:
-      '@angular/common': 21.2.13
-      '@angular/core': 21.2.13
-      '@angular/platform-browser': 21.2.13
+      '@angular/common': ^21.2.0
+      '@angular/core': ^21.2.0
+      '@angular/platform-browser': ^21.2.0
       rxjs: ^6.5.3 || ^7.4.0
 
   '@angular/platform-browser-dynamic@21.2.4':
     resolution: {integrity: sha512-LRJLnGh4rdgD0+S5xuDd4YRm5bV8WP2e6F1Pe5rIr6N4V9ofgpB0/uOjYy9se99FJZjoyPnpxaKsp8+XA753Zg==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
     peerDependencies:
-      '@angular/common': 21.2.4
-      '@angular/compiler': 21.2.4
-      '@angular/core': 21.2.4
-      '@angular/platform-browser': 21.2.4
+      '@angular/common': ^21.2.0
+      '@angular/compiler': ^21.2.0
+      '@angular/core': ^21.2.0
+      '@angular/platform-browser': ^21.2.0
 
   '@angular/platform-browser@21.2.13':
     resolution: {integrity: sha512-96rcwLHsklqAYRuS2SEBOUdQS5PLkuUIEEIjpYu4rxU2PVvOMapJEImM/QBxrbwjnCgRbj/CivkgfjiR0R0wSA==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
     peerDependencies:
       '@angular/animations': 21.2.13
-      '@angular/common': 21.2.13
-      '@angular/core': 21.2.13
+      '@angular/common': ^21.2.0
+      '@angular/core': ^21.2.0
     peerDependenciesMeta:
       '@angular/animations':
         optional: true
@@ -684,28 +694,28 @@ packages:
     resolution: {integrity: sha512-NRaaZ0gvXA9C60Y610MaFp921gB81Uffqk0gJxaPTYQ887/b1of21UZvFOZo0unMaislSrx+KQ3yhRB74DqcKg==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
     peerDependencies:
-      '@angular/common': 21.2.14
-      '@angular/compiler': 21.2.14
-      '@angular/core': 21.2.14
-      '@angular/platform-browser': 21.2.14
+      '@angular/common': ^21.2.0
+      '@angular/compiler': ^21.2.0
+      '@angular/core': ^21.2.0
+      '@angular/platform-browser': ^21.2.0
       rxjs: ^6.5.3 || ^7.4.0
 
   '@angular/router@21.2.13':
     resolution: {integrity: sha512-/JXtdhUH/rDGiJmUNrrbs52Aji4sygVCz5HIBujrnj3cjreKam7n98Ufkh0aZvAKybdGd5A8srNUFePzAvfExQ==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
     peerDependencies:
-      '@angular/common': 21.2.13
-      '@angular/core': 21.2.13
-      '@angular/platform-browser': 21.2.13
+      '@angular/common': ^21.2.0
+      '@angular/core': ^21.2.0
+      '@angular/platform-browser': ^21.2.0
       rxjs: ^6.5.3 || ^7.4.0
 
   '@angular/ssr@21.2.11':
     resolution: {integrity: sha512-YvqUtBXE0jxUU9V6ck7A06cjB/8PADqF+Argm2W+oFztoWgtM5BErAJ2PzccvEDmveUFDnFprtzEH6FSCcbqMg==}
     peerDependencies:
-      '@angular/common': ^21.0.0
-      '@angular/core': ^21.0.0
+      '@angular/common': ^21.2.0
+      '@angular/core': ^21.2.0
       '@angular/platform-server': ^21.0.0
-      '@angular/router': ^21.0.0
+      '@angular/router': ^21.2.0
     peerDependenciesMeta:
       '@angular/platform-server':
         optional: true
@@ -7367,9 +7377,8 @@ packages:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
 
-  uuid@8.3.2:
-    resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
-    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+  uuid@11.1.1:
+    resolution: {integrity: sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==}
     hasBin: true
 
   validate-npm-package-license@3.0.4:
@@ -7546,8 +7555,8 @@ packages:
       webpack:
         optional: true
 
-  webpack-dev-server@5.2.3:
-    resolution: {integrity: sha512-9Gyu2F7+bg4Vv+pjbovuYDhHX+mqdqITykfzdM9UyKqKHlsE5aAjRhR+oOEfXW5vBeu8tarzlJFIZva4ZjAdrQ==}
+  webpack-dev-server@5.2.4:
+    resolution: {integrity: sha512-GqDPGZN9bRqKBTkp4aWkobDDHMsrXKoGSdOH56smIri8qR0JG8gfL8/v/f/OZR3/OKXjG8uwJbFVhKm/FNU/UA==}
     engines: {node: '>= 18.12.0'}
     hasBin: true
     peerDependencies:
@@ -7917,7 +7926,7 @@ snapshots:
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@angular-devkit/architect': 0.2102.11(chokidar@5.0.0)
-      '@angular-devkit/build-webpack': 0.2102.11(chokidar@5.0.0)(webpack-dev-server@5.2.3(tslib@2.8.1)(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12)))(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12))
+      '@angular-devkit/build-webpack': 0.2102.11(chokidar@5.0.0)(webpack-dev-server@5.2.4(tslib@2.8.1)(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12)))(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12))
       '@angular-devkit/core': 21.2.11(chokidar@5.0.0)
       '@angular/build': 21.2.11(7ca6dfeb6f9e9123dbd6a1a4be822c3a)
       '@angular/compiler-cli': 21.2.13(@angular/compiler@21.2.13)(typescript@5.9.3)
@@ -7968,7 +7977,7 @@ snapshots:
       typescript: 5.9.3
       webpack: 5.105.2(esbuild@0.27.7)(lightningcss@1.32.0)(postcss@8.5.12)
       webpack-dev-middleware: 7.4.5(tslib@2.8.1)(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12))
-      webpack-dev-server: 5.2.3(tslib@2.8.1)(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12))
+      webpack-dev-server: 5.2.4(tslib@2.8.1)(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12))
       webpack-merge: 6.0.1
       webpack-subresource-integrity: 5.1.0(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12))
     optionalDependencies:
@@ -8011,12 +8020,12 @@ snapshots:
       - webpack-cli
       - yaml
 
-  '@angular-devkit/build-webpack@0.2102.11(chokidar@5.0.0)(webpack-dev-server@5.2.3(tslib@2.8.1)(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12)))(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12))':
+  '@angular-devkit/build-webpack@0.2102.11(chokidar@5.0.0)(webpack-dev-server@5.2.4(tslib@2.8.1)(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12)))(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12))':
     dependencies:
       '@angular-devkit/architect': 0.2102.11(chokidar@5.0.0)
       rxjs: 7.8.2
       webpack: 5.105.2(esbuild@0.27.7)(lightningcss@1.32.0)(postcss@8.5.12)
-      webpack-dev-server: 5.2.3(tslib@2.8.1)(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12))
+      webpack-dev-server: 5.2.4(tslib@2.8.1)(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12))
     transitivePeerDependencies:
       - chokidar
 
@@ -10744,7 +10753,7 @@ snapshots:
 
   '@types/connect-history-api-fallback@1.5.4':
     dependencies:
-      '@types/express-serve-static-core': 4.19.8
+      '@types/express-serve-static-core': 5.1.1
       '@types/node': 20.19.41
 
   '@types/connect@3.4.38':
@@ -10835,7 +10844,7 @@ snapshots:
 
   '@types/serve-index@1.9.4':
     dependencies:
-      '@types/express': 4.17.25
+      '@types/express': 5.0.6
 
   '@types/serve-static@1.15.10':
     dependencies:
@@ -14528,7 +14537,7 @@ snapshots:
   sockjs@0.3.24:
     dependencies:
       faye-websocket: 0.11.4
-      uuid: 8.3.2
+      uuid: 11.1.1
       websocket-driver: 0.7.4
 
   socks-proxy-agent@8.0.5:
@@ -14953,7 +14962,7 @@ snapshots:
 
   utils-merge@1.0.1: {}
 
-  uuid@8.3.2: {}
+  uuid@11.1.1: {}
 
   validate-npm-package-license@3.0.4:
     dependencies:
@@ -15144,7 +15153,7 @@ snapshots:
     transitivePeerDependencies:
       - tslib
 
-  webpack-dev-server@5.2.3(tslib@2.8.1)(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12)):
+  webpack-dev-server@5.2.4(tslib@2.8.1)(webpack@5.105.2(esbuild@0.27.3)(lightningcss@1.32.0)(postcss@8.5.12)):
     dependencies:
       '@types/bonjour': 3.5.13
       '@types/connect-history-api-fallback': 1.5.4
