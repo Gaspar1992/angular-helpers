@@ -46,9 +46,9 @@
     }
   },
   "scripts": {
-    "build": "ng-packagr -p ng-package.json",
-    "build:prod": "ng-packagr -p ng-package.json && find ../../dist/worker-http -name '*.map' -delete && find ../../dist/worker-http -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
-    "build:watch": "ng-packagr -p ng-package.json --watch",
+    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && find ../../dist/worker-http -name '*.map' -delete && find ../../dist/worker-http -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
+    "build:watch": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json --watch",
     "build:schematics": "tsc -p tsconfig.schematics.json && node scripts/rename-to-cjs.mjs",
     "test": "vitest",
     "test:watch": "vitest --watch",
@@ -84,6 +84,7 @@
   "peerDependencies": {
     "@angular/common": "^21.0.0",
     "@angular/core": "^21.0.0",
+    "@angular-helpers/core": "workspace:*",
     "rxjs": "^7.0.0",
     "seroval": "^1.0.0",
     "@toon-format/toon": "^2.0.0"

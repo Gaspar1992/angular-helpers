@@ -288,6 +288,9 @@ importers:
 
   packages/security:
     dependencies:
+      '@angular-helpers/core':
+        specifier: workspace:*
+        version: link:../core
       '@angular/common':
         specifier: ^21.2.0
         version: 21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2)
@@ -306,6 +309,9 @@ importers:
 
   packages/storage:
     dependencies:
+      '@angular-helpers/core':
+        specifier: workspace:*
+        version: link:../core
       '@angular/common':
         specifier: ^21.2.0
         version: 21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2)
@@ -328,6 +334,9 @@ importers:
 
   packages/worker-http:
     dependencies:
+      '@angular-helpers/core':
+        specifier: workspace:*
+        version: link:../core
       '@angular/common':
         specifier: ^21.2.0
         version: 21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2)

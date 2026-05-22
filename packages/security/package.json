@@ -37,14 +37,15 @@
     "access": "public"
   },
   "scripts": {
-    "build": "ng-packagr -p ng-package.json",
-    "build:prod": "ng-packagr -p ng-package.json && find ../../dist/security -name '*.map' -delete && find ../../dist/security -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
+    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && find ../../dist/security -name '*.map' -delete && find ../../dist/security -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
     "test": "vitest run"
   },
   "peerDependencies": {
     "@angular/common": "^21.0.0",
     "@angular/core": "^21.0.0",
     "@angular/forms": "^21.0.0",
+    "@angular-helpers/core": "workspace:*",
     "rxjs": "^7.0.0 || ^8.0.0"
   },
   "peerDependenciesMeta": {
