@@ -8,6 +8,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
+    "build:prod": "ng-packagr -p ng-package.json && find ../../dist/core -name '*.map' -delete && find ../../dist/core -name '*.mjs' -exec sed -i '/^\\/\\/#  sourceMappingURL=/d' {} +",
     "test": "vitest run",
     "lint": "oxlint src"
   },
