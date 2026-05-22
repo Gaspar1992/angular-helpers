@@ -25,6 +25,8 @@ export class IndexedDBTransport implements StorageTransport {
   }
 
   async read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined> {
+    if (typeof indexedDB === 'undefined') return undefined;
+
     const dbName = options?.dbName ?? 'ah_db';
     const storeName = options?.storeName ?? 'kv';
     const encryptData = options?.encrypt ?? false;
@@ -66,6 +68,8 @@ export class IndexedDBTransport implements StorageTransport {
   }
 
   async write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void> {
+    if (typeof indexedDB === 'undefined') return;
+
     const dbName = options?.dbName ?? 'ah_db';
     const storeName = options?.storeName ?? 'kv';
     const encryptData = options?.encrypt ?? false;
@@ -94,6 +98,8 @@ export class IndexedDBTransport implements StorageTransport {
   }
 
   async delete(key: string, options?: StorageSignalOptions): Promise<void> {
+    if (typeof indexedDB === 'undefined') return;
+
     const dbName = options?.dbName ?? 'ah_db';
     const storeName = options?.storeName ?? 'kv';
 

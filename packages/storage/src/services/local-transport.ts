@@ -21,6 +21,7 @@ export class LocalStorageTransport implements StorageTransport {
   private readonly indexedDB: IndexedDBTransport;
   private readonly cacheApi: CacheApiTransport;
   private readonly workerTransport?: WorkerStorageTransport;
+  private readonly broadcastChannel?: BroadcastChannel;
 
   public storageType: 'local' | 'session' | 'indexeddb' | 'cacheapi' = 'local';
   public encrypt = false;
@@ -47,6 +48,10 @@ export class LocalStorageTransport implements StorageTransport {
     if (!isMainThread) {
       this.storageType = 'indexeddb';
     }
+
+    if (isMainThread && 'BroadcastChannel' in window) {
+      this.broadcastChannel = new BroadcastChannel('ah_storage_sync');
+    }
   }
 
   async read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined> {
@@ -67,7 +72,9 @@ export class LocalStorageTransport implements StorageTransport {
 
   async write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void> {
     if (this.workerTransport) {
-      return this.workerTransport.write<T>(key, data, options);
+      await this.workerTransport.write<T>(key, data, options);
+      this.broadcastChannel?.postMessage({ type: 'write', key });
+      return;
     }
     const mergedOptions = {
       storageType: this.storageType,
@@ -78,12 +85,15 @@ export class LocalStorageTransport implements StorageTransport {
       ...options,
     };
     const transport = this.resolveTransport(mergedOptions.storageType);
-    return transport.write<T>(key, data, mergedOptions);
+    await transport.write<T>(key, data, mergedOptions);
+    this.broadcastChannel?.postMessage({ type: 'write', key });
   }
 
   async delete(key: string, options?: StorageSignalOptions): Promise<void> {
     if (this.workerTransport) {
-      return this.workerTransport.delete(key, options);
+      await this.workerTransport.delete(key, options);
+      this.broadcastChannel?.postMessage({ type: 'delete', key });
+      return;
     }
     const mergedOptions = {
       storageType: this.storageType,
@@ -93,15 +103,34 @@ export class LocalStorageTransport implements StorageTransport {
       ...options,
     };
     const transport = this.resolveTransport(mergedOptions.storageType);
-    return transport.delete(key, mergedOptions);
+    await transport.delete(key, mergedOptions);
+    this.broadcastChannel?.postMessage({ type: 'delete', key });
   }
 
   onChange<T>(key: string, callback: (value: T) => void): () => void {
+    const unsubs: (() => void)[] = [];
+
     if (this.workerTransport) {
-      return this.workerTransport.onChange(key, callback);
+      unsubs.push(this.workerTransport.onChange(key, callback));
+    } else {
+      unsubs.push(this.webStorage.onChange(key, callback));
     }
-    // Only WebStorage (local/session) supports native cross-tab sync via 'storage' event
-    return this.webStorage.onChange(key, callback);
+
+    if (this.broadcastChannel) {
+      const listener = (event: MessageEvent) => {
+        if (event.data?.key === key) {
+          if (event.data.type === 'write') {
+            this.read<T>(key).then((val) => {
+              if (val !== undefined) callback(val);
+            });
+          }
+        }
+      };
+      this.broadcastChannel.addEventListener('message', listener);
+      unsubs.push(() => this.broadcastChannel?.removeEventListener('message', listener));
+    }
+
+    return () => unsubs.forEach((u) => u());
   }
 
   private resolveTransport(type?: string): StorageTransport {

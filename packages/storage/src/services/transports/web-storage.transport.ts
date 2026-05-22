@@ -8,7 +8,7 @@ export class WebStorageTransport implements StorageTransport {
 
   async read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined> {
     if (typeof window === 'undefined') {
-      throw new Error(`WebStorage is not supported in this environment`);
+      return undefined;
     }
 
     const storageType = options?.storageType ?? 'local';
@@ -34,7 +34,7 @@ export class WebStorageTransport implements StorageTransport {
 
   async write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void> {
     if (typeof window === 'undefined') {
-      throw new Error(`WebStorage is not supported in this environment`);
+      return;
     }
 
     const storageType = options?.storageType ?? 'local';
