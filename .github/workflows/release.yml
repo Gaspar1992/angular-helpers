@@ -45,8 +45,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: Verify build works
-        run: pnpm --filter @angular-helpers/core --filter @angular-helpers/browser-web-apis --filter @angular-helpers/storage --filter @angular-helpers/security --filter @angular-helpers/worker-http --filter @angular-helpers/openlayers build:prod
+      - name: Build @angular-helpers/core (required first — dependents resolve via dist/)
+        run: pnpm --filter @angular-helpers/core build:prod
+
+      - name: Build remaining packages
+        run: pnpm --filter @angular-helpers/browser-web-apis --filter @angular-helpers/storage --filter @angular-helpers/security --filter @angular-helpers/worker-http --filter @angular-helpers/openlayers build:prod
 
       - name: Semantic Release (Core)
         env:
