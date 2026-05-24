@@ -84,7 +84,6 @@
   "peerDependencies": {
     "@angular/common": "^21.0.0",
     "@angular/core": "^21.0.0",
-    "@angular-helpers/core": "workspace:*",
     "rxjs": "^7.0.0",
     "seroval": "^1.0.0",
     "@toon-format/toon": "^2.0.0"
@@ -108,6 +107,10 @@
     "web-streams-polyfill": {
       "optional": true
     }
+  },
+  "dependencies": {
+    "@angular-helpers/core": "workspace:*",
+    "tslib": "^2.0.0"
   },
   "devDependencies": {
     "@angular-devkit/core": "^21.0.0",

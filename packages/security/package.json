@@ -45,7 +45,6 @@
     "@angular/common": "^21.0.0",
     "@angular/core": "^21.0.0",
     "@angular/forms": "^21.0.0",
-    "@angular-helpers/core": "workspace:*",
     "rxjs": "^7.0.0 || ^8.0.0"
   },
   "peerDependenciesMeta": {
@@ -54,6 +53,7 @@
     }
   },
   "dependencies": {
+    "@angular-helpers/core": "workspace:*",
     "tslib": "^2.0.0"
   },
   "ngPackage": {
@@ -62,7 +62,8 @@
     },
     "dest": "../../dist/security",
     "allowedNonPeerDependencies": [
-      "tslib"
+      "tslib",
+      "@angular-helpers/core"
     ]
   }
 }

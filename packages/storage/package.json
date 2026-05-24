@@ -42,8 +42,11 @@
     "@angular/core": "^21.0.0",
     "@angular/common": "^21.0.0",
     "@angular/platform-browser": "^21.0.0",
-    "@angular-helpers/core": "workspace:*",
     "rxjs": "^7.0.0"
+  },
+  "dependencies": {
+    "@angular-helpers/core": "workspace:*",
+    "tslib": "^2.0.0"
   },
   "devDependencies": {
     "jsdom": "^29.0.2",

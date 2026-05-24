@@ -324,6 +324,9 @@ importers:
       rxjs:
         specifier: ^7.0.0
         version: 7.8.2
+      tslib:
+        specifier: ^2.0.0
+        version: 2.8.1
     devDependencies:
       jsdom:
         specifier: ^29.0.2
@@ -352,6 +355,9 @@ importers:
       seroval:
         specifier: ^1.0.0
         version: 1.5.4
+      tslib:
+        specifier: ^2.0.0
+        version: 2.8.1
     devDependencies:
       '@angular-devkit/core':
         specifier: ^21.0.0
