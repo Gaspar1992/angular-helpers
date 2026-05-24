@@ -33,6 +33,7 @@ export interface VectorLayerConfig extends LayerConfig {
   format?: 'geojson' | 'topojson' | 'kml';
   style?: Style | ((feature: Feature) => Style);
   cluster?: ClusterConfig;
+  coordinateProjection?: string;
 }
 
 export interface HeatmapLayerConfig extends LayerConfig {

@@ -153,11 +153,31 @@ export class EntityStore<Id, Entity> {
 
   private initPersistence(key: string): void {
     this._isRestoring = true;
+    const storageOpts = this.options.storageOptions as StorageSignalOptions;
+
     this._transport
-      .read<Entity[]>(key, this.options.storageOptions as StorageSignalOptions)
+      .read<Entity[]>(key, storageOpts)
       .then((data) => {
         if (data && Array.isArray(data)) {
-          this.setMany(data);
+          if (storageOpts?.validator) {
+            const validData = data.filter((item): item is Entity => {
+              const isValid = storageOpts.validator!(item);
+              if (!isValid) {
+                console.warn(
+                  `[EntityStore] Schema drift detected for item in store: ${key}. Filtering out.`,
+                );
+              }
+              return isValid;
+            });
+            this.setMany(validData);
+
+            // If some items were invalid, trigger auto-repair rewrite
+            if (validData.length !== data.length) {
+              this.triggerPersist();
+            }
+          } else {
+            this.setMany(data);
+          }
         }
       })
       .catch((err) => console.error(`[EntityStore] Error loading persisted entities:`, err))

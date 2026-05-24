@@ -80,6 +80,7 @@ export function buildVectorLayer(config: VectorLayerConfig, source: VectorSource
   layer.set('id', config.id);
   layer.set('cluster-config', clusterCfg);
   layer.set('style-fn', styleFn);
+  layer.set('coordinate-projection', config.coordinateProjection);
 
   return layer;
 }
@@ -88,7 +89,7 @@ export function buildHeatmapLayer(config: HeatmapLayerConfig) {
   const vectorSource = new VectorSource();
 
   if (config.features && config.features.length > 0) {
-    const olFeatures = config.features.map(featureToOlFeature);
+    const olFeatures = config.features.map((f) => featureToOlFeature(f));
     vectorSource.addFeatures(olFeatures);
   }
 

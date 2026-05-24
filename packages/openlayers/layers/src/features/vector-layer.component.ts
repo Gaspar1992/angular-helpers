@@ -33,6 +33,7 @@ export class OlVectorLayerComponent {
   style = input<any | ((feature: Feature, resolution: number) => any)>();
   cluster = input<ClusterConfig>();
   clusterComponent = contentChild(OlClusterComponent);
+  coordinateProjection = input<string>('EPSG:4326');
 
   constructor() {
     // Initialize layer after DOM is ready
@@ -63,6 +64,7 @@ export class OlVectorLayerComponent {
         visible: this.visible(),
         style: this.style(),
         cluster: resolvedClusterConfig,
+        coordinateProjection: this.coordinateProjection(),
       } as VectorLayerConfig);
     });
 

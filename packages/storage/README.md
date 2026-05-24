@@ -32,7 +32,27 @@ console.log(userPref.error()); // Error | null
 userPref.set('dark-mode');
 ```
 
-### 3. High-Performance Entity Store
+### 3. Schema Drift & Safe Validation
+
+```typescript
+// Protect your application state against local storage schema changes across versions
+const userPref = injectStorageSignal('user-pref', 'light-mode', {
+  storageType: 'local',
+  serializer: 'json',
+  validator: (data): data is 'light-mode' | 'dark-mode' =>
+    data === 'light-mode' || data === 'dark-mode',
+});
+```
+
+If L2 storage contains a corrupted or legacy structure that fails the `validator`:
+
+1. The signal falls back safely to the `defaultValue` (`'light-mode'`).
+2. The `userPref.error()` signal emits a detailed schema validation error.
+3. The system **auto-repairs** the local database by rewriting it with the clean default value.
+
+---
+
+### 4. High-Performance Entity Store
 
 ```typescript
 interface Product {

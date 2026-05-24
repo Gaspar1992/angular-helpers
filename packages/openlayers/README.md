@@ -45,7 +45,7 @@ export const appConfig: ApplicationConfig = {
 
 ### 2. Use in your component
 
-```typescript
+````typescript
 // map.component.ts
 import { Component, inject, signal } from '@angular/core';
 import { OlMapComponent } from '@angular-helpers/openlayers/core';
@@ -103,7 +103,56 @@ export class MapComponent {
     this.mapService.animateView({ center: [2.2945, 48.8584], zoom: 15, duration: 1000 });
   }
 }
+## Custom Projections & Coordinate Systems
+
+Available since `0.4.1` in `@angular-helpers/openlayers/core` and `@angular-helpers/openlayers/layers`.
+
+When working with local reference systems (like UTM zones), you can register custom projections globally and pass coordinates in those reference systems directly to `[center]` or `[features]` without manual transforms:
+
+### 1. Register custom projections globally
+
+```typescript
+// app.config.ts
+import { provideOpenLayers } from '@angular-helpers/openlayers/core';
+import { withProjections } from '@angular-helpers/openlayers/core';
+import proj4 from 'proj4';
+
+export const appConfig = {
+  providers: [
+    provideOpenLayers(
+      withProjections(proj4, [
+        {
+          code: 'EPSG:25830', // UTM Zone 30N
+          def: '+proj=utm +zone=30 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
+          extent: [0, 0, 1000000, 10000000],
+        },
+      ]),
+    ),
+  ],
+};
+````
+
+### 2. Pass local coordinates natively to the map
+
+By setting `[coordinateProjection]` to match the custom projection, the component automatically bypasses longitude/latitude conversion, feeding UTM coordinates directly into OpenLayers:
+
+```html
+<ol-map
+  [projection]="'EPSG:25830'"
+  [coordinateProjection]="'EPSG:25830'"
+  [center]="[440291, 4474255]" <!-- Madrid UTM Zone 30 coordinates -->
+  [zoom]="12"
+  (viewChange)="onViewChange($event)"
+>
+  <ol-vector-layer
+    id="shapes"
+    [features]="utmFeatures()"
+    [coordinateProjection]="'EPSG:25830'"
+  />
+</ol-map>
 ```
+
+---
 
 ## Overlays — popups and tooltips
 
