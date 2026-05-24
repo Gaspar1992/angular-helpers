@@ -19,3 +19,5 @@ export type { ControlPosition, ControlConfig } from './models/control.types';
 // Types from new dedicated files
 export type { LayerSwitcherItem, LayerSwitcherPosition } from './models/layer-switcher.types';
 export type { BasemapConfig, BasemapSwitcherPosition } from './models/basemap-switcher.types';
+export { OlTimelineComponent } from './features/timeline.component';
+export type { TimelinePosition } from './models/timeline.types';

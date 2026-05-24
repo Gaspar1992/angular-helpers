@@ -1061,4 +1061,161 @@ export class MapComponent {
   tacticalStyle = this.tacticalSvc.createFrontLineStyle('#4f46e5', 'friendly');
 }`,
   },
+  {
+    id: 'time-service',
+    name: 'OlTimeService',
+    description:
+      'Service providing a high-performance, off-zone animation timing loop (60FPS) using requestAnimationFrame. Essential for running smooth WebGL map animations without triggering global change detection.',
+    scope: 'provided',
+    importPath: '@angular-helpers/openlayers/core',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Executes timing loop completely outside the Angular Zone.',
+      'Exposes read-only reactive signals for current time, speed, and play state.',
+      'Bypasses global Change Detection to maintain smooth 60FPS UI performance.',
+    ],
+    category: 'ol-core',
+    inputs: [],
+    outputs: [],
+    methods: [
+      {
+        name: 'play',
+        signature: '(): void',
+        description: 'Starts the animation loop ticks.',
+        returns: 'void',
+      },
+      {
+        name: 'pause',
+        signature: '(): void',
+        description: 'Pauses the animation loop ticks.',
+        returns: 'void',
+      },
+      {
+        name: 'stop',
+        signature: '(resetTime?: number): void',
+        description:
+          'Stops the animation loop and resets the time signal to the specified epoch timestamp (defaults to Date.now()).',
+        returns: 'void',
+      },
+      {
+        name: 'setTime',
+        signature: '(time: number): void',
+        description: 'Sets the current timeline epoch timestamp manually.',
+        returns: 'void',
+      },
+      {
+        name: 'setSpeed',
+        signature: '(speed: number): void',
+        description: 'Sets the animation play speed multiplier.',
+        returns: 'void',
+      },
+    ],
+    example: `import { OlTimeService } from '@angular-helpers/openlayers/core';
+
+@Component({
+  template: \`
+    <ol-map>
+      <ol-tile-layer source="osm" />
+    </ol-map>
+  \`
+})
+export class MapComponent {
+  private timeService = inject(OlTimeService);
+
+  startAnimation() {
+    this.timeService.setTime(1700000000000);
+    this.timeService.setSpeed(60); // 60x real time
+    this.timeService.play();
+  }
+}`,
+  },
+  {
+    id: 'timeline-control',
+    name: 'OlTimelineComponent',
+    description:
+      'A visual playback and scrubbing control for time-series maps. Sleek glassmorphic theme designed specifically to orchestrate animations reactively through <code>OlTimeService</code>.',
+    scope: 'component',
+    importPath: '@angular-helpers/openlayers/controls',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Zero reliance on CommonModule or FormsModule for maximum performance.',
+      'Direct range tracking with native elements bypasses heavy forms change detection cycles.',
+      'Can be aligned at any corner or center of the viewport.',
+    ],
+    category: 'ol-controls',
+    inputs: [
+      {
+        name: 'startTime',
+        type: 'number',
+        description: 'Start bounds of time-series in Epoch milliseconds (required)',
+      },
+      {
+        name: 'endTime',
+        type: 'number',
+        description: 'End bounds of time-series in Epoch milliseconds (required)',
+      },
+      {
+        name: 'playSpeed',
+        type: 'number',
+        defaultValue: '1',
+        description: 'Initial playback speed multiplier',
+      },
+      {
+        name: 'loop',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Whether to loop animation back to startTime when reaching endTime',
+      },
+      {
+        name: 'position',
+        type: 'TimelinePosition',
+        defaultValue: "'bottom-center'",
+        description: 'Alignment of the timeline control box on the map layout',
+      },
+      {
+        name: 'formatLabel',
+        type: '(time: number) => string',
+        defaultValue: '(t) => new Date(t).toLocaleString()',
+        description: 'Custom formatter callback for the displayed time label',
+      },
+    ],
+    outputs: [
+      {
+        name: 'timeChange',
+        type: 'number',
+        description: 'Emitted with the current epoch timestamp as the time advances or scrubs',
+      },
+      {
+        name: 'playStateChange',
+        type: 'boolean',
+        description: 'Emitted with active state when play/pause is toggled',
+      },
+    ],
+    methods: [],
+    example: `import { OlTimelineComponent } from '@angular-helpers/openlayers/controls';
+
+@Component({
+  imports: [OlMapComponent, OlTileLayerComponent, OlTimelineComponent],
+  template: \`
+    <ol-map [center]="[2.17, 41.38]" [zoom]="12">
+      <ol-tile-layer source="osm" />
+      
+      <ol-timeline
+        [startTime]="1700000000000"
+        [endTime]="1700086400000"
+        [playSpeed]="60"
+        [loop]="true"
+        position="bottom-center"
+        (timeChange)="onTimeChange($event)" />
+    </ol-map>
+  \`
+})
+export class MapComponent {
+  onTimeChange(currentTime: number) {
+    console.log('Current animation time:', currentTime);
+  }
+}`,
+  },
 ];

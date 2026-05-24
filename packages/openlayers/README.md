@@ -276,6 +276,68 @@ Renders points, lines, and polygons using WebGL 2. For peak performance, hit det
 
 Rigorous cleanup guarantees that WebGL contexts, framebuffers, and active buffers are fully released on destroy (`layer.dispose()`), preventing GPU leaks.
 
+## Time-Series Animation & Playback
+
+Available since `0.5.0` from `@angular-helpers/openlayers/core` and `@angular-helpers/openlayers/controls`.
+
+Provides high-performance, GPU-friendly reactive animation controls for time-series geospatial visualization (e.g. weather radar, vehicle tracking, historical paths).
+
+### 1. `OlTimeService` — 60FPS Animation Loop
+
+The core service coordinates playback timing. It runs its timing ticks entirely outside the Angular zone (using `requestAnimationFrame`) to prevent triggering global Angular change detection cycles at 60FPS, while exposing reactive signals for component consumption.
+
+```typescript
+import { inject, Component } from '@angular/core';
+import { OlTimeService } from '@angular-helpers/openlayers/core';
+
+@Component({
+  template: `<p>Current Time: {{ timeSvc.currentTime() }}</p>`,
+})
+export class MapAnimation {
+  protected timeSvc = inject(OlTimeService);
+
+  constructor() {
+    // Start animation loop
+    this.timeSvc.play();
+  }
+}
+```
+
+### 2. `<ol-timeline>` — Premium Playback UI Control
+
+A sleek, glassmorphic UI overlay component displaying a timeline scrubber, play/pause toggle, and playback speed multiplier.
+
+```html
+<ol-map [center]="[2.17, 41.38]" [zoom]="12">
+  <ol-tile-layer source="osm" />
+
+  <ol-timeline
+    [startTime]="1700000000000"
+    [endTime]="1700086400000"
+    [playSpeed]="60"
+    [loop]="true"
+    position="bottom-center"
+    (timeChange)="onTimeChange($event)"
+  />
+</ol-map>
+```
+
+| Input         | Type                       | Default                        | Description                                                                                               |
+| ------------- | -------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `startTime`   | `number`                   | _Required_                     | Start bounds of the time-series (Epoch ms)                                                                |
+| `endTime`     | `number`                   | _Required_                     | End bounds of the time-series (Epoch ms)                                                                  |
+| `playSpeed`   | `number`                   | `1`                            | Default speed multiplier (e.g. 1, 5, 10, 60, 3600)                                                        |
+| `loop`        | `boolean`                  | `false`                        | Loop playback when reaching `endTime`                                                                     |
+| `position`    | `TimelinePosition`         | `'bottom-center'`              | Control alignment (`top-left`, `top-center`, `top-right`, `bottom-left`, `bottom-center`, `bottom-right`) |
+| `formatLabel` | `(time: number) => string` | `new Date(t).toLocaleString()` | Custom label formatter for the time display                                                               |
+
+| Output            | Type      | Description                                                                       |
+| ----------------- | --------- | --------------------------------------------------------------------------------- |
+| `timeChange`      | `number`  | Emitted with the current active epoch timestamp when the timeline ticks or scrubs |
+| `playStateChange` | `boolean` | Emitted when playback transitions between playing (`true`) and paused (`false`)   |
+
+---
+
 ## Geodesic Geometry Helpers
 
 Available from `@angular-helpers/openlayers/core` via `OlGeometryService`.
