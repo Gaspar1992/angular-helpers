@@ -32,7 +32,27 @@ console.log(userPref.error()); // Error | null
 userPref.set('dark-mode');
 ```
 
-### 3. Store de Entidades de Alta Performance
+### 3. Validación Segura y Prevención de Schema Drift
+
+```typescript
+// Protegé tu estado contra cambios estructurales (versiones de app) en storage
+const userPref = injectStorageSignal('user-pref', 'light-mode', {
+  storageType: 'local',
+  serializer: 'json',
+  validator: (data): data is 'light-mode' | 'dark-mode' =>
+    data === 'light-mode' || data === 'dark-mode',
+});
+```
+
+Si el motor de persistencia L2 contiene un valor corrupto o desactualizado que no aprueba la validación:
+
+1. El Signal vuelve automáticamente a su valor seguro por defecto (`'light-mode'`).
+2. El sub-signal de error `userPref.error()` emite un error de validación descriptivo.
+3. El sistema **auto-repara** la persistencia local reescribiendo la base de datos con el valor por defecto de forma transparente.
+
+---
+
+### 4. Store de Entidades de Alta Performance
 
 ```typescript
 interface Product {

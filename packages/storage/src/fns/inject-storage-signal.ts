@@ -14,7 +14,7 @@ import { StorageSignalOptions, StorageSignal } from '../interfaces/storage.types
 export function injectStorageSignal<T>(
   key: string,
   defaultValue: T,
-  options: StorageSignalOptions,
+  options: StorageSignalOptions<T>,
 ): StorageSignal<T> {
   const isAsync = options.storageType === 'indexeddb' || options.storageType === 'cacheapi';
 
@@ -23,6 +23,10 @@ export function injectStorageSignal<T>(
   });
   const loadingSignal = signal<boolean>(isAsync);
   const errorSignal = signal<Error | null>(null);
+
+  // Extract original signal methods immediately to prevent TDZ and duplicate writes on initial load
+  const originalSet = dataSignal.set.bind(dataSignal);
+  const originalUpdate = dataSignal.update.bind(dataSignal);
 
   // Resolve injected transport or instantiate LocalStorageTransport
   let transport = inject(STORAGE_TRANSPORT, { optional: true });
@@ -35,7 +39,22 @@ export function injectStorageSignal<T>(
     .read<T>(key, options)
     .then((value) => {
       if (value !== undefined) {
-        dataSignal.set(value);
+        if (options.validator && !options.validator(value)) {
+          const driftError = new Error(
+            `[injectStorageSignal] Schema drift detected for key: ${key}. Data failed validation.`,
+          );
+          console.warn(driftError.message);
+          errorSignal.set(driftError);
+          originalSet(defaultValue);
+          // Auto-repair storage with default value
+          transport!
+            .write(key, defaultValue, options)
+            .catch((err) =>
+              console.error(`[injectStorageSignal] Error repairing storage key: ${key}`, err),
+            );
+        } else {
+          originalSet(value);
+        }
       }
       loadingSignal.set(false);
     })
@@ -43,10 +62,6 @@ export function injectStorageSignal<T>(
       errorSignal.set(error instanceof Error ? error : new Error(String(error)));
       loadingSignal.set(false);
     });
-
-  // 2. Encapsulate reactive persistence in writes
-  const originalSet = dataSignal.set.bind(dataSignal);
-  const originalUpdate = dataSignal.update.bind(dataSignal);
 
   const persist = (newData: T) => {
     transport!
@@ -78,7 +93,7 @@ export function injectStorageSignal<T>(
   // 3. Multi-tab synchronization (only if configured and transport supports it)
   if (options.crossTabSync && transport.onChange) {
     const unsubscribe = transport.onChange<T>(key, (newValue) => {
-      dataSignal.set(newValue);
+      originalSet(newValue);
     });
     inject(DestroyRef).onDestroy(() => unsubscribe());
   }

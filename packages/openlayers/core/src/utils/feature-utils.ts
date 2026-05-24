@@ -11,21 +11,55 @@ import type { Feature, Coordinate } from '../models/types';
  * @param olFeature - The OpenLayers feature to convert
  * @returns The converted Feature with normalized structure
  */
-export function olFeatureToFeature(olFeature: OLFeature): Feature {
+import { Point, LineString, Polygon } from 'ol/geom';
+import { transform } from 'ol/proj';
+
+export interface ProjectionOptions {
+  sourceProjection?: string;
+  targetProjection?: string;
+}
+
+function transformCoords(
+  coords: any,
+  sourceProj: string | undefined,
+  targetProj: string | undefined,
+): any {
+  if (!sourceProj || !targetProj || sourceProj === targetProj) return coords;
+  if (!Array.isArray(coords)) return coords;
+
+  if (typeof coords[0] === 'number') {
+    return transform(coords as [number, number], sourceProj, targetProj);
+  }
+
+  return coords.map((c) => transformCoords(c, sourceProj, targetProj));
+}
+
+/**
+ * Converts an OpenLayers feature to the internal Feature format.
+ * Handles coordinate extraction and geometry type mapping with custom projections.
+ *
+ * @param olFeature - The OpenLayers feature to convert
+ * @param options - Projection source and target codes
+ * @returns The converted Feature with normalized structure
+ */
+export function olFeatureToFeature(olFeature: OLFeature, options?: ProjectionOptions): Feature {
   // Unwrap spider features
   const spiderFeature = olFeature.get('spider-feature') as OLFeature | undefined;
   if (spiderFeature) {
-    return olFeatureToFeature(spiderFeature);
+    return olFeatureToFeature(spiderFeature, options);
   }
 
   // Unwrap single-item clusters
   const clusterFeatures = olFeature.get('features');
   if (Array.isArray(clusterFeatures) && clusterFeatures.length === 1) {
-    return olFeatureToFeature(clusterFeatures[0] as OLFeature);
+    return olFeatureToFeature(clusterFeatures[0] as OLFeature, options);
   }
 
   const geometry = olFeature.getGeometry();
   const geomType = geometry?.getType() ?? 'Point';
+
+  const sourceProj = options?.targetProjection;
+  const targetProj = options?.sourceProjection;
 
   // Convert coordinates based on geometry type
   let coordinates: Coordinate | Coordinate[] | Coordinate[][];
@@ -33,17 +67,11 @@ export function olFeatureToFeature(olFeature: OLFeature): Feature {
   if (geomType === 'Circle') {
     // ol/geom/Circle has no getCoordinates() — use getCenter() instead
     const circle = geometry as unknown as { getCenter(): number[]; getRadius(): number };
-    coordinates = circle.getCenter() as Coordinate;
+    coordinates = transformCoords(circle.getCenter(), sourceProj, targetProj) as Coordinate;
   } else {
     // oxlint-disable-next-line no-explicit-any
     const olCoords = (geometry as unknown as { getCoordinates(): unknown }).getCoordinates();
-    if (Array.isArray(olCoords) && Array.isArray(olCoords[0])) {
-      // Multi-coordinate structures (LineString, Polygon, etc.)
-      coordinates = olCoords as Coordinate[] | Coordinate[][];
-    } else {
-      // Single point
-      coordinates = olCoords as Coordinate;
-    }
+    coordinates = transformCoords(olCoords, sourceProj, targetProj) as any;
   }
 
   return {
@@ -56,13 +84,13 @@ export function olFeatureToFeature(olFeature: OLFeature): Feature {
   };
 }
 
-import { Point, LineString, Polygon } from 'ol/geom';
-import { fromLonLat } from 'ol/proj';
-
 /**
  * Converts an internal Feature to an OpenLayers feature.
  */
-export function featureToOlFeature(feature: Feature): OLFeature {
+export function featureToOlFeature(feature: Feature, options?: ProjectionOptions): OLFeature {
+  const sourceProj = options?.sourceProjection ?? 'EPSG:4326';
+  const targetProj = options?.targetProjection ?? 'EPSG:3857';
+
   const geom = feature.geometry;
   let geometry;
 
@@ -70,14 +98,12 @@ export function featureToOlFeature(feature: Feature): OLFeature {
     geometry = new Point([0, 0]);
   } else if (geom.type === 'Point') {
     const coords = geom.coordinates as [number, number];
-    geometry = new Point(fromLonLat(coords));
+    geometry = new Point(transformCoords(coords, sourceProj, targetProj));
   } else if (geom.type === 'LineString') {
-    const coords = (geom.coordinates as [number, number][]).map((c) => fromLonLat(c));
+    const coords = transformCoords(geom.coordinates, sourceProj, targetProj);
     geometry = new LineString(coords);
   } else if (geom.type === 'Polygon') {
-    const rings = (geom.coordinates as [number, number][][]).map((ring) =>
-      ring.map((c) => fromLonLat(c)),
-    );
+    const rings = transformCoords(geom.coordinates, sourceProj, targetProj);
     geometry = new Polygon(rings);
   } else {
     geometry = new Point([0, 0]);

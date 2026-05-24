@@ -92,9 +92,18 @@ export class OlLayerService {
         }
         const vectorSource = new VectorSource(sourceOptions);
 
+        const targetProj =
+          (typeof map.getView === 'function'
+            ? map.getView()?.getProjection()?.getCode()
+            : undefined) ?? 'EPSG:3857';
+        const sourceProj = vConfig.coordinateProjection ?? 'EPSG:4326';
+
         if (vConfig.features && vConfig.features.length > 0) {
           const olFeatures = vConfig.features.map((f) => {
-            const olf = featureToOlFeature(f);
+            const olf = featureToOlFeature(f, {
+              sourceProjection: sourceProj,
+              targetProjection: targetProj,
+            });
             if (f.style) olf.set(STYLE_PROP, f.style);
             return olf;
           });
@@ -166,6 +175,30 @@ export class OlLayerService {
     const layer = this.layerCache.get(id);
     if (map && layer) {
       map.removeLayer(layer);
+
+      // Explicitly dispose sources to prevent memory leaks
+      if ('getSource' in layer) {
+        const source = (layer as any).getSource();
+        if (source) {
+          // If it's a ClusterSource, dispose the underlying source first
+          if ('getSource' in source && typeof (source as any).getSource === 'function') {
+            const underlyingSource = (source as any).getSource();
+            if (underlyingSource && typeof underlyingSource.dispose === 'function') {
+              if (typeof underlyingSource.clear === 'function') {
+                underlyingSource.clear(true);
+              }
+              underlyingSource.dispose();
+            }
+          }
+          if (typeof source.dispose === 'function') {
+            if (typeof source.clear === 'function') {
+              source.clear(true);
+            }
+            source.dispose();
+          }
+        }
+      }
+
       layer.dispose();
       this.layerCache.delete(id);
       this.updateLayerState();
@@ -286,6 +319,13 @@ export class OlLayerService {
     const layer = this.layerCache.get(id);
     if (!(layer instanceof VectorLayer)) return;
 
+    const sourceProj = layer.get('coordinate-projection') ?? 'EPSG:4326';
+    const map = this.mapService.getMap();
+    const targetProj =
+      (map && typeof map.getView === 'function'
+        ? map.getView()?.getProjection()?.getCode()
+        : undefined) ?? 'EPSG:3857';
+
     const source = layer.getSource();
     if (!source) return;
 
@@ -318,7 +358,10 @@ export class OlLayerService {
 
       if (featuresToAdd.length > 0) {
         const olFeatures = featuresToAdd.map((f) => {
-          const olf = featureToOlFeature(f);
+          const olf = featureToOlFeature(f, {
+            sourceProjection: sourceProj,
+            targetProjection: targetProj,
+          });
           if (f.style) olf.set(STYLE_PROP, f.style);
           return olf;
         });

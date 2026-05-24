@@ -80,6 +80,7 @@ export function buildVectorLayer(config: VectorLayerConfig, source: VectorSource
   layer.set('id', config.id);
   layer.set('cluster-config', clusterCfg);
   layer.set('style-fn', styleFn);
+  layer.set('coordinate-projection', config.coordinateProjection);
 
   return layer;
 }

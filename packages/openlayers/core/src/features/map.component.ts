@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import OLMap from 'ol/Map';
 import View from 'ol/View';
-import { fromLonLat, toLonLat } from 'ol/proj';
+import { transform } from 'ol/proj';
 import type { Coordinate, Pixel, ViewState } from '../models/types';
 import { OlMapService } from '../services/map.service';
 import { OlZoneHelper } from '../services/zone-helper.service';
@@ -53,6 +53,7 @@ export class OlMapComponent {
   zoom = input<number>(0);
   rotation = input<number>(0);
   projection = input<string>('EPSG:3857');
+  coordinateProjection = input<string>('EPSG:4326'); // Dynamic input for coordinate systems
 
   viewChange = output<ViewState>();
   mapClick = output<MapClickEvent>();
@@ -82,11 +83,25 @@ export class OlMapComponent {
     this.destroyRef.onDestroy(() => this.destroyMap());
   }
 
+  private getProjectedCoordinate(coord: Coordinate): Coordinate {
+    const coordProj = this.coordinateProjection();
+    const mapProj = this.projection();
+    if (coordProj === mapProj) return coord;
+    return transform(coord, coordProj, mapProj) as Coordinate;
+  }
+
+  private getExternalCoordinate(coord: Coordinate): Coordinate {
+    const coordProj = this.coordinateProjection();
+    const mapProj = this.projection();
+    if (coordProj === mapProj) return coord;
+    return transform(coord, mapProj, coordProj) as Coordinate;
+  }
+
   private initMap(): void {
     const container = this.mapContainerRef().nativeElement;
     this.zoneHelper.runOutsideAngular(() => {
       const view = new View({
-        center: fromLonLat(this.center(), this.projection()),
+        center: this.getProjectedCoordinate(this.center()),
         zoom: this.zoom(),
         rotation: this.rotation(),
         projection: this.projection(),
@@ -118,7 +133,7 @@ export class OlMapComponent {
       this.map.on('click', (e) =>
         this.zoneHelper.runInsideAngular(() =>
           this.mapClick.emit({
-            coordinate: toLonLat(e.coordinate, this.projection()) as Coordinate,
+            coordinate: this.getExternalCoordinate(e.coordinate) as Coordinate,
             pixel: e.pixel as Pixel,
           }),
         ),
@@ -126,7 +141,7 @@ export class OlMapComponent {
       this.map.on('dblclick', (e) =>
         this.zoneHelper.runInsideAngular(() =>
           this.mapDblClick.emit({
-            coordinate: toLonLat(e.coordinate, this.projection()) as Coordinate,
+            coordinate: this.getExternalCoordinate(e.coordinate) as Coordinate,
             pixel: e.pixel as Pixel,
           }),
         ),
@@ -153,7 +168,7 @@ export class OlMapComponent {
   private updateCenter(center: Coordinate): void {
     if (!this.map) return;
     const view = this.map.getView();
-    const projectedCenter = fromLonLat(center, this.projection());
+    const projectedCenter = this.getProjectedCoordinate(center);
     const currentCenter = view.getCenter();
     // Only update if center is significantly different (prevents interfering with animations)
     if (
@@ -189,9 +204,9 @@ export class OlMapComponent {
     const view = this.map?.getView();
     if (view) {
       const projectedCenter = view.getCenter() ?? [0, 0];
-      const lonLatCenter = toLonLat(projectedCenter, this.projection()) as Coordinate;
+      const externalCenter = this.getExternalCoordinate(projectedCenter) as Coordinate;
       this.viewChange.emit({
-        center: lonLatCenter,
+        center: externalCenter,
         zoom: view.getZoom() ?? 0,
         rotation: view.getRotation() ?? 0,
       });
