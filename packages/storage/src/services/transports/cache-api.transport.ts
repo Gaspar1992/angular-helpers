@@ -2,17 +2,20 @@ import { StorageTransport } from '../storage-transport';
 import { StorageSignalOptions } from '../../interfaces/storage.types';
 import { encrypt, decrypt } from '../../utils/crypto.utils';
 import { serializeData, deserializeData } from '../../utils/serialization.utils';
-
-function getCaches(): CacheStorage | null {
-  if (typeof caches !== 'undefined') return caches;
-  if (typeof window !== 'undefined' && window.caches) return window.caches;
-  return null;
-}
+import { injectPlatform } from '@angular-helpers/core';
 
 export class CacheApiTransport implements StorageTransport {
+  private readonly platform = injectPlatform();
   private readonly VIRTUAL_BASE_URL = 'https://angular-helpers.local/storage-cache/';
 
   constructor(private readonly secretPassphrase?: string) {}
+
+  private getCaches(): CacheStorage | null {
+    if (typeof caches !== 'undefined') return caches;
+    const globalWindow = this.platform.window;
+    if (globalWindow && globalWindow.caches) return globalWindow.caches;
+    return null;
+  }
 
   async read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined> {
     const cacheName = options?.cacheName ?? 'ah_cache';
@@ -20,7 +23,7 @@ export class CacheApiTransport implements StorageTransport {
     const useToon = options?.serializer === 'toon';
 
     try {
-      const cacheContext = getCaches();
+      const cacheContext = this.getCaches();
       if (!cacheContext) throw new Error('Cache API is not supported in this environment');
 
       const cache = await cacheContext.open(cacheName);
@@ -50,7 +53,7 @@ export class CacheApiTransport implements StorageTransport {
     const useToon = options?.serializer === 'toon';
 
     try {
-      const cacheContext = getCaches();
+      const cacheContext = this.getCaches();
       if (!cacheContext) throw new Error('Cache API is not supported in this environment');
 
       let payload = await serializeData(data, useToon);
@@ -76,7 +79,7 @@ export class CacheApiTransport implements StorageTransport {
   async delete(key: string, options?: StorageSignalOptions): Promise<void> {
     const cacheName = options?.cacheName ?? 'ah_cache';
     try {
-      const cacheContext = getCaches();
+      const cacheContext = this.getCaches();
       if (!cacheContext) return;
 
       const cache = await cacheContext.open(cacheName);

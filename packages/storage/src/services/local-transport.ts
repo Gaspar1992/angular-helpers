@@ -35,23 +35,20 @@ export class LocalStorageTransport implements StorageTransport {
     private readonly secretPassphrase: string = 'fallback-passphrase-angular-helpers-default-key-sec',
     @Inject(STORAGE_WORKER_FACTORY) @Optional() private readonly workerFactory?: () => Worker,
   ) {
+    const { isBrowser, window: globalWindow } = injectPlatform();
+
     this.webStorage = new WebStorageTransport(this.secretPassphrase);
     this.indexedDB = new IndexedDBTransport(this.secretPassphrase);
     this.cacheApi = new CacheApiTransport(this.secretPassphrase);
 
-    const isMainThread = typeof window !== 'undefined';
-
-    if (isMainThread && this.workerFactory) {
+    if (isBrowser && this.workerFactory) {
       this.workerTransport = new WorkerStorageTransport(this.workerFactory);
     }
 
     // If running in worker context, default to indexeddb as L2
-    if (!isMainThread) {
+    if (!isBrowser) {
       this.storageType = 'indexeddb';
     }
-
-    // We can use injectPlatform because LocalStorageTransport is created via DI
-    const { isBrowser, window: globalWindow } = injectPlatform();
 
     if (isBrowser && globalWindow && 'BroadcastChannel' in globalWindow) {
       this.broadcastChannel = new BroadcastChannel('ah_storage_sync');

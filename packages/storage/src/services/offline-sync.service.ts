@@ -2,28 +2,32 @@ import { inject, Injectable, signal, DestroyRef } from '@angular/core';
 import { HttpBackend, HttpRequest } from '@angular/common/http';
 import { fromEvent } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { injectPlatform } from '@angular-helpers/core';
 import { OFFLINE_SYNC_SERVICE_DEFAULTS } from './offline-sync.constants';
 
 @Injectable({ providedIn: 'root' })
 export class OfflineSyncService {
+  private readonly platform = injectPlatform();
   private readonly destroyRef = inject(DestroyRef);
   private readonly httpBackend = inject(HttpBackend, { optional: true });
 
-  readonly isOnline = signal<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  readonly isOnline = signal<boolean>(
+    this.platform.isBrowser && typeof navigator !== 'undefined' ? navigator.onLine : true,
+  );
   readonly pendingSyncsCount = signal<number>(0);
 
   constructor() {
-    if (typeof window === 'undefined') return;
+    if (!this.platform.isBrowser || !this.platform.window) return;
 
     // Listen to network status changes
-    fromEvent(window, OFFLINE_SYNC_SERVICE_DEFAULTS.EVENT_ONLINE)
+    fromEvent(this.platform.window, OFFLINE_SYNC_SERVICE_DEFAULTS.EVENT_ONLINE)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.isOnline.set(true);
         this.triggerSync();
       });
 
-    fromEvent(window, OFFLINE_SYNC_SERVICE_DEFAULTS.EVENT_OFFLINE)
+    fromEvent(this.platform.window, OFFLINE_SYNC_SERVICE_DEFAULTS.EVENT_OFFLINE)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.isOnline.set(false);
@@ -37,7 +41,7 @@ export class OfflineSyncService {
    * Triggers the offline sync queue draining pipeline in the worker.
    */
   triggerSync(): void {
-    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    if (this.platform.isBrowser && typeof navigator !== 'undefined' && !navigator.onLine) {
       console.warn('[OfflineSyncService] Cannot trigger sync while offline.');
       return;
     }
