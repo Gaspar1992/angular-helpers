@@ -89,7 +89,7 @@ export function buildHeatmapLayer(config: HeatmapLayerConfig) {
   const vectorSource = new VectorSource();
 
   if (config.features && config.features.length > 0) {
-    const olFeatures = config.features.map(featureToOlFeature);
+    const olFeatures = config.features.map((f) => featureToOlFeature(f));
     vectorSource.addFeatures(olFeatures);
   }
 

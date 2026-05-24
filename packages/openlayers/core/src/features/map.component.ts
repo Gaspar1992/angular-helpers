@@ -83,17 +83,17 @@ export class OlMapComponent {
     this.destroyRef.onDestroy(() => this.destroyMap());
   }
 
-  private getProjectedCoordinate(coord: Coordinate): Coordinate {
+  private getProjectedCoordinate(coord: number[] | Coordinate): Coordinate {
     const coordProj = this.coordinateProjection();
     const mapProj = this.projection();
-    if (coordProj === mapProj) return coord;
+    if (coordProj === mapProj) return coord as Coordinate;
     return transform(coord, coordProj, mapProj) as Coordinate;
   }
 
-  private getExternalCoordinate(coord: Coordinate): Coordinate {
+  private getExternalCoordinate(coord: number[] | Coordinate): Coordinate {
     const coordProj = this.coordinateProjection();
     const mapProj = this.projection();
-    if (coordProj === mapProj) return coord;
+    if (coordProj === mapProj) return coord as Coordinate;
     return transform(coord, mapProj, coordProj) as Coordinate;
   }
 
