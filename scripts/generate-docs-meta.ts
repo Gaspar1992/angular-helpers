@@ -119,6 +119,10 @@ function getJSDocComment(node: ts.Node): string {
   return '';
 }
 
+function cleanTypeString(typeStr: string): string {
+  return typeStr.replace(/import\("[^"]+"\)\./g, '');
+}
+
 function parseClassMethods(node: ts.ClassDeclaration): MethodDoc[] {
   const methods: MethodDoc[] = [];
   for (const member of node.members) {
@@ -144,13 +148,13 @@ function parseClassMethods(node: ts.ClassDeclaration): MethodDoc[] {
       const params = member.parameters
         .map((p) => {
           const pName = p.name.getText();
-          const pType = p.type ? p.type.getText() : 'any';
+          const pType = p.type ? cleanTypeString(p.type.getText()) : 'any';
           const isOptional = p.questionToken ? '?' : '';
           return `${pName}${isOptional}: ${pType}`;
         })
         .join(', ');
 
-      const returnType = member.type ? member.type.getText() : 'void';
+      const returnType = member.type ? cleanTypeString(member.type.getText()) : 'void';
       const signature = `${name}(${params}): ${returnType}`;
       const description = getJSDocComment(member);
 
@@ -195,7 +199,7 @@ function parseClassInputsOutputs(node: ts.ClassDeclaration): {
 
         if (isInput || isOutput) {
           if (init.typeArguments && init.typeArguments.length > 0) {
-            typeArg = init.typeArguments[0].getText();
+            typeArg = cleanTypeString(init.typeArguments[0].getText());
           }
           if (init.arguments && init.arguments.length > 0) {
             defaultValue = init.arguments[0].getText();
