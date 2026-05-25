@@ -152,13 +152,13 @@ Based on research, the following implementation tasks are ready for development:
 
 ### Needs Further Research
 
-| Title                                 | Description                                                           | Labels                |
-| ------------------------------------- | --------------------------------------------------------------------- | --------------------- |
-| Safari transferable streams polyfill  | Evaluate `remote-web-streams` polyfill for Safari/iOS limitation      | research, safari      |
-| Real-world overhead benchmarks        | Measure with 10KB, 100KB, 1MB payloads to determine benefit threshold | research, performance |
-| Cold Observable re-execution handling | Design handling for Observable resubscription in worker context       | research, rxjs        |
-| Worker OOM detection strategy         | Heartbeat or timeout mechanism for worker crash detection             | research, lifecycle   |
-| COOP/COEP opt-in UX                   | Design developer experience for SharedArrayBuffer opt-in              | research, ux          |
+| Title                                 | Description                                                               | Labels                 |
+| ------------------------------------- | ------------------------------------------------------------------------- | ---------------------- |
+| Safari transferable streams polyfill  | ✅ **DONE**: Implemented custom MessagePort Ack protocol for backpressure | research, safari, done |
+| Real-world overhead benchmarks        | ✅ **DONE**: Added Large Dataset Streaming (10MB) to benchmark suite      | research, perf, done   |
+| Cold Observable re-execution handling | Design handling for Observable resubscription in worker context           | research, rxjs         |
+| Worker OOM detection strategy         | Heartbeat or timeout mechanism for worker crash detection                 | research, lifecycle    |
+| COOP/COEP opt-in UX                   | Design developer experience for SharedArrayBuffer opt-in                  | research, ux           |
 
 ### Documentation Tasks
 

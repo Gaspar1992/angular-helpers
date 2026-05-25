@@ -78,6 +78,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
   const transferDetection = config.transferDetection ?? 'none';
   const streamsPolyfill = config.streamsPolyfill ?? false;
   let polyfillLoaded = false;
+  let deserializeFn: ((port: MessagePort) => ReadableStream) | null = null;
 
   function createInstance(index: number): TransportPort {
     let worker: Worker | SharedWorker;
@@ -174,6 +175,16 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
         if (data.type === 'error') {
           subscriber.error(new Error(data.error.message));
         } else {
+          if (deserializeFn && data.result && typeof data.result === 'object') {
+            const resObj = data.result as any;
+            if (
+              resObj.body &&
+              typeof resObj.body === 'object' &&
+              resObj.body.__isStreamPolyfillPort
+            ) {
+              resObj.body = deserializeFn(resObj.body.port);
+            }
+          }
           subscriber.next(data.result);
           subscriber.complete();
         }
@@ -245,11 +256,12 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
     }
 
     try {
-      const { needsPolyfill, ponyfillStreams } =
+      const { needsPolyfill, ponyfillStreams, deserializePortToStream } =
         await import('@angular-helpers/worker-http/streams-polyfill');
 
       if (needsPolyfill()) {
         await ponyfillStreams();
+        deserializeFn = deserializePortToStream;
       }
 
       polyfillLoaded = true;
