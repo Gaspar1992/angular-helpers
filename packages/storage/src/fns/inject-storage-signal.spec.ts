@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { injectStorageSignal } from './inject-storage-signal';
-import { STORAGE_TRANSPORT, StorageTransport } from '../services/storage-transport';
+import { StorageTransport } from '../services/storage-transport';
+import { STORAGE_TRANSPORT } from '../tokens/storage.tokens';
 
 describe('injectStorageSignal', () => {
   let mockTransport: StorageTransport;

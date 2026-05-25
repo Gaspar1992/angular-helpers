@@ -63,6 +63,131 @@ export const OPENLAYERS_SERVICES: ServiceDoc[] = [
   \`
 })
 export class MapComponent {}`,
+    guides: [
+      {
+        title: 'Interactive GIS Dashboards & Vector Layers',
+        description:
+          'This guide details how to orchestrate the modular OpenLayers components in an Angular application to construct a comprehensive GIS dashboard. We bind reactive coordinate points, handle dynamic map click events to open highly interactive overlay popups, and leverage standard controls in a standalone structure.',
+        files: [
+          {
+            name: 'gis-dashboard.component.ts',
+            language: 'ts',
+            content: `import { Component, signal, computed } from '@angular/core';
+import { 
+  OlMapComponent, 
+  OlTileLayerComponent, 
+  OlVectorLayerComponent 
+} from '@angular-helpers/openlayers';
+import { 
+  OlZoomControlComponent, 
+  OlScaleLineControlComponent 
+} from '@angular-helpers/openlayers/controls';
+import { OlPopupComponent } from '@angular-helpers/openlayers/overlays';
+import { Feature } from 'ol';
+import { Point } from 'ol/geom';
+import { Coordinate } from 'ol/coordinate';
+
+interface SensorLocation {
+  id: string;
+  name: string;
+  coords: Coordinate; // [lon, lat]
+  status: 'active' | 'warning' | 'error';
+}
+
+@Component({
+  selector: 'app-gis-dashboard',
+  standalone: true,
+  imports: [
+    OlMapComponent,
+    OlTileLayerComponent,
+    OlVectorLayerComponent,
+    OlZoomControlComponent,
+    OlScaleLineControlComponent,
+    OlPopupComponent
+  ],
+  templateUrl: './gis-dashboard.component.html'
+})
+export class GisDashboardComponent {
+  // 1. Reactive data model backing sensor coordinates
+  protected readonly sensors = signal<SensorLocation[]>([
+    { id: 's1', name: 'Barceloneta Sensor Alpha', coords: [2.1895, 41.3784], status: 'active' },
+    { id: 's2', name: 'Gracia Climate station', coords: [2.1558, 41.4026], status: 'warning' },
+    { id: 's3', name: 'Montjuïc Flow Monitor', coords: [2.1485, 41.3639], status: 'active' }
+  ]);
+
+  // 2. Computed signal mapping the data model into OpenLayers features dynamically
+  protected readonly mapFeatures = computed(() => {
+    return this.sensors().map(sensor => {
+      const feat = new Feature({
+        geometry: new Point(sensor.coords),
+        name: sensor.name
+      });
+      // Attach metadata for identification during click events
+      feat.setId(sensor.id);
+      return feat;
+    });
+  });
+
+  protected readonly selectedCoords = signal<Coordinate | null>(null);
+  protected readonly activeSensor = signal<SensorLocation | null>(null);
+
+  onMapClick(event: any) {
+    const featureId = event.feature?.getId();
+    if (featureId) {
+      const match = this.sensors().find(s => s.id === featureId);
+      if (match) {
+        this.activeSensor.set(match);
+        this.selectedCoords.set(match.coords);
+      }
+    } else {
+      this.clearSelection();
+    }
+  }
+
+  clearSelection() {
+    this.selectedCoords.set(null);
+    this.activeSensor.set(null);
+  }
+}`,
+          },
+          {
+            name: 'gis-dashboard.component.html',
+            language: 'html',
+            content: `<div class="relative w-full h-[600px] rounded-3xl overflow-hidden shadow-lg border border-border">
+  <!-- 1. Root Map Component: sets view, center, zoom, and projection -->
+  <ol-map [center]="[2.1734, 41.3851]" [zoom]="12" (mapClick)="onMapClick($event)">
+    <!-- 2. Base Satellite/Tile Layer -->
+    <ol-tile-layer source="osm" />
+
+    <!-- 3. Reactive Vector Layer: renders dynamic feature points -->
+    <ol-vector-layer id="sensors" [features]="mapFeatures()" />
+
+    <!-- 4. Interactive Overlay Popup: displays detail card on feature click -->
+    <ol-popup [position]="selectedCoords()" [autoPan]="true" [closeButton]="true" (closed)="clearSelection()">
+      @if (activeSensor(); as sensor) {
+        <div class="p-4 bg-base-100 rounded-2xl shadow-xl flex flex-col gap-2 min-w-[200px]">
+          <h4 class="font-black text-base">{{ sensor.name }}</h4>
+          <p class="text-xs text-base-content/60">Status: 
+            <span class="badge badge-sm" 
+                  [class.badge-success]="sensor.status === 'active'"
+                  [class.badge-warning]="sensor.status === 'warning'">
+              {{ sensor.status }}
+            </span>
+          </p>
+          <p class="text-[10px] font-mono">Lon: {{ sensor.coords[0] }} <br> Lat: {{ sensor.coords[1] }}</p>
+        </div>
+      }
+    </ol-popup>
+
+    <!-- 5. Map Controls -->
+    <ol-zoom-control />
+    <ol-scale-line-control unit="metric" />
+  </ol-map>
+</div>`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'tile-layer',

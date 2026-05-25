@@ -1,5 +1,5 @@
 import { inject, signal, computed, Signal, WritableSignal } from '@angular/core';
-import { STORAGE_TRANSPORT } from './storage-transport';
+import { STORAGE_TRANSPORT } from '../tokens/storage.tokens';
 import { LocalStorageTransport } from './local-transport';
 import { SafeReadonlyMap } from '../utils/safe-readonly-map';
 import { EntityStoreOptions, StorageSignalOptions } from '../interfaces/storage.types';

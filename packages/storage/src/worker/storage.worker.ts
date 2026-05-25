@@ -1,13 +1,8 @@
-import { LocalStorageTransport } from '../services/local-transport';
+import { IndexedDBTransport } from '../services/transports/indexeddb.transport';
 import { WorkerStorageRequest } from '../interfaces/worker-storage.types';
 
 // Instantiate our environment-agnostic L2 storage transport
-const storageEngine = new LocalStorageTransport();
-
-// Default storage configurations for Web Worker context
-storageEngine.storageType = 'indexeddb';
-storageEngine.dbName = 'ah_db';
-storageEngine.storeName = 'kv';
+const storageEngine = new IndexedDBTransport('fallback-passphrase-angular-helpers-default-key-sec');
 
 // BroadcastChannel for ultra-fast, native multi-tab sync
 const syncChannel = new BroadcastChannel('ah-storage-sync-channel');

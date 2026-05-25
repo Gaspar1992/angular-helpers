@@ -129,5 +129,49 @@ export class MyWorkerService {
     return this.pool.run<string, string>(input);
   }
 }`,
+    guides: [
+      {
+        title: 'Multi-Threaded Computations (Round-Robin WorkerPool)',
+        description:
+          'This guide details how to build a highly parallel computational service using injectWorkerPool. We create a pool of load-balanced background workers that handle heavy calculations asynchronously, avoiding UI thread freezing. It automatically handles worker lifecycle and terminations on context destruction.',
+        code: `import { Injectable, inject } from '@angular/core';
+import { injectWorkerPool } from '@angular-helpers/core';
+
+export interface ComputePayload {
+  matrixA: number[][];
+  matrixB: number[][];
+}
+
+@Injectable({ providedIn: 'root' })
+export class HighPerformanceComputeService {
+  // 1. Instantiate the WorkerPool using direct DI integration.
+  // Pool size is automatically adjusted up to navigator.hardwareConcurrency (capped at 4).
+  // When this service (or owning context) is destroyed, all workers are automatically terminated via DestroyRef.
+  private readonly pool = injectWorkerPool(
+    () => new Worker(new URL('./compute.worker', import.meta.url), { type: 'module' }),
+    { poolSize: 4 }
+  );
+
+  async multiplyMatrices(a: number[][], b: number[][]): Promise<number[][]> {
+    const payload: ComputePayload = { matrixA: a, matrixB: b };
+
+    try {
+      // 2. Dispatch the computationally heavy task to the next available worker in a round-robin fashion.
+      // This runs off-main-thread so that your Angular UI stays completely fluid at 60 FPS.
+      const result = await this.pool.run<ComputePayload, number[][]>(payload);
+      return result;
+    } catch (error) {
+      console.error('Off-thread computation failed:', error);
+      throw error;
+    }
+  }
+
+  terminatePool() {
+    // 3. Optional manual termination of all active threads.
+    this.pool.terminate();
+  }
+}`,
+      },
+    ],
   },
 ];

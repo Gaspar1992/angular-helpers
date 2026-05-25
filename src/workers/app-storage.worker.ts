@@ -1,15 +1,9 @@
-/// <reference lib="webworker" />
-
-import { LocalStorageTransport, detectTransferables } from '@angular-helpers/storage';
-import { WorkerStorageRequest } from '@angular-helpers/storage';
+import { IndexedDBTransport } from '../../packages/storage/src/services/transports/indexeddb.transport';
+import { detectTransferables } from '../../packages/storage/src/utils/detect-transferables';
+import { WorkerStorageRequest } from '../../packages/storage/src/interfaces/worker-storage.types';
 
 // Instantiate our environment-agnostic local transport driver inside the Worker context
-const storageEngine = new LocalStorageTransport();
-
-// Configure the worker's storage targets (using high-performance IndexedDB natively)
-storageEngine.storageType = 'indexeddb';
-storageEngine.dbName = 'ah_db';
-storageEngine.storeName = 'kv';
+const storageEngine = new IndexedDBTransport('fallback-passphrase-angular-helpers-default-key-sec');
 
 // BroadcastChannel for cross-tab realtime data synchronization
 const syncChannel = new BroadcastChannel('ah-storage-sync-channel');

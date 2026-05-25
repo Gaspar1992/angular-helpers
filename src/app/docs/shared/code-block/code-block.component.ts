@@ -32,7 +32,15 @@ const LANGUAGE_ALIASES: Record<string, string> = {
   template: `
     <div class="code-block-wrapper">
       <header class="code-header">
-        <span class="lang-badge">{{ displayLanguage() }}</span>
+        <div class="flex items-center gap-3">
+          <span class="lang-badge">{{ displayLanguage() }}</span>
+          @if (filename()) {
+            <span
+              class="filename-badge text-[0.65rem] font-black text-base-content/40 font-mono tracking-wide bg-base-content/5 px-2 py-0.5 rounded border border-border-subtle"
+              >{{ filename() }}</span
+            >
+          }
+        </div>
         <button
           class="copy-btn"
           (click)="copy()"
@@ -105,6 +113,7 @@ const LANGUAGE_ALIASES: Record<string, string> = {
 export class CodeBlockComponent implements AfterViewInit {
   readonly code = input.required<string>();
   readonly language = input<string>('typescript');
+  readonly filename = input<string | undefined>(undefined);
 
   protected normalizedLanguage = computed(() => {
     const lang = this.language();
