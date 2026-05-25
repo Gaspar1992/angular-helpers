@@ -311,7 +311,6 @@ async function run() {
 
     if (fs.existsSync(dataFilePath)) {
       try {
-        const fileContent = fs.readFileSync(dataFilePath, 'utf-8');
         // Extract exported array dynamically using evaluation or tsx dynamic import
         const module = await import(dataFilePath);
         existingServices = module[pkg.varName] || [];
@@ -327,7 +326,7 @@ async function run() {
       target: ts.ScriptTarget.ES2022,
       module: ts.ModuleKind.CommonJS,
     });
-    const checker = program.getTypeChecker();
+    const _checker = program.getTypeChecker(); // Triggers semantic binding required for node.getText()
 
     for (const sourceFile of program.getSourceFiles()) {
       if (sourceFile.isDeclarationFile) continue;

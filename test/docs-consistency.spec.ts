@@ -11,7 +11,7 @@
 import { describe, it, expect } from 'vitest';
 import { PACKAGES, TOTAL_SERVICE_COUNT } from '../src/app/core/config/packages.data';
 import { HOME_STATS } from '../src/app/home/config/home.config';
-import { DOCS_NAV_SECTIONS, DOCS_NAV_LIBRARIES } from '../src/app/docs/config/docs-nav.data';
+import { DOCS_NAV_SECTIONS } from '../src/app/docs/config/docs-nav.data';
 import { BROWSER_WEB_APIS_SERVICES } from '../src/app/docs/data/browser-web-apis.data';
 import { SECURITY_SERVICES } from '../src/app/docs/data/security.data';
 import { WORKER_HTTP_ENTRIES } from '../src/app/docs/data/worker-http.data';
@@ -121,8 +121,16 @@ describe('Documentation Consistency', () => {
         'enableNotifications:',
       ];
 
-      // This would need to check the actual HTML content of code examples
-      // For now, we check the structure exists
+      for (const service of BROWSER_WEB_APIS_SERVICES) {
+        if (!service.example) continue;
+        for (const pattern of deprecatedPatterns) {
+          expect(
+            service.example,
+            `Service example for "${service.id}" contains deprecated pattern "${pattern}"`,
+          ).not.toContain(pattern);
+        }
+      }
+
       const browserPackage = PACKAGES.find((p) => p.name === 'browser-web-apis');
       expect(browserPackage?.tagline).not.toContain('37');
       expect(browserPackage?.tagline).toContain('40');
