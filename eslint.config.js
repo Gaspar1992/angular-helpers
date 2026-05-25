@@ -57,6 +57,63 @@ export default [
     },
   },
   {
+    files: [
+      'packages/*/src/worker/**/*.ts',
+      'packages/*/src/workers/**/*.ts',
+      'src/workers/**/*.ts',
+      '**/*.worker.ts',
+    ],
+    languageOptions: {
+      parser: tsparser,
+    },
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@angular/core',
+              message:
+                'Web Workers must not import @angular/core to avoid dragging Angular compiler or lifecycle code into isolated background threads. Use pure TypeScript abstractions or interfaces.',
+              allowTypeImports: true,
+            },
+            {
+              name: '@angular/common',
+              message: 'Web Workers must not import @angular/common.',
+              allowTypeImports: true,
+            },
+            {
+              name: '@angular/platform-browser',
+              message: 'Web Workers must not import @angular/platform-browser.',
+            },
+            {
+              name: '@angular/router',
+              message: 'Web Workers must not import @angular/router.',
+            },
+            {
+              name: '@angular/ssr',
+              message: 'Web Workers must not import @angular/ssr.',
+            },
+          ],
+          patterns: [
+            {
+              group: [
+                '**/components/**',
+                '**/directives/**',
+                '**/services/*.service',
+                '**/services/local-transport',
+                '**/services/entity-store',
+                '**/services/storage-transport',
+              ],
+              message:
+                'Web Workers must not import UI components, directives, or Angular services since they carry heavy main-thread dependencies.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.html'],
     languageOptions: {
       parser: angularTemplateParser,

@@ -19,33 +19,50 @@ export const BROWSER_WEB_APIS_SERVICES: ServiceDoc[] = [
       {
         name: 'initialize',
         signature: 'initialize(): Promise<BatteryInfo>',
-        description: 'Initializes the battery manager. Must be called before other methods.',
+        description: 'Public method initialize.',
         returns: 'Promise<BatteryInfo>',
       },
       {
         name: 'getBatteryInfo',
         signature: 'getBatteryInfo(): BatteryInfo',
-        description:
-          'Returns current battery state (level, charging, chargingTime, dischargingTime).',
+        description: 'Public method getBatteryInfo.',
         returns: 'BatteryInfo',
       },
       {
         name: 'watchBatteryInfo',
         signature: 'watchBatteryInfo(): Observable<BatteryInfo>',
-        description: 'Returns an Observable that emits whenever battery state changes.',
+        description: 'Public method watchBatteryInfo.',
         returns: 'Observable<BatteryInfo>',
+      },
+      {
+        name: 'getNativeBatteryManager',
+        signature: 'getNativeBatteryManager(): BatteryManager',
+        description: 'Public method getNativeBatteryManager.',
+        returns: 'BatteryManager',
       },
       {
         name: 'isCharging',
         signature: 'isCharging(): boolean',
-        description: 'Returns whether the device is currently charging.',
+        description: 'Public method isCharging.',
         returns: 'boolean',
       },
       {
         name: 'getLevel',
         signature: 'getLevel(): number',
-        description: 'Returns the battery level as a value between 0.0 and 1.0.',
-        returns: 'number (0.0–1.0)',
+        description: 'Public method getLevel.',
+        returns: 'number',
+      },
+      {
+        name: 'getChargingTime',
+        signature: 'getChargingTime(): number',
+        description: 'Public method getChargingTime.',
+        returns: 'number',
+      },
+      {
+        name: 'getDischargingTime',
+        signature: 'getDischargingTime(): number',
+        description: 'Public method getDischargingTime.',
+        returns: 'number',
       },
     ],
     example: `import { BatteryService } from '@angular-helpers/browser-web-apis';
@@ -110,17 +127,35 @@ export class BatteryComponent {
     category: 'security',
     methods: [
       {
-        name: 'isSupported',
-        signature: 'isSupported(capability: BrowserCapabilityId): boolean',
-        description: 'Returns whether the given browser API capability is supported.',
+        name: 'getCapabilities',
+        signature: 'getCapabilities(): void',
+        description: 'Public method getCapabilities.',
+        returns: 'void',
+      },
+      {
+        name: 'isSecureContext',
+        signature: 'isSecureContext(): boolean',
+        description: 'Public method isSecureContext.',
         returns: 'boolean',
       },
       {
-        name: 'getUnsupportedCapabilities',
+        name: 'isSupported',
+        signature: 'isSupported(capability: BrowserCapabilityId): boolean',
+        description: 'Public method isSupported.',
+        returns: 'boolean',
+      },
+      {
+        name: 'getAllStatuses',
+        signature: 'getAllStatuses(): void',
+        description: 'Public method getAllStatuses.',
+        returns: 'void',
+      },
+      {
+        name: 'getPermissionState',
         signature:
-          'getUnsupportedCapabilities(capabilities: BrowserCapabilityId[]): BrowserCapabilityId[]',
-        description: 'Returns the subset of the given capabilities that are NOT supported.',
-        returns: 'BrowserCapabilityId[]',
+          "getPermissionState(permission: PermissionName): Promise<PermissionState | 'unknown'>",
+        description: 'Public method getPermissionState.',
+        returns: "Promise<PermissionState | 'unknown'>",
       },
     ],
     example: `import { BrowserCapabilityService } from '@angular-helpers/browser-web-apis';
@@ -154,27 +189,52 @@ export class MyComponent {
       {
         name: 'startCamera',
         signature: 'startCamera(constraints?: MediaStreamConstraints): Promise<MediaStream>',
-        description:
-          'Starts camera capture with optional constraints. Returns the active MediaStream.',
+        description: 'Public method startCamera.',
         returns: 'Promise<MediaStream>',
       },
       {
         name: 'stopCamera',
         signature: 'stopCamera(): void',
-        description: 'Stops all camera tracks and releases the stream.',
+        description: 'Public method stopCamera.',
         returns: 'void',
       },
       {
-        name: 'takePhoto',
-        signature: 'takePhoto(videoElement: HTMLVideoElement): Promise<Blob>',
-        description: 'Captures a photo from the given video element and returns it as a Blob.',
-        returns: 'Promise<Blob>',
+        name: 'switchCamera',
+        signature:
+          'switchCamera(deviceId: string, constraints: MediaStreamConstraints): Promise<MediaStream>',
+        description: 'Public method switchCamera.',
+        returns: 'Promise<MediaStream>',
       },
       {
-        name: 'isActive',
-        signature: 'isActive(): boolean',
-        description: 'Returns whether there is a currently active camera stream.',
+        name: 'getCameraCapabilities',
+        signature:
+          'getCameraCapabilities(deviceId: string): Promise<MediaTrackCapabilities | null>',
+        description: 'Public method getCameraCapabilities.',
+        returns: 'Promise<MediaTrackCapabilities | null>',
+      },
+      {
+        name: 'getCurrentStream',
+        signature: 'getCurrentStream(): MediaStream | null',
+        description: 'Public method getCurrentStream.',
+        returns: 'MediaStream | null',
+      },
+      {
+        name: 'isStreaming',
+        signature: 'isStreaming(): boolean',
+        description: 'Public method isStreaming.',
         returns: 'boolean',
+      },
+      {
+        name: 'getVideoInputDevices',
+        signature: 'getVideoInputDevices(): Promise<MediaDeviceInfo[]>',
+        description: 'Public method getVideoInputDevices.',
+        returns: 'Promise<MediaDeviceInfo[]>',
+      },
+      {
+        name: 'getNativeMediaDevices',
+        signature: 'getNativeMediaDevices(): MediaDevices',
+        description: 'Public method getNativeMediaDevices.',
+        returns: 'MediaDevices',
       },
     ],
     example: `import { CameraService } from '@angular-helpers/browser-web-apis';
@@ -324,13 +384,13 @@ export class AvatarCaptureComponent implements OnInit, OnDestroy {
       {
         name: 'writeText',
         signature: 'writeText(text: string): Promise<void>',
-        description: 'Writes the given text to the clipboard.',
+        description: 'Public method writeText.',
         returns: 'Promise<void>',
       },
       {
         name: 'readText',
         signature: 'readText(): Promise<string>',
-        description: 'Reads text from the clipboard.',
+        description: 'Public method readText.',
         returns: 'Promise<string>',
       },
     ],
@@ -408,21 +468,26 @@ export class CopyButtonComponent {
       {
         name: 'getCurrentPosition',
         signature: 'getCurrentPosition(options?: PositionOptions): Promise<GeolocationPosition>',
-        description: 'Returns the current device position as a Promise.',
+        description: 'Public method getCurrentPosition.',
         returns: 'Promise<GeolocationPosition>',
       },
       {
         name: 'watchPosition',
         signature: 'watchPosition(options?: PositionOptions): Observable<GeolocationPosition>',
-        description:
-          'Returns an Observable that continuously emits position updates. Unsubscribe to stop watching.',
+        description: 'Public method watchPosition.',
         returns: 'Observable<GeolocationPosition>',
       },
       {
         name: 'clearWatch',
         signature: 'clearWatch(watchId: number): void',
-        description: 'Clears a position watch by its ID.',
+        description: 'Public method clearWatch.',
         returns: 'void',
+      },
+      {
+        name: 'getNativeGeolocation',
+        signature: 'getNativeGeolocation(): Geolocation',
+        description: 'Public method getNativeGeolocation.',
+        returns: 'Geolocation',
       },
     ],
     example: `import { GeolocationService } from '@angular-helpers/browser-web-apis';
@@ -492,29 +557,52 @@ export class MapComponent {
     category: 'media-device',
     methods: [
       {
-        name: 'enumerateDevices',
-        signature: 'enumerateDevices(): Promise<MediaDeviceInfo[]>',
-        description: 'Returns all available media devices.',
+        name: 'getDevices',
+        signature: 'getDevices(): Promise<MediaDeviceInfo[]>',
+        description: 'Public method getDevices.',
         returns: 'Promise<MediaDeviceInfo[]>',
       },
       {
-        name: 'getVideoDevices',
-        signature: 'getVideoDevices(): Promise<MediaDeviceInfo[]>',
-        description: 'Returns only video input devices (cameras).',
-        returns: 'Promise<MediaDeviceInfo[]>',
+        name: 'getUserMedia',
+        signature: 'getUserMedia(constraints?: MediaStreamConstraints): Promise<MediaStream>',
+        description: 'Public method getUserMedia.',
+        returns: 'Promise<MediaStream>',
       },
       {
-        name: 'getAudioDevices',
-        signature: 'getAudioDevices(): Promise<MediaDeviceInfo[]>',
-        description: 'Returns only audio input devices (microphones).',
-        returns: 'Promise<MediaDeviceInfo[]>',
+        name: 'getDisplayMedia',
+        signature: 'getDisplayMedia(constraints?: DisplayMediaConstraints): Promise<MediaStream>',
+        description: 'Public method getDisplayMedia.',
+        returns: 'Promise<MediaStream>',
       },
       {
         name: 'watchDeviceChanges',
         signature: 'watchDeviceChanges(): Observable<MediaDeviceInfo[]>',
-        description:
-          'Returns an Observable that emits whenever devices are connected or disconnected.',
+        description: 'Public method watchDeviceChanges.',
         returns: 'Observable<MediaDeviceInfo[]>',
+      },
+      {
+        name: 'getVideoInputDevices',
+        signature: 'getVideoInputDevices(): Promise<MediaDeviceInfo[]>',
+        description: 'Public method getVideoInputDevices.',
+        returns: 'Promise<MediaDeviceInfo[]>',
+      },
+      {
+        name: 'getAudioInputDevices',
+        signature: 'getAudioInputDevices(): Promise<MediaDeviceInfo[]>',
+        description: 'Public method getAudioInputDevices.',
+        returns: 'Promise<MediaDeviceInfo[]>',
+      },
+      {
+        name: 'getAudioOutputDevices',
+        signature: 'getAudioOutputDevices(): Promise<MediaDeviceInfo[]>',
+        description: 'Public method getAudioOutputDevices.',
+        returns: 'Promise<MediaDeviceInfo[]>',
+      },
+      {
+        name: 'getNativeMediaDevices',
+        signature: 'getNativeMediaDevices(): MediaDevices',
+        description: 'Public method getNativeMediaDevices.',
+        returns: 'MediaDevices',
       },
     ],
     example: `import { MediaDevicesService } from '@angular-helpers/browser-web-apis';
@@ -545,29 +633,16 @@ export class DeviceSelectorComponent {
     category: 'system',
     methods: [
       {
-        name: 'permission',
-        signature: 'get permission(): NotificationPermission',
-        description:
-          'Returns the current notification permission state: "default", "granted", or "denied".',
-        returns: 'NotificationPermission',
-      },
-      {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether the Notifications API is available in the current browser.',
-        returns: 'boolean',
-      },
-      {
         name: 'requestNotificationPermission',
         signature: 'requestNotificationPermission(): Promise<NotificationPermission>',
-        description: 'Prompts the user for notification permission.',
+        description: 'Public method requestNotificationPermission.',
         returns: 'Promise<NotificationPermission>',
       },
       {
         name: 'showNotification',
         signature:
           'showNotification(title: string, options?: NotificationOptions): Promise<Notification>',
-        description: 'Displays a browser notification. Permission must be granted first.',
+        description: 'Public method showNotification.',
         returns: 'Promise<Notification>',
       },
     ],
@@ -602,7 +677,7 @@ export class AlertComponent {
       {
         name: 'query',
         signature: 'query(descriptor: PermissionDescriptor): Promise<PermissionStatus>',
-        description: 'Queries the current state of a given permission.',
+        description: 'Public method query.',
         returns: 'Promise<PermissionStatus>',
       },
     ],
@@ -633,20 +708,26 @@ export class PermissionCheckComponent {
       {
         name: 'share',
         signature: 'share(data: ShareData): Promise<ShareResult>',
-        description: 'Opens the native share dialog with the given data.',
-        returns: 'Promise<{ shared: boolean; error?: string }>',
+        description: 'Public method share.',
+        returns: 'Promise<ShareResult>',
       },
       {
         name: 'canShare',
         signature: 'canShare(): boolean',
-        description: 'Returns whether the Web Share API is available.',
+        description: 'Public method canShare.',
         returns: 'boolean',
       },
       {
         name: 'canShareFiles',
         signature: 'canShareFiles(): boolean',
-        description: 'Returns whether file sharing is supported.',
+        description: 'Public method canShareFiles.',
         returns: 'boolean',
+      },
+      {
+        name: 'getNativeShare',
+        signature: 'getNativeShare(): typeof navigator.share',
+        description: 'Public method getNativeShare.',
+        returns: 'typeof navigator.share',
       },
     ],
     example: `import { WebShareService } from '@angular-helpers/browser-web-apis';
@@ -681,28 +762,79 @@ export class ShareButtonComponent {
     category: 'network',
     methods: [
       {
-        name: 'connect',
-        signature: 'connect(config: WebSocketConfig): Observable<WebSocketStatus>',
-        description: 'Establishes a WebSocket connection. Emits status updates.',
-        returns: 'Observable<WebSocketStatus>',
+        name: 'createClient',
+        signature: 'createClient(config: WebSocketClientConfig): WebSocketClient',
+        description: `Create a new WebSocket client. The client owns one connection and is the recommended
+surface for all interactions (status signal, request/response, reconnect, etc.).
+
+The returned client is automatically disposed when the host injector is destroyed.`,
+        returns: 'WebSocketClient',
       },
       {
-        name: 'send',
-        signature: 'send<T>(message: WebSocketMessage<T>): void',
-        description: 'Sends a typed message through the active WebSocket.',
+        name: 'disposeAll',
+        signature: 'disposeAll(): void',
+        description: `Dispose every client created via \`createClient()\` (also called automatically on destroy).`,
         returns: 'void',
       },
       {
-        name: 'messages$',
-        signature: 'messages$<T>(type?: string): Observable<WebSocketMessage<T>>',
-        description: 'Returns an Observable of incoming messages, optionally filtered by type.',
-        returns: 'Observable<WebSocketMessage<T>>',
+        name: 'connect',
+        signature: 'connect(config: WebSocketConfig): Observable<WebSocketStatus>',
+        description: 'Public method connect.',
+        returns: 'Observable<WebSocketStatus>',
       },
       {
         name: 'disconnect',
         signature: 'disconnect(): void',
-        description: 'Closes the WebSocket connection and cancels reconnection.',
+        description: 'Public method disconnect.',
         returns: 'void',
+      },
+      {
+        name: 'send',
+        signature: 'send(message: WebSocketMessage<T>): void',
+        description: 'Public method send.',
+        returns: 'void',
+      },
+      {
+        name: 'sendRaw',
+        signature: 'sendRaw(data: string): void',
+        description: 'Public method sendRaw.',
+        returns: 'void',
+      },
+      {
+        name: 'getStatus',
+        signature: 'getStatus(): Observable<WebSocketStatus>',
+        description: 'Public method getStatus.',
+        returns: 'Observable<WebSocketStatus>',
+      },
+      {
+        name: 'getMessages',
+        signature: 'getMessages(): Observable<WebSocketMessage<T>>',
+        description: 'Public method getMessages.',
+        returns: 'Observable<WebSocketMessage<T>>',
+      },
+      {
+        name: 'getMessagesByType',
+        signature: 'getMessagesByType(type: string): Observable<WebSocketMessage<T>>',
+        description: 'Public method getMessagesByType.',
+        returns: 'Observable<WebSocketMessage<T>>',
+      },
+      {
+        name: 'getNativeWebSocket',
+        signature: 'getNativeWebSocket(): WebSocket | null',
+        description: 'Public method getNativeWebSocket.',
+        returns: 'WebSocket | null',
+      },
+      {
+        name: 'isConnected',
+        signature: 'isConnected(): boolean',
+        description: 'Public method isConnected.',
+        returns: 'boolean',
+      },
+      {
+        name: 'getReadyState',
+        signature: 'getReadyState(): number',
+        description: 'Public method getReadyState.',
+        returns: 'number',
       },
     ],
     example: `import { WebSocketService, WebSocketConfig } from '@angular-helpers/browser-web-apis';
@@ -738,43 +870,103 @@ export class ChatComponent {
     category: 'storage-io',
     methods: [
       {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Returns true if either local or session storage is usable.',
+        returns: 'boolean',
+      },
+      {
+        name: 'getStorageEvents',
+        signature: 'getStorageEvents(): Observable<StorageEvent>',
+        description: 'Stream of every storage mutation observed in this tab or other tabs.',
+        returns: 'Observable<StorageEvent>',
+      },
+      {
         name: 'setLocalStorage',
-        signature: 'setLocalStorage<T>(key: string, value: T, options?: StorageOptions): boolean',
-        description: 'Stores a value in localStorage.',
-        returns: 'boolean (success)',
+        signature: 'setLocalStorage(key: string, value: T, options: StorageOptions): boolean',
+        description: 'Public method setLocalStorage.',
+        returns: 'boolean',
       },
       {
         name: 'getLocalStorage',
         signature:
-          'getLocalStorage<T>(key: string, defaultValue?: T | null, options?: StorageOptions): T | null',
-        description: 'Retrieves a value from localStorage.',
+          'getLocalStorage(key: string, defaultValue: T | null, options: StorageOptions): T | null',
+        description: 'Public method getLocalStorage.',
         returns: 'T | null',
       },
       {
         name: 'removeLocalStorage',
-        signature: 'removeLocalStorage(key: string, options?: StorageOptions): boolean',
-        description: 'Removes a key from localStorage.',
-        returns: 'boolean (success)',
+        signature: 'removeLocalStorage(key: string, options: StorageOptions): boolean',
+        description: 'Public method removeLocalStorage.',
+        returns: 'boolean',
       },
       {
-        name: 'watchLocalStorage',
-        signature:
-          'watchLocalStorage<T>(key: string, options?: StorageOptions): Observable<T | null>',
-        description: 'Watches a localStorage key for changes across tabs.',
-        returns: 'Observable<T | null>',
+        name: 'clearLocalStorage',
+        signature: 'clearLocalStorage(options: StorageOptions): boolean',
+        description: 'Public method clearLocalStorage.',
+        returns: 'boolean',
       },
       {
         name: 'setSessionStorage',
-        signature: 'setSessionStorage<T>(key: string, value: T, options?: StorageOptions): boolean',
-        description: 'Stores a value in sessionStorage.',
-        returns: 'boolean (success)',
+        signature: 'setSessionStorage(key: string, value: T, options: StorageOptions): boolean',
+        description: 'Public method setSessionStorage.',
+        returns: 'boolean',
       },
       {
         name: 'getSessionStorage',
         signature:
-          'getSessionStorage<T>(key: string, defaultValue?: T | null, options?: StorageOptions): T | null',
-        description: 'Retrieves a value from sessionStorage.',
+          'getSessionStorage(key: string, defaultValue: T | null, options: StorageOptions): T | null',
+        description: 'Public method getSessionStorage.',
         returns: 'T | null',
+      },
+      {
+        name: 'removeSessionStorage',
+        signature: 'removeSessionStorage(key: string, options: StorageOptions): boolean',
+        description: 'Public method removeSessionStorage.',
+        returns: 'boolean',
+      },
+      {
+        name: 'clearSessionStorage',
+        signature: 'clearSessionStorage(options: StorageOptions): boolean',
+        description: 'Public method clearSessionStorage.',
+        returns: 'boolean',
+      },
+      {
+        name: 'getLocalStorageSize',
+        signature: 'getLocalStorageSize(options: StorageOptions): number',
+        description: 'Public method getLocalStorageSize.',
+        returns: 'number',
+      },
+      {
+        name: 'getSessionStorageSize',
+        signature: 'getSessionStorageSize(options: StorageOptions): number',
+        description: 'Public method getSessionStorageSize.',
+        returns: 'number',
+      },
+      {
+        name: 'watchLocalStorage',
+        signature: 'watchLocalStorage(key: string, options: StorageOptions): Observable<T | null>',
+        description: 'Public method watchLocalStorage.',
+        returns: 'Observable<T | null>',
+      },
+      {
+        name: 'watchSessionStorage',
+        signature:
+          'watchSessionStorage(key: string, options: StorageOptions): Observable<T | null>',
+        description: 'Public method watchSessionStorage.',
+        returns: 'Observable<T | null>',
+      },
+      {
+        name: 'getNativeLocalStorage',
+        signature: 'getNativeLocalStorage(): Storage',
+        description: 'Public method getNativeLocalStorage.',
+        returns: 'Storage',
+      },
+      {
+        name: 'getNativeSessionStorage',
+        signature: 'getNativeSessionStorage(): Storage',
+        description: 'Public method getNativeSessionStorage.',
+        returns: 'Storage',
       },
     ],
     example: `import { WebStorageService } from '@angular-helpers/browser-web-apis';
@@ -810,26 +1002,104 @@ export class PreferencesComponent {
       {
         name: 'createWorker',
         signature: 'createWorker(name: string, scriptUrl: string): Observable<WorkerStatus>',
-        description: 'Creates and initializes a named Web Worker. Emits status updates.',
+        description: `Create a worker. Idempotent: calling twice with the same name returns the
+existing entry without recreating the worker.
+
+Returns an \`Observable<WorkerStatus>\` for backward compatibility. Prefer
+ for new code.`,
         returns: 'Observable<WorkerStatus>',
       },
       {
-        name: 'sendMessage',
-        signature: 'sendMessage<T>(name: string, task: WorkerTask<T>): void',
-        description: 'Sends a typed task message to the named worker.',
-        returns: 'void',
-      },
-      {
-        name: 'messages$',
-        signature: 'messages$<T>(name: string): Observable<WorkerMessage<T>>',
-        description: 'Returns an Observable of messages from the named worker.',
-        returns: 'Observable<WorkerMessage<T>>',
+        name: 'createWorkerSignal',
+        signature: 'createWorkerSignal(name: string, scriptUrl: string): Signal<WorkerStatus>',
+        description: `Create a worker (signal-first). Returns the status signal; status is also
+accessible later via .`,
+        returns: 'Signal<WorkerStatus>',
       },
       {
         name: 'terminateWorker',
         signature: 'terminateWorker(name: string): void',
-        description: 'Terminates a named worker and releases its resources.',
+        description: 'Public method terminateWorker.',
         returns: 'void',
+      },
+      {
+        name: 'terminateAllWorkers',
+        signature: 'terminateAllWorkers(): void',
+        description: 'Public method terminateAllWorkers.',
+        returns: 'void',
+      },
+      {
+        name: 'postMessage',
+        signature: 'postMessage(workerName: string, task: WorkerTask): void',
+        description: 'Send a fire-and-forget message. Use  when you need a reply.',
+        returns: 'void',
+      },
+      {
+        name: 'request',
+        signature:
+          'request(workerName: string, type: string, data: TReq, opts?: WorkerRequestOptions): Promise<TRes>',
+        description: `Send a message and await a correlated response. The worker MUST send back a
+message containing \`correlationId\` matching the request id.
+
+\`\`\`ts
+const result = await ws.request<{ ok: boolean }>('worker', 'compute', { n: 1 });
+\`\`\``,
+        returns: 'Promise<TRes>',
+      },
+      {
+        name: 'getMessages',
+        signature: 'getMessages(workerName: string): Observable<WorkerMessage<T>>',
+        description: 'Public method getMessages.',
+        returns: 'Observable<WorkerMessage<T>>',
+      },
+      {
+        name: 'getMessagesByType',
+        signature:
+          'getMessagesByType(workerName: string, type: string): Observable<WorkerMessage<T>>',
+        description: 'Public method getMessagesByType.',
+        returns: 'Observable<WorkerMessage<T>>',
+      },
+      {
+        name: 'getStatus',
+        signature: 'getStatus(workerName: string): Observable<WorkerStatus>',
+        description: 'Public method getStatus.',
+        returns: 'Observable<WorkerStatus>',
+      },
+      {
+        name: 'getStatusSignal',
+        signature: 'getStatusSignal(workerName: string): Signal<WorkerStatus>',
+        description: 'Public method getStatusSignal.',
+        returns: 'Signal<WorkerStatus>',
+      },
+      {
+        name: 'getCurrentStatus',
+        signature: 'getCurrentStatus(workerName: string): WorkerStatus | undefined',
+        description: 'Public method getCurrentStatus.',
+        returns: 'WorkerStatus | undefined',
+      },
+      {
+        name: 'getAllStatuses',
+        signature: 'getAllStatuses(): Map<string, WorkerStatus>',
+        description: 'Public method getAllStatuses.',
+        returns: 'Map<string, WorkerStatus>',
+      },
+      {
+        name: 'isWorkerRunning',
+        signature: 'isWorkerRunning(workerName: string): boolean',
+        description: 'Public method isWorkerRunning.',
+        returns: 'boolean',
+      },
+      {
+        name: 'getNativeWorker',
+        signature: 'getNativeWorker(name: string): Worker | undefined',
+        description: 'Public method getNativeWorker.',
+        returns: 'Worker | undefined',
+      },
+      {
+        name: 'getAllWorkers',
+        signature: 'getAllWorkers(): Map<string, Worker>',
+        description: 'Public method getAllWorkers.',
+        returns: 'Map<string, Worker>',
       },
     ],
     example: `import { WebWorkerService } from '@angular-helpers/browser-web-apis';
@@ -853,7 +1123,6 @@ export class ProcessingComponent {
   }
 }`,
   },
-  // --- Tier 1 services ---
   {
     id: 'intersection-observer',
     name: 'IntersectionObserverService',
@@ -873,23 +1142,16 @@ export class ProcessingComponent {
       {
         name: 'observe',
         signature:
-          'observe(element: Element, options?: IntersectionObserverOptions): Observable<IntersectionObserverEntry[]>',
-        description: 'Observes an element and emits raw IntersectionObserverEntry arrays.',
+          'observe(element: Element, options: IntersectionObserverOptions): Observable<IntersectionObserverEntry[]>',
+        description: 'Public method observe.',
         returns: 'Observable<IntersectionObserverEntry[]>',
       },
       {
         name: 'observeVisibility',
         signature:
-          'observeVisibility(element: Element, options?: IntersectionObserverOptions): Observable<boolean>',
-        description:
-          'Observes an element and emits a boolean indicating whether it is intersecting.',
+          'observeVisibility(element: Element, options: IntersectionObserverOptions): Observable<boolean>',
+        description: 'Public method observeVisibility.',
         returns: 'Observable<boolean>',
-      },
-      {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether IntersectionObserver is available in the current browser.',
-        returns: 'boolean',
       },
     ],
     example: `import { IntersectionObserverService } from '@angular-helpers/browser-web-apis';
@@ -950,23 +1212,16 @@ export class LazyCardComponent {
       {
         name: 'observe',
         signature:
-          'observe(element: Element, options?: ResizeObserverOptions): Observable<ResizeObserverEntry[]>',
-        description: 'Observes an element and emits raw ResizeObserverEntry arrays.',
+          'observe(element: Element, options: ResizeObserverOptions): Observable<ResizeObserverEntry[]>',
+        description: 'Public method observe.',
         returns: 'Observable<ResizeObserverEntry[]>',
       },
       {
         name: 'observeSize',
         signature:
-          'observeSize(element: Element, options?: ResizeObserverOptions): Observable<ElementSize>',
-        description:
-          'Observes an element and emits a typed ElementSize (width, height, inlineSize, blockSize).',
+          'observeSize(element: Element, options: ResizeObserverOptions): Observable<ElementSize>',
+        description: 'Public method observeSize.',
         returns: 'Observable<ElementSize>',
-      },
-      {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether ResizeObserver is available in the current browser.',
-        returns: 'boolean',
       },
     ],
     example: `import { ResizeObserverService, type ElementSize } from '@angular-helpers/browser-web-apis';
@@ -1045,26 +1300,14 @@ export class ResponsiveComponent {
       {
         name: 'watch',
         signature: 'watch(): Observable<VisibilityState>',
-        description: "Emits the document's visibility state ('visible' | 'hidden') on each change.",
-        returns: "Observable<'visible' | 'hidden' | 'prerender'>",
+        description: 'Public method watch.',
+        returns: 'Observable<VisibilityState>',
       },
       {
         name: 'watchVisibility',
         signature: 'watchVisibility(): Observable<boolean>',
-        description: 'Emits true when the page is visible, false when hidden.',
+        description: 'Public method watchVisibility.',
         returns: 'Observable<boolean>',
-      },
-      {
-        name: 'visibilityState',
-        signature: 'get visibilityState(): VisibilityState',
-        description: 'Returns the current visibility state synchronously.',
-        returns: 'VisibilityState',
-      },
-      {
-        name: 'isHidden',
-        signature: 'get isHidden(): boolean',
-        description: 'Returns true when the document is currently hidden.',
-        returns: 'boolean',
       },
     ],
     example: `import { PageVisibilityService } from '@angular-helpers/browser-web-apis';
@@ -1137,28 +1380,33 @@ export class VideoComponent {
     methods: [
       {
         name: 'open',
-        signature: 'open<T>(name: string): Observable<T>',
-        description:
-          'Opens (or reuses) a named channel and returns an Observable of incoming messages.',
+        signature: 'open(name: string): Observable<T>',
+        description: 'Public method open.',
         returns: 'Observable<T>',
       },
       {
         name: 'post',
-        signature: 'post<T>(name: string, data: T): void',
-        description: 'Posts a message to all other contexts listening on the named channel.',
+        signature: 'post(name: string, data: T): void',
+        description: 'Public method post.',
         returns: 'void',
       },
       {
         name: 'close',
         signature: 'close(name: string): void',
-        description: 'Closes and removes a named channel.',
+        description: 'Public method close.',
         returns: 'void',
       },
       {
         name: 'closeAll',
         signature: 'closeAll(): void',
-        description: 'Closes all open channels.',
+        description: 'Public method closeAll.',
         returns: 'void',
+      },
+      {
+        name: 'getOpenChannels',
+        signature: 'getOpenChannels(): string[]',
+        description: 'Public method getOpenChannels.',
+        returns: 'string[]',
       },
     ],
     example: `import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
@@ -1197,27 +1445,14 @@ export class SyncComponent {
       {
         name: 'getSnapshot',
         signature: 'getSnapshot(): NetworkInformation',
-        description: 'Returns the current network state synchronously.',
+        description: 'Public method getSnapshot.',
         returns: 'NetworkInformation',
       },
       {
         name: 'watch',
         signature: 'watch(): Observable<NetworkInformation>',
-        description:
-          'Returns an Observable that emits whenever online status or connection info changes.',
+        description: 'Public method watch.',
         returns: 'Observable<NetworkInformation>',
-      },
-      {
-        name: 'isOnline',
-        signature: 'get isOnline(): boolean',
-        description: 'Returns the current online status.',
-        returns: 'boolean',
-      },
-      {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether extended Network Information API (connection) is available.',
-        returns: 'boolean',
       },
     ],
     example: `import { NetworkInformationService } from '@angular-helpers/browser-web-apis';
@@ -1294,28 +1529,21 @@ export class OfflineBannerComponent {
     methods: [
       {
         name: 'request',
-        signature: "request(type?: 'screen'): Promise<WakeLockStatus>",
-        description:
-          'Acquires a screen wake lock. Throws if unsupported or not in a secure context.',
+        signature: 'request(type: WakeLockType): Promise<WakeLockStatus>',
+        description: 'Public method request.',
         returns: 'Promise<WakeLockStatus>',
       },
       {
         name: 'release',
         signature: 'release(): Promise<void>',
-        description: 'Releases the active wake lock.',
+        description: 'Public method release.',
         returns: 'Promise<void>',
       },
       {
         name: 'watchStatus',
         signature: 'watchStatus(): Observable<WakeLockStatus>',
-        description: 'Emits the current wake lock status whenever it changes.',
+        description: 'Public method watchStatus.',
         returns: 'Observable<WakeLockStatus>',
-      },
-      {
-        name: 'isActive',
-        signature: 'get isActive(): boolean',
-        description: 'Returns whether the wake lock is currently active.',
-        returns: 'boolean',
       },
     ],
     example: `import { ScreenWakeLockService } from '@angular-helpers/browser-web-apis';
@@ -1394,32 +1622,26 @@ export class PresentationComponent {
       {
         name: 'getSnapshot',
         signature: 'getSnapshot(): OrientationInfo',
-        description: 'Returns the current orientation type and angle synchronously.',
+        description: 'Public method getSnapshot.',
         returns: 'OrientationInfo',
       },
       {
         name: 'watch',
         signature: 'watch(): Observable<OrientationInfo>',
-        description: 'Emits the current orientation whenever it changes.',
+        description: 'Public method watch.',
         returns: 'Observable<OrientationInfo>',
       },
       {
         name: 'lock',
         signature: 'lock(orientation: OrientationLockType): Promise<void>',
-        description: 'Locks the screen to the given orientation.',
+        description: 'Public method lock.',
         returns: 'Promise<void>',
       },
       {
         name: 'unlock',
         signature: 'unlock(): void',
-        description: 'Releases any previously set orientation lock.',
+        description: 'Public method unlock.',
         returns: 'void',
-      },
-      {
-        name: 'isPortrait',
-        signature: 'get isPortrait(): boolean',
-        description: 'Returns whether the current orientation is portrait.',
-        returns: 'boolean',
       },
     ],
     example: `import { ScreenOrientationService } from '@angular-helpers/browser-web-apis';
@@ -1507,35 +1729,35 @@ export class MobileComponent {
     category: 'system',
     methods: [
       {
-        name: 'request',
-        signature: 'request(element?: Element): Promise<void>',
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
         description:
-          'Enters fullscreen for the given element (defaults to document.documentElement).',
+          'Override to also check the *enabled* flag (browser may have disabled fullscreen).',
+        returns: 'boolean',
+      },
+      {
+        name: 'request',
+        signature: 'request(element: Element): Promise<void>',
+        description: 'Public method request.',
         returns: 'Promise<void>',
       },
       {
         name: 'exit',
         signature: 'exit(): Promise<void>',
-        description: 'Exits fullscreen mode.',
+        description: 'Public method exit.',
         returns: 'Promise<void>',
       },
       {
         name: 'toggle',
-        signature: 'toggle(element?: Element): Promise<void>',
-        description: 'Toggles fullscreen mode.',
+        signature: 'toggle(element: Element): Promise<void>',
+        description: 'Public method toggle.',
         returns: 'Promise<void>',
       },
       {
         name: 'watch',
         signature: 'watch(): Observable<boolean>',
-        description: 'Emits true when entering fullscreen and false when exiting.',
+        description: 'Public method watch.',
         returns: 'Observable<boolean>',
-      },
-      {
-        name: 'isFullscreen',
-        signature: 'get isFullscreen(): boolean',
-        description: 'Returns whether the document is currently in fullscreen mode.',
-        returns: 'boolean',
       },
     ],
     example: `import { FullscreenService } from '@angular-helpers/browser-web-apis';
@@ -1572,29 +1794,44 @@ export class VideoPlayerComponent {
     category: 'storage-io',
     methods: [
       {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Override to also assert secure context (required by the spec).',
+        returns: 'boolean',
+      },
+      {
         name: 'openFile',
-        signature: 'openFile(options?: FileOpenOptions): Promise<File[]>',
-        description:
-          'Opens the native file picker. Returns selected File objects (empty array on cancel).',
+        signature: 'openFile(options: FileOpenOptions): Promise<File[]>',
+        description: 'Public method openFile.',
         returns: 'Promise<File[]>',
       },
       {
         name: 'saveFile',
-        signature: 'saveFile(content: string | Blob, options?: FileSaveOptions): Promise<void>',
-        description: 'Opens the save dialog and writes content to the chosen file.',
+        signature: 'saveFile(content: string | Blob, options: FileSaveOptions): Promise<void>',
+        description: 'Public method saveFile.',
         returns: 'Promise<void>',
       },
       {
         name: 'openDirectory',
-        signature: 'openDirectory(options?): Promise<FileSystemDirectoryHandle | null>',
-        description: 'Opens a directory picker and returns the handle (null on cancel).',
+        signature: `openDirectory(options: {
+      id?: string;
+      mode?: 'read' | 'readwrite';
+      startIn?: string;
+    }): Promise<FileSystemDirectoryHandle | null>`,
+        description: 'Public method openDirectory.',
         returns: 'Promise<FileSystemDirectoryHandle | null>',
       },
       {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether the File System Access API is supported and secure.',
-        returns: 'boolean',
+        name: 'readFileAsText',
+        signature: 'readFileAsText(file: File): Promise<string>',
+        description: 'Public method readFileAsText.',
+        returns: 'Promise<string>',
+      },
+      {
+        name: 'readFileAsArrayBuffer',
+        signature: 'readFileAsArrayBuffer(file: File): Promise<ArrayBuffer>',
+        description: 'Public method readFileAsArrayBuffer.',
+        returns: 'Promise<ArrayBuffer>',
       },
     ],
     example: `import { FileSystemAccessService } from '@angular-helpers/browser-web-apis';
@@ -1634,35 +1871,52 @@ export class FileEditorComponent {
     category: 'media-device',
     methods: [
       {
-        name: 'start',
-        signature: 'start(stream: MediaStream, options?: RecordingOptions): Promise<void>',
-        description: 'Starts recording the given stream.',
-        returns: 'Promise<void>',
+        name: 'isTypeSupported',
+        signature: 'isTypeSupported(mimeType: string): boolean',
+        description: 'Public method isTypeSupported.',
+        returns: 'boolean',
       },
       {
-        name: 'stop',
-        signature: 'stop(): RecordingResult | null',
-        description:
-          'Stops recording and returns the result with blob, URL, mimeType and duration.',
-        returns: 'RecordingResult | null',
+        name: 'watchState',
+        signature: 'watchState(): Observable<RecordingState>',
+        description: 'Public method watchState.',
+        returns: 'Observable<RecordingState>',
+      },
+      {
+        name: 'watchData',
+        signature: 'watchData(): Observable<Blob>',
+        description: 'Public method watchData.',
+        returns: 'Observable<Blob>',
+      },
+      {
+        name: 'start',
+        signature: 'start(stream: MediaStream, options: RecordingOptions): Promise<void>',
+        description: 'Public method start.',
+        returns: 'Promise<void>',
       },
       {
         name: 'pause',
         signature: 'pause(): void',
-        description: 'Pauses an active recording.',
+        description: 'Public method pause.',
         returns: 'void',
       },
       {
         name: 'resume',
         signature: 'resume(): void',
-        description: 'Resumes a paused recording.',
+        description: 'Public method resume.',
         returns: 'void',
       },
       {
-        name: 'watchState',
-        signature: 'watchState(): Observable<RecordingState>',
-        description: "Emits recording state changes ('recording' | 'paused' | 'inactive').",
-        returns: "Observable<'recording' | 'paused' | 'inactive'>",
+        name: 'stop',
+        signature: 'stop(): RecordingResult | null',
+        description: 'Public method stop.',
+        returns: 'RecordingResult | null',
+      },
+      {
+        name: 'getResult',
+        signature: 'getResult(): RecordingResult | null',
+        description: 'Public method getResult.',
+        returns: 'RecordingResult | null',
       },
     ],
     example: `import { MediaRecorderService } from '@angular-helpers/browser-web-apis';
@@ -1702,28 +1956,33 @@ export class RecorderComponent {
     methods: [
       {
         name: 'connect',
-        signature: 'connect<T>(url: string, config?: SSEConfig): Observable<SSEMessage<T>>',
-        description:
-          'Opens an SSE connection to the given URL and returns an Observable of typed messages.',
+        signature: 'connect(url: string, config: SSEConfig): Observable<SSEMessage<T>>',
+        description: 'Public method connect.',
         returns: 'Observable<SSEMessage<T>>',
       },
       {
         name: 'disconnect',
         signature: 'disconnect(url: string): void',
-        description: 'Closes the SSE connection for the given URL.',
+        description: 'Public method disconnect.',
+        returns: 'void',
+      },
+      {
+        name: 'disconnectAll',
+        signature: 'disconnectAll(): void',
+        description: 'Public method disconnectAll.',
         returns: 'void',
       },
       {
         name: 'getState',
         signature: 'getState(url: string): SSEConnectionState',
-        description: "Returns the connection state ('connecting' | 'open' | 'closed').",
+        description: 'Public method getState.',
         returns: 'SSEConnectionState',
       },
       {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether EventSource is available in the current browser.',
-        returns: 'boolean',
+        name: 'getActiveConnections',
+        signature: 'getActiveConnections(): string[]',
+        description: 'Public method getActiveConnections.',
+        returns: 'string[]',
       },
     ],
     example: `import { ServerSentEventsService } from '@angular-helpers/browser-web-apis';
@@ -1763,33 +2022,38 @@ export class LiveFeedComponent {
     methods: [
       {
         name: 'vibrate',
-        signature: 'vibrate(pattern?: VibrationPattern): boolean',
-        description:
-          'Triggers a vibration with the given pattern (ms durations). Returns false if unsupported.',
+        signature: 'vibrate(pattern: VibrationPattern): boolean',
+        description: 'Public method vibrate.',
         returns: 'boolean',
       },
       {
         name: 'success',
         signature: 'success(): boolean',
-        description: 'Triggers the preset success haptic pattern.',
+        description: 'Public method success.',
         returns: 'boolean',
       },
       {
         name: 'error',
         signature: 'error(): boolean',
-        description: 'Triggers the preset error haptic pattern.',
+        description: 'Public method error.',
         returns: 'boolean',
       },
       {
         name: 'notification',
         signature: 'notification(): boolean',
-        description: 'Triggers the preset notification haptic pattern.',
+        description: 'Public method notification.',
+        returns: 'boolean',
+      },
+      {
+        name: 'doubleTap',
+        signature: 'doubleTap(): boolean',
+        description: 'Public method doubleTap.',
         returns: 'boolean',
       },
       {
         name: 'stop',
         signature: 'stop(): boolean',
-        description: 'Stops any active vibration.',
+        description: 'Public method stop.',
         returns: 'boolean',
       },
     ],
@@ -1828,39 +2092,39 @@ export class FeedbackComponent {
     category: 'media-device',
     methods: [
       {
-        name: 'speak',
-        signature: 'speak(text: string, options?: SpeechOptions): Observable<SpeechState>',
-        description: "Speaks the given text. Emits 'speaking', 'paused', and 'idle' state changes.",
-        returns: 'Observable<SpeechState>',
-      },
-      {
         name: 'getVoices',
         signature: 'getVoices(): SpeechSynthesisVoice[]',
-        description: 'Returns the currently available voices synchronously.',
+        description: 'Public method getVoices.',
         returns: 'SpeechSynthesisVoice[]',
       },
       {
         name: 'watchVoices',
         signature: 'watchVoices(): Observable<SpeechSynthesisVoice[]>',
-        description: 'Emits the voice list whenever it changes.',
+        description: 'Public method watchVoices.',
         returns: 'Observable<SpeechSynthesisVoice[]>',
+      },
+      {
+        name: 'speak',
+        signature: 'speak(text: string, options: SpeechOptions): Observable<SpeechState>',
+        description: 'Public method speak.',
+        returns: 'Observable<SpeechState>',
       },
       {
         name: 'pause',
         signature: 'pause(): void',
-        description: 'Pauses speech synthesis.',
+        description: 'Public method pause.',
         returns: 'void',
       },
       {
         name: 'resume',
         signature: 'resume(): void',
-        description: 'Resumes paused speech synthesis.',
+        description: 'Public method resume.',
         returns: 'void',
       },
       {
         name: 'cancel',
         signature: 'cancel(): void',
-        description: 'Cancels all pending and active speech.',
+        description: 'Public method cancel.',
         returns: 'void',
       },
     ],
@@ -1881,7 +2145,6 @@ export class VoiceComponent {
   }
 }`,
   },
-  // --- Tier 2 services ---
   {
     id: 'mutation-observer',
     name: 'MutationObserverService',
@@ -1902,14 +2165,8 @@ export class VoiceComponent {
         name: 'observe',
         signature:
           'observe(target: Node, options?: MutationObserverOptions): Observable<MutationRecord[]>',
-        description: 'Observes a DOM node and emits arrays of MutationRecord on each mutation.',
+        description: 'Public method observe.',
         returns: 'Observable<MutationRecord[]>',
-      },
-      {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether MutationObserver is available in the current browser.',
-        returns: 'boolean',
       },
     ],
     example: `import { MutationObserverService } from '@angular-helpers/browser-web-apis';
@@ -1972,27 +2229,21 @@ export class DomWatcherComponent {
       {
         name: 'observe',
         signature: 'observe(config: PerformanceObserverConfig): Observable<PerformanceEntryList>',
-        description: 'Observes performance entries matching the config and emits batches.',
+        description: 'Public method observe.',
         returns: 'Observable<PerformanceEntryList>',
       },
       {
         name: 'observeByType',
         signature:
-          'observeByType(type: PerformanceEntryType, buffered?: boolean): Observable<PerformanceEntryList>',
-        description: 'Convenience method to observe a single entry type.',
+          'observeByType(type: PerformanceEntryType, buffered: any): Observable<PerformanceEntryList>',
+        description: 'Public method observeByType.',
         returns: 'Observable<PerformanceEntryList>',
       },
       {
         name: 'getSupportedEntryTypes',
         signature: 'getSupportedEntryTypes(): PerformanceEntryType[]',
-        description: 'Returns the list of supported performance entry types.',
+        description: 'Public method getSupportedEntryTypes.',
         returns: 'PerformanceEntryType[]',
-      },
-      {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether PerformanceObserver is available.',
-        returns: 'boolean',
       },
     ],
     example: `import { PerformanceObserverService } from '@angular-helpers/browser-web-apis';
@@ -2057,22 +2308,23 @@ export class MetricsComponent {
     category: 'media-device',
     methods: [
       {
-        name: 'watch',
-        signature: 'watch(options?: IdleDetectorOptions): Observable<IdleState>',
-        description: 'Starts monitoring idle state. Emits user and screen state changes.',
-        returns: 'Observable<IdleState>',
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Public method isSupported.',
+        returns: 'boolean',
       },
       {
         name: 'requestPermission',
         signature: 'requestPermission(): Promise<PermissionState>',
-        description: 'Requests the idle-detection permission.',
+        description: 'Public method requestPermission.',
         returns: 'Promise<PermissionState>',
       },
       {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether the Idle Detection API is available.',
-        returns: 'boolean',
+        name: 'watch',
+        signature: 'watch(options: IdleDetectorOptions): Observable<IdleState>',
+        description: `Starts tracking idle state. Emits the current state and subsequent changes.
+Note: You must call requestPermission() and be granted access before starting.`,
+        returns: 'Observable<IdleState>',
       },
     ],
     example: `import { IdleDetectorService } from '@angular-helpers/browser-web-apis';
@@ -2140,16 +2392,16 @@ export class PresenceComponent {
     category: 'media-device',
     methods: [
       {
-        name: 'open',
-        signature: 'open(signal?: AbortSignal): Promise<ColorSelectionResult>',
-        description: 'Opens the eyedropper tool. Returns the selected color as { sRGBHex }.',
-        returns: 'Promise<ColorSelectionResult>',
-      },
-      {
         name: 'isSupported',
         signature: 'isSupported(): boolean',
-        description: 'Returns whether the EyeDropper API is available.',
+        description: 'Override to also assert secure context (required by the spec).',
         returns: 'boolean',
+      },
+      {
+        name: 'open',
+        signature: 'open(options?: { signal?: AbortSignal }): Promise<EyeDropperResult>',
+        description: 'Opens the system eye dropper tool and returns the selected color.',
+        returns: 'Promise<EyeDropperResult>',
       },
     ],
     example: `import { EyeDropperService } from '@angular-helpers/browser-web-apis';
@@ -2184,23 +2436,30 @@ export class ColorPickerComponent {
     category: 'media-device',
     methods: [
       {
-        name: 'detect',
-        signature:
-          'detect(image: ImageBitmapSource, formats?: BarcodeFormat[]): Promise<DetectedBarcode[]>',
-        description: 'Detects barcodes in the given image source.',
-        returns: 'Promise<DetectedBarcode[]>',
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Public method isSupported.',
+        returns: 'boolean',
       },
       {
         name: 'getSupportedFormats',
         signature: 'getSupportedFormats(): Promise<BarcodeFormat[]>',
-        description: 'Returns the barcode formats supported by the browser.',
+        description: 'Public method getSupportedFormats.',
         returns: 'Promise<BarcodeFormat[]>',
       },
       {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether the BarcodeDetector API is available.',
-        returns: 'boolean',
+        name: 'detect',
+        signature:
+          'detect(source: ImageBitmapSource, formats?: BarcodeFormat[]): Promise<DetectedBarcode[]>',
+        description: 'Public method detect.',
+        returns: 'Promise<DetectedBarcode[]>',
+      },
+      {
+        name: 'detectStream',
+        signature:
+          'detectStream(video: HTMLVideoElement, options: { formats?: BarcodeFormat[]; interval?: number }): Observable<DetectedBarcode[]>',
+        description: 'Public method detectStream.',
+        returns: 'Observable<DetectedBarcode[]>',
       },
     ],
     example: `import { BarcodeDetectorService } from '@angular-helpers/browser-web-apis/experimental';
@@ -2236,50 +2495,62 @@ export class ScannerComponent {
       {
         name: 'getContext',
         signature: 'getContext(): AudioContext',
-        description: 'Returns the AudioContext, creating it if needed.',
+        description: 'Public method getContext.',
         returns: 'AudioContext',
       },
       {
         name: 'resume',
         signature: 'resume(): Promise<void>',
-        description: 'Resumes a suspended AudioContext (required after user gesture).',
+        description: 'Public method resume.',
         returns: 'Promise<void>',
       },
       {
         name: 'close',
         signature: 'close(): Promise<void>',
-        description: 'Closes the AudioContext and releases resources.',
+        description: 'Public method close.',
         returns: 'Promise<void>',
       },
       {
+        name: 'getState',
+        signature: 'getState(): AudioContextState',
+        description: 'Public method getState.',
+        returns: 'AudioContextState',
+      },
+      {
         name: 'createOscillator',
-        signature: 'createOscillator(type?: OscillatorType, frequency?: number): OscillatorNode',
-        description: 'Creates an oscillator node with the given type and frequency.',
+        signature: 'createOscillator(type: OscillatorType, frequency: any): OscillatorNode',
+        description: 'Public method createOscillator.',
         returns: 'OscillatorNode',
       },
       {
+        name: 'createGain',
+        signature: 'createGain(value: any): GainNode',
+        description: 'Public method createGain.',
+        returns: 'GainNode',
+      },
+      {
         name: 'createAnalyser',
-        signature: 'createAnalyser(fftSize?: number): AnalyserNode',
-        description: 'Creates an analyser node for audio visualization.',
+        signature: 'createAnalyser(fftSize: any): AnalyserNode',
+        description: 'Public method createAnalyser.',
         returns: 'AnalyserNode',
       },
       {
         name: 'watchAnalyser',
         signature:
-          'watchAnalyser(analyser: AnalyserNode, intervalMs?: number): Observable<AudioAnalyserData>',
-        description: 'Emits frequency and time-domain data from an analyser at the given interval.',
+          'watchAnalyser(analyser: AnalyserNode, intervalMs: any): Observable<AudioAnalyserData>',
+        description: 'Public method watchAnalyser.',
         returns: 'Observable<AudioAnalyserData>',
       },
       {
         name: 'decodeAudioData',
         signature: 'decodeAudioData(arrayBuffer: ArrayBuffer): Promise<AudioBuffer>',
-        description: 'Decodes audio data from an ArrayBuffer.',
+        description: 'Public method decodeAudioData.',
         returns: 'Promise<AudioBuffer>',
       },
       {
         name: 'playBuffer',
-        signature: 'playBuffer(buffer: AudioBuffer, loop?: boolean): AudioBufferSourceNode',
-        description: 'Plays an AudioBuffer through the default output.',
+        signature: 'playBuffer(buffer: AudioBuffer, loop: any): AudioBufferSourceNode',
+        description: 'Public method playBuffer.',
         returns: 'AudioBufferSourceNode',
       },
     ],
@@ -2317,35 +2588,29 @@ export class ToneComponent {
     category: 'media-device',
     methods: [
       {
-        name: 'poll',
-        signature: 'poll(index: number, intervalMs?: number): Observable<GamepadState>',
-        description: 'Polls a gamepad at the given interval and emits its state.',
-        returns: 'Observable<GamepadState>',
+        name: 'getSnapshot',
+        signature: 'getSnapshot(index: number): GamepadState | null',
+        description: 'Public method getSnapshot.',
+        returns: 'GamepadState | null',
+      },
+      {
+        name: 'getConnectedGamepads',
+        signature: 'getConnectedGamepads(): GamepadState[]',
+        description: 'Public method getConnectedGamepads.',
+        returns: 'GamepadState[]',
       },
       {
         name: 'watchConnections',
         signature:
           "watchConnections(): Observable<{ gamepad: GamepadState; type: 'connected' | 'disconnected' }>",
-        description: 'Emits events when gamepads are connected or disconnected.',
-        returns: 'Observable<{ gamepad: GamepadState; type: string }>',
+        description: 'Public method watchConnections.',
+        returns: "Observable<{ gamepad: GamepadState; type: 'connected' | 'disconnected' }>",
       },
       {
-        name: 'getConnectedGamepads',
-        signature: 'getConnectedGamepads(): GamepadState[]',
-        description: 'Returns a snapshot of all currently connected gamepads.',
-        returns: 'GamepadState[]',
-      },
-      {
-        name: 'getSnapshot',
-        signature: 'getSnapshot(index: number): GamepadState | null',
-        description: 'Returns the current state of a gamepad by index.',
-        returns: 'GamepadState | null',
-      },
-      {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether the Gamepad API is available.',
-        returns: 'boolean',
+        name: 'poll',
+        signature: 'poll(index: number, intervalMs: any): Observable<GamepadState>',
+        description: 'Public method poll.',
+        returns: 'Observable<GamepadState>',
       },
     ],
     example: `import { GamepadService } from '@angular-helpers/browser-web-apis';
@@ -2689,47 +2954,53 @@ export class CheckoutComponent {
     category: 'security',
     methods: [
       {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Public method isSupported.',
+        returns: 'boolean',
+      },
+      {
+        name: 'isPublicKeySupported',
+        signature: 'isPublicKeySupported(): boolean',
+        description: 'Public method isPublicKeySupported.',
+        returns: 'boolean',
+      },
+      {
         name: 'get',
         signature: 'get(options?: CredentialRequestOptions): Promise<Credential | null>',
-        description: 'Retrieves a stored credential matching the given options.',
+        description: 'Public method get.',
         returns: 'Promise<Credential | null>',
       },
       {
         name: 'store',
         signature: 'store(credential: Credential): Promise<void>',
-        description: 'Stores a credential in the browser credential store.',
+        description: 'Public method store.',
         returns: 'Promise<void>',
       },
       {
         name: 'createPasswordCredential',
         signature: 'createPasswordCredential(data: PasswordCredentialData): Promise<Credential>',
-        description: 'Creates a password credential for storage.',
+        description: 'Public method createPasswordCredential.',
         returns: 'Promise<Credential>',
       },
       {
         name: 'createPublicKeyCredential',
         signature:
           'createPublicKeyCredential(options: PublicKeyCredentialOptions): Promise<Credential | null>',
-        description: 'Creates a public key credential (WebAuthn registration).',
+        description: 'Public method createPublicKeyCredential.',
         returns: 'Promise<Credential | null>',
       },
       {
         name: 'preventSilentAccess',
         signature: 'preventSilentAccess(): Promise<void>',
-        description: 'Prevents automatic sign-in on next visit.',
+        description: 'Public method preventSilentAccess.',
         returns: 'Promise<void>',
       },
       {
         name: 'isConditionalMediationAvailable',
         signature: 'isConditionalMediationAvailable(): Promise<boolean>',
-        description: 'Checks if passkey autofill (conditional mediation) is supported.',
+        description: 'Public method isConditionalMediationAvailable.',
         returns: 'Promise<boolean>',
-      },
-      {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether the Credential Management API is available.',
-        returns: 'boolean',
       },
     ],
     example: `import { CredentialManagementService } from '@angular-helpers/browser-web-apis/experimental';
@@ -2749,7 +3020,6 @@ export class LoginComponent {
   }
 }`,
   },
-  // --- New Web Platform Services (v21.11) ---
   {
     id: 'web-locks',
     name: 'WebLocksService',
@@ -2767,24 +3037,25 @@ export class LoginComponent {
     category: 'worker-compute',
     methods: [
       {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Public method isSupported.',
+        returns: 'boolean',
+      },
+      {
         name: 'acquire',
         signature:
-          'acquire<T>(name: string, callback: () => Promise<T> | T, options?: LockOptions): Promise<T>',
-        description:
-          'Acquires a lock and runs the callback while holding it. Lock is released automatically when callback completes.',
+          'acquire(name: string, callback: () => Promise<T> | T, options: LockOptionsLike): Promise<T>',
+        description: `Acquire a lock and run the callback while holding it. The lock is released
+automatically when the callback resolves or rejects.`,
         returns: 'Promise<T>',
       },
       {
         name: 'query',
         signature: 'query(): Promise<LockManagerSnapshot>',
-        description: 'Queries current lock state (held and pending locks). Diagnostic use only.',
-        returns: 'Promise<{ held: LockInfo[], pending: LockInfo[] }>',
-      },
-      {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether the Web Locks API is available.',
-        returns: 'boolean',
+        description: `Query the current lock state. Useful for diagnostics and tests; do not gate
+critical-section logic on this — it's a snapshot, not a reservation.`,
+        returns: 'Promise<LockManagerSnapshot>',
       },
     ],
     example: `import { WebLocksService } from '@angular-helpers/browser-web-apis';
@@ -2818,28 +3089,28 @@ export class SyncComponent {
     category: 'storage-io',
     methods: [
       {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Public method isSupported.',
+        returns: 'boolean',
+      },
+      {
         name: 'estimate',
         signature: 'estimate(): Promise<StorageQuotaEstimate>',
-        description: 'Returns storage usage and quota information for the current origin.',
-        returns: 'Promise<{ usage: number, quota: number, usageDetails?: Record<string, number> }>',
+        description: 'Public method estimate.',
+        returns: 'Promise<StorageQuotaEstimate>',
       },
       {
         name: 'persist',
         signature: 'persist(): Promise<boolean>',
-        description: 'Requests that storage be made persistent (eviction-protected).',
+        description: 'Public method persist.',
         returns: 'Promise<boolean>',
       },
       {
         name: 'persisted',
         signature: 'persisted(): Promise<boolean>',
-        description: 'Checks whether storage is currently persistent.',
+        description: 'Public method persisted.',
         returns: 'Promise<boolean>',
-      },
-      {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether the Storage Manager API is available.',
-        returns: 'boolean',
       },
     ],
     example: `import { StorageManagerService } from '@angular-helpers/browser-web-apis';
@@ -2876,37 +3147,37 @@ export class StorageComponent {
     category: 'storage-io',
     methods: [
       {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Public method isSupported.',
+        returns: 'boolean',
+      },
+      {
         name: 'compress',
         signature:
-          'compress(data: Uint8Array | ArrayBuffer, format?: CompressionFormat): Promise<Uint8Array>',
-        description: 'Compresses data using the specified format (default: gzip).',
+          'compress(data: Uint8Array | ArrayBuffer, format: CompressionFormat): Promise<Uint8Array>',
+        description: `Compress a \`Uint8Array\`/\`ArrayBuffer\` using the given format.`,
         returns: 'Promise<Uint8Array>',
       },
       {
         name: 'decompress',
         signature:
-          'decompress(data: Uint8Array | ArrayBuffer, format?: CompressionFormat): Promise<Uint8Array>',
-        description: 'Decompresses data using the specified format (default: gzip).',
+          'decompress(data: Uint8Array | ArrayBuffer, format: CompressionFormat): Promise<Uint8Array>',
+        description: `Decompress a \`Uint8Array\`/\`ArrayBuffer\` using the given format.`,
         returns: 'Promise<Uint8Array>',
       },
       {
         name: 'compressString',
-        signature: 'compressString(value: string, format?: CompressionFormat): Promise<Uint8Array>',
-        description: 'Convenience method to compress a UTF-8 string.',
+        signature: 'compressString(value: string, format: CompressionFormat): Promise<Uint8Array>',
+        description: 'Convenience: compress a UTF-8 string and return the compressed bytes.',
         returns: 'Promise<Uint8Array>',
       },
       {
         name: 'decompressString',
         signature:
-          'decompressString(data: Uint8Array | ArrayBuffer, format?: CompressionFormat): Promise<string>',
-        description: 'Convenience method to decompress into a UTF-8 string.',
+          'decompressString(data: Uint8Array | ArrayBuffer, format: CompressionFormat): Promise<string>',
+        description: 'Convenience: decompress bytes into a UTF-8 string.',
         returns: 'Promise<string>',
-      },
-      {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether the Compression Streams API is available.',
-        returns: 'boolean',
       },
     ],
     example: `import { CompressionService } from '@angular-helpers/browser-web-apis';

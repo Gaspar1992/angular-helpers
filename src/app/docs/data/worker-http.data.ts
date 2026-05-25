@@ -344,8 +344,9 @@ export class DataService {
     guides: [
       {
         title: 'Thread-Isolated Request Pipelines & HMAC-SHA256 Signing',
-        description:
-          'This guide details how to construct a custom request pipeline inside the HTTP Web Worker to offload heavy network operations, response caching, and complex cryptographic signatures (HMAC-SHA256) off the main thread.\n\nThis design secures key material in background threads (preventing XSS access) and ensures the UI thread stays completely interactive at 60 FPS during heavy calculations.',
+        description: `This guide details how to construct a custom request pipeline inside the HTTP Web Worker to offload heavy network operations, response caching, and complex cryptographic signatures (HMAC-SHA256) off the main thread.
+
+This design secures key material in background threads (preventing XSS access) and ensures the UI thread stays completely interactive at 60 FPS during heavy calculations.`,
         code: `// 1. In-Worker Pipeline: workers/api.worker.ts
 import { createWorkerPipeline } from '@angular-helpers/worker-http/interceptors';
 import { 

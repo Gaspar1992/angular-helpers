@@ -61,8 +61,9 @@ export class UserPreferencesComponent {
     guides: [
       {
         title: 'Offline-First Synchronization & L2 Caching',
-        description:
-          'This guide details how to orchestrate injectStorageSignal in combination with an HTTP client and OfflineSyncService to build a robust offline-first reactive state pattern.\n\nOptimistic UI updates are written directly to the main thread signal, immediately persisted to high-performance IndexedDB L2 storage, and queued for server synchronization. When navigator connectivity status changes, OfflineSyncService intercepts the state and automatically triggers background draining pipelines.',
+        description: `This guide details how to orchestrate injectStorageSignal in combination with an HTTP client and OfflineSyncService to build a robust offline-first reactive state pattern.
+
+Optimistic UI updates are written directly to the main thread signal, immediately persisted to high-performance IndexedDB L2 storage, and queued for server synchronization. When navigator connectivity status changes, OfflineSyncService intercepts the state and automatically triggers background draining pipelines.`,
         files: [
           {
             name: 'offline-settings.component.ts',
@@ -168,45 +169,7 @@ export class OfflineSettingsComponent {
       'Includes automatic persistence debouncing to microtasks to batch I/O operations.',
       'Automatically cleans up granular signals when entities are deleted to prevent memory leaks.',
     ],
-    methods: [
-      {
-        name: 'entitySignal',
-        signature: 'entitySignal(id: Id): Signal<Entity | undefined>',
-        description:
-          'Returns a highly granular, read-only Signal for a specific entity. Dispatches updates only if that specific entity changes.',
-        returns: 'Signal<Entity | undefined>',
-      },
-      {
-        name: 'setOne',
-        signature: 'setOne(entity: Entity): void',
-        description: 'Saves or updates a single entity, cloning and freezing it on write.',
-        returns: 'void',
-      },
-      {
-        name: 'patch',
-        signature: 'patch(id: Id, partial: Partial<Entity>): void',
-        description: 'Applies a partial update to an existing entity.',
-        returns: 'void',
-      },
-      {
-        name: 'update',
-        signature: 'update(id: Id, updater: (entity: Entity) => Entity): void',
-        description: 'Updates an entity using a transformation function.',
-        returns: 'void',
-      },
-      {
-        name: 'setMany',
-        signature: 'setMany(entities: Entity[]): void',
-        description: 'Saves or updates multiple entities atomically and freezes them on write.',
-        returns: 'void',
-      },
-      {
-        name: 'deleteOne',
-        signature: 'deleteOne(id: Id): void',
-        description: 'Deletes an entity and cleans up its granular signal.',
-        returns: 'void',
-      },
-    ],
+    methods: [],
     example: `import { Component } from '@angular/core';
 import { injectEntityStore } from '@angular-helpers/storage';
 
@@ -463,6 +426,12 @@ export const appConfig = {
         signature: 'triggerSync(): void',
         description: 'Triggers the offline sync queue draining pipeline in the worker.',
         returns: 'void',
+      },
+      {
+        name: 'checkPendingCount',
+        signature: 'checkPendingCount(): Promise<number>',
+        description: 'Manually checks the number of pending queued requests in IndexedDB.',
+        returns: 'Promise<number>',
       },
     ],
     example: `import { Component, inject } from '@angular/core';

@@ -13,7 +13,6 @@
 /* oxlint-disable no-console */
 
 import * as fs from 'node:fs';
-import * as path from 'node:path';
 
 interface PackageMetadata {
   serviceCount: number;
@@ -23,25 +22,6 @@ interface PackageMetadata {
   injectFunctions: string[];
   experimentalServices: string[];
   version: string;
-}
-
-function extractExportsFromPublicApi(filePath: string): string[] {
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const exports: string[] = [];
-
-  // Match: export { ServiceName } from './path'
-  const exportRegex = /export\s*\{\s*([^}]+)\}\s*from/g;
-  let match;
-
-  while ((match = exportRegex.exec(content)) !== null) {
-    const exportedNames = match[1]
-      .split(',')
-      .map((n) => n.trim())
-      .filter((n) => n.length > 0);
-    exports.push(...exportedNames);
-  }
-
-  return exports;
 }
 
 function countServicesInDirectory(dirPath: string): { services: string[]; count: number } {
