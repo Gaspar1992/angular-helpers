@@ -14,7 +14,7 @@ export const CORE_SERVICES: ServiceDoc[] = [
       'MUST be called within an injection context (constructor, factory, or inject-phase function).',
       'Falls back to typeof window/document checks when called outside DI (useful in unit tests).',
       'Returns null for window/document when running in SSR — always guard before accessing.',
-      'Prefer this over raw PLATFORM_ID + isPlatformBrowser() to avoid import duplication across packages.',
+      'Prefer this over raw PLATFORM_ID + isPlatformBrowser() to avoid import duplication across packages.'
     ],
     methods: [],
     example: `import { Component } from '@angular/core';
@@ -33,7 +33,7 @@ export class PlatformAwareComponent {
       console.log('Viewport:', this.platform.window?.innerWidth);
     }
   }
-}`,
+}`
   },
   {
     id: 'is-transferable',
@@ -48,7 +48,7 @@ export class PlatformAwareComponent {
       'Supported Transferable types: ArrayBuffer, MessagePort, ImageBitmap, OffscreenCanvas, ReadableStream, WritableStream, TransformStream.',
       `Typed-array views (Uint8Array, etc.) are NOT Transferable — pass \`.buffer\` explicitly if needed.`,
       'Used internally by @angular-helpers/storage and @angular-helpers/worker-http to build zero-copy postMessage calls.',
-      'Each global is guarded with typeof so the predicate is safe in environments where some globals are missing.',
+      'Each global is guarded with typeof so the predicate is safe in environments where some globals are missing.'
     ],
     methods: [],
     example: `import { isTransferable } from '@angular-helpers/core';
@@ -64,7 +64,7 @@ function buildTransferList(payload: unknown): Transferable[] {
 const buffer = new ArrayBuffer(1024);
 console.log(isTransferable(buffer));   // true
 console.log(isTransferable('hello'));  // false
-console.log(isTransferable(42));       // false`,
+console.log(isTransferable(42));       // false`
   },
   {
     id: 'worker-pool',
@@ -79,21 +79,21 @@ console.log(isTransferable(42));       // false`,
       'No-ops on server (SSR): returns a pool that immediately rejects all jobs.',
       'Pool size defaults to navigator.hardwareConcurrency (capped at 4) or falls back to 1.',
       'Workers are terminated automatically via DestroyRef when the component/service is destroyed.',
-      'Round-robin dispatch ensures work is spread evenly across all workers.',
+      'Round-robin dispatch ensures work is spread evenly across all workers.'
     ],
     methods: [
       {
         name: 'execute',
         signature: 'execute(type: string, data: any, timeoutMs?: number): Promise<T>',
         description: 'Executes a task in the worker',
-        returns: 'Promise<T>',
+        returns: 'Promise<T>'
       },
       {
         name: 'terminate',
         signature: 'terminate(): void',
         description: 'Public method terminate.',
-        returns: 'void',
-      },
+        returns: 'void'
+      }
     ],
     example: `import { Injectable } from '@angular/core';
 import { injectWorkerPool } from '@angular-helpers/core';
@@ -112,8 +112,7 @@ export class MyWorkerService {
     guides: [
       {
         title: 'Multi-Threaded Computations (Round-Robin WorkerPool)',
-        description:
-          'This guide details how to build a highly parallel computational service using injectWorkerPool. We create a pool of load-balanced background workers that handle heavy calculations asynchronously, avoiding UI thread freezing. It automatically handles worker lifecycle and terminations on context destruction.',
+        description: 'This guide details how to build a highly parallel computational service using injectWorkerPool. We create a pool of load-balanced background workers that handle heavy calculations asynchronously, avoiding UI thread freezing. It automatically handles worker lifecycle and terminations on context destruction.',
         code: `import { Injectable, inject } from '@angular/core';
 import { injectWorkerPool } from '@angular-helpers/core';
 
@@ -150,8 +149,8 @@ export class HighPerformanceComputeService {
     // 3. Optional manual termination of all active threads.
     this.pool.terminate();
   }
-}`,
-      },
-    ],
-  },
+}`
+      }
+    ]
+  }
 ];
