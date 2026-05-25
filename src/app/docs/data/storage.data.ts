@@ -10,7 +10,8 @@ export const STORAGE_SERVICES: ServiceDoc[] = [
   {
     id: 'inject-storage-signal',
     name: 'injectStorageSignal',
-    description: 'An advanced reactive L1 Signal backed by asynchronous L2 storage transport. Now featuring direct data access and separate loading/error sub-signals.',
+    description:
+      'An advanced reactive L1 Signal backed by asynchronous L2 storage transport. Now featuring direct data access and separate loading/error sub-signals.',
     scope: 'provided',
     importPath: '@angular-helpers/storage',
     requiresSecureContext: false,
@@ -20,7 +21,7 @@ export const STORAGE_SERVICES: ServiceDoc[] = [
       'Returns a WritableSignal emitting the data directly (no more .data access needed).',
       'Exposes .loading() and .error() read-only sub-signals for state monitoring.',
       'Includes smart diffing to prevent unnecessary UI updates if data is deep-equal.',
-      'Supports automatic off-main-thread serialization/encryption if a worker is provided.'
+      'Supports automatic off-main-thread serialization/encryption if a worker is provided.',
     ],
     methods: [],
     example: `import { Component } from '@angular/core';
@@ -119,7 +120,7 @@ export class OfflineSettingsComponent {
   forceSync() {
     this.sync.triggerSync();
   }
-}`
+}`,
           },
           {
             name: 'offline-settings.component.html',
@@ -146,16 +147,17 @@ export class OfflineSettingsComponent {
       Sync Now
     </button>
   </div>
-</div>`
-          }
-        ]
-      }
-    ]
+</div>`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'inject-entity-store',
     name: 'injectEntityStore',
-    description: 'Surgical, reactive entity management store with strict immutability (Freeze-on-Write) and optional L2 storage persistence. Now with batch write debouncing and easy patch/update API.',
+    description:
+      'Surgical, reactive entity management store with strict immutability (Freeze-on-Write) and optional L2 storage persistence. Now with batch write debouncing and easy patch/update API.',
     scope: 'provided',
     importPath: '@angular-helpers/storage',
     requiresSecureContext: false,
@@ -165,7 +167,7 @@ export class OfflineSettingsComponent {
       'Enforces immutability by applying Object.freeze on all stored entities (Freeze-on-Write).',
       'Exposes reactive derived signals: list(), ids(), size(), and entities().',
       'Includes automatic persistence debouncing to microtasks to batch I/O operations.',
-      'Automatically cleans up granular signals when entities are deleted to prevent memory leaks.'
+      'Automatically cleans up granular signals when entities are deleted to prevent memory leaks.',
     ],
     methods: [],
     example: `import { Component } from '@angular/core';
@@ -213,7 +215,8 @@ export class UsersAdminComponent {
     guides: [
       {
         title: 'Hexagonal Repositories & Immutability (Freeze-on-Write)',
-        description: 'Learn how to build a highly scalable, robust domain repository using injectEntityStore under Hexagonal Architecture principles. Enforce immutability using Angular standalone services to decouple your presentation layer from the reactive storage medium.',
+        description:
+          'Learn how to build a highly scalable, robust domain repository using injectEntityStore under Hexagonal Architecture principles. Enforce immutability using Angular standalone services to decouple your presentation layer from the reactive storage medium.',
         files: [
           {
             name: 'product.model.ts',
@@ -223,7 +226,7 @@ export class UsersAdminComponent {
   name: string;
   price: number;
   stock: number;
-}`
+}`,
           },
           {
             name: 'product-repository.interface.ts',
@@ -238,7 +241,7 @@ export interface ProductRepository {
   save(product: Product): void;
   delete(id: string): void;
   updatePrice(id: string, newPrice: number): void;
-}`
+}`,
           },
           {
             name: 'product-indexeddb.repository.ts',
@@ -283,7 +286,7 @@ export class ProductIndexedDbRepository implements ProductRepository {
   updatePrice(id: string, newPrice: number): void {
     this.store.patch(id, { price: newPrice });
   }
-}`
+}`,
           },
           {
             name: 'product-list.component.ts',
@@ -309,7 +312,7 @@ export class ProductListComponent {
   remove(id: string) {
     this.repo.delete(id);
   }
-}`
+}`,
           },
           {
             name: 'product-list.component.html',
@@ -357,16 +360,17 @@ export class ProductListComponent {
       </tbody>
     </table>
   </div>
-</div>`
-          }
-        ]
-      }
-    ]
+</div>`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'local-transport',
     name: 'LocalStorageTransport',
-    description: 'Strategy-based storage transport implementation. Supports LocalStorage, SessionStorage, CacheAPI, and IndexedDB with automatic worker delegation support.',
+    description:
+      'Strategy-based storage transport implementation. Supports LocalStorage, SessionStorage, CacheAPI, and IndexedDB with automatic worker delegation support.',
     scope: 'provided',
     importPath: '@angular-helpers/storage',
     requiresSecureContext: false,
@@ -375,21 +379,21 @@ export class ProductListComponent {
     notes: [
       'Implements the StorageTransport interface using a Strategy router pattern.',
       'Automatically delegates to Web Workers if STORAGE_WORKER_FACTORY is provided.',
-      'Supports AES-GCM encryption and TOON serialization across all backends.'
+      'Supports AES-GCM encryption and TOON serialization across all backends.',
     ],
     methods: [
       {
         name: 'read',
         signature: 'read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined>',
         description: 'Reads and deserializes a value from the configured storage mechanism.',
-        returns: 'Promise<T | undefined>'
+        returns: 'Promise<T | undefined>',
       },
       {
         name: 'write',
         signature: 'write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void>',
         description: 'Serializes, optionally encrypts, and writes a value to storage.',
-        returns: 'Promise<void>'
-      }
+        returns: 'Promise<void>',
+      },
     ],
     example: `// Worker-aware transport setup
 import { LocalStorageTransport, STORAGE_WORKER_FACTORY, STORAGE_TRANSPORT } from '@angular-helpers/storage';
@@ -399,12 +403,13 @@ export const appConfig = {
     { provide: STORAGE_WORKER_FACTORY, useValue: () => new Worker(new URL('./storage.worker', import.meta.url)) },
     { provide: STORAGE_TRANSPORT, useClass: LocalStorageTransport }
   ]
-};`
+};`,
   },
   {
     id: 'offline-sync',
     name: 'OfflineSyncService',
-    description: 'A reactive main-thread service that bridges network status changes to the background Http Web Worker. Monitors navigator.onLine reactively using Angular Signals, counts pending queued offline mutations, and triggers background synchronization on network recovery.',
+    description:
+      'A reactive main-thread service that bridges network status changes to the background Http Web Worker. Monitors navigator.onLine reactively using Angular Signals, counts pending queued offline mutations, and triggers background synchronization on network recovery.',
     scope: 'provided',
     importPath: '@angular-helpers/storage',
     requiresSecureContext: false,
@@ -413,21 +418,21 @@ export const appConfig = {
     notes: [
       'Uses Angular Signals (isOnline and pendingSyncsCount) to expose reactive network and queue state.',
       'Listens to native window "online" and "offline" events to automatically trigger synchronization.',
-      'Triggers background queue draining by calling the virtual route "/offline-sync-drain" through Angular HttpBackend.'
+      'Triggers background queue draining by calling the virtual route "/offline-sync-drain" through Angular HttpBackend.',
     ],
     methods: [
       {
         name: 'triggerSync',
         signature: 'triggerSync(): void',
         description: 'Triggers the offline sync queue draining pipeline in the worker.',
-        returns: 'void'
+        returns: 'void',
       },
       {
         name: 'checkPendingCount',
         signature: 'checkPendingCount(): Promise<number>',
         description: 'Manually checks the number of pending queued requests in IndexedDB.',
-        returns: 'Promise<number>'
-      }
+        returns: 'Promise<number>',
+      },
     ],
     example: `import { Component, inject } from '@angular/core';
 import { OfflineSyncService } from '@angular-helpers/storage';
@@ -443,12 +448,13 @@ import { OfflineSyncService } from '@angular-helpers/storage';
 })
 export class OfflineStatusComponent {
   protected syncService = inject(OfflineSyncService);
-}`
+}`,
   },
   {
     id: 'worker-transport',
     name: 'WorkerStorageTransport',
-    description: 'Web Worker based storage transport. Proxies storage operations to a dedicated worker thread for high performance and isolation.',
+    description:
+      'Web Worker based storage transport. Proxies storage operations to a dedicated worker thread for high performance and isolation.',
     scope: 'provided',
     importPath: '@angular-helpers/storage',
     requiresSecureContext: false,
@@ -457,37 +463,39 @@ export class OfflineStatusComponent {
     notes: [
       'Automatically used by LocalStorageTransport when a worker factory is provided.',
       'Supports zero-copy transfer for large ArrayBuffer payloads.',
-      'Ensures that main thread remains responsive during heavy crypto or serialization tasks.'
+      'Ensures that main thread remains responsive during heavy crypto or serialization tasks.',
     ],
     methods: [
       {
         name: 'read',
         signature: 'read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined>',
         description: 'Sends a RPC read request to the background storage worker.',
-        returns: 'Promise<T | undefined>'
+        returns: 'Promise<T | undefined>',
       },
       {
         name: 'write',
         signature: 'write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void>',
-        description: 'Sends a RPC write request to the background storage worker with zero-copy support.',
-        returns: 'Promise<void>'
+        description:
+          'Sends a RPC write request to the background storage worker with zero-copy support.',
+        returns: 'Promise<void>',
       },
       {
         name: 'delete',
         signature: 'delete(key: string, options?: StorageSignalOptions): Promise<void>',
         description: 'Sends a RPC delete request to the background storage worker.',
-        returns: 'Promise<void>'
-      }
+        returns: 'Promise<void>',
+      },
     ],
     example: `import { WorkerStorageTransport } from '@angular-helpers/storage';
 
 // Manually instantiating a worker-based transport
-const transport = new WorkerStorageTransport(() => new Worker(new URL('./app.worker', import.meta.url)));`
+const transport = new WorkerStorageTransport(() => new Worker(new URL('./app.worker', import.meta.url)));`,
   },
   {
     id: 'storage-transport',
     name: 'StorageTransport',
-    description: 'Interface definition for pluggable storage backends. Enables the Strategy pattern used by LocalStorageTransport.',
+    description:
+      'Interface definition for pluggable storage backends. Enables the Strategy pattern used by LocalStorageTransport.',
     scope: 'provided',
     importPath: '@angular-helpers/storage',
     requiresSecureContext: false,
@@ -495,27 +503,27 @@ const transport = new WorkerStorageTransport(() => new Worker(new URL('./app.wor
     category: 'storage-io',
     notes: [
       'Define custom storage logic by implementing this interface.',
-      'Core interface for WebStorage, IndexedDB, and CacheAPI specialized transports.'
+      'Core interface for WebStorage, IndexedDB, and CacheAPI specialized transports.',
     ],
     methods: [
       {
         name: 'read',
         signature: 'read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined>',
         description: 'Reads a value from the storage medium.',
-        returns: 'Promise<T | undefined>'
+        returns: 'Promise<T | undefined>',
       },
       {
         name: 'write',
         signature: 'write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void>',
         description: 'Writes a value to the storage medium.',
-        returns: 'Promise<void>'
+        returns: 'Promise<void>',
       },
       {
         name: 'delete',
         signature: 'delete(key: string, options?: StorageSignalOptions): Promise<void>',
         description: 'Removes a value from the storage medium.',
-        returns: 'Promise<void>'
-      }
+        returns: 'Promise<void>',
+      },
     ],
     example: `import { StorageTransport, StorageSignalOptions } from '@angular-helpers/storage';
 
@@ -530,8 +538,8 @@ export class MyCustomTransport implements StorageTransport {
   async delete(key: string, options?: StorageSignalOptions): Promise<void> {
     // Custom delete logic
   }
-}`
-  }
+}`,
+  },
 ];
 
 export const STORAGE_INTERFACES: Record<string, InterfaceDoc[]> = {

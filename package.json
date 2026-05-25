@@ -22,7 +22,7 @@
     "lint:angular": "eslint .",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
-    "generate:docs": "npx tsx scripts/generate-docs-meta.ts",
+    "generate:docs": "npx tsx scripts/generate-docs-meta.ts && oxfmt src/app/docs/data/*.data.ts",
     "test:docs-consistency": "pnpm run generate:docs && npx tsx scripts/verify-docs-consistency.ts && git diff --exit-code",
     "test:browser": "CI=1 playwright test --project=chromium --project=firefox-smoke --project=webkit-smoke --workers=1",
     "test:browser:headed": "playwright test --headed",

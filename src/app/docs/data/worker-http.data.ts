@@ -4,7 +4,8 @@ export const WORKER_HTTP_ENTRIES: ServiceDoc[] = [
   {
     id: 'transport',
     name: 'createWorkerTransport',
-    description: 'Typed RPC bridge between main thread and Web Worker. Wraps postMessage with request/response correlation, Observable API, and automatic cancellation on unsubscribe.',
+    description:
+      'Typed RPC bridge between main thread and Web Worker. Wraps postMessage with request/response correlation, Observable API, and automatic cancellation on unsubscribe.',
     scope: 'root',
     importPath: '@angular-helpers/worker-http/transport',
     requiresSecureContext: false,
@@ -13,27 +14,29 @@ export const WORKER_HTTP_ENTRIES: ServiceDoc[] = [
       'Round-robin pool for parallel request handling',
       'Request cancellation via AbortController in the worker',
       'Automatic Transferable detection for zero-copy ArrayBuffer transfer',
-      'Lazy worker instantiation'
+      'Lazy worker instantiation',
     ],
     methods: [
       {
         name: 'createWorkerTransport',
         signature: 'createWorkerTransport(config: WorkerTransportConfig): WorkerTransport',
-        description: 'Creates a typed RPC transport that communicates with a Web Worker. Returns an Observable-based API for executing requests.',
-        returns: 'WorkerTransport'
+        description:
+          'Creates a typed RPC transport that communicates with a Web Worker. Returns an Observable-based API for executing requests.',
+        returns: 'WorkerTransport',
       },
       {
         name: 'execute',
         signature: 'execute(request: TRequest): Observable<TResponse>',
-        description: 'Sends a request to the worker and returns an Observable. Unsubscribing sends a cancel message.',
-        returns: 'Observable<TResponse>'
+        description:
+          'Sends a request to the worker and returns an Observable. Unsubscribing sends a cancel message.',
+        returns: 'Observable<TResponse>',
       },
       {
         name: 'terminate',
         signature: 'terminate(): void',
         description: 'Cleans up all worker instances and releases resources.',
-        returns: 'void'
-      }
+        returns: 'void',
+      },
     ],
     example: `import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
 
@@ -51,12 +54,13 @@ response$.subscribe({
 });
 
 // Clean up when done
-transport.terminate();`
+transport.terminate();`,
   },
   {
     id: 'interceptors',
     name: 'createWorkerPipeline',
-    description: 'Creates a request pipeline inside the worker using pure-function interceptors. No Angular DI, no DOM access — just (req, next) => Promise<response>.',
+    description:
+      'Creates a request pipeline inside the worker using pure-function interceptors. No Angular DI, no DOM access — just (req, next) => Promise<response>.',
     scope: 'root',
     importPath: '@angular-helpers/worker-http/interceptors',
     requiresSecureContext: false,
@@ -64,69 +68,78 @@ transport.terminate();`
     notes: [
       'Interceptors run left-to-right in the order provided',
       'Each interceptor can modify the request before passing to next()',
-      'Pure functions — no external dependencies or side effects'
+      'Pure functions — no external dependencies or side effects',
     ],
     methods: [
       {
         name: 'createWorkerPipeline',
-        signature: 'createWorkerPipeline(interceptors: WorkerInterceptorFn[]): WorkerRequestHandler',
-        description: 'Creates a request handler that runs the interceptor chain before calling fetch().',
-        returns: 'WorkerRequestHandler'
+        signature:
+          'createWorkerPipeline(interceptors: WorkerInterceptorFn[]): WorkerRequestHandler',
+        description:
+          'Creates a request handler that runs the interceptor chain before calling fetch().',
+        returns: 'WorkerRequestHandler',
       },
       {
         name: 'retryInterceptor',
         signature: 'retryInterceptor(config?: RetryConfig): WorkerInterceptorFn',
-        description: 'Retries failed requests with exponential backoff. Respects Retry-After header.',
-        returns: 'WorkerInterceptorFn'
+        description:
+          'Retries failed requests with exponential backoff. Respects Retry-After header.',
+        returns: 'WorkerInterceptorFn',
       },
       {
         name: 'cacheInterceptor',
         signature: 'cacheInterceptor(config?: CacheConfig): WorkerInterceptorFn',
-        description: 'In-worker response cache with configurable TTL and max entries. Per-factory state.',
-        returns: 'WorkerInterceptorFn'
+        description:
+          'In-worker response cache with configurable TTL and max entries. Per-factory state.',
+        returns: 'WorkerInterceptorFn',
       },
       {
         name: 'hmacSigningInterceptor',
         signature: 'hmacSigningInterceptor(config: HmacSigningConfig): WorkerInterceptorFn',
-        description: 'Signs outgoing requests with HMAC-SHA256/384/512. CryptoKey imported once and reused.',
-        returns: 'WorkerInterceptorFn'
+        description:
+          'Signs outgoing requests with HMAC-SHA256/384/512. CryptoKey imported once and reused.',
+        returns: 'WorkerInterceptorFn',
       },
       {
         name: 'loggingInterceptor',
         signature: 'loggingInterceptor(config?: LoggingConfig): WorkerInterceptorFn',
-        description: 'Logs request/response. Logger exceptions are swallowed — never interrupts pipeline.',
-        returns: 'WorkerInterceptorFn'
+        description:
+          'Logs request/response. Logger exceptions are swallowed — never interrupts pipeline.',
+        returns: 'WorkerInterceptorFn',
       },
       {
         name: 'rateLimitInterceptor',
         signature: 'rateLimitInterceptor(config?: RateLimitConfig): WorkerInterceptorFn',
-        description: 'Client-side sliding-window rate limiter. Throws { status: 429 } when exceeded.',
-        returns: 'WorkerInterceptorFn'
+        description:
+          'Client-side sliding-window rate limiter. Throws { status: 429 } when exceeded.',
+        returns: 'WorkerInterceptorFn',
       },
       {
         name: 'contentIntegrityInterceptor',
         signature: 'contentIntegrityInterceptor(config?: IntegrityConfig): WorkerInterceptorFn',
         description: 'Verifies SHA-256 hash of response body against server-provided header.',
-        returns: 'WorkerInterceptorFn'
+        returns: 'WorkerInterceptorFn',
       },
       {
         name: 'composeInterceptors',
         signature: 'composeInterceptors(...fns: WorkerInterceptorFn[]): WorkerInterceptorFn',
         description: 'Composes multiple interceptors into a single interceptor function.',
-        returns: 'WorkerInterceptorFn'
+        returns: 'WorkerInterceptorFn',
       },
       {
         name: 'offlineCacheInterceptor',
         signature: 'offlineCacheInterceptor(config?: OfflineCacheConfig): WorkerInterceptorFn',
-        description: 'Offline Cache interceptor using native Cache API in the Web Worker. Supports "network-first" and "cache-first" (stale-while-revalidate) strategies. Caches only GET requests and supports cache bypass headers.',
-        returns: 'WorkerInterceptorFn'
+        description:
+          'Offline Cache interceptor using native Cache API in the Web Worker. Supports "network-first" and "cache-first" (stale-while-revalidate) strategies. Caches only GET requests and supports cache bypass headers.',
+        returns: 'WorkerInterceptorFn',
       },
       {
         name: 'offlineSyncQueueInterceptor',
         signature: 'offlineSyncQueueInterceptor(config?: OfflineSyncConfig): WorkerInterceptorFn',
-        description: 'Chronological (FIFO) mutation sync queue. Intercepts POST, PUT, PATCH, and DELETE requests when offline, stores them in IndexedDB, and returns a synthetic 202 Accepted. Replays them on reconnection.',
-        returns: 'WorkerInterceptorFn'
-      }
+        description:
+          'Chronological (FIFO) mutation sync queue. Intercepts POST, PUT, PATCH, and DELETE requests when offline, stores them in IndexedDB, and returns a synthetic 202 Accepted. Replays them on reconnection.',
+        returns: 'WorkerInterceptorFn',
+      },
     ],
     example: `// workers/offline.worker.ts
 import { createWorkerPipeline } from '@angular-helpers/worker-http/interceptors';
@@ -147,12 +160,13 @@ createWorkerPipeline([
   offlineSyncQueueInterceptor({
     dbName: 'ah_offline_sync',
   }),
-]);`
+]);`,
   },
   {
     id: 'serializer',
     name: 'Serializers',
-    description: 'Pluggable serialization for the postMessage boundary. Structured clone (zero overhead), seroval (full type fidelity), or auto-detect (smart selection).',
+    description:
+      'Pluggable serialization for the postMessage boundary. Structured clone (zero overhead), seroval (full type fidelity), or auto-detect (smart selection).',
     scope: 'root',
     importPath: '@angular-helpers/worker-http/serializer',
     requiresSecureContext: false,
@@ -161,39 +175,42 @@ createWorkerPipeline([
       'structuredCloneSerializer is the default — zero overhead',
       'createSerovalSerializer supports Date, Map, Set, BigInt, circular refs',
       'createAutoSerializer detects complex types at depth-1 and picks best strategy',
-      'Large payloads (>100 KiB) use ArrayBuffer transfer for zero-copy'
+      'Large payloads (>100 KiB) use ArrayBuffer transfer for zero-copy',
     ],
     methods: [
       {
         name: 'structuredCloneSerializer',
         signature: 'structuredCloneSerializer: Serializer',
-        description: 'Zero-overhead serializer using native structured clone. Default when none configured.',
-        returns: 'Serializer'
+        description:
+          'Zero-overhead serializer using native structured clone. Default when none configured.',
+        returns: 'Serializer',
       },
       {
         name: 'createSerovalSerializer',
         signature: 'createSerovalSerializer(): Promise<Serializer>',
-        description: 'Async factory that returns a seroval-based serializer. Full type fidelity support.',
-        returns: 'Promise<Serializer>'
+        description:
+          'Async factory that returns a seroval-based serializer. Full type fidelity support.',
+        returns: 'Promise<Serializer>',
       },
       {
         name: 'createAutoSerializer',
         signature: 'createAutoSerializer(config?: AutoSerializerConfig): Promise<Serializer>',
-        description: 'Smart auto-detection: seroval for complex types, structured clone for simple. Async factory, sync serializer.',
-        returns: 'Promise<Serializer>'
+        description:
+          'Smart auto-detection: seroval for complex types, structured clone for simple. Async factory, sync serializer.',
+        returns: 'Promise<Serializer>',
       },
       {
         name: 'serialize',
         signature: 'serialize<T>(data: T): SerializedPayload',
         description: 'Serializes data for postMessage transfer.',
-        returns: 'SerializedPayload'
+        returns: 'SerializedPayload',
       },
       {
         name: 'deserialize',
         signature: 'deserialize<T>(payload: SerializedPayload): T',
         description: 'Deserializes payload back to original data.',
-        returns: 'T'
-      }
+        returns: 'T',
+      },
     ],
     example: `import {
   structuredCloneSerializer,
@@ -214,12 +231,13 @@ const original = seroval.deserialize(payload);
 const auto = await createAutoSerializer({ transferThreshold: 102400 });
 // Simple objects → structured clone
 // Objects with Date/Map/Set → seroval
-// Large payloads → ArrayBuffer transfer`
+// Large payloads → ArrayBuffer transfer`,
   },
   {
     id: 'backend',
     name: 'provideWorkerHttpClient',
-    description: 'Angular HttpBackend replacement that routes HttpClient requests to Web Workers off the main thread. Drop-in integration with Angular DI — use WorkerHttpClient just like HttpClient.',
+    description:
+      'Angular HttpBackend replacement that routes HttpClient requests to Web Workers off the main thread. Drop-in integration with Angular DI — use WorkerHttpClient just like HttpClient.',
     scope: 'root',
     importPath: '@angular-helpers/worker-http/backend',
     requiresSecureContext: false,
@@ -229,45 +247,52 @@ const auto = await createAutoSerializer({ transferThreshold: 102400 });
       'WorkerHttpClient wraps HttpClient with an optional { worker } routing field',
       'WORKER_TARGET HttpContextToken enables per-request worker routing',
       'SSR-safe: falls back to FetchBackend when typeof Worker === "undefined"',
-      'withWorkerSerialization() applies to request body only; worker-side deserialization is developer responsibility'
+      'withWorkerSerialization() applies to request body only; worker-side deserialization is developer responsibility',
     ],
     methods: [
       {
         name: 'provideWorkerHttpClient',
-        signature: 'provideWorkerHttpClient(...features: WorkerHttpFeature[]): EnvironmentProviders',
-        description: 'Root provider that replaces provideHttpClient(). Registers WorkerHttpBackend, WorkerHttpClient, and all feature providers.',
-        returns: 'EnvironmentProviders'
+        signature:
+          'provideWorkerHttpClient(...features: WorkerHttpFeature[]): EnvironmentProviders',
+        description:
+          'Root provider that replaces provideHttpClient(). Registers WorkerHttpBackend, WorkerHttpClient, and all feature providers.',
+        returns: 'EnvironmentProviders',
       },
       {
         name: 'withWorkerConfigs',
         signature: 'withWorkerConfigs(configs: WorkerConfig[]): WorkerHttpFeature',
-        description: 'Registers named worker definitions. Each WorkerConfig has id, workerUrl, and optional maxInstances for pooling.',
-        returns: 'WorkerHttpFeature<"WorkerConfigs">'
+        description:
+          'Registers named worker definitions. Each WorkerConfig has id, workerUrl, and optional maxInstances for pooling.',
+        returns: 'WorkerHttpFeature<"WorkerConfigs">',
       },
       {
         name: 'withWorkerRoutes',
         signature: 'withWorkerRoutes(routes: WorkerRoute[]): WorkerHttpFeature',
-        description: 'URL-pattern to worker routing rules. Higher priority = evaluated first. Patterns can be RegExp or string prefix.',
-        returns: 'WorkerHttpFeature<"WorkerRoutes">'
+        description:
+          'URL-pattern to worker routing rules. Higher priority = evaluated first. Patterns can be RegExp or string prefix.',
+        returns: 'WorkerHttpFeature<"WorkerRoutes">',
       },
       {
         name: 'withWorkerFallback',
-        signature: 'withWorkerFallback(strategy: \'main-thread\' | \'error\'): WorkerHttpFeature',
-        description: 'Configures behavior when workers are unavailable (SSR, unsupported browsers). \'main-thread\' uses FetchBackend; \'error\' throws.',
-        returns: 'WorkerHttpFeature<"WorkerFallback">'
+        signature: "withWorkerFallback(strategy: 'main-thread' | 'error'): WorkerHttpFeature",
+        description:
+          "Configures behavior when workers are unavailable (SSR, unsupported browsers). 'main-thread' uses FetchBackend; 'error' throws.",
+        returns: 'WorkerHttpFeature<"WorkerFallback">',
       },
       {
         name: 'withWorkerSerialization',
         signature: 'withWorkerSerialization(serializer: WorkerSerializer): WorkerHttpFeature',
-        description: 'Plugs in a custom serializer for request body crossing the worker boundary. Use with createSerovalSerializer() for complex types (Date, Map, Set).',
-        returns: 'WorkerHttpFeature<"WorkerSerialization">'
+        description:
+          'Plugs in a custom serializer for request body crossing the worker boundary. Use with createSerovalSerializer() for complex types (Date, Map, Set).',
+        returns: 'WorkerHttpFeature<"WorkerSerialization">',
       },
       {
         name: 'WorkerHttpClient.get / post / put / delete / patch',
         signature: 'get<T>(url, options?: WorkerRequestOptions): Observable<T>',
-        description: 'HttpClient-compatible methods with an optional { worker: string } field for per-request worker routing.',
-        returns: 'Observable<T>'
-      }
+        description:
+          'HttpClient-compatible methods with an optional { worker: string } field for per-request worker routing.',
+        returns: 'Observable<T>',
+      },
     ],
     example: `// app.config.ts
 import {
@@ -379,14 +404,15 @@ export const appConfig: ApplicationConfig = {
       withWorkerFallback('main-thread') // Graceful SSR fallback
     )
   ]
-};`
-      }
-    ]
+};`,
+      },
+    ],
   },
   {
     id: 'crypto',
     name: 'WebCrypto Utilities',
-    description: 'Standalone WebCrypto primitives for HMAC signing, AES-GCM encryption, and content hashing. Useful in workers and main thread; workers provide memory isolation for key material.',
+    description:
+      'Standalone WebCrypto primitives for HMAC signing, AES-GCM encryption, and content hashing. Useful in workers and main thread; workers provide memory isolation for key material.',
     scope: 'root',
     importPath: '@angular-helpers/worker-http/crypto',
     requiresSecureContext: true,
@@ -394,57 +420,58 @@ export const appConfig: ApplicationConfig = {
     notes: [
       'Requires secure context (HTTPS or localhost)',
       'HMAC keys are imported once and reused for performance',
-      'All operations are async and return Promises'
+      'All operations are async and return Promises',
     ],
     methods: [
       {
         name: 'createHmacSigner',
         signature: 'createHmacSigner(config: HmacConfig): Promise<HmacSigner>',
-        description: 'Creates an HMAC signer/verifier with the specified key material and algorithm.',
-        returns: 'Promise<HmacSigner>'
+        description:
+          'Creates an HMAC signer/verifier with the specified key material and algorithm.',
+        returns: 'Promise<HmacSigner>',
       },
       {
         name: 'sign',
         signature: 'sign(data: string | ArrayBuffer): Promise<ArrayBuffer>',
         description: 'Creates an HMAC signature of the data.',
-        returns: 'Promise<ArrayBuffer>'
+        returns: 'Promise<ArrayBuffer>',
       },
       {
         name: 'verify',
         signature: 'verify(data: string | ArrayBuffer, signature: ArrayBuffer): Promise<boolean>',
         description: 'Verifies an HMAC signature against the data.',
-        returns: 'Promise<boolean>'
+        returns: 'Promise<boolean>',
       },
       {
         name: 'createAesEncryptor',
         signature: 'createAesEncryptor(config: AesConfig): Promise<AesEncryptor>',
         description: 'Creates an AES-GCM encryptor/decryptor.',
-        returns: 'Promise<AesEncryptor>'
+        returns: 'Promise<AesEncryptor>',
       },
       {
         name: 'encrypt',
         signature: 'encrypt(plaintext: string): Promise<EncryptedPayload>',
         description: 'Encrypts plaintext using AES-GCM. Returns ciphertext and IV.',
-        returns: 'Promise<{ ciphertext: ArrayBuffer; iv: Uint8Array }>'
+        returns: 'Promise<{ ciphertext: ArrayBuffer; iv: Uint8Array }>',
       },
       {
         name: 'decrypt',
         signature: 'decrypt(payload: EncryptedPayload): Promise<ArrayBuffer>',
         description: 'Decrypts AES-GCM ciphertext using the provided IV.',
-        returns: 'Promise<ArrayBuffer>'
+        returns: 'Promise<ArrayBuffer>',
       },
       {
         name: 'createContentHasher',
         signature: 'createContentHasher(algorithm?: HashAlgorithm): ContentHasher',
         description: 'Creates a content hasher for the specified algorithm.',
-        returns: 'ContentHasher'
+        returns: 'ContentHasher',
       },
       {
         name: 'hash',
         signature: 'hash(data: string | ArrayBuffer): Promise<ArrayBuffer>',
         description: 'Hashes the data using the configured algorithm.',
-        returns: 'Promise<ArrayBuffer>'
-      }
+        returns: 'Promise<ArrayBuffer>',
+      },
     ],
     example: `import {
   createHmacSigner,
@@ -470,12 +497,13 @@ const decrypted = await encryptor.decrypt({ ciphertext, iv });
 
 // Content Hashing
 const hasher = createContentHasher('SHA-256');
-const hash = await hasher.hash('data to hash');`
+const hash = await hasher.hash('data to hash');`,
   },
   {
     id: 'streams-polyfill',
     name: 'Streams Polyfill',
-    description: 'Safari Transferable Streams Ponyfill. Provides ReadableStream, TransformStream, and WritableStream implementations that support structuredClone transfer to/from Web Workers on Safari 16-17.',
+    description:
+      'Safari Transferable Streams Ponyfill. Provides ReadableStream, TransformStream, and WritableStream implementations that support structuredClone transfer to/from Web Workers on Safari 16-17.',
     scope: 'root',
     importPath: '@angular-helpers/worker-http/streams-polyfill',
     requiresSecureContext: false,
@@ -484,21 +512,23 @@ const hash = await hasher.hash('data to hash');`
       'Ponyfill (not polyfill) — does not modify global scope',
       'Lazy-loaded — only downloads when Safari 16-17 is detected',
       'Used automatically by transport when safariPolyfill: true is configured',
-      'Native implementations re-exported when available'
+      'Native implementations re-exported when available',
     ],
     methods: [
       {
         name: 'needsPolyfill',
         signature: 'needsPolyfill(userAgent?: string): boolean',
-        description: 'Detects if the current browser needs the streams ponyfill. Safari 16-17 fails to transfer ReadableStream/TransformStream via structuredClone.',
-        returns: 'boolean'
+        description:
+          'Detects if the current browser needs the streams ponyfill. Safari 16-17 fails to transfer ReadableStream/TransformStream via structuredClone.',
+        returns: 'boolean',
       },
       {
         name: 'ponyfillStreams',
         signature: 'ponyfillStreams(): Promise<StreamPonyfillExports>',
-        description: 'Lazily loads the web-streams-polyfill ponyfill. Returns ponyfilled streams or native if not needed.',
-        returns: 'Promise<{ ReadableStream, TransformStream, WritableStream }>'
-      }
+        description:
+          'Lazily loads the web-streams-polyfill ponyfill. Returns ponyfilled streams or native if not needed.',
+        returns: 'Promise<{ ReadableStream, TransformStream, WritableStream }>',
+      },
     ],
     example: `import { needsPolyfill, ponyfillStreams } from '@angular-helpers/worker-http/streams-polyfill';
 
@@ -518,12 +548,13 @@ if (needsPolyfill()) {
 const transport = createWorkerTransport({
   workerUrl: new URL('./worker.ts', import.meta.url),
   safariPolyfill: true, // Auto-injects when needed
-});`
+});`,
   },
   {
     id: 'esbuild-plugin',
     name: 'esbuild Plugin',
-    description: 'Build-time esbuild plugin for bundling worker interceptors. Auto-discovers and injects interceptor imports into worker files during compilation.',
+    description:
+      'Build-time esbuild plugin for bundling worker interceptors. Auto-discovers and injects interceptor imports into worker files during compilation.',
     scope: 'root',
     importPath: '@angular-helpers/worker-http/esbuild-plugin',
     requiresSecureContext: false,
@@ -532,15 +563,16 @@ const transport = createWorkerTransport({
       'Only needed for custom esbuild setups (not Angular CLI default)',
       'Auto-discovers interceptors from src directory when autoDiscover: true',
       'Injects interceptor imports into worker files at build time',
-      'Works with any esbuild-based setup (Vite, custom webpack, etc.)'
+      'Works with any esbuild-based setup (Vite, custom webpack, etc.)',
     ],
     methods: [
       {
         name: 'workerHttpPlugin',
         signature: 'workerHttpPlugin(options?: WorkerHttpPluginOptions): Plugin',
-        description: 'Creates an esbuild plugin that bundles interceptors into worker files. Intercepts .worker.{ts,js,mjs} files.',
-        returns: 'esbuild Plugin'
-      }
+        description:
+          'Creates an esbuild plugin that bundles interceptors into worker files. Intercepts .worker.{ts,js,mjs} files.',
+        returns: 'esbuild Plugin',
+      },
     ],
     example: `import { workerHttpPlugin } from '@angular-helpers/worker-http/esbuild-plugin';
 
@@ -559,8 +591,8 @@ export default {
       autoDiscover: true, // merges discovered with explicit
     }),
   ],
-};`
-  }
+};`,
+  },
 ];
 
 export const WORKER_HTTP_INTERFACES = [

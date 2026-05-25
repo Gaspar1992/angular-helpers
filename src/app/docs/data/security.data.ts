@@ -4,7 +4,8 @@ export const SECURITY_SERVICES: ServiceDoc[] = [
   {
     id: 'regex-security',
     name: 'RegexSecurityService',
-    description: 'Executes regular expressions safely in a Web Worker to prevent ReDoS (Regular Expression Denial of Service) attacks. Provides timeout protection, complexity analysis, and safe mode enforcement.',
+    description:
+      'Executes regular expressions safely in a Web Worker to prevent ReDoS (Regular Expression Denial of Service) attacks. Provides timeout protection, complexity analysis, and safe mode enforcement.',
     scope: 'provided',
     importPath: '@angular-helpers/security',
     requiresSecureContext: false,
@@ -12,27 +13,28 @@ export const SECURITY_SERVICES: ServiceDoc[] = [
     notes: [
       'Use safeMode: true in production to block dangerous patterns.',
       'Always handle timeout: true in the result to detect potential attacks.',
-      'Pair with RegexSecurityBuilder for complex pattern construction.'
+      'Pair with RegexSecurityBuilder for complex pattern construction.',
     ],
     methods: [
       {
         name: 'builder',
         signature: 'builder(): RegexSecurityBuilder',
         description: 'Builder pattern to construct safe regular expressions',
-        returns: 'RegexSecurityBuilder'
+        returns: 'RegexSecurityBuilder',
       },
       {
         name: 'testRegex',
-        signature: 'testRegex(pattern: string, text: string, config: RegexSecurityConfig): Promise<RegexTestResult>',
+        signature:
+          'testRegex(pattern: string, text: string, config: RegexSecurityConfig): Promise<RegexTestResult>',
         description: 'Executes a regular expression safely with a timeout',
-        returns: 'Promise<RegexTestResult>'
+        returns: 'Promise<RegexTestResult>',
       },
       {
         name: 'analyzePatternSecurity',
         signature: 'analyzePatternSecurity(pattern: string): Promise<RegexSecurityResult>',
         description: 'Analyzes the security of a regular expression pattern',
-        returns: 'Promise<RegexSecurityResult>'
-      }
+        returns: 'Promise<RegexSecurityResult>',
+      },
     ],
     example: `import { RegexSecurityService } from '@angular-helpers/security';
 
@@ -136,7 +138,7 @@ export class SecureValidatorComponent {
       this.isProcessing.set(false);
     }
   }
-}`
+}`,
           },
           {
             name: 'secure-validator.component.html',
@@ -182,16 +184,17 @@ export class SecureValidatorComponent {
       </div>
     </div>
   }
-</form>`
-          }
-        ]
-      }
-    ]
+</form>`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'regex-security-builder',
     name: 'RegexSecurityBuilder',
-    description: 'Fluent builder for constructing regular expressions with built-in security analysis. Supports method chaining for readable pattern construction. Obtain an instance via RegexSecurityService.builder().',
+    description:
+      'Fluent builder for constructing regular expressions with built-in security analysis. Supports method chaining for readable pattern construction. Obtain an instance via RegexSecurityService.builder().',
     scope: 'root',
     importPath: '@angular-helpers/security',
     requiresSecureContext: false,
@@ -199,99 +202,101 @@ export class SecureValidatorComponent {
     notes: [
       'Obtain an instance via RegexSecurityService.builder() — the static builder() method is on the service.',
       'Call build() to get { pattern, options, security }, or execute() to run it directly.',
-      'safeMode() in the chain blocks execution if the pattern is unsafe.'
+      'safeMode() in the chain blocks execution if the pattern is unsafe.',
     ],
     methods: [
       {
         name: 'pattern',
         signature: 'pattern(pattern: string): RegexSecurityBuilder',
         description: 'Defines the base pattern',
-        returns: 'RegexSecurityBuilder'
+        returns: 'RegexSecurityBuilder',
       },
       {
         name: 'append',
         signature: 'append(text: string): RegexSecurityBuilder',
         description: 'Appends text to the current pattern',
-        returns: 'RegexSecurityBuilder'
+        returns: 'RegexSecurityBuilder',
       },
       {
         name: 'group',
         signature: 'group(content: string, name?: string): RegexSecurityBuilder',
         description: 'Adds a capturing group',
-        returns: 'RegexSecurityBuilder'
+        returns: 'RegexSecurityBuilder',
       },
       {
         name: 'nonCapturingGroup',
         signature: 'nonCapturingGroup(content: string): RegexSecurityBuilder',
         description: 'Adds a non-capturing group',
-        returns: 'RegexSecurityBuilder'
+        returns: 'RegexSecurityBuilder',
       },
       {
         name: 'or',
         signature: 'or(alternative: string): RegexSecurityBuilder',
         description: 'Adds an alternative',
-        returns: 'RegexSecurityBuilder'
+        returns: 'RegexSecurityBuilder',
       },
       {
         name: 'quantifier',
-        signature: 'quantifier(quantifier: \'*\' | \'+\' | \'?\' | \'{n}\' | \'{n,}\' | \'{n,m}\'): RegexSecurityBuilder',
+        signature:
+          "quantifier(quantifier: '*' | '+' | '?' | '{n}' | '{n,}' | '{n,m}'): RegexSecurityBuilder",
         description: 'Adds a quantifier',
-        returns: 'RegexSecurityBuilder'
+        returns: 'RegexSecurityBuilder',
       },
       {
         name: 'characterSet',
         signature: 'characterSet(chars: string, negate: any): RegexSecurityBuilder',
         description: 'Adds a character set',
-        returns: 'RegexSecurityBuilder'
+        returns: 'RegexSecurityBuilder',
       },
       {
         name: 'startOfLine',
         signature: 'startOfLine(): RegexSecurityBuilder',
         description: 'Adds a start of line anchor',
-        returns: 'RegexSecurityBuilder'
+        returns: 'RegexSecurityBuilder',
       },
       {
         name: 'endOfLine',
         signature: 'endOfLine(): RegexSecurityBuilder',
         description: 'Adds an end of line anchor',
-        returns: 'RegexSecurityBuilder'
+        returns: 'RegexSecurityBuilder',
       },
       {
         name: 'options',
         signature: 'options(options: RegexBuilderOptions): RegexSecurityBuilder',
         description: 'Configures regular expression options',
-        returns: 'RegexSecurityBuilder'
+        returns: 'RegexSecurityBuilder',
       },
       {
         name: 'security',
         signature: 'security(config: RegexSecurityConfig): RegexSecurityBuilder',
         description: 'Configures security options',
-        returns: 'RegexSecurityBuilder'
+        returns: 'RegexSecurityBuilder',
       },
       {
         name: 'timeout',
         signature: 'timeout(ms: number): RegexSecurityBuilder',
         description: 'Configures timeout',
-        returns: 'RegexSecurityBuilder'
+        returns: 'RegexSecurityBuilder',
       },
       {
         name: 'safeMode',
         signature: 'safeMode(): RegexSecurityBuilder',
         description: 'Activates safe mode',
-        returns: 'RegexSecurityBuilder'
+        returns: 'RegexSecurityBuilder',
       },
       {
         name: 'build',
-        signature: 'build(): { pattern: string; options: RegexBuilderOptions; security: RegexSecurityConfig }',
+        signature:
+          'build(): { pattern: string; options: RegexBuilderOptions; security: RegexSecurityConfig }',
         description: 'Builds the final regular expression',
-        returns: '{ pattern: string; options: RegexBuilderOptions; security: RegexSecurityConfig }'
+        returns: '{ pattern: string; options: RegexBuilderOptions; security: RegexSecurityConfig }',
       },
       {
         name: 'execute',
         signature: 'execute(text: string, service: RegexSecurityService): Promise<RegexTestResult>',
         description: 'Builds and executes the regular expression',
-        returns: 'Promise<RegexTestResult>'
-      }
+        returns: 'Promise<RegexTestResult>',
+      },
     ],
     example: `import { RegexSecurityService } from '@angular-helpers/security';
 
@@ -312,12 +317,13 @@ export class PatternComponent {
 
     return result.match;
   }
-}`
+}`,
   },
   {
     id: 'web-crypto',
     name: 'WebCryptoService',
-    description: 'Provides cryptographic operations using the Web Crypto API (SubtleCrypto). Supports hashing, AES-GCM encryption/decryption, key generation, key import/export, and secure random generation.',
+    description:
+      'Provides cryptographic operations using the Web Crypto API (SubtleCrypto). Supports hashing, AES-GCM encryption/decryption, key generation, key import/export, and secure random generation.',
     scope: 'provided',
     importPath: '@angular-helpers/security',
     requiresSecureContext: true,
@@ -325,87 +331,91 @@ export class PatternComponent {
     notes: [
       'Requires a secure context (HTTPS).',
       'All crypto operations are async and return Promises.',
-      'Keys are exportable as JWK for persistence or transfer.'
+      'Keys are exportable as JWK for persistence or transfer.',
     ],
     methods: [
       {
         name: 'isSupported',
         signature: 'isSupported(): boolean',
         description: 'Public method isSupported.',
-        returns: 'boolean'
+        returns: 'boolean',
       },
       {
         name: 'hash',
         signature: 'hash(data: string | ArrayBuffer, algorithm: HashAlgorithm): Promise<string>',
         description: 'Public method hash.',
-        returns: 'Promise<string>'
+        returns: 'Promise<string>',
       },
       {
         name: 'generateAesKey',
         signature: 'generateAesKey(length: AesKeyLength): Promise<CryptoKey>',
         description: 'Public method generateAesKey.',
-        returns: 'Promise<CryptoKey>'
+        returns: 'Promise<CryptoKey>',
       },
       {
         name: 'encryptAes',
-        signature: 'encryptAes(key: CryptoKey, data: string | ArrayBuffer): Promise<AesEncryptResult>',
+        signature:
+          'encryptAes(key: CryptoKey, data: string | ArrayBuffer): Promise<AesEncryptResult>',
         description: 'Public method encryptAes.',
-        returns: 'Promise<AesEncryptResult>'
+        returns: 'Promise<AesEncryptResult>',
       },
       {
         name: 'decryptAes',
-        signature: 'decryptAes(key: CryptoKey, ciphertext: ArrayBuffer, iv: Uint8Array<ArrayBuffer>): Promise<string>',
+        signature:
+          'decryptAes(key: CryptoKey, ciphertext: ArrayBuffer, iv: Uint8Array<ArrayBuffer>): Promise<string>',
         description: 'Public method decryptAes.',
-        returns: 'Promise<string>'
+        returns: 'Promise<string>',
       },
       {
         name: 'exportKey',
         signature: 'exportKey(key: CryptoKey): Promise<JsonWebKey>',
         description: 'Public method exportKey.',
-        returns: 'Promise<JsonWebKey>'
+        returns: 'Promise<JsonWebKey>',
       },
       {
         name: 'importAesKey',
         signature: 'importAesKey(jwk: JsonWebKey): Promise<CryptoKey>',
         description: 'Public method importAesKey.',
-        returns: 'Promise<CryptoKey>'
+        returns: 'Promise<CryptoKey>',
       },
       {
         name: 'generateRandomBytes',
         signature: 'generateRandomBytes(length: number): Uint8Array',
         description: 'Public method generateRandomBytes.',
-        returns: 'Uint8Array'
+        returns: 'Uint8Array',
       },
       {
         name: 'randomUUID',
         signature: 'randomUUID(): string',
         description: 'Public method randomUUID.',
-        returns: 'string'
+        returns: 'string',
       },
       {
         name: 'generateHmacKey',
         signature: 'generateHmacKey(algorithm: HmacAlgorithm): Promise<CryptoKey>',
         description: 'Public method generateHmacKey.',
-        returns: 'Promise<CryptoKey>'
+        returns: 'Promise<CryptoKey>',
       },
       {
         name: 'sign',
         signature: 'sign(key: CryptoKey, data: string | ArrayBuffer): Promise<string>',
         description: 'Signs data with an HMAC key. Returns a hex-encoded signature.',
-        returns: 'Promise<string>'
+        returns: 'Promise<string>',
       },
       {
         name: 'verify',
-        signature: 'verify(key: CryptoKey, data: string | ArrayBuffer, signature: string): Promise<boolean>',
-        description: 'Verifies an HMAC signature (hex-encoded). Returns false for malformed input — never throws.',
-        returns: 'Promise<boolean>'
+        signature:
+          'verify(key: CryptoKey, data: string | ArrayBuffer, signature: string): Promise<boolean>',
+        description:
+          'Verifies an HMAC signature (hex-encoded). Returns false for malformed input — never throws.',
+        returns: 'Promise<boolean>',
       },
       {
         name: 'importHmacKey',
         signature: 'importHmacKey(jwk: JsonWebKey, algorithm: HmacAlgorithm): Promise<CryptoKey>',
         description: 'Public method importHmacKey.',
-        returns: 'Promise<CryptoKey>'
-      }
+        returns: 'Promise<CryptoKey>',
+      },
     ],
     example: `import { WebCryptoService } from '@angular-helpers/security';
 
@@ -434,12 +444,13 @@ export class CryptoComponent {
     const signature = await this.crypto.sign(key, data);
     return await this.crypto.verify(key, data, signature);
   }
-}`
+}`,
   },
   {
     id: 'secure-storage',
     name: 'SecureStorageService',
-    description: 'Transparent AES-GCM encrypted storage on top of localStorage/sessionStorage. Supports ephemeral in-memory keys for single-session security or passphrase-derived keys via PBKDF2 for cross-session persistence.',
+    description:
+      'Transparent AES-GCM encrypted storage on top of localStorage/sessionStorage. Supports ephemeral in-memory keys for single-session security or passphrase-derived keys via PBKDF2 for cross-session persistence.',
     scope: 'provided',
     importPath: '@angular-helpers/security',
     requiresSecureContext: true,
@@ -448,14 +459,14 @@ export class CryptoComponent {
       'Requires a secure context (HTTPS) for Web Crypto API.',
       'Ephemeral mode (default): data is lost when the page reloads.',
       'Use initWithPassphrase() for data that must survive page reloads.',
-      'PBKDF2 uses 600,000 iterations by default (OWASP 2023 recommendation).'
+      'PBKDF2 uses 600,000 iterations by default (OWASP 2023 recommendation).',
     ],
     methods: [
       {
         name: 'isSupported',
         signature: 'isSupported(): boolean',
         description: 'Public method isSupported.',
-        returns: 'boolean'
+        returns: 'boolean',
       },
       {
         name: 'initWithPassphrase',
@@ -463,14 +474,14 @@ export class CryptoComponent {
         description: `Initializes the service with a passphrase-derived key (PBKDF2 + AES-GCM).
 The salt is automatically persisted in storage on first call and reused on subsequent calls.
 Calling this again replaces the active key.`,
-        returns: 'Promise<void>'
+        returns: 'Promise<void>',
       },
       {
         name: 'set',
         signature: 'set(key: string, value: T, namespace?: string): Promise<void>',
         description: `Encrypts and stores a value.
 A fresh random IV is generated for every write.`,
-        returns: 'Promise<void>'
+        returns: 'Promise<void>',
       },
       {
         name: 'get',
@@ -478,21 +489,21 @@ A fresh random IV is generated for every write.`,
         description: `Decrypts and returns a stored value.
 Returns \`null\` if the key does not exist, was written without encryption,
 or the ciphertext is corrupted.`,
-        returns: 'Promise<T | null>'
+        returns: 'Promise<T | null>',
       },
       {
         name: 'remove',
         signature: 'remove(key: string, namespace?: string): void',
         description: 'Removes a single entry from storage.',
-        returns: 'void'
+        returns: 'void',
       },
       {
         name: 'clear',
         signature: 'clear(namespace?: string): void',
         description: `Clears all entries belonging to a namespace.
 When called without arguments, clears the entire storage target.`,
-        returns: 'void'
-      }
+        returns: 'void',
+      },
     ],
     example: `import { SecureStorageService } from '@angular-helpers/security';
 
@@ -523,12 +534,13 @@ export class UserSettingsComponent {
     // Clear only this user's data
     this.storage.clear(\`user:\${userId}\`);
   }
-}`
+}`,
   },
   {
     id: 'input-sanitizer',
     name: 'InputSanitizerService',
-    description: 'Structured input sanitization to defend against XSS, URL injection, and unsafe HTML. This is defense-in-depth and does NOT replace a Content Security Policy (CSP).',
+    description:
+      'Structured input sanitization to defend against XSS, URL injection, and unsafe HTML. This is defense-in-depth and does NOT replace a Content Security Policy (CSP).',
     scope: 'provided',
     importPath: '@angular-helpers/security',
     requiresSecureContext: false,
@@ -536,21 +548,21 @@ export class UserSettingsComponent {
     notes: [
       'Always configure a proper CSP alongside using this service.',
       'sanitizeHtml uses DOMParser, not innerHTML assignment, to prevent script execution.',
-      'Allowed tags and attributes are configurable via SANITIZER_CONFIG injection token.'
+      'Allowed tags and attributes are configurable via SANITIZER_CONFIG injection token.',
     ],
     methods: [
       {
         name: 'isSupported',
         signature: 'isSupported(): boolean',
         description: 'Public method isSupported.',
-        returns: 'boolean'
+        returns: 'boolean',
       },
       {
         name: 'sanitizeHtml',
         signature: 'sanitizeHtml(input: string): string',
         description: `Parses and sanitizes an HTML string, keeping only allowed tags and attributes.
 Script execution is prevented — parsing is done via DOMParser, not innerHTML assignment.`,
-        returns: 'string'
+        returns: 'string',
       },
       {
         name: 'sanitizeUrl',
@@ -558,22 +570,22 @@ Script execution is prevented — parsing is done via DOMParser, not innerHTML a
         description: `Validates and normalizes a URL string.
 Returns the normalized URL only for \`http:\` and \`https:\` schemes.
 Returns \`null\` for \`javascript:\`, \`data:\`, \`vbscript:\`, relative URLs, or malformed input.`,
-        returns: 'string | null'
+        returns: 'string | null',
       },
       {
         name: 'escapeHtml',
         signature: 'escapeHtml(input: string): string',
         description: `Escapes HTML special characters for safe text interpolation.
 Use this when inserting user content into HTML text nodes or attributes.`,
-        returns: 'string'
+        returns: 'string',
       },
       {
         name: 'sanitizeJson',
         signature: 'sanitizeJson(input: string): unknown | null',
         description: `Safely parses a JSON string. Returns the parsed value on success, \`null\` on any error.
 Does NOT use \`eval\` or \`Function\` — uses JSON.parse only.`,
-        returns: 'unknown | null'
-      }
+        returns: 'unknown | null',
+      },
     ],
     example: `import { InputSanitizerService } from '@angular-helpers/security';
 
@@ -604,12 +616,13 @@ export class CommentComponent {
     // Safe JSON parsing without eval
     return this.sanitizer.sanitizeJson(json);
   }
-}`
+}`,
   },
   {
     id: 'password-strength',
     name: 'PasswordStrengthService',
-    description: 'Entropy-based password strength evaluation. All methods are synchronous and side-effect free — safely wrappable in Angular computed(). Detects sequences, repetitions, keyboard walks, and common passwords.',
+    description:
+      'Entropy-based password strength evaluation. All methods are synchronous and side-effect free — safely wrappable in Angular computed(). Detects sequences, repetitions, keyboard walks, and common passwords.',
     scope: 'provided',
     importPath: '@angular-helpers/security',
     requiresSecureContext: false,
@@ -617,7 +630,7 @@ export class CommentComponent {
     notes: [
       'Score thresholds: <28 bits=0, <36=1, <50=2, <70=3, >=70=4',
       'Entropy penalties applied for sequences (abc, 123), repetitions (aaa), and keyboard walks (qwerty).',
-      'Common passwords (password, 123456, qwerty, etc.) are capped at score 1.'
+      'Common passwords (password, 123456, qwerty, etc.) are capped at score 1.',
     ],
     methods: [
       {
@@ -625,8 +638,8 @@ export class CommentComponent {
         signature: 'assess(password: string): PasswordStrengthResult',
         description: `Evaluates the strength of a password.
 Never throws — returns score 0 for empty or null-like input.`,
-        returns: 'PasswordStrengthResult'
-      }
+        returns: 'PasswordStrengthResult',
+      },
     ],
     example: `import { PasswordStrengthService } from '@angular-helpers/security';
 
@@ -647,12 +660,13 @@ export class RegistrationComponent {
     // 'P@ssw0rd!' → score: 2, label: 'fair', feedback: ['Avoid keyboard patterns']
     // 'xK#9mZ$vLq2@rBnT7' → score: 4, label: 'very-strong', feedback: []
   }
-}`
+}`,
   },
   {
     id: 'jwt',
     name: 'JwtService',
-    description: 'Client-side JWT decode and inspection utilities. Explicitly NON-verifying — signature validation must happen server-side. Use for reading expiration, extracting claims for UX, or detecting expired tokens to redirect to login.',
+    description:
+      'Client-side JWT decode and inspection utilities. Explicitly NON-verifying — signature validation must happen server-side. Use for reading expiration, extracting claims for UX, or detecting expired tokens to redirect to login.',
     scope: 'provided',
     importPath: '@angular-helpers/security',
     requiresSecureContext: false,
@@ -660,36 +674,36 @@ export class RegistrationComponent {
     notes: [
       'NEVER use for authorization decisions — verify signatures server-side.',
       'decode() throws InvalidJwtError for malformed tokens; isExpired() returns true on malformed input (fail-secure).',
-      'claim<T>() returns null when the claim is absent or the token is invalid.'
+      'claim<T>() returns null when the claim is absent or the token is invalid.',
     ],
     methods: [
       {
         name: 'decode',
         signature: 'decode(token: string): T',
         description: 'Decodes the payload segment of a JWT and returns it typed.',
-        returns: 'T'
+        returns: 'T',
       },
       {
         name: 'isExpired',
         signature: 'isExpired(token: string, leewaySeconds: any): boolean',
         description: `Returns \`true\` when the token is expired relative to \`Date.now()\`.
 Missing or non-numeric \`exp\` counts as expired (fail-secure).`,
-        returns: 'boolean'
+        returns: 'boolean',
       },
       {
         name: 'expiresIn',
         signature: 'expiresIn(token: string): number',
         description: `Returns milliseconds until the token expires.
 Negative when already expired. \`0\` when \`exp\` is missing.`,
-        returns: 'number'
+        returns: 'number',
       },
       {
         name: 'claim',
         signature: 'claim(token: string, name: string): T | null',
         description: `Extracts a single claim from the payload. Returns \`null\` when the claim is absent
 or the token is malformed.`,
-        returns: 'T | null'
-      }
+        returns: 'T | null',
+      },
     ],
     example: `import { JwtService } from '@angular-helpers/security';
 
@@ -707,12 +721,13 @@ export class SessionGuard {
     const token = localStorage.getItem('access_token');
     return token ? this.jwt.claim<string>(token, 'sub') : null;
   }
-}`
+}`,
   },
   {
     id: 'hibp',
     name: 'HibpService',
-    description: 'Have I Been Pwned k-anonymity leaked-password check. Only the first 5 hex chars of the SHA-1 hash leave the browser; the full password is never transmitted. Fail-open on network errors.',
+    description:
+      'Have I Been Pwned k-anonymity leaked-password check. Only the first 5 hex chars of the SHA-1 hash leave the browser; the full password is never transmitted. Fail-open on network errors.',
     scope: 'provided',
     importPath: '@angular-helpers/security',
     requiresSecureContext: true,
@@ -720,14 +735,14 @@ export class SessionGuard {
     notes: [
       'Complements PasswordStrengthService — entropy says "is it strong?", HIBP says "is it already leaked?".',
       'Returns { leaked: false, error: "network" } on failures — never throws, never blocks form submission.',
-      'HIBP_CONFIG injection token overrides the endpoint for enterprise proxies or test fixtures.'
+      'HIBP_CONFIG injection token overrides the endpoint for enterprise proxies or test fixtures.',
     ],
     methods: [
       {
         name: 'isSupported',
         signature: 'isSupported(): boolean',
         description: 'Public method isSupported.',
-        returns: 'boolean'
+        returns: 'boolean',
       },
       {
         name: 'isPasswordLeaked',
@@ -735,8 +750,8 @@ export class SessionGuard {
         description: `Returns whether the given password is present in the HIBP breach corpus.
 Never throws: network failures return \`{ leaked: false, error: 'network' }\`,
 unsupported environments return \`{ leaked: false, error: 'unsupported' }\`.`,
-        returns: 'Promise<HibpResult>'
-      }
+        returns: 'Promise<HibpResult>',
+      },
     ],
     example: `import { HibpService } from '@angular-helpers/security';
 
@@ -749,12 +764,13 @@ export class RegistrationComponent {
     if (error) return; // fail-open
     if (leaked) alert(\`This password has appeared in \${count} data breaches.\`);
   }
-}`
+}`,
   },
   {
     id: 'csrf',
     name: 'CsrfService',
-    description: 'Double-submit CSRF token helper. Generates cryptographically secure tokens via WebCryptoService and persists them in the configured storage. Pair with withCsrfHeader() functional interceptor for automatic header injection.',
+    description:
+      'Double-submit CSRF token helper. Generates cryptographically secure tokens via WebCryptoService and persists them in the configured storage. Pair with withCsrfHeader() functional interceptor for automatic header injection.',
     scope: 'provided',
     importPath: '@angular-helpers/security',
     requiresSecureContext: false,
@@ -762,40 +778,40 @@ export class RegistrationComponent {
     notes: [
       'Default header is X-CSRF-Token to avoid collisions with Angular HttpClientXsrfModule (X-XSRF-TOKEN).',
       'Token lifecycle (create, rotate, clear) is the application responsibility — typically issued by the backend at login.',
-      'withCsrfHeader() only injects the header on POST/PUT/PATCH/DELETE by default.'
+      'withCsrfHeader() only injects the header on POST/PUT/PATCH/DELETE by default.',
     ],
     methods: [
       {
         name: 'isSupported',
         signature: 'isSupported(): boolean',
         description: 'Public method isSupported.',
-        returns: 'boolean'
+        returns: 'boolean',
       },
       {
         name: 'generateToken',
         signature: 'generateToken(): string',
         description: `Generates a new CSRF token as a 32-byte hex string. The token is NOT persisted
 automatically — call  to save it.`,
-        returns: 'string'
+        returns: 'string',
       },
       {
         name: 'storeToken',
         signature: 'storeToken(token: string): void',
         description: 'Persists the token to the configured storage.',
-        returns: 'void'
+        returns: 'void',
       },
       {
         name: 'getToken',
         signature: 'getToken(): string | null',
         description: `Returns the stored token, or \`null\` when unset or outside a browser environment.`,
-        returns: 'string | null'
+        returns: 'string | null',
       },
       {
         name: 'clearToken',
         signature: 'clearToken(): void',
         description: 'Removes the stored token.',
-        returns: 'void'
-      }
+        returns: 'void',
+      },
     ],
     example: `import { provideSecurity, CsrfService, withCsrfHeader } from '@angular-helpers/security';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -810,27 +826,28 @@ bootstrapApplication(App, {
 // After login
 const csrf = inject(CsrfService);
 csrf.storeToken(response.csrfToken);
-// Subsequent POST/PUT/PATCH/DELETE requests automatically carry X-CSRF-Token.`
+// Subsequent POST/PUT/PATCH/DELETE requests automatically carry X-CSRF-Token.`,
   },
   {
     id: 'rate-limiter',
     name: 'RateLimiterService',
-    description: 'Client-side rate limiter with per-key policies. Supports token-bucket (smooth limiting with burst capacity) and sliding-window (strict max operations per time window). Signal-based state for reactive UIs.',
+    description:
+      'Client-side rate limiter with per-key policies. Supports token-bucket (smooth limiting with burst capacity) and sliding-window (strict max operations per time window). Signal-based state for reactive UIs.',
     scope: 'provided',
     importPath: '@angular-helpers/security',
     requiresSecureContext: false,
     browserSupport: 'All modern browsers',
     notes: [
-      'Use to protect the user\'s own backend from accidental bursts (typeahead, button mashing, retries).',
+      "Use to protect the user's own backend from accidental bursts (typeahead, button mashing, retries).",
       'Unknown keys are fail-open: canExecute returns signal(true), consume is a no-op.',
-      'All state is in-memory for the service instance lifetime; cross-tab sync is out of scope for v1.'
+      'All state is in-memory for the service instance lifetime; cross-tab sync is out of scope for v1.',
     ],
     methods: [
       {
         name: 'configure',
         signature: 'configure(key: string, policy: RateLimitPolicy): void',
         description: `Registers or updates the policy for \`key\`. Re-configuring an existing key resets its state.`,
-        returns: 'void'
+        returns: 'void',
       },
       {
         name: 'consume',
@@ -840,28 +857,28 @@ csrf.storeToken(response.csrfToken);
 
 For undeclared keys, this method resolves immediately without consuming anything
 (fail-open behaviour — intentional to avoid silent failures when a policy is missing).`,
-        returns: 'Promise<void>'
+        returns: 'Promise<void>',
       },
       {
         name: 'canExecute',
         signature: 'canExecute(key: string): Signal<boolean>',
         description: `Reactive signal indicating whether a single unit can be consumed from \`key\` right now.
 For undeclared keys, returns \`signal(true)\`.`,
-        returns: 'Signal<boolean>'
+        returns: 'Signal<boolean>',
       },
       {
         name: 'remaining',
         signature: 'remaining(key: string): Signal<number>',
         description: `Reactive signal holding the remaining capacity for \`key\`.
 For undeclared keys, returns \`signal(Infinity)\`.`,
-        returns: 'Signal<number>'
+        returns: 'Signal<number>',
       },
       {
         name: 'reset',
         signature: 'reset(key: string): void',
         description: `Resets the counter for \`key\` to its maximum. No-op for undeclared keys.`,
-        returns: 'void'
-      }
+        returns: 'void',
+      },
     ],
     example: `import { RateLimiterService, RateLimitExceededError } from '@angular-helpers/security';
 
@@ -890,12 +907,13 @@ export class SearchComponent {
       }
     }
   }
-}`
+}`,
   },
   {
     id: 'sensitive-clipboard',
     name: 'SensitiveClipboardService',
-    description: 'Copies sensitive strings to the clipboard with verified automatic clearing. Mirrors password-manager behaviour: reads the clipboard before clearing and skips when the content no longer matches what was written, preventing clobbering of unrelated user copies.',
+    description:
+      'Copies sensitive strings to the clipboard with verified automatic clearing. Mirrors password-manager behaviour: reads the clipboard before clearing and skips when the content no longer matches what was written, preventing clobbering of unrelated user copies.',
     scope: 'provided',
     importPath: '@angular-helpers/security',
     requiresSecureContext: true,
@@ -903,40 +921,40 @@ export class SearchComponent {
     notes: [
       'Default clearAfterMs is 15 seconds; set 0 to disable auto-clear.',
       'Read permission may be required to verify the clipboard before clearing — on denial, the clear is skipped.',
-      'Pending clear timers are cancelled automatically when the owning injector is destroyed.'
+      'Pending clear timers are cancelled automatically when the owning injector is destroyed.',
     ],
     methods: [
       {
         name: 'isSupported',
         signature: 'isSupported(): boolean',
         description: 'Public method isSupported.',
-        returns: 'boolean'
+        returns: 'boolean',
       },
       {
         name: 'copy',
         signature: 'copy(text: string, options: SensitiveCopyOptions): Promise<void>',
         description: `Writes \`text\` to the clipboard and schedules an auto-clear.`,
-        returns: 'Promise<void>'
+        returns: 'Promise<void>',
       },
       {
         name: 'copy$',
         signature: 'copy$(text: string, options: SensitiveCopyOptions): Observable<CopyStatus>',
         description: `Reactive variant of . Emits \`'copied'\` immediately after writing, then
 \`'cleared'\` | \`'read-denied'\` | \`'error'\` once the auto-clear completes (or is skipped).`,
-        returns: 'Observable<CopyStatus>'
+        returns: 'Observable<CopyStatus>',
       },
       {
         name: 'cancelPendingClear',
         signature: 'cancelPendingClear(): void',
         description: 'Cancels any pending auto-clear timer. The clipboard content is not modified.',
-        returns: 'void'
+        returns: 'void',
       },
       {
         name: 'clear',
         signature: 'clear(): Promise<void>',
         description: 'Forcefully clears the clipboard unconditionally.',
-        returns: 'Promise<void>'
-      }
+        returns: 'Promise<void>',
+      },
     ],
     example: `import { SensitiveClipboardService } from '@angular-helpers/security';
 
@@ -947,12 +965,13 @@ export class ApiKeyPanel {
   async copyKey(value: string) {
     await this.sensitiveClipboard.copy(value, { clearAfterMs: 15_000 });
   }
-}`
+}`,
   },
   {
     id: 'security-validators',
     name: 'SecurityValidators (Reactive Forms)',
-    description: 'Static factory class exposing Reactive Forms validators that bridge the shared security helpers into Angular ValidatorFn contracts. Lives in the @angular-helpers/security/forms sub-entry so consumers not using Reactive Forms do not pay a bundle cost.',
+    description:
+      'Static factory class exposing Reactive Forms validators that bridge the shared security helpers into Angular ValidatorFn contracts. Lives in the @angular-helpers/security/forms sub-entry so consumers not using Reactive Forms do not pay a bundle cost.',
     scope: 'root',
     importPath: '@angular-helpers/security/forms',
     requiresSecureContext: false,
@@ -960,39 +979,44 @@ export class ApiKeyPanel {
     notes: [
       'Install @angular/forms. The main @angular-helpers/security entry has zero runtime dependency on @angular/forms.',
       'Validators are pure factory functions — no provider registration required.',
-      'safeHtml() returns null (no error) in SSR contexts to avoid blocking server-rendered forms.'
+      'safeHtml() returns null (no error) in SSR contexts to avoid blocking server-rendered forms.',
     ],
     methods: [
       {
         name: 'strongPassword',
         signature: 'static strongPassword(options?: { minScore?: 0 | 1 | 2 | 3 | 4 }): ValidatorFn',
-        description: 'Returns ValidatorFn that fails with { weakPassword: { score, required } } when entropy score < minScore (default 2).',
-        returns: 'ValidatorFn'
+        description:
+          'Returns ValidatorFn that fails with { weakPassword: { score, required } } when entropy score < minScore (default 2).',
+        returns: 'ValidatorFn',
       },
       {
         name: 'safeHtml',
         signature: 'static safeHtml(options?: HtmlSanitizerOptions): ValidatorFn',
-        description: 'Fails with { unsafeHtml: true } when sanitization would alter the input. Allowlist is configurable.',
-        returns: 'ValidatorFn'
+        description:
+          'Fails with { unsafeHtml: true } when sanitization would alter the input. Allowlist is configurable.',
+        returns: 'ValidatorFn',
       },
       {
         name: 'safeUrl',
         signature: 'static safeUrl(options?: { schemes?: readonly string[] }): ValidatorFn',
-        description: 'Fails with { unsafeUrl: true } for malformed URLs or schemes outside the allowlist (default: http, https).',
-        returns: 'ValidatorFn'
+        description:
+          'Fails with { unsafeUrl: true } for malformed URLs or schemes outside the allowlist (default: http, https).',
+        returns: 'ValidatorFn',
       },
       {
         name: 'noScriptInjection',
         signature: 'static noScriptInjection(): ValidatorFn',
-        description: 'Fails with { scriptInjection: true } for <script>, javascript:, or inline event handlers.',
-        returns: 'ValidatorFn'
+        description:
+          'Fails with { scriptInjection: true } for <script>, javascript:, or inline event handlers.',
+        returns: 'ValidatorFn',
       },
       {
         name: 'noSqlInjectionHints',
         signature: 'static noSqlInjectionHints(): ValidatorFn',
-        description: 'Fails with { sqlInjectionHint: true } for common SQLi sentinels — defense-in-depth; parameterize server-side queries.',
-        returns: 'ValidatorFn'
-      }
+        description:
+          'Fails with { sqlInjectionHint: true } for common SQLi sentinels — defense-in-depth; parameterize server-side queries.',
+        returns: 'ValidatorFn',
+      },
     ],
     example: `import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { SecurityValidators } from '@angular-helpers/security/forms';
@@ -1007,12 +1031,13 @@ export class SignupFormComponent {
     bio: new FormControl('', [SecurityValidators.safeHtml()]),
     homepage: new FormControl('', [SecurityValidators.safeUrl({ schemes: ['https:'] })]),
   });
-}`
+}`,
   },
   {
     id: 'signal-forms-validators',
     name: 'Signal Forms validators',
-    description: 'Angular v21 Signal Forms rule functions mirroring the Reactive Forms validators, plus an async hibpPassword() rule. Lives in the @angular-helpers/security/signal-forms sub-entry. Both paradigms delegate to the same shared core helpers, guaranteeing behavioural parity for the same input.',
+    description:
+      'Angular v21 Signal Forms rule functions mirroring the Reactive Forms validators, plus an async hibpPassword() rule. Lives in the @angular-helpers/security/signal-forms sub-entry. Both paradigms delegate to the same shared core helpers, guaranteeing behavioural parity for the same input.',
     scope: 'root',
     importPath: '@angular-helpers/security/signal-forms',
     requiresSecureContext: false,
@@ -1020,45 +1045,49 @@ export class SignupFormComponent {
     notes: [
       'Install @angular/forms v21+. The main @angular-helpers/security entry has zero dependency on @angular/forms.',
       'Rule functions are idiomatic: form(model, (p) => { strongPassword(p.password); }).',
-      'hibpPassword() requires provideHibp() in the injector hierarchy and fails open on network errors.'
+      'hibpPassword() requires provideHibp() in the injector hierarchy and fails open on network errors.',
     ],
     methods: [
       {
         name: 'strongPassword',
         signature: 'strongPassword(path, options?): void',
-        description: 'Sync rule — returns { kind: \'weakPassword\', message } when entropy score is below minScore (default 2).',
-        returns: 'void'
+        description:
+          "Sync rule — returns { kind: 'weakPassword', message } when entropy score is below minScore (default 2).",
+        returns: 'void',
       },
       {
         name: 'safeHtml',
         signature: 'safeHtml(path, options?): void',
-        description: 'Sync rule — returns { kind: \'unsafeHtml\', message } when sanitization alters the input. No-op on SSR.',
-        returns: 'void'
+        description:
+          "Sync rule — returns { kind: 'unsafeHtml', message } when sanitization alters the input. No-op on SSR.",
+        returns: 'void',
       },
       {
         name: 'safeUrl',
         signature: 'safeUrl(path, options?): void',
-        description: 'Sync rule — returns { kind: \'unsafeUrl\', message } for malformed URLs or blocked schemes.',
-        returns: 'void'
+        description:
+          "Sync rule — returns { kind: 'unsafeUrl', message } for malformed URLs or blocked schemes.",
+        returns: 'void',
       },
       {
         name: 'noScriptInjection',
         signature: 'noScriptInjection(path, options?): void',
-        description: 'Sync rule — returns { kind: \'scriptInjection\', message }.',
-        returns: 'void'
+        description: "Sync rule — returns { kind: 'scriptInjection', message }.",
+        returns: 'void',
       },
       {
         name: 'noSqlInjectionHints',
         signature: 'noSqlInjectionHints(path, options?): void',
-        description: 'Sync rule — returns { kind: \'sqlInjectionHint\', message }.',
-        returns: 'void'
+        description: "Sync rule — returns { kind: 'sqlInjectionHint', message }.",
+        returns: 'void',
       },
       {
         name: 'hibpPassword',
         signature: 'hibpPassword(path, options?): void',
-        description: 'Async rule using validateAsync. Debounces changes (default 300ms), injects HibpService, returns { kind: \'leakedPassword\', message, count } on match. Fails open on network errors.',
-        returns: 'void'
-      }
+        description:
+          "Async rule using validateAsync. Debounces changes (default 300ms), injects HibpService, returns { kind: 'leakedPassword', message, count } on match. Fails open on network errors.",
+        returns: 'void',
+      },
     ],
     example: `import { signal } from '@angular/core';
 import { form, required } from '@angular/forms/signals';
@@ -1081,8 +1110,8 @@ export class SignupSignalFormsComponent {
     safeHtml(p.bio);
     safeUrl(p.homepage, { schemes: ['https:'] });
   });
-}`
-  }
+}`,
+  },
 ];
 
 export const SECURITY_INTERFACES = [
