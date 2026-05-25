@@ -21,12 +21,14 @@ interface BenchmarkRequest {
   payloadBytes: number;
   delayMs: number;
   cpuBurnMs: number;
+  streaming?: boolean;
 }
 
 interface BenchmarkResponse {
   generatedAt: number;
   bytes: number;
-  payload: string;
+  payload?: string;
+  body?: any;
 }
 
 function burnCpu(ms: number): void {
@@ -82,47 +84,94 @@ async function handleMessage(data: {
   const deserializationEnd = performance.now();
 
   // Worker processing stage
+  let body: any = null;
   const processingStart = performance.now();
   burnCpu(req.cpuBurnMs);
 
-  if (req.delayMs > 0) {
-    await new Promise((resolve) => setTimeout(resolve, req.delayMs));
-  }
+  if (req.streaming) {
+    const encoder = new TextEncoder();
+    const totalBytes = req.payloadBytes;
+    const chunkSize = 256 * 1024; // 256KB chunks
+    const chunkDelay =
+      req.delayMs > 0 ? req.delayMs / Math.max(1, Math.ceil(totalBytes / chunkSize)) : 0;
 
-  const body = generatePayload(req.payloadBytes);
+    body = new ReadableStream({
+      start(controller) {
+        let sent = 0;
+        const sendNext = () => {
+          if (sent >= totalBytes) {
+            controller.close();
+            return;
+          }
+          const size = Math.min(chunkSize, totalBytes - sent);
+          const chunkData = generatePayload(size);
+          controller.enqueue(encoder.encode(chunkData));
+          sent += size;
+
+          if (chunkDelay > 0) {
+            setTimeout(sendNext, chunkDelay);
+          } else {
+            sendNext();
+          }
+        };
+        sendNext();
+      },
+    });
+  } else {
+    if (req.delayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, req.delayMs));
+    }
+    body = generatePayload(req.payloadBytes);
+  }
   const processingEnd = performance.now();
 
   // Serialize response
   const serializationStart = performance.now();
   const result: BenchmarkResponse = {
     generatedAt: Date.now(),
-    bytes: body.length,
-    payload: body,
+    bytes: req.payloadBytes,
+    ...(req.streaming ? { body } : { payload: body }),
   };
   const serializationEnd = performance.now();
 
   // Capture exit timestamp for transfer-out timing
   const workerSendingAt = performance.now();
 
-  self.postMessage({
-    type: 'response',
-    requestId,
-    result,
-    // Granular timing data for performance analysis
-    workerTiming: {
-      // Time from message received to start of processing
-      deserializationMs: deserializationEnd - deserializationStart,
-      // Time spent doing actual work
-      processingMs: processingEnd - processingStart,
-      // Time to serialize response
-      serializationMs: serializationEnd - serializationStart,
-      // Total time in worker (for transfer calculations)
-      totalInWorkerMs: workerSendingAt - workerReceivedAt,
-      // Timestamps for calculating transfer times on main thread
-      workerReceivedAt,
-      workerSendingAt,
+  const transferables: Transferable[] = [];
+  if (result.body instanceof ReadableStream) {
+    const { needsPolyfill, serializeStreamToPort } =
+      await import('@angular-helpers/worker-http/streams-polyfill');
+    if (needsPolyfill()) {
+      const port = serializeStreamToPort(result.body);
+      result.body = { __isStreamPolyfillPort: true, port };
+      transferables.push(port);
+    } else {
+      transferables.push(result.body);
+    }
+  }
+
+  self.postMessage(
+    {
+      type: 'response',
+      requestId,
+      result,
+      // Granular timing data for performance analysis
+      workerTiming: {
+        // Time from message received to start of processing
+        deserializationMs: deserializationEnd - deserializationStart,
+        // Time spent doing actual work
+        processingMs: processingEnd - processingStart,
+        // Time to serialize response
+        serializationMs: serializationEnd - serializationStart,
+        // Total time in worker (for transfer calculations)
+        totalInWorkerMs: workerSendingAt - workerReceivedAt,
+        // Timestamps for calculating transfer times on main thread
+        workerReceivedAt,
+        workerSendingAt,
+      },
     },
-  });
+    transferables,
+  );
 }
 
 /**
