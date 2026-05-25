@@ -64,6 +64,132 @@ export class ValidationComponent {
     return result.match;
   }
 }`,
+    guides: [
+      {
+        title: 'Off-Thread ReDoS-Safe Input Validation',
+        description:
+          'This guide details how to leverage RegexSecurityService inside an Angular reactive form to delegate heavy regular expression validations to a background WorkerPool.\n\nThis protects your main UI thread (preventing freezing and dropped frames at 60 FPS) and implements strict timeout protections to prevent Regular Expression Denial of Service (ReDoS) vulnerabilities.',
+        files: [
+          {
+            name: 'secure-validator.component.ts',
+            language: 'ts',
+            content: `import { Component, inject, signal } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RegexSecurityService } from '@angular-helpers/security';
+
+@Component({
+  selector: 'app-secure-validator',
+  standalone: true,
+  imports: [ReactiveFormsModule],
+  templateUrl: './secure-validator.component.html'
+})
+export class SecureValidatorComponent {
+  private readonly securityService = inject(RegexSecurityService);
+  
+  protected readonly isProcessing = signal<boolean>(false);
+  protected readonly evaluationResult = signal<any | null>(null);
+
+  protected readonly form = new FormGroup({
+    pattern: new FormControl('^(a+)+$', [Validators.required]),
+    payload: new FormControl('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!123', [Validators.required])
+  });
+
+  async evaluateInput() {
+    const val = this.form.value;
+    if (!val.pattern || !val.payload) return;
+
+    this.isProcessing.set(true);
+    this.evaluationResult.set(null);
+
+    try {
+      // 1. Analyze regular expression pattern for structural ReDoS vulnerabilities without executing it
+      const analysis = await this.securityService.analyzePatternSecurity(val.pattern);
+      
+      if (!analysis.safe && analysis.riskLevel === 'high') {
+        this.evaluationResult.set({
+          safe: false,
+          timeout: false,
+          executionTime: 0,
+          warnings: ['Blocked pattern prior to execution: High ReDoS risk detected.']
+        });
+        return;
+      }
+
+      // 2. Safely execute regex off the main thread inside the background WorkerPool
+      // Automatically enforces a strict 2-second timeout, returning 'timeout: true' to prevent event loop hanging.
+      const testResult = await this.securityService.testRegex(val.pattern, val.payload, {
+        timeout: 2000,
+        safeMode: true
+      });
+
+      this.evaluationResult.set({
+        safe: testResult.match,
+        timeout: testResult.timeout,
+        executionTime: testResult.executionTime,
+        warnings: testResult.timeout ? ['Regular expression took too long to run. Terminated safely.'] : []
+      });
+
+    } catch (err: any) {
+      this.evaluationResult.set({
+        safe: false,
+        timeout: false,
+        warnings: [err.message || 'Worker runtime execution error']
+      });
+    } finally {
+      this.isProcessing.set(false);
+    }
+  }
+}`,
+          },
+          {
+            name: 'secure-validator.component.html',
+            language: 'html',
+            content: `<form [formGroup]="form" class="flex flex-col gap-4 max-w-[500px] p-6 bg-base-200/50 backdrop-blur-md rounded-3xl border border-border-subtle shadow-sm">
+  <div class="form-control">
+    <label class="label">
+      <span class="label-text font-bold">Pattern to test (e.g. ^(a+)+$)</span>
+    </label>
+    <input type="text" class="input input-bordered" formControlName="pattern" />
+  </div>
+
+  <div class="form-control">
+    <label class="label">
+      <span class="label-text font-bold">Text payload</span>
+    </label>
+    <textarea class="textarea textarea-bordered h-24" formControlName="payload"></textarea>
+  </div>
+
+  <button type="button" class="btn btn-primary w-full" 
+          [disabled]="form.invalid || isProcessing()" 
+          (click)="evaluateInput()">
+    {{ isProcessing() ? 'Running in Web Worker...' : 'Run Security Evaluation' }}
+  </button>
+
+  @if (evaluationResult(); as res) {
+    <div class="alert mt-4 shadow-sm" 
+         [class.alert-error]="!res.safe || res.timeout" 
+         [class.alert-success]="res.safe && !res.timeout">
+      <div>
+        <h4 class="font-bold">{{ res.safe ? 'Safe Pattern' : 'ReDoS Risk Detected!' }}</h4>
+        <p class="text-sm">
+          Execution Time: {{ res.executionTime?.toFixed(2) }}ms | 
+          Timeout triggered: {{ res.timeout ? 'YES' : 'NO' }}
+        </p>
+        @if (res.warnings?.length) {
+          <ul class="text-xs list-disc pl-4 mt-2">
+            @for (w of res.warnings; track w) {
+              <li>{{ w }}</li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  }
+</form>`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'regex-security-builder',

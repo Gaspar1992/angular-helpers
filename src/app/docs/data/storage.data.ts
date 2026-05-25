@@ -58,6 +58,99 @@ export class UserPreferencesComponent {
     }));
   }
 }`,
+    guides: [
+      {
+        title: 'Offline-First Synchronization & L2 Caching',
+        description:
+          'This guide details how to orchestrate injectStorageSignal in combination with an HTTP client and OfflineSyncService to build a robust offline-first reactive state pattern.\n\nOptimistic UI updates are written directly to the main thread signal, immediately persisted to high-performance IndexedDB L2 storage, and queued for server synchronization. When navigator connectivity status changes, OfflineSyncService intercepts the state and automatically triggers background draining pipelines.',
+        files: [
+          {
+            name: 'offline-settings.component.ts',
+            language: 'ts',
+            content: `import { Component, inject } from '@angular/core';
+import { injectStorageSignal, OfflineSyncService } from '@angular-helpers/storage';
+
+interface UserPreferences {
+  theme: 'light' | 'dark';
+  notifications: boolean;
+  offlineChanges: any[];
+}
+
+@Component({
+  selector: 'app-offline-settings',
+  standalone: true,
+  templateUrl: './offline-settings.component.html'
+})
+export class OfflineSettingsComponent {
+  protected readonly sync = inject(OfflineSyncService);
+
+  // 1. Reactive Signal backed by high-performance L2 IndexedDB storage
+  protected readonly prefs = injectStorageSignal<UserPreferences>('user_preferences', {
+    theme: 'light',
+    notifications: true,
+    offlineChanges: []
+  }, {
+    storageType: 'indexeddb',
+    serializer: 'json',
+    crossTabSync: true, // Auto-sync across multiple browser tabs
+    validator: (data): data is UserPreferences => {
+      return typeof data === 'object' && data !== null && 'theme' in data;
+    }
+  });
+
+  toggleTheme() {
+    const nextTheme = this.prefs().theme === 'light' ? 'dark' : 'light';
+    
+    // 2. Perform optimistic local write (immediately updates UI & persists to IndexedDB L2)
+    this.prefs.update(state => ({ ...state, theme: nextTheme }));
+
+    // 3. Queue request if offline, or sync immediately if online
+    if (!this.sync.isOnline()) {
+      this.prefs.update(state => ({
+        ...state,
+        offlineChanges: [...state.offlineChanges, { type: 'THEME_CHANGE', theme: nextTheme, time: Date.now() }]
+      }));
+      console.log('Offline: Optimistic save completed. Synchronization queued.');
+    } else {
+      this.sync.triggerSync();
+    }
+  }
+
+  forceSync() {
+    this.sync.triggerSync();
+  }
+}`,
+          },
+          {
+            name: 'offline-settings.component.html',
+            language: 'html',
+            content: `<div class="card bg-base-200/50 backdrop-blur-md p-6 border border-border-subtle rounded-3xl shadow-sm">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-xl font-bold">User Preferences</h2>
+    <span class="badge" [class.badge-success]="sync.isOnline()" [class.badge-warning]="!sync.isOnline()">
+      {{ sync.isOnline() ? 'Online' : 'Offline (' + sync.pendingSyncsCount() + ' pending)' }}
+    </span>
+  </div>
+
+  <div class="form-control gap-4">
+    <label class="label cursor-pointer">
+      <span class="label-text">Dark Theme</span>
+      <input type="checkbox" class="toggle toggle-primary" 
+             [checked]="prefs().theme === 'dark'" 
+             (change)="toggleTheme()" />
+    </label>
+
+    <button class="btn btn-secondary w-full" 
+            [disabled]="!sync.isOnline() && sync.pendingSyncsCount() === 0"
+            (click)="forceSync()">
+      Sync Now
+    </button>
+  </div>
+</div>`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'inject-entity-store',
@@ -156,6 +249,159 @@ export class UsersAdminComponent {
     });
   }
 }`,
+    guides: [
+      {
+        title: 'Hexagonal Repositories & Immutability (Freeze-on-Write)',
+        description:
+          'Learn how to build a highly scalable, robust domain repository using injectEntityStore under Hexagonal Architecture principles. Enforce immutability using Angular standalone services to decouple your presentation layer from the reactive storage medium.',
+        files: [
+          {
+            name: 'product.model.ts',
+            language: 'ts',
+            content: `export interface Product {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+}`,
+          },
+          {
+            name: 'product-repository.interface.ts',
+            language: 'ts',
+            content: `import { Signal } from '@angular/core';
+import { Product } from './product.model';
+
+// 1. Ports Definition: Enforce Hexagonal Architecture decoupled abstractions
+export interface ProductRepository {
+  products$: Signal<Product[]>;
+  totalValue$: Signal<number>;
+  save(product: Product): void;
+  delete(id: string): void;
+  updatePrice(id: string, newPrice: number): void;
+}`,
+          },
+          {
+            name: 'product-indexeddb.repository.ts',
+            language: 'ts',
+            content: `import { Injectable, computed } from '@angular/core';
+import { injectEntityStore } from '@angular-helpers/storage';
+import { Product } from './product.model';
+import { ProductRepository } from './product-repository.interface';
+
+@Injectable({ providedIn: 'root' })
+export class ProductIndexedDbRepository implements ProductRepository {
+  // 2. Encapsulate EntityStore internally. 
+  // Object.freeze is enforced on all entities via Freeze-on-Write to prevent direct state mutations.
+  private readonly store = injectEntityStore<string, Product>({
+    idKey: 'id',
+    persistKey: 'catalog_products',
+    storageOptions: {
+      storageType: 'indexeddb',
+      dbName: 'e_commerce_db',
+      storeName: 'catalog'
+    }
+  });
+
+  readonly products$ = this.store.list;
+  readonly totalValue$ = computed(() => 
+    this.store.list().reduce((total, p) => total + (p.price * p.stock), 0)
+  );
+
+  // Get highly granular signal for a specific entity (optimizes rendering performance)
+  getProductSignal(id: string) {
+    return this.store.entitySignal(id);
+  }
+
+  save(product: Product): void {
+    this.store.setOne(product);
+  }
+
+  delete(id: string): void {
+    this.store.deleteOne(id);
+  }
+
+  updatePrice(id: string, newPrice: number): void {
+    this.store.patch(id, { price: newPrice });
+  }
+}`,
+          },
+          {
+            name: 'product-list.component.ts',
+            language: 'ts',
+            content: `import { Component, inject } from '@angular/core';
+import { ProductIndexedDbRepository } from './product-indexeddb.repository';
+import { Product } from './product.model';
+
+@Component({
+  selector: 'app-product-list',
+  standalone: true,
+  templateUrl: './product-list.component.html'
+})
+export class ProductListComponent {
+  // 4. Inject the Repository Port abstraction (using implementation class for DI)
+  protected readonly repo = inject(ProductIndexedDbRepository);
+
+  discountProduct(id: string, currentPrice: number) {
+    const discountedPrice = Math.max(0, currentPrice - 5);
+    this.repo.updatePrice(id, discountedPrice);
+  }
+
+  remove(id: string) {
+    this.repo.delete(id);
+  }
+}`,
+          },
+          {
+            name: 'product-list.component.html',
+            language: 'html',
+            content: `<div class="p-6 bg-base-200/50 backdrop-blur-md border border-border-subtle rounded-3xl shadow-sm">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-xl font-bold">Catalog Products</h2>
+    <span class="text-lg font-black text-primary">
+      Total Value: \${{ repo.totalValue$() }}
+    </span>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="table w-full">
+      <thead>
+        <tr>
+          <th>Product Name</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (product of repo.products$(); track product.id) {
+          <tr class="hover:bg-base-content/5 transition-colors">
+            <td class="font-bold">{{ product.name }}</td>
+            <td class="font-mono">\${{ product.price }}</td>
+            <td>{{ product.stock }} units</td>
+            <td class="flex gap-2">
+              <button class="btn btn-sm btn-primary" (click)="discountProduct(product.id, product.price)">
+                Apply -$5 Discount
+              </button>
+              <button class="btn btn-sm btn-outline btn-error" (click)="remove(product.id)">
+                Delete
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" class="text-center py-6 text-base-content/40">
+              No products available in IndexedDB catalog.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'local-transport',

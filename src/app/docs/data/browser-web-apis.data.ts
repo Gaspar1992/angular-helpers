@@ -194,6 +194,117 @@ export class PhotoComponent {
     this.stream.set(null);
   }
 }`,
+    guides: [
+      {
+        title: 'Reactive Hardware Streams & Context Cleanup',
+        description:
+          'This guide details how to build a robust photo capture interface with reactive camera permission checks, dynamic constraint adjustments, and automatic MediaStream resource cleanup when the host component is destroyed.',
+        files: [
+          {
+            name: 'avatar-capture.component.ts',
+            language: 'ts',
+            content: `import { Component, inject, signal, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
+import { CameraService } from '@angular-helpers/browser-web-apis';
+
+@Component({
+  selector: 'app-avatar-capture',
+  standalone: true,
+  templateUrl: './avatar-capture.component.html'
+})
+export class AvatarCaptureComponent implements OnInit, OnDestroy {
+  private readonly cameraService = inject(CameraService);
+
+  @ViewChild('videoEl') videoElement!: ElementRef<HTMLVideoElement>;
+
+  protected readonly stream = signal<MediaStream | null>(null);
+  protected readonly capturedImage = signal<string | null>(null);
+
+  async enableCamera() {
+    try {
+      const mediaStream = await this.cameraService.startCamera({
+        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
+      });
+
+      this.stream.set(mediaStream);
+
+      if (this.videoElement) {
+        this.videoElement.nativeElement.srcObject = mediaStream;
+      }
+    } catch (err) {
+      console.error('Failed to access camera hardware:', err);
+    }
+  }
+
+  disableCamera() {
+    this.cameraService.stopCamera();
+    this.stream.set(null);
+    if (this.videoElement) {
+      this.videoElement.nativeElement.srcObject = null;
+    }
+  }
+
+  async capture() {
+    if (!this.stream() || !this.videoElement) return;
+
+    try {
+      const photoBlob = await this.cameraService.takePhoto(this.videoElement.nativeElement);
+      const url = URL.createObjectURL(photoBlob);
+      this.capturedImage.set(url);
+      
+      this.disableCamera();
+    } catch (err) {
+      console.error('Failed to capture frame:', err);
+    }
+  }
+
+  ngOnInit() {}
+
+  ngOnDestroy() {
+    this.disableCamera();
+    if (this.capturedImage()) {
+      URL.revokeObjectURL(this.capturedImage()!);
+    }
+  }
+}`,
+          },
+          {
+            name: 'avatar-capture.component.html',
+            language: 'html',
+            content: `<div class="flex flex-col items-center gap-6 p-8 bg-base-200/50 backdrop-blur-md rounded-3xl border border-border-subtle shadow-sm max-w-[600px]">
+  <h3 class="text-xl font-bold">Profile Photo Capture</h3>
+
+  <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-border">
+    <video #videoEl autoplay playsinline class="w-full h-full object-cover" [class.hidden]="!stream()"></video>
+    
+    @if (!stream()) {
+      <div class="absolute inset-0 flex flex-col items-center justify-center text-base-content/40 gap-2">
+        <span class="text-3xl">📷</span>
+        <p>Camera is currently off</p>
+      </div>
+    }
+  </div>
+
+  <div class="flex gap-4 w-full">
+    @if (!stream()) {
+      <button class="btn btn-primary flex-1" (click)="enableCamera()">Start Camera</button>
+    } @else {
+      <button class="btn btn-warning flex-1" (click)="disableCamera()">Stop Camera</button>
+      <button class="btn btn-success flex-1" (click)="capture()">Capture Photo</button>
+    }
+  </div>
+
+  @if (capturedImage(); as img) {
+    <div class="mt-4 flex flex-col items-center gap-2">
+      <h4 class="font-bold text-sm">Preview:</h4>
+      <img [src]="img" class="w-32 h-32 rounded-full object-cover border-4 border-primary shadow-lg" />
+    </div>
+  }
+</div>`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'clipboard',
