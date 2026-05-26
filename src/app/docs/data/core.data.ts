@@ -4,8 +4,7 @@ export const CORE_SERVICES: ServiceDoc[] = [
   {
     id: 'inject-platform',
     name: 'injectPlatform',
-    description:
-      "Composable that resolves the current platform environment using Angular's Dependency Injection. Returns a typed object with `isBrowser`, `isServer`, `window`, and `document` fields. Gracefully falls back when called outside an injection context (e.g. unit tests).",
+    description: `Composable that resolves the current platform environment using Angular's Dependency Injection. Returns a typed object with \`isBrowser\`, \`isServer\`, \`window\`, and \`document\` fields. Gracefully falls back when called outside an injection context (e.g. unit tests).`,
     scope: 'provided',
     importPath: '@angular-helpers/core',
     requiresSecureContext: false,
@@ -17,15 +16,7 @@ export const CORE_SERVICES: ServiceDoc[] = [
       'Returns null for window/document when running in SSR — always guard before accessing.',
       'Prefer this over raw PLATFORM_ID + isPlatformBrowser() to avoid import duplication across packages.',
     ],
-    methods: [
-      {
-        name: 'injectPlatform',
-        signature: 'injectPlatform(): PlatformInfo',
-        description:
-          'Returns a <code>PlatformInfo</code> object with <code>isBrowser</code>, <code>isServer</code>, <code>window</code>, and <code>document</code> fields. Must be called within an Angular injection context.',
-        returns: 'PlatformInfo',
-      },
-    ],
+    methods: [],
     example: `import { Component } from '@angular/core';
 import { injectPlatform } from '@angular-helpers/core';
 
@@ -47,8 +38,7 @@ export class PlatformAwareComponent {
   {
     id: 'is-transferable',
     name: 'isTransferable',
-    description:
-      'Pure predicate that returns `true` if a value is a `Transferable` instance that can be moved zero-copy via `postMessage`. Guards every Transferable type with a `typeof` check so it is safe in Web Workers, Node.js, and SSR contexts where some globals may be absent.',
+    description: `Pure predicate that returns \`true\` if a value is a \`Transferable\` instance that can be moved zero-copy via \`postMessage\`. Guards every Transferable type with a \`typeof\` check so it is safe in Web Workers, Node.js, and SSR contexts where some globals may be absent.`,
     scope: 'provided',
     importPath: '@angular-helpers/core',
     requiresSecureContext: false,
@@ -56,19 +46,11 @@ export class PlatformAwareComponent {
     category: 'workers',
     notes: [
       'Supported Transferable types: ArrayBuffer, MessagePort, ImageBitmap, OffscreenCanvas, ReadableStream, WritableStream, TransformStream.',
-      'Typed-array views (Uint8Array, etc.) are NOT Transferable — pass `.buffer` explicitly if needed.',
+      `Typed-array views (Uint8Array, etc.) are NOT Transferable — pass \`.buffer\` explicitly if needed.`,
       'Used internally by @angular-helpers/storage and @angular-helpers/worker-http to build zero-copy postMessage calls.',
       'Each global is guarded with typeof so the predicate is safe in environments where some globals are missing.',
     ],
-    methods: [
-      {
-        name: 'isTransferable',
-        signature: 'isTransferable(value: unknown): value is Transferable',
-        description:
-          'Returns <code>true</code> if the value is a <code>Transferable</code> (ArrayBuffer, MessagePort, ImageBitmap, OffscreenCanvas, ReadableStream, WritableStream, or TransformStream).',
-        returns: 'value is Transferable',
-      },
-    ],
+    methods: [],
     example: `import { isTransferable } from '@angular-helpers/core';
 
 function buildTransferList(payload: unknown): Transferable[] {
@@ -87,8 +69,7 @@ console.log(isTransferable(42));       // false`,
   {
     id: 'worker-pool',
     name: 'WorkerPool / injectWorkerPool',
-    description:
-      'Manages a pool of Web Workers with round-robin job dispatch. `injectWorkerPool` is the DI-aware factory that automatically terminates all workers when the injection context is destroyed. Used internally by `@angular-helpers/security` to run ReDoS-safe regex operations off the main thread.',
+    description: `Manages a pool of Web Workers with round-robin job dispatch. \`injectWorkerPool\` is the DI-aware factory that automatically terminates all workers when the injection context is destroyed. Used internally by \`@angular-helpers/security\` to run ReDoS-safe regex operations off the main thread.`,
     scope: 'provided',
     importPath: '@angular-helpers/core',
     requiresSecureContext: false,
@@ -102,16 +83,15 @@ console.log(isTransferable(42));       // false`,
     ],
     methods: [
       {
-        name: 'run',
-        signature: 'run<TInput, TOutput>(input: TInput): Promise<TOutput>',
-        description:
-          'Dispatches a job to the next available worker in the pool using round-robin. Returns a Promise that resolves with the worker response.',
-        returns: 'Promise<TOutput>',
+        name: 'execute',
+        signature: 'execute(type: string, data: any, timeoutMs?: number): Promise<T>',
+        description: 'Executes a task in the worker',
+        returns: 'Promise<T>',
       },
       {
         name: 'terminate',
         signature: 'terminate(): void',
-        description: 'Terminates all workers in the pool immediately.',
+        description: 'Public method terminate.',
         returns: 'void',
       },
     ],
@@ -129,5 +109,49 @@ export class MyWorkerService {
     return this.pool.run<string, string>(input);
   }
 }`,
+    guides: [
+      {
+        title: 'Multi-Threaded Computations (Round-Robin WorkerPool)',
+        description:
+          'This guide details how to build a highly parallel computational service using injectWorkerPool. We create a pool of load-balanced background workers that handle heavy calculations asynchronously, avoiding UI thread freezing. It automatically handles worker lifecycle and terminations on context destruction.',
+        code: `import { Injectable, inject } from '@angular/core';
+import { injectWorkerPool } from '@angular-helpers/core';
+
+export interface ComputePayload {
+  matrixA: number[][];
+  matrixB: number[][];
+}
+
+@Injectable({ providedIn: 'root' })
+export class HighPerformanceComputeService {
+  // 1. Instantiate the WorkerPool using direct DI integration.
+  // Pool size is automatically adjusted up to navigator.hardwareConcurrency (capped at 4).
+  // When this service (or owning context) is destroyed, all workers are automatically terminated via DestroyRef.
+  private readonly pool = injectWorkerPool(
+    () => new Worker(new URL('./compute.worker', import.meta.url), { type: 'module' }),
+    { poolSize: 4 }
+  );
+
+  async multiplyMatrices(a: number[][], b: number[][]): Promise<number[][]> {
+    const payload: ComputePayload = { matrixA: a, matrixB: b };
+
+    try {
+      // 2. Dispatch the computationally heavy task to the next available worker in a round-robin fashion.
+      // This runs off-main-thread so that your Angular UI stays completely fluid at 60 FPS.
+      const result = await this.pool.run<ComputePayload, number[][]>(payload);
+      return result;
+    } catch (error) {
+      console.error('Off-thread computation failed:', error);
+      throw error;
+    }
+  }
+
+  terminatePool() {
+    // 3. Optional manual termination of all active threads.
+    this.pool.terminate();
+  }
+}`,
+      },
+    ],
   },
 ];

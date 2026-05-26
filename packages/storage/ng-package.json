@@ -4,5 +4,6 @@
   "lib": {
     "entryFile": "src/public-api.ts"
   },
-  "assets": ["README.md", "README.es.md"]
+  "assets": ["README.md", "README.es.md"],
+  "allowedNonPeerDependencies": ["@angular-helpers/core", "tslib"]
 }

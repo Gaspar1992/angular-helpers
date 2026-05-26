@@ -18,23 +18,21 @@ export const SECURITY_SERVICES: ServiceDoc[] = [
     methods: [
       {
         name: 'builder',
-        signature: 'static builder(): RegexSecurityBuilder',
-        description: 'Creates a new RegexSecurityBuilder instance for fluent pattern construction.',
+        signature: 'builder(): RegexSecurityBuilder',
+        description: 'Builder pattern to construct safe regular expressions',
         returns: 'RegexSecurityBuilder',
       },
       {
         name: 'testRegex',
         signature:
-          'testRegex(pattern: string, text: string, options?: RegexSecurityConfig): Promise<RegexTestResult>',
-        description:
-          'Runs a regex match in a Web Worker with configurable timeout. Returns the match result plus execution metrics.',
+          'testRegex(pattern: string, text: string, config: RegexSecurityConfig): Promise<RegexTestResult>',
+        description: 'Executes a regular expression safely with a timeout',
         returns: 'Promise<RegexTestResult>',
       },
       {
         name: 'analyzePatternSecurity',
         signature: 'analyzePatternSecurity(pattern: string): Promise<RegexSecurityResult>',
-        description:
-          'Analyzes the given pattern for ReDoS risk without executing it. Returns risk level, complexity, and recommendations.',
+        description: 'Analyzes the security of a regular expression pattern',
         returns: 'Promise<RegexSecurityResult>',
       },
     ],
@@ -64,6 +62,133 @@ export class ValidationComponent {
     return result.match;
   }
 }`,
+    guides: [
+      {
+        title: 'Off-Thread ReDoS-Safe Input Validation',
+        description: `This guide details how to leverage RegexSecurityService inside an Angular reactive form to delegate heavy regular expression validations to a background WorkerPool.
+
+This protects your main UI thread (preventing freezing and dropped frames at 60 FPS) and implements strict timeout protections to prevent Regular Expression Denial of Service (ReDoS) vulnerabilities.`,
+        files: [
+          {
+            name: 'secure-validator.component.ts',
+            language: 'ts',
+            content: `import { Component, inject, signal } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RegexSecurityService } from '@angular-helpers/security';
+
+@Component({
+  selector: 'app-secure-validator',
+  standalone: true,
+  imports: [ReactiveFormsModule],
+  templateUrl: './secure-validator.component.html'
+})
+export class SecureValidatorComponent {
+  private readonly securityService = inject(RegexSecurityService);
+  
+  protected readonly isProcessing = signal<boolean>(false);
+  protected readonly evaluationResult = signal<any | null>(null);
+
+  protected readonly form = new FormGroup({
+    pattern: new FormControl('^(a+)+$', [Validators.required]),
+    payload: new FormControl('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!123', [Validators.required])
+  });
+
+  async evaluateInput() {
+    const val = this.form.value;
+    if (!val.pattern || !val.payload) return;
+
+    this.isProcessing.set(true);
+    this.evaluationResult.set(null);
+
+    try {
+      // 1. Analyze regular expression pattern for structural ReDoS vulnerabilities without executing it
+      const analysis = await this.securityService.analyzePatternSecurity(val.pattern);
+      
+      if (!analysis.safe && analysis.riskLevel === 'high') {
+        this.evaluationResult.set({
+          safe: false,
+          timeout: false,
+          executionTime: 0,
+          warnings: ['Blocked pattern prior to execution: High ReDoS risk detected.']
+        });
+        return;
+      }
+
+      // 2. Safely execute regex off the main thread inside the background WorkerPool
+      // Automatically enforces a strict 2-second timeout, returning 'timeout: true' to prevent event loop hanging.
+      const testResult = await this.securityService.testRegex(val.pattern, val.payload, {
+        timeout: 2000,
+        safeMode: true
+      });
+
+      this.evaluationResult.set({
+        safe: testResult.match,
+        timeout: testResult.timeout,
+        executionTime: testResult.executionTime,
+        warnings: testResult.timeout ? ['Regular expression took too long to run. Terminated safely.'] : []
+      });
+
+    } catch (err: any) {
+      this.evaluationResult.set({
+        safe: false,
+        timeout: false,
+        warnings: [err.message || 'Worker runtime execution error']
+      });
+    } finally {
+      this.isProcessing.set(false);
+    }
+  }
+}`,
+          },
+          {
+            name: 'secure-validator.component.html',
+            language: 'html',
+            content: `<form [formGroup]="form" class="flex flex-col gap-4 max-w-[500px] p-6 bg-base-200/50 backdrop-blur-md rounded-3xl border border-border-subtle shadow-sm">
+  <div class="form-control">
+    <label class="label">
+      <span class="label-text font-bold">Pattern to test (e.g. ^(a+)+$)</span>
+    </label>
+    <input type="text" class="input input-bordered" formControlName="pattern" />
+  </div>
+
+  <div class="form-control">
+    <label class="label">
+      <span class="label-text font-bold">Text payload</span>
+    </label>
+    <textarea class="textarea textarea-bordered h-24" formControlName="payload"></textarea>
+  </div>
+
+  <button type="button" class="btn btn-primary w-full" 
+          [disabled]="form.invalid || isProcessing()" 
+          (click)="evaluateInput()">
+    {{ isProcessing() ? 'Running in Web Worker...' : 'Run Security Evaluation' }}
+  </button>
+
+  @if (evaluationResult(); as res) {
+    <div class="alert mt-4 shadow-sm" 
+         [class.alert-error]="!res.safe || res.timeout" 
+         [class.alert-success]="res.safe && !res.timeout">
+      <div>
+        <h4 class="font-bold">{{ res.safe ? 'Safe Pattern' : 'ReDoS Risk Detected!' }}</h4>
+        <p class="text-sm">
+          Execution Time: {{ res.executionTime?.toFixed(2) }}ms | 
+          Timeout triggered: {{ res.timeout ? 'YES' : 'NO' }}
+        </p>
+        @if (res.warnings?.length) {
+          <ul class="text-xs list-disc pl-4 mt-2">
+            @for (w of res.warnings; track w) {
+              <li>{{ w }}</li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  }
+</form>`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'regex-security-builder',
@@ -82,47 +207,94 @@ export class ValidationComponent {
     methods: [
       {
         name: 'pattern',
-        signature: 'pattern(p: string): RegexSecurityBuilder',
-        description: 'Sets a raw pattern string.',
+        signature: 'pattern(pattern: string): RegexSecurityBuilder',
+        description: 'Defines the base pattern',
         returns: 'RegexSecurityBuilder',
       },
       {
-        name: 'characterSet',
-        signature: 'characterSet(chars: string, negate?: boolean): RegexSecurityBuilder',
-        description: 'Appends a character class [chars].',
+        name: 'append',
+        signature: 'append(text: string): RegexSecurityBuilder',
+        description: 'Appends text to the current pattern',
+        returns: 'RegexSecurityBuilder',
+      },
+      {
+        name: 'group',
+        signature: 'group(content: string, name?: string): RegexSecurityBuilder',
+        description: 'Adds a capturing group',
+        returns: 'RegexSecurityBuilder',
+      },
+      {
+        name: 'nonCapturingGroup',
+        signature: 'nonCapturingGroup(content: string): RegexSecurityBuilder',
+        description: 'Adds a non-capturing group',
+        returns: 'RegexSecurityBuilder',
+      },
+      {
+        name: 'or',
+        signature: 'or(alternative: string): RegexSecurityBuilder',
+        description: 'Adds an alternative',
         returns: 'RegexSecurityBuilder',
       },
       {
         name: 'quantifier',
-        signature: 'quantifier(q: string): RegexSecurityBuilder',
-        description: 'Appends a quantifier (e.g. "+", "*", "{2,}").',
+        signature:
+          "quantifier(quantifier: '*' | '+' | '?' | '{n}' | '{n,}' | '{n,m}'): RegexSecurityBuilder",
+        description: 'Adds a quantifier',
+        returns: 'RegexSecurityBuilder',
+      },
+      {
+        name: 'characterSet',
+        signature: 'characterSet(chars: string, negate: any): RegexSecurityBuilder',
+        description: 'Adds a character set',
+        returns: 'RegexSecurityBuilder',
+      },
+      {
+        name: 'startOfLine',
+        signature: 'startOfLine(): RegexSecurityBuilder',
+        description: 'Adds a start of line anchor',
+        returns: 'RegexSecurityBuilder',
+      },
+      {
+        name: 'endOfLine',
+        signature: 'endOfLine(): RegexSecurityBuilder',
+        description: 'Adds an end of line anchor',
+        returns: 'RegexSecurityBuilder',
+      },
+      {
+        name: 'options',
+        signature: 'options(options: RegexBuilderOptions): RegexSecurityBuilder',
+        description: 'Configures regular expression options',
+        returns: 'RegexSecurityBuilder',
+      },
+      {
+        name: 'security',
+        signature: 'security(config: RegexSecurityConfig): RegexSecurityBuilder',
+        description: 'Configures security options',
         returns: 'RegexSecurityBuilder',
       },
       {
         name: 'timeout',
         signature: 'timeout(ms: number): RegexSecurityBuilder',
-        description: 'Sets the execution timeout in milliseconds.',
+        description: 'Configures timeout',
         returns: 'RegexSecurityBuilder',
       },
       {
         name: 'safeMode',
         signature: 'safeMode(): RegexSecurityBuilder',
-        description: 'Enables safe mode — blocks execution if the pattern is considered unsafe.',
+        description: 'Activates safe mode',
         returns: 'RegexSecurityBuilder',
       },
       {
         name: 'build',
         signature:
           'build(): { pattern: string; options: RegexBuilderOptions; security: RegexSecurityConfig }',
-        description:
-          'Returns the built pattern config object. Pass pattern and security to testRegex() to execute.',
+        description: 'Builds the final regular expression',
         returns: '{ pattern: string; options: RegexBuilderOptions; security: RegexSecurityConfig }',
       },
       {
         name: 'execute',
         signature: 'execute(text: string, service: RegexSecurityService): Promise<RegexTestResult>',
-        description:
-          'Executes the pattern against text using the provided service. Shorthand for build() + testRegex().',
+        description: 'Builds and executes the regular expression',
         returns: 'Promise<RegexTestResult>',
       },
     ],
@@ -163,68 +335,71 @@ export class PatternComponent {
     ],
     methods: [
       {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Public method isSupported.',
+        returns: 'boolean',
+      },
+      {
         name: 'hash',
-        signature: 'hash(data: string | ArrayBuffer, algorithm?: HashAlgorithm): Promise<string>',
-        description:
-          'Hashes the given data using the specified algorithm (default: SHA-256). Returns a hex string.',
+        signature: 'hash(data: string | ArrayBuffer, algorithm: HashAlgorithm): Promise<string>',
+        description: 'Public method hash.',
         returns: 'Promise<string>',
       },
       {
         name: 'generateAesKey',
-        signature: 'generateAesKey(length?: AesKeyLength): Promise<CryptoKey>',
-        description: 'Generates a new AES-GCM key of the given bit length (default: 256).',
+        signature: 'generateAesKey(length: AesKeyLength): Promise<CryptoKey>',
+        description: 'Public method generateAesKey.',
         returns: 'Promise<CryptoKey>',
       },
       {
         name: 'encryptAes',
         signature:
           'encryptAes(key: CryptoKey, data: string | ArrayBuffer): Promise<AesEncryptResult>',
-        description: 'Encrypts data with AES-GCM. Returns ciphertext and the generated IV.',
-        returns: 'Promise<{ ciphertext: ArrayBuffer; iv: Uint8Array }>',
+        description: 'Public method encryptAes.',
+        returns: 'Promise<AesEncryptResult>',
       },
       {
         name: 'decryptAes',
         signature:
-          'decryptAes(key: CryptoKey, ciphertext: ArrayBuffer, iv: Uint8Array): Promise<string>',
-        description: 'Decrypts AES-GCM ciphertext and returns the plaintext string.',
+          'decryptAes(key: CryptoKey, ciphertext: ArrayBuffer, iv: Uint8Array<ArrayBuffer>): Promise<string>',
+        description: 'Public method decryptAes.',
         returns: 'Promise<string>',
       },
       {
         name: 'exportKey',
         signature: 'exportKey(key: CryptoKey): Promise<JsonWebKey>',
-        description: 'Exports a CryptoKey as a JWK object for storage or transfer.',
+        description: 'Public method exportKey.',
         returns: 'Promise<JsonWebKey>',
       },
       {
         name: 'importAesKey',
         signature: 'importAesKey(jwk: JsonWebKey): Promise<CryptoKey>',
-        description: 'Imports an AES-GCM key from a JWK object.',
+        description: 'Public method importAesKey.',
         returns: 'Promise<CryptoKey>',
       },
       {
         name: 'generateRandomBytes',
         signature: 'generateRandomBytes(length: number): Uint8Array',
-        description: 'Returns a Uint8Array of cryptographically secure random bytes.',
+        description: 'Public method generateRandomBytes.',
         returns: 'Uint8Array',
       },
       {
         name: 'randomUUID',
         signature: 'randomUUID(): string',
-        description: 'Generates a cryptographically secure UUID v4 string.',
+        description: 'Public method randomUUID.',
         returns: 'string',
       },
       {
         name: 'generateHmacKey',
-        signature: 'generateHmacKey(algorithm?: HmacAlgorithm): Promise<CryptoKey>',
-        description:
-          'Generates a new HMAC key for the specified algorithm (default: HMAC-SHA-256).',
+        signature: 'generateHmacKey(algorithm: HmacAlgorithm): Promise<CryptoKey>',
+        description: 'Public method generateHmacKey.',
         returns: 'Promise<CryptoKey>',
       },
       {
         name: 'sign',
         signature: 'sign(key: CryptoKey, data: string | ArrayBuffer): Promise<string>',
-        description:
-          'Creates an HMAC signature of the data using the provided key. Returns a hex-encoded string.',
+        description: 'Signs data with an HMAC key. Returns a hex-encoded signature.',
         returns: 'Promise<string>',
       },
       {
@@ -232,13 +407,13 @@ export class PatternComponent {
         signature:
           'verify(key: CryptoKey, data: string | ArrayBuffer, signature: string): Promise<boolean>',
         description:
-          'Verifies an HMAC signature against the data using the provided key. Returns false for malformed input — never throws.',
+          'Verifies an HMAC signature (hex-encoded). Returns false for malformed input — never throws.',
         returns: 'Promise<boolean>',
       },
       {
         name: 'importHmacKey',
-        signature: 'importHmacKey(jwk: JsonWebKey, algorithm?: HmacAlgorithm): Promise<CryptoKey>',
-        description: 'Imports an HMAC key from a JWK object.',
+        signature: 'importHmacKey(jwk: JsonWebKey, algorithm: HmacAlgorithm): Promise<CryptoKey>',
+        description: 'Public method importHmacKey.',
         returns: 'Promise<CryptoKey>',
       },
     ],
@@ -290,27 +465,30 @@ export class CryptoComponent {
       {
         name: 'isSupported',
         signature: 'isSupported(): boolean',
-        description: 'Returns whether the service can be used in the current environment.',
+        description: 'Public method isSupported.',
         returns: 'boolean',
       },
       {
         name: 'initWithPassphrase',
         signature: 'initWithPassphrase(passphrase: string, explicitSalt?: string): Promise<void>',
-        description:
-          'Initializes the service with a passphrase-derived key using PBKDF2. Salt is auto-persisted to storage.',
+        description: `Initializes the service with a passphrase-derived key (PBKDF2 + AES-GCM).
+The salt is automatically persisted in storage on first call and reused on subsequent calls.
+Calling this again replaces the active key.`,
         returns: 'Promise<void>',
       },
       {
         name: 'set',
-        signature: 'set<T>(key: string, value: T, namespace?: string): Promise<void>',
-        description: 'Encrypts and stores a value. A fresh random IV is generated for every write.',
+        signature: 'set(key: string, value: T, namespace?: string): Promise<void>',
+        description: `Encrypts and stores a value.
+A fresh random IV is generated for every write.`,
         returns: 'Promise<void>',
       },
       {
         name: 'get',
-        signature: 'get<T>(key: string, namespace?: string): Promise<T | null>',
-        description:
-          'Decrypts and returns a stored value. Returns null if key does not exist or decryption fails.',
+        signature: 'get(key: string, namespace?: string): Promise<T | null>',
+        description: `Decrypts and returns a stored value.
+Returns \`null\` if the key does not exist, was written without encryption,
+or the ciphertext is corrupted.`,
         returns: 'Promise<T | null>',
       },
       {
@@ -322,8 +500,8 @@ export class CryptoComponent {
       {
         name: 'clear',
         signature: 'clear(namespace?: string): void',
-        description:
-          'Clears entries. Without namespace, clears entire storage. With namespace, clears only that namespace.',
+        description: `Clears all entries belonging to a namespace.
+When called without arguments, clears the entire storage target.`,
         returns: 'void',
       },
     ],
@@ -376,35 +554,36 @@ export class UserSettingsComponent {
       {
         name: 'isSupported',
         signature: 'isSupported(): boolean',
-        description: 'Returns whether the service can be used in the current environment.',
+        description: 'Public method isSupported.',
         returns: 'boolean',
       },
       {
         name: 'sanitizeHtml',
         signature: 'sanitizeHtml(input: string): string',
-        description:
-          'Parses and sanitizes HTML, keeping only allowed tags and attributes. Strips script tags and event handlers.',
+        description: `Parses and sanitizes an HTML string, keeping only allowed tags and attributes.
+Script execution is prevented — parsing is done via DOMParser, not innerHTML assignment.`,
         returns: 'string',
       },
       {
         name: 'sanitizeUrl',
         signature: 'sanitizeUrl(input: string): string | null',
-        description:
-          'Validates URL via URL constructor. Returns normalized URL only for http/https schemes. Returns null for javascript:, data:, vbscript:, or relative URLs.',
+        description: `Validates and normalizes a URL string.
+Returns the normalized URL only for \`http:\` and \`https:\` schemes.
+Returns \`null\` for \`javascript:\`, \`data:\`, \`vbscript:\`, relative URLs, or malformed input.`,
         returns: 'string | null',
       },
       {
         name: 'escapeHtml',
         signature: 'escapeHtml(input: string): string',
-        description:
-          'Escapes HTML special characters (&, <, >, ", \') for safe text interpolation.',
+        description: `Escapes HTML special characters for safe text interpolation.
+Use this when inserting user content into HTML text nodes or attributes.`,
         returns: 'string',
       },
       {
         name: 'sanitizeJson',
         signature: 'sanitizeJson(input: string): unknown | null',
-        description:
-          'Safely parses JSON without eval. Returns parsed value on success, null on any error.',
+        description: `Safely parses a JSON string. Returns the parsed value on success, \`null\` on any error.
+Does NOT use \`eval\` or \`Function\` — uses JSON.parse only.`,
         returns: 'unknown | null',
       },
     ],
@@ -457,8 +636,8 @@ export class CommentComponent {
       {
         name: 'assess',
         signature: 'assess(password: string): PasswordStrengthResult',
-        description:
-          'Evaluates password strength. Returns score (0-4), label, entropy in bits, and feedback messages. Never throws.',
+        description: `Evaluates the strength of a password.
+Never throws — returns score 0 for empty or null-like input.`,
         returns: 'PasswordStrengthResult',
       },
     ],
@@ -500,29 +679,29 @@ export class RegistrationComponent {
     methods: [
       {
         name: 'decode',
-        signature: 'decode<T>(token: string): T',
-        description:
-          'Decodes the base64url payload segment. Throws InvalidJwtError on malformed input.',
+        signature: 'decode(token: string): T',
+        description: 'Decodes the payload segment of a JWT and returns it typed.',
         returns: 'T',
       },
       {
         name: 'isExpired',
-        signature: 'isExpired(token: string, leewaySeconds?: number): boolean',
-        description:
-          'Returns true when exp*1000 ≤ Date.now() - leeway. Also true for missing/invalid exp.',
+        signature: 'isExpired(token: string, leewaySeconds: any): boolean',
+        description: `Returns \`true\` when the token is expired relative to \`Date.now()\`.
+Missing or non-numeric \`exp\` counts as expired (fail-secure).`,
         returns: 'boolean',
       },
       {
         name: 'expiresIn',
         signature: 'expiresIn(token: string): number',
-        description:
-          'Milliseconds until expiration. Negative when expired, 0 when no exp, -1 on malformed token.',
+        description: `Returns milliseconds until the token expires.
+Negative when already expired. \`0\` when \`exp\` is missing.`,
         returns: 'number',
       },
       {
         name: 'claim',
-        signature: 'claim<T>(token: string, name: string): T | null',
-        description: 'Typed accessor for a single claim. Returns null when absent or malformed.',
+        signature: 'claim(token: string, name: string): T | null',
+        description: `Extracts a single claim from the payload. Returns \`null\` when the claim is absent
+or the token is malformed.`,
         returns: 'T | null',
       },
     ],
@@ -562,15 +741,15 @@ export class SessionGuard {
       {
         name: 'isSupported',
         signature: 'isSupported(): boolean',
-        description:
-          'Returns whether SubtleCrypto + fetch are available in the current environment.',
+        description: 'Public method isSupported.',
         returns: 'boolean',
       },
       {
         name: 'isPasswordLeaked',
         signature: 'isPasswordLeaked(password: string): Promise<HibpResult>',
-        description:
-          'Computes SHA-1, sends 5-char prefix to HIBP, checks local match. Returns { leaked, count, error? }.',
+        description: `Returns whether the given password is present in the HIBP breach corpus.
+Never throws: network failures return \`{ leaked: false, error: 'network' }\`,
+unsupported environments return \`{ leaked: false, error: 'unsupported' }\`.`,
         returns: 'Promise<HibpResult>',
       },
     ],
@@ -603,22 +782,28 @@ export class RegistrationComponent {
     ],
     methods: [
       {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Public method isSupported.',
+        returns: 'boolean',
+      },
+      {
         name: 'generateToken',
         signature: 'generateToken(): string',
-        description: 'Returns a 32-byte hex token from WebCryptoService.generateRandomBytes(32).',
+        description: `Generates a new CSRF token as a 32-byte hex string. The token is NOT persisted
+automatically — call  to save it.`,
         returns: 'string',
       },
       {
         name: 'storeToken',
         signature: 'storeToken(token: string): void',
-        description: 'Persists the token to the configured storage (default: sessionStorage).',
+        description: 'Persists the token to the configured storage.',
         returns: 'void',
       },
       {
         name: 'getToken',
         signature: 'getToken(): string | null',
-        description:
-          'Returns the stored token, or null when unset or outside a browser environment.',
+        description: `Returns the stored token, or \`null\` when unset or outside a browser environment.`,
         returns: 'string | null',
       },
       {
@@ -661,33 +846,37 @@ csrf.storeToken(response.csrfToken);
       {
         name: 'configure',
         signature: 'configure(key: string, policy: RateLimitPolicy): void',
-        description:
-          'Registers or updates the policy for a key. Re-configuring resets its counter state.',
+        description: `Registers or updates the policy for \`key\`. Re-configuring an existing key resets its state.`,
         returns: 'void',
       },
       {
         name: 'consume',
-        signature: 'consume(key: string, tokens?: number): Promise<void>',
-        description:
-          'Attempts to consume tokens. Rejects with RateLimitExceededError ({ key, retryAfterMs }) when exhausted.',
+        signature: 'consume(key: string, tokens: any): Promise<void>',
+        description: `Attempts to consume \`tokens\` units from the bucket. Resolves on success; rejects with
+ when the bucket is exhausted.
+
+For undeclared keys, this method resolves immediately without consuming anything
+(fail-open behaviour — intentional to avoid silent failures when a policy is missing).`,
         returns: 'Promise<void>',
       },
       {
         name: 'canExecute',
         signature: 'canExecute(key: string): Signal<boolean>',
-        description: 'Reactive signal — true when at least one unit is available.',
+        description: `Reactive signal indicating whether a single unit can be consumed from \`key\` right now.
+For undeclared keys, returns \`signal(true)\`.`,
         returns: 'Signal<boolean>',
       },
       {
         name: 'remaining',
         signature: 'remaining(key: string): Signal<number>',
-        description: 'Reactive signal with the current remaining capacity.',
+        description: `Reactive signal holding the remaining capacity for \`key\`.
+For undeclared keys, returns \`signal(Infinity)\`.`,
         returns: 'Signal<number>',
       },
       {
         name: 'reset',
         signature: 'reset(key: string): void',
-        description: 'Resets the counter for a key to its maximum capacity.',
+        description: `Resets the counter for \`key\` to its maximum. No-op for undeclared keys.`,
         returns: 'void',
       },
     ],
@@ -738,28 +927,33 @@ export class SearchComponent {
       {
         name: 'isSupported',
         signature: 'isSupported(): boolean',
-        description: 'Returns whether navigator.clipboard.writeText is available.',
+        description: 'Public method isSupported.',
         returns: 'boolean',
       },
       {
         name: 'copy',
-        signature: 'copy(text: string, options?: SensitiveCopyOptions): Promise<void>',
-        description:
-          'Writes to the clipboard and schedules verified auto-clear. Throws ClipboardUnsupportedError when the API is missing.',
+        signature: 'copy(text: string, options: SensitiveCopyOptions): Promise<void>',
+        description: `Writes \`text\` to the clipboard and schedules an auto-clear.`,
         returns: 'Promise<void>',
       },
       {
         name: 'copy$',
-        signature: 'copy$(text: string, options?: SensitiveCopyOptions): Observable<CopyStatus>',
-        description:
-          "Reactive variant — emits 'copied' immediately, then 'cleared' | 'read-denied' | 'error' once auto-clear completes.",
+        signature: 'copy$(text: string, options: SensitiveCopyOptions): Observable<CopyStatus>',
+        description: `Reactive variant of . Emits \`'copied'\` immediately after writing, then
+\`'cleared'\` | \`'read-denied'\` | \`'error'\` once the auto-clear completes (or is skipped).`,
         returns: 'Observable<CopyStatus>',
       },
       {
         name: 'cancelPendingClear',
         signature: 'cancelPendingClear(): void',
-        description: 'Cancels any pending auto-clear timer without modifying the clipboard.',
+        description: 'Cancels any pending auto-clear timer. The clipboard content is not modified.',
         returns: 'void',
+      },
+      {
+        name: 'clear',
+        signature: 'clear(): Promise<void>',
+        description: 'Forcefully clears the clipboard unconditionally.',
+        returns: 'Promise<void>',
       },
     ],
     example: `import { SensitiveClipboardService } from '@angular-helpers/security';

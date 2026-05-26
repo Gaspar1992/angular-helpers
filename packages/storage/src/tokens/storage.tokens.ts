@@ -1,4 +1,5 @@
 import { InjectionToken } from '@angular/core';
+import { StorageTransport } from '../services/storage-transport';
 
 /**
  * Injection token to configure the AES-GCM encryption passphrase for StorageTransports.
@@ -8,3 +9,8 @@ export const SECURE_STORAGE_PASSPHRASE = new InjectionToken<string>('SECURE_STOR
   providedIn: 'root',
   factory: () => 'angular-helpers-secure-storage-passphrase',
 });
+
+/**
+ * Injection Token for the active Storage Transport
+ */
+export const STORAGE_TRANSPORT = new InjectionToken<StorageTransport>('STORAGE_TRANSPORT');

@@ -3,6 +3,8 @@
  */
 
 export * from './interfaces/storage.types';
+export * from './interfaces/storage-options.types';
+
 export * from './services/storage-transport';
 export * from './services/local-transport';
 export * from './utils/safe-readonly-map';

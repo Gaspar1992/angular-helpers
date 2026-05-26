@@ -103,6 +103,21 @@ export interface ServiceDoc {
   inputs?: InputDoc[];
   /** Component outputs (for Angular components) */
   outputs?: OutputDoc[];
+  /** Architectural implementation guides and patterns */
+  guides?: GuideDoc[];
+}
+
+export interface GuideFile {
+  name: string;
+  language: string;
+  content: string;
+}
+
+export interface GuideDoc {
+  title: string;
+  description: string;
+  code?: string;
+  files?: GuideFile[];
 }
 
 /** Service categories for automatic overview grouping */

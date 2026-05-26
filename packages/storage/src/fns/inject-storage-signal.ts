@@ -1,5 +1,5 @@
 import { inject, signal, DestroyRef, Signal } from '@angular/core';
-import { STORAGE_TRANSPORT } from '../services/storage-transport';
+import { STORAGE_TRANSPORT } from '../tokens/storage.tokens';
 import { LocalStorageTransport } from '../services/local-transport';
 import { StorageSignalOptions, StorageSignal } from '../interfaces/storage.types';
 

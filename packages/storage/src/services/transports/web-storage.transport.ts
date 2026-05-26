@@ -1,20 +1,25 @@
 import { StorageTransport } from '../storage-transport';
-import { StorageSignalOptions } from '../../interfaces/storage.types';
+import { StorageSignalOptions } from '../../interfaces/storage-options.types';
 import { encrypt, decrypt } from '../../utils/crypto.utils';
 import { serializeData, deserializeData } from '../../utils/serialization.utils';
+import { injectPlatform } from '@angular-helpers/core';
 
 export class WebStorageTransport implements StorageTransport {
+  private readonly platform = injectPlatform();
+
   constructor(private readonly secretPassphrase?: string) {}
 
   async read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined> {
-    if (typeof window === 'undefined') {
+    if (!this.platform.isBrowser || !this.platform.window) {
       return undefined;
     }
 
+    const globalWindow = this.platform.window;
     const storageType = options?.storageType ?? 'local';
     const encryptData = options?.encrypt ?? false;
     const useToon = options?.serializer === 'toon';
-    const storage = storageType === 'session' ? window.sessionStorage : window.localStorage;
+    const storage =
+      storageType === 'session' ? globalWindow.sessionStorage : globalWindow.localStorage;
 
     const raw = storage.getItem(key);
     if (raw === null) return undefined;
@@ -33,14 +38,16 @@ export class WebStorageTransport implements StorageTransport {
   }
 
   async write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void> {
-    if (typeof window === 'undefined') {
+    if (!this.platform.isBrowser || !this.platform.window) {
       return;
     }
 
+    const globalWindow = this.platform.window;
     const storageType = options?.storageType ?? 'local';
     const encryptData = options?.encrypt ?? false;
     const useToon = options?.serializer === 'toon';
-    const storage = storageType === 'session' ? window.sessionStorage : window.localStorage;
+    const storage =
+      storageType === 'session' ? globalWindow.sessionStorage : globalWindow.localStorage;
 
     try {
       let payload = await serializeData(data, useToon);
@@ -57,16 +64,19 @@ export class WebStorageTransport implements StorageTransport {
   }
 
   async delete(key: string, options?: StorageSignalOptions): Promise<void> {
-    if (typeof window === 'undefined') return;
+    if (!this.platform.isBrowser || !this.platform.window) return;
 
+    const globalWindow = this.platform.window;
     const storageType = options?.storageType ?? 'local';
-    const storage = storageType === 'session' ? window.sessionStorage : window.localStorage;
+    const storage =
+      storageType === 'session' ? globalWindow.sessionStorage : globalWindow.localStorage;
     storage.removeItem(key);
   }
 
   onChange<T>(key: string, callback: (value: T) => void): () => void {
-    if (typeof window === 'undefined') return () => {};
+    if (!this.platform.isBrowser || !this.platform.window) return () => {};
 
+    const globalWindow = this.platform.window;
     const listener = (event: StorageEvent) => {
       if (event.key === key && event.newValue !== null) {
         try {
@@ -79,7 +89,7 @@ export class WebStorageTransport implements StorageTransport {
       }
     };
 
-    window.addEventListener('storage', listener);
-    return () => window.removeEventListener('storage', listener);
+    globalWindow.addEventListener('storage', listener);
+    return () => globalWindow.removeEventListener('storage', listener);
   }
 }

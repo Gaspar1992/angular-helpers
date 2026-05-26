@@ -19,3 +19,4 @@
 export { needsPolyfill } from './detect';
 export { ponyfillStreams } from './ponyfill';
 export type { StreamPonyfillExports } from './ponyfill';
+export { serializeStreamToPort, deserializePortToStream } from './channel';

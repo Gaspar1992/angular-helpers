@@ -2,6 +2,14 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'docs-v21-13-0-guides-patterns-mini-ide',
+    title: 'docs v21.13.0: Guides & Patterns section with interactive Mini-IDE visualizer',
+    publishedAt: '2026-05-25',
+    tags: ['docs', 'dx', 'ide', 'signals', 'web-workers', 'architecture'],
+    excerpt:
+      'Introducing the brand new Guides & Patterns section in the Angular Helpers documentation website. Learn how we designed an interactive, glassmorphic Mini-IDE visualizer to present real-world multi-file architectural patterns with pure, decoupled Angular structure.',
+  },
+  {
     slug: 'storage-performance-overhaul-zero-copy-worker',
     title:
       'Elevating Angular Storage: Zero-Copy, Off-Main-Thread Serialization, and Unergonomic APIs',

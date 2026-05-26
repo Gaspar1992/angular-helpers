@@ -135,6 +135,7 @@ _A modern Angular wrapper for OpenLayers with modular architecture and standalon
 - 🎯 **Modular loading** — `core`, `layers`, `controls`, `interactions`, `overlays`, `military` sub-entries.
 - 🪖 **Military features** — ellipses, sectors, donuts, MIL-STD-2525 symbols via `milsymbol`.
 - 💬 **Popups & tooltips** — declarative and programmatic overlay API.
+- ⏱️ **Time-series playback** — 60FPS animation timing loop running off-zone via `requestAnimationFrame` and a premium `<ol-timeline>` control panel.
 
 **📥 Installation:**
 

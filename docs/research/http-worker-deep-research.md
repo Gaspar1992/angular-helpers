@@ -127,6 +127,15 @@ worker.postMessage({ readablePort, writablePort }, [readablePort, writablePort])
 
 **Trade-off**: Each chunk requires a `postMessage` round-trip. Still better than buffering the entire response.
 
+### Implemented Solution: Custom Ack-Based Backpressure Pipe
+
+Instead of using the external `remote-web-streams` library, a custom lightweight ponyfill was implemented. It relies on a bidirectional **Acknowledgment (Ack) Handshake Protocol** over native `MessagePort`s:
+
+- **Zero-Dependency**: Weighs less than 1KB.
+- **Strict Backpressure**: The Worker sender loop is suspended after dispatching a chunk and resumes ONLY when the client-side consumer triggers a `pull()` event on the `ReadableStream`, signaling that queue space has freed up.
+- **Zero-Copy**: Directly transfers underlying chunk `ArrayBuffer`s when present.
+- **Zero-Overhead in modern browsers**: Automatically bypasses the message bridge in Chrome/Firefox/Safari 18+ to leverage native transferable streams.
+
 ---
 
 ## 4. Request Cancellation — A Missing Primitive

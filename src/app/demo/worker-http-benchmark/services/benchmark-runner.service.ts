@@ -46,7 +46,8 @@ export interface BenchmarkRunResult {
 interface BenchmarkResponse {
   generatedAt: number;
   bytes: number;
-  payload: string;
+  payload?: string;
+  body?: any;
 }
 
 /**
@@ -180,6 +181,18 @@ export class BenchmarkRunnerService implements OnDestroy {
       // Stage 4: Worker processing (simulated on main thread)
       tracker.markStageStart('worker-processing');
       const response = await simulateMainThreadResponse(req);
+
+      let streamBytesRead = 0;
+      if (response && response.body instanceof ReadableStream) {
+        const reader = response.body.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          if (value) {
+            streamBytesRead += value.length;
+          }
+        }
+      }
       tracker.markStageEnd('worker-processing');
 
       // Stage 5: Transfer in (N/A for main thread)
@@ -231,6 +244,18 @@ export class BenchmarkRunnerService implements OnDestroy {
 
       // Execute via worker transport and capture timing from response
       const response = await firstValueFrom(transport.execute(req));
+
+      let streamBytesRead = 0;
+      if (response && response.body instanceof ReadableStream) {
+        const reader = response.body.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          if (value) {
+            streamBytesRead += value.length;
+          }
+        }
+      }
 
       tracker.markStageEnd('transfer-out');
 
@@ -309,6 +334,44 @@ async function safeDispatch(
  */
 async function simulateMainThreadResponse(req: ScenarioRequestSpec): Promise<BenchmarkResponse> {
   burnCpu(req.cpuBurnMs);
+
+  if (req.streaming) {
+    const encoder = new TextEncoder();
+    const totalBytes = req.payloadBytes;
+    const chunkSize = 256 * 1024; // 256KB chunks
+    const chunkDelay =
+      req.delayMs > 0 ? req.delayMs / Math.max(1, Math.ceil(totalBytes / chunkSize)) : 0;
+
+    const body = new ReadableStream({
+      start(controller) {
+        let sent = 0;
+        const sendNext = () => {
+          if (sent >= totalBytes) {
+            controller.close();
+            return;
+          }
+          const size = Math.min(chunkSize, totalBytes - sent);
+          const chunkData = generatePayload(size);
+          controller.enqueue(encoder.encode(chunkData));
+          sent += size;
+
+          if (chunkDelay > 0) {
+            setTimeout(sendNext, chunkDelay);
+          } else {
+            sendNext();
+          }
+        };
+        sendNext();
+      },
+    });
+
+    return {
+      generatedAt: Date.now(),
+      bytes: req.payloadBytes,
+      body,
+    };
+  }
+
   if (req.delayMs > 0) {
     await new Promise((resolve) => setTimeout(resolve, req.delayMs));
   }

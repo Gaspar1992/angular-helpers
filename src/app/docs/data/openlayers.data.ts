@@ -23,7 +23,12 @@ export const OPENLAYERS_SERVICES: ServiceDoc[] = [
         defaultValue: '[0, 0]',
         description: 'Initial map center as [longitude, latitude]',
       },
-      { name: 'zoom', type: 'number', defaultValue: '0', description: 'Initial zoom level' },
+      {
+        name: 'zoom',
+        type: 'number',
+        defaultValue: '0',
+        description: 'Initial zoom level',
+      },
       {
         name: 'rotation',
         type: 'number',
@@ -43,7 +48,11 @@ export const OPENLAYERS_SERVICES: ServiceDoc[] = [
         type: 'ViewState',
         description: 'Emitted when the view changes (center, zoom, or rotation)',
       },
-      { name: 'mapClick', type: 'MapClickEvent', description: 'Emitted when the map is clicked' },
+      {
+        name: 'mapClick',
+        type: 'MapClickEvent',
+        description: 'Emitted when the map is clicked',
+      },
       {
         name: 'mapDblClick',
         type: 'MapClickEvent',
@@ -63,6 +72,131 @@ export const OPENLAYERS_SERVICES: ServiceDoc[] = [
   \`
 })
 export class MapComponent {}`,
+    guides: [
+      {
+        title: 'Interactive GIS Dashboards & Vector Layers',
+        description:
+          'This guide details how to orchestrate the modular OpenLayers components in an Angular application to construct a comprehensive GIS dashboard. We bind reactive coordinate points, handle dynamic map click events to open highly interactive overlay popups, and leverage standard controls in a standalone structure.',
+        files: [
+          {
+            name: 'gis-dashboard.component.ts',
+            language: 'ts',
+            content: `import { Component, signal, computed } from '@angular/core';
+import { 
+  OlMapComponent, 
+  OlTileLayerComponent, 
+  OlVectorLayerComponent 
+} from '@angular-helpers/openlayers';
+import { 
+  OlZoomControlComponent, 
+  OlScaleLineControlComponent 
+} from '@angular-helpers/openlayers/controls';
+import { OlPopupComponent } from '@angular-helpers/openlayers/overlays';
+import { Feature } from 'ol';
+import { Point } from 'ol/geom';
+import { Coordinate } from 'ol/coordinate';
+
+interface SensorLocation {
+  id: string;
+  name: string;
+  coords: Coordinate; // [lon, lat]
+  status: 'active' | 'warning' | 'error';
+}
+
+@Component({
+  selector: 'app-gis-dashboard',
+  standalone: true,
+  imports: [
+    OlMapComponent,
+    OlTileLayerComponent,
+    OlVectorLayerComponent,
+    OlZoomControlComponent,
+    OlScaleLineControlComponent,
+    OlPopupComponent
+  ],
+  templateUrl: './gis-dashboard.component.html'
+})
+export class GisDashboardComponent {
+  // 1. Reactive data model backing sensor coordinates
+  protected readonly sensors = signal<SensorLocation[]>([
+    { id: 's1', name: 'Barceloneta Sensor Alpha', coords: [2.1895, 41.3784], status: 'active' },
+    { id: 's2', name: 'Gracia Climate station', coords: [2.1558, 41.4026], status: 'warning' },
+    { id: 's3', name: 'Montjuïc Flow Monitor', coords: [2.1485, 41.3639], status: 'active' }
+  ]);
+
+  // 2. Computed signal mapping the data model into OpenLayers features dynamically
+  protected readonly mapFeatures = computed(() => {
+    return this.sensors().map(sensor => {
+      const feat = new Feature({
+        geometry: new Point(sensor.coords),
+        name: sensor.name
+      });
+      // Attach metadata for identification during click events
+      feat.setId(sensor.id);
+      return feat;
+    });
+  });
+
+  protected readonly selectedCoords = signal<Coordinate | null>(null);
+  protected readonly activeSensor = signal<SensorLocation | null>(null);
+
+  onMapClick(event: any) {
+    const featureId = event.feature?.getId();
+    if (featureId) {
+      const match = this.sensors().find(s => s.id === featureId);
+      if (match) {
+        this.activeSensor.set(match);
+        this.selectedCoords.set(match.coords);
+      }
+    } else {
+      this.clearSelection();
+    }
+  }
+
+  clearSelection() {
+    this.selectedCoords.set(null);
+    this.activeSensor.set(null);
+  }
+}`,
+          },
+          {
+            name: 'gis-dashboard.component.html',
+            language: 'html',
+            content: `<div class="relative w-full h-[600px] rounded-3xl overflow-hidden shadow-lg border border-border">
+  <!-- 1. Root Map Component: sets view, center, zoom, and projection -->
+  <ol-map [center]="[2.1734, 41.3851]" [zoom]="12" (mapClick)="onMapClick($event)">
+    <!-- 2. Base Satellite/Tile Layer -->
+    <ol-tile-layer source="osm" />
+
+    <!-- 3. Reactive Vector Layer: renders dynamic feature points -->
+    <ol-vector-layer id="sensors" [features]="mapFeatures()" />
+
+    <!-- 4. Interactive Overlay Popup: displays detail card on feature click -->
+    <ol-popup [position]="selectedCoords()" [autoPan]="true" [closeButton]="true" (closed)="clearSelection()">
+      @if (activeSensor(); as sensor) {
+        <div class="p-4 bg-base-100 rounded-2xl shadow-xl flex flex-col gap-2 min-w-[200px]">
+          <h4 class="font-black text-base">{{ sensor.name }}</h4>
+          <p class="text-xs text-base-content/60">Status: 
+            <span class="badge badge-sm" 
+                  [class.badge-success]="sensor.status === 'active'"
+                  [class.badge-warning]="sensor.status === 'warning'">
+              {{ sensor.status }}
+            </span>
+          </p>
+          <p class="text-[10px] font-mono">Lon: {{ sensor.coords[0] }} <br> Lat: {{ sensor.coords[1] }}</p>
+        </div>
+      }
+    </ol-popup>
+
+    <!-- 5. Map Controls -->
+    <ol-zoom-control />
+    <ol-scale-line-control unit="metric" />
+  </ol-map>
+</div>`,
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'tile-layer',
@@ -76,9 +210,21 @@ export class MapComponent {}`,
     notes: ['Default source is OpenStreetMap', 'Supports custom XYZ and WMS sources via inputs.'],
     category: 'ol-layers',
     inputs: [
-      { name: 'id', type: 'string', description: 'Unique identifier for the layer (required)' },
-      { name: 'source', type: "'osm' | 'xyz' | 'wms'", description: 'Tile source type (required)' },
-      { name: 'url', type: 'string', description: 'URL template for XYZ or WMS sources' },
+      {
+        name: 'id',
+        type: 'string',
+        description: 'Unique identifier for the layer (required)',
+      },
+      {
+        name: 'source',
+        type: "'osm' | 'xyz' | 'wms'",
+        description: 'Tile source type (required)',
+      },
+      {
+        name: 'url',
+        type: 'string',
+        description: 'URL template for XYZ or WMS sources',
+      },
       {
         name: 'attributions',
         type: 'string | string[]',
@@ -89,8 +235,18 @@ export class MapComponent {}`,
         type: 'Record<string, unknown>',
         description: 'Additional parameters for WMS sources',
       },
-      { name: 'zIndex', type: 'number', defaultValue: '0', description: 'Layer stacking order' },
-      { name: 'opacity', type: 'number', defaultValue: '1', description: 'Layer opacity (0-1)' },
+      {
+        name: 'zIndex',
+        type: 'number',
+        defaultValue: '0',
+        description: 'Layer stacking order',
+      },
+      {
+        name: 'opacity',
+        type: 'number',
+        defaultValue: '1',
+        description: 'Layer opacity (0-1)',
+      },
       {
         name: 'visible',
         type: 'boolean',
@@ -133,15 +289,29 @@ export class MapComponent {}`,
     ],
     category: 'ol-layers',
     inputs: [
-      { name: 'id', type: 'string', description: 'Unique identifier for the layer (required)' },
+      {
+        name: 'id',
+        type: 'string',
+        description: 'Unique identifier for the layer (required)',
+      },
       {
         name: 'features',
         type: 'Feature[]',
         defaultValue: '[]',
         description: 'Array of features to display',
       },
-      { name: 'zIndex', type: 'number', defaultValue: '0', description: 'Layer stacking order' },
-      { name: 'opacity', type: 'number', defaultValue: '1', description: 'Layer opacity (0-1)' },
+      {
+        name: 'zIndex',
+        type: 'number',
+        defaultValue: '0',
+        description: 'Layer stacking order',
+      },
+      {
+        name: 'opacity',
+        type: 'number',
+        defaultValue: '1',
+        description: 'Layer opacity (0-1)',
+      },
       {
         name: 'visible',
         type: 'boolean',
@@ -370,23 +540,47 @@ export class MapComponent {}`,
     ],
     category: 'ol-layers',
     inputs: [
-      { name: 'id', type: 'string', description: 'Unique identifier for the layer (required)' },
+      {
+        name: 'id',
+        type: 'string',
+        description: 'Unique identifier for the layer (required)',
+      },
       {
         name: 'features',
         type: 'Feature[]',
         defaultValue: '[]',
         description: 'Array of features to display',
       },
-      { name: 'zIndex', type: 'number', defaultValue: '0', description: 'Layer stacking order' },
-      { name: 'opacity', type: 'number', defaultValue: '1', description: 'Layer opacity (0-1)' },
+      {
+        name: 'zIndex',
+        type: 'number',
+        defaultValue: '0',
+        description: 'Layer stacking order',
+      },
+      {
+        name: 'opacity',
+        type: 'number',
+        defaultValue: '1',
+        description: 'Layer opacity (0-1)',
+      },
       {
         name: 'visible',
         type: 'boolean',
         defaultValue: 'true',
         description: 'Whether the layer is visible',
       },
-      { name: 'blur', type: 'number', defaultValue: '15', description: 'Blur size' },
-      { name: 'radius', type: 'number', defaultValue: '8', description: 'Radius size' },
+      {
+        name: 'blur',
+        type: 'number',
+        defaultValue: '15',
+        description: 'Blur size',
+      },
+      {
+        name: 'radius',
+        type: 'number',
+        defaultValue: '8',
+        description: 'Radius size',
+      },
       {
         name: 'radiusUnit',
         type: "'pixels' | 'meters'",
@@ -451,7 +645,11 @@ export class MapComponent {}`,
         defaultValue: 'true',
         description: 'Whether to show the clustered feature count',
       },
-      { name: 'featureStyle', type: 'Style', description: 'Custom style for the cluster markers' },
+      {
+        name: 'featureStyle',
+        type: 'Style',
+        description: 'Custom style for the cluster markers',
+      },
       {
         name: 'spiderfyOnSelect',
         type: 'boolean',
@@ -635,9 +833,21 @@ export class MapComponent {}`,
     ],
     category: 'ol-layers',
     inputs: [
-      { name: 'id', type: 'string', description: 'Unique identifier for the layer (required)' },
-      { name: 'source', type: "'osm' | 'xyz' | 'mvt'", description: 'Tile source type (required)' },
-      { name: 'url', type: 'string', description: 'URL template for custom tile sources' },
+      {
+        name: 'id',
+        type: 'string',
+        description: 'Unique identifier for the layer (required)',
+      },
+      {
+        name: 'source',
+        type: "'osm' | 'xyz' | 'mvt'",
+        description: 'Tile source type (required)',
+      },
+      {
+        name: 'url',
+        type: 'string',
+        description: 'URL template for custom tile sources',
+      },
       {
         name: 'attributions',
         type: 'string | string[]',
@@ -648,9 +858,24 @@ export class MapComponent {}`,
         type: 'WebGLTileStyle | FlatStyleLike',
         description: 'Raster style expressions or MVT flat styles',
       },
-      { name: 'zIndex', type: 'number', defaultValue: '0', description: 'Layer stack order' },
-      { name: 'opacity', type: 'number', defaultValue: '1', description: 'Layer opacity (0-1)' },
-      { name: 'visible', type: 'boolean', defaultValue: 'true', description: 'Layer visibility' },
+      {
+        name: 'zIndex',
+        type: 'number',
+        defaultValue: '0',
+        description: 'Layer stack order',
+      },
+      {
+        name: 'opacity',
+        type: 'number',
+        defaultValue: '1',
+        description: 'Layer opacity (0-1)',
+      },
+      {
+        name: 'visible',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Layer visibility',
+      },
       {
         name: 'preload',
         type: 'number',
@@ -691,7 +916,11 @@ export class MapComponent {}`,
     ],
     category: 'ol-layers',
     inputs: [
-      { name: 'id', type: 'string', description: 'Unique identifier for the layer (required)' },
+      {
+        name: 'id',
+        type: 'string',
+        description: 'Unique identifier for the layer (required)',
+      },
       {
         name: 'features',
         type: 'Feature[]',
@@ -703,9 +932,24 @@ export class MapComponent {}`,
         type: 'FlatStyleLike',
         description: 'WebGL flat style declaration (required)',
       },
-      { name: 'zIndex', type: 'number', defaultValue: '0', description: 'Layer stack order' },
-      { name: 'opacity', type: 'number', defaultValue: '1', description: 'Layer opacity (0-1)' },
-      { name: 'visible', type: 'boolean', defaultValue: 'true', description: 'Layer visibility' },
+      {
+        name: 'zIndex',
+        type: 'number',
+        defaultValue: '0',
+        description: 'Layer stack order',
+      },
+      {
+        name: 'opacity',
+        type: 'number',
+        defaultValue: '1',
+        description: 'Layer opacity (0-1)',
+      },
+      {
+        name: 'visible',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Layer visibility',
+      },
       {
         name: 'disableHitDetection',
         type: 'boolean',
@@ -1059,6 +1303,163 @@ export class MapComponent {
   }
 
   tacticalStyle = this.tacticalSvc.createFrontLineStyle('#4f46e5', 'friendly');
+}`,
+  },
+  {
+    id: 'time-service',
+    name: 'OlTimeService',
+    description:
+      'Service providing a high-performance, off-zone animation timing loop (60FPS) using requestAnimationFrame. Essential for running smooth WebGL map animations without triggering global change detection.',
+    scope: 'provided',
+    importPath: '@angular-helpers/openlayers/core',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Executes timing loop completely outside the Angular Zone.',
+      'Exposes read-only reactive signals for current time, speed, and play state.',
+      'Bypasses global Change Detection to maintain smooth 60FPS UI performance.',
+    ],
+    category: 'ol-core',
+    inputs: [],
+    outputs: [],
+    methods: [
+      {
+        name: 'play',
+        signature: '(): void',
+        description: 'Starts the animation loop ticks.',
+        returns: 'void',
+      },
+      {
+        name: 'pause',
+        signature: '(): void',
+        description: 'Pauses the animation loop ticks.',
+        returns: 'void',
+      },
+      {
+        name: 'stop',
+        signature: '(resetTime?: number): void',
+        description:
+          'Stops the animation loop and resets the time signal to the specified epoch timestamp (defaults to Date.now()).',
+        returns: 'void',
+      },
+      {
+        name: 'setTime',
+        signature: '(time: number): void',
+        description: 'Sets the current timeline epoch timestamp manually.',
+        returns: 'void',
+      },
+      {
+        name: 'setSpeed',
+        signature: '(speed: number): void',
+        description: 'Sets the animation play speed multiplier.',
+        returns: 'void',
+      },
+    ],
+    example: `import { OlTimeService } from '@angular-helpers/openlayers/core';
+
+@Component({
+  template: \`
+    <ol-map>
+      <ol-tile-layer source="osm" />
+    </ol-map>
+  \`
+})
+export class MapComponent {
+  private timeService = inject(OlTimeService);
+
+  startAnimation() {
+    this.timeService.setTime(1700000000000);
+    this.timeService.setSpeed(60); // 60x real time
+    this.timeService.play();
+  }
+}`,
+  },
+  {
+    id: 'timeline-control',
+    name: 'OlTimelineComponent',
+    description:
+      'A visual playback and scrubbing control for time-series maps. Sleek glassmorphic theme designed specifically to orchestrate animations reactively through <code>OlTimeService</code>.',
+    scope: 'component',
+    importPath: '@angular-helpers/openlayers/controls',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Zero reliance on CommonModule or FormsModule for maximum performance.',
+      'Direct range tracking with native elements bypasses heavy forms change detection cycles.',
+      'Can be aligned at any corner or center of the viewport.',
+    ],
+    category: 'ol-controls',
+    inputs: [
+      {
+        name: 'startTime',
+        type: 'number',
+        description: 'Start bounds of time-series in Epoch milliseconds (required)',
+      },
+      {
+        name: 'endTime',
+        type: 'number',
+        description: 'End bounds of time-series in Epoch milliseconds (required)',
+      },
+      {
+        name: 'playSpeed',
+        type: 'number',
+        defaultValue: '1',
+        description: 'Initial playback speed multiplier',
+      },
+      {
+        name: 'loop',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Whether to loop animation back to startTime when reaching endTime',
+      },
+      {
+        name: 'position',
+        type: 'TimelinePosition',
+        defaultValue: "'bottom-center'",
+        description: 'Alignment of the timeline control box on the map layout',
+      },
+      {
+        name: 'formatLabel',
+        type: '(time: number) => string',
+        defaultValue: '(t) => new Date(t).toLocaleString()',
+        description: 'Custom formatter callback for the displayed time label',
+      },
+    ],
+    outputs: [
+      {
+        name: 'timeChange',
+        type: 'number',
+        description: 'Emitted with the current epoch timestamp as the time advances or scrubs',
+      },
+      {
+        name: 'playStateChange',
+        type: 'boolean',
+        description: 'Emitted with active state when play/pause is toggled',
+      },
+    ],
+    methods: [],
+    example: `import { OlTimelineComponent } from '@angular-helpers/openlayers/controls';
+
+@Component({
+  imports: [OlMapComponent, OlTileLayerComponent, OlTimelineComponent],
+  template: \`
+    <ol-map [center]="[2.17, 41.38]" [zoom]="12">
+      <ol-tile-layer source="osm" />
+      
+      <ol-timeline
+        [startTime]="1700000000000"
+        [endTime]="1700086400000"
+        [playSpeed]="60"
+        [loop]="true"
+        position="bottom-center"
+        (timeChange)="onTimeChange($event)" />
+    </ol-map>
+  \`
+})
+export class MapComponent {
+  onTimeChange(currentTime: number) {
+    console.log('Current animation time:', currentTime);
+  }
 }`,
   },
 ];

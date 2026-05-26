@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 import { detectTransferables } from './detect-transferables';
 import { WorkerHttpAbortError } from './worker-http-abort-error';
@@ -78,6 +78,115 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
   const transferDetection = config.transferDetection ?? 'none';
   const streamsPolyfill = config.streamsPolyfill ?? false;
   let polyfillLoaded = false;
+  let deserializeFn: ((port: MessagePort) => ReadableStream) | null = null;
+
+  // Active requests mapped by request ID to track execution routing per instance
+  const activeRequests = new Map<
+    string,
+    { subscriber: any; instance: TransportPort; cleanup: () => void }
+  >();
+
+  const statusSubject = new BehaviorSubject<'healthy' | 'degraded' | 'unsupported'>(
+    typeof Worker === 'undefined' ? 'unsupported' : 'healthy',
+  );
+
+  // Heartbeat monitoring schedules
+  const heartbeatIntervals = new Map<TransportPort, ReturnType<typeof setInterval>>();
+  const heartbeatTimeouts = new Map<TransportPort, ReturnType<typeof setTimeout>>();
+
+  function startHeartbeat(instance: TransportPort) {
+    const interval = config.heartbeatInterval ?? 0;
+    if (interval <= 0) return;
+
+    const timeoutMs = config.heartbeatTimeout ?? 2000;
+
+    const pongListener = (event: MessageEvent) => {
+      const data = event.data ?? {};
+      if (data.type === 'pong') {
+        const timeoutHandle = heartbeatTimeouts.get(instance);
+        if (timeoutHandle) {
+          clearTimeout(timeoutHandle);
+          heartbeatTimeouts.delete(instance);
+        }
+        if (statusSubject.value === 'degraded') {
+          statusSubject.next('healthy');
+        }
+      }
+    };
+    instance.addEventListener('message', pongListener);
+
+    const errorCrashListener = (event: ErrorEvent) => {
+      handleInstanceCrash(
+        instance,
+        new Error(event.message ?? 'Worker exited with execution error'),
+      );
+    };
+    instance.addEventListener('error', errorCrashListener);
+
+    const intervalHandle = setInterval(() => {
+      if (heartbeatTimeouts.has(instance)) return;
+
+      const pingRequestId = crypto.randomUUID();
+
+      const timeoutHandle = setTimeout(() => {
+        handleInstanceCrash(
+          instance,
+          new Error('Web Worker heartbeat timeout (possible OOM crash)'),
+        );
+      }, timeoutMs);
+
+      heartbeatTimeouts.set(instance, timeoutHandle);
+      instance.postMessage({ type: 'ping', requestId: pingRequestId });
+    }, interval);
+
+    heartbeatIntervals.set(instance, intervalHandle);
+
+    // Save listeners onto instance to clean them up on teardown
+    (instance as any)._pongListener = pongListener;
+    (instance as any)._errorCrashListener = errorCrashListener;
+  }
+
+  function handleInstanceCrash(instance: TransportPort, error: Error) {
+    statusSubject.next('degraded');
+    try {
+      if (instance.terminate) {
+        instance.terminate();
+      }
+    } catch {
+      /* ignore */
+    }
+
+    const intervalHandle = heartbeatIntervals.get(instance);
+    if (intervalHandle) {
+      clearInterval(intervalHandle);
+      heartbeatIntervals.delete(instance);
+    }
+    const timeoutHandle = heartbeatTimeouts.get(instance);
+    if (timeoutHandle) {
+      clearTimeout(timeoutHandle);
+      heartbeatTimeouts.delete(instance);
+    }
+
+    if ((instance as any)._pongListener) {
+      instance.removeEventListener('message', (instance as any)._pongListener);
+    }
+    if ((instance as any)._errorCrashListener) {
+      instance.removeEventListener('error', (instance as any)._errorCrashListener);
+    }
+
+    const idx = instances.indexOf(instance);
+    if (idx !== -1) {
+      instances.splice(idx, 1);
+    }
+
+    // Fail all active subscriptions routed to this dead instance
+    for (const [requestId, req] of activeRequests.entries()) {
+      if (req.instance === instance) {
+        req.cleanup();
+        req.subscriber.error(error);
+      }
+    }
+  }
 
   function createInstance(index: number): TransportPort {
     let worker: Worker | SharedWorker;
@@ -116,6 +225,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
         instance.postMessage(config.initMessage);
       }
       instances.push(instance);
+      startHeartbeat(instance);
       return instance;
     }
     const instance = instances[roundRobinIndex % instances.length];
@@ -163,6 +273,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
           externalSignal.removeEventListener('abort', abortListener);
           abortListener = undefined;
         }
+        activeRequests.delete(requestId);
       };
 
       const handleResponse = (data: WorkerResponse<TResponse> | WorkerErrorResponse) => {
@@ -174,6 +285,16 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
         if (data.type === 'error') {
           subscriber.error(new Error(data.error.message));
         } else {
+          if (deserializeFn && data.result && typeof data.result === 'object') {
+            const resObj = data.result as any;
+            if (
+              resObj.body &&
+              typeof resObj.body === 'object' &&
+              resObj.body.__isStreamPolyfillPort
+            ) {
+              resObj.body = deserializeFn(resObj.body.port);
+            }
+          }
           subscriber.next(data.result);
           subscriber.complete();
         }
@@ -200,6 +321,16 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
 
       instance.addEventListener('message', messageHandler);
       instance.addEventListener('error', errorHandler);
+
+      // Register this active request
+      activeRequests.set(requestId, {
+        subscriber,
+        instance,
+        cleanup: () => {
+          settled = true;
+          cleanup();
+        },
+      });
 
       if (transferDetection === 'auto') {
         const transferables = detectTransferables(request);
@@ -245,11 +376,12 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
     }
 
     try {
-      const { needsPolyfill, ponyfillStreams } =
+      const { needsPolyfill, ponyfillStreams, deserializePortToStream } =
         await import('@angular-helpers/worker-http/streams-polyfill');
 
       if (needsPolyfill()) {
         await ponyfillStreams();
+        deserializeFn = deserializePortToStream;
       }
 
       polyfillLoaded = true;
@@ -262,11 +394,25 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
   function terminate(): void {
     terminated = true;
     for (const instance of instances) {
-      if (instance.terminate) {
-        instance.terminate();
+      const intervalHandle = heartbeatIntervals.get(instance);
+      if (intervalHandle) clearInterval(intervalHandle);
+      const timeoutHandle = heartbeatTimeouts.get(instance);
+      if (timeoutHandle) clearTimeout(timeoutHandle);
+
+      try {
+        if (instance.terminate) instance.terminate();
+      } catch {
+        /* ignore */
       }
     }
     instances.length = 0;
+    heartbeatIntervals.clear();
+    heartbeatTimeouts.clear();
+
+    for (const [requestId, req] of activeRequests.entries()) {
+      req.cleanup();
+    }
+    activeRequests.clear();
   }
 
   return {
@@ -278,5 +424,6 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
     get activeInstances() {
       return instances.length;
     },
+    status$: statusSubject.asObservable(),
   };
 }

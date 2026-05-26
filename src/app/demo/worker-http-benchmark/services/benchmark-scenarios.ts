@@ -13,6 +13,8 @@ export interface ScenarioRequestSpec {
   delayMs: number;
   /** Synchronous CPU burn inside the "server" — simulates parsing/serialization. */
   cpuBurnMs: number;
+  /** Progressive chunk-by-chunk streaming response. */
+  streaming?: boolean;
 }
 
 export interface BenchmarkScenario {
@@ -67,5 +69,14 @@ export const SCENARIOS: readonly BenchmarkScenario[] = [
     requestCount: 20,
     request: { payloadBytes: 4096, delayMs: 30, cpuBurnMs: 20 },
     mainThreadCpuBurnMs: 500,
+  },
+  {
+    id: 'heavy-streaming',
+    title: 'Large Dataset Streaming (10MB)',
+    description:
+      'Zero memory block: progressively streams a 10MB dataset in chunks with simulated latency.',
+    mode: 'sequential',
+    requestCount: 1,
+    request: { payloadBytes: 10 * 1024 * 1024, delayMs: 200, cpuBurnMs: 0, streaming: true },
   },
 ];

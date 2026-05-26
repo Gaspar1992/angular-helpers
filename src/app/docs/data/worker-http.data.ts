@@ -341,6 +341,72 @@ export class DataService {
     return this.http.get('/api/secure/payments', { worker: 'secure' });
   }
 }`,
+    guides: [
+      {
+        title: 'Thread-Isolated Request Pipelines & HMAC-SHA256 Signing',
+        description: `This guide details how to construct a custom request pipeline inside the HTTP Web Worker to offload heavy network operations, response caching, and complex cryptographic signatures (HMAC-SHA256) off the main thread.
+
+This design secures key material in background threads (preventing XSS access) and ensures the UI thread stays completely interactive at 60 FPS during heavy calculations.`,
+        code: `// 1. In-Worker Pipeline: workers/api.worker.ts
+import { createWorkerPipeline } from '@angular-helpers/worker-http/interceptors';
+import { 
+  loggingInterceptor, 
+  cacheInterceptor, 
+  hmacSigningInterceptor 
+} from '@angular-helpers/worker-http/interceptors';
+
+// Raw HMAC key material is only loaded inside the worker's sandboxed environment.
+// This prevents cross-site scripting (XSS) in the main thread from reading secret keys.
+const rawKey = new TextEncoder().encode('production-api-secret-key-that-must-remain-confidential');
+
+createWorkerPipeline([
+  loggingInterceptor({ level: 'info' }),
+  
+  // 1. In-Worker micro-caching (prevents duplicate rapid requests)
+  cacheInterceptor({
+    ttl: 30000, // Cache GETs for 30s
+    maxEntries: 50
+  }),
+  
+  // 2. Automatic Cryptographic Request Signing
+  hmacSigningInterceptor({
+    keyMaterial: rawKey,
+    algorithm: 'SHA-256',
+    headerName: 'X-API-Signature',
+    payloadBuilder: (req) => \`\${req.method}:\${req.url}:\${req.body || ''}\`
+  })
+]);
+
+// 2. Main App Configuration: app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { 
+  provideWorkerHttpClient, 
+  withWorkerConfigs, 
+  withWorkerRoutes, 
+  withWorkerFallback 
+} from '@angular-helpers/worker-http/backend';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideWorkerHttpClient(
+      // Configure pool of background worker instances
+      withWorkerConfigs([
+        {
+          id: 'api-worker',
+          workerUrl: new URL('./workers/api.worker', import.meta.url),
+          maxInstances: 2 // Round-robin load-balanced instances
+        }
+      ]),
+      // Declarative pattern matching routing
+      withWorkerRoutes([
+        { pattern: /\\/api\\//, worker: 'api-worker' }
+      ]),
+      withWorkerFallback('main-thread') // Graceful SSR fallback
+    )
+  ]
+};`,
+      },
+    ],
   },
   {
     id: 'crypto',

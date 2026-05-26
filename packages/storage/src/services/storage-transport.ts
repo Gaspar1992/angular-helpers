@@ -1,5 +1,4 @@
-import { InjectionToken } from '@angular/core';
-import { StorageSignalOptions } from '../interfaces/storage.types';
+import { StorageSignalOptions } from '../interfaces/storage-options.types';
 
 export interface StorageTransport {
   /**
@@ -23,8 +22,3 @@ export interface StorageTransport {
    */
   onChange?<T>(key: string, callback: (value: T) => void): () => void;
 }
-
-/**
- * Injection Token for the active Storage Transport
- */
-export const STORAGE_TRANSPORT = new InjectionToken<StorageTransport>('STORAGE_TRANSPORT');
