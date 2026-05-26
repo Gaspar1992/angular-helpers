@@ -62,6 +62,11 @@ export function attachPortLoop(port: MessagePort | any, chain: RequestHandler): 
   const processMessage = async (msg: any) => {
     const { type, requestId, payload } = msg;
 
+    if (type === 'ping') {
+      port.postMessage({ type: 'pong', requestId });
+      return;
+    }
+
     if (type === 'cancel') {
       controllers.get(requestId)?.abort();
       controllers.delete(requestId);
