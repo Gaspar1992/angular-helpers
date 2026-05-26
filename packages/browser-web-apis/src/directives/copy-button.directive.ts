@@ -12,8 +12,7 @@ import { ClipboardService } from '../services/clipboard.service';
 export class CopyButtonDirective implements OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly renderer = inject(Renderer2);
-  private readonly clipboardService =
-    inject(ClipboardService, { optional: true }) || new ClipboardService();
+  private readonly clipboardService = inject(ClipboardService);
 
   readonly copyText = input<string>('');
   readonly copySuccessMessage = input<string>('Copiado al portapapeles con éxito');

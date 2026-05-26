@@ -28,7 +28,7 @@ export function injectSpeechRecognition(): SpeechRecognitionRef {
   const error = signal<Error | null>(null);
 
   let subscription: any = null;
-  const service = new SpeechRecognitionService();
+  const service = inject(SpeechRecognitionService);
 
   if (isBrowser) {
     queueMicrotask(() => {

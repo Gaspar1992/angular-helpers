@@ -11,8 +11,7 @@ export type VibrateFeedbackType = 'success' | 'error' | 'notification' | 'double
   },
 })
 export class VibrateFeedbackDirective {
-  private readonly vibrationService =
-    inject(VibrationService, { optional: true }) || new VibrationService();
+  private readonly vibrationService = inject(VibrationService);
 
   readonly vibrateFeedback = input<VibrateFeedbackType | VibrationPattern>('light');
 

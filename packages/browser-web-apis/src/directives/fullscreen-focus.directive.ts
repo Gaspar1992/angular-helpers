@@ -14,8 +14,7 @@ import { Subscription } from 'rxjs';
 export class FullscreenFocusDirective implements OnInit, OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly elementRef = inject(ElementRef);
-  private readonly fullscreenService =
-    inject(FullscreenService, { optional: true }) || new FullscreenService();
+  private readonly fullscreenService = inject(FullscreenService);
 
   private isBrowser = false;
   private watchSub: Subscription | null = null;
