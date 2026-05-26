@@ -614,4 +614,120 @@ describe('createWorkerTransport', () => {
 
     await expect(collect).resolves.toEqual([{ a: 1 }]);
   });
+
+  describe('heartbeat and resilience', () => {
+    it('sends periodic pings when heartbeatInterval is set', () => {
+      vi.useFakeTimers();
+      const transport = createWorkerTransport({
+        workerFactory: makeFactory(),
+        heartbeatInterval: 1000,
+        heartbeatTimeout: 500,
+      });
+
+      transport.execute({ foo: 'bar' }).subscribe();
+      const worker = FakeWorker.instances[0];
+
+      // Advance by heartbeatInterval
+      vi.advanceTimersByTime(1000);
+
+      const ping = worker.postedMessages.find((m) => (m.message as any).type === 'ping');
+      expect(ping).toBeDefined();
+    });
+
+    it('clears heartbeat timeout when pong is received', () => {
+      vi.useFakeTimers();
+      const transport = createWorkerTransport({
+        workerFactory: makeFactory(),
+        heartbeatInterval: 1000,
+        heartbeatTimeout: 500,
+      });
+
+      transport.execute({ foo: 'bar' }).subscribe();
+      const worker = FakeWorker.instances[0];
+
+      // Advance by heartbeatInterval to trigger ping
+      vi.advanceTimersByTime(1000);
+
+      // Respond with pong
+      worker.respond('some-ping-request-id', { type: 'pong' });
+
+      // Trigger pong listener
+      const event = { data: { type: 'pong' } } as MessageEvent;
+      (worker as any).listeners.get('message').forEach((l: any) => l(event));
+
+      // Advance by more than heartbeatTimeout - should not crash
+      vi.advanceTimersByTime(600);
+      expect(transport.isActive).toBe(true);
+    });
+
+    it('fails active requests and replaces worker on heartbeat timeout (OOM mock)', async () => {
+      vi.useFakeTimers();
+      const transport = createWorkerTransport({
+        workerFactory: makeFactory(),
+        heartbeatInterval: 1000,
+        heartbeatTimeout: 500,
+      });
+
+      const promise = firstValueFrom(transport.execute({ slow: true }));
+      const worker1 = FakeWorker.instances[0];
+
+      // Trigger ping
+      vi.advanceTimersByTime(1000);
+
+      // Do NOT respond with pong, let heartbeatTimeout expire
+      vi.advanceTimersByTime(501);
+
+      // The active request must be failed with a crash error
+      await expect(promise).rejects.toThrow('Web Worker heartbeat timeout (possible OOM crash)');
+
+      // The crashed worker must be terminated
+      expect(worker1.terminated).toBe(true);
+
+      // Spawning a new request should create a fresh healthy worker
+      const nextPromise = firstValueFrom(transport.execute({ next: true }));
+      expect(FakeWorker.instances).toHaveLength(2);
+      const worker2 = FakeWorker.instances[1];
+      expect(worker2).not.toBe(worker1);
+
+      worker2.respond(worker2.lastRequest!.requestId, 'recovered');
+      await expect(nextPromise).resolves.toBe('recovered');
+    });
+
+    it('updates status$ to degraded on crash and back to healthy on pong', async () => {
+      vi.useFakeTimers();
+      const transport = createWorkerTransport({
+        workerFactory: makeFactory(),
+        heartbeatInterval: 1000,
+        heartbeatTimeout: 500,
+      });
+
+      const states: string[] = [];
+      const sub = transport.status$.subscribe((s) => states.push(s));
+
+      expect(states).toEqual(['healthy']);
+
+      // Trigger a request to spin up the worker
+      const promise = firstValueFrom(transport.execute({ test: true }));
+
+      // Advance to trigger ping and let heartbeat expire to OOM
+      vi.advanceTimersByTime(1501);
+
+      await expect(promise).rejects.toThrow();
+      expect(states).toEqual(['healthy', 'degraded']);
+
+      // Spawning a new request should create a fresh healthy worker
+      const nextPromise = firstValueFrom(transport.execute({ next: true }));
+      const worker2 = FakeWorker.instances[1];
+
+      // Advance by 1000ms to trigger a new ping
+      vi.advanceTimersByTime(1000);
+
+      // Trigger a pong response on worker2
+      const event = { data: { type: 'pong' } } as MessageEvent;
+      (worker2 as any).listeners.get('message').forEach((l: any) => l(event));
+
+      expect(states).toEqual(['healthy', 'degraded', 'healthy']);
+      sub.unsubscribe();
+    });
+  });
 });

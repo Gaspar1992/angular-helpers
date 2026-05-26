@@ -55,10 +55,30 @@ export class LocalStorageTransport implements StorageTransport {
     }
   }
 
-  async read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined> {
-    if (this.workerTransport) {
-      return this.workerTransport.read<T>(key, options);
+  private hasWarnedAboutPassphrase = false;
+
+  private warnOnDefaultPassphrase() {
+    if (this.hasWarnedAboutPassphrase) return;
+
+    const isDefault =
+      this.secretPassphrase === 'fallback-passphrase-angular-helpers-default-key-sec' ||
+      this.secretPassphrase === 'angular-helpers-secure-storage-passphrase';
+
+    if (isDefault) {
+      this.hasWarnedAboutPassphrase = true;
+      // oxlint-disable-next-line no-console
+      console.warn(
+        `[LocalStorageTransport] WARNING: Encryption is enabled, but you are using a public or default fallback passphrase. ` +
+          `This is a severe security risk as anyone can easily decrypt your stored local data. ` +
+          `Please configure a custom passphrase by providing SECURE_STORAGE_PASSPHRASE in your application configuration:\n\n` +
+          `providers: [\n` +
+          `  { provide: SECURE_STORAGE_PASSPHRASE, useValue: 'YOUR_CUSTOM_SECURE_PASSPHRASE' }\n` +
+          `]`,
+      );
     }
+  }
+
+  async read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined> {
     const mergedOptions = {
       storageType: this.storageType,
       dbName: this.dbName,
@@ -67,16 +87,19 @@ export class LocalStorageTransport implements StorageTransport {
       encrypt: this.encrypt,
       ...options,
     } as StorageSignalOptions;
+
+    if (mergedOptions.encrypt) {
+      this.warnOnDefaultPassphrase();
+    }
+
+    if (this.workerTransport) {
+      return this.workerTransport.read<T>(key, mergedOptions);
+    }
     const transport = this.resolveTransport(mergedOptions.storageType);
     return transport.read<T>(key, mergedOptions);
   }
 
   async write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void> {
-    if (this.workerTransport) {
-      await this.workerTransport.write<T>(key, data, options);
-      this.broadcastChannel?.postMessage({ type: 'write', key });
-      return;
-    }
     const mergedOptions = {
       storageType: this.storageType,
       dbName: this.dbName,
@@ -85,17 +108,22 @@ export class LocalStorageTransport implements StorageTransport {
       encrypt: this.encrypt,
       ...options,
     } as StorageSignalOptions;
+
+    if (mergedOptions.encrypt) {
+      this.warnOnDefaultPassphrase();
+    }
+
+    if (this.workerTransport) {
+      await this.workerTransport.write<T>(key, data, mergedOptions);
+      this.broadcastChannel?.postMessage({ type: 'write', key });
+      return;
+    }
     const transport = this.resolveTransport(mergedOptions.storageType);
     await transport.write<T>(key, data, mergedOptions);
     this.broadcastChannel?.postMessage({ type: 'write', key });
   }
 
   async delete(key: string, options?: StorageSignalOptions): Promise<void> {
-    if (this.workerTransport) {
-      await this.workerTransport.delete(key, options);
-      this.broadcastChannel?.postMessage({ type: 'delete', key });
-      return;
-    }
     const mergedOptions = {
       storageType: this.storageType,
       dbName: this.dbName,
@@ -103,6 +131,12 @@ export class LocalStorageTransport implements StorageTransport {
       cacheName: this.cacheName,
       ...options,
     } as StorageSignalOptions;
+
+    if (this.workerTransport) {
+      await this.workerTransport.delete(key, mergedOptions);
+      this.broadcastChannel?.postMessage({ type: 'delete', key });
+      return;
+    }
     const transport = this.resolveTransport(mergedOptions.storageType);
     await transport.delete(key, mergedOptions);
     this.broadcastChannel?.postMessage({ type: 'delete', key });

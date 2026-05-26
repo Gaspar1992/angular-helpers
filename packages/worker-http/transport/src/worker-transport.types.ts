@@ -77,6 +77,19 @@ export interface WorkerTransportConfig {
   requestTimeout?: number;
 
   /**
+   * Interval in milliseconds for sending heartbeat pings to Web Workers.
+   * If `<= 0` or omitted, heartbeat monitoring is disabled.
+   * @default 0
+   */
+  heartbeatInterval?: number;
+
+  /**
+   * Timeout in milliseconds to wait for a heartbeat pong before declaring the worker crashed/OOM.
+   * @default 2000
+   */
+  heartbeatTimeout?: number;
+
+  /**
    * Optional handshake message posted to every worker as soon as it is
    * created, BEFORE any request. Useful to ship runtime configuration
    * (e.g. interceptor specs) that the worker uses to build its pipeline.
@@ -100,7 +113,7 @@ export interface WorkerTransportConfig {
  * Message sent from main thread to worker.
  */
 export interface WorkerMessage<TPayload = unknown> {
-  type: 'request' | 'cancel';
+  type: 'request' | 'cancel' | 'ping';
   requestId: string;
   payload?: TPayload;
   transferables?: Transferable[];
@@ -118,7 +131,7 @@ export interface WorkerBatchMessage {
  * Successful response from worker to main thread.
  */
 export interface WorkerResponse<TResult = unknown> {
-  type: 'response';
+  type: 'response' | 'pong';
   requestId: string;
   result: TResult;
   transferables?: Transferable[];
@@ -177,4 +190,7 @@ export interface WorkerTransport<TRequest = unknown, TResponse = unknown> {
 
   /** Number of currently active worker instances */
   readonly activeInstances: number;
+
+  /** Observable exposing the status of the worker pool health */
+  readonly status$: Observable<'healthy' | 'degraded' | 'unsupported'>;
 }
