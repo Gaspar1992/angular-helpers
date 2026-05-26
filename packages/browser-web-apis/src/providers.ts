@@ -23,6 +23,7 @@ import { MediaRecorderService } from './services/media-recorder.service';
 import { ServerSentEventsService } from './services/server-sent-events.service';
 import { VibrationService } from './services/vibration.service';
 import { SpeechSynthesisService } from './services/speech-synthesis.service';
+import { SpeechRecognitionService } from './services/speech-recognition.service';
 import { MutationObserverService } from './services/mutation-observer.service';
 import { PerformanceObserverService } from './services/performance-observer.service';
 import { WebAudioService } from './services/web-audio.service';
@@ -56,6 +57,7 @@ export { provideFullscreen } from './providers/fullscreen';
 export { provideServerSentEvents } from './providers/server-sent-events';
 export { provideVibration } from './providers/vibration';
 export { provideSpeechSynthesis } from './providers/speech-synthesis';
+export { provideSpeechRecognition } from './providers/speech-recognition';
 export { provideMutationObserver } from './providers/mutation-observer';
 export { providePerformanceObserver } from './providers/performance-observer';
 export { provideWebAudio } from './providers/web-audio';
@@ -112,6 +114,7 @@ export interface BrowserWebApisConfig extends BrowserWebApisCompositionConfig {
   enableServerSentEvents?: boolean;
   enableVibration?: boolean;
   enableSpeechSynthesis?: boolean;
+  enableSpeechRecognition?: boolean;
   enableMutationObserver?: boolean;
   enablePerformanceObserver?: boolean;
   enableWebAudio?: boolean;
@@ -146,6 +149,7 @@ export const defaultBrowserWebApisConfig: BrowserWebApisConfig = {
   enableServerSentEvents: false,
   enableVibration: false,
   enableSpeechSynthesis: false,
+  enableSpeechRecognition: false,
   enableMutationObserver: false,
   enablePerformanceObserver: false,
   enableWebAudio: false,
@@ -215,6 +219,7 @@ export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): Enviro
     [mergedConfig.enableServerSentEvents, ServerSentEventsService],
     [mergedConfig.enableVibration, VibrationService],
     [mergedConfig.enableSpeechSynthesis, SpeechSynthesisService],
+    [mergedConfig.enableSpeechRecognition, SpeechRecognitionService],
     [mergedConfig.enableMutationObserver, MutationObserverService],
     [mergedConfig.enablePerformanceObserver, PerformanceObserverService],
     [mergedConfig.enableWebAudio, WebAudioService],
