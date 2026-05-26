@@ -108,7 +108,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
           clearTimeout(timeoutHandle);
           heartbeatTimeouts.delete(instance);
         }
-        if (statusSubject.value === 'degraded' && heartbeatTimeouts.size === 0) {
+        if (statusSubject.value === 'degraded') {
           statusSubject.next('healthy');
         }
       }
@@ -182,9 +182,8 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
     // Fail all active subscriptions routed to this dead instance
     for (const [requestId, req] of activeRequests.entries()) {
       if (req.instance === instance) {
-        req.subscriber.error(error);
         req.cleanup();
-        activeRequests.delete(requestId);
+        req.subscriber.error(error);
       }
     }
   }

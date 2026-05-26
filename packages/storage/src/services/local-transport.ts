@@ -93,7 +93,7 @@ export class LocalStorageTransport implements StorageTransport {
     }
 
     if (this.workerTransport) {
-      return this.workerTransport.read<T>(key, options);
+      return this.workerTransport.read<T>(key, mergedOptions);
     }
     const transport = this.resolveTransport(mergedOptions.storageType);
     return transport.read<T>(key, mergedOptions);
@@ -114,7 +114,7 @@ export class LocalStorageTransport implements StorageTransport {
     }
 
     if (this.workerTransport) {
-      await this.workerTransport.write<T>(key, data, options);
+      await this.workerTransport.write<T>(key, data, mergedOptions);
       this.broadcastChannel?.postMessage({ type: 'write', key });
       return;
     }
@@ -124,11 +124,6 @@ export class LocalStorageTransport implements StorageTransport {
   }
 
   async delete(key: string, options?: StorageSignalOptions): Promise<void> {
-    if (this.workerTransport) {
-      await this.workerTransport.delete(key, options);
-      this.broadcastChannel?.postMessage({ type: 'delete', key });
-      return;
-    }
     const mergedOptions = {
       storageType: this.storageType,
       dbName: this.dbName,
@@ -136,6 +131,12 @@ export class LocalStorageTransport implements StorageTransport {
       cacheName: this.cacheName,
       ...options,
     } as StorageSignalOptions;
+
+    if (this.workerTransport) {
+      await this.workerTransport.delete(key, mergedOptions);
+      this.broadcastChannel?.postMessage({ type: 'delete', key });
+      return;
+    }
     const transport = this.resolveTransport(mergedOptions.storageType);
     await transport.delete(key, mergedOptions);
     this.broadcastChannel?.postMessage({ type: 'delete', key });
