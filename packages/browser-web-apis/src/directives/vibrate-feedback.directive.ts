@@ -1,4 +1,4 @@
-import { Directive, Input, HostListener, inject } from '@angular/core';
+import { Directive, input, inject } from '@angular/core';
 import { VibrationService, type VibrationPattern } from '../services/vibration.service';
 
 export type VibrateFeedbackType = 'success' | 'error' | 'notification' | 'doubleTap' | 'light';
@@ -6,14 +6,16 @@ export type VibrateFeedbackType = 'success' | 'error' | 'notification' | 'double
 @Directive({
   selector: '[vibrateFeedback]',
   standalone: true,
+  host: {
+    '(click)': 'onClick()',
+  },
 })
 export class VibrateFeedbackDirective {
   private readonly vibrationService =
     inject(VibrationService, { optional: true }) || new VibrationService();
 
-  @Input('vibrateFeedback') feedbackType: VibrateFeedbackType | VibrationPattern = 'light';
+  readonly vibrateFeedback = input<VibrateFeedbackType | VibrationPattern>('light');
 
-  @HostListener('click')
   onClick(): void {
     this.triggerVibration();
   }
@@ -21,8 +23,9 @@ export class VibrateFeedbackDirective {
   private triggerVibration(): void {
     if (!this.vibrationService.isSupported()) return;
 
-    if (typeof this.feedbackType === 'string') {
-      switch (this.feedbackType) {
+    const feedback = this.vibrateFeedback();
+    if (typeof feedback === 'string') {
+      switch (feedback) {
         case 'success':
           this.vibrationService.success();
           break;
@@ -41,7 +44,7 @@ export class VibrateFeedbackDirective {
           break;
       }
     } else {
-      this.vibrationService.vibrate(this.feedbackType);
+      this.vibrationService.vibrate(feedback);
     }
   }
 }

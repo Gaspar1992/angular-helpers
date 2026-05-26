@@ -1,18 +1,13 @@
-import {
-  Directive,
-  Input,
-  HostListener,
-  inject,
-  OnDestroy,
-  Renderer2,
-  PLATFORM_ID,
-} from '@angular/core';
+import { Directive, input, inject, OnDestroy, Renderer2, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { ClipboardService } from '../services/clipboard.service';
 
 @Directive({
   selector: '[copyButton]',
   standalone: true,
+  host: {
+    '(click)': 'onClick()',
+  },
 })
 export class CopyButtonDirective implements OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
@@ -20,8 +15,8 @@ export class CopyButtonDirective implements OnDestroy {
   private readonly clipboardService =
     inject(ClipboardService, { optional: true }) || new ClipboardService();
 
-  @Input() copyText = '';
-  @Input() copySuccessMessage = 'Copiado al portapapeles con éxito';
+  readonly copyText = input<string>('');
+  readonly copySuccessMessage = input<string>('Copiado al portapapeles con éxito');
 
   private liveRegion: HTMLDivElement | null = null;
   private isBrowser = false;
@@ -43,13 +38,13 @@ export class CopyButtonDirective implements OnDestroy {
     }
   }
 
-  @HostListener('click')
   async onClick(): Promise<void> {
-    if (!this.isBrowser || !this.copyText) return;
+    const text = this.copyText();
+    if (!this.isBrowser || !text) return;
 
     try {
-      await this.clipboardService.writeText(this.copyText);
-      this.announce(this.copySuccessMessage);
+      await this.clipboardService.writeText(text);
+      this.announce(this.copySuccessMessage());
     } catch {
       this.announce('Error al copiar al portapapeles');
     }

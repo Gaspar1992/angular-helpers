@@ -1,8 +1,7 @@
 import {
   Directive,
   ElementRef,
-  HostListener,
-  Input,
+  input,
   OnInit,
   OnDestroy,
   inject,
@@ -18,6 +17,9 @@ import { effect } from '@angular/core';
 @Directive({
   selector: '[voiceInput]',
   standalone: true,
+  host: {
+    '(keydown)': 'handleKeyDown($event)',
+  },
 })
 export class VoiceInputDirective implements OnInit, OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
@@ -26,8 +28,8 @@ export class VoiceInputDirective implements OnInit, OnDestroy {
   private readonly ngZone = inject(NgZone);
   private readonly renderer = inject(Renderer2);
 
-  @Input() voiceLang = 'es-ES';
-  @Input() voiceHotkey = 'KeyV'; // Default is 'KeyV' triggered with Alt
+  readonly voiceLang = input<string>('es-ES');
+  readonly voiceHotkey = input<string>('KeyV'); // Default is 'KeyV' triggered with Alt
 
   private readonly speech = injectSpeechRecognition();
   private liveRegion: HTMLDivElement | null = null;
@@ -92,10 +94,9 @@ export class VoiceInputDirective implements OnInit, OnDestroy {
     }
   }
 
-  @HostListener('keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent): void {
     // Listen for Alt + hotkey combination
-    if (event.altKey && event.code === this.voiceHotkey) {
+    if (event.altKey && event.code === this.voiceHotkey()) {
       event.preventDefault();
       this.toggleSpeech();
     }
@@ -106,7 +107,7 @@ export class VoiceInputDirective implements OnInit, OnDestroy {
       this.speech.stop();
     } else {
       this.speech.start({
-        lang: this.voiceLang,
+        lang: this.voiceLang(),
         continuous: false,
         interimResults: true,
       });
@@ -114,20 +115,20 @@ export class VoiceInputDirective implements OnInit, OnDestroy {
   }
 
   private updateValue(value: string): void {
-    const input = this.elementRef.nativeElement;
+    const inputEl = this.elementRef.nativeElement;
 
     // Support standard inputs/textareas
-    const currentValue = input.value || '';
+    const currentValue = inputEl.value || '';
     const newValue = currentValue ? `${currentValue.trim()} ${value}` : value;
 
     if (this.ngControl && this.ngControl.control) {
       this.ngControl.control.setValue(newValue);
       this.ngControl.control.markAsDirty();
     } else {
-      input.value = newValue;
+      inputEl.value = newValue;
       // Dispatch input event for external integrations
       const event = new Event('input', { bubbles: true });
-      input.dispatchEvent(event);
+      inputEl.dispatchEvent(event);
     }
   }
 
@@ -150,10 +151,10 @@ export class VoiceInputDirective implements OnInit, OnDestroy {
   private announce(message: string): void {
     if (this.liveRegion) {
       this.renderer.setProperty(this.liveRegion, 'textContent', '');
+      // Delay slightly to trigger DOM updates for the screen reader
       if (this.announceTimeout) {
         clearTimeout(this.announceTimeout);
       }
-      // Delay slightly to trigger DOM updates for the screen reader
       this.announceTimeout = setTimeout(() => {
         if (this.liveRegion) {
           this.renderer.setProperty(this.liveRegion, 'textContent', message);

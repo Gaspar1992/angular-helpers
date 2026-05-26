@@ -1,12 +1,4 @@
-import {
-  Directive,
-  ElementRef,
-  HostListener,
-  inject,
-  OnDestroy,
-  OnInit,
-  PLATFORM_ID,
-} from '@angular/core';
+import { Directive, ElementRef, inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { FullscreenService } from '../services/fullscreen.service';
 import { Subscription } from 'rxjs';
@@ -14,6 +6,10 @@ import { Subscription } from 'rxjs';
 @Directive({
   selector: '[fullscreenFocus]',
   standalone: true,
+  host: {
+    '(click)': 'onClick()',
+    '(keydown)': 'handleKeyDown($event)',
+  },
 })
 export class FullscreenFocusDirective implements OnInit, OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
@@ -45,7 +41,6 @@ export class FullscreenFocusDirective implements OnInit, OnDestroy {
     }
   }
 
-  @HostListener('click')
   async onClick(): Promise<void> {
     if (this.isBrowser) {
       try {
@@ -56,7 +51,6 @@ export class FullscreenFocusDirective implements OnInit, OnDestroy {
     }
   }
 
-  @HostListener('keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent): void {
     if (!this.isFullscreenActive) return;
 
