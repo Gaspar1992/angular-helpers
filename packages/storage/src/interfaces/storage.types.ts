@@ -1,15 +1,5 @@
 import { Signal, WritableSignal } from '@angular/core';
-
-export interface StorageSignalOptions<T = any> {
-  storageType: 'local' | 'session' | 'indexeddb' | 'cacheapi';
-  serializer: 'json' | 'toon';
-  encrypt?: boolean;
-  dbName?: string; // Solo para indexeddb
-  storeName?: string; // Solo para indexeddb
-  cacheName?: string; // Solo para cacheapi
-  crossTabSync?: boolean;
-  validator?: (data: unknown) => data is T;
-}
+import { StorageSignalOptions } from './storage-options.types';
 
 export interface StorageSignalState<T> {
   data: T;

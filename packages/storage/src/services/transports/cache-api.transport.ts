@@ -1,5 +1,5 @@
 import { StorageTransport } from '../storage-transport';
-import { StorageSignalOptions } from '../../interfaces/storage.types';
+import { StorageSignalOptions } from '../../interfaces/storage-options.types';
 import { encrypt, decrypt } from '../../utils/crypto.utils';
 import { serializeData, deserializeData } from '../../utils/serialization.utils';
 import { injectPlatform } from '@angular-helpers/core';

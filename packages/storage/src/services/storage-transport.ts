@@ -1,4 +1,4 @@
-import { StorageSignalOptions } from '../interfaces/storage.types';
+import { StorageSignalOptions } from '../interfaces/storage-options.types';
 
 export interface StorageTransport {
   /**
