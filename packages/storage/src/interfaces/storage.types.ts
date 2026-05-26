@@ -1,5 +1,6 @@
 import { Signal, WritableSignal } from '@angular/core';
 import { StorageSignalOptions } from './storage-options.types';
+export type { StorageSignalOptions };
 
 export interface StorageSignalState<T> {
   data: T;
