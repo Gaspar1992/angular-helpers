@@ -40,7 +40,8 @@ export type BrowserCapabilityId =
   | 'credentialManagement'
   | 'webLocks'
   | 'storageManager'
-  | 'compressionStreams';
+  | 'compressionStreams'
+  | 'speechRecognition';
 
 const BROWSER_CAPABILITIES = [
   { id: 'permissions', label: 'Permissions API', requiresSecureContext: false },
@@ -83,6 +84,7 @@ const BROWSER_CAPABILITIES = [
   { id: 'webLocks', label: 'Web Locks API', requiresSecureContext: true },
   { id: 'storageManager', label: 'Storage Manager API', requiresSecureContext: true },
   { id: 'compressionStreams', label: 'Compression Streams API', requiresSecureContext: false },
+  { id: 'speechRecognition', label: 'Speech Recognition API', requiresSecureContext: false },
 ] as const satisfies ReadonlyArray<{
   id: BrowserCapabilityId;
   label: string;
@@ -190,6 +192,11 @@ export class BrowserCapabilityService {
       case 'compressionStreams':
         return (
           typeof CompressionStream !== 'undefined' && typeof DecompressionStream !== 'undefined'
+        );
+      case 'speechRecognition':
+        return (
+          typeof window !== 'undefined' &&
+          ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
         );
       default:
         return false;

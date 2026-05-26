@@ -92,6 +92,13 @@ export {
   type SpeechState,
   type SpeechOptions,
 } from './services/speech-synthesis.service';
+export {
+  SpeechRecognitionService,
+  type SpeechRecognitionResult,
+  type SpeechRecognitionEvent,
+  type SpeechRecognitionConfig,
+} from './services/speech-recognition.service';
+export { VoiceInputDirective } from './directives/voice-input.directive';
 
 // Tier 2 — New services
 export {
@@ -195,10 +202,23 @@ export { injectWakeLock, type WakeLockRef } from './fns/inject-wake-lock';
 export { injectEyeDropper, type EyeDropperRef } from './fns/inject-eye-dropper';
 export { injectIdleDetector, type IdleDetectorRef } from './fns/inject-idle-detector';
 export { injectBarcodeDetector, type BarcodeDetectorRef } from './fns/inject-barcode-detector';
+export {
+  injectSpeechRecognition,
+  type SpeechRecognitionRef,
+} from './fns/inject-speech-recognition';
 
 // Utils and Guards
 export * from './utils/browser-support.util';
 export * from './guards/permission.guard';
+
+// New High-Level Accessibility Directives and Helpers
+export {
+  VibrateFeedbackDirective,
+  type VibrateFeedbackType,
+} from './directives/vibrate-feedback.directive';
+export { FullscreenFocusDirective } from './directives/fullscreen-focus.directive';
+export { CopyButtonDirective } from './directives/copy-button.directive';
+export { injectIdleBatterySaver, type IdleBatterySaverRef } from './fns/inject-idle-battery-saver';
 
 // Providers
 export * from './providers';

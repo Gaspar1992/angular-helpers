@@ -896,6 +896,84 @@ type ElementInput =
 
 This means you can pass a `viewChild` signal directly — the function will internally use an `effect` to start observing once the element is rendered, with automatic cleanup.
 
+### injectSpeechRecognition
+
+```typescript
+import { injectSpeechRecognition } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class VoiceInputComponent {
+  readonly speech = injectSpeechRecognition();
+
+  // speech.transcript()        → Signal<string> (final text)
+  // speech.interimTranscript() → Signal<string> (interim text)
+  // speech.isListening()       → Signal<boolean>
+  // speech.error()             → Signal<Error | null>
+  // speech.isSupported()       → Signal<boolean>
+
+  start() {
+    this.speech.start({ lang: 'en-US' });
+  }
+
+  stop() {
+    this.speech.stop();
+  }
+}
+```
+
+### injectIdleBatterySaver
+
+```typescript
+import { injectIdleBatterySaver } from '@angular-helpers/browser-web-apis';
+
+@Component({...})
+export class EnergySaverComponent {
+  readonly saver = injectIdleBatterySaver();
+
+  // saver.isHidden()        → Signal<boolean> (Tab is hidden)
+  // saver.isLowBattery()    → Signal<boolean> (Battery < 20% & discharging)
+  // saver.shouldSaveEnergy() → Signal<boolean> (Combined hidden OR low battery state)
+}
+```
+
+## Accessibility-First Directives
+
+This package includes high-level derived products oriented around accessibility (a11y) and user feedback.
+
+### VoiceInputDirective (`[voiceInput]`)
+
+Equips any text `<input>` or `<textarea>` element with accessible, hands-free dictation using an off-screen `aria-live="polite"` region and automatic form controls integration.
+
+```html
+<input type="text" [formControl]="myControl" voiceInput voiceLang="en-US" />
+```
+
+### VibrateFeedbackDirective (`[vibrateFeedback]`)
+
+Triggers subtle tactile haptic vibration presets (`success`, `error`, `notification`, `doubleTap`, `light`) on mobile screens to announce UI actions for visually impaired users.
+
+```html
+<button vibrateFeedback="success">Submit</button>
+```
+
+### FullscreenFocusDirective (`[fullscreenFocus]`)
+
+Launches full screen and traps keyboard Tab focus strictly inside the expanded element to prevent visually impaired or motor-impaired keyboard users from losing focus.
+
+```html
+<div fullscreenFocus class="media-container">
+  <button>Trapped focus button</button>
+</div>
+```
+
+### CopyButtonDirective (`[copyButton]`)
+
+Copies content to the clipboard and audibly announces success or errors to screen readers automatically using dynamic polite live regions.
+
+```html
+<button [copyButton] copyText="Shareable Link">Copy Link</button>
+```
+
 ## Browser Support
 
 The services automatically validate browser support and unsupported-path handling:

@@ -57,6 +57,18 @@ export default [
     },
   },
   {
+    files: ['packages/browser-web-apis/**/*.ts'],
+    languageOptions: {
+      parser: tsparser,
+    },
+    plugins: {
+      '@angular-eslint': angularEslint,
+    },
+    rules: {
+      '@angular-eslint/directive-selector': 'off',
+    },
+  },
+  {
     files: [
       'packages/*/src/worker/**/*.ts',
       'packages/*/src/workers/**/*.ts',
