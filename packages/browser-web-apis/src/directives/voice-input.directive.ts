@@ -32,6 +32,7 @@ export class VoiceInputDirective implements OnInit, OnDestroy {
   private readonly speech = injectSpeechRecognition();
   private liveRegion: HTMLDivElement | null = null;
   private isBrowser = false;
+  private announceTimeout: any = null;
 
   constructor() {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -83,6 +84,9 @@ export class VoiceInputDirective implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.announceTimeout) {
+      clearTimeout(this.announceTimeout);
+    }
     if (this.liveRegion) {
       this.liveRegion.remove();
     }
@@ -146,8 +150,11 @@ export class VoiceInputDirective implements OnInit, OnDestroy {
   private announce(message: string): void {
     if (this.liveRegion) {
       this.renderer.setProperty(this.liveRegion, 'textContent', '');
+      if (this.announceTimeout) {
+        clearTimeout(this.announceTimeout);
+      }
       // Delay slightly to trigger DOM updates for the screen reader
-      setTimeout(() => {
+      this.announceTimeout = setTimeout(() => {
         if (this.liveRegion) {
           this.renderer.setProperty(this.liveRegion, 'textContent', message);
         }

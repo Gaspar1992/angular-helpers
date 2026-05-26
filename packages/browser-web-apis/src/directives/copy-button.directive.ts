@@ -25,6 +25,7 @@ export class CopyButtonDirective implements OnDestroy {
 
   private liveRegion: HTMLDivElement | null = null;
   private isBrowser = false;
+  private announceTimeout: any = null;
 
   constructor() {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -34,6 +35,9 @@ export class CopyButtonDirective implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.announceTimeout) {
+      clearTimeout(this.announceTimeout);
+    }
     if (this.liveRegion) {
       this.liveRegion.remove();
     }
@@ -69,7 +73,10 @@ export class CopyButtonDirective implements OnDestroy {
   private announce(message: string): void {
     if (this.liveRegion) {
       this.renderer.setProperty(this.liveRegion, 'textContent', '');
-      setTimeout(() => {
+      if (this.announceTimeout) {
+        clearTimeout(this.announceTimeout);
+      }
+      this.announceTimeout = setTimeout(() => {
         if (this.liveRegion) {
           this.renderer.setProperty(this.liveRegion, 'textContent', message);
         }
