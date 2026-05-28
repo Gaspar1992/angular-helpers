@@ -1,11 +1,9 @@
-import { injectPlatform } from '@angular-helpers/core';
-
 const ENCRYPTION_SALT = new Uint8Array([7, 21, 14, 9, 3, 18, 5, 12, 1, 20, 16, 2, 8, 15, 6, 11]);
 
 function getCrypto(): Crypto | null {
   if (typeof crypto !== 'undefined') return crypto;
-  const platform = injectPlatform();
-  if (platform.window && platform.window.crypto) return platform.window.crypto;
+  if (typeof window !== 'undefined' && window.crypto) return window.crypto;
+  if (typeof self !== 'undefined' && self.crypto) return self.crypto;
   return null;
 }
 

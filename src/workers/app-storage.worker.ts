@@ -1,6 +1,40 @@
+/// <reference lib="webworker" />
 import { IndexedDBTransport } from '../../packages/storage/src/services/transports/indexeddb.transport';
-import { detectTransferables } from '../../packages/storage/src/utils/detect-transferables';
+import { isTransferable } from '../../packages/core/src/utils/transferables';
 import { WorkerStorageRequest } from '../../packages/storage/src/interfaces/worker-storage.types';
+
+/**
+ * Scans a payload recursively and collects every `Transferable` instance found.
+ * Inlined to prevent importing packages that depend on Angular.
+ */
+function detectTransferables(payload: unknown): Transferable[] {
+  if (payload === null || payload === undefined) return [];
+
+  const found: Transferable[] = [];
+  const seen = new Set<object>();
+
+  const scan = (value: unknown): void => {
+    if (value === null || value === undefined || typeof value !== 'object') return;
+    if (seen.has(value)) return;
+    seen.add(value);
+
+    if (isTransferable(value)) {
+      found.push(value);
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value as unknown[]) scan(item);
+    } else {
+      for (const key of Object.keys(value as Record<string, unknown>)) {
+        scan((value as Record<string, unknown>)[key]);
+      }
+    }
+  };
+
+  scan(payload);
+  return found;
+}
 
 // Instantiate our environment-agnostic local transport driver inside the Worker context
 const storageEngine = new IndexedDBTransport('fallback-passphrase-angular-helpers-default-key-sec');

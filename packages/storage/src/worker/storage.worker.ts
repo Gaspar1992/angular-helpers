@@ -1,3 +1,4 @@
+/// <reference lib="webworker" />
 import { IndexedDBTransport } from '../services/transports/indexeddb.transport';
 import { WorkerStorageRequest } from '../interfaces/worker-storage.types';
 
