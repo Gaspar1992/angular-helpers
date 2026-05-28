@@ -197,48 +197,50 @@ export class WorkerPool {
  * Recursively scans a value/object structure to collect all Transferable objects (ArrayBuffer, MessagePort, etc.).
  * Guarantees no infinite loops via WeakSet checks and is environment-safe.
  */
-function findTransferables(
-  value: any,
-  transfer: Set<Transferable> = new Set(),
-  visited = new WeakSet(),
-): Transferable[] {
-  if (value === null || value === undefined || typeof value !== 'object') {
-    return Array.from(transfer);
-  }
+function findTransferables(value: any): Transferable[] {
+  const transfer = new Set<Transferable>();
+  const visited = new WeakSet<any>();
 
-  if (visited.has(value)) {
-    return Array.from(transfer);
-  }
-  visited.add(value);
-
-  if (isTransferable(value)) {
-    transfer.add(value);
-    return Array.from(transfer);
-  }
-
-  // Handle common typed arrays view buffer transfer
-  if (ArrayBuffer.isView(value)) {
-    if (value.buffer && isTransferable(value.buffer)) {
-      transfer.add(value.buffer);
+  function scan(val: any): void {
+    if (val === null || val === undefined || typeof val !== 'object') {
+      return;
     }
-    return Array.from(transfer);
-  }
 
-  // Handle standard Arrays
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      findTransferables(item, transfer, visited);
+    if (visited.has(val)) {
+      return;
     }
-  } else {
-    // Handle plain objects
-    for (const key of Object.keys(value)) {
-      try {
-        findTransferables(value[key], transfer, visited);
-      } catch {
-        // Guard against any getter property crashes
+    visited.add(val);
+
+    if (isTransferable(val)) {
+      transfer.add(val);
+      return;
+    }
+
+    // Handle common typed arrays view buffer transfer
+    if (ArrayBuffer.isView(val)) {
+      if (val.buffer && isTransferable(val.buffer)) {
+        transfer.add(val.buffer);
+      }
+      return;
+    }
+
+    // Handle standard Arrays
+    if (Array.isArray(val)) {
+      for (const item of val) {
+        scan(item);
+      }
+    } else {
+      // Handle plain objects
+      for (const key of Object.keys(val)) {
+        try {
+          scan(val[key]);
+        } catch {
+          // Guard against any getter property crashes
+        }
       }
     }
   }
 
+  scan(value);
   return Array.from(transfer);
 }
