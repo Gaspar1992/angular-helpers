@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Shared internal utilities and core logic for Angular Helpers packages",
   "publishConfig": {
     "access": "public"
