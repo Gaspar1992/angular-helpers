@@ -1,4 +1,5 @@
 import { injectPlatform } from '../utils/platform';
+import { isTransferable } from '../utils/transferables';
 
 export function injectWorkerPool(
   workerUrl: URL,
@@ -121,13 +122,25 @@ export class WorkerPool {
   /**
    * Executes a task in the worker
    */
-  async execute<T = any>(type: string, data: any, timeoutMs?: number): Promise<T> {
+  async execute<T = any>(
+    type: string,
+    data: any,
+    timeoutMsOrOptions?: number | { timeoutMs?: number; transfer?: Transferable[] },
+  ): Promise<T> {
     if (!this.worker) {
       if (this.options.fallbackExecutor) {
         return this.options.fallbackExecutor(type, data);
       }
       throw new Error('Worker is not available and no fallback executor was provided.');
     }
+
+    const options =
+      typeof timeoutMsOrOptions === 'number'
+        ? { timeoutMs: timeoutMsOrOptions }
+        : timeoutMsOrOptions || {};
+
+    const timeoutMs = options.timeoutMs;
+    const explicitTransfer = options.transfer;
 
     return new Promise<T>((resolve, reject) => {
       const taskId = `${type}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -157,11 +170,17 @@ export class WorkerPool {
         this.activeTimeoutIds.set(taskId, timeoutId);
       }
 
-      this.worker!.postMessage({
-        id: taskId,
-        type,
-        data,
-      });
+      // Determine transferable objects to optimize IPC communication (zero-copy transfer)
+      const transferList = explicitTransfer || findTransferables(data);
+
+      this.worker!.postMessage(
+        {
+          id: taskId,
+          type,
+          data,
+        },
+        transferList,
+      );
     });
   }
 
@@ -172,4 +191,56 @@ export class WorkerPool {
       this.worker = null;
     }
   }
+}
+
+/**
+ * Recursively scans a value/object structure to collect all Transferable objects (ArrayBuffer, MessagePort, etc.).
+ * Guarantees no infinite loops via WeakSet checks and is environment-safe.
+ */
+function findTransferables(value: any): Transferable[] {
+  const transfer = new Set<Transferable>();
+  const visited = new WeakSet<any>();
+
+  function scan(val: any): void {
+    if (val === null || val === undefined || typeof val !== 'object') {
+      return;
+    }
+
+    if (visited.has(val)) {
+      return;
+    }
+    visited.add(val);
+
+    if (isTransferable(val)) {
+      transfer.add(val);
+      return;
+    }
+
+    // Handle common typed arrays view buffer transfer
+    if (ArrayBuffer.isView(val)) {
+      if (val.buffer && isTransferable(val.buffer)) {
+        transfer.add(val.buffer);
+      }
+      return;
+    }
+
+    // Handle standard Arrays
+    if (Array.isArray(val)) {
+      for (const item of val) {
+        scan(item);
+      }
+    } else {
+      // Handle plain objects
+      for (const key of Object.keys(val)) {
+        try {
+          scan(val[key]);
+        } catch {
+          // Guard against any getter property crashes
+        }
+      }
+    }
+  }
+
+  scan(value);
+  return Array.from(transfer);
 }
