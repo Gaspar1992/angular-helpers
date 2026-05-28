@@ -90,6 +90,17 @@ jobs:
         run: pnpm exec semantic-release
         working-directory: packages/openlayers
 
+      - name: Publish to npm with Provenance
+        run: |
+          for pkg in core browser-web-apis storage security worker-http openlayers; do
+            if [ -d "dist/$pkg" ]; then
+              echo "Publishing $pkg..."
+              (cd dist/$pkg && npm publish --provenance --access public || echo "Skipped publishing $pkg")
+            fi
+          done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Detect release artifact changes
         id: release_changes
         run: |

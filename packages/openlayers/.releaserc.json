@@ -10,7 +10,8 @@
       "@semantic-release/npm",
       {
         "pkgRoot": "../../dist/openlayers",
-        "tarballDir": "release"
+        "tarballDir": "release",
+        "npmPublish": false
       }
     ],
     [
