@@ -4,7 +4,9 @@ import { resolve } from 'path';
 export default defineConfig({
   resolve: {
     alias: {
+      '@angular-helpers/core/utils': resolve(__dirname, 'packages/core/utils/src/index.ts'),
       '@angular-helpers/core': resolve(__dirname, 'packages/core/src/index.ts'),
+      '@angular-helpers/storage/worker': resolve(__dirname, 'packages/storage/worker/src/index.ts'),
       '@angular-helpers/worker-http/interceptors': resolve(
         __dirname,
         'packages/worker-http/interceptors/src/index.ts',

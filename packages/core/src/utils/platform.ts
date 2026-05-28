@@ -3,6 +3,7 @@ import {
   isPlatformBrowser as isBrowserNative,
   isPlatformServer as isServerNative,
 } from '@angular/common';
+import { isPlatformBrowser } from '@angular-helpers/core/utils';
 
 /**
  * Composable that resolves the current platform environment using Angular's Dependency Injection.
@@ -22,7 +23,7 @@ export function injectPlatform() {
     };
   } catch {
     // Fallback if called outside an injection context (e.g. unit tests doing `new Service()`)
-    const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+    const isBrowser = isPlatformBrowser();
     return {
       isBrowser,
       isServer: !isBrowser,
@@ -32,17 +33,4 @@ export function injectPlatform() {
   }
 }
 
-/**
- * Legacy core platform utilities (deprecated: prefer injectPlatform).
- */
-export function isPlatformBrowser(): boolean {
-  return typeof window !== 'undefined' && typeof document !== 'undefined';
-}
-
-export function isPlatformServer(): boolean {
-  return !isPlatformBrowser();
-}
-
-export function getGlobalWindow(): Window | undefined {
-  return isPlatformBrowser() ? window : undefined;
-}
+export { isPlatformBrowser, isPlatformServer, getGlobalWindow } from '@angular-helpers/core/utils';

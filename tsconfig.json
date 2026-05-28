@@ -17,7 +17,8 @@
     "baseUrl": ".",
     "paths": {
       "@angular/*": ["node_modules/@angular/*"],
-      "@angular-helpers/*": ["packages/*/src/index.ts"],
+      "@angular-helpers/core/utils": ["packages/core/utils/src/index.ts"],
+      "@angular-helpers/storage/worker": ["packages/storage/worker/src/index.ts"],
       "@angular-helpers/worker-http/transport": ["packages/worker-http/transport/src/index.ts"],
       "@angular-helpers/worker-http/serializer": ["packages/worker-http/serializer/src/index.ts"],
       "@angular-helpers/worker-http/backend": ["packages/worker-http/backend/src/index.ts"],
@@ -35,7 +36,8 @@
       "@angular-helpers/openlayers/controls": ["packages/openlayers/controls/src/index.ts"],
       "@angular-helpers/openlayers/interactions": ["packages/openlayers/interactions/src/index.ts"],
       "@angular-helpers/openlayers/overlays": ["packages/openlayers/overlays/src/index.ts"],
-      "@angular-helpers/openlayers/military": ["packages/openlayers/military/src/index.ts"]
+      "@angular-helpers/openlayers/military": ["packages/openlayers/military/src/index.ts"],
+      "@angular-helpers/*": ["packages/*/src/index.ts"]
     }
   },
   "angularCompilerOptions": {
