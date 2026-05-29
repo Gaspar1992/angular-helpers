@@ -6,9 +6,9 @@ describe('docs-nav.data versioning', () => {
     expect(libraries.map((lib) => lib.id)).toContain('openlayers');
   });
 
-  it('should omit openlayers library for v21', () => {
+  it('should include openlayers library for v21', () => {
     const libraries = getNavLibrariesForVersion('v21');
-    expect(libraries.map((lib) => lib.id)).not.toContain('openlayers');
+    expect(libraries.map((lib) => lib.id)).toContain('openlayers');
   });
 
   it('should filter out experimental features for v21', () => {

@@ -7,8 +7,8 @@ export type AngularVersion = 'v21' | 'v22';
 export class DocsVersionService {
   private readonly router = inject(Router);
 
-  readonly activeVersionSignal = signal<AngularVersion>('v22');
-  readonly version = this.activeVersionSignal.asReadonly();
+  private readonly activeVersionSignal = signal<AngularVersion>('v21');
+  readonly version = computed(() => this.activeVersionSignal());
 
   constructor() {
     this.initializeFromUrl();
@@ -18,10 +18,10 @@ export class DocsVersionService {
     if (typeof window !== 'undefined') {
       const searchParams = new URLSearchParams(window.location.search);
       const v = searchParams.get('v');
-      if (v === '21') {
-        this.activeVersionSignal.set('v21');
-      } else {
+      if (v === '22') {
         this.activeVersionSignal.set('v22');
+      } else {
+        this.activeVersionSignal.set('v21');
       }
     }
   }

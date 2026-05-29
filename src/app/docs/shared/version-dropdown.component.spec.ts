@@ -16,6 +16,11 @@ describe('VersionDropdownComponent', () => {
 
     fixture = TestBed.createComponent(VersionDropdownComponent);
     component = fixture.componentInstance;
+    // Set 2 options to allow testing interactive dropdown features
+    (component as any).options = [
+      { value: 'v22', label: 'Angular v22 (Latest)' },
+      { value: 'v21', label: 'Angular v21' },
+    ];
     versionService = TestBed.inject(DocsVersionService);
     fixture.detectChanges();
   });
@@ -57,7 +62,7 @@ describe('VersionDropdownComponent', () => {
     triggerBtn.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     fixture.detectChanges();
 
-    expect(setVersionSpy).toHaveBeenCalledWith('v21');
+    expect(setVersionSpy).toHaveBeenCalledWith('v22');
     expect(triggerBtn.attributes['aria-expanded']).toBe('false');
   });
 
@@ -70,5 +75,12 @@ describe('VersionDropdownComponent', () => {
     triggerBtn.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     fixture.detectChanges();
     expect(triggerBtn.attributes['aria-expanded']).toBe('false');
+  });
+
+  it('should hide the dropdown completely when only one option is available', () => {
+    const singleFixture = TestBed.createComponent(VersionDropdownComponent);
+    singleFixture.detectChanges();
+    const triggerBtn = singleFixture.debugElement.query(By.css('[role="combobox"]'));
+    expect(triggerBtn).toBeNull();
   });
 });

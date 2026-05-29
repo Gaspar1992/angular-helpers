@@ -330,7 +330,7 @@ export const DOCS_NAV_SECTIONS: readonly NavSectionLegacy[] = DOCS_NAV_LIBRARIES
 
 export function getNavLibrariesForVersion(version: 'v21' | 'v22'): readonly LibraryNav[] {
   if (version === 'v21') {
-    return DOCS_NAV_LIBRARIES.filter((lib) => lib.id !== 'openlayers').map((lib) => ({
+    return DOCS_NAV_LIBRARIES.map((lib) => ({
       ...lib,
       sections: lib.sections.map((section) => ({
         ...section,

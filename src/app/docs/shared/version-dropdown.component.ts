@@ -77,13 +77,12 @@ export class VersionDropdownComponent {
   protected readonly container = viewChild<ElementRef>('container');
 
   protected readonly options: { value: AngularVersion; label: string }[] = [
-    { value: 'v22', label: 'Angular v22 (Latest)' },
     { value: 'v21', label: 'Angular v21' },
   ];
 
   protected currentVersionDisplay() {
     const current = this.versionService.version();
-    return current === 'v22' ? 'v22 (Latest)' : 'v21';
+    return current === 'v21' ? 'v21' : 'v22';
   }
 
   protected toggleDropdown() {
