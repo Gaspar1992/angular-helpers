@@ -1,0 +1,801 @@
+import { ServiceDoc } from '../models/doc-meta.model';
+
+export const WORKER_HTTP_ENTRIES: ServiceDoc[] = [
+  {
+    id: 'transport',
+    name: 'createWorkerTransport',
+    description:
+      'Typed RPC bridge between main thread and Web Worker. Wraps postMessage with request/response correlation, Observable API, and automatic cancellation on unsubscribe.',
+    scope: 'root',
+    importPath: '@angular-helpers/worker-http/transport',
+    requiresSecureContext: false,
+    browserSupport: 'All browsers with Web Workers support',
+    notes: [
+      'Round-robin pool for parallel request handling',
+      'Request cancellation via AbortController in the worker',
+      'Automatic Transferable detection for zero-copy ArrayBuffer transfer',
+      'Lazy worker instantiation',
+    ],
+    methods: [
+      {
+        name: 'createWorkerTransport',
+        signature: 'createWorkerTransport(config: WorkerTransportConfig): WorkerTransport',
+        description:
+          'Creates a typed RPC transport that communicates with a Web Worker. Returns an Observable-based API for executing requests.',
+        returns: 'WorkerTransport',
+      },
+      {
+        name: 'execute',
+        signature: 'execute(request: TRequest): Observable<TResponse>',
+        description:
+          'Sends a request to the worker and returns an Observable. Unsubscribing sends a cancel message.',
+        returns: 'Observable<TResponse>',
+      },
+      {
+        name: 'terminate',
+        signature: 'terminate(): void',
+        description: 'Cleans up all worker instances and releases resources.',
+        returns: 'void',
+      },
+    ],
+    example: `import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
+
+const transport = createWorkerTransport({
+  workerUrl: new URL('./workers/api.worker', import.meta.url),
+  maxInstances: 2,
+});
+
+// Execute request - returns Observable
+const response$ = transport.execute({ method: 'GET', url: '/api/users' });
+
+response$.subscribe({
+  next: (result) => console.log('Response:', result),
+  error: (err) => console.error('Error:', err),
+});
+
+// Clean up when done
+transport.terminate();`,
+  },
+  {
+    id: 'interceptors',
+    name: 'createWorkerPipeline',
+    description:
+      'Creates a request pipeline inside the worker using pure-function interceptors. No Angular DI, no DOM access — just (req, next) => Promise<response>.',
+    scope: 'root',
+    importPath: '@angular-helpers/worker-http/interceptors',
+    requiresSecureContext: false,
+    browserSupport: 'All browsers with Web Workers support',
+    notes: [
+      'Interceptors run left-to-right in the order provided',
+      'Each interceptor can modify the request before passing to next()',
+      'Pure functions — no external dependencies or side effects',
+    ],
+    methods: [
+      {
+        name: 'createWorkerPipeline',
+        signature:
+          'createWorkerPipeline(interceptors: WorkerInterceptorFn[]): WorkerRequestHandler',
+        description:
+          'Creates a request handler that runs the interceptor chain before calling fetch().',
+        returns: 'WorkerRequestHandler',
+      },
+      {
+        name: 'retryInterceptor',
+        signature: 'retryInterceptor(config?: RetryConfig): WorkerInterceptorFn',
+        description:
+          'Retries failed requests with exponential backoff. Respects Retry-After header.',
+        returns: 'WorkerInterceptorFn',
+      },
+      {
+        name: 'cacheInterceptor',
+        signature: 'cacheInterceptor(config?: CacheConfig): WorkerInterceptorFn',
+        description:
+          'In-worker response cache with configurable TTL and max entries. Per-factory state.',
+        returns: 'WorkerInterceptorFn',
+      },
+      {
+        name: 'hmacSigningInterceptor',
+        signature: 'hmacSigningInterceptor(config: HmacSigningConfig): WorkerInterceptorFn',
+        description:
+          'Signs outgoing requests with HMAC-SHA256/384/512. CryptoKey imported once and reused.',
+        returns: 'WorkerInterceptorFn',
+      },
+      {
+        name: 'loggingInterceptor',
+        signature: 'loggingInterceptor(config?: LoggingConfig): WorkerInterceptorFn',
+        description:
+          'Logs request/response. Logger exceptions are swallowed — never interrupts pipeline.',
+        returns: 'WorkerInterceptorFn',
+      },
+      {
+        name: 'rateLimitInterceptor',
+        signature: 'rateLimitInterceptor(config?: RateLimitConfig): WorkerInterceptorFn',
+        description:
+          'Client-side sliding-window rate limiter. Throws { status: 429 } when exceeded.',
+        returns: 'WorkerInterceptorFn',
+      },
+      {
+        name: 'contentIntegrityInterceptor',
+        signature: 'contentIntegrityInterceptor(config?: IntegrityConfig): WorkerInterceptorFn',
+        description: 'Verifies SHA-256 hash of response body against server-provided header.',
+        returns: 'WorkerInterceptorFn',
+      },
+      {
+        name: 'composeInterceptors',
+        signature: 'composeInterceptors(...fns: WorkerInterceptorFn[]): WorkerInterceptorFn',
+        description: 'Composes multiple interceptors into a single interceptor function.',
+        returns: 'WorkerInterceptorFn',
+      },
+      {
+        name: 'offlineCacheInterceptor',
+        signature: 'offlineCacheInterceptor(config?: OfflineCacheConfig): WorkerInterceptorFn',
+        description:
+          'Offline Cache interceptor using native Cache API in the Web Worker. Supports "network-first" and "cache-first" (stale-while-revalidate) strategies. Caches only GET requests and supports cache bypass headers.',
+        returns: 'WorkerInterceptorFn',
+      },
+      {
+        name: 'offlineSyncQueueInterceptor',
+        signature: 'offlineSyncQueueInterceptor(config?: OfflineSyncConfig): WorkerInterceptorFn',
+        description:
+          'Chronological (FIFO) mutation sync queue. Intercepts POST, PUT, PATCH, and DELETE requests when offline, stores them in IndexedDB, and returns a synthetic 202 Accepted. Replays them on reconnection.',
+        returns: 'WorkerInterceptorFn',
+      },
+    ],
+    example: `// workers/offline.worker.ts
+import { createWorkerPipeline } from '@angular-helpers/worker-http/interceptors';
+import {
+  loggingInterceptor,
+  offlineCacheInterceptor,
+  offlineSyncQueueInterceptor,
+} from '@angular-helpers/worker-http/interceptors';
+
+createWorkerPipeline([
+  loggingInterceptor(),
+  // Cache GET requests using network-first strategy
+  offlineCacheInterceptor({
+    strategy: 'network-first',
+    ttl: 86400000, // 24 hours
+  }),
+  // Queue mutations when offline, and auto-drain chronologically when online
+  offlineSyncQueueInterceptor({
+    dbName: 'ah_offline_sync',
+  }),
+]);`,
+  },
+  {
+    id: 'serializer',
+    name: 'Serializers',
+    description:
+      'Pluggable serialization for the postMessage boundary. Structured clone (zero overhead), seroval (full type fidelity), or auto-detect (smart selection).',
+    scope: 'root',
+    importPath: '@angular-helpers/worker-http/serializer',
+    requiresSecureContext: false,
+    browserSupport: 'All browsers with Web Workers support',
+    notes: [
+      'structuredCloneSerializer is the default — zero overhead',
+      'createSerovalSerializer supports Date, Map, Set, BigInt, circular refs',
+      'createAutoSerializer detects complex types at depth-1 and picks best strategy',
+      'Large payloads (>100 KiB) use ArrayBuffer transfer for zero-copy',
+    ],
+    methods: [
+      {
+        name: 'structuredCloneSerializer',
+        signature: 'structuredCloneSerializer: Serializer',
+        description:
+          'Zero-overhead serializer using native structured clone. Default when none configured.',
+        returns: 'Serializer',
+      },
+      {
+        name: 'createSerovalSerializer',
+        signature: 'createSerovalSerializer(): Promise<Serializer>',
+        description:
+          'Async factory that returns a seroval-based serializer. Full type fidelity support.',
+        returns: 'Promise<Serializer>',
+      },
+      {
+        name: 'createAutoSerializer',
+        signature: 'createAutoSerializer(config?: AutoSerializerConfig): Promise<Serializer>',
+        description:
+          'Smart auto-detection: seroval for complex types, structured clone for simple. Async factory, sync serializer.',
+        returns: 'Promise<Serializer>',
+      },
+      {
+        name: 'serialize',
+        signature: 'serialize<T>(data: T): SerializedPayload',
+        description: 'Serializes data for postMessage transfer.',
+        returns: 'SerializedPayload',
+      },
+      {
+        name: 'deserialize',
+        signature: 'deserialize<T>(payload: SerializedPayload): T',
+        description: 'Deserializes payload back to original data.',
+        returns: 'T',
+      },
+    ],
+    example: `import {
+  structuredCloneSerializer,
+  createSerovalSerializer,
+  createAutoSerializer,
+} from '@angular-helpers/worker-http/serializer';
+
+// Option 1: Structured clone (default, zero overhead)
+const simple = structuredCloneSerializer;
+
+// Option 2: Seroval for full type fidelity
+const seroval = await createSerovalSerializer();
+const payload = seroval.serialize({ date: new Date(), tags: new Set(['a']) });
+const original = seroval.deserialize(payload);
+// original.date instanceof Date → true
+
+// Option 3: Auto-detect (recommended for mixed payloads)
+const auto = await createAutoSerializer({ transferThreshold: 102400 });
+// Simple objects → structured clone
+// Objects with Date/Map/Set → seroval
+// Large payloads → ArrayBuffer transfer`,
+  },
+  {
+    id: 'backend',
+    name: 'provideWorkerHttpClient',
+    description:
+      'Angular HttpBackend replacement that routes HttpClient requests to Web Workers off the main thread. Drop-in integration with Angular DI — use WorkerHttpClient just like HttpClient.',
+    scope: 'root',
+    importPath: '@angular-helpers/worker-http/backend',
+    requiresSecureContext: false,
+    browserSupport: 'All browsers with Web Workers support. Falls back to FetchBackend in SSR.',
+    notes: [
+      'provideWorkerHttpClient() replaces provideHttpClient() — do not use both',
+      'WorkerHttpClient wraps HttpClient with an optional { worker } routing field',
+      'WORKER_TARGET HttpContextToken enables per-request worker routing',
+      'SSR-safe: falls back to FetchBackend when typeof Worker === "undefined"',
+      'withWorkerSerialization() applies to request body only; worker-side deserialization is developer responsibility',
+    ],
+    methods: [
+      {
+        name: 'provideWorkerHttpClient',
+        signature:
+          'provideWorkerHttpClient(...features: WorkerHttpFeature[]): EnvironmentProviders',
+        description:
+          'Root provider that replaces provideHttpClient(). Registers WorkerHttpBackend, WorkerHttpClient, and all feature providers.',
+        returns: 'EnvironmentProviders',
+      },
+      {
+        name: 'withWorkerConfigs',
+        signature: 'withWorkerConfigs(configs: WorkerConfig[]): WorkerHttpFeature',
+        description:
+          'Registers named worker definitions. Each WorkerConfig has id, workerUrl, and optional maxInstances for pooling.',
+        returns: 'WorkerHttpFeature<"WorkerConfigs">',
+      },
+      {
+        name: 'withWorkerRoutes',
+        signature: 'withWorkerRoutes(routes: WorkerRoute[]): WorkerHttpFeature',
+        description:
+          'URL-pattern to worker routing rules. Higher priority = evaluated first. Patterns can be RegExp or string prefix.',
+        returns: 'WorkerHttpFeature<"WorkerRoutes">',
+      },
+      {
+        name: 'withWorkerFallback',
+        signature: "withWorkerFallback(strategy: 'main-thread' | 'error'): WorkerHttpFeature",
+        description:
+          "Configures behavior when workers are unavailable (SSR, unsupported browsers). 'main-thread' uses FetchBackend; 'error' throws.",
+        returns: 'WorkerHttpFeature<"WorkerFallback">',
+      },
+      {
+        name: 'withWorkerSerialization',
+        signature: 'withWorkerSerialization(serializer: WorkerSerializer): WorkerHttpFeature',
+        description:
+          'Plugs in a custom serializer for request body crossing the worker boundary. Use with createSerovalSerializer() for complex types (Date, Map, Set).',
+        returns: 'WorkerHttpFeature<"WorkerSerialization">',
+      },
+      {
+        name: 'WorkerHttpClient.get / post / put / delete / patch',
+        signature: 'get<T>(url, options?: WorkerRequestOptions): Observable<T>',
+        description:
+          'HttpClient-compatible methods with an optional { worker: string } field for per-request worker routing.',
+        returns: 'Observable<T>',
+      },
+    ],
+    example: `// app.config.ts
+import {
+  provideWorkerHttpClient,
+  withWorkerConfigs,
+  withWorkerRoutes,
+  withWorkerFallback,
+  withWorkerSerialization,
+} from '@angular-helpers/worker-http/backend';
+import { createSerovalSerializer } from '@angular-helpers/worker-http/serializer';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideWorkerHttpClient(
+      withWorkerConfigs([
+        {
+          id: 'api',
+          workerUrl: new URL('./workers/api.worker', import.meta.url),
+          maxInstances: 2,
+        },
+        {
+          id: 'secure',
+          workerUrl: new URL('./workers/secure.worker', import.meta.url),
+        },
+      ]),
+      withWorkerRoutes([
+        { pattern: /\\/api\\/secure\\//, worker: 'secure', priority: 10 },
+        { pattern: /\\/api\\//, worker: 'api', priority: 5 },
+      ]),
+      withWorkerFallback('main-thread'), // SSR-safe
+      withWorkerSerialization(createSerovalSerializer()), // optional
+    ),
+  ],
+};
+
+// data.service.ts — use WorkerHttpClient like HttpClient
+export class DataService {
+  private http = inject(WorkerHttpClient);
+
+  getUsers() {
+    return this.http.get<User[]>('/api/users'); // auto-routed to 'api' worker
+  }
+
+  getSecureData() {
+    // explicit worker override via HttpContextToken
+    return this.http.get('/api/secure/payments', { worker: 'secure' });
+  }
+}`,
+    guides: [
+      {
+        title: 'Thread-Isolated Request Pipelines & HMAC-SHA256 Signing',
+        description: `This guide details how to construct a custom request pipeline inside the HTTP Web Worker to offload heavy network operations, response caching, and complex cryptographic signatures (HMAC-SHA256) off the main thread.
+
+This design secures key material in background threads (preventing XSS access) and ensures the UI thread stays completely interactive at 60 FPS during heavy calculations.`,
+        code: `// 1. In-Worker Pipeline: workers/api.worker.ts
+import { createWorkerPipeline } from '@angular-helpers/worker-http/interceptors';
+import { 
+  loggingInterceptor, 
+  cacheInterceptor, 
+  hmacSigningInterceptor 
+} from '@angular-helpers/worker-http/interceptors';
+
+// Raw HMAC key material is only loaded inside the worker's sandboxed environment.
+// This prevents cross-site scripting (XSS) in the main thread from reading secret keys.
+const rawKey = new TextEncoder().encode('production-api-secret-key-that-must-remain-confidential');
+
+createWorkerPipeline([
+  loggingInterceptor({ level: 'info' }),
+  
+  // 1. In-Worker micro-caching (prevents duplicate rapid requests)
+  cacheInterceptor({
+    ttl: 30000, // Cache GETs for 30s
+    maxEntries: 50
+  }),
+  
+  // 2. Automatic Cryptographic Request Signing
+  hmacSigningInterceptor({
+    keyMaterial: rawKey,
+    algorithm: 'SHA-256',
+    headerName: 'X-API-Signature',
+    payloadBuilder: (req) => \`\${req.method}:\${req.url}:\${req.body || ''}\`
+  })
+]);
+
+// 2. Main App Configuration: app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { 
+  provideWorkerHttpClient, 
+  withWorkerConfigs, 
+  withWorkerRoutes, 
+  withWorkerFallback 
+} from '@angular-helpers/worker-http/backend';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideWorkerHttpClient(
+      // Configure pool of background worker instances
+      withWorkerConfigs([
+        {
+          id: 'api-worker',
+          workerUrl: new URL('./workers/api.worker', import.meta.url),
+          maxInstances: 2 // Round-robin load-balanced instances
+        }
+      ]),
+      // Declarative pattern matching routing
+      withWorkerRoutes([
+        { pattern: /\\/api\\//, worker: 'api-worker' }
+      ]),
+      withWorkerFallback('main-thread') // Graceful SSR fallback
+    )
+  ]
+};`,
+      },
+    ],
+  },
+  {
+    id: 'crypto',
+    name: 'WebCrypto Utilities',
+    description:
+      'Standalone WebCrypto primitives for HMAC signing, AES-GCM encryption, and content hashing. Useful in workers and main thread; workers provide memory isolation for key material.',
+    scope: 'root',
+    importPath: '@angular-helpers/worker-http/crypto',
+    requiresSecureContext: true,
+    browserSupport: 'All modern browsers with Web Crypto API',
+    notes: [
+      'Requires secure context (HTTPS or localhost)',
+      'HMAC keys are imported once and reused for performance',
+      'All operations are async and return Promises',
+    ],
+    methods: [
+      {
+        name: 'createHmacSigner',
+        signature: 'createHmacSigner(config: HmacConfig): Promise<HmacSigner>',
+        description:
+          'Creates an HMAC signer/verifier with the specified key material and algorithm.',
+        returns: 'Promise<HmacSigner>',
+      },
+      {
+        name: 'sign',
+        signature: 'sign(data: string | ArrayBuffer): Promise<ArrayBuffer>',
+        description: 'Creates an HMAC signature of the data.',
+        returns: 'Promise<ArrayBuffer>',
+      },
+      {
+        name: 'verify',
+        signature: 'verify(data: string | ArrayBuffer, signature: ArrayBuffer): Promise<boolean>',
+        description: 'Verifies an HMAC signature against the data.',
+        returns: 'Promise<boolean>',
+      },
+      {
+        name: 'createAesEncryptor',
+        signature: 'createAesEncryptor(config: AesConfig): Promise<AesEncryptor>',
+        description: 'Creates an AES-GCM encryptor/decryptor.',
+        returns: 'Promise<AesEncryptor>',
+      },
+      {
+        name: 'encrypt',
+        signature: 'encrypt(plaintext: string): Promise<EncryptedPayload>',
+        description: 'Encrypts plaintext using AES-GCM. Returns ciphertext and IV.',
+        returns: 'Promise<{ ciphertext: ArrayBuffer; iv: Uint8Array }>',
+      },
+      {
+        name: 'decrypt',
+        signature: 'decrypt(payload: EncryptedPayload): Promise<ArrayBuffer>',
+        description: 'Decrypts AES-GCM ciphertext using the provided IV.',
+        returns: 'Promise<ArrayBuffer>',
+      },
+      {
+        name: 'createContentHasher',
+        signature: 'createContentHasher(algorithm?: HashAlgorithm): ContentHasher',
+        description: 'Creates a content hasher for the specified algorithm.',
+        returns: 'ContentHasher',
+      },
+      {
+        name: 'hash',
+        signature: 'hash(data: string | ArrayBuffer): Promise<ArrayBuffer>',
+        description: 'Hashes the data using the configured algorithm.',
+        returns: 'Promise<ArrayBuffer>',
+      },
+    ],
+    example: `import {
+  createHmacSigner,
+  createAesEncryptor,
+  createContentHasher,
+} from '@angular-helpers/worker-http/crypto';
+
+// HMAC Signing
+const signer = await createHmacSigner({
+  keyMaterial: new TextEncoder().encode('my-secret-key'),
+  algorithm: 'SHA-256',
+});
+const signature = await signer.sign('GET:/api/users:');
+const valid = await signer.verify('GET:/api/users:', signature);
+
+// AES Encryption
+const encryptor = await createAesEncryptor({
+  keyMaterial: new TextEncoder().encode('32-byte-secret-key-for-aes-256!!'),
+  algorithm: 'AES-GCM',
+});
+const { ciphertext, iv } = await encryptor.encrypt('sensitive data');
+const decrypted = await encryptor.decrypt({ ciphertext, iv });
+
+// Content Hashing
+const hasher = createContentHasher('SHA-256');
+const hash = await hasher.hash('data to hash');`,
+  },
+  {
+    id: 'streams-polyfill',
+    name: 'Streams Polyfill',
+    description:
+      'Safari Transferable Streams Ponyfill. Provides ReadableStream, TransformStream, and WritableStream implementations that support structuredClone transfer to/from Web Workers on Safari 16-17.',
+    scope: 'root',
+    importPath: '@angular-helpers/worker-http/streams-polyfill',
+    requiresSecureContext: false,
+    browserSupport: 'Safari 16-17 (other browsers use native streams)',
+    notes: [
+      'Ponyfill (not polyfill) — does not modify global scope',
+      'Lazy-loaded — only downloads when Safari 16-17 is detected',
+      'Used automatically by transport when safariPolyfill: true is configured',
+      'Native implementations re-exported when available',
+    ],
+    methods: [
+      {
+        name: 'needsPolyfill',
+        signature: 'needsPolyfill(userAgent?: string): boolean',
+        description:
+          'Detects if the current browser needs the streams ponyfill. Safari 16-17 fails to transfer ReadableStream/TransformStream via structuredClone.',
+        returns: 'boolean',
+      },
+      {
+        name: 'ponyfillStreams',
+        signature: 'ponyfillStreams(): Promise<StreamPonyfillExports>',
+        description:
+          'Lazily loads the web-streams-polyfill ponyfill. Returns ponyfilled streams or native if not needed.',
+        returns: 'Promise<{ ReadableStream, TransformStream, WritableStream }>',
+      },
+    ],
+    example: `import { needsPolyfill, ponyfillStreams } from '@angular-helpers/worker-http/streams-polyfill';
+
+// Check if ponyfill is needed
+if (needsPolyfill()) {
+  console.log('Safari 16-17 detected — loading ponyfill');
+  const streams = await ponyfillStreams();
+  // Use ponyfilled streams
+  const rs = new streams.ReadableStream({
+    start(controller) { controller.close(); }
+  });
+} else {
+  console.log('Native transferable streams supported');
+}
+
+// Or let the transport auto-detect
+const transport = createWorkerTransport({
+  workerUrl: new URL('./worker.ts', import.meta.url),
+  safariPolyfill: true, // Auto-injects when needed
+});`,
+  },
+  {
+    id: 'esbuild-plugin',
+    name: 'esbuild Plugin',
+    description:
+      'Build-time esbuild plugin for bundling worker interceptors. Auto-discovers and injects interceptor imports into worker files during compilation.',
+    scope: 'root',
+    importPath: '@angular-helpers/worker-http/esbuild-plugin',
+    requiresSecureContext: false,
+    browserSupport: 'N/A (build-time only)',
+    notes: [
+      'Only needed for custom esbuild setups (not Angular CLI default)',
+      'Auto-discovers interceptors from src directory when autoDiscover: true',
+      'Injects interceptor imports into worker files at build time',
+      'Works with any esbuild-based setup (Vite, custom webpack, etc.)',
+    ],
+    methods: [
+      {
+        name: 'workerHttpPlugin',
+        signature: 'workerHttpPlugin(options?: WorkerHttpPluginOptions): Plugin',
+        description:
+          'Creates an esbuild plugin that bundles interceptors into worker files. Intercepts .worker.{ts,js,mjs} files.',
+        returns: 'esbuild Plugin',
+      },
+    ],
+    example: `import { workerHttpPlugin } from '@angular-helpers/worker-http/esbuild-plugin';
+
+// esbuild.config.ts
+export default {
+  plugins: [
+    workerHttpPlugin({
+      // Option 1: Explicit interceptor paths
+      interceptors: ['./src/interceptors/auth.ts', './src/interceptors/logging.ts'],
+
+      // Option 2: Auto-discover from src directory
+      autoDiscover: true,
+
+      // Option 3: Combine both approaches
+      interceptors: ['./src/interceptors/custom.ts'],
+      autoDiscover: true, // merges discovered with explicit
+    }),
+  ],
+};`,
+  },
+];
+
+export const WORKER_HTTP_INTERFACES = [
+  {
+    name: 'WorkerTransportConfig',
+    description: 'Configuration for the worker transport.',
+    fields: [
+      {
+        name: 'workerUrl',
+        type: 'URL | string',
+        description: 'URL to the worker script (pre-transpiled)',
+      },
+      {
+        name: 'maxInstances?',
+        type: 'number',
+        description: 'Number of workers in the round-robin pool (default: 1)',
+      },
+      {
+        name: 'serializer?',
+        type: 'Serializer',
+        description: 'Custom serializer (default: structuredCloneSerializer)',
+      },
+    ],
+  },
+  {
+    name: 'WorkerInterceptorFn',
+    description: 'Interceptor function signature.',
+    fields: [
+      {
+        name: 'req',
+        type: 'WorkerRequest',
+        description: 'The request object',
+      },
+      {
+        name: 'next',
+        type: '(req: WorkerRequest) => Promise<WorkerResponse>',
+        description: 'Function to call the next interceptor or fetch',
+      },
+    ],
+  },
+  {
+    name: 'RetryConfig',
+    description: 'Configuration for retry interceptor.',
+    fields: [
+      { name: 'maxRetries?', type: 'number', description: 'Max retry attempts (default: 3)' },
+      {
+        name: 'initialDelay?',
+        type: 'number',
+        description: 'Initial retry delay in ms (default: 1000)',
+      },
+      {
+        name: 'backoffMultiplier?',
+        type: 'number',
+        description: 'Backoff multiplier (default: 2)',
+      },
+      {
+        name: 'retryStatusCodes?',
+        type: 'number[]',
+        description: 'Status codes to retry (default: [408, 429, 500, 502, 503, 504])',
+      },
+      {
+        name: 'retryOnNetworkError?',
+        type: 'boolean',
+        description: 'Retry on network errors (default: true)',
+      },
+    ],
+  },
+  {
+    name: 'CacheConfig',
+    description: 'Configuration for cache interceptor.',
+    fields: [
+      { name: 'ttl?', type: 'number', description: 'Cache TTL in ms (default: 60000)' },
+      { name: 'maxEntries?', type: 'number', description: 'Max cache entries (default: 100)' },
+      { name: 'methods?', type: 'string[]', description: "Methods to cache (default: ['GET'])" },
+    ],
+  },
+  {
+    name: 'HmacSigningConfig',
+    description: 'Configuration for HMAC signing interceptor.',
+    fields: [
+      {
+        name: 'keyMaterial',
+        type: 'ArrayBuffer | Uint8Array',
+        description: 'Raw key bytes for HMAC import',
+      },
+      {
+        name: 'algorithm?',
+        type: "'SHA-256' | 'SHA-384' | 'SHA-512'",
+        description: "Hash algorithm (default: 'SHA-256')",
+      },
+      {
+        name: 'headerName?',
+        type: 'string',
+        description: "Header name for signature (default: 'X-HMAC-Signature')",
+      },
+      {
+        name: 'payloadBuilder?',
+        type: '(req: WorkerRequest) => string',
+        description: 'Function to build the string to sign',
+      },
+    ],
+  },
+  {
+    name: 'AutoSerializerConfig',
+    description: 'Configuration for auto serializer.',
+    fields: [
+      {
+        name: 'transferThreshold?',
+        type: 'number',
+        description: 'Size threshold for ArrayBuffer transfer in bytes (default: 102400)',
+      },
+    ],
+  },
+  {
+    name: 'WorkerConfig',
+    description: 'Single worker definition registered via withWorkerConfigs().',
+    fields: [
+      { name: 'id', type: 'string', description: 'Unique identifier used for routing' },
+      {
+        name: 'workerUrl',
+        type: 'URL',
+        description: 'URL of the worker script (passed to new Worker(url))',
+      },
+      {
+        name: 'maxInstances?',
+        type: 'number',
+        description: 'Max worker instances in the pool (default: 1)',
+      },
+    ],
+  },
+  {
+    name: 'WorkerRoute',
+    description: 'URL-pattern to worker routing rule registered via withWorkerRoutes().',
+    fields: [
+      {
+        name: 'pattern',
+        type: 'RegExp | string',
+        description: 'URL pattern to match (RegExp test or string prefix)',
+      },
+      { name: 'worker', type: 'string', description: 'Must match a WorkerConfig.id' },
+      {
+        name: 'priority?',
+        type: 'number',
+        description: 'Higher priority = evaluated first (default: 0)',
+      },
+    ],
+  },
+  {
+    name: 'WorkerRequestOptions',
+    description: 'HttpClient request options extended with optional per-request worker routing.',
+    fields: [
+      {
+        name: 'worker?',
+        type: 'string',
+        description: 'Explicit worker id to use for this request. Overrides URL routing.',
+      },
+    ],
+  },
+  {
+    name: 'OfflineCacheConfig',
+    description: 'Configuration options for offlineCacheInterceptor.',
+    fields: [
+      {
+        name: 'strategy?',
+        type: "'network-first' | 'cache-first'",
+        description:
+          'Caching strategy: "network-first" (default) or "cache-first" (stale-while-revalidate).',
+      },
+      {
+        name: 'cacheName?',
+        type: 'string',
+        description: 'Name of the Cache API storage bucket (default: "ah-http-offline-cache").',
+      },
+      {
+        name: 'ttl?',
+        type: 'number',
+        description:
+          'Time-to-live for cached responses in milliseconds (default: 86400000 ms = 24h).',
+      },
+      {
+        name: 'bypassHeader?',
+        type: 'string',
+        description:
+          'Custom header key to bypass the cache entirely (default: "X-Bypass-Offline-Cache").',
+      },
+    ],
+  },
+  {
+    name: 'OfflineSyncConfig',
+    description: 'Configuration options for offlineSyncQueueInterceptor.',
+    fields: [
+      {
+        name: 'dbName?',
+        type: 'string',
+        description:
+          'Name of the IndexedDB database to persist offline mutations (default: "ah_offline_sync").',
+      },
+      {
+        name: 'bypassHeader?',
+        type: 'string',
+        description:
+          'Custom header key to bypass mutation enqueuing (default: "X-Bypass-Offline-Sync").',
+      },
+    ],
+  },
+];
