@@ -1,59 +1,45 @@
 import { ResolveFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
-import { BROWSER_WEB_APIS_SERVICES } from '../data/browser-web-apis.data';
-import { CORE_SERVICES } from '../data/core.data';
-import { SECURITY_SERVICES, SECURITY_INTERFACES } from '../data/security.data';
-import { WORKER_HTTP_ENTRIES, WORKER_HTTP_INTERFACES } from '../data/worker-http.data';
-import { OPENLAYERS_SERVICES } from '../data/openlayers.data';
-import { STORAGE_SERVICES, STORAGE_INTERFACES } from '../data/storage.data';
+import { DocsVersionService } from '../services/docs-version.service';
 import {
   ServiceDetailConfig,
   InterfaceDoc,
 } from '../feature/unified-service-detail/unified-service-detail.component';
 import { SeoService } from '../../core/services/seo.service';
 
-const SECTION_DATA = {
-  core: {
-    dataSource: CORE_SERVICES,
-    backRoute: '/docs/core',
-    backLabel: 'core',
-  },
-  'browser-web-apis': {
-    dataSource: BROWSER_WEB_APIS_SERVICES,
-    backRoute: '/docs/browser-web-apis',
-    backLabel: 'browser-web-apis',
-  },
-  security: {
-    dataSource: SECURITY_SERVICES,
-    backRoute: '/docs/security',
-    backLabel: 'security',
-  },
-  'worker-http': {
-    dataSource: WORKER_HTTP_ENTRIES,
-    backRoute: '/docs/worker-http',
-    backLabel: 'worker-http',
-  },
-  storage: {
-    dataSource: STORAGE_SERVICES,
-    backRoute: '/docs/storage',
-    backLabel: 'storage',
-  },
-  openlayers: {
-    dataSource: OPENLAYERS_SERVICES,
-    backRoute: '/docs/openlayers',
-    backLabel: 'openlayers',
-  },
-};
+// Import v21 data
+import * as browserWebApisV21 from '../data/v21/browser-web-apis.data';
+import * as coreV21 from '../data/v21/core.data';
+import * as securityV21 from '../data/v21/security.data';
+import * as workerHttpV21 from '../data/v21/worker-http.data';
+import * as openlayersV21 from '../data/v21/openlayers.data';
+import * as storageV21 from '../data/v21/storage.data';
 
-function getInterfaces(section: string, itemId: string): InterfaceDoc[] | undefined {
+// Import v22 data
+import * as browserWebApisV22 from '../data/v22/browser-web-apis.data';
+import * as coreV22 from '../data/v22/core.data';
+import * as securityV22 from '../data/v22/security.data';
+import * as workerHttpV22 from '../data/v22/worker-http.data';
+import * as openlayersV22 from '../data/v22/openlayers.data';
+import * as storageV22 from '../data/v22/storage.data';
+
+function getInterfaces(
+  section: string,
+  itemId: string,
+  isV21: boolean,
+): InterfaceDoc[] | undefined {
   if (section === 'security') {
-    return SECURITY_INTERFACES[itemId];
+    return isV21
+      ? securityV21.SECURITY_INTERFACES[itemId]
+      : securityV22.SECURITY_INTERFACES[itemId];
   }
   if (section === 'worker-http') {
-    return WORKER_HTTP_INTERFACES[itemId];
+    return isV21
+      ? workerHttpV21.WORKER_HTTP_INTERFACES[itemId]
+      : workerHttpV22.WORKER_HTTP_INTERFACES[itemId];
   }
   if (section === 'storage') {
-    return STORAGE_INTERFACES[itemId];
+    return isV21 ? storageV21.STORAGE_INTERFACES[itemId] : storageV22.STORAGE_INTERFACES[itemId];
   }
   return undefined;
 }
@@ -61,7 +47,10 @@ function getInterfaces(section: string, itemId: string): InterfaceDoc[] | undefi
 export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (route) => {
   const router = inject(Router);
   const seo = inject(SeoService);
-  const section = route.url[0]?.path as keyof typeof SECTION_DATA;
+  const versionService = inject(DocsVersionService);
+  const isV21 = versionService.version() === 'v21';
+
+  const section = route.url[0]?.path;
   const paramName =
     section === 'worker-http'
       ? 'entry'
@@ -72,13 +61,51 @@ export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (rout
           : 'service';
   const itemId = route.paramMap.get(paramName) ?? '';
 
+  const sectionDataMap: Record<
+    string,
+    { dataSource: any[]; backRoute: string; backLabel: string }
+  > = {
+    core: {
+      dataSource: isV21 ? coreV21.CORE_SERVICES : coreV22.CORE_SERVICES,
+      backRoute: '/docs/core',
+      backLabel: 'core',
+    },
+    'browser-web-apis': {
+      dataSource: isV21
+        ? browserWebApisV21.BROWSER_WEB_APIS_SERVICES
+        : browserWebApisV22.BROWSER_WEB_APIS_SERVICES,
+      backRoute: '/docs/browser-web-apis',
+      backLabel: 'browser-web-apis',
+    },
+    security: {
+      dataSource: isV21 ? securityV21.SECURITY_SERVICES : securityV22.SECURITY_SERVICES,
+      backRoute: '/docs/security',
+      backLabel: 'security',
+    },
+    'worker-http': {
+      dataSource: isV21 ? workerHttpV21.WORKER_HTTP_ENTRIES : workerHttpV22.WORKER_HTTP_ENTRIES,
+      backRoute: '/docs/worker-http',
+      backLabel: 'worker-http',
+    },
+    storage: {
+      dataSource: isV21 ? storageV21.STORAGE_SERVICES : storageV22.STORAGE_SERVICES,
+      backRoute: '/docs/storage',
+      backLabel: 'storage',
+    },
+    openlayers: {
+      dataSource: isV21 ? openlayersV21.OPENLAYERS_SERVICES : openlayersV22.OPENLAYERS_SERVICES,
+      backRoute: '/docs/openlayers',
+      backLabel: 'openlayers',
+    },
+  };
+
   // Safety check for invalid section - redirect to docs
-  if (!SECTION_DATA[section]) {
+  if (!sectionDataMap[section]) {
     await router.navigate(['/docs']);
     return null as unknown as ServiceDetailConfig;
   }
 
-  const sectionData = SECTION_DATA[section];
+  const sectionData = sectionDataMap[section];
   const item = sectionData.dataSource.find((s) => s.id === itemId);
 
   // If service not found, redirect to section overview
@@ -99,6 +126,6 @@ export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (rout
     section: section as ServiceDetailConfig['section'],
     backRoute: sectionData.backRoute,
     backLabel: sectionData.backLabel,
-    interfaces: getInterfaces(section, itemId),
+    interfaces: getInterfaces(section, itemId, isV21),
   };
 };

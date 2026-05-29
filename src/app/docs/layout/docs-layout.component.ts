@@ -16,13 +16,15 @@ import {
 } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, filter } from 'rxjs/operators';
-import { DOCS_NAV_LIBRARIES } from '../config/docs-nav.data';
+import { DOCS_NAV_LIBRARIES, getNavLibrariesForVersion } from '../config/docs-nav.data';
 import { WINDOW } from '@angular-helpers/browser-web-apis';
+import { DocsVersionService } from '../services/docs-version.service';
+import { VersionDropdownComponent } from '../shared/version-dropdown.component';
 
 @Component({
   selector: 'app-docs-layout',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, VersionDropdownComponent],
   template: `
     <div
       class="flex h-[calc(100vh-60px)] overflow-hidden bg-base-100 text-base-content font-sans selection:bg-primary/30"
@@ -65,7 +67,7 @@ import { WINDOW } from '@angular-helpers/browser-web-apis';
 
         <!-- Library Navigation -->
         <nav class="flex-1 py-3 px-2 flex flex-col gap-1.5" aria-label="Library navigation">
-          @for (lib of libraries; track lib.id) {
+          @for (lib of libraries(); track lib.id) {
             <a
               [routerLink]="lib.overviewRoute"
               routerLinkActive="bg-base-200 text-base-content shadow-sm ring-1 ring-base-content/5"
@@ -210,6 +212,7 @@ import { WINDOW } from '@angular-helpers/browser-web-apis';
               }
             }
           </nav>
+          <app-version-dropdown />
         </header>
 
         <!-- Page Content -->
@@ -231,7 +234,8 @@ export class DocsLayoutComponent {
   private readonly router = inject(Router);
   private readonly window = inject(WINDOW);
 
-  readonly libraries = DOCS_NAV_LIBRARIES;
+  private readonly versionService = inject(DocsVersionService);
+  readonly libraries = computed(() => getNavLibrariesForVersion(this.versionService.version()));
 
   // Reactive signal that updates on every navigation
   private currentUrl = toSignal(
@@ -244,7 +248,7 @@ export class DocsLayoutComponent {
 
   readonly activeLibrary = computed(() => {
     const url = this.currentUrl();
-    return this.libraries.find((lib) => url.startsWith(lib.overviewRoute)) ?? null;
+    return this.libraries().find((lib) => url.startsWith(lib.overviewRoute)) ?? null;
   });
 
   /** Find the active item within the current library based on URL */
@@ -263,6 +267,16 @@ export class DocsLayoutComponent {
   protected sidebarOpen = signal(false);
 
   constructor() {
+    const versionService = inject(DocsVersionService);
+    this.route.queryParams.subscribe((params) => {
+      const v = params['v'];
+      if (v === '21') {
+        versionService.setVersion('v21');
+      } else if (v === '22') {
+        versionService.setVersion('v22');
+      }
+    });
+
     effect(() => {
       // Wait for DOM update after navigation
       queueMicrotask(() => {

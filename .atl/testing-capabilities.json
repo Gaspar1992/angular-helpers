@@ -1,0 +1,31 @@
+{
+  "project": "angular-helpers",
+  "stack": {
+    "framework": "Angular v21",
+    "packageManager": "pnpm",
+    "compiler": "TypeScript",
+    "buildTool": "Vite"
+  },
+  "testing": {
+    "unit": {
+      "tool": "Vitest",
+      "command": "pnpm test",
+      "watchCommand": "pnpm test:watch",
+      "config": "vitest.config.ts"
+    },
+    "e2e": {
+      "tool": "Playwright",
+      "command": "pnpm test:browser",
+      "config": "playwright.config.ts"
+    },
+    "linting": {
+      "tool": "oxlint & eslint",
+      "command": "pnpm lint"
+    },
+    "formatting": {
+      "tool": "oxfmt",
+      "command": "pnpm format"
+    }
+  },
+  "strictTddMode": true
+}
