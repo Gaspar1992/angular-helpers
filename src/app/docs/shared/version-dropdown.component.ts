@@ -1,4 +1,11 @@
-import { Component, ChangeDetectionStrategy, inject, signal, ElementRef } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  signal,
+  ElementRef,
+  viewChild,
+} from '@angular/core';
 import { DocsVersionService, AngularVersion } from '../services/docs-version.service';
 
 @Component({
@@ -8,7 +15,7 @@ import { DocsVersionService, AngularVersion } from '../services/docs-version.ser
     '(document:click)': 'onClickOutside($event)',
   },
   template: `
-    <div class="relative inline-block text-left">
+    <div class="relative inline-block text-left" #container>
       <button
         type="button"
         id="version-combobox-trigger"
@@ -62,9 +69,10 @@ import { DocsVersionService, AngularVersion } from '../services/docs-version.ser
 })
 export class VersionDropdownComponent {
   protected readonly versionService = inject(DocsVersionService);
-  private readonly elementRef = inject(ElementRef);
   protected readonly isOpen = signal(false);
   protected readonly highlightedIndex = signal(0);
+
+  protected readonly container = viewChild<ElementRef>('container');
 
   protected readonly options: { value: AngularVersion; label: string }[] = [
     { value: 'v22', label: 'Angular v22 (Latest)' },
@@ -124,7 +132,8 @@ export class VersionDropdownComponent {
   }
 
   protected onClickOutside(event: Event) {
-    if (this.isOpen() && !this.elementRef.nativeElement.contains(event.target)) {
+    const containerEl = this.container();
+    if (this.isOpen() && containerEl && !containerEl.nativeElement.contains(event.target)) {
       this.isOpen.set(false);
     }
   }
