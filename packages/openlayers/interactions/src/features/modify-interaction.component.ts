@@ -15,7 +15,6 @@ import { OlInteractionService } from '../services/interaction.service';
  */
 @Component({
   selector: 'ol-modify-interaction',
-  standalone: true,
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

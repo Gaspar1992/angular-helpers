@@ -10,7 +10,6 @@ import {
   signal,
   ViewChild,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import Control from 'ol/control/Control';
 import Geolocation from 'ol/Geolocation';
@@ -23,14 +22,12 @@ import type { ControlPosition } from '../models/control.types';
 
 @Component({
   selector: 'ol-geolocation-control',
-  standalone: true,
-  imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       #controlElement
       class="ol-geolocation-control ol-unselectable ol-control"
-      [ngClass]="position()"
+      [class]="position()"
     >
       <button
         type="button"

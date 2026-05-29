@@ -30,7 +30,6 @@ import type { TimelinePosition } from '../models/timeline.types';
  */
 @Component({
   selector: 'ol-timeline',
-  standalone: true,
   imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `

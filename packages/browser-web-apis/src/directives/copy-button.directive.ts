@@ -4,7 +4,6 @@ import { ClipboardService } from '../services/clipboard.service';
 
 @Directive({
   selector: '[copyButton]',
-  standalone: true,
   host: {
     '(click)': 'onClick()',
   },
