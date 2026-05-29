@@ -15,7 +15,6 @@ class MockFullscreenService {
 }
 
 @Component({
-  standalone: true,
   imports: [FullscreenFocusDirective],
   template: `<div fullscreenFocus><button>Focus Target</button></div>`,
 })

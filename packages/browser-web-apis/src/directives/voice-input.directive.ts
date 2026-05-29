@@ -16,7 +16,6 @@ import { effect } from '@angular/core';
 
 @Directive({
   selector: '[voiceInput]',
-  standalone: true,
   host: {
     '(keydown)': 'handleKeyDown($event)',
   },

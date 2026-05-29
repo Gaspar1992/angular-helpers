@@ -5,7 +5,6 @@ export type VibrateFeedbackType = 'success' | 'error' | 'notification' | 'double
 
 @Directive({
   selector: '[vibrateFeedback]',
-  standalone: true,
   host: {
     '(click)': 'onClick()',
   },

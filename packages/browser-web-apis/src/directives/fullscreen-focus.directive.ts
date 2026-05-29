@@ -5,7 +5,6 @@ import { Subscription } from 'rxjs';
 
 @Directive({
   selector: '[fullscreenFocus]',
-  standalone: true,
   host: {
     '(click)': 'onClick()',
     '(keydown)': 'handleKeyDown($event)',

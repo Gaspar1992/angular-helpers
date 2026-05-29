@@ -23,7 +23,6 @@ vi.spyOn(injectSpeechMock, 'injectSpeechRecognition').mockReturnValue({
 });
 
 @Component({
-  standalone: true,
   imports: [VoiceInputDirective, ReactiveFormsModule],
   template: `<input type="text" [formControl]="control" voiceInput />`,
 })
