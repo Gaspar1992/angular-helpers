@@ -7,8 +7,8 @@ export type AngularVersion = 'v21' | 'v22';
 export class DocsVersionService {
   private readonly router = inject(Router);
 
-  private readonly activeVersionSignal = signal<AngularVersion>('v22');
-  readonly version = computed(() => this.activeVersionSignal());
+  readonly activeVersionSignal = signal<AngularVersion>('v22');
+  readonly version = this.activeVersionSignal.asReadonly();
 
   constructor() {
     this.initializeFromUrl();
