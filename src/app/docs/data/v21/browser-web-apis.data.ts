@@ -1,4 +1,4 @@
-import { ServiceDoc } from '../models/doc-meta.model';
+import { ServiceDoc } from '../../models/doc-meta.model';
 
 export const BROWSER_WEB_APIS_SERVICES: ServiceDoc[] = [
   {

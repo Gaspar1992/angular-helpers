@@ -271,9 +271,9 @@ export class DocsLayoutComponent {
     this.route.queryParams.subscribe((params) => {
       const v = params['v'];
       if (v === '21') {
-        versionService.activeVersionSignal.set('v21');
+        versionService.setVersion('v21');
       } else if (v === '22') {
-        versionService.activeVersionSignal.set('v22');
+        versionService.setVersion('v22');
       }
     });
 

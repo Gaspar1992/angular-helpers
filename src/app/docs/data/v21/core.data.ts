@@ -1,4 +1,4 @@
-import { ServiceDoc } from '../models/doc-meta.model';
+import { ServiceDoc } from '../../models/doc-meta.model';
 
 export const CORE_SERVICES: ServiceDoc[] = [
   {
