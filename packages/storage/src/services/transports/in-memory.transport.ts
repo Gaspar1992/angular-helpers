@@ -74,6 +74,16 @@ export class InMemoryStorageTransport implements StorageTransport {
 
   async delete(key: string, _options?: StorageSignalOptions): Promise<void> {
     this.store.delete(key);
+    const keyListeners = this.listeners.get(key);
+    if (keyListeners) {
+      for (const callback of keyListeners) {
+        try {
+          Promise.resolve().then(() => callback(undefined));
+        } catch {
+          // Ignore callback failures
+        }
+      }
+    }
   }
 
   onChange<T>(key: string, callback: (value: T) => void): () => void {

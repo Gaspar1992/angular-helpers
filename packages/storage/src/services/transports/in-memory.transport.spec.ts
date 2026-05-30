@@ -78,4 +78,18 @@ describe('InMemoryStorageTransport', () => {
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(callback).not.toHaveBeenCalled();
   });
+
+  it('should trigger subscription callbacks with undefined when a key is deleted', async () => {
+    const callback = vi.fn();
+    transport.onChange<any>('subKeyDelete', callback);
+
+    await transport.write('subKeyDelete', 'someData');
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(callback).toHaveBeenCalledWith('someData');
+    callback.mockClear();
+
+    await transport.delete('subKeyDelete');
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(callback).toHaveBeenCalledWith(undefined);
+  });
 });

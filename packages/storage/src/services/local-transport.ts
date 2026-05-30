@@ -25,6 +25,7 @@ export class LocalStorageTransport implements StorageTransport {
   private readonly inMemory: InMemoryStorageTransport;
   private readonly workerTransport?: WorkerStorageTransport;
   private readonly broadcastChannel?: BroadcastChannel;
+  private readonly isBrowser: boolean;
 
   public storageType: 'local' | 'session' | 'indexeddb' | 'cacheapi' | 'memory' = 'local';
   public encrypt = false;
@@ -38,6 +39,7 @@ export class LocalStorageTransport implements StorageTransport {
     @Inject(STORAGE_WORKER_FACTORY) @Optional() private readonly workerFactory?: () => Worker,
   ) {
     const { isBrowser, window: globalWindow } = injectPlatform();
+    this.isBrowser = isBrowser;
 
     this.webStorage = new WebStorageTransport(this.secretPassphrase);
     this.indexedDB = new IndexedDBTransport(this.secretPassphrase);
@@ -178,20 +180,15 @@ export class LocalStorageTransport implements StorageTransport {
     const targetType = type ?? this.storageType;
     switch (targetType) {
       case 'indexeddb':
-        return this.indexedDB;
+        return this.isBrowser ? this.indexedDB : this.inMemory;
       case 'cacheapi':
-        return this.cacheApi;
+        return this.isBrowser ? this.cacheApi : this.inMemory;
       case 'memory':
         return this.inMemory;
       case 'local':
       case 'session':
       default:
-        // SSR safety: if not in browser, fallback to inMemory
-        const { isBrowser } = injectPlatform();
-        if (!isBrowser) {
-          return this.inMemory;
-        }
-        return this.webStorage;
+        return this.isBrowser ? this.webStorage : this.inMemory;
     }
   }
 }
