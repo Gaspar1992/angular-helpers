@@ -8,6 +8,7 @@ import { WebStorageTransport } from './transports/web-storage.transport';
 import { IndexedDBTransport } from './transports/indexeddb.transport';
 import { CacheApiTransport } from './transports/cache-api.transport';
 import { WorkerStorageTransport } from './worker-transport';
+import { InMemoryStorageTransport } from './transports/in-memory.transport';
 
 /**
  * Composite transport that delegates to specific storage strategies (local, indexeddb, cacheapi).
@@ -21,10 +22,11 @@ export class LocalStorageTransport implements StorageTransport {
   private readonly webStorage: WebStorageTransport;
   private readonly indexedDB: IndexedDBTransport;
   private readonly cacheApi: CacheApiTransport;
+  private readonly inMemory: InMemoryStorageTransport;
   private readonly workerTransport?: WorkerStorageTransport;
   private readonly broadcastChannel?: BroadcastChannel;
 
-  public storageType: 'local' | 'session' | 'indexeddb' | 'cacheapi' = 'local';
+  public storageType: 'local' | 'session' | 'indexeddb' | 'cacheapi' | 'memory' = 'local';
   public encrypt = false;
   public dbName = 'ah_db';
   public storeName = 'kv';
@@ -40,14 +42,15 @@ export class LocalStorageTransport implements StorageTransport {
     this.webStorage = new WebStorageTransport(this.secretPassphrase);
     this.indexedDB = new IndexedDBTransport(this.secretPassphrase);
     this.cacheApi = new CacheApiTransport(this.secretPassphrase);
+    this.inMemory = new InMemoryStorageTransport(this.secretPassphrase);
 
     if (isBrowser && this.workerFactory) {
       this.workerTransport = new WorkerStorageTransport(this.workerFactory);
     }
 
-    // If running in worker context, default to indexeddb as L2
+    // Default to in-memory in SSR/Server environments to avoid failures when browser APIs are missing
     if (!isBrowser) {
-      this.storageType = 'indexeddb';
+      this.storageType = 'memory';
     }
 
     if (isBrowser && globalWindow && 'BroadcastChannel' in globalWindow) {
@@ -148,7 +151,10 @@ export class LocalStorageTransport implements StorageTransport {
     if (this.workerTransport) {
       unsubs.push(this.workerTransport.onChange(key, callback));
     } else {
-      unsubs.push(this.webStorage.onChange(key, callback));
+      const transport = this.resolveTransport(this.storageType);
+      if (transport.onChange) {
+        unsubs.push(transport.onChange(key, callback));
+      }
     }
 
     if (this.broadcastChannel) {
@@ -175,9 +181,16 @@ export class LocalStorageTransport implements StorageTransport {
         return this.indexedDB;
       case 'cacheapi':
         return this.cacheApi;
+      case 'memory':
+        return this.inMemory;
       case 'local':
       case 'session':
       default:
+        // SSR safety: if not in browser, fallback to inMemory
+        const { isBrowser } = injectPlatform();
+        if (!isBrowser) {
+          return this.inMemory;
+        }
         return this.webStorage;
     }
   }

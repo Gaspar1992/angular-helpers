@@ -5,18 +5,54 @@ import { LocalStorageTransport } from './local-transport';
 import { SECURE_STORAGE_PASSPHRASE } from '../tokens/storage.tokens';
 
 // Polyfill for JSDOM/HappyDOM lack of subtle crypto support
-if (typeof globalThis !== 'undefined' && !globalThis.crypto?.subtle) {
-  Object.defineProperty(globalThis, 'crypto', {
-    value: webcrypto,
-    configurable: true,
-    writable: true,
-  });
+if (typeof globalThis !== 'undefined') {
+  if (!globalThis.crypto?.subtle) {
+    Object.defineProperty(globalThis, 'crypto', {
+      value: webcrypto,
+      configurable: true,
+      writable: true,
+    });
+  }
+
+  // Ensure window.localStorage and window.sessionStorage are stubbed properly if JSDOM gets confused
+  const mockStorage = () => {
+    let store: Record<string, string> = {};
+    return {
+      getItem: (key: string) => store[key] || null,
+      setItem: (key: string, value: string) => {
+        store[key] = value.toString();
+      },
+      removeItem: (key: string) => {
+        delete store[key];
+      },
+      clear: () => {
+        store = {};
+      },
+      key: (index: number) => Object.keys(store)[index] || null,
+      get length() {
+        return Object.keys(store).length;
+      },
+    };
+  };
+
+  if (typeof window !== 'undefined') {
+    if (!window.localStorage || typeof window.localStorage.setItem !== 'function') {
+      Object.defineProperty(window, 'localStorage', { value: mockStorage(), writable: true });
+    }
+    if (!window.sessionStorage || typeof window.sessionStorage.setItem !== 'function') {
+      Object.defineProperty(window, 'sessionStorage', { value: mockStorage(), writable: true });
+    }
+  }
 }
 
 describe('LocalStorageTransport', () => {
   beforeEach(() => {
-    localStorage.clear();
-    sessionStorage.clear();
+    if (typeof localStorage !== 'undefined' && typeof localStorage.clear === 'function') {
+      localStorage.clear();
+    }
+    if (typeof sessionStorage !== 'undefined' && typeof sessionStorage.clear === 'function') {
+      sessionStorage.clear();
+    }
   });
 
   it('should resolve with the default encryption passphrase', () => {
@@ -112,5 +148,24 @@ describe('LocalStorageTransport', () => {
     // Confirm that the instance's default storage type didn't change
     expect(transport.storageType).toBe('local');
     expect(transport.encrypt).toBe(false);
+  });
+
+  it('should route requests correctly to the in-memory transport when storageType: memory is set', async () => {
+    TestBed.configureTestingModule({});
+    const transport = TestBed.inject(LocalStorageTransport);
+
+    await transport.write(
+      'memKey',
+      { role: 'tester' },
+      { storageType: 'memory', serializer: 'json' },
+    );
+    const result = await transport.read<any>('memKey', {
+      storageType: 'memory',
+      serializer: 'json',
+    });
+    expect(result).toEqual({ role: 'tester' });
+
+    // Verify it didn't write to standard localStorage
+    expect(localStorage.getItem('memKey')).toBeNull();
   });
 });

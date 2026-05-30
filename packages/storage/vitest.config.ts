@@ -5,7 +5,9 @@ export default defineConfig({
   cacheDir: '../../node_modules/.vitest-cache/storage',
   resolve: {
     alias: {
-      '@angular-helpers/core': resolve(__dirname, '../core/src/index.ts'),
+      '@angular-helpers/core/utils': resolve(__dirname, '../core/utils/src/index.ts'),
+      '@angular-helpers/core': resolve(__dirname, '../core/src/public-api.ts'),
+      '@angular-helpers/storage/worker': resolve(__dirname, 'worker/src/index.ts'),
       '@angular-helpers/storage': resolve(__dirname, 'src/public-api.ts'),
     },
   },
