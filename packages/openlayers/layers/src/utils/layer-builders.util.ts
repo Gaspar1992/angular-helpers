@@ -74,7 +74,7 @@ export function buildVectorLayer(config: VectorLayerConfig, source: VectorSource
     visible: config.visible ?? true,
     opacity: config.opacity ?? 1,
     zIndex: config.zIndex,
-    style: clusterCfg?.enabled ? clusterStyleFn : styleFn,
+    style: (clusterCfg?.enabled ? clusterStyleFn : styleFn) as any,
   });
 
   layer.set('id', config.id);

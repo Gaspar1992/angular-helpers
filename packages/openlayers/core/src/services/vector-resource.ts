@@ -1,4 +1,4 @@
-import { resource, type Resource, type ResourceOptions, type Signal } from '@angular/core';
+import { resource, type ResourceRef, type ResourceOptions, type Signal } from '@angular/core';
 import GeoJSON from 'ol/format/GeoJSON';
 import type { Feature } from '../models/types';
 import type OLFeature from 'ol/Feature';
@@ -20,7 +20,7 @@ export interface VectorResourceOptions {
 export function createVectorResource(
   url: Signal<string | undefined>,
   options?: VectorResourceOptions,
-): Resource<Feature[]> {
+): ResourceRef<Feature[] | undefined> {
   return resource({
     loader: async ({ abortSignal }) => {
       const fetchUrl = url();
