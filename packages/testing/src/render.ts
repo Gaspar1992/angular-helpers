@@ -3,9 +3,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
 export interface RenderOptions<T> {
+  imports?: any[];
   providers?: any[];
   inputs?: Partial<T>;
   outputs?: Partial<Record<keyof T, (event: any) => void>>;
+  hostProperties?: Record<string, any>;
   detectInitialChanges?: boolean;
   template?: string;
 }
@@ -90,12 +92,12 @@ export async function render<T>(
     const decorator = Component({
       template: options.template,
       standalone: true,
-      imports: [componentType as any],
+      imports: [componentType as any, ...(options.imports || [])],
     });
     const HostType = decorator(DynamicHostComponent) as Type<any>;
 
     await TestBed.configureTestingModule({
-      imports: [HostType],
+      imports: [HostType, ...(options.imports || [])],
       providers: options.providers || [],
     }).compileComponents();
 
@@ -103,12 +105,12 @@ export async function render<T>(
 
     const debugEl = fixture.debugElement.query(By.directive(componentType));
     if (!debugEl) {
-      throw new Error(`Could not find component in the provided template.`);
+      throw new Error(`Could not find directive or component in the provided template.`);
     }
-    componentInstance = debugEl.componentInstance;
+    componentInstance = debugEl.injector.get(componentType);
   } else {
     await TestBed.configureTestingModule({
-      imports: [componentType as any],
+      imports: [componentType as any, ...(options.imports || [])],
       providers: options.providers || [],
     }).compileComponents();
 
@@ -128,6 +130,10 @@ export async function render<T>(
         fixture.componentRef.setInput(key, (options.inputs as any)[key]);
       }
     }
+  }
+
+  if (options.hostProperties && options.template) {
+    Object.assign(fixture.componentInstance, options.hostProperties);
   }
 
   // Support for output binding (compatible with EventEmitter and Signal output())

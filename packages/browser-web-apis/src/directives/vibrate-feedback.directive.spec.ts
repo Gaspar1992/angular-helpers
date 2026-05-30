@@ -1,8 +1,8 @@
 import '@angular/compiler';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { TestBed } from '@angular/core/testing';
 import { VibrateFeedbackDirective } from './vibrate-feedback.directive';
 import { VibrationService } from '../services/vibration.service';
+import { render, RenderResult } from '@angular-helpers/testing';
 
 class MockVibrationService {
   isSupported = vi.fn().mockReturnValue(true);
@@ -14,23 +14,27 @@ class MockVibrationService {
 }
 
 describe('VibrateFeedbackDirective', () => {
-  let directive: VibrateFeedbackDirective;
-  let service: VibrationService;
+  let result: RenderResult<any>;
+  let vibrationService: MockVibrationService;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [
-        VibrateFeedbackDirective,
-        { provide: VibrationService, useClass: MockVibrationService },
-      ],
+  beforeEach(async () => {
+    result = await render(VibrateFeedbackDirective, {
+      template: '<button vibrateFeedback>Vibrate</button>',
+      providers: [{ provide: VibrationService, useClass: MockVibrationService }],
     });
-    directive = TestBed.inject(VibrateFeedbackDirective);
-    service = TestBed.inject(VibrationService);
+
+    vibrationService = result.fixture.debugElement.injector.get(
+      VibrationService,
+    ) as unknown as MockVibrationService;
   });
 
-  it('should create and trigger vibration click binding', () => {
-    expect(directive).toBeTruthy();
-    directive.onClick();
-    expect(service.vibrate).toHaveBeenCalledWith(50); // Default light feedback
+  it('should create and trigger vibration on click', () => {
+    expect(result.fixture.nativeElement.querySelector('button')).toBeTruthy();
+
+    // Simulate DOM click
+    result.click('button');
+
+    // Default light feedback is 50ms
+    expect(vibrationService.vibrate).toHaveBeenCalledWith(50);
   });
 });
