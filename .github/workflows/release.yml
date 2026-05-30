@@ -36,7 +36,7 @@ jobs:
       - name: Bootstrap first release to 21.x
         run: |
           for pkg in core browser-web-apis storage security worker-http openlayers testing; do
-            if ! git tag --list "@angular-helpers/${pkg}@*" | grep -q .; then
+            if ! git tag --list "@angular-helpers/${pkg}@21.*" | grep -q .; then
               git tag "@angular-helpers/${pkg}@21.14.0"
               git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" "refs/tags/@angular-helpers/${pkg}@21.14.0"
             fi
@@ -46,12 +46,6 @@ jobs:
 
       - name: Build all packages in topological order
         run: pnpm run build:packages:prod
-
-      - name: Strip workspace protocol from built packages dynamically
-        run: |
-          core_version=$(node -p "require('./packages/core/package.json').version")
-          echo "Replacing workspace:* with ^$core_version"
-          find dist -name "package.json" -exec sed -i "s/\"workspace:\*\"/\"^$core_version\"/g" {} +
 
       - name: Semantic Release (Core)
         env:
@@ -94,6 +88,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm exec semantic-release
         working-directory: packages/testing
+
+      - name: Strip workspace protocol from built packages dynamically
+        run: |
+          core_version=$(node -p "require('./packages/core/package.json').version")
+          echo "Replacing workspace:* with ^$core_version"
+          find dist -name "package.json" -exec sed -i "s/\"workspace:\*\"/\"^$core_version\"/g" {} +
 
       - name: Publish to npm with Provenance
         run: |
