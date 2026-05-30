@@ -1,86 +1,86 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
 import { VersionDropdownComponent } from './version-dropdown.component';
 import { DocsVersionService } from '../services/docs-version.service';
+import { render, provideMockService } from '@angular-helpers/testing';
+import { vi } from 'vitest';
+
+import { signal } from '@angular/core';
 
 describe('VersionDropdownComponent', () => {
-  let component: VersionDropdownComponent;
-  let fixture: ComponentFixture<VersionDropdownComponent>;
-  let versionService: DocsVersionService;
+  async function setup(overrideOptions = true) {
+    const result = await render(VersionDropdownComponent, {
+      providers: [
+        provideMockService(DocsVersionService, {
+          version: signal('v21'),
+        }),
+      ],
+      detectInitialChanges: false,
+    });
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [VersionDropdownComponent],
-      providers: [DocsVersionService],
-    }).compileComponents();
+    if (overrideOptions) {
+      // Set 2 options to allow testing interactive dropdown features
+      // as options is a protected property, not an @Input.
+      (result.component as any).options = [
+        { value: 'v22', label: 'Angular v22 (Latest)' },
+        { value: 'v21', label: 'Angular v21' },
+      ];
+      result.fixture.componentRef.changeDetectorRef.markForCheck();
+    }
+    result.fixture.detectChanges();
+    return result;
+  }
 
-    fixture = TestBed.createComponent(VersionDropdownComponent);
-    component = fixture.componentInstance;
-    // Set 2 options to allow testing interactive dropdown features
-    (component as any).options = [
-      { value: 'v22', label: 'Angular v22 (Latest)' },
-      { value: 'v21', label: 'Angular v21' },
-    ];
-    versionService = TestBed.inject(DocsVersionService);
-    fixture.detectChanges();
-  });
-
-  it('should create and verify accessible combobox and role="combobox"', () => {
-    const triggerBtn = fixture.debugElement.query(By.css('[role="combobox"]'));
+  it('should create and verify accessible combobox and role="combobox"', async () => {
+    const { query } = await setup();
+    const triggerBtn = query('[role="combobox"]');
     expect(triggerBtn).toBeTruthy();
-    expect(triggerBtn.attributes['aria-haspopup']).toBe('listbox');
-    expect(triggerBtn.attributes['aria-expanded']).toBe('false');
+    expect(triggerBtn?.getAttribute('aria-haspopup')).toBe('listbox');
+    expect(triggerBtn?.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('should open dropdown and verify options', async () => {
-    const triggerBtn = fixture.debugElement.query(By.css('[role="combobox"]'));
-    triggerBtn.nativeElement.click();
-    fixture.detectChanges();
+    const { query, queryAll, click } = await setup();
+    click('[role="combobox"]');
 
-    expect(triggerBtn.attributes['aria-expanded']).toBe('true');
-    const listbox = fixture.debugElement.query(By.css('[role="listbox"]'));
-    expect(listbox).toBeTruthy();
+    const triggerBtn = query('[role="combobox"]');
+    expect(triggerBtn?.getAttribute('aria-expanded')).toBe('true');
 
-    const options = fixture.debugElement.queryAll(By.css('[role="option"]'));
-    expect(options.length).toBe(2);
+    expect(query('[role="listbox"]')).toBeTruthy();
+    expect(queryAll('[role="option"]').length).toBe(2);
   });
 
-  it('should navigate options on keydown and select on Enter', () => {
-    const triggerBtn = fixture.debugElement.query(By.css('[role="combobox"]'));
+  it('should navigate options on keydown and select on Enter', async () => {
+    const { query, fixture } = await setup();
+    const triggerBtn = query('[role="combobox"]') as HTMLElement;
 
-    // Press ArrowDown to open
-    triggerBtn.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    triggerBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
     fixture.detectChanges();
-    expect(triggerBtn.attributes['aria-expanded']).toBe('true');
+    expect(triggerBtn.getAttribute('aria-expanded')).toBe('true');
 
-    // Press ArrowDown again to highlight second option (index 1 = v21 since initial index was 0)
-    triggerBtn.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-    fixture.detectChanges();
-
-    // Verify it updates service version when pressing Enter
-    const setVersionSpy = vi.spyOn(versionService, 'setVersion');
-    triggerBtn.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    triggerBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
     fixture.detectChanges();
 
-    expect(setVersionSpy).toHaveBeenCalledWith('v22');
-    expect(triggerBtn.attributes['aria-expanded']).toBe('false');
+    const versionService = fixture.debugElement.injector.get(DocsVersionService);
+    triggerBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    fixture.detectChanges();
+
+    expect(versionService.setVersion).toHaveBeenCalledWith('v22');
+    expect(triggerBtn.getAttribute('aria-expanded')).toBe('false');
   });
 
-  it('should close dropdown on Escape', () => {
-    const triggerBtn = fixture.debugElement.query(By.css('[role="combobox"]'));
-    triggerBtn.nativeElement.click();
-    fixture.detectChanges();
-    expect(triggerBtn.attributes['aria-expanded']).toBe('true');
+  it('should close dropdown on Escape', async () => {
+    const { query, click, fixture } = await setup();
+    click('[role="combobox"]');
 
-    triggerBtn.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    const triggerBtn = query('[role="combobox"]') as HTMLElement;
+    expect(triggerBtn.getAttribute('aria-expanded')).toBe('true');
+
+    triggerBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     fixture.detectChanges();
-    expect(triggerBtn.attributes['aria-expanded']).toBe('false');
+    expect(triggerBtn.getAttribute('aria-expanded')).toBe('false');
   });
 
-  it('should hide the dropdown completely when only one option is available', () => {
-    const singleFixture = TestBed.createComponent(VersionDropdownComponent);
-    singleFixture.detectChanges();
-    const triggerBtn = singleFixture.debugElement.query(By.css('[role="combobox"]'));
-    expect(triggerBtn).toBeNull();
+  it('should hide the dropdown completely when only one option is available', async () => {
+    const { query } = await setup(false);
+    expect(query('[role="combobox"]')).toBeNull();
   });
 });

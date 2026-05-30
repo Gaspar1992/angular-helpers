@@ -15,6 +15,14 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
+      thresholds: {
+        'packages/testing/src/**/*.ts': {
+          lines: 80,
+          functions: 80,
+          branches: 80,
+          statements: 80,
+        },
+      },
     },
     server: {
       deps: {
@@ -26,6 +34,7 @@ export default defineConfig({
     alias: {
       '@angular-helpers/core/utils': here('./packages/core/utils/src/index.ts'),
       '@angular-helpers/core': here('./packages/core/src/index.ts'),
+      '@angular-helpers/testing': here('./packages/testing/src/public-api.ts'),
       '@angular-helpers/storage/worker': here('./packages/storage/worker/src/index.ts'),
       '@analogjs/vitest-angular/setup-vitest': here(
         './node_modules/@analogjs/vitest-angular/setup-vitest.js',

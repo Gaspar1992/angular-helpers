@@ -55,6 +55,7 @@
     }
   },
   "devDependencies": {
+    "@angular-helpers/testing": "workspace:*",
     "@analogjs/vite-plugin-angular": "^2.4.10",
     "@analogjs/vitest-angular": "^2.4.10",
     "@types/proj4": "^2.19.0",
