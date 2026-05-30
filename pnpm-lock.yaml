@@ -267,6 +267,9 @@ importers:
       '@analogjs/vitest-angular':
         specifier: ^2.4.10
         version: 2.5.1(@analogjs/vite-plugin-angular@2.5.1(@angular-devkit/build-angular@21.2.11(f55fabde37bd1b623d18141ca9e867ba))(@angular/build@21.2.11(6eaee00960b6019428ea93ed3874e84d))(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(vite@8.0.13(@types/node@20.19.41)(esbuild@0.28.0)(jiti@2.7.0)(less@4.6.4)(sass@1.99.0)(terser@5.46.0)(tsx@4.22.0)(yaml@2.9.0)))(@angular-devkit/architect@0.2102.11(chokidar@5.0.0))(@angular-devkit/schematics@21.2.11(chokidar@5.0.0))(vitest@4.1.6)
+      '@angular-helpers/testing':
+        specifier: workspace:*
+        version: link:../testing
       '@types/proj4':
         specifier: ^2.19.0
         version: 2.19.0
