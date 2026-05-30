@@ -1,9 +1,9 @@
 import '@angular/compiler';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { Component, signal } from '@angular/core';
-import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule, NgControl } from '@angular/forms';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { signal } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { VoiceInputDirective } from './voice-input.directive';
+import { render, RenderResult } from '@angular-helpers/testing';
 import * as injectSpeechMock from '../fns/inject-speech-recognition';
 
 // Mock injectSpeechRecognition to avoid real SpeechRecognition dependency
@@ -22,39 +22,37 @@ vi.spyOn(injectSpeechMock, 'injectSpeechRecognition').mockReturnValue({
   abort: vi.fn(),
 });
 
-@Component({
-  imports: [VoiceInputDirective, ReactiveFormsModule],
-  template: `<input type="text" [formControl]="control" voiceInput />`,
-})
-class TestComponent {
-  control = new FormControl('');
-}
-
 describe('VoiceInputDirective', () => {
-  let fixture: ComponentFixture<TestComponent>;
-  let inputElement: HTMLInputElement;
+  let result: RenderResult<any>;
+  let control: FormControl;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [TestComponent],
+  beforeEach(async () => {
+    control = new FormControl('');
+
+    result = await render(VoiceInputDirective, {
+      template: `<input type="text" [formControl]="control" voiceInput />`,
+      imports: [ReactiveFormsModule],
+      hostProperties: {
+        control,
+      },
     });
-    fixture = TestBed.createComponent(TestComponent);
-    fixture.detectChanges();
-    inputElement = fixture.nativeElement.querySelector('input');
   });
 
   it('should create and apply aria-autocomplete attribute', () => {
+    const inputElement = result.fixture.nativeElement.querySelector('input');
     expect(inputElement).toBeTruthy();
     expect(inputElement.getAttribute('aria-autocomplete')).toBe('list');
   });
 
   it('should announce listening status by setting aria-busy', () => {
+    const inputElement = result.fixture.nativeElement.querySelector('input');
+
     mockIsListening.set(true);
-    fixture.detectChanges();
+    result.fixture.detectChanges();
     expect(inputElement.getAttribute('aria-busy')).toBe('true');
 
     mockIsListening.set(false);
-    fixture.detectChanges();
+    result.fixture.detectChanges();
     expect(inputElement.getAttribute('aria-busy')).toBe('false');
   });
 });

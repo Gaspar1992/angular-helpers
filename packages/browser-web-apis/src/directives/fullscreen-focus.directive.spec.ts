@@ -1,9 +1,8 @@
 import '@angular/compiler';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { Component } from '@angular/core';
-import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { FullscreenFocusDirective } from './fullscreen-focus.directive';
 import { FullscreenService } from '../services/fullscreen.service';
+import { render, RenderResult } from '@angular-helpers/testing';
 import { of } from 'rxjs';
 
 class MockFullscreenService {
@@ -14,27 +13,30 @@ class MockFullscreenService {
   fullscreenElement = null;
 }
 
-@Component({
-  imports: [FullscreenFocusDirective],
-  template: `<div fullscreenFocus><button>Focus Target</button></div>`,
-})
-class TestFullscreenComponent {}
-
 describe('FullscreenFocusDirective', () => {
-  let fixture: ComponentFixture<TestFullscreenComponent>;
-  let element: HTMLDivElement;
+  let result: RenderResult<any>;
+  let fullscreenService: MockFullscreenService;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [TestFullscreenComponent],
+  beforeEach(async () => {
+    result = await render(FullscreenFocusDirective, {
+      template: `<div fullscreenFocus><button>Focus Target</button></div>`,
       providers: [{ provide: FullscreenService, useClass: MockFullscreenService }],
     });
-    fixture = TestBed.createComponent(TestFullscreenComponent);
-    fixture.detectChanges();
-    element = fixture.nativeElement.querySelector('div');
+
+    fullscreenService = result.fixture.debugElement.injector.get(
+      FullscreenService,
+    ) as unknown as MockFullscreenService;
   });
 
   it('should create container with fullscreenFocus directive', () => {
+    const element = result.fixture.nativeElement.querySelector('div');
     expect(element).toBeTruthy();
+    expect(element.hasAttribute('fullscreenFocus')).toBe(true);
+  });
+
+  it('should toggle fullscreen on click', () => {
+    const element = result.fixture.nativeElement.querySelector('div');
+    element.click();
+    expect(fullscreenService.toggle).toHaveBeenCalled();
   });
 });

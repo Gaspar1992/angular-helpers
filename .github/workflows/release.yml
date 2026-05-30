@@ -35,13 +35,12 @@ jobs:
 
       - name: Bootstrap first release to 21.x
         run: |
-          if git tag --list 'v*' | grep -q .; then
-            echo "Existing release tags detected. Skipping bootstrap."
-            exit 0
-          fi
-
-          git tag v20.0.0
-          git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" refs/tags/v20.0.0
+          for pkg in core browser-web-apis storage security worker-http openlayers testing; do
+            if ! git tag --list "@angular-helpers/${pkg}@*" | grep -q .; then
+              git tag "@angular-helpers/${pkg}@21.14.0"
+              git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" "refs/tags/@angular-helpers/${pkg}@21.14.0"
+            fi
+          done
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 

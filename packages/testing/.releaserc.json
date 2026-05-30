@@ -1,0 +1,24 @@
+{
+  "extends": "semantic-release-monorepo",
+  "branches": ["main"],
+  "tagFormat": "@angular-helpers/testing@${version}",
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/changelog",
+    [
+      "@semantic-release/npm",
+      {
+        "pkgRoot": "../../dist/testing",
+        "tarballDir": "release",
+        "npmPublish": false
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "failComment": false
+      }
+    ]
+  ]
+}

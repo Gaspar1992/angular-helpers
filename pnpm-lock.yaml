@@ -251,6 +251,9 @@ importers:
 
   packages/openlayers:
     dependencies:
+      '@angular-helpers/testing':
+        specifier: workspace:*
+        version: link:../testing
       '@angular/common':
         specifier: ^21.2.0
         version: 21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2)
@@ -333,6 +336,21 @@ importers:
         version: 29.1.1
       vitest:
         specifier: ^4.1.5
+        version: 4.1.6(@types/node@20.19.41)(@vitest/coverage-v8@4.1.6)(@vitest/ui@4.1.6)(jsdom@29.1.1)(vite@8.0.13(@types/node@20.19.41)(esbuild@0.28.0)(jiti@2.7.0)(less@4.6.4)(sass@1.99.0)(terser@5.46.0)(tsx@4.22.0)(yaml@2.9.0))
+
+  packages/testing:
+    dependencies:
+      '@angular/common':
+        specifier: ^21.2.0
+        version: 21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@angular/core':
+        specifier: ^21.2.0
+        version: 21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2)
+      '@angular/router':
+        specifier: ^21.2.0
+        version: 21.2.13(@angular/common@21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(@angular/platform-browser@21.2.13(@angular/animations@21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2)))(@angular/common@21.2.13(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.13(@angular/compiler@21.2.13)(rxjs@7.8.2)))(rxjs@7.8.2)
+      vitest:
+        specifier: ^2.0.0 || ^3.0.0 || ^4.0.0
         version: 4.1.6(@types/node@20.19.41)(@vitest/coverage-v8@4.1.6)(@vitest/ui@4.1.6)(jsdom@29.1.1)(vite@8.0.13(@types/node@20.19.41)(esbuild@0.28.0)(jiti@2.7.0)(less@4.6.4)(sass@1.99.0)(terser@5.46.0)(tsx@4.22.0)(yaml@2.9.0))
 
   packages/worker-http:

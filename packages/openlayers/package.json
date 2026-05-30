@@ -3,9 +3,9 @@
   "version": "0.4.0",
   "description": "Modern Angular wrapper for OpenLayers with modular architecture, standalone components, and hybrid template/programmatic API",
   "scripts": {
-    "build": "ng-packagr -p ng-package.json",
-    "build:prod": "ng-packagr -p ng-package.json && find ../../dist/openlayers -name '*.map' -delete && find ../../dist/openlayers -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
-    "build:watch": "ng-packagr -p ng-package.json --watch",
+    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && find ../../dist/openlayers -name '*.map' -delete && find ../../dist/openlayers -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
+    "build:watch": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json --watch",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
@@ -41,6 +41,7 @@
     "access": "public"
   },
   "peerDependencies": {
+    "@angular-helpers/testing": "workspace:*",
     "@angular/common": "^21.0.0",
     "@angular/core": "^21.0.0",
     "milsymbol": "^3.0.0",

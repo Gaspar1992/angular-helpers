@@ -1,31 +1,28 @@
 import '@angular/compiler';
-import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { OlTimelineComponent } from './timeline.component';
 import { OlTimeService, OlZoneHelper } from '@angular-helpers/openlayers/core';
+import { render, RenderResult } from '@angular-helpers/testing';
 
 describe('OlTimelineComponent', () => {
+  let result: RenderResult<OlTimelineComponent>;
   let component: OlTimelineComponent;
-  let fixture: ComponentFixture<OlTimelineComponent>;
   let timeService: OlTimeService;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [OlTimelineComponent],
+    result = await render(OlTimelineComponent, {
       providers: [OlTimeService, OlZoneHelper],
-    }).compileComponents();
+      inputs: {
+        startTime: 1000,
+        endTime: 5000,
+        playSpeed: 10,
+        loop: false,
+      },
+    });
 
-    fixture = TestBed.createComponent(OlTimelineComponent);
-    component = fixture.componentInstance;
+    component = result.component;
     timeService = TestBed.inject(OlTimeService);
-
-    // Set required inputs
-    fixture.componentRef.setInput('startTime', 1000);
-    fixture.componentRef.setInput('endTime', 5000);
-    fixture.componentRef.setInput('playSpeed', 10);
-    fixture.componentRef.setInput('loop', false);
-
-    fixture.detectChanges();
   });
 
   it('should initialize and set default values correctly', () => {
@@ -80,23 +77,23 @@ describe('OlTimelineComponent', () => {
   });
 
   it('should loop time-series when currentTime reaches endTime and loop is true', async () => {
-    fixture.componentRef.setInput('loop', true);
-    fixture.detectChanges();
+    result.fixture.componentRef.setInput('loop', true);
+    result.fixture.detectChanges();
 
     const setTimeSpy = vi.spyOn(timeService, 'setTime');
 
     // Simulate playing and reaching the end
     timeService.play();
     timeService.setTime(5500);
-    fixture.detectChanges();
+    result.fixture.detectChanges();
     TestBed.flushEffects();
 
     expect(setTimeSpy).toHaveBeenCalledWith(1000);
   });
 
   it('should stop playback when currentTime reaches endTime and loop is false', async () => {
-    fixture.componentRef.setInput('loop', false);
-    fixture.detectChanges();
+    result.fixture.componentRef.setInput('loop', false);
+    result.fixture.detectChanges();
 
     const pauseSpy = vi.spyOn(timeService, 'pause');
     const setTimeSpy = vi.spyOn(timeService, 'setTime');
@@ -104,7 +101,7 @@ describe('OlTimelineComponent', () => {
     // Simulate playing and reaching the end
     timeService.play();
     timeService.setTime(5500);
-    fixture.detectChanges();
+    result.fixture.detectChanges();
     TestBed.flushEffects();
 
     expect(pauseSpy).toHaveBeenCalled();
