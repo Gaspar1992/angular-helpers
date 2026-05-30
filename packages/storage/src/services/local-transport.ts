@@ -8,6 +8,7 @@ import { WebStorageTransport } from './transports/web-storage.transport';
 import { IndexedDBTransport } from './transports/indexeddb.transport';
 import { CacheApiTransport } from './transports/cache-api.transport';
 import { WorkerStorageTransport } from './worker-transport';
+import { InMemoryStorageTransport } from './transports/in-memory.transport';
 
 /**
  * Composite transport that delegates to specific storage strategies (local, indexeddb, cacheapi).
@@ -21,10 +22,12 @@ export class LocalStorageTransport implements StorageTransport {
   private readonly webStorage: WebStorageTransport;
   private readonly indexedDB: IndexedDBTransport;
   private readonly cacheApi: CacheApiTransport;
+  private readonly inMemory: InMemoryStorageTransport;
   private readonly workerTransport?: WorkerStorageTransport;
   private readonly broadcastChannel?: BroadcastChannel;
+  private readonly isBrowser: boolean;
 
-  public storageType: 'local' | 'session' | 'indexeddb' | 'cacheapi' = 'local';
+  public storageType: 'local' | 'session' | 'indexeddb' | 'cacheapi' | 'memory' = 'local';
   public encrypt = false;
   public dbName = 'ah_db';
   public storeName = 'kv';
@@ -36,18 +39,20 @@ export class LocalStorageTransport implements StorageTransport {
     @Inject(STORAGE_WORKER_FACTORY) @Optional() private readonly workerFactory?: () => Worker,
   ) {
     const { isBrowser, window: globalWindow } = injectPlatform();
+    this.isBrowser = isBrowser;
 
     this.webStorage = new WebStorageTransport(this.secretPassphrase);
     this.indexedDB = new IndexedDBTransport(this.secretPassphrase);
     this.cacheApi = new CacheApiTransport(this.secretPassphrase);
+    this.inMemory = new InMemoryStorageTransport(this.secretPassphrase);
 
     if (isBrowser && this.workerFactory) {
       this.workerTransport = new WorkerStorageTransport(this.workerFactory);
     }
 
-    // If running in worker context, default to indexeddb as L2
+    // Default to in-memory in SSR/Server environments to avoid failures when browser APIs are missing
     if (!isBrowser) {
-      this.storageType = 'indexeddb';
+      this.storageType = 'memory';
     }
 
     if (isBrowser && globalWindow && 'BroadcastChannel' in globalWindow) {
@@ -148,7 +153,10 @@ export class LocalStorageTransport implements StorageTransport {
     if (this.workerTransport) {
       unsubs.push(this.workerTransport.onChange(key, callback));
     } else {
-      unsubs.push(this.webStorage.onChange(key, callback));
+      const transport = this.resolveTransport(this.storageType);
+      if (transport.onChange) {
+        unsubs.push(transport.onChange(key, callback));
+      }
     }
 
     if (this.broadcastChannel) {
@@ -172,13 +180,15 @@ export class LocalStorageTransport implements StorageTransport {
     const targetType = type ?? this.storageType;
     switch (targetType) {
       case 'indexeddb':
-        return this.indexedDB;
+        return this.isBrowser ? this.indexedDB : this.inMemory;
       case 'cacheapi':
-        return this.cacheApi;
+        return this.isBrowser ? this.cacheApi : this.inMemory;
+      case 'memory':
+        return this.inMemory;
       case 'local':
       case 'session':
       default:
-        return this.webStorage;
+        return this.isBrowser ? this.webStorage : this.inMemory;
     }
   }
 }
