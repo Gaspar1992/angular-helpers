@@ -89,9 +89,15 @@ jobs:
         run: pnpm exec semantic-release
         working-directory: packages/openlayers
 
+      - name: Semantic Release (Testing)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm exec semantic-release
+        working-directory: packages/testing
+
       - name: Publish to npm with Provenance
         run: |
-          for pkg in core browser-web-apis storage security worker-http openlayers; do
+          for pkg in core browser-web-apis storage security worker-http openlayers testing; do
             if [ -d "dist/$pkg" ]; then
               echo "Publishing $pkg..."
               (cd dist/$pkg && npm publish --provenance --access public || echo "Skipped publishing $pkg")
@@ -110,6 +116,7 @@ jobs:
             packages/security/CHANGELOG.md packages/security/package.json \
             packages/worker-http/CHANGELOG.md packages/worker-http/package.json \
             packages/openlayers/CHANGELOG.md packages/openlayers/package.json \
+            packages/testing/CHANGELOG.md packages/testing/package.json \
             pnpm-lock.yaml; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
@@ -147,4 +154,6 @@ jobs:
             packages/worker-http/package.json
             packages/openlayers/CHANGELOG.md
             packages/openlayers/package.json
+            packages/testing/CHANGELOG.md
+            packages/testing/package.json
             pnpm-lock.yaml
