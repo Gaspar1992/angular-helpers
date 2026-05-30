@@ -12,13 +12,14 @@ import { vi } from 'vitest';
 export function provideMockService<T>(type: Type<T>, mockOverrides?: Partial<T>): Provider {
   const mock: any = { ...mockOverrides };
 
-  const proto = type.prototype;
-  if (proto) {
-    Object.getOwnPropertyNames(proto).forEach((prop) => {
-      if (prop !== 'constructor' && typeof proto[prop] === 'function' && !mock[prop]) {
+  let currentProto = type.prototype;
+  while (currentProto && currentProto !== Object.prototype) {
+    Object.getOwnPropertyNames(currentProto).forEach((prop) => {
+      if (prop !== 'constructor' && typeof currentProto[prop] === 'function' && !mock[prop]) {
         mock[prop] = vi.fn();
       }
     });
+    currentProto = Object.getPrototypeOf(currentProto);
   }
 
   return {

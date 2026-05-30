@@ -1,5 +1,6 @@
 import { Provider } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 
 /**
@@ -16,9 +17,7 @@ export function provideMockRouter(): Provider {
       navigateByUrl: vi.fn().mockResolvedValue(true),
       createUrlTree: vi.fn().mockReturnValue({}),
       serializeUrl: vi.fn().mockReturnValue(''),
-      events: {
-        subscribe: vi.fn(),
-      },
+      events: new Subject<any>(),
       routerState: {
         snapshot: { root: {} },
       },

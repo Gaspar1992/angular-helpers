@@ -120,11 +120,7 @@ export async function render<T>(
 
   if (options.inputs) {
     if (options.template) {
-      // In host templates, Signal inputs should be bound natively in the template.
-      // Fallback for primitive property assignment.
-      for (const key of Object.keys(options.inputs)) {
-        (componentInstance as any)[key] = (options.inputs as any)[key];
-      }
+      // In host templates, inputs should be bound natively in the template using hostProperties.
     } else {
       for (const key of Object.keys(options.inputs)) {
         fixture.componentRef.setInput(key, (options.inputs as any)[key]);

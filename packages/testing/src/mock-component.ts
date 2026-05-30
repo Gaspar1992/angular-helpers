@@ -46,7 +46,7 @@ export function MockComponent<T>(options: MockOptions): Type<T> {
     writeValue(obj: any): void {}
     registerOnChange(fn: any): void {}
     registerOnTouched(fn: any): void {}
-    setDisabledState?(isDisabled: boolean): void {}
+    setDisabledState(isDisabled: boolean): void {}
   }
 
   if (isCVA) {
