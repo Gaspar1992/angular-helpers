@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-imports */
+import { DestroyRef, inject } from '@angular/core';
 import { injectPlatform } from '../utils/platform';
 import { isTransferable } from '../utils/transferables';
 
@@ -7,7 +9,7 @@ export function injectWorkerPool(
 ): WorkerPool {
   const { isBrowser } = injectPlatform();
 
-  return new WorkerPool({
+  const pool = new WorkerPool({
     ...options,
     workerFactory: () => {
       if (!isBrowser || typeof Worker === 'undefined') {
@@ -16,6 +18,17 @@ export function injectWorkerPool(
       return new Worker(workerUrl, { type: 'module' });
     },
   });
+
+  try {
+    const destroyRef = inject(DestroyRef);
+    destroyRef.onDestroy(() => {
+      pool.terminate();
+    });
+  } catch {
+    // Fail silently if not in an injection context (e.g. simple unit testing)
+  }
+
+  return pool;
 }
 
 export interface WorkerTaskConfig<T> {
