@@ -175,7 +175,7 @@ export function isUrlSafe(
   return sanitizeUrlString(input, allowedSchemes) !== null;
 }
 
-const SCRIPT_INJECTION_PATTERN = /<\s*script\b|javascript:|on\w+\s*=/i;
+const SCRIPT_INJECTION_PATTERN = /<\s*script\b|javascript:|on\w{1,30}\s*=/i;
 
 /**
  * Lightweight check for common script-injection sentinels. Complements (does NOT replace)

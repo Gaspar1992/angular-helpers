@@ -65,7 +65,7 @@ export function resolveSpec(spec: WorkerInterceptorSpec): WorkerInterceptorFn {
       return contentIntegrityInterceptor(spec.config);
     case 'custom': {
       const factory = customRegistry.get(spec.name);
-      if (!factory) {
+      if (typeof factory !== 'function') {
         throw new Error(
           `[worker-http] Custom interceptor "${spec.name}" was not registered. ` +
             `Call registerInterceptor("${spec.name}", factory) in your worker file before createConfigurableWorkerPipeline().`,
