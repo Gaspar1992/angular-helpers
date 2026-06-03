@@ -71,9 +71,18 @@ export class OlVectorLayerComponent {
     // Effect to sync features when input changes
     effect(() => {
       const currentFeatures = this.features();
-      // Only update if layer already exists (afterNextRender already created it)
       if (this.layerService.getLayer(this.id())) {
         this.layerService.updateFeatures(this.id(), currentFeatures);
+      }
+    });
+
+    effect(() => {
+      if (this.layerService.getLayer(this.id())) {
+        this.layerService.updateVectorLayerConfig(this.id(), {
+          url: this.url(),
+          format: this.format(),
+          coordinateProjection: this.coordinateProjection(),
+        });
       }
     });
 

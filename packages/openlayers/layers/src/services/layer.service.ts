@@ -77,20 +77,26 @@ export class OlLayerService {
     }
   }
 
+  private createVectorSource(config: VectorLayerConfig, map: OLMap): VectorSource {
+    const sourceOptions: Record<string, unknown> = {};
+
+    if (config.url && config.format) {
+      sourceOptions.url = config.url;
+      if (config.format === 'geojson') sourceOptions.format = new GeoJSON();
+      else if (config.format === 'topojson') sourceOptions.format = new TopoJSON();
+      else if (config.format === 'kml') sourceOptions.format = new KML();
+    }
+
+    return new VectorSource(sourceOptions);
+  }
+
   private createLayer(config: AnyLayerConfig, map: OLMap): { id: string } {
     let layer: BaseLayer;
 
     switch (config.type) {
       case 'vector': {
         const vConfig = config as VectorLayerConfig;
-        const sourceOptions: any = {};
-        if (vConfig.url && vConfig.format) {
-          sourceOptions.url = vConfig.url;
-          if (vConfig.format === 'geojson') sourceOptions.format = new GeoJSON();
-          else if (vConfig.format === 'topojson') sourceOptions.format = new TopoJSON();
-          else if (vConfig.format === 'kml') sourceOptions.format = new KML();
-        }
-        const vectorSource = new VectorSource(sourceOptions);
+        const vectorSource = this.createVectorSource(vConfig, map);
 
         const targetProj =
           (typeof map.getView === 'function'
@@ -203,6 +209,42 @@ export class OlLayerService {
       this.layerCache.delete(id);
       this.updateLayerState();
     }
+  }
+
+  updateVectorLayerConfig(id: string, config: Partial<VectorLayerConfig>): void {
+    const layer = this.layerCache.get(id);
+    if (!(layer instanceof VectorLayer)) return;
+
+    const map = this.mapService.getMap();
+    const nextConfig = {
+      ...(layer.get('cluster-config') ? { cluster: layer.get('cluster-config') } : {}),
+      ...(layer.get('style-fn') !== undefined ? { style: layer.get('style-fn') } : {}),
+      ...config,
+    } as VectorLayerConfig;
+
+    const nextSource = this.createVectorSource(nextConfig, map ?? ({} as OLMap));
+    const clusterCfg = nextConfig.cluster;
+
+    if (clusterCfg?.enabled) {
+      const clusterSource = new ClusterSource({
+        source: nextSource,
+        distance: clusterCfg.distance ?? 40,
+        minDistance: clusterCfg.minDistance ?? 20,
+        geometryFunction: (feature) => {
+          const geometry = feature.getGeometry();
+          if (!geometry) return null;
+          if (geometry.getType() === 'Point') return geometry as Point;
+          return new Point(getCenter(geometry.getExtent()));
+        },
+      });
+      layer.setSource(clusterSource);
+    } else {
+      layer.setSource(nextSource);
+    }
+
+    layer.set('coordinate-projection', nextConfig.coordinateProjection ?? 'EPSG:4326');
+    this.updateFeatures(id, nextConfig.features ?? []);
+    this.updateLayerState();
   }
 
   setVisibility(id: string, visible: boolean): void {

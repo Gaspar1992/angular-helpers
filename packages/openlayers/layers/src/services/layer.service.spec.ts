@@ -154,6 +154,28 @@ describe('OlLayerService', () => {
     expect(layerInfo?.type).toBe('vector');
   });
 
+  it('updates an existing vector layer source when url or format changes', () => {
+    svc.addLayer({
+      id: 'v-source',
+      type: 'vector',
+      url: 'https://example.com/old.geojson',
+      format: 'geojson',
+    } as VectorLayerConfig);
+
+    svc.updateVectorLayerConfig('v-source', {
+      url: 'https://example.com/new.geojson',
+      format: 'topojson',
+      coordinateProjection: 'EPSG:4326',
+    });
+
+    const layer = svc.getLayer('v-source') as unknown as VectorLayer;
+    const source = layer.getSource();
+
+    expect(source).toBeTruthy();
+    expect((source as any).getUrl()).toBe('https://example.com/new.geojson');
+    expect(layer.get('coordinate-projection')).toBe('EPSG:4326');
+  });
+
   it('adds an image layer with static and wms sources', () => {
     const stat: ImageLayerConfig = {
       id: 'static',
