@@ -18,6 +18,7 @@ import { DocsVersionService, AngularVersion } from '../services/docs-version.ser
     @if (options.length > 1) {
       <div class="relative inline-block text-left" #container>
         <button
+          #trigger
           type="button"
           id="version-combobox-trigger"
           role="combobox"
@@ -75,8 +76,10 @@ export class VersionDropdownComponent {
   protected readonly highlightedIndex = signal(0);
 
   protected readonly container = viewChild<ElementRef>('container');
+  protected readonly trigger = viewChild<ElementRef<HTMLButtonElement>>('trigger');
 
   protected readonly options: { value: AngularVersion; label: string }[] = [
+    { value: 'v22', label: 'Angular v22' },
     { value: 'v21', label: 'Angular v21' },
   ];
 
@@ -97,6 +100,9 @@ export class VersionDropdownComponent {
   protected selectOption(value: AngularVersion) {
     this.versionService.setVersion(value);
     this.isOpen.set(false);
+    setTimeout(() => {
+      this.trigger()?.nativeElement.focus();
+    });
   }
 
   protected onKeydown(event: KeyboardEvent) {
@@ -128,6 +134,7 @@ export class VersionDropdownComponent {
       case 'Escape':
         event.preventDefault();
         this.isOpen.set(false);
+        this.trigger()?.nativeElement.focus();
         break;
     }
   }

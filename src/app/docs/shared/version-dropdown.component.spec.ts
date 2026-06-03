@@ -2,11 +2,10 @@ import { VersionDropdownComponent } from './version-dropdown.component';
 import { DocsVersionService } from '../services/docs-version.service';
 import { render, provideMockService } from '@angular-helpers/testing';
 import { vi } from 'vitest';
-
 import { signal } from '@angular/core';
 
 describe('VersionDropdownComponent', () => {
-  async function setup(overrideOptions = true) {
+  async function setup(customOptions?: { value: any; label: string }[]) {
     const result = await render(VersionDropdownComponent, {
       providers: [
         provideMockService(DocsVersionService, {
@@ -16,15 +15,10 @@ describe('VersionDropdownComponent', () => {
       detectInitialChanges: false,
     });
 
-    if (overrideOptions) {
-      // Set 2 options to allow testing interactive dropdown features
-      // as options is a protected property, not an @Input.
-      (result.component as any).options = [
-        { value: 'v22', label: 'Angular v22 (Latest)' },
-        { value: 'v21', label: 'Angular v21' },
-      ];
-      result.fixture.componentRef.changeDetectorRef.markForCheck();
+    if (customOptions) {
+      (result.component as any).options = customOptions;
     }
+    result.fixture.componentRef.changeDetectorRef.markForCheck();
     result.fixture.detectChanges();
     return result;
   }
@@ -80,7 +74,7 @@ describe('VersionDropdownComponent', () => {
   });
 
   it('should hide the dropdown completely when only one option is available', async () => {
-    const { query } = await setup(false);
+    const { query } = await setup([{ value: 'v21', label: 'Angular v21' }]);
     expect(query('[role="combobox"]')).toBeNull();
   });
 });
