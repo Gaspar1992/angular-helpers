@@ -78,7 +78,7 @@ export class OlLayerService {
   }
 
   private createVectorSource(config: VectorLayerConfig, map: OLMap): VectorSource {
-    const sourceOptions: Record<string, unknown> = {};
+    const sourceOptions: { url?: string; format?: any } = {};
 
     if (config.url && config.format) {
       sourceOptions.url = config.url;

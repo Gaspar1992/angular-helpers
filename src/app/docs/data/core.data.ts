@@ -84,7 +84,8 @@ console.log(isTransferable(42));       // false`,
     methods: [
       {
         name: 'execute',
-        signature: 'execute(type: string, data: any, timeoutMs?: number): Promise<T>',
+        signature:
+          'execute(type: string, data: any, timeoutMsOrOptions?: number | { timeoutMs?: number; transfer?: Transferable[] }): Promise<T>',
         description: 'Executes a task in the worker',
         returns: 'Promise<T>',
       },
