@@ -7,7 +7,7 @@ import {
   input,
   output,
   signal,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import Control from 'ol/control/Control';
@@ -114,7 +114,7 @@ export class OlGeolocationControlComponent {
   position = input<ControlPosition>('top-right');
   trackingChange = output<boolean>();
 
-  @ViewChild('controlElement') controlElement!: ElementRef<HTMLElement>;
+  controlElement = viewChild.required<ElementRef<HTMLElement>>('controlElement');
 
   protected tracking = signal(false);
 
@@ -132,7 +132,7 @@ export class OlGeolocationControlComponent {
       this.zoneHelper.runOutsideAngular(() => {
         // Create the Control
         this.control = new Control({
-          element: this.controlElement.nativeElement,
+          element: this.controlElement().nativeElement,
         });
         map.addControl(this.control);
 

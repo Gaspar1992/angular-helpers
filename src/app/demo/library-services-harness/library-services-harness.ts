@@ -1,7 +1,8 @@
-import { Component, effect, inject, OnDestroy, signal } from '@angular/core';
+import { Component, effect, inject, OnDestroy, signal, resourceFromSnapshots } from '@angular/core';
 import {
   injectEntityStore,
   injectStorageSignal,
+  injectStorageResource,
   OfflineSyncService,
 } from '@angular-helpers/storage';
 import {
@@ -17,6 +18,7 @@ import {
   MediaRecorderService,
   MutationObserverService,
   NetworkInformationService,
+  injectNetworkInformationResource,
   NotificationService,
   PageVisibilityService,
   PerformanceObserverService,
@@ -64,6 +66,7 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
     PageVisibilityService,
     BroadcastChannelService,
     NetworkInformationService,
+
     ScreenWakeLockService,
     ScreenOrientationService,
     FullscreenService,
@@ -107,6 +110,46 @@ export class LibraryServicesHarnessComponent implements OnDestroy {
   private readonly screenWakeLockService = inject(ScreenWakeLockService);
   private readonly offlineSyncService = inject(OfflineSyncService);
   private readonly harnessWorkerName = 'library-services-harness-worker';
+
+  // New composed resource demo
+  readonly networkResource = injectNetworkInformationResource();
+  readonly networkSnapshot = this.networkResource.snapshot;
+
+  readonly storageResource = injectStorageResource('harness_composed_storage', 'default-value', {
+    storageType: 'local',
+    serializer: 'json',
+  });
+  readonly storageSnapshot = this.storageResource.resource.value;
+
+  readonly composedResource = resourceFromSnapshots(() => {
+    const netStatus = this.networkResource.resource.status();
+    const netValue = this.networkResource.resource.value();
+
+    const storeStatus = this.storageResource.resource.status();
+    const storeValue = this.storageResource.resource.value();
+
+    if (netStatus === 'error' || storeStatus === 'error') {
+      return { status: 'error', error: new Error('Composition Error') };
+    }
+
+    if (netStatus === 'idle' || storeStatus === 'idle') {
+      return { status: 'idle', value: undefined };
+    }
+
+    if (
+      netStatus === 'loading' ||
+      storeStatus === 'loading' ||
+      netStatus === 'reloading' ||
+      storeStatus === 'reloading'
+    ) {
+      return { status: 'loading', value: undefined };
+    }
+
+    return {
+      status: 'resolved',
+      value: !netValue?.online ? 'offline-fallback' : `online-${storeValue}`,
+    };
+  });
 
   protected readonly advancedStorage = injectStorageSignal('harness_advanced_storage', 'default', {
     storageType: 'local',

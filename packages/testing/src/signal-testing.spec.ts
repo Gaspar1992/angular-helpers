@@ -5,7 +5,6 @@ import { Component, effect, signal } from '@angular/core';
 @Component({
   selector: 'app-effect-test',
   template: '',
-  standalone: true,
 })
 class EffectComponent {
   val = signal(1);

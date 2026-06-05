@@ -182,6 +182,10 @@ export {
   type NetworkInformationRef,
 } from './fns/inject-network-information';
 export {
+  injectNetworkInformationResource,
+  type NetworkInformationResourceRef,
+} from './fns/inject-network-information-resource';
+export {
   injectScreenOrientation,
   type ScreenOrientationRef,
 } from './fns/inject-screen-orientation';
@@ -203,6 +207,7 @@ export {
   type GeolocationResourceOptions,
 } from './fns/inject-geolocation-resource';
 export { injectBattery, type BatteryRef, type BatteryInfo } from './fns/inject-battery';
+export { injectBatteryResource, type BatteryResourceRef } from './fns/inject-battery-resource';
 export { injectWakeLock, type WakeLockRef } from './fns/inject-wake-lock';
 export { injectEyeDropper, type EyeDropperRef } from './fns/inject-eye-dropper';
 export { injectIdleDetector, type IdleDetectorRef } from './fns/inject-idle-detector';

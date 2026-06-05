@@ -18,6 +18,14 @@ export interface StorageSignal<T> extends WritableSignal<T> {
   readonly error: Signal<Error | null>;
 }
 
+import { ResourceRef } from '@angular/core';
+
+export interface StorageResource<T> {
+  resource: ResourceRef<T | undefined>;
+  set: (value: T | undefined) => void;
+  update: (updater: (current: T | undefined) => T | undefined) => void;
+}
+
 export interface EntityStoreOptions<Id, Entity> {
   idKey: keyof Entity | ((entity: Entity) => Id);
   persistKey?: string;

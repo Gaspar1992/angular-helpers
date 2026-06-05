@@ -6,7 +6,6 @@ import { vi } from 'vitest';
   selector: 'app-test',
   template:
     '<form id="my-form"><button (click)="onClick()">Click {{data()}}</button><input name="username" type="text" [value]="text" (input)="text = $any($event.target).value"><input name="password" type="password" (input)="pass = $any($event.target).value"></form>',
-  standalone: true,
 })
 class TestComponent {
   data = input(1);

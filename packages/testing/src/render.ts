@@ -91,7 +91,6 @@ export async function render<T>(
     class DynamicHostComponent {}
     const decorator = Component({
       template: options.template,
-      standalone: true,
       imports: [componentType as any, ...(options.imports || [])],
     });
     const HostType = decorator(DynamicHostComponent) as Type<any>;

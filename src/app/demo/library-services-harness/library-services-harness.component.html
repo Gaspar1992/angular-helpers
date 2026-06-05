@@ -712,6 +712,26 @@
         </div>
       </section>
 
+      <!-- Composed Resource API -->
+      <section class="harness-card">
+        <h3 class="harness-card-title">Composed Resource API</h3>
+        <div class="harness-card-actions"></div>
+        <div class="harness-card-results">
+          <div class="harness-result-row">
+            <span class="harness-result-label">Status:</span>
+            <span class="harness-result-value" data-testid="composed-resource-status">{{
+              composedResource.status()
+            }}</span>
+          </div>
+          <div class="harness-result-row">
+            <span class="harness-result-label">Value:</span>
+            <span class="harness-result-value" data-testid="composed-resource-value">{{
+              composedResource.value()
+            }}</span>
+          </div>
+        </div>
+      </section>
+
       <!-- System APIs -->
       <section class="harness-card">
         <h3 class="harness-card-title">System APIs</h3>

@@ -25,7 +25,6 @@ export function MockPipe<T>(options: MockPipeOptions): Type<T> {
   // Apply the decorator dynamically so the AOT compiler doesn't throw static analysis errors
   const decorator = Pipe({
     name: options.name,
-    standalone: true,
   });
 
   return decorator(DummyPipe) as unknown as Type<T>;
