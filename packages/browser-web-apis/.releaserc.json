@@ -11,7 +11,7 @@
       {
         "pkgRoot": "../../dist/browser-web-apis",
         "tarballDir": "release",
-        "npmPublish": false
+        "npmPublish": true
       }
     ],
     [

@@ -124,7 +124,7 @@ function getOverviewConfig(section: string, version: 'v21' | 'v22'): OverviewCon
   
   bootstrapApplication(AppComponent, {
     providers: [
-      // Proveemos el transporte de almacenamiento por defecto
+      // Provide the default storage transport
       { provide: STORAGE_TRANSPORT, useClass: LocalStorageTransport }
     ],
   });`,

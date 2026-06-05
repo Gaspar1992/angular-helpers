@@ -23,6 +23,7 @@ export const DOCS_ROUTES: Routes = [
             (m) => m.UnifiedOverviewComponent,
           ),
         resolve: { config: overviewResolver },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
         title: 'core — Angular Helpers',
       },
       {
@@ -32,6 +33,7 @@ export const DOCS_ROUTES: Routes = [
             (m) => m.UnifiedServiceDetailComponent,
           ),
         resolve: { config: serviceDetailResolver },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
         title: 'Utility — Angular Helpers',
       },
       {
@@ -41,6 +43,7 @@ export const DOCS_ROUTES: Routes = [
             (m) => m.UnifiedOverviewComponent,
           ),
         resolve: { config: overviewResolver },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
         title: 'browser-web-apis — Angular Helpers',
       },
       {
@@ -50,6 +53,7 @@ export const DOCS_ROUTES: Routes = [
             (m) => m.UnifiedServiceDetailComponent,
           ),
         resolve: { config: serviceDetailResolver },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
         title: 'Service — Angular Helpers',
       },
       {
@@ -59,6 +63,7 @@ export const DOCS_ROUTES: Routes = [
             (m) => m.UnifiedOverviewComponent,
           ),
         resolve: { config: overviewResolver },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
         title: 'security — Angular Helpers',
       },
       {
@@ -68,6 +73,7 @@ export const DOCS_ROUTES: Routes = [
             (m) => m.UnifiedServiceDetailComponent,
           ),
         resolve: { config: serviceDetailResolver },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
         title: 'Service — Angular Helpers',
       },
       {
@@ -77,6 +83,7 @@ export const DOCS_ROUTES: Routes = [
             (m) => m.UnifiedOverviewComponent,
           ),
         resolve: { config: overviewResolver },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
         title: 'worker-http — Angular Helpers',
       },
       {
@@ -86,6 +93,7 @@ export const DOCS_ROUTES: Routes = [
             (m) => m.UnifiedServiceDetailComponent,
           ),
         resolve: { config: serviceDetailResolver },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
         title: 'Entry Point — Angular Helpers',
       },
       {
@@ -95,6 +103,7 @@ export const DOCS_ROUTES: Routes = [
             (m) => m.UnifiedOverviewComponent,
           ),
         resolve: { config: overviewResolver },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
         title: 'storage — Angular Helpers',
       },
       {
@@ -104,6 +113,7 @@ export const DOCS_ROUTES: Routes = [
             (m) => m.UnifiedServiceDetailComponent,
           ),
         resolve: { config: serviceDetailResolver },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
         title: 'Service — Angular Helpers',
       },
       {
@@ -113,6 +123,7 @@ export const DOCS_ROUTES: Routes = [
             (m) => m.UnifiedOverviewComponent,
           ),
         resolve: { config: overviewResolver },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
         title: 'openlayers — Angular Helpers',
       },
       {
@@ -122,6 +133,7 @@ export const DOCS_ROUTES: Routes = [
             (m) => m.UnifiedServiceDetailComponent,
           ),
         resolve: { config: serviceDetailResolver },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
         title: 'Component — Angular Helpers',
       },
       {
