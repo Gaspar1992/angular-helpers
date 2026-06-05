@@ -13,10 +13,15 @@
 
 /* oxlint-disable no-console */
 
-import { PACKAGES, TOTAL_SERVICE_COUNT } from '../src/app/core/config/packages.data';
+import {
+  PACKAGES,
+  TOTAL_SERVICE_COUNT,
+  SERVICE_COUNT,
+  INJECT_FN_COUNT,
+} from '../src/app/core/config/packages.data';
 import { HOME_STATS } from '../src/app/home/config/home.config';
 import { DOCS_NAV_SECTIONS } from '../src/app/docs/config/docs-nav.data';
-import { BROWSER_WEB_APIS_SERVICES } from '../src/app/docs/data/browser-web-apis.data';
+import { BROWSER_WEB_APIS_SERVICES } from '../src/app/docs/data/v22/browser-web-apis.data';
 
 interface ConsistencyError {
   type: 'error' | 'warning';
@@ -38,15 +43,15 @@ console.log('🔍 Checking documentation consistency...\n');
 console.log('📦 Checking package metadata...');
 const browserPackage = PACKAGES.find((p) => p.name === 'browser-web-apis');
 assert(
-  browserPackage?.serviceCount === 40,
-  `browser-web-apis serviceCount should be 40, got ${browserPackage?.serviceCount ?? 'undefined'}`,
+  browserPackage?.serviceCount === SERVICE_COUNT,
+  `browser-web-apis serviceCount should be ${SERVICE_COUNT}, got ${browserPackage?.serviceCount ?? 'undefined'}`,
   'src/app/core/config/packages.data.ts',
 );
 
 const signalStats = HOME_STATS.find((s) => s.label === 'Signal primitives');
 assert(
-  signalStats?.value === '14',
-  `Signal primitives count should be 14, got ${signalStats?.value ?? 'undefined'}`,
+  signalStats?.value === String(INJECT_FN_COUNT),
+  `Signal primitives count should be ${INJECT_FN_COUNT}, got ${signalStats?.value ?? 'undefined'}`,
   'src/app/home/config/home.config.ts',
 );
 
@@ -59,13 +64,13 @@ assert(
 
 // Check descriptions have correct counts
 assert(
-  browserPackage?.tagline?.includes('40') ?? false,
-  'browser-web-apis tagline should mention "40 services"',
+  browserPackage?.tagline?.includes(String(SERVICE_COUNT)) ?? false,
+  `browser-web-apis tagline should mention "${SERVICE_COUNT} services"`,
   'src/app/core/config/packages.data.ts',
 );
 assert(
-  browserPackage?.description?.includes('14') ?? false,
-  'browser-web-apis description should mention "14 inject() primitives"',
+  browserPackage?.description?.includes(String(INJECT_FN_COUNT)) ?? false,
+  `browser-web-apis description should mention "${INJECT_FN_COUNT} inject() primitives"`,
   'src/app/core/config/packages.data.ts',
 );
 
