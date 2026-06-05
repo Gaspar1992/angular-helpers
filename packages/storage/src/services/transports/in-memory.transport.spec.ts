@@ -1,15 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { webcrypto } from 'node:crypto';
 import { InMemoryStorageTransport } from './in-memory.transport';
-
-// Polyfill subtle crypto for JSDOM / Node environment
-if (typeof globalThis !== 'undefined' && !globalThis.crypto?.subtle) {
-  Object.defineProperty(globalThis, 'crypto', {
-    value: webcrypto,
-    configurable: true,
-    writable: true,
-  });
-}
 
 describe('InMemoryStorageTransport', () => {
   let transport: InMemoryStorageTransport;
