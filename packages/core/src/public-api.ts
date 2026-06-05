@@ -2,4 +2,4 @@
 
 export * from './utils/platform';
 export * from './utils/transferables';
-export * from './workers/worker-pool';
+export * from './workers/worker-pool'; // v22 release force

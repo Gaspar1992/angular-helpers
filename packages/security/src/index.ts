@@ -11,6 +11,6 @@ export * from './services/csrf.service';
 export * from './services/session-idle.service';
 export * from './services/secure-message.service';
 export * from './providers';
-export * from './internal/validators-core';
+export * from './internal/validators-core'; // v22 release force
 export * from './services/regex-analyzer.service';
 export * from './services/regex-worker-pool.service';
