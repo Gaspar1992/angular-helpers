@@ -1,9 +1,8 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-docs-landing',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink],
   template: `
     <div class="max-width-container py-12 sm:py-20 animate-in fade-in duration-700">

@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 
 import { SCENARIOS } from './services/benchmark-scenarios';
@@ -37,7 +29,6 @@ interface ScenarioState {
 
 @Component({
   selector: 'app-worker-http-benchmark',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DecimalPipe],
   providers: [BenchmarkRunnerService],
   template: `

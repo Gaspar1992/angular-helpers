@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  effect,
-  inject,
-  input,
-} from '@angular/core';
+import { Component, DestroyRef, effect, inject, input } from '@angular/core';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 import { OlInteractionService } from '../services/interaction.service';
@@ -16,7 +9,6 @@ import { OlInteractionService } from '../services/interaction.service';
 @Component({
   selector: 'ol-modify-interaction',
   template: '',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OlModifyInteractionComponent {
   private interactionService = inject(OlInteractionService);

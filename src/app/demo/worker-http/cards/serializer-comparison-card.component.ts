@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import {
   createAutoSerializer,
   createSerovalSerializer,
@@ -12,7 +12,6 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
 
 @Component({
   selector: 'app-worker-http-serializer-comparison-card',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="svc-card col-span-full animate-in fade-in duration-300">
       <div class="svc-card-head">

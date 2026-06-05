@@ -2,6 +2,14 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'angular-v22-upgrade-and-roadmap',
+    title: 'Upgrading to Angular v22 — and what it means for every package',
+    publishedAt: '2026-06-05',
+    tags: ['angular', 'v22', 'signals', 'rxResource', 'signal-forms', 'modernization', 'roadmap'],
+    excerpt:
+      'Angular v22 ships stable signals, rxResource, and Signal Forms. We upgraded the entire monorepo, removed 40+ redundant OnPush declarations, implemented injectGeolocationResource with rxResource(), applied injectAsync for lazy service loading, and refactored storage demos to Signal Forms. Here is what changed and what comes next for every package.',
+  },
+  {
     slug: 'docs-v21-13-0-guides-patterns-mini-ide',
     title: 'docs v21.13.0: Guides & Patterns section with interactive Mini-IDE visualizer',
     publishedAt: '2026-05-25',

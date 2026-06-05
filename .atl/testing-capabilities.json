@@ -1,7 +1,7 @@
 {
   "project": "angular-helpers",
   "stack": {
-    "framework": "Angular v21",
+    "framework": "Angular v22",
     "packageManager": "pnpm",
     "compiler": "TypeScript",
     "buildTool": "Vite"

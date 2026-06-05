@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, ViewEncapsulation, inject } from '@angular/core';
+import { Component, ViewEncapsulation, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
@@ -7,7 +7,6 @@ import type { BlogPostData } from '../../services/blog-post.resolver';
 
 @Component({
   selector: 'app-blog-post',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   imports: [RouterLink, SiteFooterComponent],
   template: `

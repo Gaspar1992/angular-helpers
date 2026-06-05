@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
-  inject,
-  input,
-  output,
-} from '@angular/core';
+import { Component, computed, effect, inject, input, output } from '@angular/core';
 import { OlTimeService } from '@angular-helpers/openlayers/core';
 import type { TimelinePosition } from '../models/timeline.types';
 
@@ -31,7 +23,6 @@ import type { TimelinePosition } from '../models/timeline.types';
 @Component({
   selector: 'ol-timeline',
   imports: [],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="ol-timeline"

@@ -1,8 +1,7 @@
-import { Component, OnDestroy, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, OnDestroy, signal } from '@angular/core';
 
 @Component({
   selector: 'app-geolocation-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['../demo.styles.css'],
   template: `
     <section class="svc-card" aria-labelledby="geo-title">

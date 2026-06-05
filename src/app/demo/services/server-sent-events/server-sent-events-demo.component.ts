@@ -1,9 +1,8 @@
-import { Component, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { ServerSentEventsService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-server-sent-events-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ServerSentEventsService],
   styleUrls: ['../demo.styles.css'],
   template: `

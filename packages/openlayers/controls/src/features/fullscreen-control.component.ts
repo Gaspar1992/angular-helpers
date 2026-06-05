@@ -1,20 +1,12 @@
 // OlFullscreenControlComponent
 
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  inject,
-  input,
-} from '@angular/core';
+import { afterNextRender, Component, DestroyRef, inject, input } from '@angular/core';
 import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import FullScreen from 'ol/control/FullScreen';
 
 @Component({
   selector: 'ol-fullscreen-control',
   template: '',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OlFullscreenControlComponent {
   private mapService = inject(OlMapService);

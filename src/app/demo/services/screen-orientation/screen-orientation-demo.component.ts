@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import {
   ScreenOrientationService,
@@ -9,7 +9,6 @@ import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.c
 
 @Component({
   selector: 'app-screen-orientation-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ScreenOrientationService],
   imports: [CodeBlockComponent],
   styleUrls: ['../demo.styles.css'],

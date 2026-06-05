@@ -2,7 +2,6 @@
 
 import {
   afterNextRender,
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   inject,
@@ -36,7 +35,6 @@ export const ROTATE_CONTROL_MAP_SERVICE = new InjectionToken<RotateControlMapSer
 @Component({
   selector: 'ol-rotate-control',
   template: '',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OlRotateControlComponent {
   private mapService = inject(ROTATE_CONTROL_MAP_SERVICE, { optional: true });

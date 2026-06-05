@@ -1,9 +1,8 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import type { Feature } from '../../models/feature.model';
 
 @Component({
   selector: 'app-feature-card',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="flex flex-col gap-6 p-8 bg-base-200 border border-base-content/5 rounded-3xl h-full transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-2xl group shadow-sm"

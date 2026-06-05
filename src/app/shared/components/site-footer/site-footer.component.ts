@@ -1,10 +1,9 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
 
 @Component({
   selector: 'app-site-footer',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, NgOptimizedImage],
   template: `
     <footer class="py-12 px-6 border-t border-base-content/5 bg-base-100">

@@ -1,9 +1,8 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { VibrationService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-vibration-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [VibrationService],
   styleUrls: ['../demo.styles.css'],
   template: `

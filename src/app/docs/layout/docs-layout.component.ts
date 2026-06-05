@@ -1,11 +1,4 @@
-import {
-  Component,
-  signal,
-  ChangeDetectionStrategy,
-  effect,
-  inject,
-  computed,
-} from '@angular/core';
+import { Component, signal, effect, inject, computed } from '@angular/core';
 import {
   RouterLink,
   RouterLinkActive,
@@ -23,7 +16,6 @@ import { VersionDropdownComponent } from '../shared/version-dropdown.component';
 
 @Component({
   selector: 'app-docs-layout',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, VersionDropdownComponent],
   template: `
     <div

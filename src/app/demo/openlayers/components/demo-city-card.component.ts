@@ -1,9 +1,8 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 @Component({
   selector: 'app-demo-city-card',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="bg-transparent backdrop-blur-md border border-base-content/10 rounded-2xl shadow-2xl p-5 min-w-[200px] text-sm"

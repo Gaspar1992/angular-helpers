@@ -197,7 +197,7 @@
               id="crypto-input"
               class="textarea textarea-bordered h-28 font-sans text-sm focus:border-primary/50 focus:outline-none"
               placeholder="Type anything to encrypt..."
-              [formControl]="cryptoControl"
+              [formField]="cryptoForm"
             ></textarea>
           </div>
 
@@ -223,7 +223,7 @@
             type="button"
             class="btn btn-primary"
             (click)="onEncrypt()"
-            [disabled]="cryptoControl.invalid"
+            [disabled]="cryptoForm().invalid()"
           >
             🔐 Encrypt in Worker
           </button>
@@ -298,7 +298,7 @@
           fields and save, the other window syncs dynamically and instantly!
         </p>
 
-        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="flex flex-col gap-4">
+        <form [formRoot]="profileForm" (submit)="saveProfile()" class="flex flex-col gap-4">
           <div class="form-control">
             <label
               class="label text-xs font-black uppercase text-base-content/40 mb-1"
@@ -309,7 +309,7 @@
               id="profile-name"
               type="text"
               class="input input-bordered focus:border-primary/50 focus:outline-none text-sm"
-              formControlName="name"
+              [formField]="profileForm.name"
               placeholder="Enter a username"
             />
           </div>
@@ -324,7 +324,7 @@
               id="profile-role"
               type="text"
               class="input input-bordered focus:border-primary/50 focus:outline-none text-sm"
-              formControlName="role"
+              [formField]="profileForm.role"
               placeholder="e.g., Senior Architect"
             />
           </div>
@@ -340,17 +340,17 @@
                 id="profile-color"
                 type="text"
                 class="input input-bordered focus:border-primary/50 focus:outline-none text-sm flex-1 font-mono"
-                formControlName="avatarColor"
+                [formField]="profileForm.avatarColor"
                 placeholder="#a855f7"
               />
               <div
                 class="w-12 h-12 rounded-xl border border-base-content/10 shadow"
-                [style.background]="profileForm.get('avatarColor')?.value"
+                [style.background]="profileModel().avatarColor"
               ></div>
             </div>
           </div>
 
-          <button type="submit" class="btn btn-primary mt-4" [disabled]="profileForm.invalid">
+          <button type="submit" class="btn btn-primary mt-4" [disabled]="profileForm().invalid()">
             💾 Save in Worker
           </button>
         </form>
@@ -424,7 +424,7 @@
           <textarea
             id="toon-object"
             class="textarea textarea-bordered h-[260px] font-mono text-xs focus:border-primary/50 focus:outline-none"
-            [formControl]="toonControl"
+            [formField]="toonForm"
           ></textarea>
         </div>
       </div>
@@ -659,7 +659,7 @@
             freeze-on-write integrity, and handles auto-persistence to IndexedDB.
           </p>
 
-          <form [formGroup]="taskForm" (ngSubmit)="addTask()" class="flex flex-col gap-4">
+          <form [formRoot]="taskForm" (submit)="addTask()" class="flex flex-col gap-4">
             <div class="form-control">
               <label
                 class="label text-xs font-black uppercase text-base-content/40 mb-1"
@@ -671,9 +671,8 @@
                   id="task-id"
                   type="text"
                   class="input input-bordered focus:border-primary/50 focus:outline-none text-sm font-mono flex-1 bg-black/10"
-                  formControlName="id"
+                  [formField]="taskForm.id"
                   placeholder="task_123"
-                  readonly
                 />
                 <button
                   type="button"
@@ -695,7 +694,7 @@
                 id="task-title"
                 type="text"
                 class="input input-bordered focus:border-primary/50 focus:outline-none text-sm"
-                formControlName="title"
+                [formField]="taskForm.title"
                 placeholder="Finish coding Storage Package"
               />
             </div>
@@ -711,7 +710,7 @@
                   id="task-category"
                   type="text"
                   class="input input-bordered focus:border-primary/50 focus:outline-none text-sm"
-                  formControlName="category"
+                  [formField]="taskForm.category"
                   placeholder="e.g. Work, Perf"
                 />
               </div>
@@ -725,7 +724,7 @@
                 <select
                   id="task-priority"
                   class="select select-bordered text-sm focus:border-primary/50 focus:outline-none"
-                  formControlName="priority"
+                  [formField]="taskForm.priority"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -739,7 +738,7 @@
                 id="task-completed"
                 type="checkbox"
                 class="checkbox checkbox-primary"
-                formControlName="completed"
+                [formField]="taskForm.completed"
               />
               <label
                 class="text-xs font-black uppercase text-base-content/60 cursor-pointer"
@@ -749,7 +748,7 @@
               </label>
             </div>
 
-            <button type="submit" class="btn btn-primary mt-4" [disabled]="taskForm.invalid">
+            <button type="submit" class="btn btn-primary mt-4" [disabled]="taskForm().invalid()">
               ➕ Add Reactive Entity
             </button>
           </form>

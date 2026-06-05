@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { SecureStorageService } from '@angular-helpers/security';
 
 @Component({
   selector: 'app-secure-storage-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [SecureStorageService],
   template: `
     <section class="svc-card" aria-labelledby="storage-title">

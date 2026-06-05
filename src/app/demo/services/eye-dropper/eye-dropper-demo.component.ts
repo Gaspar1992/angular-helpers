@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { EyeDropperService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-eye-dropper-demo',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [],
   styleUrls: ['../demo.styles.css'],
   template: `

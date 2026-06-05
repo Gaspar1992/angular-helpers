@@ -1,9 +1,8 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { ApiColumn, ApiRow } from '../../models/doc-meta.model';
 
 @Component({
   selector: 'app-docs-api-table',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="api-table-container no-scrollbar" role="region" [attr.aria-label]="ariaLabel()">
       <table>

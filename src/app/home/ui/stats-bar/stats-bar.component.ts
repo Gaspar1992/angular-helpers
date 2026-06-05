@@ -1,9 +1,8 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import type { Stat } from '../../models/stat.model';
 
 @Component({
   selector: 'app-stats-bar',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       role="list"

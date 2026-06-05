@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, input, signal } from '@angular/core';
+import { Component, OnInit, input, signal } from '@angular/core';
 import { RegexSecurityDemoComponent } from '../services/regex-security/regex-security-demo.component';
 import { WebCryptoDemoComponent } from '../services/web-crypto/web-crypto-demo.component';
 import { SecureStorageDemoComponent } from '../services/secure-storage/secure-storage-demo.component';
@@ -9,7 +9,6 @@ export type SecurityDemoTab = 'regex' | 'crypto' | 'storage' | 'sanitizer' | 'pa
 
 @Component({
   selector: 'app-security',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RegexSecurityDemoComponent,
     WebCryptoDemoComponent,

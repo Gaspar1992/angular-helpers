@@ -59,6 +59,7 @@ export class WorkerPool {
   private worker: Worker | null = null;
   private pendingTasks = new Map<string, WorkerTaskConfig<any>>();
   private activeTimeoutIds = new Map<string, any>();
+  private consecutiveCrashes = 0;
 
   constructor(private options: WorkerPoolOptions) {
     this.initWorker();
@@ -73,6 +74,7 @@ export class WorkerPool {
       this.worker = this.options.workerFactory();
 
       this.worker.onmessage = (event: MessageEvent) => {
+        this.consecutiveCrashes = 0; // Reset crash counter on successful message
         const { id, data, error } = event.data;
         if (id && this.pendingTasks.has(id)) {
           if (error) {
@@ -95,6 +97,13 @@ export class WorkerPool {
 
   private restartWorker(): void {
     this.terminate();
+    if (this.consecutiveCrashes >= 3) {
+      console.error(
+        'WorkerPool: Web Worker crashed repeatedly. Halting restarts to prevent infinite loops.',
+      );
+      return;
+    }
+    this.consecutiveCrashes++;
     this.initWorker();
   }
 

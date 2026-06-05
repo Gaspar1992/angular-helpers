@@ -1,20 +1,12 @@
 // OlAttributionControlComponent
 
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  inject,
-  input,
-} from '@angular/core';
+import { afterNextRender, Component, DestroyRef, inject, input } from '@angular/core';
 import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import Attribution from 'ol/control/Attribution';
 
 @Component({
   selector: 'ol-attribution-control',
   template: '',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OlAttributionControlComponent {
   private mapService = inject(OlMapService);

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
 import { HOME_FEATURES, HOME_STATS, HOME_PACKAGES, HOME_CODE_TABS } from './config/home.config';
@@ -9,7 +9,6 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
 
 @Component({
   selector: 'app-home',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
     NgOptimizedImage,

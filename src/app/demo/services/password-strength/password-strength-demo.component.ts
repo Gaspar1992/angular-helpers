@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { PasswordStrengthService } from '@angular-helpers/security';
 
 @Component({
   selector: 'app-password-strength-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [PasswordStrengthService],
   template: `
     <section class="svc-card" aria-labelledby="password-title">

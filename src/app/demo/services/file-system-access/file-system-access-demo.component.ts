@@ -1,10 +1,9 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FileSystemAccessService, PermissionsService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-file-system-access-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [PermissionsService, FileSystemAccessService],
   imports: [DecimalPipe],
   styleUrls: ['../demo.styles.css'],

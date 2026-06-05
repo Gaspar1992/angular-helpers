@@ -1,9 +1,8 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { SecureStorageService } from '@angular-helpers/security';
 
 @Component({
   selector: 'app-secure-storage-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [SecureStorageService],
   template: `
     <section class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5">

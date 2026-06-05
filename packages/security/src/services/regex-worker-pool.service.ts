@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { WorkerPool, injectWorkerPool } from '@angular-helpers/core';
+import { WorkerPool, injectPlatform, injectWorkerPool } from '@angular-helpers/core';
 import type { RegexSecurityConfig, RegexTestResult } from './regex-types';
 
 /**
@@ -11,7 +11,11 @@ export class RegexWorkerPoolService implements OnDestroy {
   private pool: WorkerPool;
 
   constructor() {
-    this.pool = injectWorkerPool(new URL('../workers/regex.worker', import.meta.url), {
+    const { document } = injectPlatform();
+    const workerUrl = document
+      ? new URL('assets/workers/regex.worker.js', document.baseURI)
+      : new URL('assets/workers/regex.worker.js', 'https://example.com'); // SSR: never instantiated
+    this.pool = injectWorkerPool(workerUrl, {
       defaultTimeout: 5000,
       fallbackExecutor: async (type, data) => {
         if (type !== 'regex-test') throw new Error(`Unknown task type: ${type}`);

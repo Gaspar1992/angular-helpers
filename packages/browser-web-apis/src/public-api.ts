@@ -197,6 +197,11 @@ export {
   type GeolocationRef,
   type GeolocationOptions,
 } from './fns/inject-geolocation';
+export {
+  injectGeolocationResource,
+  type GeolocationResourceRef,
+  type GeolocationResourceOptions,
+} from './fns/inject-geolocation-resource';
 export { injectBattery, type BatteryRef, type BatteryInfo } from './fns/inject-battery';
 export { injectWakeLock, type WakeLockRef } from './fns/inject-wake-lock';
 export { injectEyeDropper, type EyeDropperRef } from './fns/inject-eye-dropper';

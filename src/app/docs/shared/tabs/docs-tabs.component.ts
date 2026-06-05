@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 export interface DocTab {
   id: string;
@@ -7,7 +7,6 @@ export interface DocTab {
 
 @Component({
   selector: 'app-docs-tabs',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="tabs-container" role="tablist" [attr.aria-label]="ariaLabel()">
       @for (tab of tabs(); track tab.id) {

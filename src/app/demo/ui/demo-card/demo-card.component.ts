@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 export type DemoCardVariant = 'default' | 'success' | 'warning' | 'error';
 
@@ -11,7 +11,6 @@ const BADGE_CLASSES: Record<DemoCardVariant, string> = {
 
 @Component({
   selector: 'app-demo-card',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="bg-base-200 border border-base-content/5 rounded-3xl p-8 transition-all duration-300 shadow-sm relative overflow-hidden group hover:border-primary/40 hover:shadow-2xl"

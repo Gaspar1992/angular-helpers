@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormField, form, required } from '@angular/forms/signals';
 import {
@@ -18,7 +18,6 @@ interface SignupModel {
 
 @Component({
   selector: 'app-security-signal-forms-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormField],
   styleUrls: ['../services/demo.styles.css'],
   template: `

@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { WebCryptoService } from '@angular-helpers/security';
 
 @Component({
   selector: 'app-web-crypto-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [WebCryptoService],
   template: `
     <section class="svc-card" aria-labelledby="crypto-title">

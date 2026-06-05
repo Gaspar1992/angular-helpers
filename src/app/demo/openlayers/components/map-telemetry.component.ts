@@ -1,11 +1,10 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-map-telemetry',
   standalone: true,
   imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="bg-base-200 rounded-3xl overflow-hidden shadow-2xl border border-base-content/5 flex-grow"

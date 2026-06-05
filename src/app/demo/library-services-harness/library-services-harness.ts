@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  effect,
-  inject,
-  OnDestroy,
-  signal,
-} from '@angular/core';
+import { Component, effect, inject, OnDestroy, signal } from '@angular/core';
 import {
   injectEntityStore,
   injectStorageSignal,
@@ -83,7 +76,6 @@ type HarnessCapabilityOverview = ReturnType<BrowserCapabilityService['getAllStat
     IdleDetectorService,
     OfflineSyncService,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LibraryServicesHarnessComponent implements OnDestroy {
   private readonly browserCapabilityService = inject(BrowserCapabilityService);

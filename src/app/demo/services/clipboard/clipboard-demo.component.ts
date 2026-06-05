@@ -1,8 +1,7 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 
 @Component({
   selector: 'app-clipboard-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['../demo.styles.css'],
   template: `
     <section class="svc-card" aria-labelledby="clip-title">

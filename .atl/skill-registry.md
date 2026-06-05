@@ -26,6 +26,6 @@ Backend: **OpenSpec Local Files** (files in `openspec/` directory)
 
 ## Project Conventions
 
-| File        | Role                                                                |
-| ----------- | ------------------------------------------------------------------- |
-| `AGENTS.md` | Angular/TypeScript coding standards, accessibility, signals, OnPush |
+| File        | Role                                                        |
+| ----------- | ----------------------------------------------------------- |
+| `AGENTS.md` | Angular/TypeScript coding standards, accessibility, signals |

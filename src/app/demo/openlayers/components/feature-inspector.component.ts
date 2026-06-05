@@ -1,11 +1,10 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-feature-inspector',
   standalone: true,
   imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (selectedFeatures().length > 0) {
       <div

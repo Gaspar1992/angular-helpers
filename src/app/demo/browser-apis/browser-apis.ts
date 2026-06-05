@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PageVisibilityDemoComponent } from '../services/page-visibility/page-visibility-demo.component';
 import { NetworkInformationDemoComponent } from '../services/network-information/network-information-demo.component';
@@ -25,7 +25,6 @@ export type DemoTab = 'observers' | 'media' | 'system' | 'storage' | 'realtime' 
 
 @Component({
   selector: 'app-browser-apis',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
     PageVisibilityDemoComponent,

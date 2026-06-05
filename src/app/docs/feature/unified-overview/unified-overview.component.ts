@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 import { DocsPageHeaderComponent } from '../../../docs/shared/page-header/docs-page-header.component';
@@ -27,7 +27,6 @@ export interface OverviewConfig {
 
 @Component({
   selector: 'app-unified-overview',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, CodeBlockComponent, DocsPageHeaderComponent],
   template: `
     <div class="max-w-[900px] mx-auto py-12 sm:py-16">

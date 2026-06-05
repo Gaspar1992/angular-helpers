@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RegexSecurityService } from '@angular-helpers/security';
 
 @Component({
   selector: 'app-regex-security-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="svc-card" aria-labelledby="regex-title">
       <div class="svc-card-head">
@@ -27,7 +26,7 @@ import { RegexSecurityService } from '@angular-helpers/security';
             class="demo-input font-mono text-xs"
             [value]="regexPattern()"
             (input)="regexPattern.set($any($event.target).value)"
-            placeholder="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+            placeholder="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2}$"
           />
         </div>
         <div class="flex flex-col gap-1">
@@ -81,7 +80,7 @@ import { RegexSecurityService } from '@angular-helpers/security';
 export class RegexSecurityDemoComponent {
   private readonly regexSecurity = inject(RegexSecurityService);
 
-  readonly regexPattern = signal<string>('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+  readonly regexPattern = signal<string>('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2}$');
   readonly regexInput = signal<string>('test@example.com');
   readonly regexResult = signal<string>('');
   readonly regexTime = signal<number>(0);

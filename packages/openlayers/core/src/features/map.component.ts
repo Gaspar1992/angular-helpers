@@ -2,7 +2,6 @@
 
 import {
   afterNextRender,
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   effect,
@@ -42,7 +41,6 @@ export interface MapClickEvent {
       }
     `,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OlMapComponent {
   private mapService = inject(OlMapService);

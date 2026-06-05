@@ -1,15 +1,15 @@
 import {
   Component,
-  ChangeDetectionStrategy,
   signal,
   computed,
   inject,
   OnInit,
   OnDestroy,
   NgZone,
+  effect,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { form, required, disabled, FormRoot, FormField } from '@angular/forms/signals';
 import { JsonPipe } from '@angular/common';
 import {
   STORAGE_WORKER_FACTORY,
@@ -45,8 +45,7 @@ interface TaskEntity {
 @Component({
   selector: 'app-storage-demo',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, JsonPipe],
+  imports: [FormField, FormRoot, JsonPipe],
   templateUrl: './storage-demo.component.html',
   providers: [
     { provide: STORAGE_WORKER_FACTORY, useValue: storageWorkerFactory },
@@ -69,12 +68,20 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
     },
   });
 
-  protected readonly taskForm = new FormGroup({
-    id: new FormControl('', [Validators.required]),
-    title: new FormControl('', [Validators.required]),
-    category: new FormControl('Work', [Validators.required]),
-    priority: new FormControl<'low' | 'medium' | 'high'>('medium', [Validators.required]),
-    completed: new FormControl(false),
+  protected readonly taskModel = signal({
+    id: '',
+    title: '',
+    category: 'Work',
+    priority: 'medium' as 'low' | 'medium' | 'high',
+    completed: false,
+  });
+
+  protected readonly taskForm = form(this.taskModel, (p) => {
+    required(p.id);
+    required(p.title);
+    required(p.category);
+    required(p.priority);
+    disabled(p.id, { when: () => true });
   });
 
   protected readonly selectedTaskId = signal<string | null>(null);
@@ -92,15 +99,23 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
   protected readonly rpcLogs = signal<RPCMessageLog[]>([]);
 
   // Crypto Tab
-  protected readonly cryptoControl = new FormControl('', [Validators.required]);
+  protected readonly cryptoModel = signal('');
+  protected readonly cryptoForm = form(this.cryptoModel, (p) => {
+    required(p);
+  });
   protected readonly isEncrypted = signal<boolean>(false);
   private encryptedPayload: string | null = null;
 
   // Multi-Tab Sync Tab
-  protected readonly profileForm = new FormGroup({
-    name: new FormControl('', [Validators.required]),
-    role: new FormControl('', [Validators.required]),
-    avatarColor: new FormControl('#a855f7', [Validators.required]),
+  protected readonly profileModel = signal({
+    name: '',
+    role: '',
+    avatarColor: '#a855f7',
+  });
+  protected readonly profileForm = form(this.profileModel, (p) => {
+    required(p.name);
+    required(p.role);
+    required(p.avatarColor);
   });
   protected readonly activeProfile = signal<{ name: string; role: string; avatarColor: string }>({
     name: 'Gaston',
@@ -111,7 +126,8 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
   private toastTimeout: any = null;
 
   // TOON Tab
-  protected readonly toonControl = new FormControl('');
+  protected readonly toonModel = signal('');
+  protected readonly toonForm = form(this.toonModel);
   protected readonly toonBytes = signal<number>(0);
   protected readonly jsonBytes = signal<number>(0);
   protected readonly toonRatio = computed(() => {
@@ -147,8 +163,8 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
 
   constructor() {
     // Serialization Dynamic Listener with automatic injection-context lifecycle unsubscribe
-    this.toonControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((val) => {
-      this.calculateSerializationWeights(val || '');
+    effect(() => {
+      this.calculateSerializationWeights(this.toonModel());
     });
 
     // Handle incoming Multi-Tab Sync changes from the Web Worker BroadcastChannel
@@ -156,7 +172,7 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
       this.ngZone.run(() => {
         if (newValue) {
           this.activeProfile.set(newValue);
-          this.profileForm.patchValue(newValue, { emitEvent: false });
+          this.profileModel.set(newValue);
           this.triggerToast(`Profile for "${newValue.name}" synced in the background.`);
         }
       });
@@ -216,12 +232,12 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
       ) {
         const profile = data as { name: string; role: string; avatarColor: string };
         this.activeProfile.set(profile);
-        this.profileForm.patchValue(profile, { emitEvent: false });
+        this.profileModel.set(profile);
       } else {
         // Preset values
         const defaultProfile = { name: 'Gaston', role: 'Architect GDE', avatarColor: '#a855f7' };
         this.activeProfile.set(defaultProfile);
-        this.profileForm.patchValue(defaultProfile, { emitEvent: false });
+        this.profileModel.set(defaultProfile);
       }
     } catch {
       // Gracefully fall back to defaults when reading from fresh storage
@@ -241,7 +257,7 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
 
   // RPC Cripto: Action Encrypt
   async onEncrypt() {
-    const text = this.cryptoControl.value;
+    const text = this.cryptoModel();
     if (!text) return;
 
     const start = performance.now();
@@ -295,7 +311,7 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
       const end = performance.now();
 
       this.rpcLatency.set(Math.round(end - start));
-      this.cryptoControl.setValue(typeof result === 'string' ? result : JSON.stringify(result));
+      this.cryptoModel.set(typeof result === 'string' ? result : JSON.stringify(result));
       this.isEncrypted.set(false);
 
       this.logRPCMessage('received', {
@@ -315,7 +331,7 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
 
   // Tab 2: Profile save via RPC write to background database
   async saveProfile() {
-    const value = this.profileForm.value;
+    const value = this.profileModel();
     if (!value.name || !value.role || !value.avatarColor) return;
 
     try {
@@ -341,7 +357,7 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
       },
       tags: ['storage', 'performance', 'reactive'],
     };
-    this.toonControl.setValue(JSON.stringify(obj, null, 2));
+    this.toonModel.set(JSON.stringify(obj, null, 2));
   }
 
   private calculateSerializationWeights(value: string) {
@@ -426,13 +442,14 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
 
   // EntityStore & Direct DB Methods
   protected generateNewTaskId() {
-    this.taskForm.patchValue({
+    this.taskModel.update((m) => ({
+      ...m,
       id: 'task_' + Math.random().toString(36).substring(2, 7),
-    });
+    }));
   }
 
   protected addTask() {
-    const val = this.taskForm.value;
+    const val = this.taskModel();
     if (!val.id || !val.title || !val.category || !val.priority) return;
 
     const task: TaskEntity = {
@@ -447,7 +464,10 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
     this.triggerToast(`Task "${task.title}" saved reactively in EntityStore!`);
 
     // Reset and generate new ID
-    this.taskForm.reset({
+    this.taskForm().reset();
+    this.taskModel.set({
+      id: '',
+      title: '',
       category: 'Work',
       priority: 'medium',
       completed: false,

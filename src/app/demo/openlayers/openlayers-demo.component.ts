@@ -1,9 +1,9 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   computed,
   effect,
   inject,
+  injectAsync,
   inputBinding,
   outputBinding,
   signal,
@@ -78,7 +78,6 @@ const BASEMAPS: BasemapConfig[] = [
 
 @Component({
   selector: 'app-openlayers-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     OlMapComponent,
@@ -1142,7 +1141,10 @@ const BASEMAPS: BasemapConfig[] = [
 })
 export class OpenLayersDemoComponent {
   private layerService = inject(OlLayerService);
-  private mapService = inject(OlMapService);
+  private mapServicePromise = injectAsync(() =>
+    import('@angular-helpers/openlayers/core').then((m) => m.OlMapService),
+  );
+  private mapService!: OlMapService;
   private popupService = inject(OlPopupService);
   private measurementService = inject(MeasurementInteractionService);
   readonly interactionService = inject(OlInteractionService);
@@ -1220,6 +1222,10 @@ export class OpenLayersDemoComponent {
   });
 
   constructor() {
+    this.mapServicePromise().then((service) => {
+      this.mapService = service;
+    });
+
     // Initialize default basemap on component creation
     this.createBasemapLayer('osm');
 

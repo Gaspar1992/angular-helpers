@@ -1,6 +1,6 @@
 // OlBasemapSwitcherComponent - Switch between base map providers
 
-import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-switcher.types';
 
 /**
@@ -22,7 +22,6 @@ import type { BasemapConfig, BasemapSwitcherPosition } from '../models/basemap-s
  */
 @Component({
   selector: 'ol-basemap-switcher',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="ol-basemap-switcher"

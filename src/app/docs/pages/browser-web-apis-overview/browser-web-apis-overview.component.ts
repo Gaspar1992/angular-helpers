@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CodeBlockComponent } from '../../shared/code-block/code-block.component';
 import { DocsPageHeaderComponent } from '../../shared/page-header/docs-page-header.component';
@@ -20,29 +20,24 @@ bootstrapApplication(AppComponent, {
         provideWebSocket(),
         provideWebWorker(),
         // ...add more as needed
-      ],
-    }),
-  ],
-});`;
+      ]}),
+  ]});`;
 
 const PROVIDER_GRANULAR = `import {
   provideCamera,
   provideGeolocation,
-  provideWebStorage,
-} from '@angular-helpers/browser-web-apis';
+  provideWebStorage} from '@angular-helpers/browser-web-apis';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideCamera(),       // → only CameraService + PermissionsService
     provideGeolocation(),  // → only GeolocationService + PermissionsService
     provideWebStorage(),   // → only WebStorageService
-  ],
-});`;
+  ]});`;
 
 const CONFIG_TOKENS_EXAMPLE = `import {
   provideBrowserApiLogLevel,
-  BROWSER_API_EXPERIMENTAL_SILENT,
-} from '@angular-helpers/browser-web-apis';
+  BROWSER_API_EXPERIMENTAL_SILENT} from '@angular-helpers/browser-web-apis';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -51,8 +46,7 @@ bootstrapApplication(AppComponent, {
 
     // Suppress experimental API warnings
     { provide: BROWSER_API_EXPERIMENTAL_SILENT, useValue: true },
-  ],
-});`;
+  ]});`;
 
 const SERVICE_GROUPS = [
   {
@@ -303,7 +297,6 @@ const SERVICE_GROUPS = [
 
 @Component({
   selector: 'app-browser-web-apis-overview',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, CodeBlockComponent, DocsPageHeaderComponent],
   template: `
     <div class="docs-page">

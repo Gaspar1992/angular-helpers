@@ -2,7 +2,6 @@
 
 import {
   afterNextRender,
-  ChangeDetectionStrategy,
   Component,
   contentChild,
   DestroyRef,
@@ -18,7 +17,6 @@ import { OlClusterComponent } from './cluster.component';
 @Component({
   selector: 'ol-vector-layer',
   template: '',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OlVectorLayerComponent {
   private layerService = inject(OlLayerService);

@@ -1,11 +1,10 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SiteFooterComponent } from '../shared/components/site-footer/site-footer.component';
 import { BLOG_POSTS } from './config/posts.data';
 
 @Component({
   selector: 'app-blog',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, SiteFooterComponent],
   template: `
     <main

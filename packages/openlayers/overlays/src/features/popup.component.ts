@@ -1,15 +1,6 @@
 // OlPopupComponent — declarative popup with content projection.
 
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  ElementRef,
-  effect,
-  inject,
-  input,
-  output,
-} from '@angular/core';
+import { Component, DestroyRef, ElementRef, effect, inject, input, output } from '@angular/core';
 import Overlay from 'ol/Overlay';
 import type OLMap from 'ol/Map';
 import type { Coordinate as OLCoordinate } from 'ol/coordinate';
@@ -39,7 +30,6 @@ import type { OverlayPositioning } from '../models/overlay.types';
  */
 @Component({
   selector: 'ol-popup',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (closeButton()) {
       <button type="button" class="ol-popup-close" aria-label="Close" (click)="onCloseClick()">

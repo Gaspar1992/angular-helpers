@@ -1,10 +1,9 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PUBLIC_DEMO_SECTIONS } from '../config/demo.config';
 
 @Component({
   selector: 'app-demo-home',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink],
   template: `
     <div class="max-width-container py-12 sm:py-20">

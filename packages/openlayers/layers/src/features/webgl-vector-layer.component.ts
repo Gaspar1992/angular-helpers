@@ -2,15 +2,7 @@
 // GPU-accelerated vector layer for large datasets (10k+ features).
 // Uses FlatStyleLike instead of ol/style/Style. Must be manually disposed.
 
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  effect,
-  inject,
-  input,
-} from '@angular/core';
+import { afterNextRender, Component, DestroyRef, effect, inject, input } from '@angular/core';
 import type { Feature } from '@angular-helpers/openlayers/core';
 import { OlMapService } from '@angular-helpers/openlayers/core';
 import VectorSource from 'ol/source/Vector';
@@ -45,7 +37,6 @@ import type { FlatStyleLike } from 'ol/style/flat';
 @Component({
   selector: 'ol-webgl-vector-layer',
   template: '',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OlWebGLVectorLayerComponent {
   private mapService = inject(OlMapService);

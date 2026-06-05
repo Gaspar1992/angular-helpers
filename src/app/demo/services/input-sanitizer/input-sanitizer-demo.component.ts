@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { InputSanitizerService } from '@angular-helpers/security';
 
 @Component({
   selector: 'app-input-sanitizer-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [InputSanitizerService],
   template: `
     <section class="svc-card" aria-labelledby="sanitizer-title">

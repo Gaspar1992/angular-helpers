@@ -1,10 +1,9 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { BreadcrumbItem } from '../../models/doc-meta.model';
 
 @Component({
   selector: 'app-docs-breadcrumb',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink],
   template: `
     <nav class="docs-breadcrumb" aria-label="Breadcrumb">

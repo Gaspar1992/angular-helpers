@@ -1,9 +1,8 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RegexSecurityService } from '@angular-helpers/security';
 
 @Component({
   selector: 'app-regex-security-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5">
       <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
@@ -61,7 +60,7 @@ import { RegexSecurityService } from '@angular-helpers/security';
   `,
 })
 export class RegexSecurityDemoComponent {
-  regexPattern = signal<string>('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+  regexPattern = signal<string>('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2}$');
   regexInput = signal<string>('test@example.com');
   regexResult = signal<string>('');
   regexStatus = signal<'idle' | 'running' | 'success' | 'error'>('idle');

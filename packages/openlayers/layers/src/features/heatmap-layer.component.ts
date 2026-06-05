@@ -1,6 +1,5 @@
 import {
   afterNextRender,
-  ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
@@ -15,7 +14,6 @@ import type { HeatmapLayerConfig } from '../models/layer.types';
 @Component({
   selector: 'ol-heatmap-layer',
   template: '',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OlHeatmapLayerComponent {
   private layerService = inject(OlLayerService);

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface CodeTab {
@@ -9,7 +9,6 @@ export interface CodeTab {
 
 @Component({
   selector: 'app-code-window',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   template: `
     <div class="code-window-container group">

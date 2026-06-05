@@ -1,9 +1,8 @@
-import { Component, OnDestroy, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-camera-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule],
   styleUrls: ['../demo.styles.css'],
   template: `

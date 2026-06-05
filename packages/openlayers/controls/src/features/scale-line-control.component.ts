@@ -1,20 +1,12 @@
 // OlScaleLineControlComponent
 
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  inject,
-  input,
-} from '@angular/core';
+import { afterNextRender, Component, DestroyRef, inject, input } from '@angular/core';
 import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import ScaleLine from 'ol/control/ScaleLine';
 
 @Component({
   selector: 'ol-scale-line-control',
   template: '',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OlScaleLineControlComponent {
   private mapService = inject(OlMapService);

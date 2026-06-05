@@ -1,8 +1,7 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 
 @Component({
   selector: 'app-backend-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="bg-base-200 border border-base-300 rounded-xl p-5 sm:p-6 mb-5">
       <div class="flex items-center justify-between gap-3 flex-wrap mb-3">

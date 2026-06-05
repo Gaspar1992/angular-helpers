@@ -1,10 +1,9 @@
-import { Component, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-broadcast-channel-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [BroadcastChannelService],
   imports: [FormsModule],
   styleUrls: ['../demo.styles.css'],

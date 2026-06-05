@@ -31,6 +31,7 @@ export default defineConfig({
         'echo.worker': resolve(__dirname, 'src/workers/echo.worker.ts'),
         'http-api.worker': resolve(__dirname, 'src/workers/http-api.worker.ts'),
         'benchmark.worker': resolve(__dirname, 'src/workers/benchmark.worker.ts'),
+        'regex.worker': resolve(__dirname, 'packages/security/src/workers/regex.worker.ts'),
       },
       formats: ['es'],
       fileName: (format, entryName) => `${entryName}.js`,

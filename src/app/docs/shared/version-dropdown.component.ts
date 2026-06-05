@@ -1,16 +1,8 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  inject,
-  signal,
-  ElementRef,
-  viewChild,
-} from '@angular/core';
+import { Component, inject, signal, ElementRef, viewChild } from '@angular/core';
 import { DocsVersionService, AngularVersion } from '../services/docs-version.service';
 
 @Component({
   selector: 'app-version-dropdown',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(document:click)': 'onClickOutside($event)',
   },

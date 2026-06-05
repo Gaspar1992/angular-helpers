@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { needsPolyfill } from '@angular-helpers/worker-http/streams-polyfill';
 import { WorkerHttpDemoLogService } from '../shared/log.service';
 
@@ -10,7 +10,6 @@ interface StreamCapability {
 
 @Component({
   selector: 'app-worker-http-streams-polyfill-card',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="svc-card h-full flex flex-col">
       <div class="svc-card-head">

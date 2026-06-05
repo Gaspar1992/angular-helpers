@@ -1,10 +1,9 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { PackageInfo } from '../../../core/config/packages.data';
 
 @Component({
   selector: 'app-package-card',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink],
   template: `
     <div

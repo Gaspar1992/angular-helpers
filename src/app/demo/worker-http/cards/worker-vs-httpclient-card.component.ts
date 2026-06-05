@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
@@ -11,7 +11,6 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
 
 @Component({
   selector: 'app-worker-http-vs-httpclient-card',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="svc-card col-span-full animate-in fade-in duration-300">
       <div class="svc-card-head">

@@ -1,10 +1,9 @@
-import { Component, OnDestroy, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FullscreenService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-fullscreen-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [FullscreenService],
   styleUrls: ['../demo.styles.css'],
   template: `

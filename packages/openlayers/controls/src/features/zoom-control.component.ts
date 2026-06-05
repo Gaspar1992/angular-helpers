@@ -1,20 +1,12 @@
 // OlZoomControlComponent
 
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  inject,
-  input,
-} from '@angular/core';
+import { afterNextRender, Component, DestroyRef, inject, input } from '@angular/core';
 import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import Zoom from 'ol/control/Zoom';
 
 @Component({
   selector: 'ol-zoom-control',
   template: '',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OlZoomControlComponent {
   private mapService = inject(OlMapService);

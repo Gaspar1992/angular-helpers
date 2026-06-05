@@ -4,7 +4,6 @@ import {
   AfterViewInit,
   ElementRef,
   viewChild,
-  ChangeDetectionStrategy,
   effect,
   computed,
   signal,
@@ -28,7 +27,6 @@ const LANGUAGE_ALIASES: Record<string, string> = {
 
 @Component({
   selector: 'app-code-block',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="code-block-wrapper">
       <header class="code-header">

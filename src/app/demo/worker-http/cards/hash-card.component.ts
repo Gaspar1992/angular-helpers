@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { createContentHasher } from '@angular-helpers/worker-http/crypto';
 import type { ContentHasher } from '@angular-helpers/worker-http/crypto';
 import { WorkerHttpDemoLogService } from '../shared/log.service';
 
 @Component({
   selector: 'app-worker-http-hash-card',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="svc-card h-full flex flex-col">
       <div class="svc-card-head">
