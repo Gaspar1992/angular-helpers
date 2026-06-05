@@ -35,7 +35,7 @@ export interface ServiceDetailConfig {
       @if (service(); as s) {
         <app-docs-page-header [title]="s.name" [lead]="s.description" />
 
-        @if (s.fnVersion) {
+        @if (s.fnVersion && s.methods.length > 0) {
           <div
             class="flex items-center gap-4 p-5 mb-10 bg-base-200 border border-border-subtle rounded-3xl shadow-sm"
           >
@@ -389,7 +389,12 @@ export class UnifiedServiceDetailComponent {
     effect(() => {
       this.config();
       untracked(() => {
-        this.apiVariant.set('service');
+        const s = this.service();
+        if (s?.fnVersion && s.methods.length === 0) {
+          this.apiVariant.set('fn');
+        } else {
+          this.apiVariant.set('service');
+        }
         this.activeTab.set('api');
       });
     });
