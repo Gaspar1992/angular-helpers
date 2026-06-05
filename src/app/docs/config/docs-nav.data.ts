@@ -3,6 +3,7 @@ export interface NavItem {
   route: string;
   hasFn?: boolean;
   experimental?: boolean;
+  since?: string;
 }
 
 export interface NavSection {
@@ -82,6 +83,12 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
           { label: 'Storage Manager', route: '/docs/browser-web-apis/storage-manager' },
           { label: 'Compression Streams', route: '/docs/browser-web-apis/compression' },
           { label: 'Battery', route: '/docs/browser-web-apis/battery', hasFn: true },
+          {
+            label: 'injectBatteryResource',
+            route: '/docs/browser-web-apis/inject-battery-resource',
+            hasFn: true,
+            since: 'v22',
+          },
         ],
       },
       {
@@ -94,6 +101,12 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
             label: 'Network Information',
             route: '/docs/browser-web-apis/network-information',
             hasFn: true,
+          },
+          {
+            label: 'injectNetworkInformationResource',
+            route: '/docs/browser-web-apis/inject-network-information-resource',
+            hasFn: true,
+            since: 'v22',
           },
         ],
       },
@@ -252,6 +265,18 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
           },
           { label: 'injectEntityStore', route: '/docs/storage/inject-entity-store', hasFn: true },
           { label: 'OfflineSyncService', route: '/docs/storage/offline-sync' },
+          {
+            label: 'injectStorageResource',
+            route: '/docs/storage/inject-storage-resource',
+            hasFn: true,
+            since: 'v22',
+          },
+          {
+            label: 'resourceFromSnapshots',
+            route: '/docs/storage/resource-from-snapshots',
+            hasFn: true,
+            since: 'v22',
+          },
         ],
       },
       {
@@ -334,7 +359,7 @@ export function getNavLibrariesForVersion(version: 'v21' | 'v22'): readonly Libr
       ...lib,
       sections: lib.sections.map((section) => ({
         ...section,
-        items: section.items.filter((item) => !item.experimental),
+        items: section.items.filter((item) => !item.experimental && item.since !== 'v22'),
       })),
     }));
   }
