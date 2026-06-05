@@ -1,7 +1,9 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 
-export type AngularVersion = 'v21' | 'v22';
+import { AngularVersion } from '../models/angular-version.model';
+
+export { AngularVersion };
 
 @Injectable({ providedIn: 'root' })
 export class DocsVersionService {

@@ -1,9 +1,11 @@
+import { AngularVersion } from '../models/angular-version.model';
+
 export interface NavItem {
   label: string;
   route: string;
   hasFn?: boolean;
   experimental?: boolean;
-  since?: string;
+  since?: AngularVersion;
 }
 
 export interface NavSection {
@@ -87,7 +89,7 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
             label: 'injectBatteryResource',
             route: '/docs/browser-web-apis/inject-battery-resource',
             hasFn: true,
-            since: 'v22',
+            since: AngularVersion.v22,
           },
         ],
       },
@@ -106,7 +108,7 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
             label: 'injectNetworkInformationResource',
             route: '/docs/browser-web-apis/inject-network-information-resource',
             hasFn: true,
-            since: 'v22',
+            since: AngularVersion.v22,
           },
         ],
       },
@@ -269,13 +271,13 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
             label: 'injectStorageResource',
             route: '/docs/storage/inject-storage-resource',
             hasFn: true,
-            since: 'v22',
+            since: AngularVersion.v22,
           },
           {
             label: 'resourceFromSnapshots',
             route: '/docs/storage/resource-from-snapshots',
             hasFn: true,
-            since: 'v22',
+            since: AngularVersion.v22,
           },
         ],
       },
@@ -353,13 +355,15 @@ export const DOCS_NAV_SECTIONS: readonly NavSectionLegacy[] = DOCS_NAV_LIBRARIES
   serviceItems: lib.sections.flatMap((section) => section.items),
 }));
 
-export function getNavLibrariesForVersion(version: 'v21' | 'v22'): readonly LibraryNav[] {
-  if (version === 'v21') {
+export function getNavLibrariesForVersion(version: AngularVersion): readonly LibraryNav[] {
+  if (version === AngularVersion.v21) {
     return DOCS_NAV_LIBRARIES.map((lib) => ({
       ...lib,
       sections: lib.sections.map((section) => ({
         ...section,
-        items: section.items.filter((item) => !item.experimental && item.since !== 'v22'),
+        items: section.items.filter(
+          (item) => !item.experimental && item.since !== AngularVersion.v22,
+        ),
       })),
     }));
   }
