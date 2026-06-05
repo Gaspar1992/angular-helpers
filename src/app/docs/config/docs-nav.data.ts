@@ -273,12 +273,6 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
             hasFn: true,
             since: AngularVersion.v22,
           },
-          {
-            label: 'resourceFromSnapshots',
-            route: '/docs/storage/resource-from-snapshots',
-            hasFn: true,
-            since: AngularVersion.v22,
-          },
         ],
       },
       {

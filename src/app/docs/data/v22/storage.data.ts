@@ -542,52 +542,6 @@ export class MyCustomTransport implements StorageTransport {
   },
 
   {
-    id: 'resource-from-snapshots',
-    name: 'resourceFromSnapshots',
-    description:
-      'A utility function to compose a Resource from multiple snapshots. Use it to compose injectStorageResource with other resources, like injectNetworkInformationResource.',
-    scope: 'provided',
-    importPath: '@angular-helpers/storage',
-    requiresSecureContext: false,
-    browserSupport: 'All modern browsers',
-    category: 'storage-io',
-    notes: ['Provides a clean wrapper over Angular rxResource or resource for snapshots.'],
-    methods: [],
-    example: `import { Component, inject } from '@angular/core';
-import { injectStorageResource } from '@angular-helpers/storage';
-import { resourceFromSnapshots } from '@angular/core';
-import { injectNetworkInformationResource } from '@angular-helpers/browser-web-apis';
-
-@Component({
-  selector: 'app-composed-storage',
-  standalone: true,
-  template: '<div data-testid="composed">Value: {{ composed.value() }}</div>'
-})
-export class ComposedStorageComponent {
-  network = injectNetworkInformationResource();
-  storage = injectStorageResource('my_key', 'default', { storageType: 'local', serializer: 'json' });
-
-  composed = resourceFromSnapshots(() => {
-    const netStatus = this.network.resource.status();
-    const storeStatus = this.storage.resource.status();
-
-    if (netStatus === 'error' || storeStatus === 'error') {
-      return { status: 'error', error: new Error('Error') };
-    }
-    if (netStatus === 'idle' || storeStatus === 'idle') {
-      return { status: 'idle', value: undefined };
-    }
-    if (netStatus === 'loading' || storeStatus === 'loading') {
-      return { status: 'loading', value: undefined };
-    }
-
-    const netVal = this.network.resource.value();
-    const storeVal = this.storage.resource.value();
-    return { status: 'resolved', value: !netVal?.online ? 'offline' : 'online-' + storeVal };
-  });
-}`,
-  },
-  {
     id: 'inject-storage-resource',
     name: 'injectStorageResource',
     description:
