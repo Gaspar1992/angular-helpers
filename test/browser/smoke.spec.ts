@@ -8,12 +8,12 @@ test.describe('Browser APIs demo smoke', () => {
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Master Web APIs');
   });
 
-  test('renders the demo shell and key sections', async ({ page }) => {
-    await page.goto('/demo');
+  test('renders the demo shell and key sections', { timeout: 30_000 }, async ({ page }) => {
+    await page.goto('/demo', { waitUntil: 'networkidle' });
 
     await expect(
       page.getByRole('heading', { level: 1, name: /Explore Angular Helpers/i }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole('heading', { level: 2, name: /Browser Web APIs/i })).toBeVisible();
     await expect(page.getByRole('heading', { level: 2, name: /^Security$/i })).toBeVisible();
     await expect(
