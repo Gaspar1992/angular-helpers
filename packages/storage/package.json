@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/storage",
-  "version": "21.14.0",
+  "version": "22.0.0",
   "description": "Sistema de almacenamiento reactivo premium para Angular con soporte para Cache API, IndexedDB, compresión TOON y blindaje en runtime.",
   "scripts": {
     "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
@@ -39,9 +39,9 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@angular/core": "^21.0.0",
-    "@angular/common": "^21.0.0",
-    "@angular/platform-browser": "^21.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/common": "^22.0.0",
+    "@angular/platform-browser": "^22.0.0",
     "rxjs": "^7.0.0"
   },
   "dependencies": {

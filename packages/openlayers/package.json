@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/openlayers",
-  "version": "0.4.0",
+  "version": "22.0.0",
   "description": "Modern Angular wrapper for OpenLayers with modular architecture, standalone components, and hybrid template/programmatic API",
   "scripts": {
     "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
@@ -42,8 +42,8 @@
   },
   "peerDependencies": {
     "@angular-helpers/testing": "workspace:*",
-    "@angular/common": "^21.0.0",
-    "@angular/core": "^21.0.0",
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
     "milsymbol": "^3.0.0",
     "ol": "^10.0.0"
   },

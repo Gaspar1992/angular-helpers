@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/worker-http",
-  "version": "21.3.0",
+  "version": "22.0.0",
   "description": "Angular HTTP over Web Workers — off-main-thread HTTP pipelines with configurable interceptors, WebCrypto security, and pluggable serialization",
   "schematics": "./schematics/collection.json",
   "exports": {
@@ -82,8 +82,8 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@angular/common": "^21.0.0",
-    "@angular/core": "^21.0.0",
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
     "rxjs": "^7.0.0",
     "seroval": "^1.0.0",
     "@toon-format/toon": "^2.0.0"
@@ -113,8 +113,8 @@
     "tslib": "^2.0.0"
   },
   "devDependencies": {
-    "@angular-devkit/core": "^21.0.0",
-    "@angular-devkit/schematics": "^21.0.0",
+    "@angular-devkit/core": "^22.0.0",
+    "@angular-devkit/schematics": "^22.0.0",
     "esbuild": "^0.27.3",
     "web-streams-polyfill": "^4.2.0"
   }

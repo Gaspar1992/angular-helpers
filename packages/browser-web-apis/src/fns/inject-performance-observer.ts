@@ -29,6 +29,9 @@ export function injectPerformanceObserver(
   return {
     entries: entries.asReadonly(),
     entryCount: computed(() => entries().length),
-    latestEntry: computed(() => entries().at(-1)),
+    latestEntry: computed(() => {
+      const list = entries();
+      return list.length > 0 ? list[list.length - 1] : undefined;
+    }),
   };
 }

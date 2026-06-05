@@ -2,8 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "paths": {
-      "@angular-helpers/*": ["dist/*"]
-    }
+      "@angular-helpers/*": ["./dist/*"]
+    },
+    "types": ["node"]
   },
   "angularCompilerOptions": {
     "compilationMode": "partial"

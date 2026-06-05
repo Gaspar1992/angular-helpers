@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/core",
-  "version": "21.14.0",
+  "version": "22.0.0",
   "description": "Shared internal utilities and core logic for Angular Helpers packages",
   "publishConfig": {
     "access": "public"
@@ -17,6 +17,6 @@
     "lint": "oxlint src"
   },
   "peerDependencies": {
-    "@angular/core": "^21.0.0"
+    "@angular/core": "^22.0.0"
   }
 }

@@ -169,7 +169,10 @@ export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): Enviro
   if (services && Object.keys(flagConfig).length === 0) {
     return makeEnvironmentProviders([
       PermissionsService,
-      ...services.flatMap((env) => (env as unknown as { ɵproviders: Provider[] }).ɵproviders ?? []),
+      ...services.reduce<Provider[]>((acc, env) => {
+        const inner = (env as any).ɵproviders;
+        return inner ? acc.concat(inner) : acc;
+      }, []),
     ]);
   }
 

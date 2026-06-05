@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/security",
-  "version": "21.4.1",
+  "version": "22.0.0",
   "description": "Angular security helpers for preventing ReDoS and other security vulnerabilities",
   "keywords": [
     "angular",
@@ -42,9 +42,9 @@
     "test": "vitest run"
   },
   "peerDependencies": {
-    "@angular/common": "^21.0.0",
-    "@angular/core": "^21.0.0",
-    "@angular/forms": "^21.0.0",
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0",
     "rxjs": "^7.0.0 || ^8.0.0"
   },
   "peerDependenciesMeta": {
