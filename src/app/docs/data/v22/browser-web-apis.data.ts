@@ -126,6 +126,36 @@ export class BatteryComponent {
     notes: ['Battery API is not available in Safari.'],
     category: 'storage-io',
     methods: [],
+    fnVersion: {
+      name: 'injectBatteryResource',
+      importPath: '@angular-helpers/browser-web-apis',
+      returnType: 'BatteryResourceRef',
+      description:
+        'Provides a reactive Angular Resource (rxResource) for monitoring device battery.',
+      fields: [
+        {
+          name: 'resource',
+          type: 'ResourceRef<BatteryInfo | null>',
+          description: 'The reactive Angular ResourceRef.',
+        },
+        {
+          name: 'info',
+          type: 'Signal<BatteryInfo | null | undefined>',
+          description: 'Current battery info shortcut.',
+        },
+        {
+          name: 'isSupported',
+          type: 'Signal<boolean>',
+          description: 'True when Battery API is available.',
+        },
+        {
+          name: 'refresh',
+          type: '() => void',
+          description: 'Triggers a manual reload of the resource.',
+        },
+      ],
+      example: `const battery = injectBatteryResource();\nbattery.refresh();`,
+    },
     example: `import { Component } from '@angular/core';
 import { injectBatteryResource } from '@angular-helpers/browser-web-apis';
 
@@ -156,6 +186,61 @@ export class BatteryResourceComponent {
     notes: ['Uses the Network Information API when available, and falls back to navigator.onLine.'],
     category: 'network',
     methods: [],
+    fnVersion: {
+      name: 'injectNetworkInformationResource',
+      importPath: '@angular-helpers/browser-web-apis',
+      returnType: 'NetworkInformationResourceRef',
+      description:
+        'Provides a reactive Angular Resource (rxResource) for monitoring network connection status.',
+      fields: [
+        {
+          name: 'resource',
+          type: 'ResourceRef<NetworkInformation>',
+          description: 'The reactive Angular ResourceRef.',
+        },
+        {
+          name: 'snapshot',
+          type: 'Signal<NetworkInformation | undefined>',
+          description: 'The latest snapshot shortcut.',
+        },
+        {
+          name: 'online',
+          type: 'Signal<boolean | undefined>',
+          description: 'Whether the device is online.',
+        },
+        {
+          name: 'effectiveType',
+          type: 'Signal<EffectiveConnectionType | undefined>',
+          description: 'The effective connection type (e.g. 4g).',
+        },
+        {
+          name: 'downlink',
+          type: 'Signal<number | undefined>',
+          description: 'The effective bandwidth estimate in megabits per second.',
+        },
+        {
+          name: 'rtt',
+          type: 'Signal<number | undefined>',
+          description: 'The estimated effective round-trip time of the current connection.',
+        },
+        {
+          name: 'type',
+          type: 'Signal<ConnectionType | undefined>',
+          description: 'The underlying connection technology (e.g. wifi).',
+        },
+        {
+          name: 'saveData',
+          type: 'Signal<boolean | undefined>',
+          description: 'User data-saving mode status.',
+        },
+        {
+          name: 'isSupported',
+          type: 'Signal<boolean>',
+          description: 'True when Network Information API is available.',
+        },
+      ],
+      example: `const network = injectNetworkInformationResource();\nconsole.log(network.online());`,
+    },
     example: `import { Component } from '@angular/core';
 import { injectNetworkInformationResource } from '@angular-helpers/browser-web-apis';
 

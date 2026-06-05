@@ -556,6 +556,30 @@ export class MyCustomTransport implements StorageTransport {
       'Supports asynchronous Web Worker transports automatically.',
     ],
     methods: [],
+    fnVersion: {
+      name: 'injectStorageResource',
+      importPath: '@angular-helpers/storage',
+      returnType: 'StorageResource<T>',
+      description: 'Injects an rxResource that syncs with an L2 storage transport.',
+      fields: [
+        {
+          name: 'resource',
+          type: 'ResourceRef<T | undefined>',
+          description: 'The reactive Angular ResourceRef.',
+        },
+        {
+          name: 'set',
+          type: '(newValue: T | undefined) => void',
+          description: 'Sets a new value in storage and updates the resource.',
+        },
+        {
+          name: 'update',
+          type: '(updater: (current: T | undefined) => T | undefined) => void',
+          description: 'Updates the value in storage and resource via a callback.',
+        },
+      ],
+      example: `const store = injectStorageResource('user_id', 0, { storageType: 'local', serializer: 'json' });\nstore.set(123);`,
+    },
     example: `import { Component } from '@angular/core';
 import { injectStorageResource } from '@angular-helpers/storage';
 
