@@ -115,6 +115,66 @@ export class BatteryComponent {
     },
   },
   {
+    id: 'inject-battery-resource',
+    name: 'injectBatteryResource',
+    description:
+      'Provides a reactive Angular Resource (rxResource) for monitoring device battery level, charging state, and times.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: false,
+    browserSupport: 'Chrome ✓ · Firefox ✓ · Safari ✗ · Edge ✓',
+    notes: ['Battery API is not available in Safari.'],
+    category: 'storage-io',
+    methods: [],
+    example: `import { Component } from '@angular/core';
+import { injectBatteryResource } from '@angular-helpers/browser-web-apis';
+
+@Component({
+  selector: 'app-battery-resource',
+  template: \`
+    @if (battery.resource.isLoading()) {
+      <span>Checking battery...</span>
+    } @else if (battery.resource.hasValue()) {
+      <span>Level: {{ battery.resource.value()?.level! * 100 }}%</span>
+      <span>Charging: {{ battery.resource.value()?.charging ? 'Yes' : 'No' }}</span>
+    }
+  \`
+})
+export class BatteryResourceComponent {
+  battery = injectBatteryResource();
+}`,
+  },
+  {
+    id: 'inject-network-information-resource',
+    name: 'injectNetworkInformationResource',
+    description:
+      'Provides a reactive Angular Resource (rxResource) for monitoring the device network connection status.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: ['Uses the Network Information API when available, and falls back to navigator.onLine.'],
+    category: 'network',
+    methods: [],
+    example: `import { Component } from '@angular/core';
+import { injectNetworkInformationResource } from '@angular-helpers/browser-web-apis';
+
+@Component({
+  selector: 'app-network-resource',
+  template: \`
+    @if (network.resource.isLoading()) {
+      <span>Checking network...</span>
+    } @else if (network.resource.hasValue()) {
+      <span>Status: {{ network.resource.value()?.online ? 'Online' : 'Offline' }}</span>
+      <span>Type: {{ network.resource.value()?.effectiveType }}</span>
+    }
+  \`
+})
+export class NetworkResourceComponent {
+  network = injectNetworkInformationResource();
+}`,
+  },
+  {
     id: 'browser-capability',
     name: 'BrowserCapabilityService',
     description:

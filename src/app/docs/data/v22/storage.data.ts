@@ -587,6 +587,42 @@ export class ComposedStorageComponent {
   });
 }`,
   },
+  {
+    id: 'inject-storage-resource',
+    name: 'injectStorageResource',
+    description:
+      'Provides a reactive Angular Resource wrapper around StorageTransport. Handles async serialization/deserialization and syncs reactively.',
+    scope: 'provided',
+    importPath: '@angular-helpers/storage',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    category: 'storage-io',
+    notes: [
+      'Returns a ResourceRef powered by Angular rxResource.',
+      'Supports asynchronous Web Worker transports automatically.',
+    ],
+    methods: [],
+    example: `import { Component } from '@angular/core';
+import { injectStorageResource } from '@angular-helpers/storage';
+
+@Component({
+  selector: 'app-storage-resource',
+  template: \`
+    @if (data.resource.isLoading()) {
+      <p>Loading...</p>
+    } @else if (data.resource.hasValue()) {
+      <p>Value: {{ data.resource.value() }}</p>
+      <button (click)="data.set('updated value')">Update Value</button>
+    }
+  \`
+})
+export class StorageResourceComponent {
+  data = injectStorageResource('my_data_key', 'initial value', {
+    storageType: 'local',
+    serializer: 'json'
+  });
+}`,
+  },
 ];
 
 export const STORAGE_INTERFACES: Record<string, InterfaceDoc[]> = {
