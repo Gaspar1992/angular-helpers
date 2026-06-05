@@ -71,8 +71,8 @@ export class VersionDropdownComponent {
   protected readonly trigger = viewChild<ElementRef<HTMLButtonElement>>('trigger');
 
   protected readonly options: { value: AngularVersion; label: string }[] = [
-    { value: 'v22', label: 'Angular v22' },
-    { value: 'v21', label: 'Angular v21' },
+    { value: AngularVersion.v22, label: 'Angular v22' },
+    { value: AngularVersion.v21, label: 'Angular v21' },
   ];
 
   protected currentVersionDisplay() {

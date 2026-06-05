@@ -11,7 +11,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map, filter } from 'rxjs/operators';
 import { DOCS_NAV_LIBRARIES, getNavLibrariesForVersion } from '../config/docs-nav.data';
 import { WINDOW } from '@angular-helpers/browser-web-apis';
-import { DocsVersionService } from '../services/docs-version.service';
+import { DocsVersionService, AngularVersion } from '../services/docs-version.service';
 import { VersionDropdownComponent } from '../shared/version-dropdown.component';
 
 @Component({
@@ -263,9 +263,9 @@ export class DocsLayoutComponent {
     this.route.queryParams.subscribe((params) => {
       const v = params['v'];
       if (v === '21') {
-        versionService.setVersion('v21');
+        versionService.setVersion(AngularVersion.v21);
       } else if (v === '22') {
-        versionService.setVersion('v22');
+        versionService.setVersion(AngularVersion.v22);
       }
     });
 
