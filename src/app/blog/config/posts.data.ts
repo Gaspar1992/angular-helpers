@@ -2,6 +2,14 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'angular-22-modernization-rxresource-and-cleanup',
+    title: 'Angular 22 Modernization: rxResource, viewChild.required(), and cleaner code',
+    publishedAt: '2026-06-05',
+    tags: ['angular', 'v22', 'rxResource', 'openlayers', 'browser-web-apis', 'storage', 'release'],
+    excerpt:
+      'We have fully modernized the monorepo for Angular 22! This exciting release includes a massive cleanup of redundant standalone: true flags, migrates openlayers to use viewChild.required(), and deeply integrates rxResource. We added new rxResource injections for battery and network in browser-web-apis, wrapped the async storage transport in rxResource inside the storage package, and showcased advanced ResourceSnapshot composition using resourceFromSnapshots. A huge leap forward for reactivity and performance!',
+  },
+  {
     slug: 'angular-v22-upgrade-and-roadmap',
     title: 'Upgrading to Angular v22 — and what it means for every package',
     publishedAt: '2026-06-05',

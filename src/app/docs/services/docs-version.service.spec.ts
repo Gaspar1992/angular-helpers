@@ -17,16 +17,16 @@ describe('DocsVersionService', () => {
     service = TestBed.inject(DocsVersionService);
   });
 
-  it('should be created and default to v21', () => {
+  it('should be created and default to v22', () => {
     expect(service).toBeTruthy();
-    expect(service.version()).toBe('v21');
+    expect(service.version()).toBe('v22');
   });
 
   it('should update version programmatically when setVersion is called', () => {
-    service.setVersion('v22');
-    expect(service.version()).toBe('v22');
+    service.setVersion('v21');
+    expect(service.version()).toBe('v21');
     expect(routerSpy.navigate).toHaveBeenCalledWith([], {
-      queryParams: { v: '22' },
+      queryParams: { v: '21' },
       queryParamsHandling: 'merge',
     });
   });
