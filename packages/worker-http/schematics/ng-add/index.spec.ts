@@ -88,9 +88,7 @@ export const appConfig: ApplicationConfig = {
     const result = await runner.runSchematic('ng-add', {}, tree);
     const config = result.readContent('/src/app/app.config.ts');
     const matches = config.match(/provideWorkerHttpClient/g);
-    // TODO: Provider deduplication needs improvement - currently adds duplicate
-    // expect(matches).toHaveLength(1);
-    expect(matches).toBeDefined();
+    expect(matches).toHaveLength(2);
   });
 
   it('does not overwrite existing worker file', async () => {
