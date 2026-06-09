@@ -103,8 +103,6 @@ jobs:
               (cd dist/$pkg && npm publish --provenance --access public || echo "Skipped publishing $pkg")
             fi
           done
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Detect release artifact changes
         id: release_changes
