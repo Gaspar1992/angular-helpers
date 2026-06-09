@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-map-telemetry',
-  standalone: true,
   imports: [CommonModule],
   template: `
     <div

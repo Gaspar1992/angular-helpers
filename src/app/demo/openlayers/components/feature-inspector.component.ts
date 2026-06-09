@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-feature-inspector',
-  standalone: true,
   imports: [CommonModule],
   template: `
     @if (selectedFeatures().length > 0) {

@@ -1,13 +1,12 @@
 import { Component, inject, ElementRef, viewChild, effect, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SearchService, SearchResult } from '../../../core/services/search.service';
 
 @Component({
   selector: 'app-search-modal',
-  standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, NgOptimizedImage],
   host: {
     '(window:keydown)': 'onWindowKeydown($event)',
   },
@@ -97,7 +96,7 @@ import { SearchService, SearchResult } from '../../../core/services/search.servi
                       >
                       <span
                         class="badge font-black opacity-60 group-hover:opacity-100 px-3 py-1 scale-90 origin-left"
-                        [ngClass]="getTypeClass(res.type)"
+                        [class]="getTypeClass(res.type)"
                       >
                         {{ res.type }}
                       </span>
@@ -166,7 +165,7 @@ import { SearchService, SearchResult } from '../../../core/services/search.servi
             class="px-5 py-3 border-t border-base-content/5 bg-base-content/5 flex justify-between items-center"
           >
             <div class="flex items-center gap-2.5">
-              <img src="icon.webp" alt="" class="w-4 h-4 opacity-30" />
+              <img ngSrc="icon.webp" alt="" width="16" height="16" class="opacity-30" />
               <span class="text-[10px] font-black text-base-content/20 uppercase tracking-widest"
                 >Angular Helpers Search</span
               >

@@ -3,7 +3,6 @@ import { EyeDropperService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-eye-dropper-demo',
-  standalone: true,
   imports: [],
   styleUrls: ['../demo.styles.css'],
   template: `

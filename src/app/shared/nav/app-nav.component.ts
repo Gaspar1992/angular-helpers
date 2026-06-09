@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { NgOptimizedImage } from '@angular/common';
 
 @Component({
   selector: 'app-nav',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, NgOptimizedImage],
   template: `
     <header
       class="flex items-center justify-between px-4 sm:px-6 h-[52px] sm:h-[56px] bg-[rgba(10,10,20,0.94)] backdrop-blur-[14px] border-b border-base-300 sticky top-0 z-[100]"
@@ -14,7 +15,14 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         class="flex items-center gap-2 no-underline text-base-content transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-primary focus-visible:rounded-sm"
         aria-label="Angular Helpers home"
       >
-        <img src="icon.webp" alt="" class="w-7 h-7 object-contain" aria-hidden="true" />
+        <img
+          ngSrc="icon.webp"
+          alt=""
+          width="28"
+          height="28"
+          class="object-contain"
+          aria-hidden="true"
+        />
         <span class="font-bold text-[0.9rem] sm:text-base tracking-[-0.02em]">Angular Helpers</span>
       </a>
 

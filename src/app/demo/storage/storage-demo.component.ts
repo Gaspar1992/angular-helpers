@@ -44,7 +44,6 @@ interface TaskEntity {
 
 @Component({
   selector: 'app-storage-demo',
-  standalone: true,
   imports: [FormField, FormRoot, JsonPipe],
   templateUrl: './storage-demo.component.html',
   providers: [
