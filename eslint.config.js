@@ -2,6 +2,7 @@ import angularEslint from '@angular-eslint/eslint-plugin';
 import tsparser from '@typescript-eslint/parser';
 import angularTemplateEslint from '@angular-eslint/eslint-plugin-template';
 import angularTemplateParser from '@angular-eslint/template-parser';
+import { configs } from 'angular-eslint';
 
 export default [
   {
@@ -134,7 +135,7 @@ export default [
       '@angular-eslint/template': angularTemplateEslint,
     },
     rules: {
-      ...angularTemplateEslint.configs.recommended.rules,
+      ...configs.templateRecommended[1].rules,
     },
   },
 ];
