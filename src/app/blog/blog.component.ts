@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SiteFooterComponent } from '../shared/components/site-footer/site-footer.component';
+import { SeoService } from '../core/services/seo.service';
 import { BLOG_POSTS } from './config/posts.data';
 
 @Component({
@@ -129,5 +130,16 @@ import { BLOG_POSTS } from './config/posts.data';
   `,
 })
 export class BlogComponent {
+  private readonly seo = inject(SeoService);
+
+  constructor() {
+    this.seo.updateMetadata({
+      title: 'Blog — Technical Insights & Engineering',
+      description:
+        'Deep dives into Angular architecture, high-fidelity library design, and the latest advancements in the web platform.',
+      keywords: 'Angular, Blog, Architecture, Web Development, Performance',
+    });
+  }
+
   protected readonly posts = BLOG_POSTS;
 }

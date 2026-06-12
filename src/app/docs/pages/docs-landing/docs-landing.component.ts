@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { SeoService } from '../../../core/services/seo.service';
 
 @Component({
   selector: 'app-docs-landing',
@@ -241,4 +242,15 @@ import { RouterLink } from '@angular/router';
     </div>
   `,
 })
-export class DocsLandingComponent {}
+export class DocsLandingComponent {
+  private readonly seo = inject(SeoService);
+
+  constructor() {
+    this.seo.updateMetadata({
+      title: 'Documentation',
+      description:
+        'Explore the libraries, utilities, and architectural patterns of Angular Helpers including Web Workers, Crypto, Storage, and Browser Web APIs.',
+      keywords: 'Angular, Documentation, Web Workers, Browser APIs, Security',
+    });
+  }
+}

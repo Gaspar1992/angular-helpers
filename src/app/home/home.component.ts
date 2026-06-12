@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
+import { SeoService } from '../core/services/seo.service';
 import { HOME_FEATURES, HOME_STATS, HOME_PACKAGES, HOME_CODE_TABS } from './config/home.config';
 import { CodeWindowComponent } from '../shared/components/code-window/code-window.component';
 import { StatsBarComponent } from './ui/stats-bar/stats-bar.component';
@@ -286,6 +287,17 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
   `,
 })
 export class HomeComponent {
+  private readonly seo = inject(SeoService);
+
+  constructor() {
+    this.seo.updateMetadata({
+      title: 'Browser APIs, Security, Storage & Workers',
+      description:
+        'Signal-based utilities to seamlessly integrate Browser APIs, Security, Storage, and Web Workers into Angular applications. Zero boilerplate, zero main-thread jank.',
+      keywords: 'Angular, Web Workers, Signals, WebCrypto, Geolocation, Security',
+    });
+  }
+
   protected readonly features = HOME_FEATURES;
   protected readonly stats = HOME_STATS;
   protected readonly packages = HOME_PACKAGES;
