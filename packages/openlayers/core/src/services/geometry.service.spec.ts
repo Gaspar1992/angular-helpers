@@ -100,6 +100,29 @@ describe('OlGeometryService', () => {
     ])('throws RangeError for invalid input ($input)', ({ input, pattern }) => {
       expect(() => service.createEllipse({ center, ...(input as any) })).toThrow(pattern);
     });
+
+    it('accurately constructs strategic-scale ellipses without planar distortion', () => {
+      const semiMajor = 4_000_000;
+      const semiMinor = 2_000_000;
+      const f = service.createEllipse({
+        center,
+        semiMajor,
+        semiMinor,
+        rotation: 0,
+        segments: 64,
+      });
+      const ring = (f.geometry.coordinates as Coordinate[][])[0];
+
+      expect(distanceMeters(center, ring[0])).toBeCloseTo(semiMajor, -1);
+      expect(distanceMeters(center, ring[16])).toBeCloseTo(semiMinor, -1);
+    });
+
+    it('throws RangeError when ellipse semiMajor/semiMinor exceeds 1/4 of Earth circumference', () => {
+      const tooLarge = 6371008.8 * (Math.PI / 2) + 10;
+      expect(() => service.createEllipse({ center, semiMajor: tooLarge, semiMinor: 1000 })).toThrow(
+        /quarter/i,
+      );
+    });
   });
 
   // -------------------------------------------------------------------------

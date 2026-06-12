@@ -29,17 +29,36 @@ export class OlGeometryService {
       throw new RangeError('segments must be >= 8');
     }
 
-    const cosR = Math.cos(rotation);
-    const sinR = Math.sin(rotation);
+    const rRadius = 6371008.8; // Standard Earth radius used by OpenLayers
+    const alpha = semiMajor / rRadius;
+    const beta = semiMinor / rRadius;
+
+    // Failsafe for strategic-scale inputs exceeding spherical boundaries (quarter of Earth)
+    if (alpha >= Math.PI / 2 || beta >= Math.PI / 2) {
+      throw new RangeError(
+        'semiMajor and semiMinor must be less than quarter of Earth circumference',
+      );
+    }
+
+    const tanAlpha = Math.tan(alpha);
+    const tanBeta = Math.tan(beta);
+    const tanAlphaSq = tanAlpha * tanAlpha;
+    const tanBetaSq = tanBeta * tanBeta;
+
     const ring: Coordinate[] = [];
     for (let i = 0; i < segments; i++) {
       const theta = (i / segments) * Math.PI * 2;
-      // Ellipse in local axis-aligned frame, then rotated by `rotation`.
-      const ax = Math.cos(theta) * semiMajor;
-      const ay = Math.sin(theta) * semiMinor;
-      const dx = ax * cosR - ay * sinR;
-      const dy = ax * sinR + ay * cosR;
-      ring.push(this.offsetMetersToLonLat(center, dx, dy));
+      const cosT = Math.cos(theta);
+
+      // Spherical ellipse polar equation:
+      // tan^2(rho) = tan^2(beta) / (1 - cos^2(theta) * (1 - tan^2(beta) / tan^2(alpha)))
+      const denom = 1 - cosT * cosT * (1 - tanBetaSq / tanAlphaSq);
+      const tanSqRho = tanBetaSq / denom;
+      const rho = Math.atan(Math.sqrt(tanSqRho));
+      const distance = rho * rRadius;
+      const bearing = Math.PI / 2 - (rotation + theta);
+
+      ring.push(offset(center, distance, bearing) as Coordinate);
     }
     ring.push(ring[0]); // close the ring
 
@@ -73,9 +92,8 @@ export class OlGeometryService {
     const span = endAngle - startAngle;
     for (let i = 0; i <= segments; i++) {
       const theta = startAngle + (i / segments) * span;
-      const dx = Math.cos(theta) * radius;
-      const dy = Math.sin(theta) * radius;
-      ring.push(this.offsetMetersToLonLat(center, dx, dy));
+      const bearing = Math.PI / 2 - theta;
+      ring.push(offset(center, radius, bearing) as Coordinate);
     }
     ring.push(center); // close back to apex
 
@@ -107,13 +125,9 @@ export class OlGeometryService {
     const inner: Coordinate[] = [];
     for (let i = 0; i < segments; i++) {
       const theta = (i / segments) * Math.PI * 2;
-      const cosT = Math.cos(theta);
-      const sinT = Math.sin(theta);
-      // Outer ring: CCW (theta increasing)
-      outer.push(this.offsetMetersToLonLat(center, cosT * outerRadius, sinT * outerRadius));
-      // Inner ring: CW — sample the SAME thetas but we'll reverse the
-      // accumulator below so the ring is traversed in the opposite sense.
-      inner.push(this.offsetMetersToLonLat(center, cosT * innerRadius, sinT * innerRadius));
+      const bearing = Math.PI / 2 - theta;
+      outer.push(offset(center, outerRadius, bearing) as Coordinate);
+      inner.push(offset(center, innerRadius, bearing) as Coordinate);
     }
     inner.reverse();
     outer.push(outer[0]);

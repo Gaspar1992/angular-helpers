@@ -54,6 +54,8 @@ export class OlWebGLTileLayerComponent {
   visible = input<boolean>(true);
   /** Preload low-res tiles up to this many zoom levels */
   preload = input<number>(0);
+  /** Style variables for dynamic expressions (e.g. `['var', 'brightness']`) */
+  variables = input<Record<string, string | number | boolean | number[]>>();
 
   private layer: WebGLTileLayer | WebGLVectorTileLayer<any, any> | null = null;
 
@@ -76,6 +78,7 @@ export class OlWebGLTileLayerComponent {
             opacity: this.opacity(),
             zIndex: this.zIndex(),
             style: (this.tileStyle() as FlatStyleLike) || {},
+            ...(this.variables() ? { variables: this.variables() } : {}),
           });
           break;
         case 'xyz':
@@ -90,6 +93,7 @@ export class OlWebGLTileLayerComponent {
             zIndex: this.zIndex(),
             preload: this.preload(),
             ...(this.tileStyle() ? { style: this.tileStyle() as WebGLTileStyle } : {}),
+            ...(this.variables() ? { variables: this.variables() } : {}),
           });
           break;
         case 'osm':
@@ -104,6 +108,7 @@ export class OlWebGLTileLayerComponent {
             zIndex: this.zIndex(),
             preload: this.preload(),
             ...(this.tileStyle() ? { style: this.tileStyle() as WebGLTileStyle } : {}),
+            ...(this.variables() ? { variables: this.variables() } : {}),
           });
           break;
       }
@@ -137,6 +142,13 @@ export class OlWebGLTileLayerComponent {
       }
     });
 
+    effect(() => {
+      const vars = this.variables();
+      if (vars && this.layer) {
+        this.layer.updateStyleVariables(vars as any);
+      }
+    });
+
     // WebGL tile layers also need manual dispose
     this.destroyRef.onDestroy(() => {
       const map = this.mapService.getMap();
@@ -145,5 +157,15 @@ export class OlWebGLTileLayerComponent {
         this.layer.dispose();
       }
     });
+  }
+
+  /**
+   * Imperatively update style variables without triggering Angular change detection.
+   * Ideal for 60FPS animations where you don't want to use the declarative [variables] input.
+   */
+  updateVariables(vars: Record<string, string | number | boolean | number[]>): void {
+    if (this.layer) {
+      this.layer.updateStyleVariables(vars as any);
+    }
   }
 }

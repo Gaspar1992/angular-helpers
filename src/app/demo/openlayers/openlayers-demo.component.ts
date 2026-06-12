@@ -356,7 +356,11 @@ const BASEMAPS: BasemapConfig[] = [
               [features]="webglFeatures()"
               [zIndex]="15"
               [flatStyle]="{
-                'circle-radius': ['+', 5, ['*', 3, ['sin', ['/', ['var', 'time'], 200]]]],
+                'circle-radius': [
+                  '+',
+                  ['var', 'baseRadius'],
+                  ['*', 3, ['sin', ['/', ['var', 'time'], 200]]],
+                ],
                 'circle-fill-color': [
                   'case',
                   ['==', ['get', 'type'], 'alert'],
@@ -366,6 +370,7 @@ const BASEMAPS: BasemapConfig[] = [
                 'circle-stroke-color': '#ffffff',
                 'circle-stroke-width': 1,
               }"
+              [variables]="{ time: timeSvc.currentTime(), baseRadius: webglPointRadius() }"
             >
             </ol-webgl-vector-layer>
           } @else if (webglFeatures().length > 0) {
@@ -1130,6 +1135,25 @@ const BASEMAPS: BasemapConfig[] = [
                       (change)="timeAnimationActive.set(!timeAnimationActive())"
                     />
                   </label>
+
+                  <div
+                    class="flex flex-col gap-2 w-full p-4 bg-base-content/5 border border-base-content/5 rounded-xl mt-2"
+                  >
+                    <div
+                      class="flex justify-between text-[10px] font-black uppercase tracking-widest text-base-content/50"
+                    >
+                      <span>Shader Radius</span>
+                      <span class="font-mono text-primary">{{ webglPointRadius() }}px</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="2"
+                      max="20"
+                      [value]="webglPointRadius()"
+                      (input)="onPointRadiusChange($event)"
+                      class="range range-xs range-primary"
+                    />
+                  </div>
                 }
               </div>
             </div>
@@ -1162,6 +1186,7 @@ export class OpenLayersDemoComponent {
   timeAnimationActive = signal<boolean>(false);
   timeSvc = inject(OlTimeService);
   webglLayer = viewChild<OlWebGLVectorLayerComponent>('webglLayer');
+  webglPointRadius = signal<number>(5);
 
   lastClick = signal<MapClickEvent | null>(null);
   activeBasemap = signal<string>('osm');
@@ -1248,7 +1273,10 @@ export class OpenLayersDemoComponent {
     effect(() => {
       const layer = this.webglLayer();
       if (layer) {
-        layer.updateVariables({ time: this.timeSvc.currentTime() });
+        layer.updateVariables({
+          time: this.timeSvc.currentTime(),
+          baseRadius: this.webglPointRadius(),
+        });
       }
     });
 
@@ -1506,6 +1534,18 @@ export class OpenLayersDemoComponent {
 
   onDrawTypeClick(type: string): void {
     this.setDrawType(type as 'Polygon' | 'LineString' | 'Point' | 'Circle' | 'Ellipse' | 'Donut');
+  }
+
+  onPointRadiusChange(event: Event): void {
+    const val = Number((event.target as HTMLInputElement).value);
+    this.webglPointRadius.set(val);
+    const layer = this.webglLayer();
+    if (layer) {
+      layer.updateVariables({
+        time: this.timeSvc.currentTime(),
+        baseRadius: val,
+      });
+    }
   }
 
   setDrawType(type: 'Polygon' | 'LineString' | 'Point' | 'Circle' | 'Ellipse' | 'Donut'): void {
