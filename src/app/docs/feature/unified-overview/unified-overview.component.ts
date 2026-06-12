@@ -57,6 +57,7 @@ export interface OverviewConfig {
             @for (service of group.items; track service.id) {
               <a
                 [routerLink]="[service.id]"
+                queryParamsHandling="merge"
                 class="flex flex-col p-8 bg-base-200 border border-base-content/5 rounded-[2rem] transition-all hover:border-primary/40 hover:shadow-2xl group no-underline shadow-sm"
               >
                 <h3

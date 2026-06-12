@@ -9,7 +9,7 @@ import { BreadcrumbItem } from '../../models/doc-meta.model';
     <nav class="docs-breadcrumb" aria-label="Breadcrumb">
       @for (item of items(); track $index) {
         @if (item.route) {
-          <a [routerLink]="item.route">{{ item.label }}</a>
+          <a [routerLink]="item.route" queryParamsHandling="merge">{{ item.label }}</a>
         } @else {
           <span>{{ item.label }}</span>
         }

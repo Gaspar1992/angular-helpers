@@ -30,6 +30,7 @@ import { SeoService } from '../../../core/services/seo.service';
         <!-- Browser APIs -->
         <a
           routerLink="/docs/browser-web-apis"
+          queryParamsHandling="merge"
           class="bg-base-200 border border-base-content/5 rounded-3xl p-6 sm:p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
         >
           <div class="flex flex-col gap-4 items-start">
@@ -65,6 +66,7 @@ import { SeoService } from '../../../core/services/seo.service';
         <!-- Security -->
         <a
           routerLink="/docs/security"
+          queryParamsHandling="merge"
           class="bg-base-200 border border-base-content/5 rounded-3xl p-6 sm:p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
         >
           <div class="flex flex-col gap-4 items-start">
@@ -99,6 +101,7 @@ import { SeoService } from '../../../core/services/seo.service';
         <!-- Worker HTTP -->
         <a
           routerLink="/docs/worker-http"
+          queryParamsHandling="merge"
           class="bg-base-200 border border-base-content/5 rounded-3xl p-6 sm:p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
         >
           <div class="flex flex-col gap-4 items-start">
@@ -133,6 +136,7 @@ import { SeoService } from '../../../core/services/seo.service';
         <!-- OpenLayers -->
         <a
           routerLink="/docs/openlayers"
+          queryParamsHandling="merge"
           class="bg-base-200 border border-base-content/5 rounded-3xl p-6 sm:p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
         >
           <div class="flex flex-col gap-4 items-start">
@@ -167,6 +171,7 @@ import { SeoService } from '../../../core/services/seo.service';
         <!-- Storage & Persistence -->
         <a
           routerLink="/docs/storage"
+          queryParamsHandling="merge"
           class="bg-base-200 border border-base-content/5 rounded-3xl p-6 sm:p-10 flex flex-col gap-6 hover:border-primary/40 hover:shadow-2xl transition-all duration-300 group no-underline"
         >
           <div class="flex flex-col gap-4 items-start">

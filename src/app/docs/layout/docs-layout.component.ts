@@ -33,6 +33,7 @@ import { VersionDropdownComponent } from '../shared/version-dropdown.component';
         >
           <a
             routerLink="/docs"
+            queryParamsHandling="merge"
             class="font-black text-sm text-base-content no-underline tracking-tighter hover:text-primary transition-colors hidden lg:flex items-center gap-2"
             (click)="closeSidebar()"
           >
@@ -43,6 +44,7 @@ import { VersionDropdownComponent } from '../shared/version-dropdown.component';
           </a>
           <a
             routerLink="/docs"
+            queryParamsHandling="merge"
             class="font-black text-lg text-base-content no-underline hover:text-primary transition-colors lg:hidden mx-auto"
             (click)="closeSidebar()"
           >
@@ -62,6 +64,7 @@ import { VersionDropdownComponent } from '../shared/version-dropdown.component';
           @for (lib of libraries(); track lib.id) {
             <a
               [routerLink]="lib.overviewRoute"
+              queryParamsHandling="merge"
               routerLinkActive="bg-base-200 text-base-content shadow-sm ring-1 ring-base-content/5"
               [routerLinkActiveOptions]="{ exact: false }"
               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-base-content/50 hover:text-base-content hover:bg-base-content/5 transition-all duration-300 no-underline group"
@@ -96,6 +99,7 @@ import { VersionDropdownComponent } from '../shared/version-dropdown.component';
             <!-- Overview Link -->
             <a
               [routerLink]="lib.overviewRoute"
+              queryParamsHandling="merge"
               routerLinkActive="bg-primary/10 text-primary border-primary/20"
               [routerLinkActiveOptions]="{ exact: true }"
               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-base-content/50 hover:text-base-content hover:bg-base-content/5 border border-transparent transition-all duration-200 no-underline mb-4 font-bold"
@@ -119,6 +123,7 @@ import { VersionDropdownComponent } from '../shared/version-dropdown.component';
                     <li>
                       <a
                         [routerLink]="item.route"
+                        queryParamsHandling="merge"
                         routerLinkActive="bg-base-300 text-base-content font-bold"
                         [routerLinkActiveOptions]="{ exact: true }"
                         class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-base-content/60 hover:text-base-content hover:bg-base-content/5 transition-all duration-200 no-underline group"
@@ -186,6 +191,7 @@ import { VersionDropdownComponent } from '../shared/version-dropdown.component';
           <nav class="flex items-center gap-2 text-sm font-bold flex-1" aria-label="Breadcrumb">
             <a
               routerLink="/docs"
+              queryParamsHandling="merge"
               class="text-base-content/40 hover:text-base-content transition-colors no-underline"
               >docs</a
             >
@@ -193,6 +199,7 @@ import { VersionDropdownComponent } from '../shared/version-dropdown.component';
               <span class="text-base-content/20">/</span>
               <a
                 [routerLink]="lib.overviewRoute"
+                queryParamsHandling="merge"
                 class="text-base-content/60 hover:text-base-content transition-colors truncate max-w-[150px] no-underline"
                 >{{ lib.label }}</a
               >

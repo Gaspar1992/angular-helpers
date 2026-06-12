@@ -341,7 +341,11 @@ const SERVICE_GROUPS = [
             <h3 class="group-label">{{ group.icon }} {{ group.label }}</h3>
             <div class="services-list">
               @for (svc of group.items; track svc.id) {
-                <a [routerLink]="'/docs/browser-web-apis/' + svc.id" class="service-card">
+                <a
+                  [routerLink]="'/docs/browser-web-apis/' + svc.id"
+                  queryParamsHandling="merge"
+                  class="service-card"
+                >
                   <span class="svc-name">{{ svc.name }}</span>
                   <span class="svc-desc">{{ svc.description }}</span>
                 </a>
