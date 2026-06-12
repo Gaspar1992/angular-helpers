@@ -882,23 +882,9 @@ export class MapComponent {}`,
         defaultValue: '0',
         description: 'Preload low-res tiles zoom level',
       },
-      {
-        name: 'variables',
-        type: 'Record<string, string | number | boolean | number[]>',
-        description: "Style variables for dynamic expressions (e.g. ['var', 'brightness'])",
-      },
     ],
     outputs: [],
-    methods: [
-      {
-        name: 'updateVariables',
-        signature:
-          'updateVariables(vars: Record<string, string | number | boolean | number[]>): void',
-        description:
-          'Imperatively update style variables without triggering Angular change detection, ideal for 60FPS animations.',
-        returns: 'void',
-      },
-    ],
+    methods: [],
     example: `import { OlWebGLTileLayerComponent } from '@angular-helpers/openlayers/layers';
 
 @Component({
