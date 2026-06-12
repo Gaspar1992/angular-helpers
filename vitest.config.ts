@@ -50,6 +50,7 @@ export default defineConfig({
         './packages/worker-http/interceptors/src/index.ts',
       ),
       '@angular-helpers/worker-http/crypto': here('./packages/worker-http/crypto/src/index.ts'),
+      '@angular-helpers/worker-http/realtime': here('./packages/worker-http/realtime/src/index.ts'),
       '@angular-helpers/security/forms': here('./packages/security/forms/src/index.ts'),
       '@angular-helpers/security/signal-forms': here(
         './packages/security/signal-forms/src/index.ts',

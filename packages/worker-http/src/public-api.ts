@@ -12,5 +12,6 @@
  *   - @angular-helpers/worker-http/backend       (P3: Angular HttpBackend replacement)
  *   - @angular-helpers/worker-http/interceptors  (P4: pure-fn interceptors for workers)
  *   - @angular-helpers/worker-http/crypto        (P5: WebCrypto primitives)
+ *   - @angular-helpers/worker-http/realtime      (P6: off-main-thread WebSockets and SSE)
  */
 export {}; // v22 release force
