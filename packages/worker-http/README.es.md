@@ -25,6 +25,7 @@ Además, los workers proveen un límite de aislamiento natural para lógica sens
 | `@angular-helpers/worker-http/backend`          | Reemplazo de `HttpBackend` de Angular — `provideWorkerHttpClient()` | ✅ Disponible |
 | `@angular-helpers/worker-http/esbuild-plugin`   | Plugin esbuild para auto-bundle de interceptors en workers          | ✅ Disponible |
 | `@angular-helpers/worker-http/streams-polyfill` | Ponyfill de streams para Safari (transferible streams)              | ✅ Disponible |
+| `@angular-helpers/worker-http/realtime`         | Clientes de WebSockets y SSE fuera del hilo principal               | ✅ Disponible |
 
 ---
 
@@ -607,6 +608,112 @@ provideWorkerHttpClient(
 - Ves `DataCloneError` cuando transferís streams hacia/desde workers
 
 **Impacto en bundle:** Cero para browsers modernos. El polyfill se carga lazy solo en versiones afectadas de Safari cuando los streams se usan realmente.
+
+</details>
+
+---
+
+### `/realtime` — Clientes de WebSockets y SSE
+
+Ejecutá conexiones en tiempo real de alta frecuencia (WebSockets y Server-Sent Events) dentro de Web Workers. Mové el procesamiento de streams y el filtrado de datos fuera del hilo principal, comunicando el estado y las emisiones de mensajes usando Angular Signals y RxJS.
+
+<details>
+<summary><strong>Setup, APIs y ejemplos</strong></summary>
+
+#### 1. Setup en el Web Worker
+
+Dentro de tu archivo worker (ej. `src/workers/realtime.worker.ts`), invocá `attachRealtimeWorker()` para manejar las conexiones entrantes y la gestión de mensajes:
+
+```typescript
+import { attachRealtimeWorker } from '@angular-helpers/worker-http/realtime';
+
+// Escucha solicitudes de sockets y SSE en este worker
+attachRealtimeWorker();
+```
+
+#### 2. WorkerWebSocketClient (Hilo Principal)
+
+Maneja una conexión WebSocket en el worker. Expone el estado de la conexión como un Signal de Angular y el flujo de mensajes como Observables de RxJS. Soporta correlación de requests/responses, heartbeat automatizado y reconexión con backoff exponencial y jitter.
+
+```typescript
+import { WorkerWebSocketClient } from '@angular-helpers/worker-http/realtime';
+
+const worker = new Worker(new URL('./workers/realtime.worker', import.meta.url), {
+  type: 'module',
+});
+
+const wsClient = new WorkerWebSocketClient(worker, {
+  url: 'wss://api.example.com/stream',
+  reconnectInterval: 1000, // Intervalo inicial de reconexión con backoff exponencial
+  maxReconnectAttempts: 5, // Intentos máximos de reconexión
+  maxReconnectDelay: 30000, // Límite máximo de delay de reconexión
+  heartbeatInterval: 15000, // Enviar heartbeat cada 15s
+  heartbeatMessage: 'ping', // Payload de texto plano o JSON
+});
+
+// 1. Signal de estado de conexión ('idle' | 'connecting' | 'open' | 'closing' | 'closed' | 'reconnecting')
+const status = wsClient.status();
+console.log('Estado actual:', status().state, 'Intentos:', status().reconnectAttempts);
+
+// 2. Stream de mensajes RxJS
+wsClient.messages$.subscribe((msg) => {
+  console.log('Payload recibido:', msg.data);
+});
+
+// 3. Stream filtrado por tipo de mensaje
+wsClient.messagesByType<{ price: number }>('ticker').subscribe((msg) => {
+  console.log('Precio ticker:', msg.data.price);
+});
+
+// 4. Enviar mensajes (serializados como JSON o string plano)
+wsClient.send({ type: 'subscribe', data: { symbol: 'BTCUSD' } });
+wsClient.sendRaw('texto plano');
+
+// 5. Correlación de Request-Response (Basado en Promises/Async)
+const response = await wsClient.request('get_profile', { userId: 42 }, { timeout: 5000 });
+console.log('Perfil de usuario:', response);
+
+// Limpiar (envía mensaje de cierre y remueve listeners del worker)
+wsClient.close();
+```
+
+#### 3. WorkerSseClient (Hilo Principal)
+
+Maneja una conexión de Server-Sent Events (EventSource) en el worker. Expone el estado de la conexión como un Signal de Angular y el flujo de eventos como Observables de RxJS.
+
+```typescript
+import { WorkerSseClient } from '@angular-helpers/worker-http/realtime';
+
+const worker = new Worker(new URL('./workers/realtime.worker', import.meta.url), {
+  type: 'module',
+});
+
+const sseClient = new WorkerSseClient(worker, {
+  url: 'https://api.example.com/events',
+  withCredentials: true,
+  events: ['ticker-update', 'system-alert'], // Nombres de eventos personalizados a escuchar
+});
+
+// 1. Signal de estado de conexión ('idle' | 'connecting' | 'open' | 'closed')
+const status = sseClient.status();
+
+// 2. Stream de todos los mensajes y eventos custom
+sseClient.events$.subscribe((msg) => {
+  console.log('Nombre de evento:', msg.event); // 'message', 'ticker-update', etc.
+  console.log('Payload:', msg.data);
+  console.log('ID del último evento:', msg.lastEventId);
+});
+
+// Limpiar
+sseClient.close();
+```
+
+**Características:**
+
+- **UI fluida**: El procesamiento de strings de SSE y el decode de frames de WebSocket corren dentro del Web Worker.
+- **Heartbeat y Reconexión**: Soporte nativo para heartbeats e intentos de reconexión automáticos usando backoff exponencial con aleatoriedad (jitter).
+- **Correlación**: Auto-correlaciona pares de request/response usando IDs de mensaje para poder esperar respuestas específicas de forma asíncrona mediante `request()`.
+- **Stand-alone o Shared**: Se puede enlazar directo a un `Worker` o a un `MessagePort` (permitiendo su uso dentro de arquitecturas `SharedWorker`).
 
 </details>
 
