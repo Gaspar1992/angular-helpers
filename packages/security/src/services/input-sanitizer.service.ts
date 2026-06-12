@@ -50,7 +50,9 @@ export class InputSanitizerService {
 
   /**
    * Parses and sanitizes an HTML string, keeping only allowed tags and attributes.
-   * Script execution is prevented — parsing is done via DOMParser, not innerHTML assignment.
+   * Leverages the native browser Sanitizer API (e.g. Element.prototype.setHTML) if available
+   * for high-performance execution, falling back to a custom DOMParser implementation on
+   * unsupported environments (such as older browsers or SSR).
    *
    * @throws {Error} When called in a non-browser environment.
    */
@@ -58,6 +60,43 @@ export class InputSanitizerService {
     if (!this.isSupported()) {
       throw new Error('sanitizeHtml requires a browser environment (DOMParser unavailable)');
     }
+
+    // 1. Try native Element.prototype.setHTML (modern standard in Firefox 148+, etc.)
+    if (typeof Element !== 'undefined' && 'setHTML' in Element.prototype) {
+      try {
+        const tempDiv = document.createElement('div');
+        const config = {
+          allowElements: this.allowedTags as string[],
+          allowAttributes: this.allowedAttributes as Record<string, string[]>,
+        };
+        try {
+          (tempDiv as any).setHTML(input, { sanitizer: config });
+        } catch {
+          (tempDiv as any).setHTML(input);
+        }
+        return tempDiv.innerHTML;
+      } catch {
+        // Fallback on error
+      }
+    }
+
+    // 2. Try older Sanitizer API spec draft (implemented in some Chrome versions)
+    if (typeof (window as any).Sanitizer !== 'undefined') {
+      try {
+        const tempDiv = document.createElement('div');
+        const config = {
+          allowElements: this.allowedTags as string[],
+          allowAttributes: this.allowedAttributes as Record<string, string[]>,
+        };
+        const sanitizer = new (window as any).Sanitizer(config);
+        tempDiv.innerHTML = sanitizer.sanitizeToString(input);
+        return tempDiv.innerHTML;
+      } catch {
+        // Fallback on error
+      }
+    }
+
+    // 3. Fallback to DOMParser-based allowlist sanitizer
     return sanitizeHtmlString(input, {
       allowedTags: this.allowedTags,
       allowedAttributes: this.allowedAttributes,

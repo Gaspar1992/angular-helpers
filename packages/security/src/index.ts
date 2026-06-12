@@ -14,3 +14,4 @@ export * from './providers';
 export * from './internal/validators-core'; // v22 release force
 export * from './services/regex-analyzer.service';
 export * from './services/regex-worker-pool.service';
+export * from './services/csp.service';
