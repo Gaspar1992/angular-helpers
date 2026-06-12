@@ -250,6 +250,16 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
         title: 'Cryptography',
         items: [{ label: 'WebCrypto Utilities', route: '/docs/worker-http/crypto' }],
       },
+      {
+        title: 'Realtime',
+        items: [
+          {
+            label: 'Realtime Clients',
+            route: '/docs/worker-http/realtime',
+            since: AngularVersion.v22,
+          },
+        ],
+      },
     ],
   },
   {
