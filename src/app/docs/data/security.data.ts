@@ -561,7 +561,9 @@ export class UserSettingsComponent {
         name: 'sanitizeHtml',
         signature: 'sanitizeHtml(input: string): string',
         description: `Parses and sanitizes an HTML string, keeping only allowed tags and attributes.
-Script execution is prevented — parsing is done via DOMParser, not innerHTML assignment.`,
+Leverages the native browser Sanitizer API (e.g. Element.prototype.setHTML) if available
+for high-performance execution, falling back to a custom DOMParser implementation on
+unsupported environments (such as older browsers or SSR).`,
         returns: 'string',
       },
       {
