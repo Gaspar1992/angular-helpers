@@ -263,6 +263,143 @@ describe('Worker Realtime module', () => {
       await expect(requestPromise).rejects.toThrow('timeout');
       client.close();
     });
+
+    it('should throw error when calling send/sendRaw after closing', () => {
+      const worker = new MockWorker();
+      const client = new WorkerWebSocketClient(worker as any, {
+        url: 'wss://echo.websocket.org',
+      });
+      client.close();
+      expect(() => client.send({ type: 'test', data: 'hello' })).toThrow();
+      expect(() => client.sendRaw('raw-data')).toThrow();
+    });
+
+    it('should support sendRaw method', () => {
+      const worker = new MockWorker();
+      const client = new WorkerWebSocketClient(worker as any, {
+        url: 'wss://echo.websocket.org',
+      });
+      client.sendRaw('raw-test');
+      expect(worker.postedMessages.length).toBe(2);
+      expect(worker.postedMessages[1].data).toBe('raw-test');
+      client.close();
+    });
+
+    it('should clean up with DestroyRef', () => {
+      const worker = new MockWorker();
+      let destroyCb: (() => void) | null = null;
+      const destroyRefMock = {
+        onDestroy: (cb: () => void) => {
+          destroyCb = cb;
+        },
+      } as any;
+
+      const client = new WorkerWebSocketClient(
+        worker as any,
+        {
+          url: 'wss://echo.websocket.org',
+        },
+        destroyRefMock,
+      );
+
+      expect(destroyCb).toBeTypeOf('function');
+      destroyCb!(); // trigger destroy
+      expect(client.status().state).toBe('closed');
+    });
+
+    it('should fallback to generateId when crypto.randomUUID is not available', () => {
+      const originalUUID = globalThis.crypto.randomUUID;
+      Object.defineProperty(globalThis.crypto, 'randomUUID', {
+        value: undefined,
+        writable: true,
+        configurable: true,
+      });
+
+      const worker = new MockWorker();
+      const client = new WorkerWebSocketClient(worker as any, {
+        url: 'wss://echo.websocket.org',
+      });
+
+      expect(worker.postedMessages[0].connectionId).toBeDefined();
+      client.close();
+
+      Object.defineProperty(globalThis.crypto, 'randomUUID', {
+        value: originalUUID,
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    it('should support messagesByType observable', () => {
+      const worker = new MockWorker();
+      const client = new WorkerWebSocketClient(worker as any, {
+        url: 'wss://echo.websocket.org',
+      });
+
+      const messages: any[] = [];
+      client.messagesByType('greeting').subscribe((msg) => messages.push(msg.data));
+
+      const connMsg = worker.postedMessages[0];
+      worker.triggerMessage({
+        type: 'ws-message',
+        connectionId: connMsg.connectionId,
+        data: '{"type":"greeting","data":"hello"}',
+      });
+
+      worker.triggerMessage({
+        type: 'ws-message',
+        connectionId: connMsg.connectionId,
+        data: '{"type":"other","data":"ignored"}',
+      });
+
+      expect(messages).toEqual(['hello']);
+      client.close();
+    });
+
+    it('should handle raw messages in handleIncoming when JSON parsing fails', () => {
+      const worker = new MockWorker();
+      const client = new WorkerWebSocketClient(worker as any, {
+        url: 'wss://echo.websocket.org',
+      });
+
+      const messages: any[] = [];
+      client.messages$.subscribe((msg) => messages.push(msg));
+
+      const connMsg = worker.postedMessages[0];
+      worker.triggerMessage({
+        type: 'ws-message',
+        connectionId: connMsg.connectionId,
+        data: 'plain-text-raw',
+      });
+
+      expect(messages.length).toBe(1);
+      expect(messages[0].type).toBe('raw');
+      expect(messages[0].data).toBe('plain-text-raw');
+      client.close();
+    });
+
+    it('should reject pending requests if send fails (e.g. client is closed)', async () => {
+      const worker = new MockWorker();
+      const client = new WorkerWebSocketClient(worker as any, {
+        url: 'wss://echo.websocket.org',
+      });
+      client.close(); // dispose the client
+
+      const reqPromise = client.request('test-type', { data: 123 });
+      await expect(reqPromise).rejects.toThrow('WebSocket client is closed');
+    });
+
+    it('should reject all pending requests on close', async () => {
+      const worker = new MockWorker();
+      const client = new WorkerWebSocketClient(worker as any, {
+        url: 'wss://echo.websocket.org',
+      });
+
+      const reqPromise = client.request('test-type', { data: 123 });
+      client.close(); // should trigger rejectAllPending
+
+      await expect(reqPromise).rejects.toThrow('WebSocket closed');
+    });
   });
 
   describe('WorkerSseClient', () => {
@@ -305,6 +442,132 @@ describe('Worker Realtime module', () => {
       expect(events[0].data).toEqual({ count: 1 });
       expect(events[0].id).toBe('id-1');
       client.close();
+    });
+
+    it('should handle non-JSON data in parseData and fallback ID generation', () => {
+      const originalUUID = globalThis.crypto.randomUUID;
+      Object.defineProperty(globalThis.crypto, 'randomUUID', {
+        value: undefined,
+        writable: true,
+        configurable: true,
+      });
+
+      const worker = new MockWorker();
+      const client = new WorkerSseClient(worker as any, {
+        url: 'https://api.eventsource.org',
+      });
+
+      const events: any[] = [];
+      client.events$.subscribe((e) => events.push(e));
+
+      const sseMsg = worker.postedMessages[0];
+      worker.triggerMessage({
+        type: 'sse-message',
+        connectionId: sseMsg.connectionId,
+        data: 'plain-text',
+      });
+
+      worker.triggerMessage({
+        type: 'sse-message',
+        connectionId: sseMsg.connectionId,
+        data: 1234, // non-string
+      });
+
+      expect(events.length).toBe(2);
+      expect(events[0].data).toBe('plain-text');
+      expect(events[1].data).toBe(1234);
+      client.close();
+
+      Object.defineProperty(globalThis.crypto, 'randomUUID', {
+        value: originalUUID,
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    it('should clean up with DestroyRef', () => {
+      const worker = new MockWorker();
+      let destroyCb: (() => void) | null = null;
+      const destroyRefMock = {
+        onDestroy: (cb: () => void) => {
+          destroyCb = cb;
+        },
+      } as any;
+
+      const client = new WorkerSseClient(
+        worker as any,
+        {
+          url: 'https://api.eventsource.org',
+        },
+        destroyRefMock,
+      );
+
+      expect(destroyCb).toBeTypeOf('function');
+      destroyCb!();
+      expect(client.status().state).toBe('closed');
+    });
+
+    it('should ignore messages with incorrect connectionId or null/undefined messages', () => {
+      const worker = new MockWorker();
+      const client = new WorkerSseClient(worker as any, {
+        url: 'https://api.eventsource.org',
+      });
+
+      const events: any[] = [];
+      client.events$.subscribe((e) => events.push(e));
+
+      // Trigger message with wrong connection ID
+      worker.triggerMessage({
+        type: 'sse-message',
+        connectionId: 'wrong-id',
+        data: 'ignored-data',
+      });
+
+      // Trigger null message
+      worker.triggerMessage(null);
+
+      // Trigger undefined message
+      worker.triggerMessage(undefined);
+
+      expect(events.length).toBe(0);
+      client.close();
+    });
+
+    it('should ignore unknown message types', () => {
+      const worker = new MockWorker();
+      const client = new WorkerSseClient(worker as any, {
+        url: 'https://api.eventsource.org',
+      });
+
+      const sseMsg = worker.postedMessages[0];
+      const connectionId = sseMsg.connectionId;
+
+      const events: any[] = [];
+      client.events$.subscribe((e) => events.push(e));
+
+      worker.triggerMessage({
+        type: 'unknown-sse-type',
+        connectionId,
+        data: 'ignored-data',
+      });
+
+      expect(events.length).toBe(0);
+      client.close();
+    });
+
+    it('should do nothing on subsequent close calls', () => {
+      const worker = new MockWorker();
+      const client = new WorkerSseClient(worker as any, {
+        url: 'https://api.eventsource.org',
+      });
+
+      const initialCount = worker.postedMessages.length;
+      client.close();
+      expect(worker.postedMessages.length).toBe(initialCount + 1);
+
+      // Call close again
+      client.close();
+      expect(worker.postedMessages.length).toBe(initialCount + 1); // Should not post message again
     });
   });
 
@@ -422,6 +685,176 @@ describe('Worker Realtime module', () => {
         connectionId,
       });
       expect(sseInstance.closeSpy).toHaveBeenCalled();
+    });
+
+    it('should manage WebSocket error and connection failure', () => {
+      const workerScope = new MockWorker();
+      attachRealtimeWorker(workerScope as any);
+
+      const connectionId = 'ws-test-error';
+      workerScope.triggerMessage({
+        type: 'connect-ws',
+        connectionId,
+        url: 'wss://echo.org',
+      });
+
+      const socketInstance = MockWebSocket.instances[0];
+
+      // Trigger error
+      socketInstance.onerror!();
+      const errorMsg = workerScope.postedMessages.find(
+        (m: any) => m.connectionId === connectionId && m.error === 'WebSocket connection error',
+      );
+      expect(errorMsg).toBeDefined();
+    });
+
+    it('should start heartbeat interval and send ping messages', () => {
+      const workerScope = new MockWorker();
+      attachRealtimeWorker(workerScope as any);
+
+      const connectionId = 'ws-test-heartbeat';
+      workerScope.triggerMessage({
+        type: 'connect-ws',
+        connectionId,
+        url: 'wss://echo.org',
+        heartbeatInterval: 200,
+        heartbeatMessage: 'ping-tick',
+      });
+
+      const socketInstance = MockWebSocket.instances[0];
+      socketInstance.triggerOpen();
+
+      // Advance timers to trigger interval
+      vi.advanceTimersByTime(200);
+      expect(socketInstance.sendSpy).toHaveBeenCalledWith('ping-tick');
+
+      // Test with non-string heartbeat message
+      const connectionId2 = 'ws-test-hb-json';
+      workerScope.triggerMessage({
+        type: 'connect-ws',
+        connectionId: connectionId2,
+        url: 'wss://echo.org',
+        heartbeatInterval: 200,
+        heartbeatMessage: { check: true },
+      });
+
+      const socketInstance2 = MockWebSocket.instances[1];
+      socketInstance2.triggerOpen();
+      vi.advanceTimersByTime(200);
+      expect(socketInstance2.sendSpy).toHaveBeenCalledWith(
+        '{"type":"heartbeat","data":{"check":true}}',
+      );
+    });
+
+    it('should handle EventSource connection error and standard message event', () => {
+      const workerScope = new MockWorker();
+      attachRealtimeWorker(workerScope as any);
+
+      const connectionId = 'sse-test-errors';
+      workerScope.triggerMessage({
+        type: 'connect-sse',
+        connectionId,
+        url: 'https://api.org',
+      });
+
+      const sseInstance = MockEventSource.instances[0];
+
+      // Trigger error
+      sseInstance.triggerError();
+      const errStatusMsg = workerScope.postedMessages.find(
+        (m: any) => m.connectionId === connectionId && m.state === 'connecting' && m.error !== null,
+      );
+      expect(errStatusMsg).toBeDefined();
+
+      // Trigger standard message event
+      sseInstance.triggerMessage('standard-data');
+      const messageMsg = workerScope.postedMessages.find(
+        (m: any) =>
+          m.connectionId === connectionId && m.type === 'sse-message' && m.data === 'standard-data',
+      );
+      expect(messageMsg).toBeDefined();
+    });
+
+    it('should catch exceptions in EventSource constructor', () => {
+      // Mock EventSource constructor to throw
+      const badEventSource = vi.fn().mockImplementation(() => {
+        throw new Error('Invalid URL scheme');
+      });
+      globalThis.EventSource = badEventSource as any;
+
+      const workerScope = new MockWorker();
+      attachRealtimeWorker(workerScope as any);
+
+      const connectionId = 'sse-test-throw';
+      workerScope.triggerMessage({
+        type: 'connect-sse',
+        connectionId,
+        url: 'bad-url',
+      });
+      const errStatusMsg = workerScope.postedMessages.find(
+        (m: any) => m.connectionId === connectionId && m.state === 'closed',
+      );
+      expect(errStatusMsg).toBeDefined();
+      expect(errStatusMsg.error).toBeDefined();
+    });
+
+    it('should clear reconnect timers and heartbeat intervals on WebSocket cleanup', () => {
+      const workerScope = new MockWorker();
+      attachRealtimeWorker(workerScope as any);
+
+      const connectionId = 'ws-cleanup-test';
+      workerScope.triggerMessage({
+        type: 'connect-ws',
+        connectionId,
+        url: 'wss://echo.org',
+        reconnectInterval: 100,
+        maxReconnectAttempts: 3,
+        heartbeatInterval: 200,
+        heartbeatMessage: 'ping',
+      });
+
+      const socketInstance = MockWebSocket.instances[0];
+      socketInstance.triggerOpen();
+
+      // Unclean close to trigger reconnect scheduling
+      socketInstance.triggerClose(false, 1006, 'Abnormal Closure');
+
+      // Trigger cleanup by sending close message
+      workerScope.triggerMessage({
+        type: 'close-ws',
+        connectionId,
+      });
+
+      // Wait to verify no reconnect happens
+      vi.advanceTimersByTime(200);
+      expect(MockWebSocket.instances.length).toBe(1);
+    });
+
+    it('should prevent actions if socket is already disposed', () => {
+      const workerScope = new MockWorker();
+      attachRealtimeWorker(workerScope as any);
+
+      const connectionId = 'ws-disposed-test';
+      workerScope.triggerMessage({
+        type: 'connect-ws',
+        connectionId,
+        url: 'wss://echo.org',
+      });
+
+      const socketInstance = MockWebSocket.instances[0];
+
+      // Trigger close immediately which disposes the socket
+      workerScope.triggerMessage({
+        type: 'close-ws',
+        connectionId,
+      });
+
+      // Trigger socket.onclose manually
+      const initialMsgsCount = workerScope.postedMessages.length;
+      socketInstance.triggerClose(false, 1006, 'Abnormal Closure');
+
+      // Should not have sent any additional status message
+      expect(workerScope.postedMessages.length).toBe(initialMsgsCount);
     });
   });
 });
