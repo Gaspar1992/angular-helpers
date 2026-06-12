@@ -20,6 +20,21 @@ describe('CSP Helpers & Service', () => {
       );
     });
 
+    it('should serialize CspDirectives with various value types', () => {
+      const directives = {
+        'default-src': ["'self'"],
+        'script-src': [],
+        'style-src': "'unsafe-inline'",
+        'img-src': null,
+        'font-src': undefined,
+        'upgrade-insecure-requests': true,
+      };
+      const result = serializeCsp(directives);
+      expect(result).toBe(
+        "default-src 'self'; script-src; style-src 'unsafe-inline'; upgrade-insecure-requests",
+      );
+    });
+
     it('should parse CSP string to CspDirectives', () => {
       const policy =
         "default-src 'self'; script-src 'self' https://apis.google.com; upgrade-insecure-requests";
@@ -27,6 +42,16 @@ describe('CSP Helpers & Service', () => {
       expect(result['default-src']).toEqual(["'self'"]);
       expect(result['script-src']).toEqual(["'self'", 'https://apis.google.com']);
       expect(result['upgrade-insecure-requests']).toBe(true);
+    });
+
+    it('should parse CSP string with different directive structures', () => {
+      const policy =
+        "upgrade-insecure-requests; block-all-mixed-content; sandbox; default-src 'self'";
+      const result = parseCsp(policy);
+      expect(result['upgrade-insecure-requests']).toBe(true);
+      expect(result['block-all-mixed-content']).toBe(true);
+      expect(result['sandbox']).toEqual([]);
+      expect(result['default-src']).toEqual(["'self'"]);
     });
   });
 
@@ -83,6 +108,11 @@ describe('CSP Helpers & Service', () => {
       const builder = new CspPolicyBuilder().defaultSrc("'self'").upgradeInsecureRequests();
 
       expect(builder.toString()).toBe("default-src 'self'; upgrade-insecure-requests");
+    });
+
+    it('should support setting boolean custom directives', () => {
+      const directives = new CspPolicyBuilder().set('custom-bool', true).build();
+      expect(directives['custom-bool']).toBe(true);
     });
   });
 
