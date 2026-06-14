@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RegexSecurityService } from '@angular-helpers/security';
 
 @Component({
@@ -60,13 +60,12 @@ import { RegexSecurityService } from '@angular-helpers/security';
   `,
 })
 export class RegexSecurityDemoComponent {
+  private readonly regexSecurity = inject(RegexSecurityService);
   regexPattern = signal<string>('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2}$');
   regexInput = signal<string>('test@example.com');
   regexResult = signal<string>('');
   regexStatus = signal<'idle' | 'running' | 'success' | 'error'>('idle');
   regexTime = signal<number>(0);
-
-  constructor(private regexSecurity: RegexSecurityService) {}
 
   async testRegex(): Promise<void> {
     this.regexStatus.set('running');

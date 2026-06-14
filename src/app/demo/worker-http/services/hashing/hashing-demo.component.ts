@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { WebCryptoService } from '@angular-helpers/security';
 
 @Component({
@@ -30,10 +30,9 @@ import { WebCryptoService } from '@angular-helpers/security';
   `,
 })
 export class HashingDemoComponent {
+  private readonly webCrypto = inject(WebCryptoService);
   hashResult = signal<string>('');
   private lastHash = '';
-
-  constructor(private webCrypto: WebCryptoService) {}
 
   async hashContent(): Promise<void> {
     try {

@@ -9,7 +9,7 @@ import {
 } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, filter } from 'rxjs/operators';
-import { DOCS_NAV_LIBRARIES, getNavLibrariesForVersion } from '../config/docs-nav.data';
+import { getNavLibrariesForVersion } from '../config/docs-nav.data';
 import { WINDOW } from '@angular-helpers/browser-web-apis';
 import { DocsVersionService, AngularVersion } from '../services/docs-version.service';
 import { VersionDropdownComponent } from '../shared/version-dropdown.component';

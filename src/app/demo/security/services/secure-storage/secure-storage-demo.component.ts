@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { SecureStorageService } from '@angular-helpers/security';
 
 @Component({
@@ -57,11 +57,10 @@ import { SecureStorageService } from '@angular-helpers/security';
   `,
 })
 export class SecureStorageDemoComponent {
+  private readonly secureStorage = inject(SecureStorageService);
   storageKey = signal<string>('demo-key');
   storageValue = signal<string>('{"message": "Hello World"}');
   storageResult = signal<string>('');
-
-  constructor(private secureStorage: SecureStorageService) {}
 
   async saveData(): Promise<void> {
     try {

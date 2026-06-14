@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { injectPlatform } from '@angular-helpers/core';
 import { StorageTransport } from './storage-transport';
 import { SECURE_STORAGE_PASSPHRASE } from '../tokens/storage.tokens';
@@ -19,6 +19,9 @@ import { InMemoryStorageTransport } from './transports/in-memory.transport';
  */
 @Injectable({ providedIn: 'root' })
 export class LocalStorageTransport implements StorageTransport {
+  private readonly secretPassphrase: string;
+  private readonly workerFactory?: () => Worker;
+
   private readonly webStorage: WebStorageTransport;
   private readonly indexedDB: IndexedDBTransport;
   private readonly cacheApi: CacheApiTransport;
@@ -33,11 +36,20 @@ export class LocalStorageTransport implements StorageTransport {
   public storeName = 'kv';
   public cacheName = 'ah_cache';
 
-  constructor(
-    @Inject(SECURE_STORAGE_PASSPHRASE)
-    private readonly secretPassphrase: string = 'fallback-passphrase-angular-helpers-default-key-sec',
-    @Inject(STORAGE_WORKER_FACTORY) @Optional() private readonly workerFactory?: () => Worker,
-  ) {
+  constructor() {
+    let secret = 'fallback-passphrase-angular-helpers-default-key-sec';
+    let factory: (() => Worker) | undefined = undefined;
+
+    try {
+      secret = inject(SECURE_STORAGE_PASSPHRASE, { optional: true }) ?? secret;
+      factory = inject(STORAGE_WORKER_FACTORY, { optional: true }) ?? undefined;
+    } catch {
+      // Graceful fallback when executed outside Angular injection context (e.g. unit tests doing new LocalStorageTransport())
+    }
+
+    this.secretPassphrase = secret;
+    this.workerFactory = factory;
+
     const { isBrowser, window: globalWindow } = injectPlatform();
     this.isBrowser = isBrowser;
 
