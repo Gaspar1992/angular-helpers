@@ -1,6 +1,13 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, InjectionToken, OnDestroy, inject } from '@angular/core';
 import { WorkerPool, injectPlatform, injectWorkerPool } from '@angular-helpers/core';
 import type { RegexSecurityConfig, RegexTestResult } from './regex-types';
+import { REGEX_WORKER_INLINE } from '../workers/regex.worker.inline';
+
+export interface RegexWorkerConfig {
+  workerUrl?: string | URL;
+}
+
+export const REGEX_WORKER_CONFIG = new InjectionToken<RegexWorkerConfig>('REGEX_WORKER_CONFIG');
 
 /**
  * Service responsible for managing Web Workers for safe regex execution.
@@ -8,15 +15,24 @@ import type { RegexSecurityConfig, RegexTestResult } from './regex-types';
  */
 @Injectable()
 export class RegexWorkerPoolService implements OnDestroy {
+  private config = inject(REGEX_WORKER_CONFIG, { optional: true });
   private pool: WorkerPool;
 
   constructor() {
     const { document } = injectPlatform();
-    const workerUrl = document
-      ? new URL('assets/workers/regex.worker.js', document.baseURI)
-      : new URL('assets/workers/regex.worker.js', 'https://example.com'); // SSR: never instantiated
+    let workerUrl: URL | string;
+
+    if (this.config?.workerUrl) {
+      workerUrl = this.config.workerUrl;
+    } else {
+      workerUrl = document
+        ? new URL('assets/workers/regex.worker.js', document.baseURI)
+        : new URL('assets/workers/regex.worker.js', 'https://example.com'); // SSR: never instantiated
+    }
+
     this.pool = injectWorkerPool(workerUrl, {
       defaultTimeout: 5000,
+      fallbackWorkerCode: REGEX_WORKER_INLINE,
       fallbackExecutor: async (type, data) => {
         if (type !== 'regex-test') throw new Error(`Unknown task type: ${type}`);
         const { pattern, text } = data;
