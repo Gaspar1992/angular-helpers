@@ -1,11 +1,7 @@
 import '@angular/compiler';
 import { describe, it, expect, vi } from 'vitest';
-import {
-  signal,
-  runInInjectionContext,
-  createEnvironmentInjector,
-  ENVIRONMENT_INITIALIZER,
-} from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { injectIdleBatterySaver } from './inject-idle-battery-saver';
 import * as visibilityMock from './inject-page-visibility';
 import * as batteryMock from './inject-battery';
@@ -31,26 +27,18 @@ describe('injectIdleBatterySaver', () => {
     mockIsHidden.set(false);
     mockBatteryInfo.set({ level: 0.9, charging: true });
 
-    const injector = createEnvironmentInjector([
-      { provide: ENVIRONMENT_INITIALIZER, useValue: () => {}, multi: true },
-    ]);
-    const saver = runInInjectionContext(injector, () => injectIdleBatterySaver());
+    const saver = TestBed.runInInjectionContext(() => injectIdleBatterySaver());
     expect(saver.shouldSaveEnergy()).toBe(false);
 
     // If page goes hidden, should save energy
     mockIsHidden.set(true);
     expect(saver.shouldSaveEnergy()).toBe(true);
-
-    injector.destroy();
   });
 
   it('should resolve and compute saving state correctly on low battery', () => {
     mockIsHidden.set(false);
 
-    const injector = createEnvironmentInjector([
-      { provide: ENVIRONMENT_INITIALIZER, useValue: () => {}, multi: true },
-    ]);
-    const saver = runInInjectionContext(injector, () => injectIdleBatterySaver());
+    const saver = TestBed.runInInjectionContext(() => injectIdleBatterySaver());
 
     // If battery is low (< 20%) and discharging (charging = false), should save energy
     mockBatteryInfo.set({ level: 0.15, charging: false });
@@ -61,7 +49,5 @@ describe('injectIdleBatterySaver', () => {
     mockBatteryInfo.set({ level: 0.15, charging: true });
     expect(saver.isLowBattery()).toBe(false);
     expect(saver.shouldSaveEnergy()).toBe(false);
-
-    injector.destroy();
   });
 });
