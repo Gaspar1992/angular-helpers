@@ -1,4 +1,5 @@
 import {
+  assertInInjectionContext,
   computed,
   DestroyRef,
   effect,
@@ -28,6 +29,7 @@ export function injectIntersectionObserver(
   elementOrRef: ElementInput,
   options?: IntersectionObserverOptions,
 ): IntersectionRef {
+  assertInInjectionContext(injectIntersectionObserver);
   const destroyRef = inject(DestroyRef);
   const platformId = inject(PLATFORM_ID);
 

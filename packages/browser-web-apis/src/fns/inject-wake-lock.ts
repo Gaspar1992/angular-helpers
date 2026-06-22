@@ -1,4 +1,11 @@
-import { DestroyRef, inject, PLATFORM_ID, signal, type Signal } from '@angular/core';
+import {
+  assertInInjectionContext,
+  DestroyRef,
+  inject,
+  PLATFORM_ID,
+  signal,
+  type Signal,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 interface WakeLockSentinelLike extends EventTarget {
@@ -20,6 +27,7 @@ export interface WakeLockRef {
 }
 
 export function injectWakeLock(): WakeLockRef {
+  assertInInjectionContext(injectWakeLock);
   const destroyRef = inject(DestroyRef);
   const platformId = inject(PLATFORM_ID);
 

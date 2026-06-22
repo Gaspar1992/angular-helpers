@@ -1,4 +1,11 @@
-import { DestroyRef, inject, PLATFORM_ID, signal, type Signal } from '@angular/core';
+import {
+  assertInInjectionContext,
+  DestroyRef,
+  inject,
+  PLATFORM_ID,
+  signal,
+  type Signal,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 interface BatteryManagerLike extends EventTarget {
@@ -28,6 +35,7 @@ export interface BatteryRef {
 }
 
 export function injectBattery(): BatteryRef {
+  assertInInjectionContext(injectBattery);
   const destroyRef = inject(DestroyRef);
   const platformId = inject(PLATFORM_ID);
 

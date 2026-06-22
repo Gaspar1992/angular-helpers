@@ -1,4 +1,5 @@
 import {
+  assertInInjectionContext,
   computed,
   inject,
   PLATFORM_ID,
@@ -32,6 +33,7 @@ export interface GeolocationResourceRef {
 export function injectGeolocationResource(
   opts: GeolocationResourceOptions = {},
 ): GeolocationResourceRef {
+  assertInInjectionContext(injectGeolocationResource);
   const platformId = inject(PLATFORM_ID);
   const isBrowser = isPlatformBrowser(platformId);
 

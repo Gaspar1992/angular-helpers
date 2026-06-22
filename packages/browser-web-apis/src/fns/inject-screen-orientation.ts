@@ -1,4 +1,12 @@
-import { computed, DestroyRef, inject, PLATFORM_ID, signal, type Signal } from '@angular/core';
+import {
+  assertInInjectionContext,
+  computed,
+  DestroyRef,
+  inject,
+  PLATFORM_ID,
+  signal,
+  type Signal,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { type Subscription } from 'rxjs';
 
@@ -24,6 +32,7 @@ interface ScreenOrientationWithLock extends ScreenOrientation {
 }
 
 export function injectScreenOrientation(): ScreenOrientationRef {
+  assertInInjectionContext(injectScreenOrientation);
   const destroyRef = inject(DestroyRef);
   const platformId = inject(PLATFORM_ID);
   const isBrowser = isPlatformBrowser(platformId);

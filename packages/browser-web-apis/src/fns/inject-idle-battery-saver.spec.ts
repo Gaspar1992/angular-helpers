@@ -1,5 +1,6 @@
 import '@angular/compiler';
 import { describe, it, expect, vi } from 'vitest';
+import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { injectIdleBatterySaver } from './inject-idle-battery-saver';
 import * as visibilityMock from './inject-page-visibility';
@@ -26,7 +27,7 @@ describe('injectIdleBatterySaver', () => {
     mockIsHidden.set(false);
     mockBatteryInfo.set({ level: 0.9, charging: true });
 
-    const saver = injectIdleBatterySaver();
+    const saver = TestBed.runInInjectionContext(() => injectIdleBatterySaver());
     expect(saver.shouldSaveEnergy()).toBe(false);
 
     // If page goes hidden, should save energy
@@ -37,7 +38,7 @@ describe('injectIdleBatterySaver', () => {
   it('should resolve and compute saving state correctly on low battery', () => {
     mockIsHidden.set(false);
 
-    const saver = injectIdleBatterySaver();
+    const saver = TestBed.runInInjectionContext(() => injectIdleBatterySaver());
 
     // If battery is low (< 20%) and discharging (charging = false), should save energy
     mockBatteryInfo.set({ level: 0.15, charging: false });

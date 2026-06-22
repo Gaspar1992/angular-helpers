@@ -1,4 +1,5 @@
 import {
+  assertInInjectionContext,
   inject,
   PLATFORM_ID,
   signal,
@@ -33,6 +34,7 @@ export interface NetworkInformationResourceRef {
 }
 
 export function injectNetworkInformationResource(): NetworkInformationResourceRef {
+  assertInInjectionContext(injectNetworkInformationResource);
   const platformId = inject(PLATFORM_ID);
   const isBrowser = isPlatformBrowser(platformId);
 

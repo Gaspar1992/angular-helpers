@@ -1,4 +1,11 @@
-import { DestroyRef, inject, PLATFORM_ID, signal, type Signal } from '@angular/core';
+import {
+  assertInInjectionContext,
+  DestroyRef,
+  inject,
+  PLATFORM_ID,
+  signal,
+  type Signal,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { type Subscription } from 'rxjs';
 
@@ -22,6 +29,7 @@ export interface BarcodeDetectorRef {
 }
 
 export function injectBarcodeDetector(): BarcodeDetectorRef {
+  assertInInjectionContext(injectBarcodeDetector);
   const destroyRef = inject(DestroyRef);
   const platformId = inject(PLATFORM_ID);
   const isBrowser = isPlatformBrowser(platformId);

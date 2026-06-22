@@ -1,4 +1,12 @@
-import { computed, DestroyRef, inject, PLATFORM_ID, signal, type Signal } from '@angular/core';
+import {
+  assertInInjectionContext,
+  computed,
+  DestroyRef,
+  inject,
+  PLATFORM_ID,
+  signal,
+  type Signal,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 import { type GamepadState, isGamepadSupported, gamepadPollStream } from '../utils/gamepad.utils';
@@ -11,6 +19,7 @@ export interface GamepadRef {
 }
 
 export function injectGamepad(index: number, intervalMs = 16): GamepadRef {
+  assertInInjectionContext(injectGamepad);
   const destroyRef = inject(DestroyRef);
   const platformId = inject(PLATFORM_ID);
 

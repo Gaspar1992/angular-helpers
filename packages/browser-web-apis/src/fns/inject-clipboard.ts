@@ -1,4 +1,11 @@
-import { DestroyRef, inject, PLATFORM_ID, signal, type Signal } from '@angular/core';
+import {
+  assertInInjectionContext,
+  DestroyRef,
+  inject,
+  PLATFORM_ID,
+  signal,
+  type Signal,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 export interface ClipboardRef {
@@ -15,6 +22,7 @@ export interface ClipboardRef {
 }
 
 export function injectClipboard(): ClipboardRef {
+  assertInInjectionContext(injectClipboard);
   const destroyRef = inject(DestroyRef);
   const platformId = inject(PLATFORM_ID);
   const isBrowser = isPlatformBrowser(platformId);

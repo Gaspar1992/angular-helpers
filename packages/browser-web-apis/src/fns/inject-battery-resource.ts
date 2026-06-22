@@ -1,4 +1,11 @@
-import { inject, PLATFORM_ID, signal, type Signal, type ResourceRef } from '@angular/core';
+import {
+  assertInInjectionContext,
+  inject,
+  PLATFORM_ID,
+  signal,
+  type Signal,
+  type ResourceRef,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
@@ -29,6 +36,7 @@ export interface BatteryResourceRef {
 }
 
 export function injectBatteryResource(): BatteryResourceRef {
+  assertInInjectionContext(injectBatteryResource);
   const platformId = inject(PLATFORM_ID);
   const isBrowser = isPlatformBrowser(platformId);
 
