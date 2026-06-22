@@ -14,9 +14,9 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   ],
 })
 class CvaOriginalComponent implements ControlValueAccessor {
-  writeValue(obj: any): void {}
-  registerOnChange(fn: any): void {}
-  registerOnTouched(fn: any): void {}
+  writeValue(_obj: any): void {}
+  registerOnChange(_fn: any): void {}
+  registerOnTouched(_fn: any): void {}
 }
 
 describe('MockComponent', () => {

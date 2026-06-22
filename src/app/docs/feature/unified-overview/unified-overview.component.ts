@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 import { DocsPageHeaderComponent } from '../../../docs/shared/page-header/docs-page-header.component';
-import { BreadcrumbItem, ServiceDoc } from '../../../docs/models/doc-meta.model';
+import { BreadcrumbItem } from '../../../docs/models/doc-meta.model';
 
 export interface ServiceGroupItem {
   id: string;

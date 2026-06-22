@@ -3,7 +3,6 @@ import { Subscription } from 'rxjs';
 import {
   ScreenOrientationService,
   injectScreenOrientation,
-  type OrientationType,
 } from '@angular-helpers/browser-web-apis';
 import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 

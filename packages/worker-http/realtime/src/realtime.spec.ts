@@ -1,7 +1,6 @@
 import '@angular/compiler';
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { DestroyRef } from '@angular/core';
 import { WorkerWebSocketClient } from './websocket-client';
 import { WorkerSseClient } from './sse-client';
 import { attachRealtimeWorker } from './worker-handler';

@@ -171,7 +171,7 @@ export function deserializePortToStream(port: MessagePort): ReadableStream {
       // Send initial acknowledgment to start the sender pump loop
       port.postMessage({ type: 'ack' });
     },
-    pull(controller) {
+    pull(_controller) {
       // The browser's stream engine calls pull() when the consumer reads a chunk
       // and the queue drops below its highWaterMark.
       // If we deferred the acknowledgment due to a full queue, send it now to resume the pump!

@@ -171,7 +171,7 @@ export class BenchmarkRunnerService implements OnDestroy {
 
       // Stage 2: Serialization
       tracker.markStageStart('serialization');
-      const serializedReq = JSON.stringify(req);
+      const _serializedReq = JSON.stringify(req);
       tracker.markStageEnd('serialization');
 
       // Stage 3: Transfer out (N/A for main thread)
@@ -235,7 +235,7 @@ export class BenchmarkRunnerService implements OnDestroy {
 
       // Stage 2: Serialization (main thread)
       tracker.markStageStart('serialization');
-      const serializedReq = JSON.stringify(req);
+      const _serializedReq = JSON.stringify(req);
       tracker.markStageEnd('serialization');
 
       // Stage 3: Transfer out + Stage 4: Worker processing + Stage 5: Transfer in
@@ -468,58 +468,6 @@ function createGranularTracker(requestId: string, payloadSize: number) {
       };
     },
   };
-}
-
-/**
- * Simulates a main-thread request with granular stage tracking.
- * Used for "fetch" baseline comparison.
- */
-async function simulateMainThreadResponseGranular(
-  req: ScenarioRequestSpec,
-  requestId: string,
-): Promise<{ response: BenchmarkResponse; metrics: RequestMetrics }> {
-  const tracker = createGranularTracker(requestId, req.payloadBytes);
-
-  // Stage 1: Worker init (N/A for main thread - mark as 0)
-  tracker.markStageStart('worker-init');
-  tracker.markStageEnd('worker-init');
-
-  // Stage 2: Serialization (JSON stringify of request)
-  tracker.markStageStart('serialization');
-  const serializedReq = JSON.stringify(req);
-  tracker.markStageEnd('serialization');
-
-  // Stage 3: Transfer out (N/A for main thread)
-  tracker.markStageStart('transfer-out');
-  tracker.markStageEnd('transfer-out');
-
-  // Stage 4: Worker processing (simulated server work)
-  tracker.markStageStart('worker-processing');
-  burnCpu(req.cpuBurnMs);
-  if (req.delayMs > 0) {
-    await new Promise((resolve) => setTimeout(resolve, req.delayMs));
-  }
-  const body = generatePayload(req.payloadBytes);
-  const response: BenchmarkResponse = {
-    generatedAt: Date.now(),
-    bytes: body.length,
-    payload: body,
-  };
-  tracker.markStageEnd('worker-processing');
-
-  // Stage 5: Transfer in (N/A for main thread)
-  tracker.markStageStart('transfer-in');
-  tracker.markStageEnd('transfer-in');
-
-  // Stage 6: Deserialization (JSON parse of response)
-  tracker.markStageStart('deserialization');
-  const _deserialized = JSON.parse(JSON.stringify(response)); // Simulate parse
-  tracker.markStageEnd('deserialization');
-
-  tracker.markStageStart('total');
-  tracker.markStageEnd('total');
-
-  return { response, metrics: tracker.getRequestMetrics() };
 }
 
 /**

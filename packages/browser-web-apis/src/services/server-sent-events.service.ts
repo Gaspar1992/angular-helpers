@@ -60,7 +60,7 @@ export class ServerSentEventsService extends ConnectionRegistryBaseService<Event
         }
       };
 
-      const errorHandler = (event: Event) => {
+      const errorHandler = (_event: Event) => {
         if (source.readyState === EventSource.CLOSED) {
           observer.error(new Error('SSE connection closed unexpectedly'));
         } else {

@@ -15,11 +15,13 @@ describe('detectTransferables', () => {
     const payload = {
       a: 1,
       b: buffer1,
-      c: { d: buffer2 }, // Note: current implementation is one-level deep or recursive?
+      c: { d: buffer2 },
     };
 
-    // Let's re-read the implementation of detectTransferables I just wrote.
-    // It is one-level deep for objects, but checks if payload itself is transferable.
+    const result = detectTransferables(payload);
+    expect(result).toContain(buffer1);
+    expect(result).toContain(buffer2);
+    expect(result.length).toBe(2);
   });
 
   it('should filter duplicates', () => {

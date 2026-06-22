@@ -180,7 +180,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
     }
 
     // Fail all active subscriptions routed to this dead instance
-    for (const [requestId, req] of activeRequests.entries()) {
+    for (const [, req] of activeRequests.entries()) {
       if (req.instance === instance) {
         req.cleanup();
         req.subscriber.error(error);
@@ -409,7 +409,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
     heartbeatIntervals.clear();
     heartbeatTimeouts.clear();
 
-    for (const [requestId, req] of activeRequests.entries()) {
+    for (const [, req] of activeRequests.entries()) {
       req.cleanup();
     }
     activeRequests.clear();

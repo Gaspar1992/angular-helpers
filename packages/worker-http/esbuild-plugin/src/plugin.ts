@@ -132,7 +132,7 @@ function scanDirectory(dir: string, interceptors: string[], rootDir: string): vo
  * Generates import statements for discovered interceptors.
  * Converts relative paths to valid import specifiers.
  */
-function generateInterceptorImports(interceptorPaths: string[], workerFilePath: string): string[] {
+function generateInterceptorImports(interceptorPaths: string[], _workerFilePath: string): string[] {
   return interceptorPaths.map((interceptorPath) => {
     return `import '${interceptorPath}';`;
   });

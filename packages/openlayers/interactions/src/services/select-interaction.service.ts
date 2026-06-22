@@ -45,7 +45,7 @@ export class SelectInteractionService {
         multi: config.multi ?? false,
         hitTolerance: config.hitTolerance ?? 0,
         condition: config.condition === 'pointerMove' ? pointerMove : click,
-        style: (olFeature: any, resolution: number) => {
+        style: (olFeature: any, _resolution: number) => {
           const styles: any[] = [];
 
           // 1. Resolve feature's own custom style (same as layer style Fn)

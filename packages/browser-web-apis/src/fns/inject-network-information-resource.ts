@@ -16,7 +16,6 @@ import {
   type NetworkInformation,
 } from '../services/network-information.service';
 import {
-  getNetworkSnapshot,
   networkInformationStream,
   isNetworkInformationSupported,
 } from '../utils/network-information.utils';

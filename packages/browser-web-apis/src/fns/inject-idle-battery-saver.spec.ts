@@ -1,5 +1,5 @@
 import '@angular/compiler';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { signal } from '@angular/core';
 import { injectIdleBatterySaver } from './inject-idle-battery-saver';
 import * as visibilityMock from './inject-page-visibility';

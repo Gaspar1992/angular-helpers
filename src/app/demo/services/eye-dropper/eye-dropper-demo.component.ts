@@ -70,7 +70,7 @@ export class EyeDropperDemoComponent {
     try {
       const result = await this.eyeDropper.open();
       this.selectedColor.set(result.sRGBHex);
-    } catch (e) {
+    } catch {
       // ignore
     }
   }

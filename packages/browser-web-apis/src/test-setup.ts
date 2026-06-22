@@ -54,7 +54,7 @@ Object.defineProperty(globalThis, 'URL', {
   value: class MockURL {
     constructor(
       public url: string,
-      base?: string,
+      _base?: string,
     ) {}
     static createObjectURL = vi.fn(() => 'mock-url');
     static revokeObjectURL = vi.fn();

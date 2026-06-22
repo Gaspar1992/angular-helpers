@@ -716,7 +716,7 @@ describe('createWorkerTransport', () => {
       expect(states).toEqual(['healthy', 'degraded']);
 
       // Spawning a new request should create a fresh healthy worker
-      const nextPromise = firstValueFrom(transport.execute({ next: true }));
+      firstValueFrom(transport.execute({ next: true }));
       const worker2 = FakeWorker.instances[1];
 
       // Advance by 1000ms to trigger a new ping

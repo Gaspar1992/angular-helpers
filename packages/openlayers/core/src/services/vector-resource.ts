@@ -1,4 +1,4 @@
-import { resource, type ResourceRef, type ResourceOptions, type Signal } from '@angular/core';
+import { resource, type ResourceRef, type Signal } from '@angular/core';
 import GeoJSON from 'ol/format/GeoJSON';
 import type { Feature } from '../models/types';
 import type OLFeature from 'ol/Feature';

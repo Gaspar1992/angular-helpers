@@ -5,7 +5,6 @@ import ImageLayer from 'ol/layer/Image';
 import VectorSource from 'ol/source/Vector';
 import ClusterSource from 'ol/source/Cluster';
 import OLFeature from 'ol/Feature';
-import type OLMap from 'ol/Map';
 import { Style, Circle as CircleStyle, Fill, Stroke, Icon } from 'ol/style';
 import { createClusterStyleFn } from './cluster-style.util';
 import { featureToOlFeature } from '@angular-helpers/openlayers/core';

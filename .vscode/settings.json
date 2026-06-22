@@ -4,6 +4,8 @@
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "editor.codeActionsOnSave": {
     "source.removeUnusedImports": "always",
-    "source.fixAll.oxlint": "always"
+    "source.organizeImports": "always",
+    "source.fixAll.oxlint": "always",
+    "source.fixAll.oxc": "always"
   }
 }

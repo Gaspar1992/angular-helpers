@@ -1,4 +1,4 @@
-import { computed, inject, signal, type Signal } from '@angular/core';
+import { computed, type Signal } from '@angular/core';
 import { injectPageVisibility } from './inject-page-visibility';
 import { injectBattery } from './inject-battery';
 

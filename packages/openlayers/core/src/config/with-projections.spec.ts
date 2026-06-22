@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { EnvironmentInjector } from '@angular/core';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { provideOpenLayers } from './providers';
 import { withProjections } from './with-projections';
 import { get as getProjection } from 'ol/proj';

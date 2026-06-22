@@ -2,7 +2,7 @@
 
 import { inject, Injectable } from '@angular/core';
 import type OLMap from 'ol/Map';
-import Draw, { createBox } from 'ol/interaction/Draw';
+import Draw from 'ol/interaction/Draw';
 import Snap from 'ol/interaction/Snap';
 import VectorSource from 'ol/source/Vector';
 import type VectorLayer from 'ol/layer/Vector';

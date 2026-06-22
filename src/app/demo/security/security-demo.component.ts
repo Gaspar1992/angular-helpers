@@ -565,7 +565,7 @@ export class SecurityDemoComponent {
       await this.storageService.set(this.storageKey(), value);
       this.storageResult.set(`✅ Stored encrypted value for key: ${this.storageKey()}`);
       this.log('Storage', `Encrypted and saved key: ${this.storageKey()}`, 'success');
-    } catch (e) {
+    } catch {
       this.storageResult.set('❌ Invalid JSON value');
       this.log('Storage', 'Failed to store: Invalid JSON format', 'error');
     }

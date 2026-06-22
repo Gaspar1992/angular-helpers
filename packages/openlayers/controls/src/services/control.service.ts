@@ -5,6 +5,6 @@ import type { ControlPosition } from '../models/control.types';
 
 @Injectable()
 export class OlControlService {
-  addCustomControl(element: HTMLElement, position: ControlPosition): void {}
-  removeCustomControl(element: HTMLElement): void {}
+  addCustomControl(_element: HTMLElement, _position: ControlPosition): void {}
+  removeCustomControl(_element: HTMLElement): void {}
 }

@@ -43,10 +43,10 @@ export function MockComponent<T>(options: MockOptions): Type<T> {
     }
 
     // Dummy CVA implementations
-    writeValue(obj: any): void {}
-    registerOnChange(fn: any): void {}
-    registerOnTouched(fn: any): void {}
-    setDisabledState(isDisabled: boolean): void {}
+    writeValue(_obj: any): void {}
+    registerOnChange(_fn: any): void {}
+    registerOnTouched(_fn: any): void {}
+    setDisabledState(_isDisabled: boolean): void {}
   }
 
   if (isCVA) {

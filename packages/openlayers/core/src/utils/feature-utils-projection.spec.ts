@@ -3,7 +3,6 @@ import { featureToOlFeature, olFeatureToFeature } from './feature-utils';
 import type { Feature } from '../models/types';
 import proj4 from 'proj4';
 import { register } from 'ol/proj/proj4';
-import { get as getProjection } from 'ol/proj';
 
 // Register custom UTM projection for tests
 proj4.defs(

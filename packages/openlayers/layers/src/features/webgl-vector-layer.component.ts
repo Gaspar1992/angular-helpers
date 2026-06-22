@@ -82,7 +82,7 @@ export class OlWebGLVectorLayerComponent {
 
         this.layer.set('id', this.id());
         map.addLayer(this.layer);
-      } catch (err) {
+      } catch {
         // WebGL Vector Layer failed to initialize (e.g., not supported by browser)
       }
     });

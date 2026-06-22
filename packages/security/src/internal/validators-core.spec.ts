@@ -6,7 +6,6 @@ import {
   isUrlSafe,
   sanitizeUrlString,
   sanitizeHtmlString,
-  isHtmlSafe,
 } from './validators-core';
 
 describe('validators-core (shared between Reactive Forms and Signal Forms)', () => {

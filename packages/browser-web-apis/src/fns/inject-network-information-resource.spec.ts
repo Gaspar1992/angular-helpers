@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { PLATFORM_ID } from '@angular/core';
 import { injectNetworkInformationResource } from './inject-network-information-resource';
-import { vi } from 'vitest';
 
 describe('injectNetworkInformationResource', () => {
   it('should create and return un-supported when not browser', () => {

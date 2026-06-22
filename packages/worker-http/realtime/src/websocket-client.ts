@@ -197,7 +197,7 @@ export class WorkerWebSocketClient {
     try {
       const text = typeof raw === 'string' ? raw : String(raw);
       message = JSON.parse(text) as WebSocketMessage;
-    } catch (error) {
+    } catch {
       // If parsing fails, treat it as a raw message without correlation
       message = {
         type: 'raw',

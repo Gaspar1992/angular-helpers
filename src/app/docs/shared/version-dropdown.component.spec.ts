@@ -1,7 +1,6 @@
 import { VersionDropdownComponent } from './version-dropdown.component';
 import { DocsVersionService } from '../services/docs-version.service';
 import { render, provideMockService } from '@angular-helpers/testing';
-import { vi } from 'vitest';
 import { signal } from '@angular/core';
 
 describe('VersionDropdownComponent', () => {
