@@ -1,4 +1,4 @@
-import { computed, type Signal } from '@angular/core';
+import { assertInInjectionContext, computed, type Signal } from '@angular/core';
 import { injectPageVisibility } from './inject-page-visibility';
 import { injectBattery } from './inject-battery';
 
@@ -9,6 +9,7 @@ export interface IdleBatterySaverRef {
 }
 
 export function injectIdleBatterySaver(): IdleBatterySaverRef {
+  assertInInjectionContext(injectIdleBatterySaver);
   // Leverage existing reactive primitives
   const visibility = injectPageVisibility();
   const battery = injectBattery();

@@ -1,4 +1,11 @@
-import { DestroyRef, inject, PLATFORM_ID, signal, type Signal } from '@angular/core';
+import {
+  assertInInjectionContext,
+  DestroyRef,
+  inject,
+  PLATFORM_ID,
+  signal,
+  type Signal,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 export interface GeolocationOptions extends PositionOptions {
@@ -20,6 +27,7 @@ export interface GeolocationRef {
 }
 
 export function injectGeolocation(opts: GeolocationOptions = {}): GeolocationRef {
+  assertInInjectionContext(injectGeolocation);
   const destroyRef = inject(DestroyRef);
   const platformId = inject(PLATFORM_ID);
   const isBrowser = isPlatformBrowser(platformId);

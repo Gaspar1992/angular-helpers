@@ -1,4 +1,12 @@
-import { DestroyRef, computed, inject, PLATFORM_ID, signal, type Signal } from '@angular/core';
+import {
+  assertInInjectionContext,
+  DestroyRef,
+  computed,
+  inject,
+  PLATFORM_ID,
+  signal,
+  type Signal,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import type { IdleState, IdleDetectorOptions } from '../services/idle-detector.service';
 
@@ -18,6 +26,7 @@ interface WindowWithIdleDetector extends Window {
 }
 
 export function injectIdleDetector(): IdleDetectorRef {
+  assertInInjectionContext(injectIdleDetector);
   const platformId = inject(PLATFORM_ID);
   const destroyRef = inject(DestroyRef);
   const isBrowser = isPlatformBrowser(platformId);

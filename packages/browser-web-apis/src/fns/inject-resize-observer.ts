@@ -1,4 +1,5 @@
 import {
+  assertInInjectionContext,
   computed,
   DestroyRef,
   effect,
@@ -28,6 +29,7 @@ export function injectResizeObserver(
   elementOrRef: ElementInput,
   options?: ResizeObserverOptions,
 ): ResizeRef {
+  assertInInjectionContext(injectResizeObserver);
   const destroyRef = inject(DestroyRef);
   const platformId = inject(PLATFORM_ID);
 
