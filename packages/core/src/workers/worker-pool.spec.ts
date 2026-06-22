@@ -35,7 +35,8 @@ describe('injectWorkerPool', () => {
 
       let poolInstance: any;
       runInInjectionContext(envInjector, () => {
-        poolInstance = injectWorkerPool(new URL('http://mock-worker.js'));
+        // Use localhost so the HTTPS guard is not triggered
+        poolInstance = injectWorkerPool(new URL('http://localhost/mock-worker.js'));
       });
 
       expect(poolInstance).toBeDefined();
@@ -58,8 +59,28 @@ describe('injectWorkerPool', () => {
     globalThis.Worker = MockWorker as any;
 
     try {
-      const pool = injectWorkerPool(new URL('http://mock-worker.js'));
+      const pool = injectWorkerPool(new URL('http://localhost/mock-worker.js'));
       expect(pool).toBeDefined();
+    } finally {
+      globalThis.Worker = originalWorker;
+    }
+  });
+
+  it('should reject insecure HTTP URLs (non-localhost)', async () => {
+    const originalWorker = globalThis.Worker;
+    class MockWorker {
+      terminate = vi.fn();
+    }
+    globalThis.Worker = MockWorker as any;
+
+    try {
+      // The HTTPS guard fires inside workerFactory (async init), so the pool is created
+      // but execute() rejects because initError is set after the factory throws.
+      const pool = injectWorkerPool('http://example.com/worker.js', {
+        fallbackWorkerCode: 'console.log("fallback")',
+      });
+
+      await expect(pool.execute('test-task', {})).rejects.toThrow(/HTTPS/);
     } finally {
       globalThis.Worker = originalWorker;
     }
@@ -87,15 +108,16 @@ describe('injectWorkerPool', () => {
     URL.createObjectURL = vi.fn().mockReturnValue('blob:mock');
 
     try {
-      injectWorkerPool('http://example.com/worker.js', {
+      // Use https:// to pass the HTTPS guard
+      injectWorkerPool('https://example.com/worker.js', {
         fallbackWorkerCode: 'console.log("fallback")',
       });
 
       await new Promise((resolve) => setTimeout(resolve, 50));
 
-      expect(fetchMock).toHaveBeenCalledWith('http://example.com/worker.js');
+      expect(fetchMock).toHaveBeenCalledWith('https://example.com/worker.js');
       expect(workerInstances.length).toBe(1);
-      expect(workerInstances[0].url).toBe('http://example.com/worker.js');
+      expect(workerInstances[0].url).toBe('https://example.com/worker.js');
       expect(workerInstances[0].options).toEqual({ type: 'module' });
     } finally {
       globalThis.Worker = originalWorker;
@@ -107,8 +129,9 @@ describe('injectWorkerPool', () => {
   it('should fallback to Blob URL if fetch fails (e.g. 404)', async () => {
     const originalWorker = globalThis.Worker;
     const originalFetch = globalThis.fetch;
-    const createObjectURLMock = vi.fn().mockReturnValue('blob:mock-fallback-url');
     const originalCreateObjectURL = URL.createObjectURL;
+    const originalRevokeObjectURL = URL.revokeObjectURL;
+    const createObjectURLMock = vi.fn().mockReturnValue('blob:mock-fallback-url');
 
     const workerInstances: any[] = [];
     class MockWorker {
@@ -125,30 +148,35 @@ describe('injectWorkerPool', () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 404 });
     globalThis.fetch = fetchMock;
     URL.createObjectURL = createObjectURLMock;
+    URL.revokeObjectURL = vi.fn();
 
     try {
-      injectWorkerPool('http://example.com/worker.js', {
+      injectWorkerPool('https://example.com/worker.js', {
         fallbackWorkerCode: 'console.log("fallback")',
       });
 
       await new Promise((resolve) => setTimeout(resolve, 50));
 
-      expect(fetchMock).toHaveBeenCalledWith('http://example.com/worker.js');
+      expect(fetchMock).toHaveBeenCalledWith('https://example.com/worker.js');
       expect(createObjectURLMock).toHaveBeenCalled();
+      // Blob URL must be revoked after worker creation to avoid memory leak
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-fallback-url');
       expect(workerInstances.length).toBe(1);
       expect(workerInstances[0].url).toBe('blob:mock-fallback-url');
     } finally {
       globalThis.Worker = originalWorker;
       globalThis.fetch = originalFetch;
       URL.createObjectURL = originalCreateObjectURL;
+      URL.revokeObjectURL = originalRevokeObjectURL;
     }
   });
 
   it('should fallback to Blob URL if fetch throws error', async () => {
     const originalWorker = globalThis.Worker;
     const originalFetch = globalThis.fetch;
-    const createObjectURLMock = vi.fn().mockReturnValue('blob:mock-fallback-url-2');
     const originalCreateObjectURL = URL.createObjectURL;
+    const originalRevokeObjectURL = URL.revokeObjectURL;
+    const createObjectURLMock = vi.fn().mockReturnValue('blob:mock-fallback-url-2');
 
     const workerInstances: any[] = [];
     class MockWorker {
@@ -165,9 +193,10 @@ describe('injectWorkerPool', () => {
     const fetchMock = vi.fn().mockRejectedValue(new Error('Network Error'));
     globalThis.fetch = fetchMock;
     URL.createObjectURL = createObjectURLMock;
+    URL.revokeObjectURL = vi.fn();
 
     try {
-      injectWorkerPool('http://example.com/worker.js', {
+      injectWorkerPool('https://example.com/worker.js', {
         fallbackWorkerCode: 'console.log("fallback")',
       });
 
@@ -175,11 +204,13 @@ describe('injectWorkerPool', () => {
 
       expect(fetchMock).toHaveBeenCalled();
       expect(createObjectURLMock).toHaveBeenCalled();
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-fallback-url-2');
       expect(workerInstances[0].url).toBe('blob:mock-fallback-url-2');
     } finally {
       globalThis.Worker = originalWorker;
       globalThis.fetch = originalFetch;
       URL.createObjectURL = originalCreateObjectURL;
+      URL.revokeObjectURL = originalRevokeObjectURL;
     }
   });
 
@@ -199,7 +230,7 @@ describe('injectWorkerPool', () => {
     URL.createObjectURL = vi.fn().mockReturnValue('blob:csp-blocked-url');
 
     try {
-      const pool = injectWorkerPool('http://example.com/worker.js', {
+      const pool = injectWorkerPool('https://example.com/worker.js', {
         fallbackWorkerCode: 'console.log("fallback")',
       });
 

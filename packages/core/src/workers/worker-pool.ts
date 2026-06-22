@@ -20,6 +20,14 @@ export function injectWorkerPool(
 
       const urlString = workerUrl instanceof URL ? workerUrl.toString() : workerUrl;
 
+      // Reject insecure HTTP URLs to prevent loading sensitive worker code over an unencrypted connection
+      if (urlString.startsWith('http://') && !urlString.startsWith('http://localhost')) {
+        throw new Error(
+          `WorkerPool: worker URL must use HTTPS (received: ${urlString}). ` +
+            `Loading workers over HTTP exposes sensitive code to network interception.`,
+        );
+      }
+
       if (options?.fallbackWorkerCode) {
         return fetch(urlString)
           .then((res) => {
@@ -28,13 +36,16 @@ export function injectWorkerPool(
             }
             throw new Error(`Failed to fetch worker: ${res.status}`);
           })
-          .catch((fetchError) => {
+          .catch(() => {
             try {
               const blob = new Blob([options.fallbackWorkerCode!], {
                 type: 'application/javascript',
               });
               const blobUrl = URL.createObjectURL(blob);
-              return new Worker(blobUrl);
+              const w = new Worker(blobUrl);
+              // Revoke the object URL immediately — the Worker has already resolved it synchronously
+              URL.revokeObjectURL(blobUrl);
+              return w;
             } catch (blobError: any) {
               throw new Error(
                 `Failed to create fallback Blob worker (possibly blocked by Content Security Policy). ` +
@@ -105,9 +116,15 @@ export class WorkerPool {
     try {
       const res = this.options.workerFactory();
       if (res instanceof Promise) {
-        this.workerPromise = res.then(
+        const capturedPromise = res.then(
           (w) => {
-            this.setupWorker(w);
+            // Guard against race condition: if terminate() was called while this Promise
+            // was pending, workerPromise is null — do not set up the worker.
+            if (this.workerPromise === capturedPromise) {
+              this.setupWorker(w);
+            } else {
+              w.terminate();
+            }
             return w;
           },
           (err) => {
@@ -115,6 +132,7 @@ export class WorkerPool {
             return null;
           },
         );
+        this.workerPromise = capturedPromise;
       } else {
         this.setupWorker(res);
         this.workerPromise = Promise.resolve(res);
@@ -211,11 +229,13 @@ export class WorkerPool {
     }
 
     if (!this.worker) {
-      if (this.initError) {
-        throw this.initError;
-      }
+      // Prefer fallbackExecutor over throwing — allows graceful degradation (e.g. main-thread regex)
+      // even when worker initialization failed (CSP block, SSR, network error).
       if (this.options.fallbackExecutor) {
         return this.options.fallbackExecutor(type, data);
+      }
+      if (this.initError) {
+        throw this.initError;
       }
       throw new Error('Worker is not available and no fallback executor was provided.');
     }
