@@ -28,10 +28,9 @@ describe('RegexWorkerPoolService', () => {
 
     const service = TestBed.inject(RegexWorkerPoolService);
     expect(service).toBeDefined();
-    expect(injectWorkerPool).toHaveBeenCalled();
-    const calls = vi.mocked(injectWorkerPool).mock.calls;
-    const lastCallUrl = calls[calls.length - 1][0];
-    expect(lastCallUrl.toString()).toContain('assets/workers/regex.worker.js');
+    expect(injectWorkerPool).toHaveBeenCalledTimes(1);
+    const firstCallUrl = vi.mocked(injectWorkerPool).mock.calls[0][0];
+    expect(firstCallUrl.toString()).toContain('assets/workers/regex.worker.js');
   });
 
   it('should instantiate the worker pool with config workerUrl when REGEX_WORKER_CONFIG is provided', () => {
@@ -48,8 +47,8 @@ describe('RegexWorkerPoolService', () => {
 
     const service = TestBed.inject(RegexWorkerPoolService);
     expect(service).toBeDefined();
-    const calls = vi.mocked(injectWorkerPool).mock.calls;
-    const lastCallUrl = calls[calls.length - 1][0];
-    expect(lastCallUrl.toString()).toBe(customUrl);
+    expect(injectWorkerPool).toHaveBeenCalledTimes(1);
+    const firstCallUrl = vi.mocked(injectWorkerPool).mock.calls[0][0];
+    expect(firstCallUrl.toString()).toBe(customUrl);
   });
 });

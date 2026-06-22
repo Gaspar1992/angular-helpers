@@ -46,7 +46,7 @@ const injectFns = [
 describe('Browser Web APIs Injection Context Checks', () => {
   injectFns.forEach(({ name, fn }) => {
     it(`should throw an error mentioning ${name} when called outside an injection context`, () => {
-      expect(() => fn()).toThrow(new RegExp(`${name}`));
+      expect(() => fn()).toThrow(name);
     });
   });
 });
