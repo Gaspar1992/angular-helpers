@@ -37,6 +37,7 @@
     "access": "public"
   },
   "scripts": {
+    "prebuild": "node ../../scripts/inline-workers.js",
     "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
     "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && find ../../dist/security -name '*.map' -delete && find ../../dist/security -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
     "test": "vitest run"

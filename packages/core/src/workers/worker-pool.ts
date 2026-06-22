@@ -4,8 +4,10 @@ import { injectPlatform } from '../utils/platform';
 import { isTransferable } from '../utils/transferables';
 
 export function injectWorkerPool(
-  workerUrl: URL,
-  options?: Omit<WorkerPoolOptions, 'workerFactory'>,
+  workerUrl: URL | string,
+  options?: Omit<WorkerPoolOptions, 'workerFactory'> & {
+    fallbackWorkerCode?: string;
+  },
 ): WorkerPool {
   const { isBrowser } = injectPlatform();
 
@@ -15,6 +17,45 @@ export function injectWorkerPool(
       if (!isBrowser || typeof Worker === 'undefined') {
         throw new Error('Web Workers are not available in this environment');
       }
+
+      const urlString = workerUrl instanceof URL ? workerUrl.toString() : workerUrl;
+
+      // Reject insecure HTTP URLs to prevent loading sensitive worker code over an unencrypted connection
+      if (urlString.startsWith('http://') && !urlString.startsWith('http://localhost')) {
+        throw new Error(
+          `WorkerPool: worker URL must use HTTPS (received: ${urlString}). ` +
+            `Loading workers over HTTP exposes sensitive code to network interception.`,
+        );
+      }
+
+      if (options?.fallbackWorkerCode) {
+        return fetch(urlString)
+          .then((res) => {
+            if (res.ok) {
+              return new Worker(workerUrl, { type: 'module' });
+            }
+            throw new Error(`Failed to fetch worker: ${res.status}`);
+          })
+          .catch(() => {
+            try {
+              const blob = new Blob([options.fallbackWorkerCode!], {
+                type: 'application/javascript',
+              });
+              const blobUrl = URL.createObjectURL(blob);
+              const w = new Worker(blobUrl);
+              // Revoke the object URL immediately — the Worker has already resolved it synchronously
+              URL.revokeObjectURL(blobUrl);
+              return w;
+            } catch (blobError: any) {
+              throw new Error(
+                `Failed to create fallback Blob worker (possibly blocked by Content Security Policy). ` +
+                  `Original error: ${blobError.message || blobError}. ` +
+                  `Please configure a custom workerUrl using REGEX_WORKER_CONFIG to bypass this policy.`,
+              );
+            }
+          });
+      }
+
       return new Worker(workerUrl, { type: 'module' });
     },
   });
@@ -42,7 +83,7 @@ export interface WorkerTaskConfig<T> {
 
 export interface WorkerPoolOptions {
   /** Function that creates and returns a Web Worker instance */
-  workerFactory: () => Worker;
+  workerFactory: () => Worker | Promise<Worker>;
   /** Default timeout in milliseconds for tasks. Default: 5000 */
   defaultTimeout?: number;
   /** Callback when a worker crashes */
@@ -57,6 +98,8 @@ export interface WorkerPoolOptions {
  */
 export class WorkerPool {
   private worker: Worker | null = null;
+  private workerPromise: Promise<Worker | null> | null = null;
+  private initError: any = null;
   private pendingTasks = new Map<string, WorkerTaskConfig<any>>();
   private activeTimeoutIds = new Map<string, any>();
   private consecutiveCrashes = 0;
@@ -71,28 +114,60 @@ export class WorkerPool {
     }
 
     try {
-      this.worker = this.options.workerFactory();
-
-      this.worker.onmessage = (event: MessageEvent) => {
-        this.consecutiveCrashes = 0; // Reset crash counter on successful message
-        const { id, data, error } = event.data;
-        if (id && this.pendingTasks.has(id)) {
-          if (error) {
-            this.handleTaskError(id, error);
-          } else {
-            this.handleTaskSuccess(id, data);
-          }
-        }
-      };
-
-      this.worker.onerror = (error: ErrorEvent) => {
-        this.options.onCrash?.(error);
-        this.failAllTasks(`Worker crashed: ${error.message || 'Unknown error'}`);
-        this.restartWorker();
-      };
-    } catch {
-      this.worker = null;
+      const res = this.options.workerFactory();
+      if (res instanceof Promise) {
+        const capturedPromise = res.then(
+          (w) => {
+            // Guard against race condition: if terminate() was called while this Promise
+            // was pending, workerPromise is null — do not set up the worker.
+            if (this.workerPromise === capturedPromise) {
+              this.setupWorker(w);
+            } else {
+              w.terminate();
+            }
+            return w;
+          },
+          (err) => {
+            this.handleInitError(err);
+            return null;
+          },
+        );
+        this.workerPromise = capturedPromise;
+      } else {
+        this.setupWorker(res);
+        this.workerPromise = Promise.resolve(res);
+      }
+    } catch (err) {
+      this.handleInitError(err);
+      this.workerPromise = Promise.resolve(null);
     }
+  }
+
+  private setupWorker(worker: Worker): void {
+    this.worker = worker;
+    this.worker.onmessage = (event: MessageEvent) => {
+      this.consecutiveCrashes = 0; // Reset crash counter on successful message
+      const { id, data, error } = event.data;
+      if (id && this.pendingTasks.has(id)) {
+        if (error) {
+          this.handleTaskError(id, error);
+        } else {
+          this.handleTaskSuccess(id, data);
+        }
+      }
+    };
+
+    this.worker.onerror = (error: ErrorEvent) => {
+      this.options.onCrash?.(error);
+      this.failAllTasks(`Worker crashed: ${error.message || 'Unknown error'}`);
+      this.restartWorker();
+    };
+  }
+
+  private handleInitError(err: any): void {
+    this.worker = null;
+    this.initError = err;
+    this.failAllTasks(err.message || String(err));
   }
 
   private restartWorker(): void {
@@ -149,9 +224,18 @@ export class WorkerPool {
     data: any,
     timeoutMsOrOptions?: number | { timeoutMs?: number; transfer?: Transferable[] },
   ): Promise<T> {
+    if (this.workerPromise) {
+      await this.workerPromise;
+    }
+
     if (!this.worker) {
+      // Prefer fallbackExecutor over throwing — allows graceful degradation (e.g. main-thread regex)
+      // even when worker initialization failed (CSP block, SSR, network error).
       if (this.options.fallbackExecutor) {
         return this.options.fallbackExecutor(type, data);
+      }
+      if (this.initError) {
+        throw this.initError;
       }
       throw new Error('Worker is not available and no fallback executor was provided.');
     }
@@ -212,6 +296,8 @@ export class WorkerPool {
       this.worker.terminate();
       this.worker = null;
     }
+    this.workerPromise = null;
+    this.initError = null;
   }
 }
 
