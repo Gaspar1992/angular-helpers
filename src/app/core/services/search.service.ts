@@ -1,4 +1,8 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { of, from } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
+import { injectWorkerPool, injectPlatform } from '@angular-helpers/core';
 import { PACKAGES } from '../config/packages.data';
 import { BLOG_POSTS } from '../../blog/config/posts.data';
 import { PUBLIC_DEMO_SECTIONS } from '../../demo/config/demo.config';
@@ -49,20 +53,52 @@ export class SearchService {
     })),
   ];
 
-  readonly results = computed(() => {
-    const q = this.query().toLowerCase().trim();
-    if (!q) return [];
+  private readonly pool = (() => {
+    const { document } = injectPlatform();
+    const workerUrl = document
+      ? new URL('assets/workers/search.worker.js', document.baseURI)
+      : new URL('assets/workers/search.worker.js', 'https://example.com');
 
-    return this.index
-      .filter((item) => {
-        return (
-          item.title.toLowerCase().includes(q) ||
-          item.description.toLowerCase().includes(q) ||
-          item.tags?.some((tag) => tag.toLowerCase().includes(q))
+    return injectWorkerPool(workerUrl, {
+      defaultTimeout: 5000,
+      fallbackExecutor: async (type, data) => {
+        if (type !== 'search') {
+          throw new Error(`Unknown task type: ${type}`);
+        }
+        const { q } = data;
+        const query = (q || '').toLowerCase().trim();
+        if (!query) return [];
+
+        return this.index
+          .filter((item) => {
+            return (
+              item.title.toLowerCase().includes(query) ||
+              item.description.toLowerCase().includes(query) ||
+              item.tags?.some((tag) => tag.toLowerCase().includes(query))
+            );
+          })
+          .slice(0, 8);
+      },
+    });
+  })();
+
+  readonly results = toSignal(
+    toObservable(this.query).pipe(
+      switchMap((q) => {
+        const query = q.toLowerCase().trim();
+        if (!query) {
+          return of([]);
+        }
+        return from(this.pool.execute<SearchResult[]>('search', { q })).pipe(
+          catchError((error) => {
+            console.error('Search worker error:', error);
+            return of([]);
+          }),
         );
-      })
-      .slice(0, 8); // Limit to top 8 results
-  });
+      }),
+    ),
+    { initialValue: [] },
+  );
 
   open(): void {
     this.isOpen.set(true);
