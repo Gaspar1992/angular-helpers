@@ -1,4 +1,11 @@
-import { inject, signal, computed, Signal, WritableSignal } from '@angular/core';
+import {
+  inject,
+  signal,
+  computed,
+  Signal,
+  WritableSignal,
+  assertInInjectionContext,
+} from '@angular/core';
 import { STORAGE_TRANSPORT } from '../tokens/storage.tokens';
 import { LocalStorageTransport } from './local-transport';
 import { SafeReadonlyMap } from '../utils/safe-readonly-map';
@@ -208,5 +215,6 @@ export class EntityStore<Id, Entity> {
 export function injectEntityStore<Id, Entity>(
   options: EntityStoreOptions<Id, Entity>,
 ): EntityStore<Id, Entity> {
+  assertInInjectionContext(injectEntityStore);
   return new EntityStore<Id, Entity>(options);
 }

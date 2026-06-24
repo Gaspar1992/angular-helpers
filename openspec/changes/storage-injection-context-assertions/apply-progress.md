@@ -1,0 +1,15 @@
+# TDD Cycle Evidence: Storage Injection Context Assertions
+
+This file documents the Test-Driven Development (TDD) cycle followed for each task in this change.
+
+## TDD Cycles
+
+| Target Function         | Test File                                                                                                                                        | Red Test (Failing Assertion)                                                                                                                                     | Implementation (Green)                                                                                                                                                  | Verification              |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `injectStorageSignal`   | [inject-storage-signal.spec.ts](file:///home/gasparrv92/Repositorios/angular-helpers/packages/storage/src/fns/inject-storage-signal.spec.ts)     | Assert that calling it outside an injection context throws an error matching `/injectStorageSignal/` (failed because standard `inject()` error did not match).   | Import `assertInInjectionContext` from `@angular/core` and call `assertInInjectionContext(injectStorageSignal)` at the start of `injectStorageSignal`.                  | Test passes successfully. |
+| `injectStorageResource` | [inject-storage-resource.spec.ts](file:///home/gasparrv92/Repositorios/angular-helpers/packages/storage/src/fns/inject-storage-resource.spec.ts) | Assert that calling it outside an injection context throws an error matching `/injectStorageResource/` (failed because standard `inject()` error did not match). | Import `assertInInjectionContext` from `@angular/core` and call `assertInInjectionContext(injectStorageResource)` at the start of `injectStorageResource`.              | Test passes successfully. |
+| `injectEntityStore`     | [entity-store.spec.ts](file:///home/gasparrv92/Repositorios/angular-helpers/packages/storage/src/services/entity-store.spec.ts)                  | Assert that calling it outside an injection context throws an error matching `/injectEntityStore/` (failed because wrapper function did not throw at all).       | Import `assertInInjectionContext` from `@angular/core` and call `assertInInjectionContext(injectEntityStore)` at the start of the `injectEntityStore` wrapper function. | Test passes successfully. |
+
+## Full Test Suite Run
+
+All 729 tests passed successfully across the workspace, verifying that direct `new EntityStore(...)` usage remains unaffected and only injection-context-bound helpers enforce context checks.

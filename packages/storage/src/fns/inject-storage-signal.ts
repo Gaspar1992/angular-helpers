@@ -1,4 +1,4 @@
-import { inject, signal, DestroyRef } from '@angular/core';
+import { inject, signal, DestroyRef, assertInInjectionContext } from '@angular/core';
 import { STORAGE_TRANSPORT } from '../tokens/storage.tokens';
 import { LocalStorageTransport } from '../services/local-transport';
 import { StorageSignalOptions, StorageSignal } from '../interfaces/storage.types';
@@ -16,6 +16,7 @@ export function injectStorageSignal<T>(
   defaultValue: T,
   options: StorageSignalOptions<T>,
 ): StorageSignal<T> {
+  assertInInjectionContext(injectStorageSignal);
   const isAsync = options.storageType === 'indexeddb' || options.storageType === 'cacheapi';
 
   const dataSignal = signal<T>(defaultValue, {

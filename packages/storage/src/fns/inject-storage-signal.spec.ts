@@ -19,6 +19,13 @@ describe('injectStorageSignal', () => {
     });
   });
 
+  it('should throw an error when called outside of an injection context', () => {
+    const opts = { storageType: 'local', serializer: 'json' } as const;
+    expect(() => injectStorageSignal('user-pref', 'light-mode', opts)).toThrow(
+      /injectStorageSignal/,
+    );
+  });
+
   it('should initialize with default value if transport has no persisted data', async () => {
     await TestBed.runInInjectionContext(async () => {
       const opts = { storageType: 'local', serializer: 'json' } as const;

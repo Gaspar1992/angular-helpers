@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { computed } from '@angular/core';
-import { EntityStore } from './entity-store';
+import { EntityStore, injectEntityStore } from './entity-store';
 
 interface User {
   id: string;
@@ -131,5 +131,11 @@ describe('EntityStore', () => {
     // 5. Read again - now it should have run again
     expect(computedB()).toEqual({ id: 'B', name: 'Bob Mutated', age: 31 });
     expect(evaluations).toBe(2); // Updated!
+  });
+});
+
+describe('injectEntityStore', () => {
+  it('should throw an error when called outside of an injection context', () => {
+    expect(() => injectEntityStore({ idKey: 'id' })).toThrow(/injectEntityStore/);
   });
 });

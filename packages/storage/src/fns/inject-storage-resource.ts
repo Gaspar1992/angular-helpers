@@ -1,4 +1,4 @@
-import { inject, DestroyRef } from '@angular/core';
+import { inject, DestroyRef, assertInInjectionContext } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { STORAGE_TRANSPORT } from '../tokens/storage.tokens';
 import { LocalStorageTransport } from '../services/local-transport';
@@ -19,6 +19,7 @@ export function injectStorageResource<T>(
   defaultValue: T,
   options: StorageSignalOptions<T>,
 ): StorageResource<T> {
+  assertInInjectionContext(injectStorageResource);
   let transport = inject(STORAGE_TRANSPORT, { optional: true });
   if (!transport) {
     transport = inject(LocalStorageTransport);
