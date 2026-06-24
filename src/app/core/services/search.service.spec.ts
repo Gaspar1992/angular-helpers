@@ -127,6 +127,34 @@ describe('SearchService', () => {
     ]);
   });
 
+  it('should set searching signal to true during execution and false when complete', async () => {
+    let resolveSearch: any;
+    const searchPromise = new Promise<any>((resolve) => {
+      resolveSearch = resolve;
+    });
+    const executeMock = vi.fn().mockImplementation(() => searchPromise);
+    vi.mocked(injectWorkerPool).mockImplementation(
+      () =>
+        ({
+          execute: executeMock,
+          terminate: vi.fn(),
+        }) as any,
+    );
+
+    const service = TestBed.inject(SearchService);
+    expect(service.searching()).toBe(false);
+
+    service.query.set('angular');
+    TestBed.flushEffects();
+
+    expect(service.searching()).toBe(true);
+
+    resolveSearch([]);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(service.searching()).toBe(false);
+  });
+
   it('should fall back to synchronous execution in SSR environment', async () => {
     // Import actual injectWorkerPool so we can verify the actual fallback routing under PLATFORM_ID: 'server'
     const realInjectWorkerPool = await vi

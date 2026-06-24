@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { of, from } from 'rxjs';
-import { switchMap, catchError } from 'rxjs/operators';
+import { switchMap, catchError, tap, finalize } from 'rxjs/operators';
 import { injectWorkerPool, injectPlatform } from '@angular-helpers/core';
 import { PACKAGES } from '../config/packages.data';
 import { BLOG_POSTS } from '../../blog/config/posts.data';
@@ -22,6 +22,7 @@ export interface SearchResult {
 export class SearchService {
   readonly isOpen = signal(false);
   readonly query = signal('');
+  readonly searching = signal(false);
 
   private readonly index: SearchResult[] = [
     // Packages / Docs
@@ -89,11 +90,14 @@ export class SearchService {
         if (!query) {
           return of([]);
         }
+        this.searching.set(true);
         return from(this.pool.execute<SearchResult[]>('search', { q })).pipe(
+          tap(() => this.searching.set(false)),
           catchError((error) => {
             console.error('Search worker error:', error);
             return of([]);
           }),
+          finalize(() => this.searching.set(false)),
         );
       }),
     ),

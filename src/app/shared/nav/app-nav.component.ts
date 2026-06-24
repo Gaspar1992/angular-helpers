@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
+import { SearchService } from '../../core/services/search.service';
 
 @Component({
   selector: 'app-nav',
@@ -26,6 +27,36 @@ import { NgOptimizedImage } from '@angular/common';
         <span class="font-bold text-[0.9rem] sm:text-base tracking-[-0.02em]">Angular Helpers</span>
       </a>
 
+      <!-- Search Trigger Button -->
+      <button
+        type="button"
+        class="group flex items-center gap-2 px-2.5 py-1.5 text-xs text-base-content/40 hover:text-base-content/85 bg-white/[0.02] hover:bg-white/[0.06] border border-base-content/5 hover:border-base-content/15 rounded-lg transition-all duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
+        (click)="search.open()"
+        aria-label="Open search modal"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="text-base-content/30 group-hover:text-primary transition-colors duration-200"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+        <span class="font-bold tracking-tight hidden sm:inline">Search...</span>
+        <kbd
+          class="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-base-content/5 border border-base-content/5 text-[9px] font-black text-base-content/30"
+        >
+          <span>Ctrl</span><span>K</span>
+        </kbd>
+      </button>
+
       <nav aria-label="Main navigation">
         <ul role="list" class="list-none m-0 p-0 flex gap-1">
           @for (item of navItems; track item.path) {
@@ -46,6 +77,7 @@ import { NgOptimizedImage } from '@angular/common';
   `,
 })
 export class AppNavComponent {
+  protected readonly search = inject(SearchService);
   protected readonly navItems = [
     { label: 'Docs', path: '/docs' },
     { label: 'Demo', path: '/demo' },

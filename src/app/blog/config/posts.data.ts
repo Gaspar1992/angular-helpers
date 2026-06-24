@@ -2,6 +2,14 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'angular-v22-injection-context-assertions-and-hybrid-workers',
+    title: 'Angular v22: Injection Context Assertions and Hybrid Workers',
+    publishedAt: '2026-06-24',
+    tags: ['angular', 'v22', 'injection-context', 'web-workers', 'vitals', 'animations', 'ux'],
+    excerpt:
+      'We have rolled out major updates focusing on Angular v22 injection context robustness, hybrid worker orchestration, and polished UX animations. Here is a deep dive into what is new.',
+  },
+  {
     slug: 'angular-22-modernization-rxresource-and-cleanup',
     title: 'Angular 22 Modernization: rxResource, viewChild.required(), and cleaner code',
     publishedAt: '2026-06-05',

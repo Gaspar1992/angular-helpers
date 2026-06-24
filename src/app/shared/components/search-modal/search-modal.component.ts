@@ -68,6 +68,10 @@ import { SearchService, SearchResult } from '../../../core/services/search.servi
             </div>
           </div>
 
+          @if (search.searching()) {
+            <div class="search-progress-bar"></div>
+          }
+
           <!-- Results List -->
           <div class="max-h-[450px] overflow-y-auto no-scrollbar py-2">
             @if (search.results().length > 0) {
@@ -187,6 +191,21 @@ import { SearchService, SearchResult } from '../../../core/services/search.servi
     `
       :host {
         display: contents;
+      }
+      .search-progress-bar {
+        height: 2px;
+        width: 100%;
+        background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+        background-size: 200% 100%;
+        animation: slide-glow 1.5s infinite linear;
+      }
+      @keyframes slide-glow {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
       }
     `,
   ],

@@ -75,45 +75,44 @@ function computeInp(entries: PerformanceEntryList): number | null {
       ⚡ Vitals
     </button>
 
-    @if (expanded()) {
-      <div
-        id="vitals-panel-content"
-        class="vitals-content"
-        role="region"
-        aria-label="Core Web Vitals"
-      >
-        <div class="vitals-metric">
-          <span class="vitals-label">LCP</span>
-          <span class="vitals-value" [class]="lcpStatusClass()">
-            @if (lcpMs() !== null) {
-              {{ lcpFormatted() }}s
-            } @else {
-              N/A
-            }
-          </span>
-        </div>
-        <div class="vitals-metric">
-          <span class="vitals-label">CLS</span>
-          <span class="vitals-value" [class]="clsStatusClass()">
-            @if (clsScore() !== null) {
-              {{ clsFormatted() }}
-            } @else {
-              N/A
-            }
-          </span>
-        </div>
-        <div class="vitals-metric">
-          <span class="vitals-label">INP</span>
-          <span class="vitals-value" [class]="inpStatusClass()">
-            @if (inpMs() !== null) {
-              {{ inpMs() }}ms
-            } @else {
-              N/A
-            }
-          </span>
-        </div>
+    <div
+      id="vitals-panel-content"
+      class="vitals-content"
+      [class.expanded]="expanded()"
+      role="region"
+      aria-label="Core Web Vitals"
+    >
+      <div class="vitals-metric">
+        <span class="vitals-label">LCP</span>
+        <span class="vitals-value" [class]="lcpStatusClass()">
+          @if (lcpMs() !== null) {
+            {{ lcpFormatted() }}s
+          } @else {
+            N/A
+          }
+        </span>
       </div>
-    }
+      <div class="vitals-metric">
+        <span class="vitals-label">CLS</span>
+        <span class="vitals-value" [class]="clsStatusClass()">
+          @if (clsScore() !== null) {
+            {{ clsFormatted() }}
+          } @else {
+            N/A
+          }
+        </span>
+      </div>
+      <div class="vitals-metric">
+        <span class="vitals-label">INP</span>
+        <span class="vitals-value" [class]="inpStatusClass()">
+          @if (inpMs() !== null) {
+            {{ inpMs() }}ms
+          } @else {
+            N/A
+          }
+        </span>
+      </div>
+    </div>
   `,
   styles: `
     :host {
@@ -165,6 +164,21 @@ function computeInp(entries: PerformanceEntryList): number | null {
       gap: 8px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
       min-width: 140px;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.95) translateY(4px);
+      transform-origin: bottom right;
+      transition:
+        opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform, opacity;
+    }
+
+    .vitals-content.expanded {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
     }
 
     .vitals-metric {
