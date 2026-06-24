@@ -135,6 +135,7 @@ export class CodeBlockComponent implements AfterViewInit {
       const el = this.codeEl();
       if (el && isPlatformBrowser(this.platformId)) {
         el.nativeElement.textContent = codeValue;
+        delete el.nativeElement.dataset['highlighted'];
         hljs.highlightElement(el.nativeElement);
       }
     });
@@ -142,6 +143,7 @@ export class CodeBlockComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
+      delete this.codeEl().nativeElement.dataset['highlighted'];
       hljs.highlightElement(this.codeEl().nativeElement);
     }
   }
