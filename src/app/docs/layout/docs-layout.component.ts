@@ -14,10 +14,17 @@ import { WINDOW } from '@angular-helpers/browser-web-apis';
 import { DocsVersionService, AngularVersion } from '../services/docs-version.service';
 import { VersionDropdownComponent } from '../shared/version-dropdown.component';
 import { DocsHistoryService } from '../services/docs-history.service';
+import { VitalsPanelComponent } from './vitals-panel.component';
 
 @Component({
   selector: 'app-docs-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, VersionDropdownComponent],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    VersionDropdownComponent,
+    VitalsPanelComponent,
+  ],
   template: `
     <div
       class="flex h-[calc(100vh-60px)] overflow-hidden bg-base-100 text-base-content font-sans selection:bg-primary/30"
@@ -286,6 +293,7 @@ import { DocsHistoryService } from '../services/docs-history.service';
           </div>
         </main>
       </div>
+      <app-vitals-panel />
     </div>
   `,
 })

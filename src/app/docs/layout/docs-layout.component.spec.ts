@@ -1,11 +1,18 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { Router, ActivatedRoute } from '@angular/router';
 import { of, Subject } from 'rxjs';
-import { signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { DocsLayoutComponent } from './docs-layout.component';
 import { DocsHistoryService } from '../services/docs-history.service';
 import { DocsVersionService } from '../services/docs-version.service';
 import { WINDOW } from '@angular-helpers/browser-web-apis';
+import { VitalsPanelComponent } from './vitals-panel.component';
+
+@Component({
+  selector: 'app-vitals-panel',
+  template: '',
+})
+class VitalsPanelStubComponent {}
 
 describe('DocsLayoutComponent', () => {
   let fixture: ComponentFixture<DocsLayoutComponent>;
@@ -52,6 +59,9 @@ describe('DocsLayoutComponent', () => {
         { provide: DocsVersionService, useValue: mockVersionService },
         { provide: WINDOW, useValue: mockWindow },
       ],
+    }).overrideComponent(DocsLayoutComponent, {
+      remove: { imports: [VitalsPanelComponent] },
+      add: { imports: [VitalsPanelStubComponent] },
     });
 
     fixture = TestBed.createComponent(DocsLayoutComponent);
@@ -84,5 +94,11 @@ describe('DocsLayoutComponent', () => {
 
     expect(bookmarksSec.textContent).toContain('WorkerPool');
     expect(historySec.textContent).toContain('isTransferable');
+  });
+
+  it('should render the vitals panel stub', () => {
+    fixture.detectChanges();
+    const vitalsPanel = fixture.nativeElement.querySelector('app-vitals-panel');
+    expect(vitalsPanel).toBeTruthy();
   });
 });
