@@ -1204,7 +1204,8 @@ export class MapComponent {
       {
         name: 'createSector',
         signature: '(config: SectorConfig): Feature',
-        description: 'Generates a pie sector polygon with geodesic math',
+        description:
+          'Generates a pie sector polygon with geodesic math (includes radial edge densification for radii > 100km to avoid projection distortions)',
         returns: 'Feature',
       },
       {
@@ -1473,6 +1474,128 @@ export class MapComponent {
 export class MapComponent {
   onTimeChange(currentTime: number) {
     console.log('Current animation time:', currentTime);
+  }
+}`,
+  },
+  {
+    id: 'select-interaction',
+    name: 'OlSelectInteractionComponent',
+    description:
+      'Declarative component to configure and manage OpenLayers Select Interactions. Supports mouse selection, custom query layers, and optimized hover event emission via signals.',
+    scope: 'component',
+    importPath: '@angular-helpers/openlayers/interactions',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers',
+    notes: [
+      'Must be placed inside an <ol-map> component context.',
+      'Optimizes hover (pointerMove) emission by checking feature ID changes outside the Angular zone, preventing change detection flooding.',
+    ],
+    category: 'ol-controls',
+    inputs: [
+      {
+        name: 'id',
+        type: 'string',
+        description: 'Unique identifier for the select interaction.',
+      },
+      {
+        name: 'layers',
+        type: 'string[]',
+        description: 'Optional list of layer IDs that the selection interaction will target.',
+      },
+      {
+        name: 'multi',
+        type: 'boolean',
+        defaultValue: 'false',
+        description: 'Whether multiple features can be selected concurrently.',
+      },
+      {
+        name: 'hitTolerance',
+        type: 'number',
+        defaultValue: '0',
+        description: 'Hit-detection tolerance in pixels.',
+      },
+      {
+        name: 'condition',
+        type: "'click' | 'pointerMove'",
+        defaultValue: "'click'",
+        description: 'The condition that triggers feature selection.',
+      },
+      {
+        name: 'active',
+        type: 'boolean',
+        defaultValue: 'true',
+        description: 'Whether the interaction is currently active on the map.',
+      },
+    ],
+    outputs: [
+      {
+        name: 'selectEvent',
+        type: 'SelectEvent',
+        description: 'Emitted when a feature is selected (typically on click).',
+      },
+      {
+        name: 'hoverEvent',
+        type: 'SelectHoverEvent',
+        description:
+          'Emitted when a feature is hovered (when condition is pointerMove). Emits inside the Angular zone only on feature ID transitions.',
+      },
+    ],
+    methods: [],
+    example: `import { OlSelectInteractionComponent } from '@angular-helpers/openlayers/interactions';
+import { OlPopupComponent } from '@angular-helpers/openlayers/overlays';
+
+@Component({
+  imports: [
+    OlMapComponent,
+    OlTileLayerComponent,
+    OlVectorLayerComponent,
+    OlSelectInteractionComponent,
+    OlPopupComponent
+  ],
+  template: \`
+    <ol-map [center]="[0, 0]" [zoom]="4">
+      <ol-tile-layer source="osm" />
+      
+      <ol-vector-layer id="stations" [features]="features()" />
+      
+      <!-- Click-to-select interaction -->
+      <ol-select-interaction
+        id="station-selector"
+        [layers]="['stations']"
+        (selectEvent)="onFeatureSelected($event)" />
+
+      <!-- Hover-based tooltip interaction -->
+      <ol-select-interaction
+        id="station-hover"
+        [layers]="['stations']"
+        condition="pointerMove"
+        (hoverEvent)="onFeatureHovered($event)" />
+
+      @if (hoveredStationCoords(); as coords) {
+        <ol-popup [position]="coords" [autoPan]="false">
+          <div class="p-2 text-xs">
+            <strong>Station:</strong> {{ hoveredStationName() }}
+          </div>
+        </ol-popup>
+      }
+    </ol-map>
+  \`
+})
+export class MapComponent {
+  hoveredStationCoords = signal<Coordinate | null>(null);
+  hoveredStationName = signal<string>('');
+
+  onFeatureSelected(event: any) {
+    console.log('Selected:', event.features);
+  }
+
+  onFeatureHovered(event: any) {
+    if (event.feature) {
+      this.hoveredStationCoords.set(event.coordinate);
+      this.hoveredStationName.set(event.feature.get('name'));
+    } else {
+      this.hoveredStationCoords.set(null);
+    }
   }
 }`,
   },

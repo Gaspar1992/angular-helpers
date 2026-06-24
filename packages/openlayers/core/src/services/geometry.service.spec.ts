@@ -158,6 +158,73 @@ describe('OlGeometryService', () => {
       }
     });
 
+    it('densifies radial straight edges for radius > 100_000', () => {
+      const radius = 150_000; // 150 km
+      const segments = 32;
+      const f = service.createSector({
+        center,
+        radius,
+        startAngle: 0,
+        endAngle: Math.PI / 2,
+        segments,
+      });
+      const ring = (f.geometry.coordinates as Coordinate[][])[0];
+      // Expected length: 32 + 3 + 15 + 15 = 65
+      expect(ring).toHaveLength(segments + 33);
+
+      // The start radial edge (indices 1 to 15) should be intermediate points
+      for (let j = 1; j <= 15; j++) {
+        const expectedDist = (j / 16) * radius;
+        expect(distanceMeters(center, ring[j])).toBeCloseTo(expectedDist, -1);
+      }
+
+      // The end radial edge (indices ring.length - 16 to ring.length - 2) should be intermediate points
+      for (let j = 1; j <= 15; j++) {
+        const expectedDist = ((16 - j) / 16) * radius;
+        expect(distanceMeters(center, ring[ring.length - 17 + j])).toBeCloseTo(expectedDist, -1);
+      }
+    });
+
+    it('does not densify radial straight edges for radius <= 100_000', () => {
+      const radius = 100_000; // 100 km (boundary condition)
+      const segments = 32;
+      const f = service.createSector({
+        center,
+        radius,
+        startAngle: 0,
+        endAngle: Math.PI / 2,
+        segments,
+      });
+      const ring = (f.geometry.coordinates as Coordinate[][])[0];
+      // Expected length: 32 + 3 = 35 (no densification)
+      expect(ring).toHaveLength(segments + 3);
+    });
+
+    it('verifies radial straight edges are geodetically aligned', () => {
+      const radius = 200_000;
+      const f = service.createSector({
+        center,
+        radius,
+        startAngle: Math.PI / 4,
+        endAngle: Math.PI / 2,
+        segments: 16,
+      });
+      const ring = (f.geometry.coordinates as Coordinate[][])[0];
+
+      // Point at 8/16 of the start radial edge
+      const midpoint = ring[8];
+      const startArcPoint = ring[16];
+
+      // Geodesic distance from center to midpoint + midpoint to startArcPoint
+      // should equal center to startArcPoint (since they lie on the same geodesic path).
+      const d1 = distanceMeters(center, midpoint);
+      const d2 = distanceMeters(midpoint, startArcPoint);
+      const dTotal = distanceMeters(center, startArcPoint);
+
+      // In a true geodesic straight line, the sum of segments equals the total length
+      expect(d1 + d2).toBeCloseTo(dTotal, 1);
+    });
+
     it.each([
       { input: { radius: 0, startAngle: 0, endAngle: 1 }, pattern: /positive/i },
       { input: { radius: 1, startAngle: 1, endAngle: 1 }, pattern: /endAngle/i },

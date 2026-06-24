@@ -109,6 +109,7 @@ describe('OlInteractionService', () => {
     expect(ctx.svc.drawStart$).toBeDefined();
     expect(ctx.svc.drawEnd$).toBeDefined();
     expect(ctx.svc.modify$).toBeDefined();
+    expect((ctx.svc as any).hover$).toBeDefined();
   });
 
   it('enableSelect creates an interaction via SelectInteractionService and tracks it', () => {

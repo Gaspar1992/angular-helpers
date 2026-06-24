@@ -90,11 +90,27 @@ export class OlGeometryService {
 
     const ring: Coordinate[] = [center];
     const span = endAngle - startAngle;
+    const bearingStart = Math.PI / 2 - startAngle;
+    const bearingEnd = Math.PI / 2 - endAngle;
+
+    if (radius > 100_000) {
+      for (let j = 1; j <= 15; j++) {
+        ring.push(offset(center, (j / 16) * radius, bearingStart) as Coordinate);
+      }
+    }
+
     for (let i = 0; i <= segments; i++) {
       const theta = startAngle + (i / segments) * span;
       const bearing = Math.PI / 2 - theta;
       ring.push(offset(center, radius, bearing) as Coordinate);
     }
+
+    if (radius > 100_000) {
+      for (let j = 1; j <= 15; j++) {
+        ring.push(offset(center, ((16 - j) / 16) * radius, bearingEnd) as Coordinate);
+      }
+    }
+
     ring.push(center); // close back to apex
 
     return {

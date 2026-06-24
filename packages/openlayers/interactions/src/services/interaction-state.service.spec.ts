@@ -94,6 +94,21 @@ describe('InteractionStateService', () => {
     expect(handler).toHaveBeenCalledWith({ features: expect.any(Array), type: 'modifyend' });
   });
 
+  it('emits hover events to subscribers', () => {
+    const handler = vi.fn();
+    (svc as any).hover$.subscribe(handler);
+    (svc as any).emitHover({
+      interactionId: 's1',
+      hoveredId: 'feat-1',
+      feature: makeFeature('feat-1'),
+    });
+    expect(handler).toHaveBeenCalledWith({
+      interactionId: 's1',
+      hoveredId: 'feat-1',
+      feature: expect.any(Object),
+    });
+  });
+
   it('getInteractionState summarizes id, type and active flag', () => {
     const a = makeManaged('a', 'select');
     const b = makeManaged('b', 'draw');

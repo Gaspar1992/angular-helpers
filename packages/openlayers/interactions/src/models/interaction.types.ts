@@ -42,6 +42,12 @@ export interface SelectEvent {
   deselected: Feature[];
 }
 
+export interface SelectHoverEvent {
+  interactionId: string;
+  hoveredId: string | null;
+  feature: Feature | null;
+}
+
 export interface DrawEndEvent {
   interactionId: string;
   feature: Feature;

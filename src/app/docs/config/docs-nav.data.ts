@@ -334,6 +334,16 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
         ],
       },
       {
+        title: 'Interactions',
+        items: [
+          {
+            label: 'Select Interaction',
+            route: '/docs/openlayers/select-interaction',
+            since: AngularVersion.v22,
+          },
+        ],
+      },
+      {
         title: 'Military',
         items: [
           { label: 'Military Service', route: '/docs/openlayers/military' },
@@ -363,12 +373,14 @@ export function getNavLibrariesForVersion(version: AngularVersion): readonly Lib
   if (version === AngularVersion.v21) {
     return DOCS_NAV_LIBRARIES.map((lib) => ({
       ...lib,
-      sections: lib.sections.map((section) => ({
-        ...section,
-        items: section.items.filter(
-          (item) => !item.experimental && item.since !== AngularVersion.v22,
-        ),
-      })),
+      sections: lib.sections
+        .map((section) => ({
+          ...section,
+          items: section.items.filter(
+            (item) => !item.experimental && item.since !== AngularVersion.v22,
+          ),
+        }))
+        .filter((section) => section.items.length > 0),
     }));
   }
   return DOCS_NAV_LIBRARIES;

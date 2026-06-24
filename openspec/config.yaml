@@ -4,7 +4,7 @@ execution_mode: interactive
 delivery_strategy: ask-on-risk
 strict_tdd: true
 stack:
-  framework: Angular v21
+  framework: Angular v22
   packageManager: pnpm
   compiler: TypeScript
   buildTool: Vite

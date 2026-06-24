@@ -131,6 +131,8 @@ export class SelectInteractionService {
         },
       });
 
+      let lastHoveredId: string | null = null;
+
       // Listen to selection changes — use getFeatures().getArray() for the full
       // accumulated collection, not e.selected which only contains newly added ones
       select.on('select', (e: { selected: OLFeature[]; deselected: OLFeature[] }) => {
@@ -140,9 +142,19 @@ export class SelectInteractionService {
           .map((f) => olFeatureToFeature(f));
 
         if (config.condition === 'pointerMove') {
-          // Update signal outside Angular zone. Consumers of this signal will schedule
-          // targeted change detection automatically.
-          this.stateService.setHoveredFeature(allFeatures.length > 0 ? allFeatures[0] : null);
+          const hoveredFeature = allFeatures.length > 0 ? allFeatures[0] : null;
+          const hoveredId = hoveredFeature ? (hoveredFeature.id as string) : null;
+          if (hoveredId !== lastHoveredId) {
+            lastHoveredId = hoveredId;
+            this.stateService.setHoveredFeature(hoveredFeature);
+            this.zoneHelper.runInsideAngular(() => {
+              this.stateService.emitHover({
+                interactionId: id,
+                hoveredId,
+                feature: hoveredFeature,
+              });
+            });
+          }
         } else {
           this.zoneHelper.runInsideAngular(() => {
             this.stateService.setSelectedFeatures(allFeatures);

@@ -1,7 +1,8 @@
-import { Component, DestroyRef, effect, inject, input } from '@angular/core';
-import { outputFromObservable } from '@angular/core/rxjs-interop';
+import { Component, DestroyRef, effect, inject, input, output } from '@angular/core';
+import { outputFromObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 import { OlInteractionService } from '../services/interaction.service';
+import type { SelectHoverEvent } from '../models/interaction.types';
 
 /**
  * Declarative component to configure an OpenLayers Select Interaction.
@@ -26,8 +27,18 @@ export class OlSelectInteractionComponent {
   );
 
   selectEvent = outputFromObservable(this.selectFiltered$);
+  hoverEvent = output<SelectHoverEvent>();
 
   constructor() {
+    this.interactionService.hover$
+      .pipe(
+        filter((e) => e.interactionId === this.id()),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((event) => {
+        this.hoverEvent.emit(event);
+      });
+
     effect(() => {
       if (this.active()) {
         this.interactionService.enableSelect(this.id(), {
