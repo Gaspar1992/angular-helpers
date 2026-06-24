@@ -1,4 +1,6 @@
-import { Component, input } from '@angular/core';
+import { Component, input, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { DocsHistoryService } from '../../services/docs-history.service';
 
 @Component({
   selector: 'app-docs-page-header',
@@ -15,6 +17,24 @@ import { Component, input } from '@angular/core';
             {{ badge() }}
           </span>
         }
+
+        <button
+          class="btn btn-ghost btn-circle bookmark-btn"
+          (click)="toggleBookmark()"
+          [attr.aria-label]="isBookmarked() ? 'Remove from bookmarks' : 'Add to bookmarks'"
+          id="bookmark-toggle"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            [class.filled]="isBookmarked()"
+            class="star-icon"
+          >
+            <path
+              d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+            />
+          </svg>
+        </button>
       </div>
 
       <p class="docs-page-lead" [innerHTML]="lead()"></p>
@@ -43,6 +63,7 @@ import { Component, input } from '@angular/core';
           align-items: center;
           gap: var(--spacing-4);
           flex-wrap: wrap;
+          width: 100%;
         }
 
         .docs-page-title {
@@ -53,6 +74,40 @@ import { Component, input } from '@angular/core';
           &.title-mono {
             font-family: var(--font-mono);
             font-weight: 700;
+          }
+        }
+
+        .bookmark-btn {
+          margin-inline-start: auto;
+          color: var(--c-warning, #f59e0b);
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          border-radius: 9999px;
+          background: transparent;
+          border: none;
+          transition: background-color 0.2s;
+
+          &:hover {
+            background-color: var(--c-bg-hover, rgba(0, 0, 0, 0.05));
+          }
+        }
+
+        .star-icon {
+          width: var(--spacing-6);
+          height: var(--spacing-6);
+          fill: none;
+          stroke: currentColor;
+          stroke-width: 2;
+          transition:
+            fill 0.2s,
+            transform 0.2s;
+
+          &.filled {
+            fill: currentColor;
           }
         }
 
@@ -76,4 +131,19 @@ export class DocsPageHeaderComponent {
   readonly lead = input.required<string>();
   readonly scope = input<string>();
   readonly requiresSecureContext = input(false);
+
+  private readonly router = inject(Router);
+  private readonly historyService = inject(DocsHistoryService);
+
+  private getCleanPath(): string {
+    return this.router.url.split(/[?#]/)[0];
+  }
+
+  isBookmarked(): boolean {
+    return this.historyService.isBookmarked(this.getCleanPath());
+  }
+
+  toggleBookmark(): void {
+    this.historyService.toggleBookmark(this.getCleanPath());
+  }
 }

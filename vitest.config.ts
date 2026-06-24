@@ -36,6 +36,8 @@ export default defineConfig({
       '@angular-helpers/core': here('./packages/core/src/index.ts'),
       '@angular-helpers/testing': here('./packages/testing/src/public-api.ts'),
       '@angular-helpers/storage/worker': here('./packages/storage/worker/src/index.ts'),
+      '@angular-helpers/storage': here('./packages/storage/src/index.ts'),
+      '@angular-helpers/browser-web-apis': here('./packages/browser-web-apis/src/index.ts'),
       '@analogjs/vitest-angular/setup-vitest': here(
         './node_modules/@analogjs/vitest-angular/setup-vitest.js',
       ),
