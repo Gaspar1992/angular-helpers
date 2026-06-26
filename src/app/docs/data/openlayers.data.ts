@@ -1540,7 +1540,14 @@ export class MapComponent {
           'Emitted when a feature is hovered (when condition is pointerMove). Emits inside the Angular zone only on feature ID transitions.',
       },
     ],
-    methods: [],
+    methods: [
+      {
+        name: 'createSelectInteraction',
+        signature: 'createSelectInteraction(id: string, config: SelectConfig, map: OLMap): void',
+        description: 'Creates and configures a Select interaction.',
+        returns: 'void',
+      },
+    ],
     example: `import { OlSelectInteractionComponent } from '@angular-helpers/openlayers/interactions';
 import { OlPopupComponent } from '@angular-helpers/openlayers/overlays';
 

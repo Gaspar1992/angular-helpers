@@ -2,6 +2,14 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'browser-observer-signals-and-core-operators',
+    title: "Unlocking Angular's Reactivity: Browser Observer Signals & Core Operators",
+    publishedAt: '2026-06-26',
+    tags: ['angular', 'signals', 'reactivity', 'browser-web-apis', 'core', 'performance', 'a11y'],
+    excerpt:
+      "We've added 8 new browser observer signal helpers to @angular-helpers/browser-web-apis (including media queries, window scroll, mouse position, and permissions) and 3 general-purpose signal operators to @angular-helpers/core. Here is how they simplify responsive design, UX timing, and SSR-safe reactivity.",
+  },
+  {
     slug: 'angular-v22-injection-context-assertions-and-hybrid-workers',
     title: 'Angular v22: Injection Context Assertions and Hybrid Workers',
     publishedAt: '2026-06-24',

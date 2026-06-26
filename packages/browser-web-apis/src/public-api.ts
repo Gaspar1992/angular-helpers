@@ -231,6 +231,22 @@ export { CopyButtonDirective } from './directives/copy-button.directive';
 export { injectIdleBatterySaver, type IdleBatterySaverRef } from './fns/inject-idle-battery-saver';
 
 // Providers
+export { injectMediaQuery, type MediaQueryOptions } from './fns/inject-media-query';
+export { injectBreakpoints, type BreakpointsOptions } from './fns/inject-breakpoints';
+export {
+  injectPreferredColorScheme,
+  type PreferredColorSchemeOptions,
+} from './fns/inject-preferred-color-scheme';
+export { injectReducedMotion, type ReducedMotionOptions } from './fns/inject-reduced-motion';
+export {
+  injectDocumentTitle,
+  type DocumentTitleOptions,
+  type DocumentTitleRef,
+} from './fns/inject-document-title';
+export { injectMousePosition, type MousePosition } from './fns/inject-mouse-position';
+export { injectWindowScroll, type ScrollPosition } from './fns/inject-window-scroll';
+export { injectPermissionState, type PermissionStateRef } from './fns/inject-permission-state';
+
 export * from './providers';
 
 // Version

@@ -3,3 +3,4 @@
 export * from './utils/platform';
 export * from './utils/transferables';
 export * from './workers/worker-pool'; // v22 release force
+export * from './fns';

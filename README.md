@@ -6,6 +6,47 @@ A suite of Angular libraries that helps you build secure, browser-integrated app
 
 ## 📦 Available Packages
 
+### ⚡ `@angular-helpers/core`
+
+_Lightweight, high-performance, and SSR-safe timing signal operators and core utilities_
+
+🌐 **Documentation**: https://gaspar1992.github.io/angular-helpers/docs/core
+
+**🎯 What it solves:**
+
+- Avoiding RxJS interoperability overhead (`toObservable` and `toSignal` back-and-forth conversion).
+- Stabilisation hangs during Server-Side Rendering (SSR) by safely bypassing timer registrations.
+- Complex and error-prone memory management with automatic `DestroyRef` cleanup.
+
+**✨ Key features:**
+
+- ⏱️ **`debouncedSignal`** — delays emitting values until a specified time window of silence.
+- 🚀 **`throttledSignal`** — limits emissions to at most once per specified time window, supporting leading/trailing configurations.
+- 🕐 **`timerSignal`** — native delay and periodic interval signals.
+- ⚙️ **Custom Injector support** — allowing execution outside of an active injection context.
+
+**💡 Example usage:**
+
+```typescript
+// Debounce search inputs
+const search = signal('');
+const debouncedSearch = debouncedSignal(search, 300);
+
+// Throttled scroll triggers
+const scrolled = throttledSignal(scrollOffset, 150);
+
+// Periodic ticker
+const timer = timerSignal(1000, 2000); // starts after 1s, ticks every 2s
+```
+
+**📥 Installation:**
+
+```bash
+pnpm add @angular-helpers/core
+```
+
+---
+
 ### 🔐 `@angular-helpers/security`
 
 _Advanced regular expression security and ReDoS prevention_
