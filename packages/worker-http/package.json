@@ -47,13 +47,13 @@
   },
   "scripts": {
     "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
-    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && find ../../dist/worker-http -name '*.map' -delete && find ../../dist/worker-http -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/worker-http",
     "build:watch": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json --watch",
     "build:schematics": "tsc -p tsconfig.schematics.json && node scripts/rename-to-cjs.mjs",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
-    "clean": "rm -rf dist",
+    "clean": "node ../../scripts/clean.js",
     "lint": "oxlint src",
     "prepublishOnly": "pnpm run build"
   },
@@ -110,12 +110,12 @@
   },
   "dependencies": {
     "@angular-helpers/core": "workspace:*",
-    "tslib": "^2.0.0"
+    "tslib": "catalog:"
   },
   "devDependencies": {
-    "@angular-devkit/core": "^22.0.0",
-    "@angular-devkit/schematics": "^22.0.0",
-    "esbuild": "^0.28.1",
-    "web-streams-polyfill": "^4.2.0"
+    "@angular-devkit/core": "catalog:",
+    "@angular-devkit/schematics": "catalog:",
+    "esbuild": "catalog:",
+    "web-streams-polyfill": "catalog:"
   }
 }

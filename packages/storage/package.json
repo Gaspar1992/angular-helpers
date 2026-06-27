@@ -4,12 +4,12 @@
   "description": "Sistema de almacenamiento reactivo premium para Angular con soporte para Cache API, IndexedDB, compresión TOON y blindaje en runtime.",
   "scripts": {
     "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
-    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && find ../../dist/storage -name '*.map' -delete && find ../../dist/storage -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/storage",
     "build:watch": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json --watch",
     "test": "vitest run",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
-    "clean": "rm -rf dist",
+    "clean": "node ../../scripts/clean.js",
     "lint": "oxlint src",
     "prepublishOnly": "pnpm run build"
   },
@@ -46,10 +46,10 @@
   },
   "dependencies": {
     "@angular-helpers/core": "workspace:*",
-    "tslib": "^2.0.0"
+    "tslib": "catalog:"
   },
   "devDependencies": {
-    "jsdom": "^29.0.2",
-    "vitest": "^4.1.5"
+    "jsdom": "catalog:",
+    "vitest": "catalog:"
   }
 }

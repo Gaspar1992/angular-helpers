@@ -12,7 +12,8 @@
   "sideEffects": false,
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
-    "build:prod": "ng-packagr -p ng-package.json && find ../../dist/core -name '*.map' -delete && find ../../dist/core -name '*.mjs' -exec sed -i '/^\\/\\/#  sourceMappingURL=/d' {} +",
+    "build:prod": "ng-packagr -p ng-package.json && node ../../scripts/post-build.js ../../dist/core",
+    "clean": "node ../../scripts/clean.js",
     "test": "vitest run",
     "lint": "oxlint src"
   },

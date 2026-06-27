@@ -4,12 +4,12 @@
   "description": "Modern Angular wrapper for OpenLayers with modular architecture, standalone components, and hybrid template/programmatic API",
   "scripts": {
     "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
-    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && find ../../dist/openlayers -name '*.map' -delete && find ../../dist/openlayers -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/openlayers",
     "build:watch": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json --watch",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
-    "clean": "rm -rf dist",
+    "clean": "node ../../scripts/clean.js",
     "lint": "oxlint src",
     "prepublishOnly": "pnpm run build"
   },
@@ -56,13 +56,13 @@
     }
   },
   "devDependencies": {
-    "@analogjs/vite-plugin-angular": "^2.4.10",
-    "@analogjs/vitest-angular": "^2.4.10",
-    "@types/proj4": "^2.19.0",
-    "@vitest/coverage-v8": "^4.1.5",
-    "jsdom": "^29.0.2",
-    "ol": "^10.9.0",
-    "proj4": "^2.20.8",
-    "vitest": "^4.1.5"
+    "@analogjs/vite-plugin-angular": "catalog:",
+    "@analogjs/vitest-angular": "catalog:",
+    "@types/proj4": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "jsdom": "catalog:",
+    "ol": "catalog:",
+    "proj4": "catalog:",
+    "vitest": "catalog:"
   }
 }

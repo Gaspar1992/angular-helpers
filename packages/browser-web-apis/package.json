@@ -3,13 +3,14 @@
   "version": "22.0.0",
   "description": "Sistema de servicios Angular para acceso formalizado a Browser Web APIs (cámara, permisos, geolocalización, etc.)",
   "scripts": {
+    "prebuild": "node ../../scripts/sync-versions.js . src/public-api.ts",
     "build": "ng-packagr -p ng-package.json",
-    "build:prod": "ng-packagr -p ng-package.json && find ../../dist/browser-web-apis -name '*.map' -delete && find ../../dist/browser-web-apis -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
+    "build:prod": "node ../../scripts/sync-versions.js . src/public-api.ts && ng-packagr -p ng-package.json && node ../../scripts/post-build.js ../../dist/browser-web-apis",
     "build:watch": "ng-packagr -p ng-package.json --watch",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
-    "clean": "rm -rf dist",
+    "clean": "node ../../scripts/clean.js",
     "lint": "oxlint src",
     "prepublishOnly": "pnpm run build"
   },
@@ -46,7 +47,7 @@
     "rxjs": "^7.0.0"
   },
   "devDependencies": {
-    "jsdom": "^29.0.2",
-    "vitest": "^4.1.5"
+    "jsdom": "catalog:",
+    "vitest": "catalog:"
   }
 }

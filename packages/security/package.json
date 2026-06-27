@@ -39,7 +39,8 @@
   "scripts": {
     "prebuild": "node ../../scripts/inline-workers.js",
     "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
-    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && find ../../dist/security -name '*.map' -delete && find ../../dist/security -name '*.mjs' -exec sed -i '/^\\/\\/# sourceMappingURL=/d' {} +",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/security",
+    "clean": "node ../../scripts/clean.js",
     "test": "vitest run"
   },
   "peerDependencies": {
@@ -55,7 +56,7 @@
   },
   "dependencies": {
     "@angular-helpers/core": "workspace:*",
-    "tslib": "^2.0.0"
+    "tslib": "catalog:"
   },
   "ngPackage": {
     "lib": {

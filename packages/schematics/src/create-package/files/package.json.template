@@ -1,0 +1,27 @@
+{
+  "name": "@angular-helpers/<%= name %>",
+  "version": "1.0.0",
+  "description": "<%= description %>",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gaspar1992/angular-helpers"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json",
+    "build:prod": "ng-packagr -p ng-package.json && node ../../scripts/post-build.js ../../dist/<%= name %>",
+    "clean": "node ../../scripts/clean.js",
+    "test": "vitest run",
+    "lint": "oxlint src"
+  },
+  "dependencies": {
+    "@angular/core": "catalog:",
+    "@angular/common": "catalog:",
+    "@angular/platform-browser": "catalog:",
+    "rxjs": "catalog:",
+    "tslib": "catalog:"
+  }
+}

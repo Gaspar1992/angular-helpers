@@ -1,0 +1,6 @@
+// Public API Surface of @angular-helpers/<%= name %>
+
+export * from './services';
+export * from './interfaces';
+export * from './utils';
+export * from './guards';

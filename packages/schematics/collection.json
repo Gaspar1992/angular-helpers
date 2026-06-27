@@ -1,0 +1,10 @@
+{
+  "$schema": "../../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "create-package": {
+      "description": "Create a new Angular helper package in the monorepo",
+      "factory": "./create-package/index.cjs#createPackage",
+      "schema": "./create-package/schema.json"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+# @angular-helpers/<%= name %>
+
+<%= description %>
+
+## Installation
+
+```bash
+pnpm add @angular-helpers/<%= name %>
+```
+
+## Usage
+
+Describe how to use the package here.

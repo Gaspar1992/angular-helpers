@@ -1,6 +1,43 @@
 packages:
   - 'packages/*'
 
+catalog:
+  '@analogjs/vite-plugin-angular': ^2.6.1
+  '@analogjs/vitest-angular': ^2.6.1
+  '@angular/animations': ^22.0.2
+  '@angular/common': ^22.0.2
+  '@angular/compiler': ^22.0.2
+  '@angular/core': ^22.0.2
+  '@angular/forms': ^22.0.2
+  '@angular/platform-browser': ^22.0.2
+  '@angular/platform-browser-dynamic': ^22.0.2
+  '@angular/platform-server': ^22.0.2
+  '@angular/router': ^22.0.2
+  '@angular/ssr': ^22.0.3
+  '@angular-devkit/build-angular': ^22.0.3
+  '@angular-devkit/core': ^22.0.0
+  '@angular-devkit/schematics': ^22.0.0
+  '@toon-format/toon': ^2.3.0
+  '@types/node': ^20.19.43
+  '@types/proj4': ^2.19.0
+  '@vitest/browser': ^4.1.9
+  '@vitest/coverage-v8': ^4.1.9
+  '@vitest/ui': ^4.1.9
+  'esbuild': ^0.28.1
+  'express': ^5.2.1
+  'highlight.js': ^11.11.1
+  'jsdom': ^29.1.1
+  'marked': ^18.0.5
+  'ol': ^10.9.0
+  'proj4': ^2.20.8
+  'rxjs': ~7.8.2
+  'seroval': ^1.5.4
+  'tslib': ^2.8.1
+  'typescript': ~6.0.3
+  'vite': ^8.0.16
+  'vitest': ^4.1.9
+  'web-streams-polyfill': ^4.3.0
+
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true
