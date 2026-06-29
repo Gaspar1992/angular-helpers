@@ -121,19 +121,19 @@ export class OlMapComponent {
       }
 
       view.on('change:center', () => {
-        if (this.viewChange.observed) {
+        if ((this.viewChange as any).observed) {
           this.zoneHelper.runInsideAngular(() => this.emitViewChange());
         }
       });
       view.on('change:resolution', () => {
         this.mapService.setResolution(view.getResolution() ?? 1);
-        if (this.viewChange.observed) {
+        if ((this.viewChange as any).observed) {
           this.zoneHelper.runInsideAngular(() => this.emitViewChange());
         }
       });
 
       this.map.on('click', (e) => {
-        if (this.mapClick.observed) {
+        if ((this.mapClick as any).observed) {
           this.zoneHelper.runInsideAngular(() =>
             this.mapClick.emit({
               coordinate: this.getExternalCoordinate(e.coordinate) as Coordinate,
@@ -143,7 +143,7 @@ export class OlMapComponent {
         }
       });
       this.map.on('dblclick', (e) => {
-        if (this.mapDblClick.observed) {
+        if ((this.mapDblClick as any).observed) {
           this.zoneHelper.runInsideAngular(() =>
             this.mapDblClick.emit({
               coordinate: this.getExternalCoordinate(e.coordinate) as Coordinate,
