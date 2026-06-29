@@ -116,22 +116,19 @@ export class WorkerPool {
     try {
       const res = this.options.workerFactory();
       if (res instanceof Promise) {
-        const capturedPromise = res.then(
-          (w) => {
-            // Guard against race condition: if terminate() was called while this Promise
-            // was pending, workerPromise is null — do not set up the worker.
+        const capturedPromise = res
+          .then((w) => {
             if (this.workerPromise === capturedPromise) {
               this.setupWorker(w);
             } else {
               w.terminate();
             }
             return w;
-          },
-          (err) => {
+          })
+          .catch((err) => {
             this.handleInitError(err);
             return null;
-          },
-        );
+          });
         this.workerPromise = capturedPromise;
       } else {
         this.setupWorker(res);
