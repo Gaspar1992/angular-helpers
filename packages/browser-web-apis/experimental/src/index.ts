@@ -6,10 +6,11 @@ export {
   IdleDetectorService,
   type IdleState,
   type IdleDetectorOptions,
-} from './idle-detector.service';
-export type { UserIdleState, ScreenIdleState } from './idle-detector.service';
-
-export { EyeDropperService, type ColorSelectionResult } from './eye-dropper.service';
+  type UserIdleState,
+  type ScreenIdleState,
+  EyeDropperService,
+  type EyeDropperResult as ColorSelectionResult,
+} from '@angular-helpers/browser-web-apis';
 
 export {
   BarcodeDetectorService,

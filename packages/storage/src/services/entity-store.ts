@@ -8,12 +8,11 @@ import {
 } from '@angular/core';
 import { STORAGE_TRANSPORT } from '../tokens/storage.tokens';
 import { LocalStorageTransport } from './local-transport';
-import { SafeReadonlyMap } from '../utils/safe-readonly-map';
 import { EntityStoreOptions, StorageSignalOptions } from '../interfaces/storage.types';
 
 export class EntityStore<Id, Entity> {
   private readonly _rawMap = new Map<Id, Entity>();
-  private readonly _entities = signal<ReadonlyMap<Id, Entity>>(new SafeReadonlyMap(this._rawMap));
+  private readonly _entities = signal<ReadonlyMap<Id, Entity>>(new Map(this._rawMap));
 
   // Public Reactive APIs
   readonly entities = this._entities.asReadonly();
@@ -57,7 +56,7 @@ export class EntityStore<Id, Entity> {
     const secureEntity = Object.freeze({ ...entity });
 
     this._rawMap.set(id, secureEntity);
-    this._entities.set(new SafeReadonlyMap(this._rawMap));
+    this._entities.set(new Map(this._rawMap));
 
     const sig = this._entitySignals.get(id);
     if (sig) {
@@ -83,7 +82,7 @@ export class EntityStore<Id, Entity> {
       }
     }
 
-    this._entities.set(new SafeReadonlyMap(this._rawMap));
+    this._entities.set(new Map(this._rawMap));
     this.triggerPersist();
   }
 
@@ -115,7 +114,7 @@ export class EntityStore<Id, Entity> {
     if (!this._rawMap.has(id)) return;
 
     this._rawMap.delete(id);
-    this._entities.set(new SafeReadonlyMap(this._rawMap));
+    this._entities.set(new Map(this._rawMap));
 
     const sig = this._entitySignals.get(id);
     if (sig) {
@@ -131,7 +130,7 @@ export class EntityStore<Id, Entity> {
    */
   clear(): void {
     this._rawMap.clear();
-    this._entities.set(new SafeReadonlyMap(this._rawMap));
+    this._entities.set(new Map(this._rawMap));
 
     for (const sig of this._entitySignals.values()) {
       sig.set(undefined);

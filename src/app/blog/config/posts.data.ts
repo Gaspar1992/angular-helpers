@@ -59,24 +59,6 @@ export const BLOG_POSTS: readonly BlogPost[] = [
       'Introducing @angular-helpers/storage v21.12.0, a high-performance reactive storage system for Angular. It bridges a fast synchronous L1 memory Signal Cache with async L2 storage backends (Cache API, IndexedDB, Local/SessionStorage) with dynamic TOON compression, AES-GCM encryption, and surgical key-level reactive Entity management.',
   },
   {
-    slug: 'openlayers-military',
-    title:
-      'openlayers v0.4.0: Military symbology — Ellipse, Sector, Donut, and lazy-loaded MIL-STD-2525',
-    publishedAt: '2026-04-27',
-    tags: [
-      'openlayers',
-      'angular',
-      'maps',
-      'military',
-      'milsymbol',
-      'mil-std-2525',
-      'geometry',
-      'lazy-loading',
-    ],
-    excerpt:
-      'Phase 2 closes. v0.4.0 fills in the last entry point with real implementations of createEllipse, createSector, and createDonut (pure math, zero deps), plus createMilSymbol that lazy-loads milsymbol on first use. Donuts ship with the right-hand-rule winding so the hole actually renders.',
-  },
-  {
     slug: 'openlayers-overlays',
     title:
       'openlayers v0.3.0: Overlays — Popups, Tooltips, and Dynamic Angular Components on the Map',

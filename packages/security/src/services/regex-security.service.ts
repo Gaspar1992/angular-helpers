@@ -1,11 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import type { RegexSecurityConfig, RegexTestResult, RegexSecurityResult } from './regex-types';
-import { RegexSecurityBuilder } from './regex-builder';
 import { RegexAnalyzerService } from './regex-analyzer.service';
 import { RegexWorkerPoolService } from './regex-worker-pool.service';
 
 export * from './regex-types';
-export * from './regex-builder';
 
 /**
  * Security service for regular expressions that prevents ReDoS
@@ -15,13 +13,6 @@ export * from './regex-builder';
 export class RegexSecurityService {
   private analyzer = inject(RegexAnalyzerService);
   private workerPool = inject(RegexWorkerPoolService);
-
-  /**
-   * Builder pattern to construct safe regular expressions
-   */
-  static builder(): RegexSecurityBuilder {
-    return new RegexSecurityBuilder();
-  }
 
   /**
    * Executes a regular expression safely with a timeout

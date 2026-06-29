@@ -3,7 +3,6 @@ import { provideSecurity } from '@angular-helpers/security';
 import { provideOpenLayers } from '@angular-helpers/openlayers/core';
 import { withLayers } from '@angular-helpers/openlayers/layers';
 import { withControls } from '@angular-helpers/openlayers/controls';
-import { withMilitary } from '@angular-helpers/openlayers/military';
 import {
   provideBrowserWebApis,
   provideCamera,
@@ -153,7 +152,7 @@ export const DEMO_ROUTES: Routes = [
         path: 'openlayers',
         loadComponent: () =>
           import('./openlayers/openlayers-demo.component').then((m) => m.OpenLayersDemoComponent),
-        providers: [provideOpenLayers(withLayers(), withControls(), withMilitary())],
+        providers: [provideOpenLayers(withLayers(), withControls())],
         title: 'OpenLayers — Demo',
       },
       {

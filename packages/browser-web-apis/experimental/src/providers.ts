@@ -1,7 +1,5 @@
 import { makeEnvironmentProviders, EnvironmentProviders, Provider } from '@angular/core';
 
-import { IdleDetectorService } from './idle-detector.service';
-import { EyeDropperService } from './eye-dropper.service';
 import { WebBluetoothService } from './web-bluetooth.service';
 import { WebUsbService } from './web-usb.service';
 import { WebNfcService } from './web-nfc.service';
@@ -14,6 +12,8 @@ import {
   CredentialManagementService,
   provideBarcodeDetector,
   provideCredentialManagement,
+  IdleDetectorService,
+  EyeDropperService,
 } from '@angular-helpers/browser-web-apis';
 
 export { provideBarcodeDetector, provideCredentialManagement };

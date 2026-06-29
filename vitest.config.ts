@@ -67,7 +67,6 @@ export default defineConfig({
         './packages/openlayers/interactions/src/index.ts',
       ),
       '@angular-helpers/openlayers/overlays': here('./packages/openlayers/overlays/src/index.ts'),
-      '@angular-helpers/openlayers/military': here('./packages/openlayers/military/src/index.ts'),
     },
   },
 });

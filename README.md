@@ -167,14 +167,12 @@ _A modern Angular wrapper for OpenLayers with modular architecture and standalon
 
 - **Imperative OpenLayers API** — wraps it in declarative Angular components.
 - **Bundle bloat** — modular sub-entry points import only what you need.
-- **Military mapping** — ellipses, sectors, NATO symbology out of the box.
 
 **✨ Key features:**
 
 - 🗺️ **Standalone components** for maps, layers, controls, interactions, and overlays.
 - 📡 **Signals integration** — native Angular signals for reactive state.
-- 🎯 **Modular loading** — `core`, `layers`, `controls`, `interactions`, `overlays`, `military` sub-entries.
-- 🪖 **Military features** — ellipses, sectors, donuts, MIL-STD-2525 symbols via `milsymbol`.
+- 🎯 **Modular loading** — `core`, `layers`, `controls`, `interactions`, `overlays` sub-entries.
 - 💬 **Popups & tooltips** — declarative and programmatic overlay API.
 - ⏱️ **Time-series playback** — 60FPS animation timing loop running off-zone via `requestAnimationFrame` and a premium `<ol-timeline>` control panel.
 
@@ -359,7 +357,6 @@ They live as Markdown files in [`public/content/blog/`](./public/content/blog/) 
 
 | Date | Article |
 | 2026-05-16 | [openlayers v0.5.0: Proj4 projections, Geodesic precision, and WebGL MVT](./public/content/blog/openlayers-v0-5-0.md) |
-| 2026-04-27 | [openlayers v0.4.0: Military symbology — Ellipse, Sector, Donut, and lazy-loaded MIL-STD-2525](./public/content/blog/openlayers-military.md) |
 | 2026-04-27 | [openlayers v0.3.0: Overlays — Popups, Tooltips, and Dynamic Angular Components on the Map](./public/content/blog/openlayers-overlays.md) |
 | 2026-04-27 | [openlayers v0.2.0: SRP-refactored interactions, Circle draw, and a native-style toolbar](./public/content/blog/openlayers-interactions-srp.md) |
 | 2026-04-26 | [worker-http v21.2.0: TOON serializer — 30–60% smaller postMessage payloads](./public/content/blog/worker-http-toon-serializer.md) |

@@ -6,7 +6,7 @@ import {
   type UserIdleState,
   type ScreenIdleState,
   type IdleDetectorOptions,
-} from './idle-detector.service';
+} from '@angular-helpers/browser-web-apis';
 
 interface IdleDetectorInstance extends EventTarget {
   readonly userState: UserIdleState;
@@ -24,17 +24,17 @@ function getIdleDetectorClass(): IdleDetectorConstructor | undefined {
 
 export interface IdleDetectorRef {
   readonly state: Signal<IdleState>;
-  readonly userState: Signal<UserIdleState>;
-  readonly screenState: Signal<ScreenIdleState>;
+  readonly userState: Signal<UserIdleState | null>;
+  readonly screenState: Signal<ScreenIdleState | null>;
   readonly isUserIdle: Signal<boolean>;
   readonly isScreenLocked: Signal<boolean>;
 }
 
-export function injectIdleDetector(options: IdleDetectorOptions = {}): IdleDetectorRef {
+export function injectIdleDetector(options: Partial<IdleDetectorOptions> = {}): IdleDetectorRef {
   const destroyRef = inject(DestroyRef);
   const platformId = inject(PLATFORM_ID);
 
-  const defaultState: IdleState = { user: 'active', screen: 'unlocked' };
+  const defaultState: IdleState = { userState: 'active', screenState: 'unlocked' };
   const state = signal<IdleState>(defaultState);
 
   if (isPlatformBrowser(platformId) && 'IdleDetector' in window) {
@@ -43,8 +43,8 @@ export function injectIdleDetector(options: IdleDetectorOptions = {}): IdleDetec
 
     detector.addEventListener('change', () => {
       state.set({
-        user: detector.userState,
-        screen: detector.screenState,
+        userState: detector.userState,
+        screenState: detector.screenState,
       });
     });
 
@@ -62,9 +62,9 @@ export function injectIdleDetector(options: IdleDetectorOptions = {}): IdleDetec
 
   return {
     state: state.asReadonly(),
-    userState: computed(() => state().user),
-    screenState: computed(() => state().screen),
-    isUserIdle: computed(() => state().user === 'idle'),
-    isScreenLocked: computed(() => state().screen === 'locked'),
+    userState: computed(() => state().userState),
+    screenState: computed(() => state().screenState),
+    isUserIdle: computed(() => state().userState === 'idle'),
+    isScreenLocked: computed(() => state().screenState === 'locked'),
   };
 }

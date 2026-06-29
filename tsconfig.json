@@ -38,7 +38,6 @@
         "./packages/openlayers/interactions/src/index.ts"
       ],
       "@angular-helpers/openlayers/overlays": ["./packages/openlayers/overlays/src/index.ts"],
-      "@angular-helpers/openlayers/military": ["./packages/openlayers/military/src/index.ts"],
       "@angular-helpers/*": ["./packages/*/src/index.ts"]
     }
   },
