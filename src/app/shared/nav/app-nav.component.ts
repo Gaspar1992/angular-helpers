@@ -30,7 +30,7 @@ import { SearchService } from '../../core/services/search.service';
       <!-- Search Trigger Button -->
       <button
         type="button"
-        class="group flex items-center gap-2 px-2.5 py-1.5 text-xs text-base-content/40 hover:text-base-content/85 bg-white/[0.02] hover:bg-white/[0.06] border border-base-content/5 hover:border-base-content/15 rounded-lg transition-all duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
+        class="group flex items-center gap-2 px-3 py-1.5 text-xs text-base-content/60 hover:text-base-content bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] hover:border-white/[0.15] rounded-lg transition-all duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
         (click)="search.open()"
         aria-label="Open search modal"
       >

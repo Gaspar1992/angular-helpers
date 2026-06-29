@@ -17,21 +17,24 @@ import { SearchService, SearchResult } from '../../../core/services/search.servi
         (click)="close()"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="search-label"
+        aria-labelledby="search-modal-title"
       >
         <!-- Backdrop -->
         <div
-          class="fixed inset-0 bg-base-content/5 backdrop-blur-sm animate-in fade-in duration-300"
+          class="fixed inset-0 bg-black/60 backdrop-blur-md animate-in fade-in duration-300"
         ></div>
 
         <!-- Modal Container -->
         <div
+          #modalContainer
           class="relative w-full max-w-[650px] bg-base-200 border border-base-content/10 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
           (click)="$event.stopPropagation()"
         >
+          <h2 id="search-modal-title" class="sr-only">Search Ecosystem</h2>
+
           <!-- Search Input -->
           <div
-            class="flex items-center gap-4 px-5 py-5 border-b border-base-content/5 bg-base-content/5"
+            class="flex items-center gap-4 px-5 py-5 border-b border-base-content/10 bg-base-100"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -51,7 +54,7 @@ import { SearchService, SearchResult } from '../../../core/services/search.servi
             <input
               #searchInput
               type="text"
-              class="flex-1 bg-transparent border-none outline-none text-base-content text-lg font-bold placeholder:text-base-content/20"
+              class="flex-1 bg-transparent border-none outline-none text-base-content text-lg font-bold placeholder:text-base-content/45"
               placeholder="Search documentation, blog, demos..."
               [ngModel]="search.query()"
               (ngModelChange)="search.query.set($event)"
@@ -59,7 +62,14 @@ import { SearchService, SearchResult } from '../../../core/services/search.servi
               (keydown.enter)="selectActiveResult()"
               (keydown.arrowDown)="navigateResults(1)"
               (keydown.arrowUp)="navigateResults(-1)"
-              id="search-label"
+              aria-label="Search documentation, blog, and demos"
+              role="combobox"
+              [attr.aria-expanded]="search.results().length > 0 ? 'true' : 'false'"
+              aria-autocomplete="list"
+              aria-controls="search-results-list"
+              [attr.aria-activedescendant]="
+                search.results().length > 0 ? 'result-' + activeIndex() : null
+              "
             />
             <div
               class="flex items-center gap-2 px-2 py-1 rounded bg-base-content/5 border border-base-content/10 text-[10px] font-black uppercase text-base-content/30 tracking-widest"
@@ -73,7 +83,12 @@ import { SearchService, SearchResult } from '../../../core/services/search.servi
           }
 
           <!-- Results List -->
-          <div class="max-h-[450px] overflow-y-auto no-scrollbar py-2">
+          <div
+            id="search-results-list"
+            role="listbox"
+            aria-label="Search results"
+            class="max-h-[450px] overflow-y-auto no-scrollbar py-2"
+          >
             @if (search.results().length > 0) {
               <div
                 class="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-base-content/20"
@@ -83,9 +98,13 @@ import { SearchService, SearchResult } from '../../../core/services/search.servi
               @for (res of search.results(); track res.url; let i = $index) {
                 <a
                   [routerLink]="res.url"
-                  class="flex items-start gap-4 px-4 py-4 mx-2 rounded-xl transition-all duration-200 no-underline hover:bg-primary/10 group relative border border-transparent hover:border-primary/20"
+                  class="flex items-start gap-4 px-4 py-4 mx-2 rounded-xl transition-all duration-200 no-underline hover:bg-primary/10 group relative border border-transparent hover:border-primary/20 focus:outline-none focus:bg-primary/10 focus:border-primary/20"
                   (click)="close()"
-                  [class.bg-base-content/5]="i === activeIndex()"
+                  [class.bg-base-content/10]="i === activeIndex()"
+                  [class.border-base-content/10]="i === activeIndex()"
+                  role="option"
+                  [id]="'result-' + i"
+                  [attr.aria-selected]="i === activeIndex() ? 'true' : 'false'"
                 >
                   <div
                     class="p-3 bg-base-content/5 rounded-xl border border-base-content/10 group-hover:border-primary/30 transition-colors shadow-inner shrink-0"
@@ -215,6 +234,7 @@ export class SearchModalComponent {
   private readonly router = inject(Router);
 
   private inputEl = viewChild<ElementRef<HTMLInputElement>>('searchInput');
+  private modalContainer = viewChild<ElementRef<HTMLDivElement>>('modalContainer');
   activeIndex = signal(0);
 
   constructor() {
@@ -234,15 +254,35 @@ export class SearchModalComponent {
   }
 
   onWindowKeydown(e: KeyboardEvent) {
+    if (!this.search.isOpen()) return;
+
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
       this.search.toggle();
     }
-    if (e.key === '/' && !this.search.isOpen()) {
-      const target = e.target as HTMLElement;
-      if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-        e.preventDefault();
-        this.search.open();
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      this.close();
+    }
+    if (e.key === 'Tab') {
+      const container = this.modalContainer()?.nativeElement;
+      if (container) {
+        const focusable = container.querySelectorAll('input, a, button');
+        if (focusable.length > 0) {
+          const first = focusable[0] as HTMLElement;
+          const last = focusable[focusable.length - 1] as HTMLElement;
+          if (e.shiftKey) {
+            if (document.activeElement === first) {
+              last.focus();
+              e.preventDefault();
+            }
+          } else {
+            if (document.activeElement === last) {
+              first.focus();
+              e.preventDefault();
+            }
+          }
+        }
       }
     }
   }
