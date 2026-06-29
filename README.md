@@ -184,6 +184,71 @@ pnpm add @angular-helpers/openlayers ol
 
 ---
 
+### 📐 `@angular-helpers/storage`
+
+_Premium, high-performance, and secure reactive storage system with L1/L2 caching, schema drift validation, and encryption_
+
+🌐 **Documentation**: https://gaspar1992.github.io/angular-helpers/docs/storage
+
+**🎯 What it solves:**
+
+- **Local state synchronization** between synchronous UI signals and asynchronous storage backends.
+- **Data corruption/schema drift** on client databases across application updates.
+- **Storage size limitations** and **unencrypted local data** at rest.
+
+**✨ Key features:**
+
+- ⚡ **L1 + L2 Cache** — Synchronous Signal state backed by asynchronous IndexedDB, Cache API, or WebStorage.
+- 🛡️ **Schema Drift Validation** — Native validation guards with automatic database self-repair.
+- 📦 **TOON Compression** — Reduces JSON payloads by 30-60%, bypassing standard 5MB browser limits.
+- 🔐 **AES-GCM Encryption** — Native WebCrypto asynchronous encryption for secure data at rest.
+- 🗃️ **Entity Store** — Surgical key-level reactive state management with frozen runtime immutability.
+
+**💡 Example usage:**
+
+```typescript
+const userPref = injectStorageSignal('user-pref', 'light-mode', {
+  storageType: 'local',
+  validator: (data): data is 'light-mode' | 'dark-mode' =>
+    data === 'light-mode' || data === 'dark-mode',
+});
+```
+
+**📥 Installation:**
+
+```bash
+pnpm add @angular-helpers/storage
+```
+
+---
+
+### 🧪 `@angular-helpers/testing`
+
+_Lightweight, high-performance testing utilities and mocks for modern Angular applications_
+
+🌐 **Documentation**: https://gaspar1992.github.io/angular-helpers/docs/testing
+
+**🎯 What it solves:**
+
+- **Verbose TestBed boilerplate** when writing unit/integration tests.
+- **Complex mock setups** for components, pipes, services, and routers.
+- **Asynchronous effect evaluation** in testing environments.
+
+**✨ Key features:**
+
+- 🎭 **`render()`** — Intuitive wrapper for rendering standalone components, binding inputs/outputs, and testing `<ng-content>`.
+- 🧩 **Mocking Utilities** — Quick spies and mocks via `provideMockService()`, `MockComponent()`, and `MockPipe()`.
+- 🗺️ **Routing Mocks** — Seamless routing simulations with `provideMockRouter()` and `provideMockActivatedRoute()`.
+- ⚡ **Signal Testing** — `flushEffects()` to manually trigger and evaluate `effect()` queues synchronously.
+
+**📥 Installation:**
+
+```bash
+pnpm add @angular-helpers/testing -D
+```
+
+---
+
 ## 🎯 Why Angular Helpers?
 
 ### ⚡ Immediate Productivity
@@ -231,10 +296,13 @@ pnpm run start:https
 
 ```bash
 # Install the packages you need
+pnpm add @angular-helpers/core
 pnpm add @angular-helpers/security
 pnpm add @angular-helpers/browser-web-apis
+pnpm add @angular-helpers/storage
 pnpm add @angular-helpers/worker-http
 pnpm add @angular-helpers/openlayers ol
+pnpm add @angular-helpers/testing -D
 ```
 
 For modern Angular standalone integration, check each package's own README.
@@ -291,10 +359,13 @@ pnpm run lint
 ```
 angular-helpers/
 ├── packages/
+│   ├── core/              # 📦 @angular-helpers/core
 │   ├── security/          # 📦 @angular-helpers/security
 │   ├── browser-web-apis/  # 📦 @angular-helpers/browser-web-apis
+│   ├── storage/           # 📦 @angular-helpers/storage
 │   ├── worker-http/       # 📦 @angular-helpers/worker-http
-│   └── openlayers/        # 📦 @angular-helpers/openlayers
+│   ├── openlayers/        # 📦 @angular-helpers/openlayers
+│   └── testing/           # 📦 @angular-helpers/testing
 ├── src/                   # 🚀 Demo application
 ├── public/content/blog/   # ✍️ Blog articles
 ├── docs/                  # 📚 Documentation
@@ -308,11 +379,9 @@ angular-helpers/
 ### Planned 🚧
 
 - **@angular-helpers/pwa** — Service Worker and PWA capabilities.
-- **@angular-helpers/storage** — Unified storage helpers.
 
 ### In Progress 🔄
 
-- **@angular-helpers/openlayers** — heatmap layers, clustering, and draw interactions.
 - Runtime and bundle-size improvements across all packages.
 - More real-world examples and demos.
 
