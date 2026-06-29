@@ -6,22 +6,46 @@ import { serializeData, deserializeData } from '../../utils/serialization.utils'
 export class IndexedDBTransport implements StorageTransport {
   constructor(private readonly secretPassphrase?: string) {}
 
+  private dbCache = new Map<string, Promise<IDBDatabase>>();
+
   private async openDB(dbName: string, storeName: string): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
-      if (typeof indexedDB === 'undefined') {
-        reject(new Error('IndexedDB is not supported in this environment'));
-        return;
-      }
-      const request = indexedDB.open(dbName, 1);
-      request.onupgradeneeded = () => {
-        const db = request.result;
-        if (!db.objectStoreNames.contains(storeName)) {
-          db.createObjectStore(storeName);
+    let cached = this.dbCache.get(dbName);
+    if (!cached) {
+      cached = new Promise<IDBDatabase>((resolve, reject) => {
+        if (typeof indexedDB === 'undefined') {
+          reject(new Error('IndexedDB is not supported in this environment'));
+          return;
         }
-      };
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
+        const request = indexedDB.open(dbName, 1);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains(storeName)) {
+            db.createObjectStore(storeName);
+          }
+        };
+        request.onsuccess = () => {
+          const db = request.result;
+          db.onversionchange = () => {
+            db.close();
+            this.dbCache.delete(dbName);
+          };
+          db.onclose = () => {
+            this.dbCache.delete(dbName);
+          };
+          db.onerror = () => {
+            db.close();
+            this.dbCache.delete(dbName);
+          };
+          resolve(db);
+        };
+        request.onerror = () => {
+          this.dbCache.delete(dbName);
+          reject(request.error);
+        };
+      });
+      this.dbCache.set(dbName, cached);
+    }
+    return cached;
   }
 
   async read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined> {
