@@ -8,9 +8,10 @@ import {
   ElementRef,
   inject,
   input,
-  output,
   viewChild,
 } from '@angular/core';
+import { outputFromObservable } from '@angular/core/rxjs-interop';
+import { Subject } from 'rxjs';
 import OLMap from 'ol/Map';
 import View from 'ol/View';
 import { transform } from 'ol/proj';
@@ -53,9 +54,14 @@ export class OlMapComponent {
   projection = input<string>('EPSG:3857');
   coordinateProjection = input<string>('EPSG:4326'); // Dynamic input for coordinate systems
 
-  viewChange = output<ViewState>();
-  mapClick = output<MapClickEvent>();
-  mapDblClick = output<MapClickEvent>();
+  private readonly viewChange$ = new Subject<ViewState>();
+  readonly viewChange = outputFromObservable(this.viewChange$);
+
+  private readonly mapClick$ = new Subject<MapClickEvent>();
+  readonly mapClick = outputFromObservable(this.mapClick$);
+
+  private readonly mapDblClick$ = new Subject<MapClickEvent>();
+  readonly mapDblClick = outputFromObservable(this.mapDblClick$);
 
   mapContainerRef = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
   private map?: OLMap;
@@ -121,21 +127,21 @@ export class OlMapComponent {
       }
 
       view.on('change:center', () => {
-        if ((this.viewChange as any).observed) {
+        if (this.viewChange$.observed) {
           this.zoneHelper.runInsideAngular(() => this.emitViewChange());
         }
       });
       view.on('change:resolution', () => {
         this.mapService.setResolution(view.getResolution() ?? 1);
-        if ((this.viewChange as any).observed) {
+        if (this.viewChange$.observed) {
           this.zoneHelper.runInsideAngular(() => this.emitViewChange());
         }
       });
 
       this.map.on('click', (e) => {
-        if ((this.mapClick as any).observed) {
+        if (this.mapClick$.observed) {
           this.zoneHelper.runInsideAngular(() =>
-            this.mapClick.emit({
+            this.mapClick$.next({
               coordinate: this.getExternalCoordinate(e.coordinate) as Coordinate,
               pixel: e.pixel as Pixel,
             }),
@@ -143,9 +149,9 @@ export class OlMapComponent {
         }
       });
       this.map.on('dblclick', (e) => {
-        if ((this.mapDblClick as any).observed) {
+        if (this.mapDblClick$.observed) {
           this.zoneHelper.runInsideAngular(() =>
-            this.mapDblClick.emit({
+            this.mapDblClick$.next({
               coordinate: this.getExternalCoordinate(e.coordinate) as Coordinate,
               pixel: e.pixel as Pixel,
             }),
@@ -211,7 +217,7 @@ export class OlMapComponent {
     if (view) {
       const projectedCenter = view.getCenter() ?? [0, 0];
       const externalCenter = this.getExternalCoordinate(projectedCenter) as Coordinate;
-      this.viewChange.emit({
+      this.viewChange$.next({
         center: externalCenter,
         zoom: view.getZoom() ?? 0,
         rotation: view.getRotation() ?? 0,
