@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
 const FIXTURES_DIR = path.resolve(__dirname, 'fixtures/post-build-test');
 
@@ -59,7 +59,7 @@ describe('post-build.js utility script', () => {
     const initialPlainMtime = fs.statSync(plainJsFile).mtimeMs;
 
     // Run post-build.js
-    execSync(`node ${scriptPath} "${FIXTURES_DIR}"`, { stdio: 'pipe' });
+    execFileSync('node', [scriptPath, FIXTURES_DIR], { stdio: 'pipe' });
 
     // .map files should be deleted
     expect(fs.existsSync(jsMapFile)).toBe(false);
@@ -90,7 +90,7 @@ describe('post-build.js utility script', () => {
   it('should fail with exit code 1 if no target directory is passed', () => {
     const scriptPath = path.resolve(__dirname, '../scripts/post-build.js');
     expect(() => {
-      execSync(`node ${scriptPath}`, { stdio: 'pipe' });
+      execFileSync('node', [scriptPath], { stdio: 'pipe' });
     }).toThrow();
   });
 });

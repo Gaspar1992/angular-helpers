@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
 const FIXTURES_DIR = path.resolve(__dirname, 'fixtures/sync-test');
 
@@ -31,7 +31,7 @@ describe('sync-versions.js utility script', () => {
     const sourceFile = path.join(FIXTURES_DIR, 'src/public-api.ts');
 
     // Run sync-versions.js
-    execSync(`node ${scriptPath} "${FIXTURES_DIR}" "src/public-api.ts"`, { stdio: 'pipe' });
+    execFileSync('node', [scriptPath, FIXTURES_DIR, 'src/public-api.ts'], { stdio: 'pipe' });
 
     // Assert version is updated
     const sourceContent = fs.readFileSync(sourceFile, 'utf8');
@@ -47,7 +47,7 @@ describe('sync-versions.js utility script', () => {
     // Rewrite with double quotes
     fs.writeFileSync(sourceFile, 'export const version = "1.0.0";\n');
 
-    execSync(`node ${scriptPath} "${FIXTURES_DIR}" "src/public-api.ts"`, { stdio: 'pipe' });
+    execFileSync('node', [scriptPath, FIXTURES_DIR, 'src/public-api.ts'], { stdio: 'pipe' });
 
     const sourceContent = fs.readFileSync(sourceFile, 'utf8');
     expect(sourceContent).toContain('export const version = "2.3.4";');
@@ -65,7 +65,7 @@ describe('sync-versions.js utility script', () => {
     // Small delay to ensure timestamp resolution difference if overwritten
     await new Promise((resolve) => setTimeout(resolve, 10));
 
-    execSync(`node ${scriptPath} "${FIXTURES_DIR}" "src/public-api.ts"`, { stdio: 'pipe' });
+    execFileSync('node', [scriptPath, FIXTURES_DIR, 'src/public-api.ts'], { stdio: 'pipe' });
 
     const finalMtime = fs.statSync(sourceFile).mtimeMs;
     expect(finalMtime).toBe(initialMtime);
@@ -74,7 +74,7 @@ describe('sync-versions.js utility script', () => {
   it('should fail with exit code 1 if arguments are missing', () => {
     const scriptPath = path.resolve(__dirname, '../scripts/sync-versions.js');
     expect(() => {
-      execSync(`node ${scriptPath}`, { stdio: 'pipe' });
+      execFileSync('node', [scriptPath], { stdio: 'pipe' });
     }).toThrow();
   });
 });

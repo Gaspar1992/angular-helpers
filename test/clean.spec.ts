@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
 const FIXTURES_DIR = path.resolve(__dirname, 'fixtures/clean-test');
 
@@ -37,7 +37,7 @@ describe('clean.js utility script', () => {
     expect(fs.existsSync(target2)).toBe(true);
 
     // Run clean.js with arguments
-    execSync(`node ${scriptPath} "${target1}" "${target2}"`, { stdio: 'pipe' });
+    execFileSync('node', [scriptPath, target1, target2], { stdio: 'pipe' });
 
     // These should be deleted
     expect(fs.existsSync(target1)).toBe(false);
@@ -57,7 +57,7 @@ describe('clean.js utility script', () => {
     expect(fs.existsSync(keepMe)).toBe(true);
 
     // Run clean.js with no arguments, setting cwd to FIXTURES_DIR
-    execSync(`node ${scriptPath}`, { cwd: FIXTURES_DIR, stdio: 'pipe' });
+    execFileSync('node', [scriptPath], { cwd: FIXTURES_DIR, stdio: 'pipe' });
 
     // Default folders should be deleted
     expect(fs.existsSync(rootDist)).toBe(false);
@@ -75,7 +75,7 @@ describe('clean.js utility script', () => {
 
     // Running with non-existent dir as argument should not fail
     expect(() => {
-      execSync(`node ${scriptPath} "${nonExistent}"`, { stdio: 'pipe' });
+      execFileSync('node', [scriptPath, nonExistent], { stdio: 'pipe' });
     }).not.toThrow();
   });
 });
