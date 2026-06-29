@@ -120,30 +120,38 @@ export class OlMapComponent {
         this.resizeObserver.observe(container);
       }
 
-      view.on('change:center', () => this.zoneHelper.runInsideAngular(() => this.emitViewChange()));
+      view.on('change:center', () => {
+        if (this.viewChange.observed) {
+          this.zoneHelper.runInsideAngular(() => this.emitViewChange());
+        }
+      });
       view.on('change:resolution', () => {
-        this.zoneHelper.runInsideAngular(() => {
-          this.mapService.setResolution(view.getResolution() ?? 1);
-          this.emitViewChange();
-        });
+        this.mapService.setResolution(view.getResolution() ?? 1);
+        if (this.viewChange.observed) {
+          this.zoneHelper.runInsideAngular(() => this.emitViewChange());
+        }
       });
 
-      this.map.on('click', (e) =>
-        this.zoneHelper.runInsideAngular(() =>
-          this.mapClick.emit({
-            coordinate: this.getExternalCoordinate(e.coordinate) as Coordinate,
-            pixel: e.pixel as Pixel,
-          }),
-        ),
-      );
-      this.map.on('dblclick', (e) =>
-        this.zoneHelper.runInsideAngular(() =>
-          this.mapDblClick.emit({
-            coordinate: this.getExternalCoordinate(e.coordinate) as Coordinate,
-            pixel: e.pixel as Pixel,
-          }),
-        ),
-      );
+      this.map.on('click', (e) => {
+        if (this.mapClick.observed) {
+          this.zoneHelper.runInsideAngular(() =>
+            this.mapClick.emit({
+              coordinate: this.getExternalCoordinate(e.coordinate) as Coordinate,
+              pixel: e.pixel as Pixel,
+            }),
+          );
+        }
+      });
+      this.map.on('dblclick', (e) => {
+        if (this.mapDblClick.observed) {
+          this.zoneHelper.runInsideAngular(() =>
+            this.mapDblClick.emit({
+              coordinate: this.getExternalCoordinate(e.coordinate) as Coordinate,
+              pixel: e.pixel as Pixel,
+            }),
+          );
+        }
+      });
     });
     this.emitViewChange();
   }
