@@ -94,18 +94,22 @@ export class OlTooltipDirective {
     const propKey = this.olTooltip();
 
     let matched: OLFeature | null = null;
-    map.forEachFeatureAtPixel(
-      event.pixel,
-      (feature) => {
-        matched = feature as OLFeature;
-        return true;
-      },
-      {
-        layerFilter: layerId
-          ? (layer: BaseLayer) => layer.get('id') === layerId || !!layer.get('is-spider-layer')
-          : undefined,
-      },
-    );
+    try {
+      map.forEachFeatureAtPixel(
+        event.pixel,
+        (feature) => {
+          matched = feature as OLFeature;
+          return true;
+        },
+        {
+          layerFilter: layerId
+            ? (layer: BaseLayer) => layer.get('id') === layerId || !!layer.get('is-spider-layer')
+            : undefined,
+        },
+      );
+    } catch (error) {
+      // Suppress errors from layers with disabled hit detection (e.g., WebGL layers)
+    }
 
     if (!matched) {
       tooltip.style.display = 'none';

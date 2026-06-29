@@ -1382,10 +1382,14 @@ export class OpenLayersDemoComponent {
     const map = this.mapService.getMap();
     if (map) {
       let hit = false;
-      map.forEachFeatureAtPixel(event.pixel, () => {
-        hit = true;
-        return true;
-      });
+      try {
+        map.forEachFeatureAtPixel(event.pixel, () => {
+          hit = true;
+          return true;
+        });
+      } catch (error) {
+        // Suppress errors from layers with disabled hit detection (e.g., WebGL layers)
+      }
       if (!hit) {
         this.interactionService.clearSelection();
       }

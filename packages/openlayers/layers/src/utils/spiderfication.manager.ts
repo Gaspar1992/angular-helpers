@@ -35,45 +35,49 @@ export class SpiderficationManager {
       let handled = false;
       let keepSpiderOpen = false;
 
-      map.forEachFeatureAtPixel(e.pixel, (f, l) => {
-        if (handled) return;
+      try {
+        map.forEachFeatureAtPixel(e.pixel, (f, l) => {
+          if (handled) return;
 
-        // Check if we clicked a spider item
-        if (l === this.spiderLayer) {
-          const originalOlFeature = f.get('spider-feature') as OLFeature;
-          if (originalOlFeature) {
-            const layerId = f.get('cluster-layer-id');
-            const layerObj = this.layerCache.get(layerId);
-            if (layerObj) {
-              const clusterCfg = layerObj.get('cluster-config') as ClusterConfig;
-              if (clusterCfg?.onSpiderfyClick) {
-                // Use olFeatureToFeature so coordinates are properly extracted!
-                const feat = olFeatureToFeature(originalOlFeature);
-                clusterCfg.onSpiderfyClick(feat);
+          // Check if we clicked a spider item
+          if (l === this.spiderLayer) {
+            const originalOlFeature = f.get('spider-feature') as OLFeature;
+            if (originalOlFeature) {
+              const layerId = f.get('cluster-layer-id');
+              const layerObj = this.layerCache.get(layerId);
+              if (layerObj) {
+                const clusterCfg = layerObj.get('cluster-config') as ClusterConfig;
+                if (clusterCfg?.onSpiderfyClick) {
+                  // Use olFeatureToFeature so coordinates are properly extracted!
+                  const feat = olFeatureToFeature(originalOlFeature);
+                  clusterCfg.onSpiderfyClick(feat);
+                }
               }
             }
-          }
-          handled = true;
-          keepSpiderOpen = true; // Keep spider open when clicking a leg
-          return;
-        }
-
-        // Check if we clicked a cluster
-        if (!l) return;
-        const features = f.get('features');
-        if (features && features.length > 1) {
-          const clusterCfg = l.get('cluster-config') as ClusterConfig;
-          if (clusterCfg?.spiderfyOnSelect) {
-            keepSpiderOpen = true;
             handled = true;
-
-            // Execute layer manipulations outside the synchronous event loop
-            setTimeout(() => {
-              this.spiderfy(map, f as OLFeature, features, l as VectorLayer<any>, clusterCfg);
-            });
+            keepSpiderOpen = true; // Keep spider open when clicking a leg
+            return;
           }
-        }
-      });
+
+          // Check if we clicked a cluster
+          if (!l) return;
+          const features = f.get('features');
+          if (features && features.length > 1) {
+            const clusterCfg = l.get('cluster-config') as ClusterConfig;
+            if (clusterCfg?.spiderfyOnSelect) {
+              keepSpiderOpen = true;
+              handled = true;
+
+              // Execute layer manipulations outside the synchronous event loop
+              setTimeout(() => {
+                this.spiderfy(map, f as OLFeature, features, l as VectorLayer<any>, clusterCfg);
+              });
+            }
+          }
+        });
+      } catch (error) {
+        // Suppress errors from layers with disabled hit detection (e.g., WebGL layers)
+      }
 
       // Cleanup existing spider layer if we clicked anything else
       if (!keepSpiderOpen) {
