@@ -79,13 +79,13 @@ export class WebStorageTransport implements StorageTransport {
     const globalWindow = this.platform.window;
     const listener = (event: StorageEvent) => {
       if (event.key === key && event.newValue !== null) {
-        try {
-          // Note: cross-tab sync usually doesn't know if toon was used for the remote update
-          // without additional metadata. For now we assume default JSON or toon if configured.
-          deserializeData<T>(event.newValue).then((val) => callback(val));
-        } catch {
-          // Ignore failed parsing
-        }
+        // Note: cross-tab sync usually doesn't know if toon was used for the remote update
+        // without additional metadata. For now we assume default JSON or toon if configured.
+        deserializeData<T>(event.newValue)
+          .then((val) => callback(val))
+          .catch(() => {
+            // Ignore failed parsing
+          });
       }
     };
 
