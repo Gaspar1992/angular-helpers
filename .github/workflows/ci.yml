@@ -40,6 +40,9 @@ jobs:
       - name: Run linter
         run: pnpm run lint
 
+      - name: Build schematics
+        run: pnpm run build:schematics
+
       - name: Run unit tests
         run: pnpm test
 
