@@ -304,7 +304,7 @@ export class BenchmarkRunnerService implements OnDestroy {
       ).workerTiming;
 
       if (workerTiming) {
-        const sendTime = timing.stages.get('transfer-out')?.start ?? timing.startTime;
+        const sendTime = tracker.stages.get('transfer-out')?.start ?? tracker.startTime;
 
         // Precise transfer-out: from start of send until worker received it
         tracker.stages.set('transfer-out', {
@@ -470,8 +470,9 @@ function createGranularTracker(requestId: string, payloadSize: number) {
         existing.end = performance.now();
       }
     },
-    // Expose stages map for injecting worker-reported timings
+    // Expose stages map and startTime for injecting worker-reported timings
     stages: timing.stages,
+    startTime: timing.startTime,
     getRequestMetrics: (): RequestMetrics => {
       const stages: StageMetrics[] = [];
       let totalDuration = 0;
