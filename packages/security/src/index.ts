@@ -16,3 +16,4 @@ export * from './services/regex-analyzer.service';
 export * from './services/regex-worker-pool.service';
 export * from './services/csp.service';
 export * from './directives/safe-html.directive';
+export * from './services/web-authn.service';

@@ -25,6 +25,7 @@ import {
 import { CsrfService, CsrfConfig, CSRF_CONFIG } from './services/csrf.service';
 import { SessionIdleService } from './services/session-idle.service';
 import { SecureMessageService } from './services/secure-message.service';
+import { WebAuthnService } from './services/web-authn.service';
 
 export interface SecurityConfig {
   enableRegexSecurity?: boolean;
@@ -39,6 +40,7 @@ export interface SecurityConfig {
   enableCsrf?: boolean;
   enableSessionIdle?: boolean;
   enableSecureMessage?: boolean;
+  enableWebAuthn?: boolean;
   defaultTimeout?: number;
   safeMode?: boolean;
 }
@@ -56,6 +58,7 @@ export const defaultSecurityConfig: SecurityConfig = {
   enableCsrf: false,
   enableSessionIdle: false,
   enableSecureMessage: false,
+  enableWebAuthn: false,
   defaultTimeout: 5000,
   safeMode: false,
 };
@@ -81,6 +84,7 @@ export function provideSecurity(config: SecurityConfig = {}): EnvironmentProvide
   }
   if (mergedConfig.enableSessionIdle) providers.push(SessionIdleService);
   if (mergedConfig.enableSecureMessage) providers.push(SecureMessageService);
+  if (mergedConfig.enableWebAuthn) providers.push(WebAuthnService);
 
   return makeEnvironmentProviders(providers);
 }
@@ -152,4 +156,8 @@ export function provideSessionIdle(): EnvironmentProviders {
 
 export function provideSecureMessage(): EnvironmentProviders {
   return makeEnvironmentProviders([WebCryptoService, SecureMessageService]);
+}
+
+export function provideWebAuthn(): EnvironmentProviders {
+  return makeEnvironmentProviders([WebAuthnService]);
 }

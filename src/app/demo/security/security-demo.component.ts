@@ -7,6 +7,11 @@ import {
   SecureStorageService,
   InputSanitizerService,
   PasswordStrengthService,
+  RateLimiterService,
+  WebAuthnService,
+  SafeHtmlDirective,
+  PublicKeyCredentialCreationOptionsJSON,
+  PublicKeyCredentialRequestOptionsJSON,
 } from '@angular-helpers/security';
 
 interface LogEntry {
@@ -19,7 +24,7 @@ interface LogEntry {
 
 @Component({
   selector: 'app-security-demo',
-  imports: [DecimalPipe, FormsModule],
+  imports: [DecimalPipe, FormsModule, SafeHtmlDirective],
   styleUrls: ['../services/demo.styles.css'],
   template: `
     <div class="max-width-container py-12 sm:py-20 animate-in fade-in duration-700">
@@ -46,6 +51,8 @@ interface LogEntry {
           <span class="badge badge-accent font-black">Secure Storage</span>
           <span class="badge badge-info font-black">Input Sanitizer</span>
           <span class="badge badge-success font-black">Password Strength</span>
+          <span class="badge badge-warning font-black">Rate Limiter</span>
+          <span class="badge badge-success font-black">WebAuthn</span>
         </div>
       </header>
 
@@ -300,6 +307,11 @@ interface LogEntry {
                 }
               </div>
             }
+
+            <div class="mt-4 p-4 bg-base-content/5 rounded-2xl border border-base-content/5">
+              <span class="kv-key block mb-2">Live Sanitized Render</span>
+              <div [safeHtml]="htmlInput()"></div>
+            </div>
           </div>
         </section>
 
@@ -386,6 +398,124 @@ interface LogEntry {
             }
           </div>
         </section>
+
+        <!-- Rate Limiter -->
+        <section class="svc-card">
+          <div class="svc-card-head">
+            <h2 class="svc-card-title">
+              <span class="text-warning text-3xl">⏳</span> RateLimiter
+            </h2>
+            <span class="badge badge-outline border-warning/30 text-warning font-bold"
+              >Token Bucket</span
+            >
+          </div>
+          <p class="svc-desc">
+            Client-side rate limiting with persistent local storage. Refills smoothly over time and
+            prevents spamming.
+          </p>
+
+          <div class="space-y-6">
+            <div
+              class="flex items-center justify-between p-6 bg-base-content/5 rounded-2xl border border-base-content/5"
+            >
+              <div>
+                <span class="block text-xs opacity-55 font-bold uppercase tracking-wider"
+                  >Remaining Tokens</span
+                >
+                <span class="text-3xl font-black text-warning">{{ remainingTokens() }}</span>
+                <span class="text-sm opacity-40 font-medium"> / 10</span>
+              </div>
+              <div class="text-right">
+                <span class="block text-xs opacity-55 font-bold uppercase tracking-wider"
+                  >Storage</span
+                >
+                <span class="badge badge-secondary font-black">localStorage</span>
+              </div>
+            </div>
+
+            <button (click)="consumeToken()" class="btn btn-primary w-full">Consume 1 Token</button>
+
+            <p class="text-xs text-base-content/40 text-center font-bold">
+              ℹ️ Try mashing the button, then refresh the page! The token count persists.
+            </p>
+          </div>
+        </section>
+
+        <!-- WebAuthn -->
+        <section class="svc-card">
+          <div class="svc-card-head">
+            <h2 class="svc-card-title">
+              <span class="text-success text-3xl">🔑</span> WebAuthn (Passkeys)
+            </h2>
+            <span class="badge badge-outline border-success/30 text-success font-bold"
+              >WebAuthn API</span
+            >
+          </div>
+          <p class="svc-desc">
+            Passwordless authentication via security keys or built-in platform authenticators
+            (TouchID, Windows Hello).
+          </p>
+
+          <div class="space-y-6">
+            <div class="grid grid-cols-2 gap-4">
+              <div
+                class="p-4 bg-base-content/5 rounded-2xl border border-base-content/5 text-center"
+              >
+                <span class="block text-xs opacity-55 font-bold uppercase tracking-wider"
+                  >Supported</span
+                >
+                <span
+                  class="text-lg font-black"
+                  [class.text-success]="webAuthnSupported()"
+                  [class.text-error]="!webAuthnSupported()"
+                >
+                  {{ webAuthnSupported() ? 'YES' : 'NO' }}
+                </span>
+              </div>
+              <div
+                class="p-4 bg-base-content/5 rounded-2xl border border-base-content/5 text-center"
+              >
+                <span class="block text-xs opacity-55 font-bold uppercase tracking-wider"
+                  >Platform Auth</span
+                >
+                <span
+                  class="text-lg font-black"
+                  [class.text-success]="webAuthnPlatformAvailable()"
+                  [class.text-error]="!webAuthnPlatformAvailable()"
+                >
+                  {{ webAuthnPlatformAvailable() ? 'AVAILABLE' : 'UNAVAILABLE' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <button
+                (click)="triggerWebAuthnRegister()"
+                [disabled]="!webAuthnSupported()"
+                class="btn btn-primary flex-1"
+              >
+                Register Passkey
+              </button>
+              <button
+                (click)="triggerWebAuthnAuthenticate()"
+                [disabled]="!webAuthnSupported()"
+                class="btn btn-secondary flex-1"
+              >
+                Authenticate
+              </button>
+            </div>
+
+            @if (webAuthnResult()) {
+              <div class="svc-result animate-in slide-in-from-bottom-2 duration-300">
+                <span class="kv-key block mb-2">WebAuthn Result</span>
+                <pre
+                  class="text-xs font-mono text-success overflow-x-auto max-h-48 p-4 bg-base-content/5 rounded-2xl border border-base-content/5 whitespace-pre-wrap break-all"
+                  >{{ webAuthnResult() }}</pre
+                >
+              </div>
+            }
+          </div>
+        </section>
       </div>
 
       <!-- Activity Log -->
@@ -443,6 +573,32 @@ export class SecurityDemoComponent {
   private storageService = inject(SecureStorageService);
   private sanitizerService = inject(InputSanitizerService);
   private passwordService = inject(PasswordStrengthService);
+  private rateLimiterService = inject(RateLimiterService);
+  private webAuthnService = inject(WebAuthnService);
+
+  // Rate Limiter
+  remainingTokens = this.rateLimiterService.remaining('demo-limit');
+
+  // WebAuthn
+  webAuthnSupported = signal(false);
+  webAuthnPlatformAvailable = signal(false);
+  webAuthnResult = signal<string | null>(null);
+
+  constructor() {
+    this.rateLimiterService.configure('demo-limit', {
+      type: 'token-bucket',
+      capacity: 10,
+      refillPerSecond: 0.5,
+      storage: 'local',
+    });
+
+    this.webAuthnSupported.set(this.webAuthnService.isSupported());
+    if (this.webAuthnSupported()) {
+      this.webAuthnService.isPlatformAuthenticatorAvailable().then((avail) => {
+        this.webAuthnPlatformAvailable.set(avail);
+      });
+    }
+  }
 
   // Regex Signals
   regexPattern = signal('^([a-z0-9_\\.-]+)@([\\da-z\\.-]+)\\.([a-z\\.]{2,6})$');
@@ -643,5 +799,79 @@ export class SecurityDemoComponent {
 
   clearLogs(): void {
     this.logs.set([]);
+  }
+
+  // Rate Limiter Methods
+  async consumeToken(): Promise<void> {
+    try {
+      await this.rateLimiterService.consume('demo-limit');
+      this.log('Rate Limiter', 'Token consumed successfully.', 'success');
+    } catch (error: any) {
+      this.log('Rate Limiter', error.message || 'Rate limit exceeded!', 'error');
+    }
+  }
+
+  // WebAuthn Methods
+  async triggerWebAuthnRegister(): Promise<void> {
+    try {
+      this.log('WebAuthn', 'Starting registration flow...');
+      const challenge = this.webAuthnService.bufferToBase64url(
+        crypto.getRandomValues(new Uint8Array(16)),
+      );
+      const userId = this.webAuthnService.bufferToBase64url(
+        crypto.getRandomValues(new Uint8Array(16)),
+      );
+
+      const options: PublicKeyCredentialCreationOptionsJSON = {
+        challenge,
+        rp: {
+          name: 'Angular Helpers Demo',
+          id: window.location.hostname,
+        },
+        user: {
+          id: userId,
+          name: 'demo-user@example.com',
+          displayName: 'Demo User',
+        },
+        pubKeyCredParams: [
+          { type: 'public-key', alg: -7 },
+          { type: 'public-key', alg: -257 },
+        ],
+        authenticatorSelection: {
+          authenticatorAttachment: 'platform',
+          userVerification: 'required',
+          residentKey: 'required',
+        },
+      };
+
+      const credential = await this.webAuthnService.register(options);
+      this.webAuthnResult.set(JSON.stringify(credential, null, 2));
+      this.log('WebAuthn', 'Registration successful!', 'success');
+    } catch (error: any) {
+      this.webAuthnResult.set(`Error: ${error.message}`);
+      this.log('WebAuthn', `Registration failed: ${error.message}`, 'error');
+    }
+  }
+
+  async triggerWebAuthnAuthenticate(): Promise<void> {
+    try {
+      this.log('WebAuthn', 'Starting authentication flow...');
+      const challenge = this.webAuthnService.bufferToBase64url(
+        crypto.getRandomValues(new Uint8Array(16)),
+      );
+
+      const options: PublicKeyCredentialRequestOptionsJSON = {
+        challenge,
+        rpId: window.location.hostname,
+        userVerification: 'required',
+      };
+
+      const credential = await this.webAuthnService.authenticate(options);
+      this.webAuthnResult.set(JSON.stringify(credential, null, 2));
+      this.log('WebAuthn', 'Authentication successful!', 'success');
+    } catch (error: any) {
+      this.webAuthnResult.set(`Error: ${error.message}`);
+      this.log('WebAuthn', `Authentication failed: ${error.message}`, 'error');
+    }
   }
 }
