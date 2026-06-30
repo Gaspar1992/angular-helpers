@@ -2,6 +2,14 @@ import type { BlogPost } from '../models/blog-post.model';
 
 export const BLOG_POSTS: readonly BlogPost[] = [
   {
+    slug: 'worker-http-performance-boost',
+    title: 'Boosting Angular Web Worker HTTP Performance: Zero-Copy and Smart Routing',
+    publishedAt: '2026-06-30',
+    tags: ['worker-http', 'performance', 'angular', 'web-workers', 'zero-copy', 'transferables'],
+    excerpt:
+      'We introduced two major performance improvements to @angular-helpers/worker-http: opt-in payload-size routing to bypass the worker for small requests, and transparent zero-copy transferables for large payloads (> 100 KB) to eliminate structured clone overhead.',
+  },
+  {
     slug: 'browser-observer-signals-and-core-operators',
     title: "Unlocking Angular's Reactivity: Browser Observer Signals & Core Operators",
     publishedAt: '2026-06-26',
