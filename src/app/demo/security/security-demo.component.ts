@@ -816,10 +816,10 @@ export class SecurityDemoComponent {
     try {
       this.log('WebAuthn', 'Starting registration flow...');
       const challenge = this.webAuthnService.bufferToBase64url(
-        crypto.getRandomValues(new Uint8Array(16)),
+        crypto.getRandomValues(new Uint8Array(16)).buffer,
       );
       const userId = this.webAuthnService.bufferToBase64url(
-        crypto.getRandomValues(new Uint8Array(16)),
+        crypto.getRandomValues(new Uint8Array(16)).buffer,
       );
 
       const options: PublicKeyCredentialCreationOptionsJSON = {
@@ -857,7 +857,7 @@ export class SecurityDemoComponent {
     try {
       this.log('WebAuthn', 'Starting authentication flow...');
       const challenge = this.webAuthnService.bufferToBase64url(
-        crypto.getRandomValues(new Uint8Array(16)),
+        crypto.getRandomValues(new Uint8Array(16)).buffer,
       );
 
       const options: PublicKeyCredentialRequestOptionsJSON = {

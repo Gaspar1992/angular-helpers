@@ -133,7 +133,9 @@ export class WebAuthnService {
     const response = credential.response as AuthenticatorAttestationResponse;
 
     // Optional fields from WebAuthn L3 / browser-specific implementations
-    const transports = response.getTransports ? response.getTransports() : undefined;
+    const transports = response.getTransports
+      ? (response.getTransports() as AuthenticatorTransport[])
+      : undefined;
     const publicKey = (response as any).getPublicKey
       ? this.bufferToBase64url((response as any).getPublicKey())
       : undefined;
@@ -157,7 +159,8 @@ export class WebAuthnService {
         authenticatorData,
       },
       clientExtensionResults: credential.getClientExtensionResults(),
-      authenticatorAttachment: credential.authenticatorAttachment ?? undefined,
+      authenticatorAttachment:
+        (credential.authenticatorAttachment as AuthenticatorAttachment) ?? undefined,
     };
   }
 
@@ -201,7 +204,8 @@ export class WebAuthnService {
         userHandle: response.userHandle ? this.bufferToBase64url(response.userHandle) : undefined,
       },
       clientExtensionResults: credential.getClientExtensionResults(),
-      authenticatorAttachment: credential.authenticatorAttachment ?? undefined,
+      authenticatorAttachment:
+        (credential.authenticatorAttachment as AuthenticatorAttachment) ?? undefined,
     };
   }
 
