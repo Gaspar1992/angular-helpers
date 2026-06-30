@@ -7,10 +7,27 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { SecureStorageService } from './secure-storage.service';
 
 export type RateLimitPolicy =
-  | { type: 'token-bucket'; capacity: number; refillPerSecond: number }
-  | { type: 'sliding-window'; max: number; windowMs: number };
+  | {
+      type: 'token-bucket';
+      capacity: number;
+      refillPerSecond: number;
+      storage?: 'memory' | 'local' | 'session' | 'secure';
+    }
+  | {
+      type: 'sliding-window';
+      max: number;
+      windowMs: number;
+      storage?: 'memory' | 'local' | 'session' | 'secure';
+    };
+
+interface PersistedState {
+  tokens?: number;
+  lastRefillAt?: number;
+  timestamps?: number[];
+}
 
 export interface RateLimiterConfig {
   /**
@@ -73,6 +90,7 @@ interface BucketState {
 @Injectable()
 export class RateLimiterService {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly secureStorage = inject(SecureStorageService, { optional: true });
 
   private readonly buckets = new Map<string, BucketState>();
 
@@ -94,7 +112,7 @@ export class RateLimiterService {
   /**
    * Registers or updates the policy for `key`. Re-configuring an existing key resets its state.
    */
-  configure(key: string, policy: RateLimitPolicy): void {
+  async configure(key: string, policy: RateLimitPolicy): Promise<void> {
     validatePolicy(policy);
 
     const existing = this.buckets.get(key);
@@ -105,13 +123,28 @@ export class RateLimiterService {
     const now = Date.now();
     const initialRemaining = policy.type === 'token-bucket' ? policy.capacity : policy.max;
 
-    this.buckets.set(key, {
+    const bucket: BucketState = {
       policy,
       tokens: policy.type === 'token-bucket' ? policy.capacity : 0,
       lastRefillAt: now,
       timestamps: [],
       remaining: signal(initialRemaining),
-    });
+    };
+
+    this.buckets.set(key, bucket);
+
+    await this.loadPersistedState(key, bucket);
+
+    const loadTime = Date.now();
+    if (bucket.policy.type === 'token-bucket') {
+      this.refillTokenBucket(bucket, loadTime);
+    } else {
+      const windowStart = loadTime - bucket.policy.windowMs;
+      bucket.timestamps = bucket.timestamps.filter((t) => t > windowStart);
+      bucket.remaining.set(bucket.policy.max - bucket.timestamps.length);
+    }
+
+    this.scheduleAutoRefill(key, bucket);
   }
 
   /**
@@ -125,6 +158,8 @@ export class RateLimiterService {
     const bucket = this.buckets.get(key);
     if (!bucket) return;
 
+    await this.loadPersistedState(key, bucket);
+
     const now = Date.now();
 
     if (bucket.policy.type === 'token-bucket') {
@@ -135,12 +170,14 @@ export class RateLimiterService {
       if (bucket.tokens < tokens) {
         const deficit = tokens - bucket.tokens;
         const retryAfterMs = Math.ceil((deficit / bucket.policy.refillPerSecond) * 1000);
+        await this.savePersistedState(key, bucket);
         throw new RateLimitExceededError(key, retryAfterMs);
       }
       bucket.tokens -= tokens;
       bucket.remaining.set(Math.floor(bucket.tokens));
 
       this.scheduleAutoRefill(key, bucket);
+      await this.savePersistedState(key, bucket);
       return;
     }
 
@@ -150,12 +187,14 @@ export class RateLimiterService {
     if (bucket.timestamps.length + tokens > bucket.policy.max) {
       const oldest = bucket.timestamps[0] ?? now;
       const retryAfterMs = Math.max(0, oldest + bucket.policy.windowMs - now);
+      await this.savePersistedState(key, bucket);
       throw new RateLimitExceededError(key, retryAfterMs);
     }
     for (let i = 0; i < tokens; i++) bucket.timestamps.push(now);
     bucket.remaining.set(bucket.policy.max - bucket.timestamps.length);
 
     this.scheduleAutoRefill(key, bucket);
+    await this.savePersistedState(key, bucket);
   }
 
   /**
@@ -181,7 +220,7 @@ export class RateLimiterService {
   /**
    * Resets the counter for `key` to its maximum. No-op for undeclared keys.
    */
-  reset(key: string): void {
+  async reset(key: string): Promise<void> {
     const bucket = this.buckets.get(key);
     if (!bucket) return;
 
@@ -197,6 +236,88 @@ export class RateLimiterService {
       bucket.remaining.set(bucket.policy.capacity);
     } else {
       bucket.remaining.set(bucket.policy.max);
+    }
+
+    const storageType = bucket.policy.storage ?? 'memory';
+    if (storageType !== 'memory') {
+      const storageKey = `rate-limit:${key}`;
+      try {
+        if (storageType === 'secure') {
+          if (this.secureStorage) {
+            await this.secureStorage.remove(storageKey);
+          }
+        } else {
+          const storage = storageType === 'local' ? localStorage : sessionStorage;
+          storage.removeItem(storageKey);
+        }
+      } catch (e) {
+        console.warn(`Failed to clear rate limiter state for key "${key}":`, e);
+      }
+    }
+  }
+
+  private async loadPersistedState(key: string, bucket: BucketState): Promise<void> {
+    const storageType = bucket.policy.storage ?? 'memory';
+    if (storageType === 'memory') return;
+
+    const storageKey = `rate-limit:${key}`;
+    let state: PersistedState | null = null;
+
+    try {
+      if (storageType === 'secure') {
+        if (this.secureStorage) {
+          state = await this.secureStorage.get<PersistedState>(storageKey);
+        }
+      } else {
+        const storage = storageType === 'local' ? localStorage : sessionStorage;
+        const raw = storage.getItem(storageKey);
+        if (raw) {
+          state = JSON.parse(raw);
+        }
+      }
+    } catch (e) {
+      console.warn(`Failed to load rate limiter state for key "${key}":`, e);
+    }
+
+    if (state) {
+      if (bucket.policy.type === 'token-bucket') {
+        if (typeof state.tokens === 'number') {
+          bucket.tokens = state.tokens;
+        }
+        if (typeof state.lastRefillAt === 'number') {
+          bucket.lastRefillAt = state.lastRefillAt;
+        }
+        bucket.remaining.set(Math.floor(bucket.tokens));
+      } else {
+        if (Array.isArray(state.timestamps)) {
+          bucket.timestamps = state.timestamps;
+        }
+        bucket.remaining.set(bucket.policy.max - bucket.timestamps.length);
+      }
+    }
+  }
+
+  private async savePersistedState(key: string, bucket: BucketState): Promise<void> {
+    const storageType = bucket.policy.storage ?? 'memory';
+    if (storageType === 'memory') return;
+
+    const storageKey = `rate-limit:${key}`;
+    const state: PersistedState =
+      bucket.policy.type === 'token-bucket'
+        ? { tokens: bucket.tokens, lastRefillAt: bucket.lastRefillAt }
+        : { timestamps: bucket.timestamps };
+
+    try {
+      if (storageType === 'secure') {
+        if (this.secureStorage) {
+          await this.secureStorage.set(storageKey, state);
+        }
+      } else {
+        const storage = storageType === 'local' ? localStorage : sessionStorage;
+        storage.setItem(storageKey, JSON.stringify(state));
+      }
+    } catch (e) {
+      console.warn(`Failed to save rate limiter state for key "${key}":`, e);
     }
   }
 

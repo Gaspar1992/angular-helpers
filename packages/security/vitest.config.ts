@@ -5,6 +5,7 @@ export default defineConfig({
   cacheDir: '../../node_modules/.vitest-cache/security',
   resolve: {
     alias: {
+      '@angular-helpers/core/utils': resolve(__dirname, '../core/utils/src/index.ts'),
       '@angular-helpers/core': resolve(__dirname, '../core/src/index.ts'),
       '@angular-helpers/security': resolve(__dirname, 'src/index.ts'),
       '@angular-helpers/security/forms': resolve(__dirname, 'forms/src/index.ts'),
@@ -14,6 +15,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    setupFiles: ['./vitest.setup.ts'],
     include: ['**/*.spec.ts'],
     exclude: ['**/node_modules/**'],
   },

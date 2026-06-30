@@ -2,6 +2,7 @@ import '@angular/compiler';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { RateLimiterService } from './rate-limiter.service';
+import { SecureStorageService } from './secure-storage.service';
 
 describe('RateLimiterService', () => {
   let service: RateLimiterService;
@@ -102,6 +103,147 @@ describe('RateLimiterService', () => {
       // Los elementos de la ventana expiran y el signal se actualiza automáticamente a 2
       expect(remaining()).toBe(2);
       expect(canExec()).toBe(true);
+    });
+  });
+
+  describe('Persistence Support', () => {
+    beforeEach(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+      vi.restoreAllMocks();
+    });
+
+    afterEach(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
+
+    it('should persist and load token-bucket state in localStorage', async () => {
+      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+      const getItemSpy = vi.spyOn(Storage.prototype, 'getItem');
+
+      await service.configure('local-tb', {
+        type: 'token-bucket',
+        capacity: 5,
+        refillPerSecond: 1,
+        storage: 'local',
+      });
+
+      // Initially, loads state (will be null/empty)
+      expect(getItemSpy).toHaveBeenCalledWith('rate-limit:local-tb');
+
+      await service.consume('local-tb', 2);
+
+      // Should save state to localStorage
+      expect(setItemSpy).toHaveBeenCalledWith(
+        'rate-limit:local-tb',
+        expect.stringContaining('"tokens":3'),
+      );
+
+      // Create a new service instance to simulate page reload / new service
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [RateLimiterService],
+      });
+      const newService = TestBed.inject(RateLimiterService);
+
+      await newService.configure('local-tb', {
+        type: 'token-bucket',
+        capacity: 5,
+        refillPerSecond: 1,
+        storage: 'local',
+      });
+
+      expect(newService.remaining('local-tb')()).toBe(3);
+    });
+
+    it('should persist and load sliding-window state in sessionStorage', async () => {
+      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+      const getItemSpy = vi.spyOn(Storage.prototype, 'getItem');
+
+      await service.configure('session-sw', {
+        type: 'sliding-window',
+        max: 3,
+        windowMs: 10000,
+        storage: 'session',
+      });
+
+      await service.consume('session-sw', 1);
+
+      expect(setItemSpy).toHaveBeenCalledWith(
+        'rate-limit:session-sw',
+        expect.stringContaining('"timestamps"'),
+      );
+
+      // Reload state in a new configuration
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [RateLimiterService],
+      });
+      const newService = TestBed.inject(RateLimiterService);
+
+      await newService.configure('session-sw', {
+        type: 'sliding-window',
+        max: 3,
+        windowMs: 10000,
+        storage: 'session',
+      });
+
+      expect(newService.remaining('session-sw')()).toBe(2);
+    });
+
+    it('should clear persisted state from storage on reset', async () => {
+      const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem');
+
+      await service.configure('local-tb', {
+        type: 'token-bucket',
+        capacity: 5,
+        refillPerSecond: 1,
+        storage: 'local',
+      });
+
+      await service.consume('local-tb', 1);
+      expect(localStorage.getItem('rate-limit:local-tb')).toBeTruthy();
+
+      await service.reset('local-tb');
+      expect(removeItemSpy).toHaveBeenCalledWith('rate-limit:local-tb');
+      expect(localStorage.getItem('rate-limit:local-tb')).toBeNull();
+    });
+
+    it('should use SecureStorageService when storage is secure', async () => {
+      const mockSecureStorage = {
+        get: vi.fn().mockResolvedValue({ tokens: 2, lastRefillAt: Date.now() }),
+        set: vi.fn().mockResolvedValue(undefined),
+        remove: vi.fn().mockResolvedValue(undefined),
+      };
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          RateLimiterService,
+          { provide: SecureStorageService, useValue: mockSecureStorage },
+        ],
+      });
+      const secureService = TestBed.inject(RateLimiterService);
+
+      await secureService.configure('secure-tb', {
+        type: 'token-bucket',
+        capacity: 5,
+        refillPerSecond: 1,
+        storage: 'secure',
+      });
+
+      expect(mockSecureStorage.get).toHaveBeenCalledWith('rate-limit:secure-tb');
+      expect(secureService.remaining('secure-tb')()).toBe(2);
+
+      await secureService.consume('secure-tb', 1);
+      expect(mockSecureStorage.set).toHaveBeenCalledWith(
+        'rate-limit:secure-tb',
+        expect.objectContaining({ tokens: 1 }),
+      );
+
+      await secureService.reset('secure-tb');
+      expect(mockSecureStorage.remove).toHaveBeenCalledWith('rate-limit:secure-tb');
     });
   });
 });
