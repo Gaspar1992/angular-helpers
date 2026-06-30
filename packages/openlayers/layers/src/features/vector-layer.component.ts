@@ -9,10 +9,10 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { Feature } from '@angular-helpers/openlayers/core';
+import { Feature, OlMapService } from '@angular-helpers/openlayers/core';
 import FeatureFormat from 'ol/format/Feature';
 import { OlLayerService } from '../services/layer.service';
-import type { ClusterConfig, VectorLayerConfig } from '../models/layer.types';
+import type { AutoFitOptions, ClusterConfig, VectorLayerConfig } from '../models/layer.types';
 import { OlClusterComponent } from './cluster.component';
 
 @Component({
@@ -21,6 +21,7 @@ import { OlClusterComponent } from './cluster.component';
 })
 export class OlVectorLayerComponent {
   private layerService = inject(OlLayerService);
+  private mapService = inject(OlMapService);
   private destroyRef = inject(DestroyRef);
   id = input.required<string>();
   features = input<Feature[] | undefined>(undefined);
@@ -33,6 +34,7 @@ export class OlVectorLayerComponent {
   cluster = input<ClusterConfig>();
   clusterComponent = contentChild(OlClusterComponent);
   coordinateProjection = input<string>('EPSG:4326');
+  autoFit = input<boolean | AutoFitOptions>(false);
 
   constructor() {
     // Initialize layer after DOM is ready
@@ -64,7 +66,48 @@ export class OlVectorLayerComponent {
         style: this.style(),
         cluster: resolvedClusterConfig,
         coordinateProjection: this.coordinateProjection(),
+        autoFit: this.autoFit(),
       } as VectorLayerConfig);
+
+      // Handle autoFit on initialization
+      const autoFitActive = this.autoFit();
+      if (autoFitActive) {
+        const parsedOptions = typeof autoFitActive === 'object' ? autoFitActive : undefined;
+
+        const setupFitListener = () => {
+          const layer = this.layerService.getLayer(this.id());
+          if (layer && 'getSource' in layer) {
+            const source = (layer as any).getSource();
+            if (source) {
+              const vectorSource =
+                'getSource' in source && typeof source.getSource === 'function'
+                  ? source.getSource()
+                  : source;
+
+              if (vectorSource) {
+                if (this.url()) {
+                  // Wait for features to load asynchronously
+                  vectorSource.on('featuresloadend', () => {
+                    this.layerService.fitToLayer(this.id(), parsedOptions);
+                  });
+                } else {
+                  // Fit immediately for static features
+                  this.layerService.fitToLayer(this.id(), parsedOptions);
+                }
+              }
+            }
+          }
+        };
+
+        const map = this.mapService.getMap();
+        if (map) {
+          setupFitListener();
+        } else {
+          this.mapService.onReady(() => {
+            setupFitListener();
+          });
+        }
+      }
     });
 
     // Effect to sync features when input changes
@@ -75,6 +118,15 @@ export class OlVectorLayerComponent {
       }
       if (this.layerService.getLayer(this.id())) {
         this.layerService.updateFeatures(this.id(), currentFeatures);
+
+        // Fit to layer reactively if autoFit is active
+        const autoFitActive = this.autoFit();
+        if (autoFitActive) {
+          const parsedOptions = typeof autoFitActive === 'object' ? autoFitActive : undefined;
+          queueMicrotask(() => {
+            this.layerService.fitToLayer(this.id(), parsedOptions);
+          });
+        }
       }
     });
 

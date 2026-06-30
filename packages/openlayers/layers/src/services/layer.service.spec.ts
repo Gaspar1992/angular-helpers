@@ -478,4 +478,79 @@ describe('OlLayerService', () => {
     expect(vectorDisposeSpy).toHaveBeenCalledOnce();
     expect(layerDisposeSpy).toHaveBeenCalledOnce();
   });
+
+  describe('fitToLayer', () => {
+    let fitSpy: any;
+    let mockView: any;
+
+    beforeEach(() => {
+      fitSpy = vi.fn();
+      mockView = {
+        fit: fitSpy,
+        getProjection: () => ({ getCode: () => 'EPSG:3857' }),
+      };
+      (map as any).getView = vi.fn(() => mockView);
+    });
+
+    it('fits the map view to the extent of a vector layer', () => {
+      svc.addLayer({
+        id: 'v-fit',
+        type: 'vector',
+        features: [
+          { id: 'f1', geometry: { type: 'Point', coordinates: [10, 20] } },
+          { id: 'f2', geometry: { type: 'Point', coordinates: [30, 40] } },
+        ],
+      } as VectorLayerConfig);
+
+      const zoneHelper = (svc as any).zoneHelper;
+      const zoneSpy = vi.spyOn(zoneHelper, 'runOutsideAngular');
+
+      svc.fitToLayer('v-fit', { padding: [10, 10, 10, 10], duration: 200 });
+
+      expect(zoneSpy).toHaveBeenCalled();
+      expect(fitSpy).toHaveBeenCalled();
+      const [extent, options] = fitSpy.mock.calls[0];
+      expect(extent).toBeDefined();
+      expect(extent.length).toBe(4);
+      expect(options).toEqual({
+        padding: [10, 10, 10, 10],
+        duration: 200,
+      });
+    });
+
+    it('unwraps ClusterSource to fit the underlying VectorSource', () => {
+      svc.addLayer({
+        id: 'v-cluster-fit',
+        type: 'vector',
+        features: [{ id: 'f1', geometry: { type: 'Point', coordinates: [10, 20] } }],
+        cluster: { enabled: true },
+      } as VectorLayerConfig);
+
+      svc.fitToLayer('v-cluster-fit');
+
+      expect(fitSpy).toHaveBeenCalled();
+      const [extent] = fitSpy.mock.calls[0];
+      expect(extent).toBeDefined();
+      expect(extent.length).toBe(4);
+    });
+
+    it('does not call fit if the extent is invalid (empty layer)', () => {
+      svc.addLayer({
+        id: 'v-empty-fit',
+        type: 'vector',
+        features: [],
+      } as VectorLayerConfig);
+
+      svc.fitToLayer('v-empty-fit');
+
+      expect(fitSpy).not.toHaveBeenCalled();
+    });
+
+    it('gracefully handles missing layer or uninitialized map', () => {
+      expect(() => svc.fitToLayer('non-existent')).not.toThrow();
+
+      const { svc: noMapSvc } = makeService(null);
+      expect(() => noMapSvc.fitToLayer('some-id')).not.toThrow();
+    });
+  });
 });

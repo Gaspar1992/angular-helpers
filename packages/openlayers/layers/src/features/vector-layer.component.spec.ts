@@ -47,6 +47,7 @@ describe('OlVectorLayerComponent', () => {
       setOpacity: vi.fn(),
       setVisibility: vi.fn(),
       setZIndex: vi.fn(),
+      fitToLayer: vi.fn(),
     };
     mapServiceMock = {
       getMap: vi.fn().mockReturnValue({}),
@@ -55,7 +56,7 @@ describe('OlVectorLayerComponent', () => {
   });
 
   const buildHarness = async (
-    inputs: { id: string; url?: string; features?: any[] } = { id: 'v-layer' },
+    inputs: { id: string; url?: string; features?: any[]; autoFit?: any } = { id: 'v-layer' },
   ) => {
     const parent = await ensureRootInjector();
     const env = createEnvironmentInjector(
@@ -83,9 +84,13 @@ describe('OlVectorLayerComponent', () => {
     if (inputs.features !== undefined) {
       componentRef.setInput('features', inputs.features);
     }
+    if (inputs.autoFit !== undefined) {
+      componentRef.setInput('autoFit', inputs.autoFit);
+    }
 
     appRef.attachView(componentRef.hostView);
     componentRef.changeDetectorRef.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     return { componentRef, host };
   };
@@ -98,5 +103,64 @@ describe('OlVectorLayerComponent', () => {
   it('calls updateFeatures when features is explicitly provided (even if empty)', async () => {
     await buildHarness({ id: 'v-layer', url: 'https://example.com/data.geojson', features: [] });
     expect(layerServiceMock.updateFeatures).toHaveBeenCalledWith('v-layer', []);
+  });
+
+  it('triggers auto-fit on initialization for static features', async () => {
+    await buildHarness({ id: 'v-layer', features: [], autoFit: true });
+    expect(layerServiceMock.fitToLayer).toHaveBeenCalledWith('v-layer', undefined);
+  });
+
+  it('triggers auto-fit with custom options', async () => {
+    const customOptions = { padding: [10], duration: 150 };
+    await buildHarness({ id: 'v-layer', features: [], autoFit: customOptions });
+    expect(layerServiceMock.fitToLayer).toHaveBeenCalledWith('v-layer', customOptions);
+  });
+
+  it('sets up featuresloadend listener for remote url and fits on load', async () => {
+    let loadEndCallback: any;
+    const mockSource = {
+      on: vi.fn((event, cb) => {
+        if (event === 'featuresloadend') {
+          loadEndCallback = cb;
+        }
+      }),
+    };
+    layerServiceMock.getLayer = vi.fn().mockReturnValue({
+      getSource: () => mockSource,
+    });
+
+    const customOptions = { padding: [10], duration: 150 };
+    await buildHarness({
+      id: 'v-layer',
+      url: 'https://example.com/data.geojson',
+      autoFit: customOptions,
+    });
+
+    expect(mockSource.on).toHaveBeenCalledWith('featuresloadend', expect.any(Function));
+    expect(layerServiceMock.fitToLayer).not.toHaveBeenCalled();
+
+    // Trigger the load end event
+    loadEndCallback();
+    expect(layerServiceMock.fitToLayer).toHaveBeenCalledWith('v-layer', customOptions);
+  });
+
+  it('triggers auto-fit reactively when features change', async () => {
+    const { componentRef } = await buildHarness({
+      id: 'v-layer',
+      features: [{ id: 'f1', geometry: { type: 'Point', coordinates: [0, 0] } }],
+      autoFit: true,
+    });
+
+    // Initial fit
+    expect(layerServiceMock.fitToLayer).toHaveBeenCalledWith('v-layer', undefined);
+    layerServiceMock.fitToLayer.mockClear();
+
+    // Update features
+    componentRef.setInput('features', [{ id: 'f1' }, { id: 'f2' }]);
+    componentRef.changeDetectorRef.detectChanges();
+
+    // Flush microtasks
+    await Promise.resolve();
+    expect(layerServiceMock.fitToLayer).toHaveBeenCalledWith('v-layer', undefined);
   });
 });

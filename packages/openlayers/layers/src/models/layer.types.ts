@@ -27,6 +27,11 @@ export interface ClusterConfig {
   onSpiderfyClick?: (feature: Feature) => void;
 }
 
+export interface AutoFitOptions {
+  padding?: number[];
+  duration?: number;
+}
+
 export interface VectorLayerConfig extends LayerConfig {
   type: 'vector';
   features?: Feature[];
@@ -35,6 +40,7 @@ export interface VectorLayerConfig extends LayerConfig {
   style?: Style | ((feature: Feature) => Style);
   cluster?: ClusterConfig;
   coordinateProjection?: string;
+  autoFit?: boolean | AutoFitOptions;
 }
 
 export interface HeatmapLayerConfig extends LayerConfig {

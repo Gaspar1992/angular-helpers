@@ -20,6 +20,7 @@ import type {
   ImageLayerConfig,
   HeatmapLayerConfig,
   AnyLayerConfig,
+  AutoFitOptions,
 } from '../models/layer.types';
 
 import { buildTileSource, buildImageSource } from '../utils/source-builders.util';
@@ -456,6 +457,48 @@ export class OlLayerService {
         vectorSource.addFeatures(olFeatures);
       }
     }
+  }
+
+  fitToLayer(id: string, options?: AutoFitOptions): void {
+    const map = this.mapService.getMap();
+    if (!map) return;
+
+    const layer = this.layerCache.get(id);
+    if (!layer || !(layer instanceof VectorLayer || layer instanceof HeatmapLayer)) return;
+
+    const source = (layer as any).getSource();
+    if (!source) return;
+
+    // Unwrap ClusterSource to the underlying VectorSource if necessary
+    const vectorSource =
+      'getSource' in source && typeof source.getSource === 'function' ? source.getSource() : source;
+
+    if (!vectorSource || typeof vectorSource.getExtent !== 'function') return;
+
+    const extent = vectorSource.getExtent();
+
+    // Validate extent: must be of length 4, all elements finite, and not the default empty extent
+    if (
+      !extent ||
+      extent.length !== 4 ||
+      !extent.every((val: number) => isFinite(val)) ||
+      (extent[0] === Infinity &&
+        extent[1] === Infinity &&
+        extent[2] === -Infinity &&
+        extent[3] === -Infinity)
+    ) {
+      return;
+    }
+
+    const view = map.getView();
+    if (!view) return;
+
+    this.zoneHelper.runOutsideAngular(() => {
+      view.fit(extent, {
+        padding: options?.padding,
+        duration: options?.duration,
+      });
+    });
   }
 
   private updateLayerState(): void {
