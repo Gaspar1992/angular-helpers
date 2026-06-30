@@ -541,14 +541,6 @@ export function calculateStageAverages(metrics: RequestMetrics[]): Record<string
  * harmless if the requests run in a worker.
  */
 async function scheduleMainThreadBurn(totalMs: number): Promise<void> {
-  const chunkMs = 20;
-  const chunks = Math.ceil(totalMs / chunkMs);
-  for (let i = 0; i < chunks; i++) {
-    await new Promise<void>((resolve) =>
-      setTimeout(() => {
-        burnCpu(chunkMs);
-        resolve();
-      }, 0),
-    );
-  }
+  // Burn the CPU synchronously to simulate a heavy blocking UI task (e.g. rendering a complex grid)
+  burnCpu(totalMs);
 }
