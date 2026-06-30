@@ -26,23 +26,38 @@ export function attachPortLoop(port: MessagePort | any, chain: RequestHandler): 
 
       const activePolyfill = needsPolyfill();
 
+      const responseTransferables: Transferable[] = [];
+
       for (const res of responses) {
-        if (
-          activePolyfill &&
-          res.type === 'response' &&
-          res.result &&
-          res.result.body &&
-          typeof ReadableStream !== 'undefined' &&
-          res.result.body instanceof ReadableStream
-        ) {
-          const streamPort = serializeStreamToPort(res.result.body);
-          res.result.body = { __isStreamPolyfillPort: true, port: streamPort };
+        if (res.type === 'response' && res.result) {
+          if (typeof res.result.body === 'string') {
+            const bodyStr = res.result.body;
+            if (typeof TextEncoder !== 'undefined') {
+              const encoded = new TextEncoder().encode(bodyStr);
+              if (encoded.byteLength > 102400) {
+                res.result.body = encoded.buffer;
+                res.result._bodyWasString = true;
+                responseTransferables.push(encoded.buffer);
+              }
+            }
+          }
+
+          if (
+            activePolyfill &&
+            res.result.body &&
+            typeof ReadableStream !== 'undefined' &&
+            res.result.body instanceof ReadableStream
+          ) {
+            const streamPort = serializeStreamToPort(res.result.body);
+            res.result.body = { __isStreamPolyfillPort: true, port: streamPort };
+          }
         }
       }
 
       const transferables = [
-        ...new Set(
-          responses.flatMap((res) => {
+        ...new Set([
+          ...responseTransferables,
+          ...responses.flatMap((res) => {
             if (res.type === 'response' && res.result) {
               const body = res.result.body;
               if (body && typeof body === 'object' && '__isStreamPolyfillPort' in body) {
@@ -52,7 +67,7 @@ export function attachPortLoop(port: MessagePort | any, chain: RequestHandler): 
             }
             return [];
           }),
-        ),
+        ]),
       ];
 
       port.postMessage({ type: 'batch-response', responses }, transferables);
@@ -77,11 +92,21 @@ export function attachPortLoop(port: MessagePort | any, chain: RequestHandler): 
       return;
     }
 
+    const finalPayload = payload;
+    if (finalPayload && typeof finalPayload === 'object') {
+      if (finalPayload._bodyWasString && finalPayload.body instanceof ArrayBuffer) {
+        if (typeof TextDecoder !== 'undefined') {
+          finalPayload.body = new TextDecoder().decode(finalPayload.body);
+        }
+        delete finalPayload._bodyWasString;
+      }
+    }
+
     const controller = new AbortController();
     controllers.set(requestId, controller);
 
     try {
-      const response = await chain(payload, controller.signal);
+      const response = await chain(finalPayload, controller.signal);
       responseBuffer.push({ type: 'response', requestId, result: response });
       scheduleFlush();
     } catch (error: any) {

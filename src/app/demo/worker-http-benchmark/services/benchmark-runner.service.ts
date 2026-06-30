@@ -78,7 +78,7 @@ export class BenchmarkRunnerService implements OnDestroy {
     const dispatch =
       mode === 'main-thread'
         ? this.getInstrumentedMainThreadDispatcher(requestMetrics)
-        : this.getInstrumentedWorkerDispatcher(mode, requestMetrics);
+        : this.getInstrumentedWorkerDispatcher(mode, requestMetrics, scenario);
 
     // Warm-up: ensure worker is booted before measurement starts.
     if (mode !== 'main-thread') {
@@ -221,6 +221,7 @@ export class BenchmarkRunnerService implements OnDestroy {
   private getInstrumentedWorkerDispatcher(
     mode: 'worker-pool-1' | 'worker-pool-4',
     metricsCollector: RequestMetrics[],
+    scenario: BenchmarkScenario,
   ): (req: ScenarioRequestSpec) => Promise<BenchmarkResponse> {
     let requestCounter = 0;
     const transport = mode === 'worker-pool-4' ? this.getOrCreatePool(4) : this.getOrCreatePool(1);
@@ -233,31 +234,54 @@ export class BenchmarkRunnerService implements OnDestroy {
       tracker.markStageStart('worker-init');
       tracker.markStageEnd('worker-init');
 
-      // Stage 2: Serialization (main thread)
-      tracker.markStageStart('serialization');
-      const _serializedReq = JSON.stringify(req);
-      tracker.markStageEnd('serialization');
+      const shouldBypass = scenario.id === 'threshold-bypass';
 
-      // Stage 3: Transfer out + Stage 4: Worker processing + Stage 5: Transfer in
-      // These are measured together via the transport execute
-      tracker.markStageStart('transfer-out');
+      let response: BenchmarkResponse;
+      if (shouldBypass) {
+        // Simulate WorkerHttpBackend threshold bypass: execute directly on main thread
+        // Stage 2: Serialization (N/A)
+        tracker.markStageStart('serialization');
+        tracker.markStageEnd('serialization');
 
-      // Execute via worker transport and capture timing from response
-      const response = await firstValueFrom(transport.execute(req));
+        // Stage 3: Transfer out (N/A)
+        tracker.markStageStart('transfer-out');
+        tracker.markStageEnd('transfer-out');
 
-      let streamBytesRead = 0;
-      if (response && response.body instanceof ReadableStream) {
-        const reader = response.body.getReader();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          if (value) {
-            streamBytesRead += value.length;
+        // Stage 4: Worker processing (run on main thread)
+        tracker.markStageStart('worker-processing');
+        response = await simulateMainThreadResponse(req);
+        tracker.markStageEnd('worker-processing');
+
+        // Stage 5: Transfer in (N/A)
+        tracker.markStageStart('transfer-in');
+        tracker.markStageEnd('transfer-in');
+      } else {
+        // Stage 2: Serialization (main thread)
+        tracker.markStageStart('serialization');
+        const _serializedReq = JSON.stringify(req);
+        tracker.markStageEnd('serialization');
+
+        // Stage 3: Transfer out + Stage 4: Worker processing + Stage 5: Transfer in
+        // These are measured together via the transport execute
+        tracker.markStageStart('transfer-out');
+
+        // Execute via worker transport and capture timing from response
+        response = await firstValueFrom(transport.execute(req));
+
+        let streamBytesRead = 0;
+        if (response && response.body instanceof ReadableStream) {
+          const reader = response.body.getReader();
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (value) {
+              streamBytesRead += value.length;
+            }
           }
         }
-      }
 
-      tracker.markStageEnd('transfer-out');
+        tracker.markStageEnd('transfer-out');
+      }
 
       // The worker returns timing data in workerTiming property
       // Note: In the actual implementation, we'd need the transport to expose this

@@ -563,6 +563,7 @@ manual control.
 - `withWorkerFallback(strategy)` — `'main-thread'` (SSR-safe) or `'error'`
 - `withWorkerSerialization(serializer)` — plug in `createSerovalSerializer()` for complex request bodies (`Date`, `Map`, `Set`)
 - `withWorkerInterceptors(specs | specsByWorker)` — configure the worker-side pipeline from Angular DI; pairs with `createConfigurableWorkerPipeline()` in the worker file
+- `withMinPayloadSizeForWorker(size)` — configures the minimum payload size (in bytes) to route requests to the Web Worker. Small payloads below this threshold bypass the worker and run on the main thread.
 - `WORKER_TARGET` — `HttpContextToken<string | null>` for per-request worker routing via `HttpContext`
 - `WorkerHttpClient` — `HttpClient` wrapper with optional `{ worker: string }` routing field, plus per-request `signal?: AbortSignal` and `timeout?: number` for cancellation. Aborted requests error with `WorkerHttpAbortError`; expired timeouts with `WorkerHttpTimeoutError`.
 - `WorkerHttpBackend` — the `HttpBackend` implementation (injectable for advanced use)
@@ -960,6 +961,28 @@ Numbers vary by hardware, browser, and current system load — always run a scen
 and watch the trend, not a single value.
 
 </details>
+
+---
+
+## Performance Optimizations
+
+### Opt-in Payload-Size Routing
+
+To avoid the IPC context-switching overhead for small requests (like tiny POSTs or GETs), you can configure a minimum payload size threshold in bytes. Requests with payloads smaller than this threshold will bypass the worker and run directly on the main thread:
+
+```ts
+provideWorkerHttpClient(
+  withWorkerConfigs([...]),
+  withWorkerRoutes([...]),
+  withMinPayloadSizeForWorker(1024) // 1 KB threshold
+)
+```
+
+GET and HEAD requests (0-byte body) bypass the worker automatically under this threshold unless they match a specific route or have `WORKER_TARGET` set.
+
+### Transparent Zero-Copy Transferables
+
+For large payloads (exceeding 100 KB), `@angular-helpers/worker-http` automatically uses `TextEncoder`/`TextDecoder` to convert stringified bodies into `ArrayBuffer`s and transfers them using `postMessage` transfer lists. This eliminates the structured clone deep-copy overhead and is completely transparent to the developer.
 
 ---
 

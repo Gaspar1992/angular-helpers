@@ -730,4 +730,68 @@ describe('createWorkerTransport', () => {
       sub.unsubscribe();
     });
   });
+
+  describe('zero-copy transferables', () => {
+    it('transfers large string request bodies as ArrayBuffer zero-copy', async () => {
+      const transport = createWorkerTransport({ workerFactory: makeFactory() });
+
+      // 105 KB string
+      const largeString = 'a'.repeat(102400 + 1024);
+      const response$ = transport.execute({ body: largeString });
+      firstValueFrom(response$);
+
+      const worker = FakeWorker.instances[0];
+      const req = worker.postedMessages.find(
+        (m) => (m.message as { type: string }).type === 'batch',
+      )!;
+      const batchMsg = (req.message as any).messages[0];
+
+      // Should be transformed to ArrayBuffer
+      expect(batchMsg.payload.body).toBeInstanceOf(ArrayBuffer);
+      expect(batchMsg.payload._bodyWasString).toBe(true);
+      expect(req.transfer).toContain(batchMsg.payload.body);
+    });
+
+    it('does not transfer small string request bodies (< 100 KB)', async () => {
+      const transport = createWorkerTransport({ workerFactory: makeFactory() });
+
+      // 50 KB string
+      const smallString = 'a'.repeat(51200);
+      const response$ = transport.execute({ body: smallString });
+      firstValueFrom(response$);
+
+      const worker = FakeWorker.instances[0];
+      const req = worker.postedMessages.find(
+        (m) => (m.message as { type: string }).type === 'batch',
+      )!;
+      const batchMsg = (req.message as any).messages[0];
+
+      expect(batchMsg.payload.body).toBe(smallString);
+      expect(batchMsg.payload._bodyWasString).toBeUndefined();
+      expect(req.transfer).not.toContain(batchMsg.payload.body);
+    });
+
+    it('decodes large string response bodies from ArrayBuffer back to string', async () => {
+      const transport = createWorkerTransport({ workerFactory: makeFactory() });
+
+      const response$ = transport.execute({ query: 'test' });
+      const promise = firstValueFrom(response$);
+
+      const worker = FakeWorker.instances[0];
+      const reqId = worker.lastRequest!.requestId;
+
+      // Simulate worker responding with a transferred string
+      const originalString = 'response-data-'.repeat(10000);
+      const encoded = new TextEncoder().encode(originalString);
+
+      worker.respond(reqId, {
+        body: encoded.buffer,
+        _bodyWasString: true,
+      });
+
+      const res = (await promise) as any;
+      expect(res.body).toBe(originalString);
+      expect(res._bodyWasString).toBeUndefined();
+    });
+  });
 });

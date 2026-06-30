@@ -133,3 +133,12 @@ export const WORKER_HTTP_STREAMS_POLYFILL_TOKEN = new InjectionToken<boolean>(
   'WorkerHttpStreamsPolyfill',
   { factory: () => false },
 );
+
+/**
+ * Minimum payload size (in bytes) to route requests to the Web Worker.
+ * If the payload is smaller than this threshold, it bypasses the worker.
+ */
+export const WORKER_HTTP_MIN_PAYLOAD_SIZE_TOKEN = new InjectionToken<number | null>(
+  'WorkerHttpMinPayloadSize',
+  { factory: () => null },
+);

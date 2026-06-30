@@ -15,6 +15,7 @@ export {
   WORKER_HTTP_SERIALIZER_TOKEN,
   WORKER_HTTP_INTERCEPTORS_TOKEN,
   WORKER_HTTP_STREAMS_POLYFILL_TOKEN,
+  WORKER_HTTP_MIN_PAYLOAD_SIZE_TOKEN,
 } from './worker-http-tokens';
 export type { WorkerInterceptorSpecsMap } from './worker-http-tokens';
 
@@ -27,6 +28,7 @@ export {
   withWorkerInterceptors,
   withTelemetry,
   withWorkerStreamsPolyfill,
+  withMinPayloadSizeForWorker,
 } from './worker-http-providers';
 export type {
   WorkerHttpTelemetry,

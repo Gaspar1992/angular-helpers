@@ -285,14 +285,21 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
         if (data.type === 'error') {
           subscriber.error(new Error(data.error.message));
         } else {
-          if (deserializeFn && data.result && typeof data.result === 'object') {
-            const resObj = data.result as any;
+          const result = data.result as any;
+          if (result && typeof result === 'object') {
+            if (result._bodyWasString && result.body instanceof ArrayBuffer) {
+              if (typeof TextDecoder !== 'undefined') {
+                result.body = new TextDecoder().decode(result.body);
+              }
+              delete result._bodyWasString;
+            }
             if (
-              resObj.body &&
-              typeof resObj.body === 'object' &&
-              resObj.body.__isStreamPolyfillPort
+              deserializeFn &&
+              result.body &&
+              typeof result.body === 'object' &&
+              result.body.__isStreamPolyfillPort
             ) {
-              resObj.body = deserializeFn(resObj.body.port);
+              result.body = deserializeFn(result.body.port);
             }
           }
           subscriber.next(data.result);
@@ -332,11 +339,42 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
         },
       });
 
+      let finalRequest = request as any;
+      const requestTransferables: Transferable[] = [];
+
+      if (
+        finalRequest &&
+        typeof finalRequest === 'object' &&
+        typeof finalRequest.body === 'string'
+      ) {
+        const bodyStr = finalRequest.body;
+        if (typeof TextEncoder !== 'undefined') {
+          const encoded = new TextEncoder().encode(bodyStr);
+          if (encoded.byteLength > 102400) {
+            finalRequest = {
+              ...finalRequest,
+              body: encoded.buffer,
+              _bodyWasString: true,
+            };
+            requestTransferables.push(encoded.buffer);
+          }
+        }
+      }
+
+      let extraTransferables: Transferable[] = [];
       if (transferDetection === 'auto') {
-        const transferables = detectTransferables(request);
-        dispatchToWorker(instance, { type: 'request', requestId, payload: request }, transferables);
+        extraTransferables = detectTransferables(finalRequest);
+      }
+      const allTransferables = [...new Set([...requestTransferables, ...extraTransferables])];
+
+      if (allTransferables.length > 0) {
+        dispatchToWorker(
+          instance,
+          { type: 'request', requestId, payload: finalRequest },
+          allTransferables,
+        );
       } else {
-        dispatchToWorker(instance, { type: 'request', requestId, payload: request });
+        dispatchToWorker(instance, { type: 'request', requestId, payload: finalRequest });
       }
 
       if (effectiveTimeout > 0 && Number.isFinite(effectiveTimeout)) {

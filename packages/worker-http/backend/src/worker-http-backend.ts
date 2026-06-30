@@ -24,8 +24,10 @@ import {
   WORKER_HTTP_TELEMETRY_TOKEN,
   WORKER_HTTP_TIMEOUT,
   WORKER_TARGET,
+  WORKER_HTTP_MIN_PAYLOAD_SIZE_TOKEN,
 } from './worker-http-tokens';
 import type { WorkerInterceptorSpec } from '@angular-helpers/worker-http/interceptors';
+import type { WorkerSerializer } from '@angular-helpers/worker-http/serializer';
 import type {
   SerializableRequest,
   SerializableResponse,
@@ -53,6 +55,75 @@ function now(): number {
     : Date.now();
 }
 
+// Helper to estimate body size in bytes
+export function getRequestBodySize(body: unknown, serializer?: WorkerSerializer | null): number {
+  if (body === null || body === undefined) {
+    return 0;
+  }
+
+  try {
+    if (typeof body === 'string') {
+      return typeof TextEncoder !== 'undefined'
+        ? new TextEncoder().encode(body).byteLength
+        : body.length; // fallback
+    }
+    if (body instanceof Blob) {
+      return body.size;
+    }
+    if (body instanceof ArrayBuffer) {
+      return body.byteLength;
+    }
+    if (ArrayBuffer.isView(body)) {
+      return body.byteLength;
+    }
+    if (body instanceof URLSearchParams) {
+      const str = body.toString();
+      return typeof TextEncoder !== 'undefined'
+        ? new TextEncoder().encode(str).byteLength
+        : str.length;
+    }
+    if (body instanceof FormData) {
+      let total = 0;
+      body.forEach((value, key) => {
+        total +=
+          typeof TextEncoder !== 'undefined'
+            ? new TextEncoder().encode(key).byteLength
+            : key.length;
+        if (value instanceof Blob) {
+          total += value.size;
+        } else if (typeof value === 'string') {
+          total +=
+            typeof TextEncoder !== 'undefined'
+              ? new TextEncoder().encode(value).byteLength
+              : value.length;
+        }
+      });
+      return total;
+    }
+    if (typeof body === 'object') {
+      if (serializer) {
+        const serialized = serializer.serialize(body).data;
+        if (typeof serialized === 'string') {
+          return typeof TextEncoder !== 'undefined'
+            ? new TextEncoder().encode(serialized).byteLength
+            : serialized.length;
+        }
+        return getRequestBodySize(serialized, null);
+      }
+      const json = JSON.stringify(body);
+      return typeof TextEncoder !== 'undefined'
+        ? new TextEncoder().encode(json).byteLength
+        : json.length;
+    }
+  } catch {
+    // If anything fails (e.g., circular references in JSON.stringify),
+    // return Infinity to guarantee it's routed to the worker.
+    return Infinity;
+  }
+
+  return 0;
+}
+
 /**
  * Angular `HttpBackend` replacement that routes HTTP requests to web workers.
  *
@@ -75,6 +146,7 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
   private readonly fetchBackend = inject(FetchBackend, { optional: true });
   private readonly telemetry = inject(WORKER_HTTP_TELEMETRY_TOKEN);
   private readonly streamsPolyfill = inject(WORKER_HTTP_STREAMS_POLYFILL_TOKEN);
+  private readonly minPayloadSize = inject(WORKER_HTTP_MIN_PAYLOAD_SIZE_TOKEN, { optional: true });
 
   private readonly transports = new Map<
     string,
@@ -94,6 +166,34 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
 
     if (!workerId) {
       return this.handleFallback(req, null, `No worker route matched for URL: ${req.url}`);
+    }
+
+    // Check if we should bypass the worker based on the payload size threshold
+    let bypassWorker = false;
+    if (this.minPayloadSize !== null && this.fallback === 'main-thread') {
+      const hasExplicitTarget = req.context.get(WORKER_TARGET) !== null;
+      if (!hasExplicitTarget) {
+        const isGetOrHead = req.method === 'GET' || req.method === 'HEAD';
+        if (isGetOrHead) {
+          const matchesRoute = matchWorkerRoute(req.url, this.routes) !== null;
+          if (!matchesRoute) {
+            bypassWorker = true;
+          }
+        } else {
+          const bodySize = getRequestBodySize(req.body, this.serializer);
+          if (bodySize < this.minPayloadSize) {
+            bypassWorker = true;
+          }
+        }
+      }
+    }
+
+    if (bypassWorker) {
+      return this.handleFallback(
+        req,
+        workerId,
+        `Request payload size is below the threshold of ${this.minPayloadSize} bytes. Bypassing worker.`,
+      );
     }
 
     const config = this.configs.find((c) => c.id === workerId);

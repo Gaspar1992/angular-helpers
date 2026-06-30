@@ -11,7 +11,8 @@ export type WorkerHttpFeatureKind =
   | 'WorkerSerialization'
   | 'WorkerInterceptors'
   | 'Telemetry'
-  | 'StreamsPolyfill';
+  | 'StreamsPolyfill'
+  | 'MinPayloadSize';
 
 /**
  * Feature object — mirrors Angular's HttpFeature<K> shape.

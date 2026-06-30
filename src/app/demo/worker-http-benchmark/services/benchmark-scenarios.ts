@@ -79,4 +79,22 @@ export const SCENARIOS: readonly BenchmarkScenario[] = [
     requestCount: 1,
     request: { payloadBytes: 10 * 1024 * 1024, delayMs: 200, cpuBurnMs: 0, streaming: true },
   },
+  {
+    id: 'threshold-bypass',
+    title: '100 small POST requests (with 1KB threshold)',
+    description:
+      'Bypass benefit: 100 POST requests (500 bytes each) with threshold configured. Should execute on main thread to avoid IPC overhead.',
+    mode: 'sequential',
+    requestCount: 100,
+    request: { payloadBytes: 500, delayMs: 0, cpuBurnMs: 0 },
+  },
+  {
+    id: 'large-transferable',
+    title: '5 large requests & responses (5MB each)',
+    description:
+      'Transferable benefit: 5 requests and responses of 5MB. Measures the reduction in serialization/deserialization times using zero-copy transfer.',
+    mode: 'sequential',
+    requestCount: 5,
+    request: { payloadBytes: 5 * 1024 * 1024, delayMs: 0, cpuBurnMs: 0 },
+  },
 ];

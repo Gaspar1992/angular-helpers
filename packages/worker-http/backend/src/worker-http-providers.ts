@@ -11,6 +11,7 @@ import {
   WORKER_HTTP_SERIALIZER_TOKEN,
   WORKER_HTTP_STREAMS_POLYFILL_TOKEN,
   WORKER_HTTP_TELEMETRY_TOKEN,
+  WORKER_HTTP_MIN_PAYLOAD_SIZE_TOKEN,
 } from './worker-http-tokens';
 import type { WorkerInterceptorSpecsMap } from './worker-http-tokens';
 import type { WorkerHttpTelemetry } from './worker-http-telemetry';
@@ -271,5 +272,24 @@ export function withWorkerStreamsPolyfill(): WorkerHttpFeature<'StreamsPolyfill'
   return {
     kind: 'StreamsPolyfill',
     providers: [{ provide: WORKER_HTTP_STREAMS_POLYFILL_TOKEN, useValue: true }],
+  };
+}
+
+/**
+ * Configures the minimum payload size (in bytes) required to route a request to a worker.
+ * Requests with payloads below this threshold will bypass the worker and run on the main thread.
+ *
+ * @example
+ * ```typescript
+ * provideWorkerHttpClient(
+ *   withWorkerConfigs([...]),
+ *   withMinPayloadSizeForWorker(1024) // 1 KB threshold
+ * )
+ * ```
+ */
+export function withMinPayloadSizeForWorker(size: number): WorkerHttpFeature<'MinPayloadSize'> {
+  return {
+    kind: 'MinPayloadSize',
+    providers: [{ provide: WORKER_HTTP_MIN_PAYLOAD_SIZE_TOKEN, useValue: size }],
   };
 }
