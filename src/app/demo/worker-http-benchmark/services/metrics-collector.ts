@@ -100,7 +100,16 @@ export class MetricsCollector {
   stop(): BenchmarkMetrics {
     const totalMs = performance.now() - this.startedAt;
     cancelAnimationFrame(this.rafHandle);
-    this.observer?.disconnect();
+
+    if (this.observer) {
+      // Flush any pending entries that haven't been delivered to the callback yet
+      const pendingEntries = this.observer.takeRecords();
+      for (const entry of pendingEntries) {
+        this.longTaskCount += 1;
+        this.longTaskTotalMs += entry.duration;
+      }
+      this.observer.disconnect();
+    }
     this.observer = null;
 
     return {
