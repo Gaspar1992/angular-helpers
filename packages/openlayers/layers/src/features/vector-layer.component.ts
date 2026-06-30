@@ -10,6 +10,7 @@ import {
   input,
 } from '@angular/core';
 import { Feature } from '@angular-helpers/openlayers/core';
+import FeatureFormat from 'ol/format/Feature';
 import { OlLayerService } from '../services/layer.service';
 import type { ClusterConfig, VectorLayerConfig } from '../models/layer.types';
 import { OlClusterComponent } from './cluster.component';
@@ -22,9 +23,9 @@ export class OlVectorLayerComponent {
   private layerService = inject(OlLayerService);
   private destroyRef = inject(DestroyRef);
   id = input.required<string>();
-  features = input<Feature[]>([]);
+  features = input<Feature[] | undefined>(undefined);
   url = input<string>();
-  format = input<'geojson' | 'topojson' | 'kml'>();
+  format = input<'geojson' | 'topojson' | 'kml' | FeatureFormat>();
   zIndex = input<number>(0);
   opacity = input<number>(1);
   visible = input<boolean>(true);
@@ -69,6 +70,9 @@ export class OlVectorLayerComponent {
     // Effect to sync features when input changes
     effect(() => {
       const currentFeatures = this.features();
+      if (currentFeatures === undefined && this.url()) {
+        return;
+      }
       if (this.layerService.getLayer(this.id())) {
         this.layerService.updateFeatures(this.id(), currentFeatures);
       }

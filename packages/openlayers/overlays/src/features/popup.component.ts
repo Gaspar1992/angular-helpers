@@ -152,6 +152,7 @@ export class OlPopupComponent {
     const map = this.currentMap;
     this.zoneHelper.runOutsideAngular(() => {
       if (this.wasVisible) map.removeOverlay(overlay);
+      overlay.dispose();
     });
     this.overlay = null;
     this.currentMap = null;

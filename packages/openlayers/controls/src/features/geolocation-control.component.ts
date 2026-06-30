@@ -14,8 +14,8 @@ import Control from 'ol/control/Control';
 import Geolocation from 'ol/Geolocation';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
-import { Vector as VectorLayer } from 'ol/layer';
-import { Vector as VectorSource } from 'ol/source';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import type { ControlPosition } from '../models/control.types';
 
@@ -192,13 +192,27 @@ export class OlGeolocationControlComponent {
 
     this.destroyRef.onDestroy(() => {
       const map = this.mapService.getMap();
-      if (map) {
-        if (this.control) map.removeControl(this.control);
-        if (this.layer) map.removeLayer(this.layer);
-      }
-      if (this.geolocation) {
-        this.geolocation.setTracking(false);
-      }
+      this.zoneHelper.runOutsideAngular(() => {
+        if (map) {
+          if (this.control) map.removeControl(this.control);
+          if (this.layer) map.removeLayer(this.layer);
+        }
+        if (this.geolocation) {
+          this.geolocation.setTracking(false);
+          this.geolocation.dispose();
+        }
+        if (this.layer) {
+          const source = this.layer.getSource();
+          if (source) {
+            source.clear(true);
+            source.dispose();
+          }
+          this.layer.dispose();
+        }
+        if (this.control) {
+          this.control.dispose();
+        }
+      });
     });
   }
 

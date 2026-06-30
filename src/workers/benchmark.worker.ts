@@ -150,25 +150,28 @@ async function handleMessage(data: {
     }
   }
 
+  const workerTiming = {
+    // Time from message received to start of processing
+    deserializationMs: deserializationEnd - deserializationStart,
+    // Time spent doing actual work
+    processingMs: processingEnd - processingStart,
+    // Time to serialize response
+    serializationMs: serializationEnd - serializationStart,
+    // Total time in worker (for transfer calculations)
+    totalInWorkerMs: workerSendingAt - workerReceivedAt,
+    // Timestamps for calculating transfer times on main thread
+    workerReceivedAt,
+    workerSendingAt,
+  };
+
+  (result as any).workerTiming = workerTiming;
+
   self.postMessage(
     {
       type: 'response',
       requestId,
       result,
-      // Granular timing data for performance analysis
-      workerTiming: {
-        // Time from message received to start of processing
-        deserializationMs: deserializationEnd - deserializationStart,
-        // Time spent doing actual work
-        processingMs: processingEnd - processingStart,
-        // Time to serialize response
-        serializationMs: serializationEnd - serializationStart,
-        // Total time in worker (for transfer calculations)
-        totalInWorkerMs: workerSendingAt - workerReceivedAt,
-        // Timestamps for calculating transfer times on main thread
-        workerReceivedAt,
-        workerSendingAt,
-      },
+      workerTiming,
     },
     transferables,
   );

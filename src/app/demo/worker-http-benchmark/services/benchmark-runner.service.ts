@@ -237,6 +237,8 @@ export class BenchmarkRunnerService implements OnDestroy {
       const shouldBypass = scenario.id === 'threshold-bypass';
 
       let response: BenchmarkResponse;
+      let receiveTime = performance.now();
+
       if (shouldBypass) {
         // Simulate WorkerHttpBackend threshold bypass: execute directly on main thread
         // Stage 2: Serialization (N/A)
@@ -250,6 +252,7 @@ export class BenchmarkRunnerService implements OnDestroy {
         // Stage 4: Worker processing (run on main thread)
         tracker.markStageStart('worker-processing');
         response = await simulateMainThreadResponse(req);
+        receiveTime = performance.now();
         tracker.markStageEnd('worker-processing');
 
         // Stage 5: Transfer in (N/A)
@@ -267,6 +270,7 @@ export class BenchmarkRunnerService implements OnDestroy {
 
         // Execute via worker transport and capture timing from response
         response = await firstValueFrom(transport.execute(req));
+        receiveTime = performance.now();
 
         let streamBytesRead = 0;
         if (response && response.body instanceof ReadableStream) {
@@ -300,10 +304,24 @@ export class BenchmarkRunnerService implements OnDestroy {
       ).workerTiming;
 
       if (workerTiming) {
-        // Add worker-reported stages
+        const sendTime = timing.stages.get('transfer-out')?.start ?? timing.startTime;
+
+        // Precise transfer-out: from start of send until worker received it
+        tracker.stages.set('transfer-out', {
+          start: sendTime,
+          end: workerTiming.workerReceivedAt,
+        });
+
+        // Precise worker-processing: time spent inside the worker
         tracker.stages.set('worker-processing', {
-          start: 0,
-          end: workerTiming.processingMs,
+          start: workerTiming.workerReceivedAt,
+          end: workerTiming.workerSendingAt,
+        });
+
+        // Precise transfer-in: from when the worker sent it until we received it on main thread
+        tracker.stages.set('transfer-in', {
+          start: workerTiming.workerSendingAt,
+          end: receiveTime,
         });
       }
 

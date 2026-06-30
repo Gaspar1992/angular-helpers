@@ -4,7 +4,7 @@
 
 import { afterNextRender, Component, DestroyRef, effect, inject, input } from '@angular/core';
 import type { Feature } from '@angular-helpers/openlayers/core';
-import { OlMapService } from '@angular-helpers/openlayers/core';
+import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import VectorSource from 'ol/source/Vector';
 import OLFeature from 'ol/Feature';
 import { LineString, Point, Polygon, Circle as CircleGeom } from 'ol/geom';
@@ -40,6 +40,7 @@ import type { FlatStyleLike } from 'ol/style/flat';
 })
 export class OlWebGLVectorLayerComponent {
   private mapService = inject(OlMapService);
+  private zoneHelper = inject(OlZoneHelper);
   private destroyRef = inject(DestroyRef);
 
   /** Unique layer identifier */
@@ -88,6 +89,7 @@ export class OlWebGLVectorLayerComponent {
     });
 
     // Reactive feature sync
+    // ... (rest of file)
     effect(() => {
       const currentFeatures = this.features();
       if (this.layer) {
@@ -122,14 +124,22 @@ export class OlWebGLVectorLayerComponent {
     // CRITICAL: WebGL layers must be manually disposed
     this.destroyRef.onDestroy(() => {
       const map = this.mapService.getMap();
-      if (map && this.layer) {
-        map.removeLayer(this.layer);
-        try {
-          this.layer.dispose();
-        } catch {
-          // Ignore WebGL layer disposal errors (e.g., reading 'deleteBuffer' if renderer not fully initialized)
+      this.zoneHelper.runOutsideAngular(() => {
+        if (map && this.layer) {
+          map.removeLayer(this.layer);
         }
-      }
+        if (this.vectorSource) {
+          this.vectorSource.clear(true);
+          this.vectorSource.dispose();
+        }
+        if (this.layer) {
+          try {
+            this.layer.dispose();
+          } catch {
+            // Ignore WebGL layer disposal errors (e.g., reading 'deleteBuffer' if renderer not fully initialized)
+          }
+        }
+      });
     });
   }
 

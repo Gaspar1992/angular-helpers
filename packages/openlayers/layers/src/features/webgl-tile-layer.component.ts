@@ -2,7 +2,7 @@
 // GPU-accelerated tile layer with style expressions for color manipulation.
 
 import { afterNextRender, Component, DestroyRef, effect, inject, input } from '@angular/core';
-import { OlMapService } from '@angular-helpers/openlayers/core';
+import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import WebGLTileLayer from 'ol/layer/WebGLTile';
 import type { Style as WebGLTileStyle } from 'ol/layer/WebGLTile';
 import WebGLVectorTileLayer from 'ol/layer/WebGLVectorTile';
@@ -34,6 +34,7 @@ import MVT from 'ol/format/MVT';
 })
 export class OlWebGLTileLayerComponent {
   private mapService = inject(OlMapService);
+  private zoneHelper = inject(OlZoneHelper);
   private destroyRef = inject(DestroyRef);
 
   /** Unique layer identifier */
@@ -58,6 +59,7 @@ export class OlWebGLTileLayerComponent {
   variables = input<Record<string, string | number | boolean | number[]>>();
 
   private layer: WebGLTileLayer | WebGLVectorTileLayer<any, any> | null = null;
+  private sourceInstance: any = null;
 
   constructor() {
     afterNextRender(() => {
@@ -113,6 +115,8 @@ export class OlWebGLTileLayerComponent {
           break;
       }
 
+      this.sourceInstance = tileSource;
+
       if (this.layer) {
         this.layer.set('id', this.id());
         map.addLayer(this.layer as any);
@@ -152,10 +156,17 @@ export class OlWebGLTileLayerComponent {
     // WebGL tile layers also need manual dispose
     this.destroyRef.onDestroy(() => {
       const map = this.mapService.getMap();
-      if (map && this.layer) {
-        map.removeLayer(this.layer);
-        this.layer.dispose();
-      }
+      this.zoneHelper.runOutsideAngular(() => {
+        if (map && this.layer) {
+          map.removeLayer(this.layer);
+        }
+        if (this.sourceInstance && typeof this.sourceInstance.dispose === 'function') {
+          this.sourceInstance.dispose();
+        }
+        if (this.layer) {
+          this.layer.dispose();
+        }
+      });
     });
   }
 

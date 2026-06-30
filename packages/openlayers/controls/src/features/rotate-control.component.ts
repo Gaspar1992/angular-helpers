@@ -54,7 +54,10 @@ export class OlRotateControlComponent {
     destroyRef.onDestroy(() => {
       if (this.control) {
         const map = this.mapService!.getMap();
-        if (map) this.zoneHelper.runOutsideAngular(() => map.removeControl(this.control!));
+        this.zoneHelper.runOutsideAngular(() => {
+          if (map) map.removeControl(this.control!);
+          this.control!.dispose();
+        });
       }
       destroyed = true;
     });

@@ -1,5 +1,6 @@
 // Layer types for @angular-helpers/openlayers/layers
 
+import FeatureFormat from 'ol/format/Feature';
 import type { Extent, Feature, Layer, Style } from '@angular-helpers/openlayers/core';
 
 export interface LayerConfig extends Layer {
@@ -30,7 +31,7 @@ export interface VectorLayerConfig extends LayerConfig {
   type: 'vector';
   features?: Feature[];
   url?: string;
-  format?: 'geojson' | 'topojson' | 'kml';
+  format?: 'geojson' | 'topojson' | 'kml' | FeatureFormat;
   style?: Style | ((feature: Feature) => Style);
   cluster?: ClusterConfig;
   coordinateProjection?: string;

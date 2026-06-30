@@ -159,11 +159,15 @@ describe('OlPopupComponent', () => {
     expect(harness.host.querySelector('button.ol-popup-close')).toBeNull();
   });
 
-  it('removes the overlay on destroy', () => {
+  it('removes the overlay on destroy and disposes of it', () => {
     harness.componentRef.setInput('position', [0, 0]);
     harness.componentRef.changeDetectorRef.detectChanges();
 
+    const overlay = (harness.stub.map as unknown as { overlays: Overlay[] }).overlays[0];
+    const disposeSpy = vi.spyOn(overlay, 'dispose');
+
     harness.componentRef.destroy();
     expect(harness.stub.map.removeOverlay).toHaveBeenCalled();
+    expect(disposeSpy).toHaveBeenCalledOnce();
   });
 });

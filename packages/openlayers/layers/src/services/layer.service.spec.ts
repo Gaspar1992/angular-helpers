@@ -6,9 +6,10 @@ import { Feature as OLFeature } from 'ol';
 import { Point } from 'ol/geom';
 import type VectorLayer from 'ol/layer/Vector';
 import { Icon, Style } from 'ol/style';
+import GeoJSON from 'ol/format/GeoJSON';
 import type OLMap from 'ol/Map';
 import type BaseLayer from 'ol/layer/Base';
-import { OlMapService } from '@angular-helpers/openlayers/core';
+import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import { OlLayerService } from './layer.service';
 import type { ImageLayerConfig, TileLayerConfig, VectorLayerConfig } from '../models/layer.types';
 
@@ -35,7 +36,16 @@ const makeService = (map: OLMap | null) => {
     flushReady: (m: OLMap) => onReadyCb?.(m),
   };
   const injector = Injector.create({
-    providers: [{ provide: OlMapService, useValue: mapService }],
+    providers: [
+      { provide: OlMapService, useValue: mapService },
+      {
+        provide: OlZoneHelper,
+        useValue: {
+          runOutsideAngular: <T>(f: () => T) => f(),
+          runInsideAngular: <T>(f: () => T) => f(),
+        },
+      },
+    ],
   });
   const svc = runInInjectionContext(injector, () => new OlLayerService());
   return { svc, mapService };
@@ -394,5 +404,78 @@ describe('OlLayerService', () => {
     expect(svc.tileLayers().map((l) => l.id)).toEqual(['t']);
     expect(svc.vectorLayers().map((l) => l.id)).toEqual(['v']);
     expect(svc.visibleLayers().map((l) => l.id)).toEqual(['t']);
+  });
+
+  it('resolves native FeatureFormat instances directly in createVectorSource', () => {
+    const customFormat = new GeoJSON();
+    const config: VectorLayerConfig = {
+      id: 'v-native-format',
+      type: 'vector',
+      url: 'https://example.com/data.geojson',
+      format: customFormat,
+    };
+
+    svc.addLayer(config);
+    const layer = svc.getLayer('v-native-format') as any;
+    const source = layer.getSource();
+    expect(source.getFormat()).toBe(customFormat);
+  });
+
+  it('disposes of old source and underlying source on config update', () => {
+    svc.addLayer({
+      id: 'v-dispose-update',
+      type: 'vector',
+      url: 'https://example.com/old.geojson',
+      format: 'geojson',
+      cluster: { enabled: true },
+    } as VectorLayerConfig);
+
+    const layer = svc.getLayer('v-dispose-update') as any;
+    const oldClusterSource = layer.getSource();
+    const oldVectorSource = oldClusterSource.getSource();
+
+    const clusterClearSpy = vi.spyOn(oldClusterSource, 'clear');
+    const clusterDisposeSpy = vi.spyOn(oldClusterSource, 'dispose');
+    const vectorClearSpy = vi.spyOn(oldVectorSource, 'clear');
+    const vectorDisposeSpy = vi.spyOn(oldVectorSource, 'dispose');
+
+    svc.updateVectorLayerConfig('v-dispose-update', {
+      url: 'https://example.com/new.geojson',
+      format: 'geojson',
+      cluster: { enabled: false },
+    });
+
+    expect(clusterClearSpy).toHaveBeenCalled();
+    expect(clusterDisposeSpy).toHaveBeenCalledOnce();
+    expect(vectorClearSpy).toHaveBeenCalled();
+    expect(vectorDisposeSpy).toHaveBeenCalledOnce();
+  });
+
+  it('disposes of source and underlying source on layer removal', () => {
+    svc.addLayer({
+      id: 'v-dispose-remove',
+      type: 'vector',
+      url: 'https://example.com/old.geojson',
+      format: 'geojson',
+      cluster: { enabled: true },
+    } as VectorLayerConfig);
+
+    const layer = svc.getLayer('v-dispose-remove') as any;
+    const clusterSource = layer.getSource();
+    const vectorSource = clusterSource.getSource();
+
+    const clusterClearSpy = vi.spyOn(clusterSource, 'clear');
+    const clusterDisposeSpy = vi.spyOn(clusterSource, 'dispose');
+    const vectorClearSpy = vi.spyOn(vectorSource, 'clear');
+    const vectorDisposeSpy = vi.spyOn(vectorSource, 'dispose');
+    const layerDisposeSpy = vi.spyOn(layer, 'dispose');
+
+    svc.removeLayer('v-dispose-remove');
+
+    expect(clusterClearSpy).toHaveBeenCalled();
+    expect(clusterDisposeSpy).toHaveBeenCalledOnce();
+    expect(vectorClearSpy).toHaveBeenCalled();
+    expect(vectorDisposeSpy).toHaveBeenCalledOnce();
+    expect(layerDisposeSpy).toHaveBeenCalledOnce();
   });
 });
