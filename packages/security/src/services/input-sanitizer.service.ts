@@ -10,6 +10,7 @@ import {
 export interface SanitizerConfig {
   allowedTags?: string[];
   allowedAttributes?: Record<string, string[]>;
+  enableDefaultTrustedTypesPolicy?: boolean;
 }
 
 export const SANITIZER_CONFIG = new InjectionToken<SanitizerConfig>('SANITIZER_CONFIG');
@@ -37,11 +38,47 @@ export class InputSanitizerService {
 
   private readonly allowedTags: readonly string[];
   private readonly allowedAttributes: Readonly<Record<string, readonly string[]>>;
+  private readonly trustedTypesPolicy?: any;
 
   constructor() {
     const config = inject(SANITIZER_CONFIG, { optional: true }) ?? {};
     this.allowedTags = config.allowedTags ?? DEFAULT_ALLOWED_TAGS;
     this.allowedAttributes = config.allowedAttributes ?? DEFAULT_ALLOWED_ATTRIBUTES;
+
+    if (typeof window !== 'undefined' && (window as any).trustedTypes) {
+      const tt = (window as any).trustedTypes;
+      const policyName = config.enableDefaultTrustedTypesPolicy
+        ? 'default'
+        : '@angular-helpers/security';
+
+      const globalTtPolicies = (window as any).__ttPolicies || new Map();
+      (window as any).__ttPolicies = globalTtPolicies;
+
+      if (globalTtPolicies.has(policyName)) {
+        this.trustedTypesPolicy = globalTtPolicies.get(policyName);
+      } else {
+        try {
+          const policyOptions: any = {
+            createHTML: (input: string) => {
+              return sanitizeHtmlString(input, {
+                allowedTags: this.allowedTags,
+                allowedAttributes: this.allowedAttributes,
+              });
+            },
+          };
+
+          if (policyName === 'default') {
+            policyOptions.createScript = (input: string) => input;
+            policyOptions.createScriptURL = (input: string) => input;
+          }
+
+          this.trustedTypesPolicy = tt.createPolicy(policyName, policyOptions);
+          globalTtPolicies.set(policyName, this.trustedTypesPolicy);
+        } catch {
+          // Fallback if policy creation fails or policy already exists
+        }
+      }
+    }
   }
 
   isSupported(): boolean {
@@ -101,6 +138,17 @@ export class InputSanitizerService {
       allowedTags: this.allowedTags,
       allowedAttributes: this.allowedAttributes,
     });
+  }
+
+  /**
+   * Returns a TrustedHTML object (or similar if using a polyfill) if the Trusted Types policy
+   * is available, otherwise returns the raw input string.
+   */
+  getTrustedHtml(input: string): any {
+    if (this.trustedTypesPolicy) {
+      return this.trustedTypesPolicy.createHTML(input);
+    }
+    return input;
   }
 
   /**

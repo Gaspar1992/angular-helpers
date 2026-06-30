@@ -1,8 +1,10 @@
 import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
+import angular from '@analogjs/vite-plugin-angular';
 
 export default defineConfig({
   cacheDir: '../../node_modules/.vitest-cache/security',
+  plugins: [angular()],
   resolve: {
     alias: {
       '@angular-helpers/core/utils': resolve(__dirname, '../core/utils/src/index.ts'),
