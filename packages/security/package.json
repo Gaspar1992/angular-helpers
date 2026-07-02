@@ -41,7 +41,7 @@
     "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
     "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/security",
     "clean": "node ../../scripts/clean.js",
-    "test": "vitest run"
+    "test": "vitest run --root ../.. packages/security"
   },
   "peerDependencies": {
     "@angular/common": "^22.0.0",

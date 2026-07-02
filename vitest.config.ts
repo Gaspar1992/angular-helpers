@@ -5,11 +5,17 @@ import angular from '@analogjs/vite-plugin-angular';
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
 export default defineConfig({
-  plugins: [angular({ tsconfig: './tsconfig.spec.json' })],
+  root: here('.'),
+  plugins: [
+    angular({
+      tsconfig: here('./tsconfig.spec.json'),
+      workspaceRoot: here('.'),
+    }),
+  ],
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test-setup.ts'],
+    setupFiles: [here('./src/test-setup.ts')],
     include: ['packages/**/*.spec.ts', 'src/**/*.spec.ts'],
     exclude: ['packages/**/schematics/**/*.spec.ts'],
     coverage: {

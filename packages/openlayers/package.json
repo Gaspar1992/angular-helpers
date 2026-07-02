@@ -6,7 +6,7 @@
     "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
     "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/openlayers",
     "build:watch": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json --watch",
-    "test": "vitest",
+    "test": "vitest run --root ../.. packages/openlayers",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
     "clean": "node ../../scripts/clean.js",

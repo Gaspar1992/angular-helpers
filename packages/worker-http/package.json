@@ -50,7 +50,7 @@
     "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/worker-http",
     "build:watch": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json --watch",
     "build:schematics": "tsc -p tsconfig.schematics.json && node scripts/rename-to-cjs.mjs",
-    "test": "vitest",
+    "test": "vitest run --root ../.. packages/worker-http",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
     "clean": "node ../../scripts/clean.js",

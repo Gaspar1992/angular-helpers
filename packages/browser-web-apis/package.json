@@ -7,7 +7,7 @@
     "build": "ng-packagr -p ng-package.json",
     "build:prod": "node ../../scripts/sync-versions.js . src/public-api.ts && ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/browser-web-apis",
     "build:watch": "ng-packagr -p ng-package.json --watch",
-    "test": "vitest",
+    "test": "vitest run --root ../.. packages/browser-web-apis",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
     "clean": "node ../../scripts/clean.js",

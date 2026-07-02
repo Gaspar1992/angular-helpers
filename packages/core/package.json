@@ -14,7 +14,7 @@
     "build": "ng-packagr -p ng-package.json",
     "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/core",
     "clean": "node ../../scripts/clean.js",
-    "test": "vitest run",
+    "test": "vitest run --root ../.. packages/core",
     "lint": "oxlint src"
   },
   "peerDependencies": {
