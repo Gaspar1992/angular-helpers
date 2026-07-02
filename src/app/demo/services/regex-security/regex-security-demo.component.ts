@@ -63,8 +63,8 @@ import { RegexSecurityService } from '@angular-helpers/security';
         <div class="svc-result mt-4">
           <div
             class="font-mono text-sm break-all"
-            [class.text-success]="regexStatus() === 'done' && !regexResult()?.includes('❌')"
-            [class.text-error]="regexStatus() === 'error' || regexResult()?.includes('❌')"
+            [class.text-success]="regexStatus() === 'done' && !regexResult().includes('❌')"
+            [class.text-error]="regexStatus() === 'error' || regexResult().includes('❌')"
             [class.text-info]="regexStatus() === 'idle'"
           >
             {{ regexResult() }}

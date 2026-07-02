@@ -29,17 +29,18 @@ function getInterfaces(
   isV21: boolean,
 ): InterfaceDoc[] | undefined {
   if (section === 'security') {
-    return isV21
-      ? securityV21.SECURITY_INTERFACES[itemId]
-      : securityV22.SECURITY_INTERFACES[itemId];
+    const interfaces = isV21 ? securityV21.SECURITY_INTERFACES : securityV22.SECURITY_INTERFACES;
+    return (interfaces as unknown as Record<string, InterfaceDoc[]>)[itemId];
   }
   if (section === 'worker-http') {
-    return isV21
-      ? workerHttpV21.WORKER_HTTP_INTERFACES[itemId]
-      : workerHttpV22.WORKER_HTTP_INTERFACES[itemId];
+    const interfaces = isV21
+      ? workerHttpV21.WORKER_HTTP_INTERFACES
+      : workerHttpV22.WORKER_HTTP_INTERFACES;
+    return (interfaces as unknown as Record<string, InterfaceDoc[]>)[itemId];
   }
   if (section === 'storage') {
-    return isV21 ? storageV21.STORAGE_INTERFACES[itemId] : storageV22.STORAGE_INTERFACES[itemId];
+    const interfaces = isV21 ? storageV21.STORAGE_INTERFACES : storageV22.STORAGE_INTERFACES;
+    return (interfaces as Record<string, InterfaceDoc[]>)[itemId];
   }
   return undefined;
 }

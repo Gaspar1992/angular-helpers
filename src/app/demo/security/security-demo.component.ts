@@ -229,13 +229,13 @@ interface LogEntry {
                 Clear All
               </button>
             </div>
-            @if (storageResult()) {
+            @if (storageResult(); as result) {
               <div
                 class="svc-result animate-in fade-in duration-300 font-black text-sm"
-                [class.text-success]="storageResult().startsWith('✅')"
-                [class.text-error]="storageResult().startsWith('❌')"
+                [class.text-success]="result.startsWith('✅')"
+                [class.text-error]="result.startsWith('❌')"
               >
-                {{ storageResult() }}
+                {{ result }}
               </div>
             }
           </div>
@@ -343,7 +343,7 @@ interface LogEntry {
               </button>
             </div>
 
-            @if (passwordScore() !== null) {
+            @if (passwordScore(); as score) {
               <div class="svc-result animate-in zoom-in-95 duration-500">
                 <div class="flex flex-col md:flex-row md:items-center gap-12">
                   <div class="flex-1 space-y-6">
@@ -351,22 +351,22 @@ interface LogEntry {
                       <span class="kv-key">Security Score</span>
                       <span
                         class="font-black text-2xl tracking-tighter"
-                        [class.text-success]="passwordScore() >= 3"
-                        [class.text-warning]="passwordScore() === 2"
-                        [class.text-error]="passwordScore() <= 1"
+                        [class.text-success]="score >= 3"
+                        [class.text-warning]="score === 2"
+                        [class.text-error]="score <= 1"
                       >
                         {{ passwordLabel() }}
-                        <span class="opacity-30 text-lg">({{ passwordScore() }}/4)</span>
+                        <span class="opacity-30 text-lg">({{ score }}/4)</span>
                       </span>
                     </div>
                     <div class="flex gap-3 h-5">
                       @for (i of [0, 1, 2, 3, 4]; track i) {
                         <div
                           class="flex-1 rounded-full transition-all duration-700 shadow-lg shadow-black/40"
-                          [class.bg-success]="i < passwordScore() && passwordScore() >= 3"
-                          [class.bg-warning]="i < passwordScore() && passwordScore() === 2"
-                          [class.bg-error]="i < passwordScore() && passwordScore() <= 1"
-                          [class.bg-base-content/5]="i >= passwordScore()"
+                          [class.bg-success]="i < score && score >= 3"
+                          [class.bg-warning]="i < score && score === 2"
+                          [class.bg-error]="i < score && score <= 1"
+                          [class.bg-base-content/5]="i >= score"
                         ></div>
                       }
                     </div>

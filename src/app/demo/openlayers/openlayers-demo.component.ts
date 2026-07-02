@@ -1317,7 +1317,7 @@ export class OpenLayersDemoComponent {
             if (source) {
               const olFeature = source.getFeatureById(feature.id);
               if (olFeature) {
-                olFeature.set('name', feature.properties['name']);
+                olFeature.set('name', feature.properties?.['name']);
                 olFeature.set('__angular_helpers_style__', feature.style);
                 olFeature.changed();
               }
@@ -1721,7 +1721,8 @@ export class OpenLayersDemoComponent {
     const position = fromLonLat(lonLat) as [number, number];
     const id = 'random-city';
 
-    const handle = this.popupService.openComponent({
+    let handle: { close: () => void } | null = null;
+    handle = this.popupService.openComponent({
       id,
       position,
       component: DemoCityCardComponent,
@@ -1730,7 +1731,7 @@ export class OpenLayersDemoComponent {
       bindings: [
         inputBinding('name', () => String(city.properties?.['name'] ?? city.id)),
         inputBinding('population', () => Number(city.properties?.['population'] ?? 0)),
-        outputBinding<void>('closed', () => handle.close()),
+        outputBinding<void>('closed', () => handle?.close()),
       ],
     });
 
