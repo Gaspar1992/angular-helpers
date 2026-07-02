@@ -342,9 +342,6 @@ importers:
 
   packages/openlayers:
     dependencies:
-      '@angular-helpers/testing':
-        specifier: workspace:*
-        version: link:../testing
       '@angular/common':
         specifier: ^22.0.2
         version: 22.0.2(@angular/core@22.0.2(@angular/compiler@22.0.2)(rxjs@7.8.2))(rxjs@7.8.2)
@@ -358,6 +355,9 @@ importers:
       '@analogjs/vitest-angular':
         specifier: 'catalog:'
         version: 2.6.1(@analogjs/vite-plugin-angular@2.6.1(@angular-devkit/build-angular@22.0.3(fcfbe43a79f044e833973a5a306a5ad1))(@angular/build@22.0.3(560a99c2d2b09fd454aef58531746af0))(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(vite@8.0.16(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(less@4.6.6)(sass@1.101.0)(terser@5.46.2)(tsx@4.22.4)(yaml@2.9.0)))(@angular-devkit/architect@0.2200.3(chokidar@5.0.0))(@angular-devkit/schematics@22.0.3(chokidar@5.0.0))(vitest@4.1.9)
+      '@angular-helpers/testing':
+        specifier: workspace:*
+        version: link:../testing
       '@types/proj4':
         specifier: 'catalog:'
         version: 2.19.0

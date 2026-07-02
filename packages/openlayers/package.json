@@ -41,7 +41,6 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@angular-helpers/testing": "workspace:*",
     "@angular/common": "^22.0.0",
     "@angular/core": "^22.0.0",
     "ol": "^10.0.0"
@@ -54,6 +53,7 @@
   "devDependencies": {
     "@analogjs/vite-plugin-angular": "catalog:",
     "@analogjs/vitest-angular": "catalog:",
+    "@angular-helpers/testing": "workspace:*",
     "@types/proj4": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "jsdom": "catalog:",

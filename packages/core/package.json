@@ -12,7 +12,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
-    "build:prod": "ng-packagr -p ng-package.json && node ../../scripts/post-build.js ../../dist/core",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/core",
     "clean": "node ../../scripts/clean.js",
     "test": "vitest run",
     "lint": "oxlint src"
