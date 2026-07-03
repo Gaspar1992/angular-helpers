@@ -72,7 +72,6 @@
     "highlight.js": "catalog:",
     "marked": "catalog:",
     "rxjs": "catalog:",
-    "seroval": "catalog:",
     "tslib": "catalog:"
   },
   "devDependencies": {
@@ -89,6 +88,8 @@
     "@angular/compiler-cli": "catalog:",
     "@angular/platform-browser-dynamic": "catalog:",
     "@axe-core/playwright": "catalog:",
+    "@commitlint/cli": "catalog:",
+    "@commitlint/config-conventional": "catalog:",
     "@eslint/js": "catalog:",
     "@oxc-project/runtime": "catalog:",
     "@playwright/test": "catalog:",
@@ -115,6 +116,7 @@
     "eslint-plugin-oxlint": "catalog:",
     "husky": "catalog:",
     "jsdom": "catalog:",
+    "knip": "catalog:",
     "lint-staged": "catalog:",
     "ng-packagr": "catalog:",
     "ol": "catalog:",

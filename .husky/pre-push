@@ -2,4 +2,4 @@
 [ "${SKIP_BROWSER_TESTS}" = "1" ] && exit 0
 
 echo "Running smoke tests (use SKIP_BROWSER_TESTS=1 to skip)..."
-npm run test:browser:smoke
+pnpm test:browser:smoke

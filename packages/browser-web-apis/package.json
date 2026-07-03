@@ -47,6 +47,7 @@
     "rxjs": "^7.0.0"
   },
   "devDependencies": {
+    "@angular-helpers/testing": "workspace:*",
     "jsdom": "catalog:",
     "vitest": "catalog:"
   }

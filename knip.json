@@ -1,0 +1,50 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/main.ts",
+    "src/main.server.ts",
+    "src/server.ts",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts",
+    "scripts/*.js",
+    "scripts/*.ts",
+    "src/workers/*.ts",
+    "test/**/*.spec.ts",
+    "**/*.spec.ts"
+  ],
+  "project": ["src/**/*.ts", "scripts/**/*.js", "scripts/**/*.ts"],
+  "ignore": ["src/styles.css", "packages/browser-web-apis/src/test-setup.ts"],
+  "ignoreDependencies": [
+    "husky",
+    "semantic-release",
+    "semantic-release-monorepo",
+    "@semantic-release/*",
+    "@angular-devkit/*",
+    "@typescript-eslint/*",
+    "@eslint/js",
+    "eslint-plugin-oxlint",
+    "@oxc-project/runtime",
+    "@angular/compiler-cli",
+    "@angular/platform-browser-dynamic",
+    "vite-tsconfig-paths",
+    "web-streams-polyfill",
+    "concurrently",
+    "daisyui",
+    "@tailwindcss/typography"
+  ],
+  "workspaces": {
+    "packages/*": {
+      "entry": [
+        "src/index.ts",
+        "src/public-api.ts",
+        "**/src/index.ts",
+        "src/workers/*.ts",
+        "src/worker/*.ts",
+        "src/**/*.spec.ts"
+      ],
+      "project": ["src/**/*.ts", "**/src/**/*.ts"],
+      "ignoreDependencies": ["tslib"]
+    }
+  }
+}
