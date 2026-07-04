@@ -41,7 +41,9 @@ export type BrowserCapabilityId =
   | 'webLocks'
   | 'storageManager'
   | 'compressionStreams'
-  | 'speechRecognition';
+  | 'speechRecognition'
+  | 'deviceOrientation'
+  | 'deviceMotion';
 
 const BROWSER_CAPABILITIES = [
   { id: 'permissions', label: 'Permissions API', requiresSecureContext: false },
@@ -85,6 +87,8 @@ const BROWSER_CAPABILITIES = [
   { id: 'storageManager', label: 'Storage Manager API', requiresSecureContext: true },
   { id: 'compressionStreams', label: 'Compression Streams API', requiresSecureContext: false },
   { id: 'speechRecognition', label: 'Speech Recognition API', requiresSecureContext: false },
+  { id: 'deviceOrientation', label: 'Device Orientation API', requiresSecureContext: true },
+  { id: 'deviceMotion', label: 'Device Motion API', requiresSecureContext: true },
 ] as const satisfies ReadonlyArray<{
   id: BrowserCapabilityId;
   label: string;
@@ -198,6 +202,10 @@ export class BrowserCapabilityService {
           typeof window !== 'undefined' &&
           ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
         );
+      case 'deviceOrientation':
+        return typeof window !== 'undefined' && 'DeviceOrientationEvent' in window;
+      case 'deviceMotion':
+        return typeof window !== 'undefined' && 'DeviceMotionEvent' in window;
       default:
         return false;
     }

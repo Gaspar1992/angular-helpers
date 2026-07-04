@@ -143,6 +143,8 @@ export {
   type PublicKeyCredentialOptions,
   type CredentialResult,
 } from './services/credential-management.service';
+export { DeviceOrientationService } from './services/device-orientation.service';
+export { DeviceMotionService } from './services/device-motion.service';
 
 // Tokens
 export {
@@ -216,6 +218,16 @@ export {
   injectSpeechRecognition,
   type SpeechRecognitionRef,
 } from './fns/inject-speech-recognition';
+export {
+  injectDeviceOrientation,
+  type DeviceOrientationRef,
+} from './fns/inject-device-orientation';
+export { injectDeviceMotion, type DeviceMotionRef } from './fns/inject-device-motion';
+export {
+  type DeviceSensorConfig,
+  type DeviceOrientationData,
+  type DeviceMotionData,
+} from './utils/device-orientation.utils';
 
 // Utils and Guards
 export * from './utils/browser-support.util';

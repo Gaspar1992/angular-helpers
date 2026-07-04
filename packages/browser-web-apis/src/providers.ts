@@ -37,6 +37,8 @@ export { provideEyeDropper } from './providers/eye-dropper';
 export { provideIdleDetector } from './providers/idle-detector';
 export { provideBarcodeDetector } from './providers/barcode-detector';
 export { provideCredentialManagement } from './providers/credential-management';
+export { provideDeviceOrientation } from './providers/device-orientation';
+export { provideDeviceMotion } from './providers/device-motion';
 export {
   provideMediaApis,
   provideLocationApis,

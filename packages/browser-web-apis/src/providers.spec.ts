@@ -7,12 +7,16 @@ import {
   provideGeolocation,
   provideBattery,
   provideWebStorage,
+  provideDeviceOrientation,
+  provideDeviceMotion,
 } from './providers';
 import { PermissionsService } from './services/permissions.service';
 import { CameraService } from './services/camera.service';
 import { GeolocationService } from './services/geolocation.service';
 import { BatteryService } from './services/battery.service';
 import { WebStorageService } from './services/web-storage.service';
+import { DeviceOrientationService } from './services/device-orientation.service';
+import { DeviceMotionService } from './services/device-motion.service';
 
 type EnvironmentProvidersLike = {
   ɵproviders: unknown[];
@@ -53,5 +57,14 @@ describe('provideBrowserWebApis', () => {
     expect(hasProvider(providers, WebStorageService)).toBe(true);
     expect(hasProvider(providers, CameraService)).toBe(false);
     expect(hasProvider(providers, GeolocationService)).toBe(false);
+  });
+
+  it('provides DeviceOrientationService and DeviceMotionService', () => {
+    const providers = extractProviders({
+      services: [provideDeviceOrientation(), provideDeviceMotion()],
+    });
+
+    expect(hasProvider(providers, DeviceOrientationService)).toBe(true);
+    expect(hasProvider(providers, DeviceMotionService)).toBe(true);
   });
 });
