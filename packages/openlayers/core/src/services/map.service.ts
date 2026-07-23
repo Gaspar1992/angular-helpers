@@ -1,6 +1,6 @@
 // OlMapService
 
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, Signal } from '@angular/core';
 import type OLMap from 'ol/Map';
 import type { View } from 'ol';
 import type { Coordinate as OLCoordinate } from 'ol/coordinate';
@@ -17,14 +17,29 @@ export class OlMapService {
   private map: OLMap | null = null;
   private readyCallbacks: Array<(map: OLMap) => void> = [];
 
+  private _center = signal<Coordinate>([0, 0]);
+  private _zoom = signal<number>(0);
+  private _rotation = signal<number>(0);
   private _resolution = signal<number>(1);
+
+  readonly center: Signal<Coordinate> = this._center.asReadonly();
+  readonly zoom: Signal<number> = this._zoom.asReadonly();
+  readonly rotation: Signal<number> = this._rotation.asReadonly();
   /** Signal that emits the current map resolution in meters per pixel */
-  readonly resolution = this._resolution.asReadonly();
+  readonly resolution: Signal<number> = this._resolution.asReadonly();
 
   setMap(map: OLMap | null): void {
     this.map = map;
     if (map) {
-      this._resolution.set(map.getView()?.getResolution() ?? 1);
+      const view = map.getView();
+      if (view) {
+        this._center.set((view.getCenter() ?? [0, 0]) as Coordinate);
+        this._zoom.set(view.getZoom() ?? 0);
+        this._rotation.set(view.getRotation() ?? 0);
+        this._resolution.set(view.getResolution() ?? 1);
+      } else {
+        this._resolution.set(1);
+      }
       const callbacks = this.readyCallbacks.splice(0);
       for (const cb of callbacks) {
         cb(map);
@@ -34,6 +49,12 @@ export class OlMapService {
 
   setResolution(resolution: number): void {
     this._resolution.set(resolution);
+  }
+
+  updateViewState(center: Coordinate, zoom: number, rotation: number): void {
+    this._center.set(center);
+    this._zoom.set(zoom);
+    this._rotation.set(rotation);
   }
 
   getMap(): OLMap | null {

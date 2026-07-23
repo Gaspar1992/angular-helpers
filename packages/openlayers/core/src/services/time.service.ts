@@ -1,4 +1,4 @@
-import { inject, Injectable, signal, computed } from '@angular/core';
+import { inject, Injectable, signal, computed, Signal } from '@angular/core';
 import { OlZoneHelper } from './zone-helper.service';
 
 /**
@@ -18,9 +18,9 @@ export class OlTimeService {
   private animationFrameId: number | null = null;
   private lastTick: number = 0;
 
-  readonly currentTime = computed(() => this.timeSignal());
-  readonly isPlaying = computed(() => this.playingSignal());
-  readonly speed = computed(() => this.speedSignal());
+  readonly currentTime: Signal<number> = computed(() => this.timeSignal());
+  readonly isPlaying: Signal<boolean> = computed(() => this.playingSignal());
+  readonly speed: Signal<number> = computed(() => this.speedSignal());
 
   /**
    * Sets the current time manually.

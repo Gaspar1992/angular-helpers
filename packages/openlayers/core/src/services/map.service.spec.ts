@@ -145,9 +145,9 @@ describe('OlMapService', () => {
 
   it('getViewState falls back to defaults when view returns nullish values', () => {
     const view = createView();
-    view.getCenter.mockReturnValueOnce(undefined as never);
-    view.getZoom.mockReturnValueOnce(undefined as never);
-    view.getRotation.mockReturnValueOnce(undefined as never);
+    view.getCenter.mockReturnValue(undefined as never);
+    view.getZoom.mockReturnValue(undefined as never);
+    view.getRotation.mockReturnValue(undefined as never);
     svc.setMap(createMap(view));
 
     expect(svc.getViewState()).toEqual({ center: [0, 0], zoom: 0, rotation: 0 });
