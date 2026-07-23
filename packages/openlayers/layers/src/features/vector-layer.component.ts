@@ -3,6 +3,7 @@
 import {
   afterNextRender,
   Component,
+  computed,
   contentChild,
   DestroyRef,
   effect,
@@ -24,6 +25,7 @@ export class OlVectorLayerComponent {
   private mapService = inject(OlMapService);
   private destroyRef = inject(DestroyRef);
   id = input.required<string>();
+  source = input<VectorSourceConfig | string | Feature[] | undefined>(undefined);
   features = input<Feature[] | undefined>(undefined);
   url = input<string>();
   format = input<'geojson' | 'topojson' | 'kml' | FeatureFormat>();
@@ -35,6 +37,27 @@ export class OlVectorLayerComponent {
   clusterComponent = contentChild(OlClusterComponent);
   coordinateProjection = input<string>('EPSG:4326');
   autoFit = input<boolean | AutoFitOptions>(false);
+
+  readonly resolvedSourceConfig = computed<VectorSourceConfig>(() => {
+    const src = this.source();
+    const fallback: VectorSourceConfig = {
+      features: this.features(),
+      url: this.url(),
+      format: this.format(),
+      coordinateProjection: this.coordinateProjection(),
+      autoFit: this.autoFit(),
+    };
+    if (typeof src === 'string') {
+      return { ...fallback, url: src };
+    }
+    if (Array.isArray(src)) {
+      return { ...fallback, features: src };
+    }
+    if (src && typeof src === 'object') {
+      return { ...fallback, ...src };
+    }
+    return fallback;
+  });
 
   constructor() {
     // Initialize layer after DOM is ready
@@ -54,23 +77,24 @@ export class OlVectorLayerComponent {
             }
           : undefined);
 
+      const config = this.resolvedSourceConfig();
       this.layerService.addLayer({
         id: this.id(),
         type: 'vector',
-        features: this.features(),
-        url: this.url(),
-        format: this.format(),
+        features: config.features,
+        url: config.url,
+        format: config.format,
         zIndex: this.zIndex(),
         opacity: this.opacity(),
         visible: this.visible(),
         style: this.style(),
         cluster: resolvedClusterConfig,
-        coordinateProjection: this.coordinateProjection(),
-        autoFit: this.autoFit(),
+        coordinateProjection: config.coordinateProjection,
+        autoFit: config.autoFit,
       } as VectorLayerConfig);
 
       // Handle autoFit on initialization
-      const autoFitActive = this.autoFit();
+      const autoFitActive = config.autoFit;
       if (autoFitActive) {
         const parsedOptions = typeof autoFitActive === 'object' ? autoFitActive : undefined;
 
@@ -85,7 +109,7 @@ export class OlVectorLayerComponent {
                   : source;
 
               if (vectorSource) {
-                if (this.url()) {
+                if (config.url) {
                   // Wait for features to load asynchronously
                   vectorSource.on('featuresloadend', () => {
                     this.layerService.fitToLayer(this.id(), parsedOptions);
@@ -112,15 +136,16 @@ export class OlVectorLayerComponent {
 
     // Effect to sync features when input changes
     effect(() => {
-      const currentFeatures = this.features();
-      if (currentFeatures === undefined && this.url()) {
+      const config = this.resolvedSourceConfig();
+      const currentFeatures = config.features;
+      if (currentFeatures === undefined && config.url) {
         return;
       }
       if (this.layerService.getLayer(this.id())) {
         this.layerService.updateFeatures(this.id(), currentFeatures);
 
         // Fit to layer reactively if autoFit is active
-        const autoFitActive = this.autoFit();
+        const autoFitActive = config.autoFit;
         if (autoFitActive) {
           const parsedOptions = typeof autoFitActive === 'object' ? autoFitActive : undefined;
           queueMicrotask(() => {
@@ -131,11 +156,12 @@ export class OlVectorLayerComponent {
     });
 
     effect(() => {
+      const config = this.resolvedSourceConfig();
       if (this.layerService.getLayer(this.id())) {
         this.layerService.updateVectorLayerConfig(this.id(), {
-          url: this.url(),
-          format: this.format(),
-          coordinateProjection: this.coordinateProjection(),
+          url: config.url,
+          format: config.format,
+          coordinateProjection: config.coordinateProjection,
         });
       }
     });

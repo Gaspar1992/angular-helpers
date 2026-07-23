@@ -2,7 +2,15 @@
 // GPU-accelerated vector layer for large datasets (10k+ features).
 // Uses FlatStyleLike instead of ol/style/Style. Must be manually disposed.
 
-import { afterNextRender, Component, DestroyRef, effect, inject, input } from '@angular/core';
+import {
+  afterNextRender,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+} from '@angular/core';
 import type { Feature } from '@angular-helpers/openlayers/core';
 import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import VectorSource from 'ol/source/Vector';
@@ -11,6 +19,11 @@ import { LineString, Point, Polygon, Circle as CircleGeom } from 'ol/geom';
 import { fromLonLat } from 'ol/proj';
 import WebGLVectorLayer from 'ol/layer/WebGLVector';
 import type { FlatStyleLike } from 'ol/style/flat';
+import FeatureFormat from 'ol/format/Feature';
+import GeoJSON from 'ol/format/GeoJSON';
+import TopoJSON from 'ol/format/TopoJSON';
+import KML from 'ol/format/KML';
+import type { AutoFitOptions, VectorSourceConfig } from '../models/layer.types';
 
 /**
  * GPU-accelerated vector layer for rendering large datasets.
@@ -45,8 +58,18 @@ export class OlWebGLVectorLayerComponent {
 
   /** Unique layer identifier */
   id = input.required<string>();
+  /** Polymorphic vector source configuration */
+  source = input<VectorSourceConfig | string | Feature[] | undefined>(undefined);
   /** Features to render */
   features = input<Feature[]>([]);
+  /** Remote URL */
+  url = input<string>();
+  /** Format specification */
+  format = input<'geojson' | 'topojson' | 'kml' | FeatureFormat>();
+  /** Data coordinate projection */
+  coordinateProjection = input<string>('EPSG:4326');
+  /** Auto fit options */
+  autoFit = input<boolean | AutoFitOptions>(false);
   /** WebGL flat style (required — no default provided) */
   flatStyle = input.required<FlatStyleLike>();
   /** Z-index for layer ordering */
@@ -59,6 +82,27 @@ export class OlWebGLVectorLayerComponent {
   disableHitDetection = input<boolean>(true);
   /** Style variables for dynamic expressions (e.g. `['var', 'threshold']`) */
   variables = input<Record<string, string | number | boolean | number[]>>();
+
+  readonly resolvedSourceConfig = computed<VectorSourceConfig>(() => {
+    const src = this.source();
+    const fallback: VectorSourceConfig = {
+      features: this.features(),
+      url: this.url(),
+      format: this.format(),
+      coordinateProjection: this.coordinateProjection(),
+      autoFit: this.autoFit(),
+    };
+    if (typeof src === 'string') {
+      return { ...fallback, url: src };
+    }
+    if (Array.isArray(src)) {
+      return { ...fallback, features: src };
+    }
+    if (src && typeof src === 'object') {
+      return { ...fallback, ...src };
+    }
+    return fallback;
+  });
 
   private layer: WebGLVectorLayer | null = null;
   private vectorSource = new VectorSource();

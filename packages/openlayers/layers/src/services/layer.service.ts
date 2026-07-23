@@ -80,22 +80,31 @@ export class OlLayerService {
     }
   }
 
-  private createVectorSource(config: VectorLayerConfig, _map: OLMap): VectorSource {
+  private createVectorSource(config: VectorLayerConfig, map: OLMap): VectorSource {
     const sourceOptions: { url?: string; format?: any } = {};
 
-    if (config.url && config.format) {
+    if (config.url) {
       sourceOptions.url = config.url;
     }
 
-    if (config.format) {
-      if (config.format instanceof FeatureFormat) {
-        sourceOptions.format = config.format;
-      } else if (config.format === 'geojson') {
-        sourceOptions.format = new GeoJSON();
-      } else if (config.format === 'topojson') {
-        sourceOptions.format = new TopoJSON();
-      } else if (config.format === 'kml') {
-        sourceOptions.format = new KML();
+    const targetProj =
+      (map && typeof map.getView === 'function'
+        ? map.getView()?.getProjection()?.getCode()
+        : undefined) ?? 'EPSG:3857';
+    const sourceProj = config.coordinateProjection ?? 'EPSG:4326';
+    const formatOptions = { dataProjection: sourceProj, featureProjection: targetProj };
+
+    const fmt = config.format ?? (config.url ? 'geojson' : undefined);
+
+    if (fmt) {
+      if (fmt instanceof FeatureFormat) {
+        sourceOptions.format = fmt;
+      } else if (fmt === 'geojson') {
+        sourceOptions.format = new GeoJSON(formatOptions);
+      } else if (fmt === 'topojson') {
+        sourceOptions.format = new TopoJSON(formatOptions);
+      } else if (fmt === 'kml') {
+        sourceOptions.format = new KML(formatOptions);
       }
     }
 

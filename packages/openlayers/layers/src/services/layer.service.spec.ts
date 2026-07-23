@@ -553,4 +553,37 @@ describe('OlLayerService', () => {
       expect(() => noMapSvc.fitToLayer('some-id')).not.toThrow();
     });
   });
+
+  describe('VectorSourceConfig & Projections', () => {
+    it('creates vector source with GeoJSON format using configured coordinateProjection as dataProjection', () => {
+      svc.addLayer({
+        id: 'v-proj',
+        type: 'vector',
+        url: 'https://example.com/data.geojson',
+        format: 'geojson',
+        coordinateProjection: 'EPSG:4326',
+      } as VectorLayerConfig);
+
+      const layer = svc.getLayer('v-proj') as VectorLayer<any>;
+      expect(layer).toBeDefined();
+      const source = layer.getSource();
+      expect(source).toBeDefined();
+      expect(source?.getFormat()).toBeInstanceOf(GeoJSON);
+      const format = source?.getFormat() as GeoJSON;
+      expect((format as any).dataProjection.getCode()).toBe('EPSG:4326');
+    });
+
+    it('defaults format to GeoJSON when url is provided without explicit format', () => {
+      svc.addLayer({
+        id: 'v-url-default',
+        type: 'vector',
+        url: 'https://example.com/data.json',
+      } as VectorLayerConfig);
+
+      const layer = svc.getLayer('v-url-default') as VectorLayer<any>;
+      expect(layer).toBeDefined();
+      const source = layer.getSource();
+      expect(source?.getFormat()).toBeInstanceOf(GeoJSON);
+    });
+  });
 });

@@ -32,15 +32,21 @@ export interface AutoFitOptions {
   duration?: number;
 }
 
-export interface VectorLayerConfig extends LayerConfig {
-  type: 'vector';
+export interface VectorSourceConfig {
   features?: Feature[];
   url?: string;
   format?: 'geojson' | 'topojson' | 'kml' | FeatureFormat;
-  style?: Style | ((feature: Feature) => Style);
-  cluster?: ClusterConfig;
   coordinateProjection?: string;
   autoFit?: boolean | AutoFitOptions;
+  onError?: (error: Error) => void;
+  onFeaturesLoaded?: (features: Feature[]) => void;
+  throttleTime?: number;
+}
+
+export interface VectorLayerConfig extends LayerConfig, VectorSourceConfig {
+  type: 'vector';
+  style?: Style | ((feature: Feature) => Style);
+  cluster?: ClusterConfig;
 }
 
 export interface HeatmapLayerConfig extends LayerConfig {

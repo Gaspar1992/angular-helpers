@@ -137,5 +137,39 @@ describe('WebGL Layer Components', () => {
       expect(sourceDisposeSpy).toHaveBeenCalledOnce();
       expect(layerSpy).toHaveBeenCalledOnce();
     });
+
+    it('resolves string URL source input into resolvedSourceConfig', async () => {
+      const parent = await ensureRootInjector();
+      const env = createEnvironmentInjector(
+        [
+          { provide: OlMapService, useValue: mapServiceMock },
+          { provide: OlZoneHelper, useValue: passthroughZone },
+        ],
+        parent,
+      );
+
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+
+      const componentRef = createComponent(OlWebGLVectorLayerComponent, {
+        environmentInjector: env,
+        hostElement: host,
+      });
+
+      componentRef.setInput('id', 'vector-layer-url');
+      componentRef.setInput('source', 'https://example.com/data.geojson');
+      componentRef.setInput('flatStyle', {
+        'circle-radius': 5,
+        'circle-fill-color': 'blue',
+      });
+
+      expect(componentRef.instance.resolvedSourceConfig()).toEqual({
+        features: [],
+        url: 'https://example.com/data.geojson',
+        format: undefined,
+        coordinateProjection: 'EPSG:4326',
+        autoFit: false,
+      });
+    });
   });
 });
