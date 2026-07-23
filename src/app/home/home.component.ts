@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
 import { SeoService } from '../core/services/seo.service';
@@ -32,7 +32,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
             <!-- Badge -->
             <div class="badge badge-outline gap-2 p-4 rounded-full shadow-sm">
               <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              <span class="text-[11px] font-black uppercase tracking-widest text-base-content/60"
+              <span class="text-[11px] font-black uppercase tracking-widest text-base-content/80"
                 >Version 1.41.1 is out</span
               >
             </div>
@@ -48,7 +48,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
             </h1>
 
             <p
-              class="text-lg @xl:text-xl text-base-content/70 font-medium text-balance max-w-2xl m-0"
+              class="text-lg @xl:text-xl text-base-content/80 font-medium text-balance max-w-2xl m-0"
             >
               Signal-based utilities to seamlessly integrate Browser APIs, Security, Storage, and
               Web Workers. Zero boilerplate.
@@ -58,32 +58,52 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
             <div class="flex flex-wrap items-center justify-center gap-4 mt-4">
               <a
                 routerLink="/docs"
-                class="btn btn-primary btn-lg shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all font-bold px-8 border-none"
+                class="btn btn-primary btn-lg shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all font-bold px-8 border-none focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
               >
                 Get started
               </a>
               <!-- Snippet interactivo -->
               <div
-                class="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2 shadow-inner"
+                class="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2 shadow-inner relative"
               >
-                <code class="font-mono text-sm text-base-content/80">pnpm add angular-helpers</code>
+                <code class="font-mono text-sm text-base-content/90 font-semibold"
+                  >pnpm add angular-helpers</code
+                >
                 <button
-                  class="btn btn-square btn-sm btn-ghost text-base-content/60 hover:text-base-content"
-                  aria-label="Copy command"
+                  class="btn btn-square btn-sm btn-ghost text-base-content/70 hover:text-base-content focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-1 transition-colors"
+                  [class.text-success]="copied()"
+                  [attr.aria-label]="copied() ? 'Command copied to clipboard' : 'Copy command'"
                   (click)="copyInstallCommand()"
                 >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                  </svg>
+                  @if (copied()) {
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      class="text-success animate-in fade-in zoom-in duration-200"
+                    >
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  } @else {
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                  }
                 </button>
+                <span class="sr-only" role="status" aria-live="polite">
+                  {{ copied() ? 'Command copied to clipboard' : '' }}
+                </span>
               </div>
             </div>
           </header>
@@ -188,14 +208,14 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
                   </div>
 
                   <p
-                    class="text-base text-base-content/60 leading-relaxed max-w-[450px] relative z-10 font-medium m-0"
+                    class="text-base text-base-content/70 leading-relaxed max-w-[450px] relative z-10 font-medium m-0"
                     [innerHTML]="p.description"
                   ></p>
 
                   <div class="flex flex-wrap gap-2.5 mt-2 relative z-10">
                     @for (item of p.highlights; track item) {
                       <span
-                        class="badge badge-outline border-base-content/20 hover:border-base-content/40 text-base-content/70 h-auto py-1.5 whitespace-normal text-left"
+                        class="badge badge-outline border-base-content/20 hover:border-base-content/40 text-base-content/80 h-auto py-1.5 whitespace-normal text-left"
                       >
                         {{ item }}
                       </span>
@@ -206,12 +226,12 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
                     @if (p.docsLink) {
                       <a
                         [routerLink]="p.docsLink"
-                        class="btn btn-ghost btn-sm text-base-content/60 hover:text-base-content hover:bg-base-content/5 rounded-xl font-bold px-4"
+                        class="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content hover:bg-base-content/5 rounded-xl font-bold px-4 focus-visible:outline-2 focus-visible:outline-primary"
                       >
                         Explore documentation <span class="ml-1">→</span>
                       </a>
                     } @else {
-                      <span class="text-sm text-base-content/40 italic font-medium ml-4"
+                      <span class="text-sm text-base-content/50 italic font-medium ml-4"
                         >Documentation under construction</span
                       >
                     }
@@ -245,21 +265,21 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
           >
             Ready to scale?
           </h2>
-          <p class="text-lg text-base-content/60 leading-relaxed font-medium m-0 text-balance">
+          <p class="text-lg text-base-content/70 leading-relaxed font-medium m-0 text-balance">
             Join hundreds of developers building robust, high-performance Angular applications with
             our specialized helper suite.
           </p>
           <div class="flex flex-wrap gap-4 justify-center mt-4">
             <a
               routerLink="/docs"
-              class="btn btn-primary btn-lg px-10 rounded-2xl font-black shadow-xl shadow-primary/20 border-none"
+              class="btn btn-primary btn-lg px-10 rounded-2xl font-black shadow-xl shadow-primary/20 border-none focus-visible:outline-2 focus-visible:outline-primary"
             >
               Start building
             </a>
             <a
               href="https://github.com/Gaspar1992/angular-helpers"
               target="_blank"
-              class="btn btn-outline btn-lg border-base-300 hover:border-base-content/30 hover:bg-base-content/5 text-base-content font-bold px-10 rounded-2xl"
+              class="btn btn-outline btn-lg border-base-300 hover:border-base-content/30 hover:bg-base-content/5 text-base-content font-bold px-10 rounded-2xl focus-visible:outline-2 focus-visible:outline-primary"
             >
               GitHub
             </a>
@@ -303,7 +323,11 @@ export class HomeComponent {
   protected readonly packages = HOME_PACKAGES;
   protected readonly codeTabs = HOME_CODE_TABS;
 
+  protected readonly copied = signal(false);
+
   copyInstallCommand() {
     navigator.clipboard.writeText('pnpm add angular-helpers');
+    this.copied.set(true);
+    setTimeout(() => this.copied.set(false), 2000);
   }
 }

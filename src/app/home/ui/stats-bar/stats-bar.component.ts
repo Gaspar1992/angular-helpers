@@ -17,7 +17,7 @@ import type { Stat } from '../../models/stat.model';
             {{ s.value }}
           </span>
           <span
-            class="text-[11px] font-black uppercase tracking-[0.2em] text-base-content/30 text-center leading-snug"
+            class="text-[11px] font-black uppercase tracking-[0.2em] text-base-content/60 text-center leading-snug"
           >
             {{ s.label }}
           </span>
