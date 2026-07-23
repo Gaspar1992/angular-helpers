@@ -492,10 +492,7 @@ Mirroring Angular's own discriminated union pattern for HTTP features:
 ```typescript
 // Discriminated union for feature kinds — mirrors HttpFeatureKind in @angular/common/http
 export type WorkerHttpFeatureKind =
-  | 'WorkerConfigs'
-  | 'WorkerRoutes'
-  | 'WorkerFallback'
-  | 'WorkerSerialization';
+  'WorkerConfigs' | 'WorkerRoutes' | 'WorkerFallback' | 'WorkerSerialization';
 
 // Feature object — mirrors HttpFeature<K> shape (ɵ prefix = Angular convention)
 export interface WorkerHttpFeature<K extends WorkerHttpFeatureKind> {

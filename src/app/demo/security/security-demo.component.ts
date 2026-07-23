@@ -510,8 +510,7 @@ interface LogEntry {
                 <span class="kv-key block mb-2">WebAuthn Result</span>
                 <pre
                   class="text-xs font-mono text-success overflow-x-auto max-h-48 p-4 bg-base-content/5 rounded-2xl border border-base-content/5 whitespace-pre-wrap break-all"
-                  >{{ webAuthnResult() }}</pre
-                >
+                  >{{ webAuthnResult() }}</pre>
               </div>
             }
           </div>

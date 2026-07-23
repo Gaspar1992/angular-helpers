@@ -269,8 +269,7 @@
                 </div>
                 <pre
                   class="overflow-x-auto select-all p-1.5 rounded bg-black/30 max-h-24 leading-snug no-scrollbar"
-                  >{{ log.payload | json }}</pre
-                >
+                  >{{ log.payload | json }}</pre>
               </div>
             } @empty {
               <div class="text-center py-16 text-base-content/30 italic text-xs">
@@ -872,8 +871,7 @@
             </div>
             <pre
               class="text-[11px] font-mono text-purple-200 bg-black/40 p-3 rounded-xl overflow-x-auto leading-relaxed max-h-36 no-scrollbar"
-              >{{ selectedTaskSignal() | json }}</pre
-            >
+              >{{ selectedTaskSignal() | json }}</pre>
             <p class="text-[10px] text-purple-300/60 mt-2 leading-tight">
               Only this specific signal fires when you mutate this task! The parent list signal is
               not re-evaluated, maintaining premium UX performance.
@@ -929,8 +927,7 @@
                   </div>
                   <pre
                     class="overflow-x-auto p-2 rounded bg-black/40 text-[10px] leading-snug no-scrollbar select-all text-cyan-200"
-                    >{{ entry.value | json }}</pre
-                  >
+                    >{{ entry.value | json }}</pre>
                 </div>
               } @empty {
                 <div

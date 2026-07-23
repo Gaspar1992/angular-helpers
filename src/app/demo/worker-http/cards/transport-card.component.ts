@@ -47,8 +47,7 @@ import { WorkerHttpDemoLogService } from '../shared/log.service';
             </div>
             <pre
               class="text-base-content/80 whitespace-pre-wrap font-mono text-[11px] leading-relaxed"
-              >{{ result() }}</pre
-            >
+              >{{ result() }}</pre>
           </div>
         }
       </div>

@@ -889,9 +889,7 @@ Both `injectResizeObserver` and `injectIntersectionObserver` accept the `Element
 
 ```typescript
 type ElementInput =
-  | Element
-  | ElementRef<Element>
-  | Signal<Element | ElementRef<Element> | undefined>;
+  Element | ElementRef<Element> | Signal<Element | ElementRef<Element> | undefined>;
 ```
 
 This means you can pass a `viewChild` signal directly — the function will internally use an `effect` to start observing once the element is rendered, with automatic cleanup.
