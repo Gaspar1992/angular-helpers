@@ -19,6 +19,7 @@ import json from 'highlight.js/lib/languages/json';
 hljs.registerLanguage('typescript', typescript);
 hljs.registerLanguage('bash', bash);
 hljs.registerLanguage('json', json);
+hljs.configure({ ignoreUnescapedHTML: true });
 
 const LANGUAGE_ALIASES: Record<string, string> = {
   ts: 'typescript',

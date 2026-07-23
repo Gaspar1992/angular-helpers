@@ -14,6 +14,11 @@ export { provideBattery } from './providers/battery';
 export { provideWebShare } from './providers/web-share';
 export { provideWebStorage } from './providers/web-storage';
 export { provideWebSocket } from './providers/web-socket';
+export {
+  provideWebTransport,
+  WEB_TRANSPORT_SUPPORTED,
+  WEB_TRANSPORT_TOKEN,
+} from './providers/web-transport';
 export { provideWebWorker } from './providers/web-worker';
 export { provideIntersectionObserver } from './providers/intersection-observer';
 export { provideResizeObserver } from './providers/resize-observer';

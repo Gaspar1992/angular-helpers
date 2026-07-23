@@ -3197,4 +3197,50 @@ export class CompressionComponent {
   }
 }`,
   },
+  {
+    id: 'web-transport',
+    name: 'injectWebTransportResource',
+    apiName: 'WebTransport (Signal Resource)',
+    description:
+      'Provides modern, low-latency, HTTP/3 & QUIC multiplexed stream and datagram transport via Angular Signal rxResource().',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Edge ✓ · Safari (Experimental) · Firefox (Partial)',
+    notes: [
+      'Requires HTTP/3 & QUIC enabled server.',
+      'Supports datagrams (unreliable) and multiplexed streams (reliable).',
+      'Integrates with rxResource() and DestroyRef for automatic cleanup.',
+    ],
+    category: 'network',
+    methods: [
+      {
+        name: 'injectWebTransportResource',
+        signature:
+          'injectWebTransportResource(url: Signal<string> | string, options?: WebTransportResourceOptions): WebTransportResourceRef',
+        description:
+          'Creates a reactive WebTransport Signal Resource managing connection, status, and incoming datagrams.',
+        returns: 'WebTransportResourceRef',
+      },
+    ],
+    example: `import { Component, signal } from '@angular/core';
+import { injectWebTransportResource } from '@angular-helpers/browser-web-apis';
+
+@Component({
+  standalone: true,
+  template: \`
+    <p>Status: {{ wt.status() }}</p>
+    <p>Datagram: {{ wt.datagram() }}</p>
+    <button (click)="send()">Send Datagram</button>
+  \`,
+})
+export class RealtimeComponent {
+  readonly url = signal('https://example.com/webtransport');
+  readonly wt = injectWebTransportResource(this.url);
+
+  async send() {
+    await this.wt.sendDatagram(new TextEncoder().encode('Hello WebTransport!'));
+  }
+}`,
+  },
 ];

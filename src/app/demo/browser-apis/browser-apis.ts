@@ -16,6 +16,7 @@ import { ClipboardDemoComponent } from '../services/clipboard/clipboard-demo.com
 import { FileSystemAccessDemoComponent } from '../services/file-system-access/file-system-access-demo.component';
 import { BroadcastChannelDemoComponent } from '../services/broadcast-channel/broadcast-channel-demo.component';
 import { ServerSentEventsDemoComponent } from '../services/server-sent-events/server-sent-events-demo.component';
+import { WebTransportDemoComponent } from '../services/web-transport/web-transport-demo.component';
 import { GeolocationDemoComponent } from '../services/geolocation/geolocation-demo.component';
 import { NotificationDemoComponent } from '../services/notification/notification-demo.component';
 import { EyeDropperDemoComponent } from '../services/eye-dropper/eye-dropper-demo.component';
@@ -43,6 +44,7 @@ export type DemoTab = 'observers' | 'media' | 'system' | 'storage' | 'realtime' 
     FileSystemAccessDemoComponent,
     BroadcastChannelDemoComponent,
     ServerSentEventsDemoComponent,
+    WebTransportDemoComponent,
     GeolocationDemoComponent,
     NotificationDemoComponent,
     EyeDropperDemoComponent,
@@ -175,6 +177,7 @@ export type DemoTab = 'observers' | 'media' | 'system' | 'storage' | 'realtime' 
           >
             <app-broadcast-channel-demo />
             <app-server-sent-events-demo />
+            <app-web-transport-demo />
           </div>
         }
         @if (activeTab() === 'location') {

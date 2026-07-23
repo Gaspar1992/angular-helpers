@@ -53,6 +53,7 @@ Angular services package for a structured and secure access layer over browser W
 
 - `WebSocketService` - WebSocket connection handling
 - `ServerSentEventsService` - Server-Sent Events client
+- `injectWebTransportResource` - Low-latency HTTP/3 & QUIC streams and datagrams via Signal Resource (`rxResource`)
 - `BroadcastChannelService` - Inter-tab communication
 - `NetworkInformationService` - Connection info and online status
 

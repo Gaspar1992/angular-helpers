@@ -5,6 +5,8 @@ import { of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
+
+hljs.configure({ ignoreUnescapedHTML: true });
 import type { BlogPost } from '../models/blog-post.model';
 import { DomSanitizer, type SafeHtml } from '@angular/platform-browser';
 import { SeoService } from '../../core/services/seo.service';

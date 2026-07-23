@@ -28,6 +28,14 @@ export {
 } from './services/web-socket.service';
 export { type WebSocketState, type WebSocketRequestOptions } from './clients/web-socket.client';
 export {
+  WebTransportService,
+  type WebTransportState,
+  type WebTransportOptions,
+  type WebTransportCloseInfo,
+  type WebTransportHash,
+  type WebTransportBidirectionalStream,
+} from './services/web-transport.service';
+export {
   WebWorkerService,
   type WorkerMessage,
   type WorkerStatus,
@@ -228,6 +236,14 @@ export {
   type DeviceOrientationData,
   type DeviceMotionData,
 } from './utils/device-orientation.utils';
+export {
+  injectWebTransportResource,
+  injectWebTransport,
+  type WebTransportResourceRef,
+  type WebTransportResourceOptions,
+  type WebTransportSessionInfo,
+  type WebTransportStatus,
+} from './fns/inject-web-transport-resource';
 
 // Utils and Guards
 export * from './utils/browser-support.util';
