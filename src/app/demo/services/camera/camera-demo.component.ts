@@ -1,4 +1,4 @@
-import { Component, OnDestroy, signal } from '@angular/core';
+import { Component, type OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject, signal } from '@angular/core';
+import { Component, type OnDestroy, inject, signal } from '@angular/core';
 import { ServerSentEventsService } from '@angular-helpers/browser-web-apis';
 
 @Component({

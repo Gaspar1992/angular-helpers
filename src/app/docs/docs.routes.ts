@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import type { Routes } from '@angular/router';
 import { serviceDetailResolver } from './services/service-detail.resolver';
 import { overviewResolver } from './services/overview.resolver';
 import { DOCS_NAV_LIBRARIES, DOCS_NAV_SECTIONS } from './config/docs-nav.data';

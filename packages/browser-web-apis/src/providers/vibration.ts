@@ -1,4 +1,4 @@
-import { makeEnvironmentProviders, EnvironmentProviders } from '@angular/core';
+import { makeEnvironmentProviders, type EnvironmentProviders } from '@angular/core';
 import { VibrationService } from '../services/vibration.service';
 
 export function provideVibration(): EnvironmentProviders {

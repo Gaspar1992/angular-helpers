@@ -1,4 +1,4 @@
-import { Component, OnDestroy, signal } from '@angular/core';
+import { Component, type OnDestroy, signal } from '@angular/core';
 import { MediaRecorderService } from '@angular-helpers/browser-web-apis';
 
 @Component({

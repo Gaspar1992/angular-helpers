@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 import { IndexedDBTransport } from '@angular-helpers/storage/worker';
 import { detectTransferables } from '@angular-helpers/storage/worker';
-import { WorkerStorageRequest } from '@angular-helpers/storage/worker';
+import type { WorkerStorageRequest } from '@angular-helpers/storage/worker';
 
 // Instantiate our environment-agnostic local transport driver inside the Worker context
 const storageEngine = new IndexedDBTransport('fallback-passphrase-angular-helpers-default-key-sec');

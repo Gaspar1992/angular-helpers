@@ -1,4 +1,4 @@
-import { makeEnvironmentProviders, EnvironmentProviders } from '@angular/core';
+import { makeEnvironmentProviders, type EnvironmentProviders } from '@angular/core';
 import { CameraService } from '../services/camera.service';
 
 export function provideCamera(): EnvironmentProviders {

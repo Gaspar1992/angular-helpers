@@ -1,4 +1,4 @@
-import { Component, OnDestroy, signal } from '@angular/core';
+import { Component, type OnDestroy, signal } from '@angular/core';
 
 @Component({
   selector: 'app-geolocation-demo',

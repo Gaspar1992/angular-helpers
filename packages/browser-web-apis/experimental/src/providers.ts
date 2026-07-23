@@ -1,4 +1,4 @@
-import { makeEnvironmentProviders, EnvironmentProviders, Provider } from '@angular/core';
+import { makeEnvironmentProviders, type EnvironmentProviders, type Provider } from '@angular/core';
 
 import { WebBluetoothService } from './web-bluetooth.service';
 import { WebUsbService } from './web-usb.service';

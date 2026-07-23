@@ -1,4 +1,4 @@
-import { Directive, input, inject, OnDestroy, Renderer2, PLATFORM_ID } from '@angular/core';
+import { Directive, input, inject, type OnDestroy, Renderer2, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { ClipboardService } from '../services/clipboard.service';
 

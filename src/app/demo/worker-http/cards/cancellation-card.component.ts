@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject, signal } from '@angular/core';
+import { Component, type OnDestroy, inject, signal } from '@angular/core';
 import {
   createWorkerTransport,
   WorkerHttpAbortError,

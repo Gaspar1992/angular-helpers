@@ -1,10 +1,10 @@
-import { Injectable, inject, NgZone, signal, Signal } from '@angular/core';
+import { Injectable, inject, NgZone, signal, type Signal } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 import type { BrowserCapabilityId } from './browser-capability.service';
 import {
-  DeviceOrientationData,
-  DeviceSensorConfig,
+  type DeviceOrientationData,
+  type DeviceSensorConfig,
   requestDeviceOrientationPermission,
   createDeviceOrientationStream,
 } from '../utils/device-orientation.utils';

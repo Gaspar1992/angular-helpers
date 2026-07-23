@@ -1,4 +1,4 @@
-import { makeEnvironmentProviders, EnvironmentProviders } from '@angular/core';
+import { makeEnvironmentProviders, type EnvironmentProviders } from '@angular/core';
 import { PageVisibilityService } from '../services/page-visibility.service';
 
 export function providePageVisibility(): EnvironmentProviders {

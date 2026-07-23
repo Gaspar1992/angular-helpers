@@ -1,4 +1,4 @@
-import { makeEnvironmentProviders, EnvironmentProviders } from '@angular/core';
+import { makeEnvironmentProviders, type EnvironmentProviders } from '@angular/core';
 import { PerformanceObserverService } from '../services/performance-observer.service';
 
 export function providePerformanceObserver(): EnvironmentProviders {

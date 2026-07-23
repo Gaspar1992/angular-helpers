@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject, signal } from '@angular/core';
+import { Component, type OnDestroy, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { PageVisibilityService, injectPageVisibility } from '@angular-helpers/browser-web-apis';
 import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';

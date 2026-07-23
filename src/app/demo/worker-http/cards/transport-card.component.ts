@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject, signal } from '@angular/core';
+import { Component, type OnDestroy, inject, signal } from '@angular/core';
 import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
 import type { WorkerTransport } from '@angular-helpers/worker-http/transport';
 import { ECHO_WORKER_URL } from '../shared/samples';

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject, signal, viewChild, ElementRef } from '@angular/core';
+import { Component, type OnDestroy, inject, signal, viewChild, ElementRef } from '@angular/core';
 import { Subscription } from 'rxjs';
 import {
   IntersectionObserverService,

@@ -1,7 +1,7 @@
-import { ResolveFn } from '@angular/router';
+import type { ResolveFn } from '@angular/router';
 import { inject } from '@angular/core';
 import { DocsVersionService } from '../services/docs-version.service';
-import { OverviewConfig } from '../feature/unified-overview/unified-overview.component';
+import type { OverviewConfig } from '../feature/unified-overview/unified-overview.component';
 import { generateServiceGroups } from './overview.utils';
 
 // Import v21 data

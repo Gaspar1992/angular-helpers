@@ -1,4 +1,11 @@
-import { Component, effect, inject, OnDestroy, signal, resourceFromSnapshots } from '@angular/core';
+import {
+  Component,
+  effect,
+  inject,
+  type OnDestroy,
+  signal,
+  resourceFromSnapshots,
+} from '@angular/core';
 import {
   injectEntityStore,
   injectStorageSignal,

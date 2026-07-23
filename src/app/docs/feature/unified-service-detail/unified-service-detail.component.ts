@@ -4,13 +4,13 @@ import { DocsPageHeaderComponent } from '../../../docs/shared/page-header/docs-p
 import { DocsApiTableComponent } from '../../../docs/shared/api-table/docs-api-table.component';
 import { DocsTabsComponent, type DocTab } from '../../../docs/shared/tabs/docs-tabs.component';
 import {
-  ServiceDoc,
-  ApiRow,
+  type ServiceDoc,
+  type ApiRow,
   METHODS_COLUMNS,
   FN_FIELDS_COLUMNS,
   INPUTS_COLUMNS,
   OUTPUTS_COLUMNS,
-  GuideFile,
+  type GuideFile,
 } from '../../../docs/models/doc-meta.model';
 
 export interface InterfaceDoc {

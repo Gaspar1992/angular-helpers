@@ -8,7 +8,14 @@ import type {
 import type { StorageSignalOptions } from '../interfaces/storage.types';
 import { detectTransferables } from '../utils/detect-transferables';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+  useFactory: () => {
+    const factory =
+      inject<(() => Worker) | null>(STORAGE_WORKER_FACTORY, { optional: true }) ?? undefined;
+    return new WorkerStorageTransport(factory);
+  },
+})
 export class WorkerStorageTransport implements StorageTransport {
   private worker?: Worker;
   private readonly pendingRequests = new Map<
@@ -16,17 +23,8 @@ export class WorkerStorageTransport implements StorageTransport {
     { resolve: (value: any) => void; reject: (err: Error) => void }
   >();
   private readonly changeCallbacks = new Map<string, Set<(value: any) => void>>();
-  private readonly workerFactory?: () => Worker;
 
-  constructor(workerFactory?: () => Worker) {
-    try {
-      this.workerFactory =
-        workerFactory ??
-        inject<(() => Worker) | null>(STORAGE_WORKER_FACTORY, { optional: true }) ??
-        undefined;
-    } catch {
-      this.workerFactory = workerFactory;
-    }
+  constructor(private readonly workerFactory?: () => Worker) {
     if (this.workerFactory) {
       this.initWorker();
     }

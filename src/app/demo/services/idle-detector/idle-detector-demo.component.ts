@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject, signal } from '@angular/core';
+import { Component, type OnDestroy, inject, signal } from '@angular/core';
 import { UpperCasePipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { IdleDetectorService } from '@angular-helpers/browser-web-apis';

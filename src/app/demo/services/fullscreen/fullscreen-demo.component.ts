@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject, signal } from '@angular/core';
+import { Component, type OnDestroy, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FullscreenService } from '@angular-helpers/browser-web-apis';
 

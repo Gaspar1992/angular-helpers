@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { ApiColumn, ApiRow } from '../../models/doc-meta.model';
+import type { ApiColumn, ApiRow } from '../../models/doc-meta.model';
 
 @Component({
   selector: 'app-docs-api-table',

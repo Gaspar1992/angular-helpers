@@ -1,7 +1,7 @@
 import {
   Component,
   input,
-  AfterViewInit,
+  type AfterViewInit,
   ElementRef,
   viewChild,
   effect,

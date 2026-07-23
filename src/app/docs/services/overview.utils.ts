@@ -1,4 +1,4 @@
-import { ServiceDoc, ServiceCategory } from '../models/doc-meta.model';
+import type { ServiceDoc, ServiceCategory } from '../models/doc-meta.model';
 
 export interface ServiceGroupItem {
   id: string;

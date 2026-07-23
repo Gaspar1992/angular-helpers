@@ -1,4 +1,4 @@
-import { makeEnvironmentProviders, EnvironmentProviders } from '@angular/core';
+import { makeEnvironmentProviders, type EnvironmentProviders } from '@angular/core';
 import { NetworkInformationService } from '../services/network-information.service';
 
 export function provideNetworkInformation(): EnvironmentProviders {

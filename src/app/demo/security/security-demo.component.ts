@@ -10,8 +10,8 @@ import {
   RateLimiterService,
   WebAuthnService,
   SafeHtmlDirective,
-  PublicKeyCredentialCreationOptionsJSON,
-  PublicKeyCredentialRequestOptionsJSON,
+  type PublicKeyCredentialCreationOptionsJSON,
+  type PublicKeyCredentialRequestOptionsJSON,
 } from '@angular-helpers/security';
 
 interface LogEntry {

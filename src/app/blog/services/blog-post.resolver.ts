@@ -1,12 +1,12 @@
 import { inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { ResolveFn, ActivatedRouteSnapshot } from '@angular/router';
+import { type ResolveFn, ActivatedRouteSnapshot } from '@angular/router';
 import { of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
 import type { BlogPost } from '../models/blog-post.model';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer, type SafeHtml } from '@angular/platform-browser';
 import { SeoService } from '../../core/services/seo.service';
 
 // Configure marked to use highlight.js for syntax highlighting

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 import type { BrowserCapabilityId } from './browser-capability.service';
-import { BrowserPermissions } from '../interfaces/permissions.interface';
+import type { BrowserPermissions } from '../interfaces/permissions.interface';
 
 @Injectable()
 export class PermissionsService extends BrowserApiBaseService implements BrowserPermissions {

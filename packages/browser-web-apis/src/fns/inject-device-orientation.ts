@@ -9,7 +9,7 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import { type Subscription } from 'rxjs';
 import { DeviceOrientationService } from '../services/device-orientation.service';
-import { DeviceOrientationData, DeviceSensorConfig } from '../utils/device-orientation.utils';
+import type { DeviceOrientationData, DeviceSensorConfig } from '../utils/device-orientation.utils';
 
 export interface DeviceOrientationRef {
   readonly isSupported: Signal<boolean>;

@@ -1,4 +1,4 @@
-import { makeEnvironmentProviders, EnvironmentProviders } from '@angular/core';
+import { makeEnvironmentProviders, type EnvironmentProviders } from '@angular/core';
 import { PermissionsService } from '../services/permissions.service';
 import { ScreenWakeLockService } from '../services/screen-wake-lock.service';
 

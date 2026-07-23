@@ -1,4 +1,4 @@
-import { makeEnvironmentProviders, EnvironmentProviders } from '@angular/core';
+import { makeEnvironmentProviders, type EnvironmentProviders } from '@angular/core';
 import { BroadcastChannelService } from '../services/broadcast-channel.service';
 
 export function provideBroadcastChannel(): EnvironmentProviders {

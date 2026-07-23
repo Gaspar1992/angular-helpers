@@ -1,4 +1,4 @@
-import { Component, OnInit, input, signal } from '@angular/core';
+import { Component, type OnInit, input, signal } from '@angular/core';
 import { RegexSecurityDemoComponent } from '../services/regex-security/regex-security-demo.component';
 import { WebCryptoDemoComponent } from '../services/web-crypto/web-crypto-demo.component';
 import { SecureStorageDemoComponent } from '../services/secure-storage/secure-storage-demo.component';

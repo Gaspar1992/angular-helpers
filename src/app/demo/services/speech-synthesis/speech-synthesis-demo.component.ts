@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject, signal } from '@angular/core';
+import { Component, type OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SpeechSynthesisService } from '@angular-helpers/browser-web-apis';
 

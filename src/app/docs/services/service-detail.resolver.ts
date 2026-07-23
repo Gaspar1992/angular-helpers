@@ -1,9 +1,9 @@
-import { ResolveFn, Router } from '@angular/router';
+import { type ResolveFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { DocsVersionService } from '../services/docs-version.service';
 import {
-  ServiceDetailConfig,
-  InterfaceDoc,
+  type ServiceDetailConfig,
+  type InterfaceDoc,
 } from '../feature/unified-service-detail/unified-service-detail.component';
 import { SeoService } from '../../core/services/seo.service';
 

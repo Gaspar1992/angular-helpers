@@ -1,7 +1,7 @@
-import { CanActivateFn, ActivatedRouteSnapshot, Router } from '@angular/router';
+import { type CanActivateFn, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { PermissionsService } from '../services/permissions.service';
-import { PermissionNameExt } from '../interfaces/permissions.interface';
+import type { PermissionNameExt } from '../interfaces/permissions.interface';
 
 /**
  * Functional guard that checks if the user has the required permission.

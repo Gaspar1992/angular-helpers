@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, type OnDestroy, type OnInit, computed, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 
 import { SCENARIOS } from './services/benchmark-scenarios';

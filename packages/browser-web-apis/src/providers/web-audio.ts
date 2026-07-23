@@ -1,4 +1,4 @@
-import { makeEnvironmentProviders, EnvironmentProviders } from '@angular/core';
+import { makeEnvironmentProviders, type EnvironmentProviders } from '@angular/core';
 import { WebAudioService } from '../services/web-audio.service';
 
 export function provideWebAudio(): EnvironmentProviders {

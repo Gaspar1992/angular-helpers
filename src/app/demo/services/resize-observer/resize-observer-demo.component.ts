@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject, signal, viewChild, ElementRef } from '@angular/core';
+import { Component, type OnDestroy, inject, signal, viewChild, ElementRef } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';

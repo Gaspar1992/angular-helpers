@@ -3,8 +3,8 @@ import {
   signal,
   computed,
   inject,
-  OnInit,
-  OnDestroy,
+  type OnInit,
+  type OnDestroy,
   NgZone,
   effect,
 } from '@angular/core';

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CodeBlockComponent } from '../../shared/code-block/code-block.component';
 import { DocsPageHeaderComponent } from '../../shared/page-header/docs-page-header.component';
-import { BreadcrumbItem } from '../../models/doc-meta.model';
+import type { BreadcrumbItem } from '../../models/doc-meta.model';
 
 const PROVIDER_ALL_IN_ONE = `import { provideBrowserWebApis } from '@angular-helpers/browser-web-apis';
 import {

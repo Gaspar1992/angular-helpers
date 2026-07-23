@@ -1,4 +1,4 @@
-import { ServiceDoc } from '../../models/doc-meta.model';
+import type { ServiceDoc } from '../../models/doc-meta.model';
 
 export const OPENLAYERS_SERVICES: ServiceDoc[] = [
   {

@@ -1,4 +1,4 @@
-import { makeEnvironmentProviders, EnvironmentProviders } from '@angular/core';
+import { makeEnvironmentProviders, type EnvironmentProviders } from '@angular/core';
 import { SpeechSynthesisService } from '../services/speech-synthesis.service';
 
 export function provideSpeechSynthesis(): EnvironmentProviders {

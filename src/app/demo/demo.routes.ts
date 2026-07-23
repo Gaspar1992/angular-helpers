@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import type { Routes } from '@angular/router';
 import { provideSecurity } from '@angular-helpers/security';
 import { provideOpenLayers } from '@angular-helpers/openlayers/core';
 import { withLayers } from '@angular-helpers/openlayers/layers';

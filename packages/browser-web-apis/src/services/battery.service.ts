@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
-import { BatteryInfo, BatteryManager } from '../interfaces/battery.interface';
+import type { BatteryInfo, BatteryManager } from '../interfaces/battery.interface';
 import type { BrowserCapabilityId } from './browser-capability.service';
 
 // Battery API is not standardized in TypeScript, so we need this helper interface

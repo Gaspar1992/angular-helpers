@@ -1,4 +1,4 @@
-import { InjectionToken, PLATFORM_ID, inject, signal, WritableSignal } from '@angular/core';
+import { InjectionToken, PLATFORM_ID, inject, signal, type WritableSignal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 /**

@@ -1,4 +1,4 @@
-import { makeEnvironmentProviders, EnvironmentProviders, Provider } from '@angular/core';
+import { makeEnvironmentProviders, type EnvironmentProviders, type Provider } from '@angular/core';
 import { PermissionsService } from './services/permissions.service';
 
 export { providePermissions } from './providers/permissions';

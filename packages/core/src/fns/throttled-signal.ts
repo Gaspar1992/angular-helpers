@@ -5,7 +5,7 @@ import {
   inject,
   Injector,
   runInInjectionContext,
-  Signal,
+  type Signal,
   signal,
 } from '@angular/core';
 import { injectPlatform } from '../utils/platform';

@@ -1,4 +1,11 @@
-import { Directive, ElementRef, inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  inject,
+  type OnDestroy,
+  type OnInit,
+  PLATFORM_ID,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { FullscreenService } from '../services/fullscreen.service';
 import { Subscription } from 'rxjs';

@@ -10,7 +10,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SearchService, SearchResult } from '../../../core/services/search.service';
+import { SearchService, type SearchResult } from '../../../core/services/search.service';
 
 @Component({
   selector: 'app-search-modal',
