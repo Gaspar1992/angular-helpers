@@ -1,4 +1,12 @@
-import { Component, inject, ElementRef, viewChild, effect, signal } from '@angular/core';
+import {
+  Component,
+  inject,
+  ElementRef,
+  viewChild,
+  effect,
+  signal,
+  linkedSignal,
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,6 +20,7 @@ import { SearchService, SearchResult } from '../../../core/services/search.servi
   },
   template: `
     @if (search.isOpen()) {
+      @let results = search.results();
       <div
         class="fixed inset-0 z-[200] flex items-start justify-center pt-[15vh] px-4"
         (click)="close()"
@@ -64,12 +73,10 @@ import { SearchService, SearchResult } from '../../../core/services/search.servi
               (keydown.arrowUp)="navigateResults(-1)"
               aria-label="Search documentation, blog, and demos"
               role="combobox"
-              [attr.aria-expanded]="search.results().length > 0 ? 'true' : 'false'"
+              [attr.aria-expanded]="results.length > 0 ? 'true' : 'false'"
               aria-autocomplete="list"
               aria-controls="search-results-list"
-              [attr.aria-activedescendant]="
-                search.results().length > 0 ? 'result-' + activeIndex() : null
-              "
+              [attr.aria-activedescendant]="results.length > 0 ? 'result-' + activeIndex() : null"
             />
             <div
               class="flex items-center gap-2 px-2 py-1 rounded bg-base-content/5 border border-base-content/10 text-[10px] font-black uppercase text-base-content/30 tracking-widest"
@@ -89,13 +96,13 @@ import { SearchService, SearchResult } from '../../../core/services/search.servi
             aria-label="Search results"
             class="max-h-[450px] overflow-y-auto no-scrollbar py-2"
           >
-            @if (search.results().length > 0) {
+            @if (results.length > 0) {
               <div
                 class="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-base-content/20"
               >
-                Found {{ search.results().length }} results
+                Found {{ results.length }} results
               </div>
-              @for (res of search.results(); track res.url; let i = $index) {
+              @for (res of results; track res.url; let i = $index) {
                 <a
                   [routerLink]="res.url"
                   class="flex items-start gap-4 px-4 py-4 mx-2 rounded-xl transition-all duration-200 no-underline hover:bg-primary/10 group relative border border-transparent hover:border-primary/20 focus:outline-none focus:bg-primary/10 focus:border-primary/20"
@@ -235,21 +242,17 @@ export class SearchModalComponent {
 
   private inputEl = viewChild<ElementRef<HTMLInputElement>>('searchInput');
   private modalContainer = viewChild<ElementRef<HTMLDivElement>>('modalContainer');
-  activeIndex = signal(0);
+  activeIndex = linkedSignal({
+    source: () => [this.search.query(), this.search.isOpen()] as const,
+    computation: () => 0,
+  });
 
   constructor() {
     // Auto-focus input when modal opens
     effect(() => {
       if (this.search.isOpen()) {
         setTimeout(() => this.inputEl()?.nativeElement.focus(), 50);
-        this.activeIndex.set(0);
       }
-    });
-
-    // Reset index on query change
-    effect(() => {
-      this.search.query();
-      this.activeIndex.set(0);
     });
   }
 

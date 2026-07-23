@@ -1,4 +1,23 @@
-export const OFFLINE_SYNC_DEFAULTS = Object.freeze({
+export interface OfflineSyncConfig {
+  readonly DB_NAME: string;
+  readonly BYPASS_HEADER: string;
+  readonly STORE_NAME: string;
+  readonly DB_VERSION: number;
+  readonly MUTATION_METHODS: readonly string[];
+  readonly URL_STATUS: string;
+  readonly URL_DRAIN: string;
+  readonly TX_READWRITE: string;
+  readonly TX_READONLY: string;
+  readonly STATUS_OK: number;
+  readonly STATUS_ACCEPTED: number;
+  readonly STATUS_ERROR: number;
+  readonly STATUS_UNAVAILABLE: number;
+  readonly HEADER_CONTENT_TYPE: string;
+  readonly HEADER_QUEUED_ID: string;
+  readonly CONTENT_TYPE_JSON: string;
+}
+
+export const OFFLINE_SYNC_DEFAULTS: OfflineSyncConfig = Object.freeze({
   DB_NAME: 'ah_offline_sync',
   BYPASS_HEADER: 'X-Bypass-Offline-Sync',
   STORE_NAME: 'requests',

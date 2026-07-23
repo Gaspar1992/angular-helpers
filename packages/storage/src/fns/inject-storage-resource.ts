@@ -1,10 +1,7 @@
-import { inject, DestroyRef, assertInInjectionContext } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { inject, DestroyRef, assertInInjectionContext, resource } from '@angular/core';
 import { STORAGE_TRANSPORT } from '../tokens/storage.tokens';
 import { LocalStorageTransport } from '../services/local-transport';
 import { StorageSignalOptions, StorageResource } from '../interfaces/storage.types';
-import { from } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
 
 /**
  * Injects a Resource that automatically synchronizes with a storage medium (L2).
@@ -25,31 +22,21 @@ export function injectStorageResource<T>(
     transport = inject(LocalStorageTransport);
   }
 
-  const resource = rxResource<T | undefined, unknown>({
-    stream: () => {
-      return from(transport!.read<T>(key, options)).pipe(
-        map((value) => {
-          if (value !== undefined) {
-            if (options.validator && !options.validator(value)) {
-              console.warn(
-                `[injectStorageResource] Schema drift detected for key: ${key}. Data failed validation.`,
-              );
-              // Auto-repair storage with default value
-              transport!
-                .write(key, defaultValue, options)
-                .catch((err) =>
-                  console.error(`[injectStorageResource] Error repairing storage key: ${key}`, err),
-                );
-              return defaultValue;
-            }
-            return value;
-          }
+  const res = resource<T | undefined, unknown>({
+    loader: async () => {
+      const value = await transport!.read<T>(key, options);
+      if (value !== undefined) {
+        if (options.validator && !options.validator(value)) {
+          console.warn(
+            `[injectStorageResource] Schema drift detected for key: ${key}. Data failed validation.`,
+          );
+          // Auto-repair storage with default value
+          await transport!.write(key, defaultValue, options);
           return defaultValue;
-        }),
-        catchError((err) => {
-          throw err;
-        }),
-      );
+        }
+        return value;
+      }
+      return defaultValue;
     },
   });
 
@@ -59,7 +46,7 @@ export function injectStorageResource<T>(
         .write(key, newData, options)
         .catch((err) => console.error(`[injectStorageResource] Error writing key: ${key}`, err));
     } else {
-      // If undefined, maybe remove? For now just write undefined as we do in original signal
+      // If undefined, write undefined as in original implementation
       transport!
         .write(key, newData, options)
         .catch((err) => console.error(`[injectStorageResource] Error writing key: ${key}`, err));
@@ -68,11 +55,11 @@ export function injectStorageResource<T>(
 
   const set = (newValue: T | undefined) => {
     persist(newValue);
-    resource.update(() => newValue);
+    res.update(() => newValue);
   };
 
   const update = (updater: (current: T | undefined) => T | undefined) => {
-    resource.update((current) => {
+    res.update((current) => {
       const next = updater(current);
       persist(next);
       return next;
@@ -81,10 +68,10 @@ export function injectStorageResource<T>(
 
   if (options.crossTabSync && transport!.onChange) {
     const unsubscribe = transport!.onChange<T>(key, (newValue) => {
-      resource.update(() => newValue);
+      res.update(() => newValue);
     });
     inject(DestroyRef).onDestroy(() => unsubscribe());
   }
 
-  return { resource, set, update };
+  return { resource: res, set, update };
 }
