@@ -145,6 +145,28 @@ describe('injectWebTransportResource', () => {
     };
 
     const writeFn = vi.fn().mockResolvedValue(undefined);
+    const releaseLockFn = vi.fn();
+
+    class MockWebTransport {
+      ready = Promise.resolve();
+      closed = new Promise<void>(() => {});
+      datagrams = {
+        readable: {
+          getReader: () => ({
+            read: () => readCallback(),
+          }),
+        },
+        writable: {
+          getWriter: () => ({
+            write: writeFn,
+            releaseLock: releaseLockFn,
+          }),
+        },
+      };
+      close = vi.fn();
+    }
+
+    (globalThis as any).WebTransport = MockWebTransport;
 
     TestBed.configureTestingModule({
       providers: [{ provide: PLATFORM_ID, useValue: 'browser' }],
