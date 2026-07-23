@@ -1,5 +1,5 @@
-import { Type, Component } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component, type Type } from '@angular/core';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
 export interface RenderOptions<T> {

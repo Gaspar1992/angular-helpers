@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Type, Provider, forwardRef } from '@angular/core';
-import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+import { Component, EventEmitter, forwardRef, type Type, type Provider } from '@angular/core';
+import { NG_VALUE_ACCESSOR, type ControlValueAccessor } from '@angular/forms';
 
 export interface MockOptions {
   selector: string;

@@ -1,4 +1,4 @@
-import { HttpTestingController } from '@angular/common/http/testing';
+import type { HttpTestingController } from '@angular/common/http/testing';
 
 export interface MockHttpOptions {
   method?: string;

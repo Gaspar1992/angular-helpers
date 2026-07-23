@@ -1,4 +1,4 @@
-import { Provider, Type } from '@angular/core';
+import type { Provider, Type } from '@angular/core';
 import { vi } from 'vitest';
 
 /**

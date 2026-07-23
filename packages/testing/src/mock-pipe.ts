@@ -1,4 +1,4 @@
-import { Pipe, Type } from '@angular/core';
+import { Pipe, type Type } from '@angular/core';
 
 export interface MockPipeOptions {
   name: string;

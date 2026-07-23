@@ -1,4 +1,4 @@
-import { Provider } from '@angular/core';
+import type { Provider } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { vi } from 'vitest';
