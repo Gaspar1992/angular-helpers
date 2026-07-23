@@ -1,4 +1,4 @@
-import { Injectable, Signal, signal, NgZone, inject, PLATFORM_ID } from '@angular/core';
+import { Injectable, type Signal, signal, NgZone, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { Observable, Subject } from 'rxjs';
 import { WebCryptoService } from './web-crypto.service';

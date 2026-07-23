@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { StorageTransport } from '../services/storage-transport';
+import type { StorageTransport } from '../services/storage-transport';
 
 /**
  * Injection token to configure the AES-GCM encryption passphrase for StorageTransports.

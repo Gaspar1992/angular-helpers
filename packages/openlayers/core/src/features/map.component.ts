@@ -9,9 +9,9 @@ import {
   inject,
   input,
   viewChild,
-  Signal,
-  InputSignal,
-  OutputRef,
+  type Signal,
+  type InputSignal,
+  type OutputRef,
 } from '@angular/core';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';

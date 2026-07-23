@@ -1,4 +1,4 @@
-import { Injectable, InjectionToken, OnDestroy, inject } from '@angular/core';
+import { Injectable, InjectionToken, type OnDestroy, inject } from '@angular/core';
 import { WorkerPool, injectPlatform, injectWorkerPool } from '@angular-helpers/core';
 import type { RegexSecurityConfig, RegexTestResult } from './regex-types';
 import { REGEX_WORKER_INLINE } from '../workers/regex.worker.inline';

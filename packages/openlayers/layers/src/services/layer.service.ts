@@ -104,7 +104,7 @@ export class OlLayerService {
       } else if (fmt === 'topojson') {
         sourceOptions.format = new TopoJSON(formatOptions);
       } else if (fmt === 'kml') {
-        sourceOptions.format = new KML(formatOptions);
+        sourceOptions.format = new KML();
       }
     }
 

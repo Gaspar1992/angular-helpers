@@ -1,5 +1,5 @@
-import { Signal, WritableSignal } from '@angular/core';
-import { StorageSignalOptions } from './storage-options.types';
+import type { Signal, WritableSignal } from '@angular/core';
+import type { StorageSignalOptions } from './storage-options.types';
 export type { StorageSignalOptions };
 
 export interface StorageSignalState<T> {
@@ -18,7 +18,7 @@ export interface StorageSignal<T> extends WritableSignal<T> {
   readonly error: Signal<Error | null>;
 }
 
-import { ResourceRef } from '@angular/core';
+import type { ResourceRef } from '@angular/core';
 
 export interface StorageResource<T> {
   resource: ResourceRef<T | undefined>;

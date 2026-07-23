@@ -1,4 +1,4 @@
-import { inject, Injectable, signal, computed, Signal } from '@angular/core';
+import { inject, Injectable, signal, computed, type Signal } from '@angular/core';
 import { OlZoneHelper } from './zone-helper.service';
 
 /**

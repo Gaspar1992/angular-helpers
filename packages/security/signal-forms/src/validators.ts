@@ -1,8 +1,8 @@
-import { inject, resource, Signal } from '@angular/core';
+import { inject, resource, type Signal } from '@angular/core';
 import {
-  PathKind,
-  SchemaPath,
-  SchemaPathRules,
+  type PathKind,
+  type SchemaPath,
+  type SchemaPathRules,
   validate,
   validateAsync,
 } from '@angular/forms/signals';
@@ -11,10 +11,10 @@ import {
   containsScriptInjection,
   containsSqlInjectionHints,
   HibpService,
-  HtmlSanitizerOptions,
+  type HtmlSanitizerOptions,
   isHtmlSafe,
   isUrlSafe,
-  PasswordScore,
+  type PasswordScore,
 } from '@angular-helpers/security';
 
 /**

@@ -10,10 +10,15 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { Feature, OlMapService } from '@angular-helpers/openlayers/core';
+import { type Feature, OlMapService } from '@angular-helpers/openlayers/core';
 import FeatureFormat from 'ol/format/Feature';
 import { OlLayerService } from '../services/layer.service';
-import type { AutoFitOptions, ClusterConfig, VectorLayerConfig } from '../models/layer.types';
+import type {
+  AutoFitOptions,
+  ClusterConfig,
+  VectorLayerConfig,
+  VectorSourceConfig,
+} from '../models/layer.types';
 import { OlClusterComponent } from './cluster.component';
 
 @Component({

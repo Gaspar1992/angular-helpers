@@ -2,7 +2,7 @@ import {
   DestroyRef,
   Injectable,
   InjectionToken,
-  Signal,
+  type Signal,
   computed,
   inject,
   signal,

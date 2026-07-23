@@ -1,7 +1,7 @@
 import { inject, DestroyRef, assertInInjectionContext, resource } from '@angular/core';
 import { STORAGE_TRANSPORT } from '../tokens/storage.tokens';
 import { LocalStorageTransport } from '../services/local-transport';
-import { StorageSignalOptions, StorageResource } from '../interfaces/storage.types';
+import type { StorageSignalOptions, StorageResource } from '../interfaces/storage.types';
 
 /**
  * Injects a Resource that automatically synchronizes with a storage medium (L2).

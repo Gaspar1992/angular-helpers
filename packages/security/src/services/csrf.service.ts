@@ -1,6 +1,11 @@
 import { Injectable, InjectionToken, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { HttpHandlerFn, HttpInterceptorFn, HttpRequest, HttpEvent } from '@angular/common/http';
+import {
+  type HttpHandlerFn,
+  type HttpInterceptorFn,
+  HttpRequest,
+  type HttpEvent,
+} from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { WebCryptoService } from './web-crypto.service';
 

@@ -2,13 +2,13 @@ import {
   inject,
   signal,
   computed,
-  Signal,
-  WritableSignal,
+  type Signal,
+  type WritableSignal,
   assertInInjectionContext,
 } from '@angular/core';
 import { STORAGE_TRANSPORT } from '../tokens/storage.tokens';
 import { LocalStorageTransport } from './local-transport';
-import { EntityStoreOptions, StorageSignalOptions } from '../interfaces/storage.types';
+import type { EntityStoreOptions, StorageSignalOptions } from '../interfaces/storage.types';
 
 export class EntityStore<Id, Entity> {
   private readonly _rawMap = new Map<Id, Entity>();

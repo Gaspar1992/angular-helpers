@@ -1,6 +1,6 @@
 // OlLayerSwitcherComponent - UI control for managing layer visibility
 
-import { Component, input, OnInit, output, signal } from '@angular/core';
+import { Component, input, type OnInit, output, signal } from '@angular/core';
 import type { LayerSwitcherItem } from '../models/layer-switcher.types';
 
 /**

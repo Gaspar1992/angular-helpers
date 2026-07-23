@@ -1,8 +1,11 @@
-import { Inject, Injectable, Optional } from '@angular/core';
-import { StorageTransport } from './storage-transport';
+import { Injectable, inject } from '@angular/core';
+import type { StorageTransport } from './storage-transport';
 import { STORAGE_WORKER_FACTORY } from '../tokens/worker.tokens';
-import { WorkerStorageAction, WorkerStorageResponse } from '../interfaces/worker-storage.types';
-import { StorageSignalOptions } from '../interfaces/storage.types';
+import type {
+  WorkerStorageAction,
+  WorkerStorageResponse,
+} from '../interfaces/worker-storage.types';
+import type { StorageSignalOptions } from '../interfaces/storage.types';
 import { detectTransferables } from '../utils/detect-transferables';
 
 @Injectable()
@@ -13,10 +16,17 @@ export class WorkerStorageTransport implements StorageTransport {
     { resolve: (value: any) => void; reject: (err: Error) => void }
   >();
   private readonly changeCallbacks = new Map<string, Set<(value: any) => void>>();
+  private readonly workerFactory?: () => Worker;
 
-  constructor(
-    @Inject(STORAGE_WORKER_FACTORY) @Optional() private readonly workerFactory?: () => Worker,
-  ) {
+  constructor(workerFactory?: () => Worker) {
+    try {
+      this.workerFactory =
+        workerFactory ??
+        inject<(() => Worker) | null>(STORAGE_WORKER_FACTORY, { optional: true }) ??
+        undefined;
+    } catch {
+      this.workerFactory = workerFactory;
+    }
     if (this.workerFactory) {
       this.initWorker();
     }

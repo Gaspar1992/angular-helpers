@@ -1,28 +1,28 @@
-import { makeEnvironmentProviders, EnvironmentProviders, Provider } from '@angular/core';
+import { makeEnvironmentProviders, type EnvironmentProviders, type Provider } from '@angular/core';
 import { RegexSecurityService } from './services/regex-security.service';
 import { RegexAnalyzerService } from './services/regex-analyzer.service';
 import { RegexWorkerPoolService } from './services/regex-worker-pool.service';
 import { WebCryptoService } from './services/web-crypto.service';
 import {
   SecureStorageService,
-  SecureStorageConfig,
   SECURE_STORAGE_CONFIG,
+  type SecureStorageConfig,
 } from './services/secure-storage.service';
 import {
   InputSanitizerService,
-  SanitizerConfig,
   SANITIZER_CONFIG,
+  type SanitizerConfig,
 } from './services/input-sanitizer.service';
 import { PasswordStrengthService } from './services/password-strength.service';
 import { JwtService } from './services/jwt.service';
 import { SensitiveClipboardService } from './services/sensitive-clipboard.service';
-import { HibpService, HibpConfig, HIBP_CONFIG } from './services/hibp.service';
+import { HibpService, HIBP_CONFIG, type HibpConfig } from './services/hibp.service';
 import {
   RateLimiterService,
-  RateLimiterConfig,
   RATE_LIMITER_CONFIG,
+  type RateLimiterConfig,
 } from './services/rate-limiter.service';
-import { CsrfService, CsrfConfig, CSRF_CONFIG } from './services/csrf.service';
+import { CsrfService, CSRF_CONFIG, type CsrfConfig } from './services/csrf.service';
 import { SessionIdleService } from './services/session-idle.service';
 import { SecureMessageService } from './services/secure-message.service';
 import { WebAuthnService } from './services/web-authn.service';

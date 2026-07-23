@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { assessPasswordStrength, PasswordAssessment } from '../internal/validators-core';
+import { assessPasswordStrength, type PasswordAssessment } from '../internal/validators-core';
 
 /**
  * Backwards-compatible alias for the shared {@link PasswordAssessment} type.

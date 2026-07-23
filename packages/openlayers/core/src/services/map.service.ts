@@ -1,6 +1,6 @@
 // OlMapService
 
-import { Injectable, inject, signal, Signal } from '@angular/core';
+import { Injectable, inject, signal, type Signal } from '@angular/core';
 import type OLMap from 'ol/Map';
 import type { View } from 'ol';
 import type { Coordinate as OLCoordinate } from 'ol/coordinate';

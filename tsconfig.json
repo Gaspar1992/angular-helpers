@@ -10,9 +10,9 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "isolatedModules": true,
-    "experimentalDecorators": true,
+    "verbatimModuleSyntax": true,
     "importHelpers": true,
-    "target": "ES2022",
+    "target": "ES2024",
     "module": "preserve",
     "moduleResolution": "bundler",
     "paths": {

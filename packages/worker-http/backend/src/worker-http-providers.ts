@@ -1,4 +1,4 @@
-import { EnvironmentProviders, Provider, makeEnvironmentProviders } from '@angular/core';
+import { type EnvironmentProviders, type Provider, makeEnvironmentProviders } from '@angular/core';
 import { FetchBackend, HttpBackend, provideHttpClient, withFetch } from '@angular/common/http';
 
 import { WorkerHttpBackend } from './worker-http-backend';

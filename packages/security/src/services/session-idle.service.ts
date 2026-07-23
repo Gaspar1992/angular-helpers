@@ -1,4 +1,12 @@
-import { Injectable, Signal, signal, NgZone, inject, Injector, DestroyRef } from '@angular/core';
+import {
+  Injectable,
+  type Signal,
+  signal,
+  NgZone,
+  inject,
+  Injector,
+  DestroyRef,
+} from '@angular/core';
 import { Observable, Subject, fromEvent, merge, Subscription } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
 import { DOCUMENT } from '@angular/common';

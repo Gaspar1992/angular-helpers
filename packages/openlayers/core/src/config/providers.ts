@@ -1,7 +1,7 @@
 // Provider functions
 
 import type { Provider } from '@angular/core';
-import { EnvironmentProviders, makeEnvironmentProviders } from '@angular/core';
+import { type EnvironmentProviders, makeEnvironmentProviders } from '@angular/core';
 import { OlMapService } from '../services/map.service';
 import { OlZoneHelper } from '../services/zone-helper.service';
 

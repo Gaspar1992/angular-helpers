@@ -6,8 +6,8 @@ export interface OfflineSyncConfig {
   readonly MUTATION_METHODS: readonly string[];
   readonly URL_STATUS: string;
   readonly URL_DRAIN: string;
-  readonly TX_READWRITE: string;
-  readonly TX_READONLY: string;
+  readonly TX_READWRITE: IDBTransactionMode;
+  readonly TX_READONLY: IDBTransactionMode;
   readonly STATUS_OK: number;
   readonly STATUS_ACCEPTED: number;
   readonly STATUS_ERROR: number;
@@ -25,8 +25,8 @@ export const OFFLINE_SYNC_DEFAULTS: OfflineSyncConfig = Object.freeze({
   MUTATION_METHODS: Object.freeze(['POST', 'PUT', 'PATCH', 'DELETE']),
   URL_STATUS: 'https://angular-helpers.local/offline-sync-status',
   URL_DRAIN: 'https://angular-helpers.local/offline-sync-drain',
-  TX_READWRITE: 'readwrite',
-  TX_READONLY: 'readonly',
+  TX_READWRITE: 'readwrite' as IDBTransactionMode,
+  TX_READONLY: 'readonly' as IDBTransactionMode,
   STATUS_OK: 200,
   STATUS_ACCEPTED: 202,
   STATUS_ERROR: 500,

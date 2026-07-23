@@ -1,9 +1,9 @@
-import { Injectable, OnDestroy, inject } from '@angular/core';
+import { Injectable, type OnDestroy, inject } from '@angular/core';
 import {
   FetchBackend,
   HttpBackend,
   HttpErrorResponse,
-  HttpEvent,
+  type HttpEvent,
   HttpRequest,
   HttpResponse,
 } from '@angular/common/http';

@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { injectPlatform } from '@angular-helpers/core';
-import { StorageTransport } from './storage-transport';
+import type { StorageTransport } from './storage-transport';
 import { SECURE_STORAGE_PASSPHRASE } from '../tokens/storage.tokens';
 import { STORAGE_WORKER_FACTORY } from '../tokens/worker.tokens';
-import { StorageSignalOptions } from '../interfaces/storage.types';
+import type { StorageSignalOptions } from '../interfaces/storage.types';
 import { WebStorageTransport } from './transports/web-storage.transport';
 import { IndexedDBTransport } from './transports/indexeddb.transport';
 import { CacheApiTransport } from './transports/cache-api.transport';
@@ -59,7 +59,7 @@ export class LocalStorageTransport implements StorageTransport {
     this.inMemory = new InMemoryStorageTransport(this.secretPassphrase);
 
     if (isBrowser && this.workerFactory) {
-      this.workerTransport = new WorkerStorageTransport(this.workerFactory);
+      this.workerTransport = new WorkerStorageTransport();
     }
 
     // Default to in-memory in SSR/Server environments to avoid failures when browser APIs are missing

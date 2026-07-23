@@ -1,12 +1,12 @@
-import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { AbstractControl, type ValidationErrors, type ValidatorFn } from '@angular/forms';
 import {
   assessPasswordStrength,
   containsScriptInjection,
   containsSqlInjectionHints,
-  HtmlSanitizerOptions,
+  type HtmlSanitizerOptions,
   isHtmlSafe,
   isUrlSafe,
-  PasswordScore,
+  type PasswordScore,
 } from '@angular-helpers/security';
 
 export interface StrongPasswordOptions {
