@@ -43,9 +43,16 @@ const tasks = {
       cmd += ' smoke.spec.ts --project=chromium';
     } else if (mode === 'ci') {
       envVars.CI = '1';
+      // In CI we always serve the pre-built SSR bundle over plain HTTP.
+      // This avoids starting the Angular dev-server (which needs to compile
+      // the whole app on the fly and can time out inside the 180 s window).
+      envVars.BROWSER_TEST_USE_HTTPS = 'false';
+      envVars.BROWSER_TEST_SERVER_CMD = 'node dist/angular-helpers/server/server.mjs';
       cmd += ' --project=chromium --workers=1';
     } else if (mode === 'cross') {
       envVars.CI = '1';
+      envVars.BROWSER_TEST_USE_HTTPS = 'false';
+      envVars.BROWSER_TEST_SERVER_CMD = 'node dist/angular-helpers/server/server.mjs';
       cmd += ' --project=firefox-smoke --project=webkit-smoke --workers=1';
     } else if (mode === 'install') {
       cmd = 'playwright install chromium';

@@ -5,9 +5,15 @@ const host = process.env['BROWSER_TEST_HOST'] ?? 'localhost';
 const port = Number(process.env['BROWSER_TEST_PORT'] ?? '4200');
 const protocol = useHttps ? 'https' : 'http';
 const baseUrl = `${protocol}://${host}:${port}`;
-const startCommand = useHttps
+
+// BROWSER_TEST_SERVER_CMD overrides the default server command.
+// Used in CI to serve the pre-built SSR bundle instead of the Angular dev-server.
+const defaultStartCommand = useHttps
   ? `pnpm run start:https --host ${host} --port ${port}`
   : 'pnpm run start:test';
+const startCommand = process.env['BROWSER_TEST_SERVER_CMD']
+  ? `PORT=${port} HOST=${host} ${process.env['BROWSER_TEST_SERVER_CMD']}`
+  : defaultStartCommand;
 
 export default defineConfig({
   testDir: './test/browser',

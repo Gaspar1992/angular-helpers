@@ -88,11 +88,11 @@ jobs:
         with:
           playwright-cache: 'true'
 
-      - name: Generate SSL certificates
-        run: pnpm run ssl:generate
-
       - name: Build worker files
         run: pnpm run build:workers
+
+      - name: Build web app (SSR)
+        run: pnpm nx build web --configuration production
 
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
@@ -117,11 +117,11 @@ jobs:
         with:
           playwright-cache: 'true'
 
-      - name: Generate SSL certificates
-        run: pnpm run ssl:generate
-
       - name: Build worker files
         run: pnpm run build:workers
+
+      - name: Build web app (SSR)
+        run: pnpm nx build web --configuration production
 
       - name: Install Playwright Firefox and WebKit
         run: pnpm exec playwright install --with-deps firefox webkit
