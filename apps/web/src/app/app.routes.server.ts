@@ -26,6 +26,10 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
+    path: 'docs/yjs/:service',
+    renderMode: RenderMode.Client,
+  },
+  {
     path: 'blog/:slug',
     renderMode: RenderMode.Client,
   },

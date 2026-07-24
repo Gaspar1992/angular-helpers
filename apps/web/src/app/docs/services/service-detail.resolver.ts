@@ -22,6 +22,7 @@ import * as securityV22 from '../data/v22/security.data';
 import * as workerHttpV22 from '../data/v22/worker-http.data';
 import * as openlayersV22 from '../data/v22/openlayers.data';
 import * as storageV22 from '../data/v22/storage.data';
+import * as yjsV22 from '../data/v22/yjs.data';
 
 function getInterfaces(
   section: string,
@@ -97,6 +98,11 @@ export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (rout
       dataSource: isV21 ? openlayersV21.OPENLAYERS_SERVICES : openlayersV22.OPENLAYERS_SERVICES,
       backRoute: '/docs/openlayers',
       backLabel: 'openlayers',
+    },
+    yjs: {
+      dataSource: isV21 ? [] : yjsV22.YJS_SERVICES,
+      backRoute: '/docs/yjs',
+      backLabel: 'yjs',
     },
   };
 

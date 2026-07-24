@@ -98,4 +98,8 @@ export class DocsHistoryService {
       return updated.slice(0, 10);
     });
   }
+
+  clearHistory(): void {
+    this.history.set([]);
+  }
 }

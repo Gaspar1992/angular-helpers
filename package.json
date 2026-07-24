@@ -136,6 +136,7 @@
     "vite": "catalog:",
     "vite-tsconfig-paths": "catalog:",
     "vitest": "catalog:",
-    "web-streams-polyfill": "catalog:"
+    "web-streams-polyfill": "catalog:",
+    "y-protocols": "^1.0.7"
   }
 }

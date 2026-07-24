@@ -352,6 +352,26 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
       },
     ],
   },
+  {
+    id: 'yjs',
+    label: 'Yjs CRDT',
+    overviewRoute: '/docs/yjs',
+    sections: [
+      {
+        title: 'Signals & State',
+        items: [
+          { label: 'yjsSignal', route: '/docs/yjs/yjs-signal', hasFn: true },
+          {
+            label: 'injectYjsUndoManager',
+            route: '/docs/yjs/inject-yjs-undo-manager',
+            hasFn: true,
+          },
+          { label: 'injectYjsAwareness', route: '/docs/yjs/inject-yjs-awareness', hasFn: true },
+          { label: 'YjsDocService', route: '/docs/yjs/yjs-provider' },
+        ],
+      },
+    ],
+  },
 ];
 
 // Legacy export for backward compatibility during migration

@@ -23,10 +23,13 @@
   },
   "peerDependencies": {
     "@angular/core": "^22.0.0",
+    "y-protocols": "^1.0.5",
     "yjs": "^13.6.0"
   },
-  "dependencies": {
-    "tslib": "catalog:"
+  "peerDependenciesMeta": {
+    "y-protocols": {
+      "optional": true
+    }
   },
   "ngPackage": {
     "lib": {

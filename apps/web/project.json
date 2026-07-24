@@ -68,8 +68,15 @@
       },
       "outputs": ["{options.outputFile}"]
     },
+    "ssl-generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/task-runner.js ssl:generate"
+      }
+    },
     "serve": {
       "executor": "@angular/build:dev-server",
+      "dependsOn": ["ssl-generate"],
       "options": {
         "ssl": true,
         "sslKey": "apps/web/ssl/localhost.key",

@@ -137,6 +137,26 @@ export const DOCS_ROUTES: Routes = [
         title: 'Component — Angular Helpers',
       },
       {
+        path: 'yjs',
+        loadComponent: () =>
+          import('./feature/unified-overview/unified-overview.component').then(
+            (m) => m.UnifiedOverviewComponent,
+          ),
+        resolve: { config: overviewResolver },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+        title: 'yjs — Angular Helpers',
+      },
+      {
+        path: 'yjs/:service',
+        loadComponent: () =>
+          import('./feature/unified-service-detail/unified-service-detail.component').then(
+            (m) => m.UnifiedServiceDetailComponent,
+          ),
+        resolve: { config: serviceDetailResolver },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+        title: 'Service — Angular Helpers',
+      },
+      {
         path: '**',
         redirectTo: '',
       },

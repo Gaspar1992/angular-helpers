@@ -29,6 +29,7 @@ const CATEGORY_ICONS: Record<ServiceCategory, string> = {
   'ol-overlays': '📍',
   'ol-controls': '🎮',
   'ol-military': '🎖️',
+  'realtime-crdt': '🔄',
 };
 
 const CATEGORY_LABELS: Record<ServiceCategory, string> = {
@@ -47,6 +48,7 @@ const CATEGORY_LABELS: Record<ServiceCategory, string> = {
   'ol-overlays': 'Overlays',
   'ol-controls': 'Controls',
   'ol-military': 'Military',
+  'realtime-crdt': 'Realtime & CRDT',
 };
 
 /**
@@ -109,6 +111,7 @@ export function generateServiceGroups(
     'ol-overlays',
     'ol-controls',
     'ol-military',
+    'realtime-crdt',
   ];
 
   return categoryOrder

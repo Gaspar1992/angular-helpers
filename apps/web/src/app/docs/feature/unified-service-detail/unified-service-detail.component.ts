@@ -21,7 +21,7 @@ export interface InterfaceDoc {
 
 export interface ServiceDetailConfig {
   service: ServiceDoc;
-  section: 'browser-web-apis' | 'security' | 'worker-http' | 'openlayers' | 'storage';
+  section: 'browser-web-apis' | 'security' | 'worker-http' | 'openlayers' | 'storage' | 'yjs';
   backRoute: string;
   backLabel: string;
   interfaces?: InterfaceDoc[];

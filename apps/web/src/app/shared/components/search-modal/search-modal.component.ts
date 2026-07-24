@@ -1,16 +1,9 @@
-import {
-  Component,
-  inject,
-  ElementRef,
-  viewChild,
-  effect,
-  signal,
-  linkedSignal,
-} from '@angular/core';
+import { Component, inject, ElementRef, viewChild, effect, linkedSignal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SearchService, type SearchResult } from '../../../core/services/search.service';
+import { DocsHistoryService } from '../../../docs/services/docs-history.service';
 
 @Component({
   selector: 'app-search-modal',
@@ -155,38 +148,86 @@ import { SearchService, type SearchResult } from '../../../core/services/search.
                 </p>
               </div>
             } @else {
-              <div class="py-12 text-center flex flex-col items-center gap-4">
+              @if (historyService.historyItems().length > 0) {
                 <div
-                  class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl text-primary animate-pulse border border-primary/20"
+                  class="px-5 py-2.5 flex items-center justify-between border-b border-base-content/10 bg-base-content/5"
                 >
-                  ⌨️
+                  <span
+                    class="text-[10px] font-black uppercase tracking-[0.2em] text-base-content/40 flex items-center gap-1.5"
+                  >
+                    <span>🕒</span> Recent History
+                  </span>
+                  <button
+                    type="button"
+                    class="text-[10px] font-bold text-base-content/40 hover:text-error transition-colors bg-transparent border-none cursor-pointer py-0.5 px-2 rounded hover:bg-base-content/10"
+                    (click)="historyService.clearHistory()"
+                  >
+                    Clear history
+                  </button>
                 </div>
-                <p class="text-sm text-base-content/30 font-black uppercase tracking-widest">
-                  Type to search the ecosystem
-                </p>
-                <div class="flex gap-4 mt-2">
-                  <div class="flex flex-col items-center gap-1">
-                    <span
-                      class="text-[9px] font-black text-base-content/20 uppercase tracking-widest"
-                      >Select</span
+                <div class="py-2">
+                  @for (item of historyService.historyItems(); track item.route) {
+                    <a
+                      [routerLink]="item.route"
+                      class="flex items-center gap-4 px-4 py-3 mx-2 rounded-xl transition-all duration-200 no-underline hover:bg-primary/10 group relative border border-transparent hover:border-primary/20"
+                      (click)="close()"
                     >
-                    <kbd
-                      class="px-2 py-1 rounded bg-base-content/5 border border-base-content/5 text-[10px] text-base-content/40"
-                      >ENTER</kbd
-                    >
+                      <div
+                        class="p-2.5 bg-base-content/5 rounded-lg text-base-content/40 group-hover:text-primary group-hover:bg-primary/10 transition-colors shrink-0"
+                      >
+                        🕒
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <span
+                          class="text-sm font-bold text-base-content group-hover:text-primary transition-colors truncate block"
+                        >
+                          {{ item.label }}
+                        </span>
+                        <span class="text-xs text-base-content/40 font-mono truncate block">
+                          {{ item.route }}
+                        </span>
+                      </div>
+                      <span
+                        class="text-base-content/20 group-hover:text-primary transition-colors text-sm font-bold"
+                        >→</span
+                      >
+                    </a>
+                  }
+                </div>
+              } @else {
+                <div class="py-12 text-center flex flex-col items-center gap-4">
+                  <div
+                    class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl text-primary animate-pulse border border-primary/20"
+                  >
+                    ⌨️
                   </div>
-                  <div class="flex flex-col items-center gap-1">
-                    <span
-                      class="text-[9px] font-black text-base-content/20 uppercase tracking-widest"
-                      >Navigate</span
-                    >
-                    <kbd
-                      class="px-2 py-1 rounded bg-base-content/5 border border-base-content/5 text-[10px] text-base-content/40"
-                      >↑↓</kbd
-                    >
+                  <p class="text-sm text-base-content/30 font-black uppercase tracking-widest">
+                    Type to search the ecosystem
+                  </p>
+                  <div class="flex gap-4 mt-2">
+                    <div class="flex flex-col items-center gap-1">
+                      <span
+                        class="text-[9px] font-black text-base-content/20 uppercase tracking-widest"
+                        >Select</span
+                      >
+                      <kbd
+                        class="px-2 py-1 rounded bg-base-content/5 border border-base-content/5 text-[10px] text-base-content/40"
+                        >ENTER</kbd
+                      >
+                    </div>
+                    <div class="flex flex-col items-center gap-1">
+                      <span
+                        class="text-[9px] font-black text-base-content/20 uppercase tracking-widest"
+                        >Navigate</span
+                      >
+                      <kbd
+                        class="px-2 py-1 rounded bg-base-content/5 border border-base-content/5 text-[10px] text-base-content/40"
+                        >↑↓</kbd
+                      >
+                    </div>
                   </div>
                 </div>
-              </div>
+              }
             }
           </div>
 
@@ -238,6 +279,7 @@ import { SearchService, type SearchResult } from '../../../core/services/search.
 })
 export class SearchModalComponent {
   protected readonly search = inject(SearchService);
+  protected readonly historyService = inject(DocsHistoryService);
   private readonly router = inject(Router);
 
   private inputEl = viewChild<ElementRef<HTMLInputElement>>('searchInput');

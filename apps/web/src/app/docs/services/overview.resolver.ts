@@ -19,6 +19,7 @@ import * as securityV22 from '../data/v22/security.data';
 import * as workerHttpV22 from '../data/v22/worker-http.data';
 import * as openlayersV22 from '../data/v22/openlayers.data';
 import * as storageV22 from '../data/v22/storage.data';
+import * as yjsV22 from '../data/v22/yjs.data';
 
 function getOverviewConfig(section: string, version: 'v21' | 'v22'): OverviewConfig {
   const isV21 = version === 'v21';
@@ -35,6 +36,7 @@ function getOverviewConfig(section: string, version: 'v21' | 'v22'): OverviewCon
   const openlayersServices = isV21
     ? openlayersV21.OPENLAYERS_SERVICES
     : openlayersV22.OPENLAYERS_SERVICES;
+  const yjsServices = isV21 ? [] : yjsV22.YJS_SERVICES;
 
   const OVERVIEW_CONFIGS: Record<string, OverviewConfig> = {
     core: {
@@ -157,6 +159,23 @@ function getOverviewConfig(section: string, version: 'v21' | 'v22'): OverviewCon
   })
   export class MapComponent {}`,
       serviceGroups: generateServiceGroups(openlayersServices),
+    },
+    yjs: {
+      packageName: 'yjs',
+      npmPackage: '@angular-helpers/yjs',
+      lead: 'Bidirectional Angular Signal bindings for Yjs CRDT real-time collaborative state.',
+      providerExample: `import { yjsSignal, YjsDocService } from '@angular-helpers/yjs';
+  
+  const yjs = inject(YjsDocService);
+  const yMap = yjs.doc.getMap('doc');
+  const title = yjsSignal(yMap, { key: 'title' });`,
+      serviceGroups: [
+        {
+          label: 'Signals & State',
+          icon: '🔄',
+          items: yjsServices,
+        },
+      ],
     },
   };
 
