@@ -1,0 +1,9 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@angular-helpers/openlayers",
+  "projectType": "library",
+  "sourceRoot": "libs/openlayers/src",
+  "prefix": "ol",
+  "targets": {},
+  "tags": ["type:lib", "scope:openlayers"]
+}

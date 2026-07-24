@@ -1,0 +1,9 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@angular-helpers/<%= name %>",
+  "projectType": "library",
+  "sourceRoot": "libs/<%= name %>/src",
+  "prefix": "lib",
+  "targets": {},
+  "tags": ["type:lib", "scope:<%= name %>"]
+}

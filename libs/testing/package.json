@@ -1,0 +1,26 @@
+{
+  "name": "@angular-helpers/testing",
+  "version": "22.0.0",
+  "description": "Streamlined testing utilities for modern Angular applications",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gaspar1992/angular-helpers"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/testing",
+    "clean": "node ../../scripts/clean.js",
+    "test": "vitest run --root ../.. libs/testing",
+    "lint": "oxlint src"
+  },
+  "peerDependencies": {
+    "@angular/core": "^22.0.0",
+    "@angular/common": "^22.0.0",
+    "@angular/router": "^22.0.0",
+    "vitest": "^2.0.0 || ^3.0.0 || ^4.0.0"
+  }
+}

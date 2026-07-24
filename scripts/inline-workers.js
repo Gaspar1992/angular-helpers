@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const srcPath = path.join(__dirname, '../packages/security/src/workers/regex.worker.ts');
-const destPath = path.join(__dirname, '../packages/security/src/workers/regex.worker.inline.ts');
+const srcPath = path.join(__dirname, '../libs/security/src/workers/regex.worker.ts');
+const destPath = path.join(__dirname, '../libs/security/src/workers/regex.worker.inline.ts');
 
 try {
   // Compile the worker TypeScript source directly using esbuild (no prior build needed)

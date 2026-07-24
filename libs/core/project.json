@@ -1,0 +1,9 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@angular-helpers/core",
+  "projectType": "library",
+  "sourceRoot": "libs/core/src",
+  "prefix": "lib",
+  "targets": {},
+  "tags": ["type:lib", "scope:core"]
+}

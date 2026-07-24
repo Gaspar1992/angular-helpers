@@ -1,0 +1,63 @@
+{
+  "name": "@angular-helpers/openlayers",
+  "version": "22.0.0",
+  "description": "Modern Angular wrapper for OpenLayers with modular architecture, standalone components, and hybrid template/programmatic API",
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/openlayers",
+    "build:watch": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json --watch",
+    "test": "vitest run --root ../.. libs/openlayers",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "clean": "node ../../scripts/clean.js",
+    "lint": "oxlint src",
+    "prepublishOnly": "pnpm run build"
+  },
+  "homepage": "https://gaspar1992.github.io/angular-helpers/docs/openlayers",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gaspar1992/angular-helpers"
+  },
+  "bugs": {
+    "url": "https://github.com/Gaspar1992/angular-helpers/issues"
+  },
+  "keywords": [
+    "angular",
+    "openlayers",
+    "ol",
+    "mapping",
+    "gis",
+    "cartography",
+    "standalone",
+    "signals",
+    "modular",
+    "military",
+    "milsymbol"
+  ],
+  "author": "",
+  "license": "MIT",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "ol": "^10.0.0"
+  },
+  "peerDependenciesMeta": {
+    "ol": {
+      "optional": false
+    }
+  },
+  "devDependencies": {
+    "@analogjs/vite-plugin-angular": "catalog:",
+    "@analogjs/vitest-angular": "catalog:",
+    "@angular-helpers/testing": "workspace:*",
+    "@vitest/coverage-v8": "catalog:",
+    "jsdom": "catalog:",
+    "ol": "catalog:",
+    "proj4": "catalog:",
+    "vitest": "catalog:"
+  }
+}

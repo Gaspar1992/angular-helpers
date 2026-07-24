@@ -1,0 +1,9 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@angular-helpers/browser-web-apis",
+  "projectType": "library",
+  "sourceRoot": "libs/browser-web-apis/src",
+  "prefix": "lib",
+  "targets": {},
+  "tags": ["type:lib", "scope:browser-web-apis"]
+}

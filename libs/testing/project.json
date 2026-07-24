@@ -1,0 +1,9 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@angular-helpers/testing",
+  "projectType": "library",
+  "sourceRoot": "libs/testing/src",
+  "prefix": "lib",
+  "targets": {},
+  "tags": ["type:lib", "scope:testing"]
+}

@@ -13,11 +13,11 @@ ssl/
 /bazel-out
 
 # Packages dist folders
-packages/*/dist
+libs/*/dist
 dist/
 
 # Generated workers (built by Vite and copied to public)
-public/assets/workers/
+apps/web/public/assets/workers/
 
 # Node
 node_modules/
@@ -145,3 +145,9 @@ tmp/
 temp/
 .turbo/
 
+
+
+
+.nx/cache
+.nx/workspace-data
+.nx/migrate-runs

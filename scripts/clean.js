@@ -25,12 +25,12 @@ if (args.length > 0) {
     deletePath(path.join(cwd, folder));
   }
 
-  // Clean in packages/*/
-  const packagesDir = path.join(cwd, 'packages');
-  if (fs.existsSync(packagesDir) && fs.statSync(packagesDir).isDirectory()) {
-    const packages = fs.readdirSync(packagesDir);
-    for (const pkg of packages) {
-      const pkgDir = path.join(packagesDir, pkg);
+  // Clean in libs/*/
+  const libsDir = path.join(cwd, 'libs');
+  if (fs.existsSync(libsDir) && fs.statSync(libsDir).isDirectory()) {
+    const libs = fs.readdirSync(libsDir);
+    for (const pkg of libs) {
+      const pkgDir = path.join(libsDir, pkg);
       if (fs.statSync(pkgDir).isDirectory()) {
         for (const folder of defaultFolders) {
           deletePath(path.join(pkgDir, folder));

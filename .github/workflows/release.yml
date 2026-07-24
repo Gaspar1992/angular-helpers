@@ -51,47 +51,47 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm exec semantic-release
-        working-directory: packages/core
+        working-directory: libs/core
 
       - name: Semantic Release (Browser Web APIs)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm exec semantic-release
-        working-directory: packages/browser-web-apis
+        working-directory: libs/browser-web-apis
 
       - name: Semantic Release (Storage)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm exec semantic-release
-        working-directory: packages/storage
+        working-directory: libs/storage
 
       - name: Semantic Release (Security)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm exec semantic-release
-        working-directory: packages/security
+        working-directory: libs/security
 
       - name: Semantic Release (Worker HTTP)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm exec semantic-release
-        working-directory: packages/worker-http
+        working-directory: libs/worker-http
 
       - name: Semantic Release (OpenLayers)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm exec semantic-release
-        working-directory: packages/openlayers
+        working-directory: libs/openlayers
 
       - name: Semantic Release (Testing)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm exec semantic-release
-        working-directory: packages/testing
+        working-directory: libs/testing
 
       - name: Strip workspace protocol from built packages dynamically
         run: |
-          core_version=$(node -p "require('./packages/core/package.json').version")
+          core_version=$(node -p "require('./libs/core/package.json').version")
           echo "Replacing workspace:* with ^$core_version"
           find dist -name "package.json" -exec sed -i "s/\"workspace:\*\"/\"^$core_version\"/g" {} +
 
@@ -108,13 +108,13 @@ jobs:
         id: release_changes
         run: |
           if git diff --quiet -- \
-            packages/core/CHANGELOG.md packages/core/package.json \
-            packages/browser-web-apis/CHANGELOG.md packages/browser-web-apis/package.json \
-            packages/storage/CHANGELOG.md packages/storage/package.json \
-            packages/security/CHANGELOG.md packages/security/package.json \
-            packages/worker-http/CHANGELOG.md packages/worker-http/package.json \
-            packages/openlayers/CHANGELOG.md packages/openlayers/package.json \
-            packages/testing/CHANGELOG.md packages/testing/package.json \
+            libs/core/CHANGELOG.md libs/core/package.json \
+            libs/browser-web-apis/CHANGELOG.md libs/browser-web-apis/package.json \
+            libs/storage/CHANGELOG.md libs/storage/package.json \
+            libs/security/CHANGELOG.md libs/security/package.json \
+            libs/worker-http/CHANGELOG.md libs/worker-http/package.json \
+            libs/openlayers/CHANGELOG.md libs/openlayers/package.json \
+            libs/testing/CHANGELOG.md libs/testing/package.json \
             pnpm-lock.yaml; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
@@ -140,18 +140,18 @@ jobs:
             ## Notes
             - Required because `main` is protected and disallows direct pushes.
           add-paths: |
-            packages/core/CHANGELOG.md
-            packages/core/package.json
-            packages/browser-web-apis/CHANGELOG.md
-            packages/browser-web-apis/package.json
-            packages/storage/CHANGELOG.md
-            packages/storage/package.json
-            packages/security/CHANGELOG.md
-            packages/security/package.json
-            packages/worker-http/CHANGELOG.md
-            packages/worker-http/package.json
-            packages/openlayers/CHANGELOG.md
-            packages/openlayers/package.json
-            packages/testing/CHANGELOG.md
-            packages/testing/package.json
+            libs/core/CHANGELOG.md
+            libs/core/package.json
+            libs/browser-web-apis/CHANGELOG.md
+            libs/browser-web-apis/package.json
+            libs/storage/CHANGELOG.md
+            libs/storage/package.json
+            libs/security/CHANGELOG.md
+            libs/security/package.json
+            libs/worker-http/CHANGELOG.md
+            libs/worker-http/package.json
+            libs/openlayers/CHANGELOG.md
+            libs/openlayers/package.json
+            libs/testing/CHANGELOG.md
+            libs/testing/package.json
             pnpm-lock.yaml

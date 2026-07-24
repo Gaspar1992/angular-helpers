@@ -2,11 +2,42 @@ import angularEslint from '@angular-eslint/eslint-plugin';
 import tsparser from '@typescript-eslint/parser';
 import angularTemplateEslint from '@angular-eslint/eslint-plugin-template';
 import angularTemplateParser from '@angular-eslint/template-parser';
+import nxEslintPlugin from '@nx/eslint-plugin';
 import { configs } from 'angular-eslint';
 
 export default [
   {
     ignores: ['**/coverage/**', '**/dist/**', '**/node_modules/**'],
+  },
+  {
+    plugins: {
+      '@nx': nxEslintPlugin,
+    },
+  },
+  {
+    files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+    languageOptions: {
+      parser: tsparser,
+    },
+    rules: {
+      '@nx/enforce-module-boundaries': [
+        'error',
+        {
+          enforceBuildableLibDependency: true,
+          allow: [],
+          depConstraints: [
+            {
+              sourceTag: 'type:app',
+              onlyDependOnLibsWithTags: ['type:lib'],
+            },
+            {
+              sourceTag: 'type:lib',
+              onlyDependOnLibsWithTags: ['type:lib'],
+            },
+          ],
+        },
+      ],
+    },
   },
   {
     files: ['**/*.ts'],
@@ -24,7 +55,7 @@ export default [
     },
   },
   {
-    files: ['packages/openlayers/**/*.ts'],
+    files: ['libs/openlayers/**/*.ts'],
     languageOptions: {
       parser: tsparser,
     },
@@ -43,7 +74,7 @@ export default [
     },
   },
   {
-    files: ['src/**/*.ts'],
+    files: ['apps/web/**/*.ts'],
     languageOptions: {
       parser: tsparser,
     },
@@ -58,7 +89,7 @@ export default [
     },
   },
   {
-    files: ['packages/browser-web-apis/**/*.ts'],
+    files: ['libs/browser-web-apis/**/*.ts'],
     languageOptions: {
       parser: tsparser,
     },
@@ -71,9 +102,9 @@ export default [
   },
   {
     files: [
-      'packages/*/src/worker/**/*.ts',
-      'packages/*/src/workers/**/*.ts',
-      'src/workers/**/*.ts',
+      'libs/*/src/worker/**/*.ts',
+      'libs/*/src/workers/**/*.ts',
+      'apps/web/src/workers/**/*.ts',
       '**/*.worker.ts',
     ],
     languageOptions: {

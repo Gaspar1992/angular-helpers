@@ -1,0 +1,54 @@
+{
+  "name": "@angular-helpers/browser-web-apis",
+  "version": "22.0.0",
+  "description": "Sistema de servicios Angular para acceso formalizado a Browser Web APIs (cámara, permisos, geolocalización, etc.)",
+  "scripts": {
+    "prebuild": "node ../../scripts/sync-versions.js . src/public-api.ts",
+    "build": "ng-packagr -p ng-package.json",
+    "build:prod": "node ../../scripts/sync-versions.js . src/public-api.ts && ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/browser-web-apis",
+    "build:watch": "ng-packagr -p ng-package.json --watch",
+    "test": "vitest run --root ../.. libs/browser-web-apis",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "clean": "node ../../scripts/clean.js",
+    "lint": "oxlint src",
+    "prepublishOnly": "pnpm run build"
+  },
+  "homepage": "https://gaspar1992.github.io/angular-helpers/docs/browser-web-apis",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gaspar1992/angular-helpers"
+  },
+  "bugs": {
+    "url": "https://github.com/Gaspar1992/angular-helpers/issues"
+  },
+  "keywords": [
+    "angular",
+    "typescript",
+    "browser",
+    "web-apis",
+    "camera",
+    "permissions",
+    "geolocation",
+    "media",
+    "sensors"
+  ],
+  "author": "",
+  "license": "MIT",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@angular/core": "^22.0.0",
+    "@angular/common": "^22.0.0",
+    "@angular/platform-browser": "^22.0.0",
+    "@angular/ssr": "^22.0.0",
+    "rxjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@angular-helpers/testing": "workspace:*",
+    "jsdom": "catalog:",
+    "vitest": "catalog:"
+  }
+}

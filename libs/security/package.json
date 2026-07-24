@@ -1,0 +1,71 @@
+{
+  "name": "@angular-helpers/security",
+  "version": "22.0.0",
+  "description": "Angular security helpers for preventing ReDoS and other security vulnerabilities",
+  "keywords": [
+    "angular",
+    "security",
+    "regex",
+    "redos",
+    "prevention",
+    "web-worker",
+    "builder-pattern",
+    "encryption",
+    "web-crypto",
+    "hmac",
+    "xss",
+    "sanitization",
+    "password-strength",
+    "secure-storage",
+    "session-idle",
+    "inactivity",
+    "postmessage",
+    "iframe",
+    "secure-channel"
+  ],
+  "author": "Angular Helpers Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gaspar1992/angular-helpers"
+  },
+  "bugs": {
+    "url": "https://github.com/Gaspar1992/angular-helpers/issues"
+  },
+  "homepage": "https://gaspar1992.github.io/angular-helpers/docs/security",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prebuild": "node ../../scripts/inline-workers.js",
+    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/security",
+    "clean": "node ../../scripts/clean.js",
+    "test": "vitest run --root ../.. libs/security"
+  },
+  "peerDependencies": {
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0",
+    "rxjs": "^7.0.0 || ^8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@angular/forms": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@angular-helpers/core": "workspace:*",
+    "tslib": "catalog:"
+  },
+  "ngPackage": {
+    "lib": {
+      "entryFile": "src/index.ts"
+    },
+    "dest": "../../dist/security",
+    "allowedNonPeerDependencies": [
+      "tslib",
+      "@angular-helpers/core"
+    ]
+  }
+}

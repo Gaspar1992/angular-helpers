@@ -1,0 +1,55 @@
+{
+  "name": "@angular-helpers/storage",
+  "version": "22.0.0",
+  "description": "Sistema de almacenamiento reactivo premium para Angular con soporte para Cache API, IndexedDB, compresión TOON y blindaje en runtime.",
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/storage",
+    "build:watch": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json --watch",
+    "test": "vitest run --root ../.. libs/storage",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "clean": "node ../../scripts/clean.js",
+    "lint": "oxlint src",
+    "prepublishOnly": "pnpm run build"
+  },
+  "homepage": "https://gaspar1992.github.io/angular-helpers/docs/storage",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gaspar1992/angular-helpers"
+  },
+  "bugs": {
+    "url": "https://github.com/Gaspar1992/angular-helpers/issues"
+  },
+  "keywords": [
+    "angular",
+    "typescript",
+    "storage",
+    "reactive",
+    "indexeddb",
+    "cache-api",
+    "signals",
+    "toon",
+    "immutability"
+  ],
+  "author": "",
+  "license": "MIT",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@angular/core": "^22.0.0",
+    "@angular/common": "^22.0.0",
+    "@angular/platform-browser": "^22.0.0",
+    "rxjs": "^7.0.0"
+  },
+  "dependencies": {
+    "@angular-helpers/core": "workspace:*",
+    "tslib": "catalog:"
+  },
+  "devDependencies": {
+    "jsdom": "catalog:",
+    "vitest": "catalog:"
+  }
+}

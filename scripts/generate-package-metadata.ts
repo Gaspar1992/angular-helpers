@@ -7,7 +7,7 @@
  *
  * Run: npx tsx scripts/generate-package-metadata.ts
  *
- * Generates: src/app/core/config/packages.generated.ts
+ * Generates: apps/web/src/app/core/config/libs.generated.ts
  */
 
 /* oxlint-disable no-console */
@@ -68,14 +68,14 @@ function countInjectFunctionsInDirectory(dirPath: string): { functions: string[]
 }
 
 function getExperimentalServices(): string[] {
-  const experimentalDir = 'packages/browser-web-apis/experimental/src';
+  const experimentalDir = 'libs/browser-web-apis/experimental/src';
   const { services } = countServicesInDirectory(experimentalDir);
   return services;
 }
 
 function generateMetadata(): PackageMetadata {
-  const browserWebApisDir = 'packages/browser-web-apis/src';
-  const experimentalDir = 'packages/browser-web-apis/experimental/src';
+  const browserWebApisDir = 'libs/browser-web-apis/src';
+  const experimentalDir = 'libs/browser-web-apis/experimental/src';
 
   // Count services (main + experimental)
   const mainServices = countServicesInDirectory(`${browserWebApisDir}/services`);
@@ -90,9 +90,7 @@ function generateMetadata(): PackageMetadata {
   ];
 
   // Get version from package.json
-  const packageJson = JSON.parse(
-    fs.readFileSync('packages/browser-web-apis/package.json', 'utf-8'),
-  );
+  const packageJson = JSON.parse(fs.readFileSync('libs/browser-web-apis/package.json', 'utf-8'));
 
   return {
     serviceCount: allServices.length,
@@ -144,14 +142,14 @@ function main(): void {
   console.log(`   - Main: ${mainInjectCount}`);
   console.log(`   - Experimental: ${experimentalInjectCount}\n`);
 
-  const outputPath = 'src/app/core/config/packages.generated.ts';
+  const outputPath = 'apps/web/src/app/core/config/libs.generated.ts';
   const content = generateTypeScriptFile(metadata);
 
   fs.writeFileSync(outputPath, content, 'utf-8');
 
   console.log(`✅ Generated: ${outputPath}`);
   console.log('\nNext steps:');
-  console.log('  1. Import from packages.generated.ts in packages.data.ts');
+  console.log('  1. Import from libs.generated.ts in libs.data.ts');
   console.log('  2. Update HOME_STATS to use INJECT_FN_COUNT');
   console.log('  3. Run: npm run test:docs-consistency');
 }

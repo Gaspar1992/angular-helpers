@@ -16,29 +16,25 @@
     "module": "preserve",
     "moduleResolution": "bundler",
     "paths": {
-      "@angular-helpers/core/utils": ["./packages/core/utils/src/index.ts"],
-      "@angular-helpers/storage/worker": ["./packages/storage/worker/src/index.ts"],
-      "@angular-helpers/worker-http/transport": ["./packages/worker-http/transport/src/index.ts"],
-      "@angular-helpers/worker-http/serializer": ["./packages/worker-http/serializer/src/index.ts"],
-      "@angular-helpers/worker-http/backend": ["./packages/worker-http/backend/src/index.ts"],
-      "@angular-helpers/worker-http/interceptors": [
-        "./packages/worker-http/interceptors/src/index.ts"
-      ],
-      "@angular-helpers/worker-http/crypto": ["./packages/worker-http/crypto/src/index.ts"],
-      "@angular-helpers/worker-http/realtime": ["./packages/worker-http/realtime/src/index.ts"],
-      "@angular-helpers/security/forms": ["./packages/security/forms/src/index.ts"],
-      "@angular-helpers/security/signal-forms": ["./packages/security/signal-forms/src/index.ts"],
+      "@angular-helpers/core/utils": ["./libs/core/utils/src/index.ts"],
+      "@angular-helpers/storage/worker": ["./libs/storage/worker/src/index.ts"],
+      "@angular-helpers/worker-http/transport": ["./libs/worker-http/transport/src/index.ts"],
+      "@angular-helpers/worker-http/serializer": ["./libs/worker-http/serializer/src/index.ts"],
+      "@angular-helpers/worker-http/backend": ["./libs/worker-http/backend/src/index.ts"],
+      "@angular-helpers/worker-http/interceptors": ["./libs/worker-http/interceptors/src/index.ts"],
+      "@angular-helpers/worker-http/crypto": ["./libs/worker-http/crypto/src/index.ts"],
+      "@angular-helpers/worker-http/realtime": ["./libs/worker-http/realtime/src/index.ts"],
+      "@angular-helpers/security/forms": ["./libs/security/forms/src/index.ts"],
+      "@angular-helpers/security/signal-forms": ["./libs/security/signal-forms/src/index.ts"],
       "@angular-helpers/browser-web-apis/experimental": [
-        "./packages/browser-web-apis/experimental/src/index.ts"
+        "./libs/browser-web-apis/experimental/src/index.ts"
       ],
-      "@angular-helpers/openlayers/core": ["./packages/openlayers/core/src/index.ts"],
-      "@angular-helpers/openlayers/layers": ["./packages/openlayers/layers/src/index.ts"],
-      "@angular-helpers/openlayers/controls": ["./packages/openlayers/controls/src/index.ts"],
-      "@angular-helpers/openlayers/interactions": [
-        "./packages/openlayers/interactions/src/index.ts"
-      ],
-      "@angular-helpers/openlayers/overlays": ["./packages/openlayers/overlays/src/index.ts"],
-      "@angular-helpers/*": ["./packages/*/src/index.ts"]
+      "@angular-helpers/openlayers/core": ["./libs/openlayers/core/src/index.ts"],
+      "@angular-helpers/openlayers/layers": ["./libs/openlayers/layers/src/index.ts"],
+      "@angular-helpers/openlayers/controls": ["./libs/openlayers/controls/src/index.ts"],
+      "@angular-helpers/openlayers/interactions": ["./libs/openlayers/interactions/src/index.ts"],
+      "@angular-helpers/openlayers/overlays": ["./libs/openlayers/overlays/src/index.ts"],
+      "@angular-helpers/*": ["./libs/*/src/index.ts"]
     }
   },
   "angularCompilerOptions": {
@@ -51,7 +47,7 @@
   "files": [],
   "references": [
     {
-      "path": "./tsconfig.app.json"
+      "path": "./apps/web/tsconfig.app.json"
     }
   ]
 }

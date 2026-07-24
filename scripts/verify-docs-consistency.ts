@@ -18,10 +18,10 @@ import {
   TOTAL_SERVICE_COUNT,
   SERVICE_COUNT,
   INJECT_FN_COUNT,
-} from '../src/app/core/config/packages.data';
-import { HOME_STATS } from '../src/app/home/config/home.config';
-import { DOCS_NAV_SECTIONS } from '../src/app/docs/config/docs-nav.data';
-import { BROWSER_WEB_APIS_SERVICES } from '../src/app/docs/data/v22/browser-web-apis.data';
+} from '../apps/web/src/app/core/config/packages.data';
+import { HOME_STATS } from '../apps/web/src/app/home/config/home.config';
+import { DOCS_NAV_SECTIONS } from '../apps/web/src/app/docs/config/docs-nav.data';
+import { BROWSER_WEB_APIS_SERVICES } from '../apps/web/src/app/docs/data/v22/browser-web-apis.data';
 
 interface ConsistencyError {
   type: 'error' | 'warning';
@@ -45,33 +45,33 @@ const browserPackage = PACKAGES.find((p) => p.name === 'browser-web-apis');
 assert(
   browserPackage?.serviceCount === SERVICE_COUNT,
   `browser-web-apis serviceCount should be ${SERVICE_COUNT}, got ${browserPackage?.serviceCount ?? 'undefined'}`,
-  'src/app/core/config/packages.data.ts',
+  'apps/web/src/app/core/config/packages.data.ts',
 );
 
 const signalStats = HOME_STATS.find((s) => s.label === 'Signal primitives');
 assert(
   signalStats?.value === String(INJECT_FN_COUNT),
   `Signal primitives count should be ${INJECT_FN_COUNT}, got ${signalStats?.value ?? 'undefined'}`,
-  'src/app/home/config/home.config.ts',
+  'apps/web/src/app/home/config/home.config.ts',
 );
 
 const expectedTotal = PACKAGES.reduce((sum, pkg) => sum + (pkg.serviceCount ?? 0), 0);
 assert(
   TOTAL_SERVICE_COUNT === expectedTotal,
   `TOTAL_SERVICE_COUNT (${TOTAL_SERVICE_COUNT}) doesn't match sum of package counts (${expectedTotal})`,
-  'src/app/core/config/packages.data.ts',
+  'apps/web/src/app/core/config/packages.data.ts',
 );
 
 // Check descriptions have correct counts
 assert(
   browserPackage?.tagline?.includes(String(SERVICE_COUNT)) ?? false,
   `browser-web-apis tagline should mention "${SERVICE_COUNT} services"`,
-  'src/app/core/config/packages.data.ts',
+  'apps/web/src/app/core/config/packages.data.ts',
 );
 assert(
   browserPackage?.description?.includes(String(INJECT_FN_COUNT)) ?? false,
   `browser-web-apis description should mention "${INJECT_FN_COUNT} inject() primitives"`,
-  'src/app/core/config/packages.data.ts',
+  'apps/web/src/app/core/config/packages.data.ts',
 );
 
 console.log('✅ Package metadata checks passed\n');
@@ -95,7 +95,7 @@ for (const navId of navServiceIds) {
     assert(
       false,
       `Service "${navId}" in browser-web-apis navigation missing from browser-web-apis.data.ts`,
-      'src/app/docs/data/browser-web-apis.data.ts',
+      'apps/web/src/app/docs/data/browser-web-apis.data.ts',
     );
   }
 }
@@ -105,7 +105,7 @@ for (const doc of BROWSER_WEB_APIS_SERVICES) {
   assert(
     navServiceIds.has(doc.id),
     `Documented service "${doc.id}" not found in browser-web-apis navigation`,
-    'src/app/docs/config/docs-nav.data.ts',
+    'apps/web/src/app/docs/config/docs-nav.data.ts',
   );
 }
 
@@ -126,7 +126,7 @@ for (const doc of BROWSER_WEB_APIS_SERVICES) {
     assert(
       navItem?.hasFn === true,
       `Service "${doc.id}" has fnVersion but missing hasFn: true in navigation`,
-      'src/app/docs/config/docs-nav.data.ts',
+      'apps/web/src/app/docs/config/docs-nav.data.ts',
     );
   }
 }
@@ -141,7 +141,7 @@ for (const fn of v2111Functions) {
   assert(
     documentedFns.includes(fn),
     `v21.11 inject function "${fn}" should be documented`,
-    'src/app/docs/data/browser-web-apis.data.ts',
+    'apps/web/src/app/docs/data/browser-web-apis.data.ts',
   );
 }
 
@@ -171,7 +171,7 @@ for (const expId of expectedExperimental) {
     assert(
       navItem.experimental === true,
       `Experimental service "${expId}" should have experimental: true`,
-      'src/app/docs/config/docs-nav.data.ts',
+      'apps/web/src/app/docs/config/docs-nav.data.ts',
     );
   }
 }
@@ -187,7 +187,7 @@ if (servicesWithoutCategory.length > 0) {
     assert(
       false,
       `Service "${service.id}" (${service.name}) is missing category field needed for overview grouping`,
-      'src/app/docs/data/browser-web-apis.data.ts',
+      'apps/web/src/app/docs/data/browser-web-apis.data.ts',
     );
   }
 } else {
@@ -201,7 +201,7 @@ console.log('🚫 Checking for deprecated API patterns...');
 const _deprecatedPatterns = ['enableCamera:', 'enableGeolocation:', 'enableWebStorage:'];
 
 // This would need file content checking - simplified version
-// In production, this would scan all .ts files in src/app
+// In production, this would scan all .ts files in apps/web/src/app
 
 // Summary
 console.log('='.repeat(50));

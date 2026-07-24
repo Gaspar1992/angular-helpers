@@ -1,0 +1,23 @@
+{
+  "name": "@angular-helpers/core",
+  "version": "22.0.0",
+  "description": "Shared internal utilities and core logic for Angular Helpers packages",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gaspar1992/angular-helpers"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/core",
+    "clean": "node ../../scripts/clean.js",
+    "test": "vitest run --root ../.. libs/core",
+    "lint": "oxlint src"
+  },
+  "peerDependencies": {
+    "@angular/core": "^22.0.0"
+  }
+}

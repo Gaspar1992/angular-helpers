@@ -1,0 +1,9 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@angular-helpers/schematics",
+  "projectType": "library",
+  "sourceRoot": "libs/schematics/src",
+  "prefix": "lib",
+  "targets": {},
+  "tags": ["type:lib", "scope:schematics"]
+}

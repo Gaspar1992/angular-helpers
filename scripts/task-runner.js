@@ -21,18 +21,18 @@ function runCommand(commandLine, envVars = {}) {
 const tasks = {
   // SSL certificates generation for local HTTPS serving
   async 'ssl:generate'() {
-    if (!existsSync('ssl')) {
-      mkdirSync('ssl', { recursive: true });
+    if (!existsSync('apps/web/ssl')) {
+      mkdirSync('apps/web/ssl', { recursive: true });
     }
     const opensslCmd =
-      'openssl req -x509 -newkey rsa:2048 -sha256 -nodes -keyout ssl/localhost.key -out ssl/localhost.crt -days 365 -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"';
+      'openssl req -x509 -newkey rsa:2048 -sha256 -nodes -keyout apps/web/ssl/localhost.key -out apps/web/ssl/localhost.crt -days 365 -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"';
     await runCommand(opensslCmd);
   },
 
   // Playwright Browser E2E Tests runner
   async 'test:browser'() {
     const mode = argv[3];
-    let cmd = 'playwright test';
+    let cmd = 'playwright test --config=apps/web/playwright.config.ts';
     const envVars = {};
 
     if (mode === 'headed') {
@@ -63,7 +63,7 @@ const tasks = {
   // Documentation Generation
   async 'generate:docs'() {
     await runCommand('npx tsx scripts/generate-docs-meta.ts');
-    await runCommand('oxfmt src/app/docs/data/*.data.ts');
+    await runCommand('oxfmt apps/web/src/app/docs/data/*.data.ts');
   },
 
   // Documentation Consistency verification

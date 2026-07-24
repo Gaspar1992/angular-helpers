@@ -42,37 +42,37 @@ interface ServiceDoc {
 const PACKAGES = [
   {
     name: 'core',
-    srcDir: 'packages/core/src',
+    srcDir: 'libs/core/src',
     dataFile: 'src/app/docs/data/core.data.ts',
     varName: 'CORE_SERVICES',
   },
   {
     name: 'security',
-    srcDir: 'packages/security/src',
+    srcDir: 'libs/security/src',
     dataFile: 'src/app/docs/data/security.data.ts',
     varName: 'SECURITY_SERVICES',
   },
   {
     name: 'browser-web-apis',
-    srcDir: 'packages/browser-web-apis/src',
+    srcDir: 'libs/browser-web-apis/src',
     dataFile: 'src/app/docs/data/browser-web-apis.data.ts',
     varName: 'BROWSER_WEB_APIS_SERVICES',
   },
   {
     name: 'worker-http',
-    srcDir: 'packages/worker-http',
+    srcDir: 'libs/worker-http',
     dataFile: 'src/app/docs/data/worker-http.data.ts',
     varName: 'WORKER_HTTP_ENTRIES',
   },
   {
     name: 'openlayers',
-    srcDir: 'packages/openlayers',
+    srcDir: 'libs/openlayers',
     dataFile: 'src/app/docs/data/openlayers.data.ts',
     varName: 'OPENLAYERS_SERVICES',
   },
   {
     name: 'storage',
-    srcDir: 'packages/storage/src',
+    srcDir: 'libs/storage/src',
     dataFile: 'src/app/docs/data/storage.data.ts',
     varName: 'STORAGE_SERVICES',
   },

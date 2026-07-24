@@ -1,0 +1,9 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@angular-helpers/worker-http",
+  "projectType": "library",
+  "sourceRoot": "libs/worker-http/src",
+  "prefix": "lib",
+  "targets": {},
+  "tags": ["type:lib", "scope:worker-http"]
+}

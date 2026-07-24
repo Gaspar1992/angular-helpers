@@ -1,0 +1,9 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@angular-helpers/storage",
+  "projectType": "library",
+  "sourceRoot": "libs/storage/src",
+  "prefix": "lib",
+  "targets": {},
+  "tags": ["type:lib", "scope:storage"]
+}

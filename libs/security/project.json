@@ -1,0 +1,9 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@angular-helpers/security",
+  "projectType": "library",
+  "sourceRoot": "libs/security/src",
+  "prefix": "lib",
+  "targets": {},
+  "tags": ["type:lib", "scope:security"]
+}
