@@ -1,5 +1,5 @@
 import {
-  WritableSignal,
+  type WritableSignal,
   signal,
   DestroyRef,
   inject,

@@ -42,9 +42,14 @@ export function injectYjsUndoManager(
 
   const undoManager = new Y.UndoManager(typeScope, {
     trackedOrigins: options?.trackedOrigins,
-    ignoredOrigins: options?.ignoredOrigins,
     captureTimeout: options?.captureTimeout,
   });
+
+  if (options?.ignoredOrigins) {
+    for (const origin of options.ignoredOrigins) {
+      undoManager.trackedOrigins.delete(origin);
+    }
+  }
 
   const canUndoSig = signal<boolean>(undoManager.canUndo());
   const canRedoSig = signal<boolean>(undoManager.canRedo());

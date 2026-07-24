@@ -70,4 +70,12 @@ export const PUBLIC_DEMO_SECTIONS: readonly DemoSection[] = [
     icon: '💾',
     packageName: '@angular-helpers/storage',
   },
+  {
+    path: '/demo/yjs',
+    title: 'Yjs CRDT & Collaboration',
+    description:
+      'Real-time collaborative CRDT state with Angular Signals, UndoManager, and presence awareness.',
+    icon: '🔄',
+    packageName: '@angular-helpers/yjs',
+  },
 ];

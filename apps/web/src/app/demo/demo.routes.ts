@@ -169,6 +169,11 @@ export const DEMO_ROUTES: Routes = [
           import('./storage/storage-demo.component').then((m) => m.StorageDemoComponent),
         title: 'Storage & Entity Management — Demo',
       },
+      {
+        path: 'yjs',
+        loadComponent: () => import('./yjs/yjs-demo.component').then((m) => m.YjsDemoComponent),
+        title: 'Yjs CRDT & Collaboration — Demo',
+      },
     ],
   },
 ];

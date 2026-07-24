@@ -252,6 +252,123 @@ export class PresenceDemoComponent {
 }`,
   },
   {
+    id: 'inject-yjs-websocket',
+    name: 'injectYjsWebsocket',
+    description:
+      'Connects a Y.Doc to a y-websocket server. Exposes status() and isSynced() read-only Signals to track real-time WebSocket connection state.',
+    scope: 'provided',
+    importPath: '@angular-helpers/yjs',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers with WebSockets support',
+    category: 'realtime-crdt',
+    notes: [
+      "Exposes status() ('connecting' | 'connected' | 'disconnected') and isSynced() Signals.",
+      'Supports connect() and disconnect() methods.',
+      'Cleans up listeners and destroys WebsocketProvider on DestroyRef.',
+    ],
+    methods: [],
+    fnVersion: {
+      name: 'injectYjsWebsocket',
+      importPath: '@angular-helpers/yjs',
+      returnType: 'YjsWebsocketRef',
+      description:
+        'Connects a Y.Doc to a y-websocket server endpoint and returns reactive connection signals.',
+      fields: [
+        {
+          name: 'serverUrl',
+          type: 'string',
+          description: 'The WebSocket server endpoint (e.g. wss://demos.yjs.dev)',
+        },
+        { name: 'roomName', type: 'string', description: 'Room/document identifier key.' },
+        { name: 'doc', type: 'Y.Doc', description: 'Target Y.Doc instance.' },
+        {
+          name: 'options?',
+          type: 'YjsWebsocketOptions',
+          description: 'Optional provider params or polyfills.',
+        },
+      ],
+      example: `import { Component, inject } from '@angular/core';
+import { injectYjsWebsocket, YjsDocService } from '@angular-helpers/yjs';
+
+@Component({
+  selector: 'app-websocket-collab',
+  standalone: true,
+  template: \`
+    <div class="status">Connection: {{ ws.status() }} | Synced: {{ ws.isSynced() }}</div>
+  \`
+})
+export class WebsocketCollabComponent {
+  private yjs = inject(YjsDocService);
+  protected ws = injectYjsWebsocket('wss://demos.yjs.dev', 'my-room', this.yjs.doc);
+}`,
+    },
+    example: `import { Component, inject } from '@angular/core';
+import { injectYjsWebsocket, YjsDocService } from '@angular-helpers/yjs';
+
+@Component({
+  selector: 'app-ws-demo',
+  standalone: true,
+  template: \`<div>Status: {{ ws.status() }}</div>\`
+})
+export class WsDemoComponent {
+  private yjs = inject(YjsDocService);
+  protected ws = injectYjsWebsocket('wss://demos.yjs.dev', 'demo-room', this.yjs.doc);
+}`,
+  },
+  {
+    id: 'inject-yjs-indexeddb',
+    name: 'injectYjsIndexeddb',
+    description:
+      'Persists a Y.Doc to local IndexedDB storage using y-indexeddb. Exposes a synced() Signal to detect when local document hydration is complete.',
+    scope: 'provided',
+    importPath: '@angular-helpers/yjs',
+    requiresSecureContext: false,
+    browserSupport: 'All modern browsers with IndexedDB support',
+    category: 'realtime-crdt',
+    notes: [
+      'Exposes synced() Signal indicating hydration status.',
+      'Includes clearData() method to wipe stored document state.',
+      'SSR-safe: gracefully falls back when indexedDB is unavailable.',
+    ],
+    methods: [],
+    fnVersion: {
+      name: 'injectYjsIndexeddb',
+      importPath: '@angular-helpers/yjs',
+      returnType: 'YjsIndexeddbRef',
+      description: 'Persists a Y.Doc to IndexedDB and returns reactive hydration signals.',
+      fields: [
+        { name: 'name', type: 'string', description: 'IndexedDB key identifier name.' },
+        { name: 'doc', type: 'Y.Doc', description: 'Target Y.Doc instance.' },
+      ],
+      example: `import { Component, inject } from '@angular/core';
+import { injectYjsIndexeddb, YjsDocService } from '@angular-helpers/yjs';
+
+@Component({
+  selector: 'app-offline-persistence',
+  standalone: true,
+  template: \`
+    <div class="db-status">IndexedDB Status: {{ db.synced() ? 'Ready' : 'Hydrating...' }}</div>
+  \`
+})
+export class OfflinePersistenceComponent {
+  private yjs = inject(YjsDocService);
+  protected db = injectYjsIndexeddb('my_app_doc', this.yjs.doc);
+}`,
+    },
+    example: `import { Component, inject } from '@angular/core';
+import { injectYjsIndexeddb, YjsDocService } from '@angular-helpers/yjs';
+
+@Component({
+  selector: 'app-db-demo',
+  standalone: true,
+  template: \`<div>Synced: {{ db.synced() }}</div>\`
+})
+export class DbDemoComponent {
+  private yjs = inject(YjsDocService);
+  protected db = injectYjsIndexeddb('doc_db', this.yjs.doc);
+}`,
+  },
+  {
     id: 'yjs-provider',
     name: 'YjsDocService',
     description:

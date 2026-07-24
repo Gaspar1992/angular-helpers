@@ -23,11 +23,19 @@
   },
   "peerDependencies": {
     "@angular/core": "^22.0.0",
+    "y-indexeddb": "^9.0.0",
     "y-protocols": "^1.0.5",
+    "y-websocket": "^2.0.0 || ^3.0.0",
     "yjs": "^13.6.0"
   },
   "peerDependenciesMeta": {
+    "y-indexeddb": {
+      "optional": true
+    },
     "y-protocols": {
+      "optional": true
+    },
+    "y-websocket": {
       "optional": true
     }
   },

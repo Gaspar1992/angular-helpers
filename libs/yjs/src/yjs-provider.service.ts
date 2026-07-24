@@ -1,10 +1,10 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, type OnDestroy } from '@angular/core';
 import * as Y from 'yjs';
 
 /**
  * Service providing a managed Y.Doc instance bound to the Angular dependency injection container lifecycle.
  */
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class YjsDocService implements OnDestroy {
   readonly doc = new Y.Doc();
 

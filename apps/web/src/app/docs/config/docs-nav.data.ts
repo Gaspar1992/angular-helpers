@@ -367,6 +367,8 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
             hasFn: true,
           },
           { label: 'injectYjsAwareness', route: '/docs/yjs/inject-yjs-awareness', hasFn: true },
+          { label: 'injectYjsWebsocket', route: '/docs/yjs/inject-yjs-websocket', hasFn: true },
+          { label: 'injectYjsIndexeddb', route: '/docs/yjs/inject-yjs-indexeddb', hasFn: true },
           { label: 'YjsDocService', route: '/docs/yjs/yjs-provider' },
         ],
       },

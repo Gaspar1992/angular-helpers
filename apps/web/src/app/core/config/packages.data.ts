@@ -128,20 +128,20 @@ export const PACKAGES: readonly PackageInfo[] = [
     npmPackage: '@angular-helpers/yjs',
     tagline: 'Bidirectional Angular Signal bindings for Yjs CRDT real-time collaborative state.',
     description:
-      'Seamlessly connect Angular WritableSignals with Yjs shared types (Y.Map, Y.Array, Y.Text). Local signal updates write to Yjs transactions, and remote CRDT edits stream back into Angular signals with zero feedback loops.',
+      'Seamlessly connect Angular WritableSignals with Yjs shared types (Y.Map, Y.Array, Y.Text). Features UndoManager stack signals, presence awareness, WebSockets provider, and IndexedDB offline hydration.',
     highlights: [
       'yjsSignal: Bidirectional WritableSignal adapter for Y.Map, Y.Array, Y.Text',
-      'YjsDocService: Managed root Y.Doc instance with lifecycle cleanup',
-      'Automatic cleanup on component/service DestroyRef',
-      'Zero feedback loop transaction origin matching',
+      'injectYjsUndoManager: Undo/Redo stack signals for buttons and shortcuts',
+      'injectYjsAwareness: Real-time user presence, avatars, and cursor tracking',
+      'injectYjsWebsocket & injectYjsIndexeddb: Network and offline persistence',
     ],
     highlightsLabel: 'Yjs features',
     installCmd: 'pnpm add @angular-helpers/yjs yjs',
     docsLink: '/docs/yjs',
-    demoLink: null,
+    demoLink: '/demo/yjs',
     badge: 'NEW',
     promise: 'performance',
-    serviceCount: 2,
+    serviceCount: 6,
   },
 ];
 
