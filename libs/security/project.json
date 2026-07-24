@@ -4,6 +4,21 @@
   "projectType": "library",
   "sourceRoot": "libs/security/src",
   "prefix": "lib",
-  "targets": {},
+  "targets": {
+    "inline-workers": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/inline-workers.js"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["inline-workers", "^build"],
+      "options": {
+        "command": "cross-env NG_BUILD_CACHE_PATH=../../node_modules/.cache/ng-packagr ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/security",
+        "cwd": "libs/security"
+      }
+    }
+  },
   "tags": ["type:lib", "scope:security"]
 }

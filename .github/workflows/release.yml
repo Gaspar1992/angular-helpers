@@ -35,7 +35,7 @@ jobs:
 
       - name: Bootstrap first release to 21.x
         run: |
-          for pkg in core browser-web-apis storage security worker-http openlayers testing; do
+          for pkg in core browser-web-apis storage security worker-http openlayers testing yjs; do
             if ! git tag --list "@angular-helpers/${pkg}@21.*" | grep -q .; then
               git tag "@angular-helpers/${pkg}@21.14.0"
               git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" "refs/tags/@angular-helpers/${pkg}@21.14.0"
@@ -89,6 +89,12 @@ jobs:
         run: pnpm exec semantic-release
         working-directory: libs/testing
 
+      - name: Semantic Release (Yjs)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm exec semantic-release
+        working-directory: libs/yjs
+
       - name: Strip workspace protocol from built packages dynamically
         run: |
           core_version=$(node -p "require('./libs/core/package.json').version")
@@ -97,7 +103,7 @@ jobs:
 
       - name: Publish to npm with Provenance
         run: |
-          for pkg in core browser-web-apis storage security worker-http openlayers testing; do
+          for pkg in core browser-web-apis storage security worker-http openlayers testing yjs; do
             if [ -d "dist/$pkg" ]; then
               echo "Publishing $pkg..."
               (cd dist/$pkg && npm publish --provenance --access public || echo "Skipped publishing $pkg")
@@ -115,6 +121,7 @@ jobs:
             libs/worker-http/CHANGELOG.md libs/worker-http/package.json \
             libs/openlayers/CHANGELOG.md libs/openlayers/package.json \
             libs/testing/CHANGELOG.md libs/testing/package.json \
+            libs/yjs/CHANGELOG.md libs/yjs/package.json \
             pnpm-lock.yaml; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
@@ -154,4 +161,6 @@ jobs:
             libs/openlayers/package.json
             libs/testing/CHANGELOG.md
             libs/testing/package.json
+            libs/yjs/CHANGELOG.md
+            libs/yjs/package.json
             pnpm-lock.yaml

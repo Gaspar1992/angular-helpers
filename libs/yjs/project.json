@@ -1,0 +1,9 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@angular-helpers/yjs",
+  "projectType": "library",
+  "sourceRoot": "libs/yjs/src",
+  "prefix": "lib",
+  "targets": {},
+  "tags": ["type:lib", "scope:yjs"]
+}

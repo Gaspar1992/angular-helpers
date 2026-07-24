@@ -1,6 +1,5 @@
 packages:
   - 'apps/*'
-  - 'libs/*'
 
 catalog:
   '@analogjs/vite-plugin-angular': ^2.6.1
@@ -64,11 +63,11 @@ catalog:
   'ol': ^10.9.0
   'oxfmt': ^0.60.0
   'oxlint': ^1.75.0
-  'proj4': ^2.20.8
+  'proj4': ^2.20.9
   'rxjs': ~7.8.2
   'semantic-release': ^25.0.5
   'semantic-release-monorepo': ^8.0.2
-  'seroval': ^1.5.4
+  'seroval': ^1.5.6
   'tailwindcss': ^4.3.1
   'tslib': ^2.8.1
   'tsx': ^4.23.1

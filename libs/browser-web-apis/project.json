@@ -4,6 +4,22 @@
   "projectType": "library",
   "sourceRoot": "libs/browser-web-apis/src",
   "prefix": "lib",
-  "targets": {},
+  "targets": {
+    "sync-versions": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ../../scripts/sync-versions.js . src/public-api.ts",
+        "cwd": "libs/browser-web-apis"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["sync-versions", "^build"],
+      "options": {
+        "command": "cross-env NG_BUILD_CACHE_PATH=../../node_modules/.cache/ng-packagr ng-packagr -p ng-package.json",
+        "cwd": "libs/browser-web-apis"
+      }
+    }
+  },
   "tags": ["type:lib", "scope:browser-web-apis"]
 }

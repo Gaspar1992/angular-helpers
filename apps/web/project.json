@@ -7,8 +7,15 @@
   "sourceRoot": "apps/web/src",
   "prefix": "app",
   "targets": {
+    "build-workers": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vite build"
+      }
+    },
     "build": {
       "executor": "@angular/build:application",
+      "dependsOn": ["build-workers", "^build"],
       "options": {
         "browser": "apps/web/src/main.ts",
         "tsConfig": "apps/web/tsconfig.app.json",

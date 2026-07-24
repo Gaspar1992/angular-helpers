@@ -1,0 +1,37 @@
+{
+  "name": "@angular-helpers/yjs",
+  "version": "22.0.0",
+  "description": "Reactive Angular Signal adapters and helpers for Yjs CRDT real-time collaboration",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gaspar1992/angular-helpers"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/yjs",
+    "clean": "node ../../scripts/clean.js",
+    "test": "vitest run --root ../.. libs/yjs",
+    "lint": "oxlint src"
+  },
+  "dependencies": {
+    "@angular-helpers/core": "workspace:*",
+    "tslib": "catalog:"
+  },
+  "peerDependencies": {
+    "@angular/core": "^22.0.0",
+    "yjs": "^13.6.0"
+  },
+  "dependencies": {
+    "tslib": "catalog:"
+  },
+  "ngPackage": {
+    "lib": {
+      "entryFile": "src/index.ts"
+    },
+    "dest": "../../dist/yjs"
+  }
+}
