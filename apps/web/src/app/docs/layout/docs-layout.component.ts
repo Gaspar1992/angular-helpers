@@ -185,6 +185,36 @@ import { VitalsPanelComponent } from './vitals-panel.component';
                 </ul>
               </div>
             }
+
+            <!-- History Section -->
+            @if (historyItems().length > 0) {
+              <div class="mt-6 mb-2" id="sidebar-history">
+                <div
+                  class="px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-base-content/30 mb-3"
+                >
+                  🕐 Recent
+                </div>
+                <ul class="list-none p-0 m-0 flex flex-col gap-0.5">
+                  @for (item of historyItems(); track item.route) {
+                    <li>
+                      <a
+                        [routerLink]="item.route"
+                        queryParamsHandling="merge"
+                        routerLinkActive="bg-base-300 text-base-content font-bold"
+                        [routerLinkActiveOptions]="{ exact: true }"
+                        class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-base-content/60 hover:text-base-content hover:bg-base-content/5 transition-all duration-200 no-underline group"
+                        (click)="closeSidebar()"
+                      >
+                        <span
+                          class="truncate transition-transform duration-200 group-hover:translate-x-0.5"
+                          >{{ item.label }}</span
+                        >
+                      </a>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
           </nav>
         </aside>
       }
@@ -276,6 +306,7 @@ export class DocsLayoutComponent {
   private readonly historyService = inject(DocsHistoryService);
 
   readonly bookmarkedItems = this.historyService.bookmarkedItems;
+  readonly historyItems = this.historyService.historyItems;
   readonly libraries = computed(() => getNavLibrariesForVersion(this.versionService.version()));
 
   // Reactive signal that updates on every navigation
