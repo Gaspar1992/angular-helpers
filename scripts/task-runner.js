@@ -40,6 +40,9 @@ const tasks = {
     } else if (mode === 'debug') {
       cmd += ' --debug';
     } else if (mode === 'smoke') {
+      // Serve the pre-built SSR bundle for fast smoke checks (no Angular dev-server compile).
+      envVars.BROWSER_TEST_USE_HTTPS = 'false';
+      envVars.BROWSER_TEST_SERVER_CMD = `node ${process.cwd()}/dist/angular-helpers/server/server.mjs`;
       cmd += ' smoke.spec.ts --project=chromium';
     } else if (mode === 'ci') {
       envVars.CI = '1';
