@@ -46,13 +46,15 @@ const tasks = {
       // In CI we always serve the pre-built SSR bundle over plain HTTP.
       // This avoids starting the Angular dev-server (which needs to compile
       // the whole app on the fly and can time out inside the 180 s window).
+      // Use absolute path so Playwright resolves it correctly regardless of
+      // where playwright.config.ts lives (apps/web/).
       envVars.BROWSER_TEST_USE_HTTPS = 'false';
-      envVars.BROWSER_TEST_SERVER_CMD = 'node dist/angular-helpers/server/server.mjs';
+      envVars.BROWSER_TEST_SERVER_CMD = `node ${process.cwd()}/dist/angular-helpers/server/server.mjs`;
       cmd += ' --project=chromium --workers=1';
     } else if (mode === 'cross') {
       envVars.CI = '1';
       envVars.BROWSER_TEST_USE_HTTPS = 'false';
-      envVars.BROWSER_TEST_SERVER_CMD = 'node dist/angular-helpers/server/server.mjs';
+      envVars.BROWSER_TEST_SERVER_CMD = `node ${process.cwd()}/dist/angular-helpers/server/server.mjs`;
       cmd += ' --project=firefox-smoke --project=webkit-smoke --workers=1';
     } else if (mode === 'install') {
       cmd = 'playwright install chromium';

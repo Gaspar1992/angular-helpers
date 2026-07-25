@@ -12,7 +12,7 @@ const defaultStartCommand = useHttps
   ? `pnpm run start:https --host ${host} --port ${port}`
   : 'pnpm run start:test';
 const startCommand = process.env['BROWSER_TEST_SERVER_CMD']
-  ? `PORT=${port} HOST=${host} ${process.env['BROWSER_TEST_SERVER_CMD']}`
+  ? `PORT=${port} HOST=${host} NG_ALLOWED_HOSTS=${host} ${process.env['BROWSER_TEST_SERVER_CMD']}`
   : defaultStartCommand;
 
 export default defineConfig({
