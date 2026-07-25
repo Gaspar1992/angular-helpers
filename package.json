@@ -13,6 +13,7 @@
     "build:gh-pages": "nx build web --base-href /angular-helpers/",
     "build:gh-pages-root": "nx build web --base-href /",
     "build:packages": "nx run-many -t build",
+    "build:packages:prod": "nx run-many -t build:prod",
     "build:schematics": "nx build @angular-helpers/schematics",
     "generate:package": "nx generate ./dist/libs/schematics/collection.json:create-package",
     "watch": "nx build web --watch --configuration development",
