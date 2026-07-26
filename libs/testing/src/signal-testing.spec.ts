@@ -1,4 +1,4 @@
-import { flushEffects } from './signal-testing';
+import { flushEffects, createMockSignal, withFlushedEffects } from './signal-testing';
 import { TestBed } from '@angular/core/testing';
 import { Component, effect, signal } from '@angular/core';
 
@@ -31,6 +31,19 @@ describe('flushEffects', () => {
     expect(fixture.componentInstance.effectRunCount).toBe(1);
 
     flushEffects();
+    expect(fixture.componentInstance.effectRunCount).toBe(2);
+  });
+
+  it('should create mock signal and update effects using withFlushedEffects', () => {
+    TestBed.configureTestingModule({ imports: [EffectComponent] });
+    const fixture = TestBed.createComponent(EffectComponent);
+    const mockSig = createMockSignal(10);
+    expect(mockSig()).toBe(10);
+
+    fixture.detectChanges();
+    withFlushedEffects(() => {
+      fixture.componentInstance.val.set(99);
+    });
     expect(fixture.componentInstance.effectRunCount).toBe(2);
   });
 });

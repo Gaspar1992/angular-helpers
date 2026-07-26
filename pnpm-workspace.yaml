@@ -1,5 +1,6 @@
 packages:
   - 'apps/*'
+  - 'libs/*'
 
 catalog:
   '@analogjs/vite-plugin-angular': ^2.6.1

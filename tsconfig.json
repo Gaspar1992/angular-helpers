@@ -16,24 +16,33 @@
     "module": "preserve",
     "moduleResolution": "bundler",
     "paths": {
+      "@angular-helpers/core": ["./libs/core/src/index.ts"],
       "@angular-helpers/core/utils": ["./libs/core/utils/src/index.ts"],
+      "@angular-helpers/storage": ["./libs/storage/src/index.ts"],
       "@angular-helpers/storage/worker": ["./libs/storage/worker/src/index.ts"],
+      "@angular-helpers/testing": ["./libs/testing/src/public-api.ts"],
+      "@angular-helpers/browser-web-apis": ["./libs/browser-web-apis/src/index.ts"],
+      "@angular-helpers/browser-web-apis/experimental": [
+        "./libs/browser-web-apis/experimental/src/index.ts"
+      ],
+      "@angular-helpers/security": ["./libs/security/src/index.ts"],
+      "@angular-helpers/security/forms": ["./libs/security/forms/src/index.ts"],
+      "@angular-helpers/security/signal-forms": ["./libs/security/signal-forms/src/index.ts"],
+      "@angular-helpers/worker-http": ["./libs/worker-http/src/index.ts"],
       "@angular-helpers/worker-http/transport": ["./libs/worker-http/transport/src/index.ts"],
       "@angular-helpers/worker-http/serializer": ["./libs/worker-http/serializer/src/index.ts"],
       "@angular-helpers/worker-http/backend": ["./libs/worker-http/backend/src/index.ts"],
       "@angular-helpers/worker-http/interceptors": ["./libs/worker-http/interceptors/src/index.ts"],
       "@angular-helpers/worker-http/crypto": ["./libs/worker-http/crypto/src/index.ts"],
       "@angular-helpers/worker-http/realtime": ["./libs/worker-http/realtime/src/index.ts"],
-      "@angular-helpers/security/forms": ["./libs/security/forms/src/index.ts"],
-      "@angular-helpers/security/signal-forms": ["./libs/security/signal-forms/src/index.ts"],
-      "@angular-helpers/browser-web-apis/experimental": [
-        "./libs/browser-web-apis/experimental/src/index.ts"
-      ],
+      "@angular-helpers/openlayers": ["./libs/openlayers/src/index.ts"],
       "@angular-helpers/openlayers/core": ["./libs/openlayers/core/src/index.ts"],
       "@angular-helpers/openlayers/layers": ["./libs/openlayers/layers/src/index.ts"],
       "@angular-helpers/openlayers/controls": ["./libs/openlayers/controls/src/index.ts"],
       "@angular-helpers/openlayers/interactions": ["./libs/openlayers/interactions/src/index.ts"],
       "@angular-helpers/openlayers/overlays": ["./libs/openlayers/overlays/src/index.ts"],
+      "@angular-helpers/yjs": ["./libs/yjs/src/index.ts"],
+      "@angular-helpers/schematics": ["./libs/schematics/src/index.ts"],
       "@angular-helpers/*": ["./libs/*/src/index.ts"]
     }
   },

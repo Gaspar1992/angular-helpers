@@ -1,30 +1,10 @@
 import { defineConfig } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import { resolve } from 'path';
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      '@angular-helpers/core/utils': resolve(__dirname, 'libs/core/utils/src/index.ts'),
-      '@angular-helpers/core': resolve(__dirname, 'libs/core/src/index.ts'),
-      '@angular-helpers/storage/worker': resolve(__dirname, 'libs/storage/worker/src/index.ts'),
-      '@angular-helpers/worker-http/interceptors': resolve(
-        __dirname,
-        'libs/worker-http/interceptors/src/index.ts',
-      ),
-      '@angular-helpers/worker-http/transport': resolve(
-        __dirname,
-        'libs/worker-http/transport/src/index.ts',
-      ),
-      '@angular-helpers/worker-http/serializer': resolve(
-        __dirname,
-        'libs/worker-http/serializer/src/index.ts',
-      ),
-      '@angular-helpers/worker-http/crypto': resolve(
-        __dirname,
-        'libs/worker-http/crypto/src/index.ts',
-      ),
-    },
-  },
+  plugins: [tsconfigPaths()],
+
   build: {
     lib: {
       entry: {

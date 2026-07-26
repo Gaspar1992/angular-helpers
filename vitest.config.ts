@@ -30,6 +30,11 @@ export default defineConfig({
         },
       },
     },
+    onConsoleLog(log: string) {
+      if (log.includes('Could not parse CSS stylesheet')) {
+        return false;
+      }
+    },
     server: {
       deps: {
         inline: ['ora'],

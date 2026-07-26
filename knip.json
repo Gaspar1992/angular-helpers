@@ -1,20 +1,19 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "entry": [
-    "src/main.ts",
-    "src/main.server.ts",
-    "src/server.ts",
+    "apps/web/src/main.ts",
+    "apps/web/src/main.server.ts",
+    "apps/web/src/server.ts",
     "vite.config.ts",
     "vitest.config.ts",
-    "playwright.config.ts",
+    "apps/web-e2e/playwright.config.ts",
     "scripts/*.js",
     "scripts/*.ts",
-    "src/workers/*.ts",
-    "test/**/*.spec.ts",
+    "apps/web/src/workers/*.ts",
     "**/*.spec.ts"
   ],
-  "project": ["src/**/*.ts", "scripts/**/*.js", "scripts/**/*.ts"],
-  "ignore": ["src/styles.css", "packages/browser-web-apis/src/test-setup.ts"],
+  "project": ["apps/**/*.ts", "libs/**/*.ts", "scripts/**/*.js", "scripts/**/*.ts"],
+  "ignore": ["apps/web/src/styles.css"],
   "ignoreDependencies": [
     "husky",
     "semantic-release",
@@ -34,7 +33,7 @@
     "@tailwindcss/typography"
   ],
   "workspaces": {
-    "packages/*": {
+    "libs/*": {
       "entry": [
         "src/index.ts",
         "src/public-api.ts",
@@ -45,6 +44,16 @@
       ],
       "project": ["src/**/*.ts", "**/src/**/*.ts"],
       "ignoreDependencies": ["tslib"]
+    },
+    "apps/*": {
+      "entry": [
+        "src/main.ts",
+        "src/main.server.ts",
+        "src/server.ts",
+        "src/workers/*.ts",
+        "src/**/*.spec.ts"
+      ],
+      "project": ["src/**/*.ts"]
     }
   }
 }

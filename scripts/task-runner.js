@@ -32,7 +32,7 @@ const tasks = {
   // Playwright Browser E2E Tests runner
   async 'test:browser'() {
     const mode = argv[3];
-    let cmd = 'playwright test --config=apps/web/playwright.config.ts';
+    let cmd = 'playwright test --config=apps/web-e2e/playwright.config.ts';
     const envVars = {};
 
     if (mode === 'headed') {
