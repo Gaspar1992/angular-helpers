@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { signal, WritableSignal } from '@angular/core';
+import { signal, type WritableSignal } from '@angular/core';
 
 /**
  * Flushes all pending Angular effects in the testing environment.
