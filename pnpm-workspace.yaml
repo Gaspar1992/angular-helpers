@@ -21,7 +21,7 @@ catalog:
   '@angular/forms': ^22.0.2
   '@angular/platform-browser': ^22.0.2
   '@angular/platform-browser-dynamic': ^22.0.2
-  '@angular/platform-server': ^22.0.2
+  '@angular/platform-server': ^22.0.7
   '@angular/router': ^22.0.2
   '@angular/ssr': ^22.0.3
   '@axe-core/playwright': ^4.12.1
@@ -107,7 +107,7 @@ overrides:
   '@angular/animations': ^22.0.2
   '@angular/forms': ^22.0.2
   '@angular/platform-browser': ^22.0.2
-  '@angular/platform-server': ^22.0.2
+  '@angular/platform-server': ^22.0.7
   '@angular/router': ^22.0.2
   '@angular/ssr': ^22.0.3
   '@angular/compiler-cli': ^22.0.2
