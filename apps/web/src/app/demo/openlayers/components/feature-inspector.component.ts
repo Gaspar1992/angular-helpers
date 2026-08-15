@@ -44,13 +44,19 @@ import { CommonModule } from '@angular/common';
               </div>
             </div>
 
-            @if (feature.id && (feature.id.toString().startsWith('drawn-') || !feature.properties?.['population'])) {
+            @if (
+              feature.id &&
+              (feature.id.toString().startsWith('drawn-') || !feature.properties?.['population'])
+            ) {
               <!-- Cyber-Premium Style & Label Editor -->
               <div class="space-y-4">
                 <div class="divider my-1 opacity-5"></div>
-                
+
                 <div>
-                  <label class="text-[10px] font-black uppercase tracking-widest text-base-content/30 block mb-2 px-1">Label / Annotation</label>
+                  <label
+                    class="text-[10px] font-black uppercase tracking-widest text-base-content/30 block mb-2 px-1"
+                    >Label / Annotation</label
+                  >
                   <input
                     type="text"
                     [value]="feature.properties?.['name'] || ''"
@@ -62,7 +68,10 @@ import { CommonModule } from '@angular/common';
 
                 <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest text-base-content/30 block mb-2 px-1">Stroke Color</label>
+                    <label
+                      class="text-[10px] font-black uppercase tracking-widest text-base-content/30 block mb-2 px-1"
+                      >Stroke Color</label
+                    >
                     <div class="flex items-center gap-2">
                       <input
                         type="color"
@@ -70,12 +79,17 @@ import { CommonModule } from '@angular/common';
                         (input)="onUpdate(feature.id, { strokeColor: $any($event.target).value })"
                         class="w-10 h-8 rounded-lg cursor-pointer border border-base-content/10 bg-transparent"
                       />
-                      <span class="text-xs font-mono font-bold text-base-content/70">{{ feature.properties?.['strokeColor'] || '#3b82f6' }}</span>
+                      <span class="text-xs font-mono font-bold text-base-content/70">{{
+                        feature.properties?.['strokeColor'] || '#3b82f6'
+                      }}</span>
                     </div>
                   </div>
 
                   <div>
-                    <label class="text-[10px] font-black uppercase tracking-widest text-base-content/30 block mb-2 px-1">Fill Color</label>
+                    <label
+                      class="text-[10px] font-black uppercase tracking-widest text-base-content/30 block mb-2 px-1"
+                      >Fill Color</label
+                    >
                     <div class="flex items-center gap-2">
                       <input
                         type="color"
@@ -83,15 +97,21 @@ import { CommonModule } from '@angular/common';
                         (input)="onUpdate(feature.id, { fillColor: $any($event.target).value })"
                         class="w-10 h-8 rounded-lg cursor-pointer border border-base-content/10 bg-transparent"
                       />
-                      <span class="text-xs font-mono font-bold text-base-content/70">{{ feature.properties?.['fillColor'] || '#3b82f6' }}</span>
+                      <span class="text-xs font-mono font-bold text-base-content/70">{{
+                        feature.properties?.['fillColor'] || '#3b82f6'
+                      }}</span>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <div class="flex justify-between text-[10px] font-black uppercase tracking-widest text-base-content/30 mb-2 px-1">
+                  <div
+                    class="flex justify-between text-[10px] font-black uppercase tracking-widest text-base-content/30 mb-2 px-1"
+                  >
                     <span>Stroke Width</span>
-                    <span class="font-bold text-base-content">{{ feature.properties?.['strokeWidth'] || 2 }}px</span>
+                    <span class="font-bold text-base-content"
+                      >{{ feature.properties?.['strokeWidth'] || 2 }}px</span
+                    >
                   </div>
                   <input
                     type="range"
@@ -105,9 +125,15 @@ import { CommonModule } from '@angular/common';
                 </div>
 
                 <div>
-                  <div class="flex justify-between text-[10px] font-black uppercase tracking-widest text-base-content/30 mb-2 px-1">
+                  <div
+                    class="flex justify-between text-[10px] font-black uppercase tracking-widest text-base-content/30 mb-2 px-1"
+                  >
                     <span>Fill Transparency</span>
-                    <span class="font-bold text-base-content">{{ (+$any(feature.properties?.['fillOpacity'] ?? 0.2) * 100).toFixed(0) }}%</span>
+                    <span class="font-bold text-base-content"
+                      >{{
+                        (+$any(feature.properties?.['fillOpacity'] ?? 0.2) * 100).toFixed(0)
+                      }}%</span
+                    >
                   </div>
                   <input
                     type="range"

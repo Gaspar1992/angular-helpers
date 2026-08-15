@@ -29,28 +29,35 @@ interface DocState {
     <div class="max-w-6xl mx-auto px-4 py-8 space-y-8">
       <!-- Header -->
       <div class="text-center space-y-4">
-        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold border border-primary/20">
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold border border-primary/20"
+        >
           <span>🔄</span>
           <span>@angular-helpers/yjs</span>
           <span class="badge badge-sm badge-primary">v22.0.0</span>
         </div>
-        <h1 class="text-4xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+        <h1
+          class="text-4xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent"
+        >
           Real-Time CRDT Collaboration & Signals
         </h1>
         <p class="text-lg text-base-content/70 max-w-2xl mx-auto">
-          Seamlessly synchronize Angular Signals with Yjs shared types, UndoManager stack, presence awareness, and offline IndexedDB persistence with zero feedback loops.
+          Seamlessly synchronize Angular Signals with Yjs shared types, UndoManager stack, presence
+          awareness, and offline IndexedDB persistence with zero feedback loops.
         </p>
       </div>
 
       <!-- Main Interactive Panel Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
         <!-- Column 1 & 2: Collaborative Document & Signals -->
         <div class="lg:col-span-2 space-y-6">
-
           <!-- Collaborative Editor Card -->
-          <div class="card bg-base-200/50 backdrop-blur-md border border-base-300 shadow-xl rounded-3xl p-6 space-y-6">
-            <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-base-300">
+          <div
+            class="card bg-base-200/50 backdrop-blur-md border border-base-300 shadow-xl rounded-3xl p-6 space-y-6"
+          >
+            <div
+              class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-base-300"
+            >
               <div class="flex items-center gap-3">
                 <span class="text-3xl">📝</span>
                 <div>
@@ -60,7 +67,9 @@ interface DocState {
               </div>
 
               <!-- Undo/Redo Toolbar -->
-              <div class="flex items-center gap-2 bg-base-300/50 p-1.5 rounded-2xl border border-base-300">
+              <div
+                class="flex items-center gap-2 bg-base-300/50 p-1.5 rounded-2xl border border-base-300"
+              >
                 <button
                   class="btn btn-sm btn-ghost gap-1 font-mono"
                   [disabled]="!undoRef.canUndo()"
@@ -90,7 +99,9 @@ interface DocState {
             <!-- Fields -->
             <div class="space-y-4">
               <div>
-                <label class="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-2">
+                <label
+                  class="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-2"
+                >
                   Document Title
                 </label>
                 <input
@@ -103,7 +114,9 @@ interface DocState {
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-2">
+                <label
+                  class="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-2"
+                >
                   Content Body
                 </label>
                 <textarea
@@ -118,12 +131,15 @@ interface DocState {
 
             <!-- Signal Output Inspector -->
             <div class="bg-base-300/40 rounded-2xl p-4 space-y-2 border border-base-300">
-              <div class="text-xs font-semibold uppercase tracking-wider text-base-content/60 flex items-center justify-between">
+              <div
+                class="text-xs font-semibold uppercase tracking-wider text-base-content/60 flex items-center justify-between"
+              >
                 <span>Signal State Snapshot</span>
                 <span class="badge badge-xs badge-accent">Live Reactive Binding</span>
               </div>
-              <pre class="text-xs font-mono bg-base-100/80 p-3 rounded-xl overflow-x-auto text-primary">
-{{ JSON.stringify(docState(), null, 2) }}
+              <pre
+                class="text-xs font-mono bg-base-100/80 p-3 rounded-xl overflow-x-auto text-primary"
+                >{{ JSON.stringify(docState(), null, 2) }}
               </pre>
             </div>
           </div>
@@ -131,7 +147,9 @@ interface DocState {
           <!-- Feature Cards Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Offline Persistence Card -->
-            <div class="card bg-base-200/50 backdrop-blur-md border border-base-300 p-5 space-y-3 rounded-2xl">
+            <div
+              class="card bg-base-200/50 backdrop-blur-md border border-base-300 p-5 space-y-3 rounded-2xl"
+            >
               <div class="flex items-center gap-3">
                 <span class="text-2xl">💾</span>
                 <div>
@@ -152,7 +170,9 @@ interface DocState {
             </div>
 
             <!-- Network Status Card -->
-            <div class="card bg-base-200/50 backdrop-blur-md border border-base-300 p-5 space-y-3 rounded-2xl">
+            <div
+              class="card bg-base-200/50 backdrop-blur-md border border-base-300 p-5 space-y-3 rounded-2xl"
+            >
               <div class="flex items-center gap-3">
                 <span class="text-2xl">⚡</span>
                 <div>
@@ -161,18 +181,19 @@ interface DocState {
                 </div>
               </div>
               <p class="text-xs text-base-content/70">
-                Signal writes tag transactions with local client origins to prevent recursive update cycles.
+                Signal writes tag transactions with local client origins to prevent recursive update
+                cycles.
               </p>
             </div>
           </div>
-
         </div>
 
         <!-- Column 3: Presence & Collaborators Panel -->
         <div class="space-y-6">
-
           <!-- Presence Card -->
-          <div class="card bg-base-200/50 backdrop-blur-md border border-base-300 shadow-xl rounded-3xl p-6 space-y-6">
+          <div
+            class="card bg-base-200/50 backdrop-blur-md border border-base-300 shadow-xl rounded-3xl p-6 space-y-6"
+          >
             <div class="flex items-center gap-3 pb-4 border-b border-base-300">
               <span class="text-3xl">👥</span>
               <div>
@@ -186,7 +207,7 @@ interface DocState {
               <h3 class="text-xs font-semibold uppercase tracking-wider text-base-content/70">
                 Your Local Profile
               </h3>
-              
+
               <div class="space-y-3">
                 <div>
                   <label class="text-xs text-base-content/60 block mb-1">User Name</label>
@@ -207,7 +228,9 @@ interface DocState {
                       (ngModelChange)="presence.patchLocalState({ color: $event })"
                       class="w-10 h-9 rounded-xl border border-base-300 cursor-pointer p-1 bg-base-100"
                     />
-                    <span class="font-mono text-xs text-base-content/70">{{ presence.localState()?.color }}</span>
+                    <span class="font-mono text-xs text-base-content/70">{{
+                      presence.localState()?.color
+                    }}</span>
                   </div>
                 </div>
               </div>
@@ -229,7 +252,9 @@ interface DocState {
 
               <div class="space-y-2">
                 @for (user of presence.users(); track user.clientID) {
-                  <div class="flex items-center justify-between p-3 rounded-2xl bg-base-100/80 border border-base-300 transition-all hover:scale-[1.01]">
+                  <div
+                    class="flex items-center justify-between p-3 rounded-2xl bg-base-100/80 border border-base-300 transition-all hover:scale-[1.01]"
+                  >
                     <div class="flex items-center gap-3">
                       <div
                         class="w-4 h-4 rounded-full shadow-inner"
@@ -261,11 +286,8 @@ interface DocState {
                 }
               </div>
             </div>
-
           </div>
-
         </div>
-
       </div>
     </div>
   `,
