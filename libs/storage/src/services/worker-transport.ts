@@ -10,24 +10,44 @@ import { detectTransferables } from '../utils/detect-transferables';
 
 @Injectable({
   providedIn: 'root',
-  useFactory: () => {
-    const factory =
-      inject<(() => Worker) | null>(STORAGE_WORKER_FACTORY, { optional: true }) ?? undefined;
-    return new WorkerStorageTransport(factory);
-  },
 })
 export class WorkerStorageTransport implements StorageTransport {
   private worker?: Worker;
+  private workerFactory?: () => Worker;
   private readonly pendingRequests = new Map<
     string,
     { resolve: (value: any) => void; reject: (err: Error) => void }
   >();
   private readonly changeCallbacks = new Map<string, Set<(value: any) => void>>();
 
-  constructor(private readonly workerFactory?: () => Worker) {
+  constructor() {
+    try {
+      this.workerFactory =
+        inject<(() => Worker) | null>(STORAGE_WORKER_FACTORY, { optional: true }) ?? undefined;
+    } catch {
+      // Graceful fallback when instantiated outside an injection context
+    }
+
     if (this.workerFactory) {
       this.initWorker();
     }
+  }
+
+  /**
+   * Updates the worker factory and initializes the underlying Web Worker.
+   */
+  public setWorkerFactory(workerFactory: () => Worker): void {
+    this.workerFactory = workerFactory;
+    this.initWorker();
+  }
+
+  /**
+   * Factory method for creating an instance with an explicit worker factory (e.g. in unit tests).
+   */
+  public static create(workerFactory: () => Worker): WorkerStorageTransport {
+    const transport = new WorkerStorageTransport();
+    transport.setWorkerFactory(workerFactory);
+    return transport;
   }
 
   private initWorker() {

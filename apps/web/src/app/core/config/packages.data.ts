@@ -3,6 +3,7 @@ import { SERVICE_COUNT, INJECT_FN_COUNT } from './packages.generated';
 export interface PackageInfo {
   icon: string;
   name: string;
+  title?: string;
   npmPackage: string;
   tagline: string;
   description: string;
@@ -12,6 +13,7 @@ export interface PackageInfo {
   docsLink: string;
   demoLink: string | null;
   badge: string | null;
+  tags?: string[];
   promise: 'lightweight' | 'robust' | 'performance';
   serviceCount?: number;
 }
@@ -20,6 +22,7 @@ export const PACKAGES: readonly PackageInfo[] = [
   {
     icon: '🌐',
     name: 'browser-web-apis',
+    title: 'Browser Web APIs',
     npmPackage: '@angular-helpers/browser-web-apis',
     tagline: `${SERVICE_COUNT} typed Angular services for the browser. One provider.`,
     description: `${SERVICE_COUNT} typed Angular services covering Camera, Geolocation, Storage, WebSocket, WebLocks, StorageManager, Compression, EyeDropper, IdleDetector, and 31 more. Plus ${INJECT_FN_COUNT} signal-based inject() primitives.`,
@@ -34,12 +37,14 @@ export const PACKAGES: readonly PackageInfo[] = [
     docsLink: '/docs/browser-web-apis',
     demoLink: '/demo/browser-apis',
     badge: null,
+    tags: [`${SERVICE_COUNT} services`, 'Signals'],
     promise: 'lightweight',
     serviceCount: SERVICE_COUNT,
   },
   {
     icon: '🛡️',
     name: 'security',
+    title: 'Security Utilities',
     npmPackage: '@angular-helpers/security',
     tagline: 'Worker-isolated, ReDoS-safe security primitives.',
     description:
@@ -56,11 +61,13 @@ export const PACKAGES: readonly PackageInfo[] = [
     docsLink: '/docs/security',
     demoLink: '/demo/security',
     badge: null,
+    tags: ['ReDoS Prevention', 'Crypto'],
     promise: 'robust',
   },
   {
     icon: '🚀',
     name: 'worker-http',
+    title: 'Worker HTTP',
     npmPackage: '@angular-helpers/worker-http',
     tagline: 'HTTP off the main thread. Non-blocking by design.',
     description:
@@ -76,11 +83,13 @@ export const PACKAGES: readonly PackageInfo[] = [
     docsLink: '/docs/worker-http',
     demoLink: '/demo/worker-http',
     badge: null,
+    tags: ['Web Workers', 'Performance'],
     promise: 'performance',
   },
   {
     icon: '💾',
     name: 'storage',
+    title: 'Storage & Persistence',
     npmPackage: '@angular-helpers/storage',
     tagline: 'High-performance, reactive, secure, and compressed storage primitives.',
     description:
@@ -97,12 +106,14 @@ export const PACKAGES: readonly PackageInfo[] = [
     docsLink: '/docs/storage',
     demoLink: '/demo/storage',
     badge: null,
+    tags: ['Offline First', 'AES-GCM'],
     promise: 'performance',
     serviceCount: 5,
   },
   {
     icon: '🗺️',
     name: 'openlayers',
+    title: 'OpenLayers',
     npmPackage: '@angular-helpers/openlayers',
     tagline: 'Modern Angular wrapper for OpenLayers. Standalone, signal-first, modular.',
     description:
@@ -119,12 +130,14 @@ export const PACKAGES: readonly PackageInfo[] = [
     docsLink: '/docs/openlayers',
     demoLink: '/demo/openlayers',
     badge: null,
+    tags: ['GIS', 'Maps'],
     promise: 'lightweight',
     serviceCount: 0,
   },
   {
     icon: '🔄',
     name: 'yjs',
+    title: 'Yjs CRDT',
     npmPackage: '@angular-helpers/yjs',
     tagline: 'Bidirectional Angular Signal bindings for Yjs CRDT real-time collaborative state.',
     description:
@@ -140,6 +153,7 @@ export const PACKAGES: readonly PackageInfo[] = [
     docsLink: '/docs/yjs',
     demoLink: '/demo/yjs',
     badge: 'NEW',
+    tags: ['CRDT', 'Signals'],
     promise: 'performance',
     serviceCount: 6,
   },

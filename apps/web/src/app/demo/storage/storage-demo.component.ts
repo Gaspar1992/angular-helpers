@@ -19,12 +19,16 @@ import {
 
 // Native factory to load our background app storage worker in Vite/Esbuild
 export function storageWorkerFactory(): Worker | undefined {
-  if (typeof Worker !== 'undefined') {
-    return new Worker(new URL('../../../workers/app-storage.worker.ts', import.meta.url), {
-      type: 'module',
-    });
+  if (typeof window === 'undefined' || typeof Worker === 'undefined') {
+    return undefined;
   }
-  return undefined;
+  const workerUrl =
+    typeof document !== 'undefined'
+      ? new URL('assets/workers/storage.worker.js', document.baseURI)
+      : new URL('assets/workers/storage.worker.js', 'https://example.com');
+  return new Worker(workerUrl, {
+    type: 'module',
+  });
 }
 
 interface RPCMessageLog {
@@ -47,7 +51,10 @@ interface TaskEntity {
   templateUrl: './storage-demo.component.html',
   providers: [
     { provide: STORAGE_WORKER_FACTORY, useValue: storageWorkerFactory },
-    WorkerStorageTransport,
+    {
+      provide: WorkerStorageTransport,
+      useFactory: () => new WorkerStorageTransport(),
+    },
   ],
 })
 export class StorageDemoComponent implements OnInit, OnDestroy {

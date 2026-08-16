@@ -23,7 +23,7 @@ describe('WorkerStorageTransport', () => {
     };
 
     factory = () => mockWorker as unknown as Worker;
-    transport = new WorkerStorageTransport(factory);
+    transport = WorkerStorageTransport.create(factory);
   });
 
   it('should send a read message to the worker with a unique ID and resolve on success response', async () => {
