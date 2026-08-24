@@ -53,7 +53,7 @@ export function injectGeolocation(opts: GeolocationOptions = {}): GeolocationRef
 
   const stop = (): void => {
     if (watchId !== null) {
-      navigator.geolocation.clearWatch(watchId);
+      navigator?.geolocation?.clearWatch?.(watchId);
       watchId = null;
     }
     watching.set(false);

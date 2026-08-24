@@ -27,6 +27,6 @@ export function screenOrientationStream(): Observable<OrientationInfo> {
     const handler = () => observer.next(getOrientationSnapshot());
     screen.orientation.addEventListener('change', handler);
     observer.next(getOrientationSnapshot());
-    return () => screen.orientation.removeEventListener('change', handler);
+    return () => screen?.orientation?.removeEventListener?.('change', handler);
   });
 }

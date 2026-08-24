@@ -56,26 +56,26 @@ export class IndexedDBTransport implements StorageTransport {
 
     try {
       const db = await this.openDB(dbName, storeName);
-      return new Promise<T | undefined>((resolve, reject) => {
+      return await new Promise<T | undefined>((resolve, reject) => {
         const transaction = db.transaction(storeName, 'readonly');
         const store = transaction.objectStore(storeName);
         const request = store.get(key);
 
         request.onsuccess = async () => {
-          if (request.result) {
-            if (options?.encrypt) {
-              if (!this.secretPassphrase) throw new Error('Encryption passphrase not provided');
-              try {
+          try {
+            if (request.result) {
+              if (options?.encrypt) {
+                if (!this.secretPassphrase) throw new Error('Encryption passphrase not provided');
                 const decrypted = await decrypt(request.result, this.secretPassphrase);
                 resolve(deserializeData<T>(decrypted, options?.serializer === 'toon'));
-              } catch (e) {
-                reject(e);
+              } else {
+                resolve(deserializeData<T>(request.result, options?.serializer === 'toon'));
               }
             } else {
-              resolve(deserializeData<T>(request.result, options?.serializer === 'toon'));
+              resolve(undefined);
             }
-          } else {
-            resolve(undefined);
+          } catch (e) {
+            reject(e);
           }
         };
 
@@ -102,7 +102,7 @@ export class IndexedDBTransport implements StorageTransport {
       }
 
       const db = await this.openDB(dbName, storeName);
-      return new Promise<void>((resolve, reject) => {
+      return await new Promise<void>((resolve, reject) => {
         const transaction = db.transaction(storeName, 'readwrite');
         const store = transaction.objectStore(storeName);
         const request = store.put(payload, key);
@@ -123,7 +123,7 @@ export class IndexedDBTransport implements StorageTransport {
 
     try {
       const db = await this.openDB(dbName, storeName);
-      return new Promise<void>((resolve, reject) => {
+      return await new Promise<void>((resolve, reject) => {
         const transaction = db.transaction(storeName, 'readwrite');
         const store = transaction.objectStore(storeName);
         const request = store.delete(key);

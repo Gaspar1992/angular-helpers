@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import {
   PLATFORM_ID,
@@ -6,15 +6,32 @@ import {
   createEnvironmentInjector,
   EnvironmentInjector,
 } from '@angular/core';
-import { injectPlatform } from './platform';
+import * as coreUtils from '@angular-helpers/core/utils';
+import { injectPlatform, isPlatformBrowser, isPlatformServer, getGlobalWindow } from './platform';
 
 describe('injectPlatform', () => {
-  it('should fall back to pure platform detection outside of injection context', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('should fall back to pure platform detection outside of injection context (browser)', () => {
     const platform = injectPlatform();
     expect(platform).toBeDefined();
     expect(typeof platform.isBrowser).toBe('boolean');
     expect(typeof platform.isServer).toBe('boolean');
     expect(platform.isBrowser).not.toBe(platform.isServer);
+    expect(platform.window).toBe(window);
+    expect(platform.document).toBe(document);
+  });
+
+  it('should fall back to pure platform detection outside of injection context (server fallback)', () => {
+    vi.spyOn(coreUtils, 'isPlatformBrowser').mockReturnValue(false);
+
+    const platform = injectPlatform();
+    expect(platform.isBrowser).toBe(false);
+    expect(platform.isServer).toBe(true);
+    expect(platform.window).toBeNull();
+    expect(platform.document).toBeNull();
   });
 
   it('should detect browser platform when inside injection context', () => {
@@ -47,5 +64,11 @@ describe('injectPlatform', () => {
       expect(platform.window).toBeNull();
       expect(platform.document).toBeNull();
     });
+  });
+
+  it('should re-export platform helper utilities', () => {
+    expect(isPlatformBrowser).toBeDefined();
+    expect(isPlatformServer).toBeDefined();
+    expect(getGlobalWindow).toBeDefined();
   });
 });

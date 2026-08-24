@@ -32,6 +32,8 @@ describe('debouncedSignal', () => {
       const source = signal('initial');
       const debounced = debouncedSignal(source, 100);
 
+      // Flush initial effect without changing source to trigger early return
+      TestBed.flushEffects();
       expect(debounced()).toBe('initial');
 
       // Update source
@@ -97,13 +99,8 @@ describe('debouncedSignal', () => {
 
       expect(debounced()).toBe('initial');
 
-      // SSR shouldn't schedule timeouts, so even if we update source, it should update synchronously or not at all depending on SSR policy.
-      // Usually, in SSR we just return the initial value or follow the source immediately.
-      // Let's check: the design says: "Fake injectPlatform().isBrowser to false and assert timers are skipped, returning initial value immediately."
       source.set('ssr-update');
       TestBed.flushEffects();
-      // Since timers are bypassed, the value should not change or it changes immediately without timers. Let's design it to either keep initial value or track immediately.
-      // Let's assert that no timers were scheduled.
       expect(vi.getTimerCount()).toBe(0);
     });
   });

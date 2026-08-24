@@ -70,22 +70,24 @@ export class BrowserSupportUtil {
     isEdge: boolean;
   } {
     const userAgent = this.getUserAgent();
+    const ua = userAgent.toLowerCase();
 
     return {
-      name: this.getBrowserName(userAgent),
+      name: this.getBrowserName(ua),
       version: this.getBrowserVersion(userAgent),
-      isChrome: /chrome/.test(userAgent) && !/edge/.test(userAgent),
-      isFirefox: /firefox/.test(userAgent),
-      isSafari: /safari/.test(userAgent) && !/chrome/.test(userAgent),
-      isEdge: /edge/.test(userAgent) || /edg/.test(userAgent),
+      isChrome: /chrome/.test(ua) && !/edge|edg/.test(ua),
+      isFirefox: /firefox/.test(ua),
+      isSafari: /safari/.test(ua) && !/chrome/.test(ua),
+      isEdge: /edge|edg/.test(ua),
     };
   }
 
   private static getBrowserName(userAgent: string): string {
-    if (/chrome/.test(userAgent) && !/edge/.test(userAgent)) return 'Chrome';
-    if (/firefox/.test(userAgent)) return 'Firefox';
-    if (/safari/.test(userAgent) && !/chrome/.test(userAgent)) return 'Safari';
-    if (/edge/.test(userAgent) || /edg/.test(userAgent)) return 'Edge';
+    const ua = userAgent.toLowerCase();
+    if (/chrome/.test(ua) && !/edge|edg/.test(ua)) return 'Chrome';
+    if (/firefox/.test(ua)) return 'Firefox';
+    if (/safari/.test(ua) && !/chrome/.test(ua)) return 'Safari';
+    if (/edge|edg/.test(ua)) return 'Edge';
     return 'Unknown';
   }
 

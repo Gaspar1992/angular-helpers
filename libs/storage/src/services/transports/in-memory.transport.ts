@@ -57,11 +57,15 @@ export class InMemoryStorageTransport implements StorageTransport {
         for (const callback of keyListeners) {
           try {
             // Retrieve deep isolated clone to avoid listener side effects modifying internal state
-            this.read<T>(key, options).then((value) => {
-              if (value !== undefined) {
-                callback(value);
-              }
-            });
+            this.read<T>(key, options)
+              .then((value) => {
+                if (value !== undefined) {
+                  callback(value);
+                }
+              })
+              .catch(() => {
+                // Ignore callback failures
+              });
           } catch {
             // Ignore callback failures
           }
@@ -78,7 +82,11 @@ export class InMemoryStorageTransport implements StorageTransport {
     if (keyListeners) {
       for (const callback of keyListeners) {
         try {
-          Promise.resolve().then(() => callback(undefined));
+          Promise.resolve()
+            .then(() => callback(undefined))
+            .catch(() => {
+              // Ignore callback failures
+            });
         } catch {
           // Ignore callback failures
         }

@@ -3,7 +3,7 @@ import {
   EnvironmentInjector,
   runInInjectionContext,
 } from '@angular/core';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as Y from 'yjs';
 import { injectYjsUndoManager } from './yjs-undo';
 
@@ -62,5 +62,37 @@ describe('injectYjsUndoManager', () => {
       expect(undoRef.canUndo()).toBe(false);
       expect(undoRef.canRedo()).toBe(false);
     });
+  });
+
+  it('should support ignoredOrigins and stopCapturing', () => {
+    runInInjectionContext(injector, () => {
+      const undoRef = injectYjsUndoManager(yMap, {
+        ignoredOrigins: new Set(['yjs-signal']),
+      });
+
+      expect(undoRef.undoManager.trackedOrigins.has('yjs-signal')).toBe(false);
+
+      const stopSpy = vi.spyOn(undoRef.undoManager, 'stopCapturing');
+      undoRef.stopCapturing();
+      expect(stopSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('should clean up listeners and destroy UndoManager on injector destroy', () => {
+    let undoRefInstance: any;
+
+    runInInjectionContext(injector, () => {
+      undoRefInstance = injectYjsUndoManager(yMap);
+    });
+
+    const offSpy = vi.spyOn(undoRefInstance.undoManager, 'off');
+    const destroySpy = vi.spyOn(undoRefInstance.undoManager, 'destroy');
+
+    injector.destroy();
+
+    expect(offSpy).toHaveBeenCalledWith('stack-item-added', expect.any(Function));
+    expect(offSpy).toHaveBeenCalledWith('stack-item-popped', expect.any(Function));
+    expect(offSpy).toHaveBeenCalledWith('stack-cleared', expect.any(Function));
+    expect(destroySpy).toHaveBeenCalledTimes(1);
   });
 });

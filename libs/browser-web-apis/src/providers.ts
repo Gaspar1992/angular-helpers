@@ -44,6 +44,9 @@ export { provideBarcodeDetector } from './providers/barcode-detector';
 export { provideCredentialManagement } from './providers/credential-management';
 export { provideDeviceOrientation } from './providers/device-orientation';
 export { provideDeviceMotion } from './providers/device-motion';
+export { provideWebBluetooth } from './providers/web-bluetooth';
+export { provideWebSerial } from './providers/web-serial';
+export { provideWebHid } from './providers/web-hid';
 export {
   provideMediaApis,
   provideLocationApis,

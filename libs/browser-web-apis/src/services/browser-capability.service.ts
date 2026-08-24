@@ -34,6 +34,8 @@ export type BrowserCapabilityId =
   | 'webAudio'
   | 'gamepad'
   | 'webBluetooth'
+  | 'webSerial'
+  | 'webHid'
   | 'webUsb'
   | 'webNfc'
   | 'paymentRequest'
@@ -79,6 +81,8 @@ const BROWSER_CAPABILITIES = [
   { id: 'webAudio', label: 'Web Audio API', requiresSecureContext: false },
   { id: 'gamepad', label: 'Gamepad API', requiresSecureContext: true },
   { id: 'webBluetooth', label: 'Web Bluetooth API', requiresSecureContext: true },
+  { id: 'webSerial', label: 'Web Serial API', requiresSecureContext: true },
+  { id: 'webHid', label: 'WebHID API', requiresSecureContext: true },
   { id: 'webUsb', label: 'WebUSB API', requiresSecureContext: true },
   { id: 'webNfc', label: 'Web NFC API', requiresSecureContext: true },
   { id: 'paymentRequest', label: 'Payment Request API', requiresSecureContext: true },
@@ -177,6 +181,10 @@ export class BrowserCapabilityService {
         return typeof navigator !== 'undefined' && 'getGamepads' in navigator;
       case 'webBluetooth':
         return typeof navigator !== 'undefined' && 'bluetooth' in navigator;
+      case 'webSerial':
+        return typeof navigator !== 'undefined' && 'serial' in navigator;
+      case 'webHid':
+        return typeof navigator !== 'undefined' && 'hid' in navigator;
       case 'webUsb':
         return typeof navigator !== 'undefined' && 'usb' in navigator;
       case 'webNfc':

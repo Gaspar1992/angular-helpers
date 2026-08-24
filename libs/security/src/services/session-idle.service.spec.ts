@@ -122,4 +122,18 @@ describe('SessionIdleService', () => {
     vi.advanceTimersByTime(1000);
     expect(secureStorageSpy.clear).not.toHaveBeenCalled();
   });
+
+  it('should clear clipboard if autoClearClipboard is true', () => {
+    service.start({ timeoutMs: 1000, autoClearClipboard: true });
+
+    vi.advanceTimersByTime(1000);
+    expect(clipboardSpy.clear).toHaveBeenCalled();
+  });
+
+  it('should not clear clipboard if autoClearClipboard is false', () => {
+    service.start({ timeoutMs: 1000, autoClearClipboard: false });
+
+    vi.advanceTimersByTime(1000);
+    expect(clipboardSpy.clear).not.toHaveBeenCalled();
+  });
 });

@@ -3,7 +3,7 @@ import {
   EnvironmentInjector,
   runInInjectionContext,
 } from '@angular/core';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Awareness, encodeAwarenessUpdate, applyAwarenessUpdate } from 'y-protocols/awareness';
 import * as Y from 'yjs';
 import { injectYjsAwareness } from './yjs-awareness';
@@ -17,6 +17,10 @@ describe('injectYjsAwareness', () => {
     doc = new Y.Doc();
     awareness = new Awareness(doc);
     injector = createEnvironmentInjector([]);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('should initialize local state and reactive signals', () => {
@@ -51,6 +55,16 @@ describe('injectYjsAwareness', () => {
 
       pres.setLocalState({ name: 'Updated User' });
       expect(pres.localState()).toEqual({ name: 'Updated User' });
+    });
+  });
+
+  it('should patch local state when initial state is undefined', () => {
+    runInInjectionContext(injector, () => {
+      const pres = injectYjsAwareness<{ name?: string }>(awareness);
+      expect(pres.localState()).toEqual({});
+
+      pres.patchLocalState({ name: 'Patched User' });
+      expect(pres.localState()).toEqual({ name: 'Patched User' });
     });
   });
 
@@ -93,5 +107,38 @@ describe('injectYjsAwareness', () => {
       document.dispatchEvent(new Event('visibilitychange'));
       expect(setLocalStateSpy).toHaveBeenCalled();
     });
+  });
+
+  it('should clean up awareness listeners and reset local state on DestroyRef', () => {
+    const offSpy = vi.spyOn(awareness, 'off');
+    const setLocalStateSpy = vi.spyOn(awareness, 'setLocalState');
+
+    runInInjectionContext(injector, () => {
+      injectYjsAwareness<{ name: string }>(
+        awareness,
+        { name: 'Cleanup User' },
+        { clearOnDestroy: true },
+      );
+    });
+
+    injector.destroy();
+
+    expect(offSpy).toHaveBeenCalledWith('change', expect.any(Function));
+    expect(setLocalStateSpy).toHaveBeenCalledWith(null);
+  });
+
+  it('should not clear local state on DestroyRef when clearOnDestroy is false', () => {
+    runInInjectionContext(injector, () => {
+      injectYjsAwareness<{ name: string }>(
+        awareness,
+        { name: 'Persisted User' },
+        { clearOnDestroy: false, autoResyncOnVisibility: false },
+      );
+    });
+
+    const setLocalStateSpy = vi.spyOn(awareness, 'setLocalState');
+    injector.destroy();
+
+    expect(setLocalStateSpy).not.toHaveBeenCalledWith(null);
   });
 });

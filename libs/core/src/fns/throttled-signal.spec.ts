@@ -32,6 +32,8 @@ describe('throttledSignal', () => {
       const source = signal('initial');
       const throttled = throttledSignal(source, 100);
 
+      // Flush initial effect where val === lastValue
+      TestBed.flushEffects();
       expect(throttled()).toBe('initial');
 
       // Update source at t=0

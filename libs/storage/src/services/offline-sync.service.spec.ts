@@ -1,8 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpBackend, HttpRequest, HttpResponse } from '@angular/common/http';
+import { HttpBackend, HttpResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { OfflineSyncService } from './offline-sync.service';
-import { OFFLINE_SYNC_SERVICE_DEFAULTS } from './offline-sync.constants';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 describe('OfflineSyncService', () => {
@@ -16,7 +15,6 @@ describe('OfflineSyncService', () => {
     vi.useFakeTimers();
     dbStore = new Map();
 
-    // Mock Navigator using Object.defineProperty to override modern read-only properties
     originalNavigator = globalThis.navigator;
     Object.defineProperty(globalThis, 'navigator', {
       value: { onLine: true },
@@ -24,7 +22,6 @@ describe('OfflineSyncService', () => {
       writable: true,
     });
 
-    // Mock HttpBackend for synthetic requests
     mockHttpBackend = {
       handle: vi.fn().mockImplementation(() => {
         return of(
@@ -37,7 +34,6 @@ describe('OfflineSyncService', () => {
       }),
     };
 
-    // Mock IndexedDB
     const mockIDBRequest = (result: any = null) => {
       const r: any = { onsuccess: null, onerror: null, result };
       return r;
@@ -107,7 +103,6 @@ describe('OfflineSyncService', () => {
   it('should initialize with correct online status and pending count', async () => {
     expect(service.isOnline()).toBe(true);
 
-    // Allow pending count promise to resolve
     await new Promise((resolve) => queueMicrotask(resolve));
     expect(service.pendingSyncsCount()).toBe(0);
   });
@@ -115,7 +110,6 @@ describe('OfflineSyncService', () => {
   it('should react to window online event and trigger sync', async () => {
     const triggerSyncSpy = vi.spyOn(service, 'triggerSync');
 
-    // Simulate going offline first
     Object.defineProperty(globalThis, 'navigator', {
       value: { onLine: false },
       configurable: true,
@@ -124,7 +118,6 @@ describe('OfflineSyncService', () => {
     window.dispatchEvent(new Event('offline'));
     expect(service.isOnline()).toBe(false);
 
-    // Simulate going online
     Object.defineProperty(globalThis, 'navigator', {
       value: { onLine: true },
       configurable: true,
@@ -136,32 +129,187 @@ describe('OfflineSyncService', () => {
     expect(triggerSyncSpy).toHaveBeenCalled();
   });
 
-  it('should trigger sync and call HttpBackend to drain queue', async () => {
-    mockHttpBackend.handle.mockClear();
+  it('should not trigger sync when offline', () => {
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    Object.defineProperty(globalThis, 'navigator', {
+      value: { onLine: false },
+      configurable: true,
+      writable: true,
+    });
 
     service.triggerSync();
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      '[OfflineSyncService] Cannot trigger sync while offline.',
+    );
+    expect(mockHttpBackend.handle).not.toHaveBeenCalled();
 
+    consoleWarnSpy.mockRestore();
+  });
+
+  it('should trigger sync and update pendingSyncsCount from response body', async () => {
+    mockHttpBackend.handle.mockReturnValue(
+      of(
+        new HttpResponse({
+          status: 200,
+          body: { success: true, pendingCount: 5 },
+        }),
+      ),
+    );
+
+    service.triggerSync();
     expect(mockHttpBackend.handle).toHaveBeenCalled();
-    const req = mockHttpBackend.handle.mock.calls[0][0] as HttpRequest<any>;
-    expect(req.method).toBe(OFFLINE_SYNC_SERVICE_DEFAULTS.HTTP_METHOD_GET);
-    expect(req.url).toBe(OFFLINE_SYNC_SERVICE_DEFAULTS.URL_DRAIN);
+    expect(service.pendingSyncsCount()).toBe(5);
+  });
 
-    // Allow promises to flush
-    await new Promise((resolve) => queueMicrotask(resolve));
-    expect(service.pendingSyncsCount()).toBe(0);
+  it('should fallback to checkPendingCount if response body has no pendingCount', async () => {
+    mockHttpBackend.handle.mockReturnValue(
+      of(
+        new HttpResponse({
+          status: 200,
+          body: { success: true },
+        }),
+      ),
+    );
+    const checkPendingSpy = vi.spyOn(service, 'checkPendingCount');
+
+    service.triggerSync();
+    expect(checkPendingSpy).toHaveBeenCalled();
+  });
+
+  it('should warn and check pending count when HttpBackend is not available', () => {
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const checkPendingSpy = vi.spyOn(service, 'checkPendingCount');
+
+    // Simulate HttpBackend being absent
+    (service as any).httpBackend = null;
+
+    service.triggerSync();
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('[OfflineSyncService] HttpBackend not available'),
+    );
+    expect(checkPendingSpy).toHaveBeenCalled();
+
+    consoleWarnSpy.mockRestore();
   });
 
   it('should handle sync errors gracefully and check pending count', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockHttpBackend.handle.mockReturnValue(throwError(() => new Error('Sync failed')));
 
-    dbStore.set('1', { id: '1' }); // Mock 1 item in db
+    dbStore.set('1', { id: '1' });
     const checkPendingSpy = vi.spyOn(service, 'checkPendingCount');
 
     service.triggerSync();
 
-    // Allow promises to flush
     await new Promise((resolve) => queueMicrotask(resolve));
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('[OfflineSyncService] Error draining offline queue:'),
+      expect.any(Error),
+    );
     expect(checkPendingSpy).toHaveBeenCalled();
     expect(service.pendingSyncsCount()).toBe(1);
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  describe('checkPendingCount edge cases', () => {
+    it('should resolve to 0 when indexedDB is undefined', async () => {
+      (globalThis as any).indexedDB = undefined;
+      const count = await service.checkPendingCount();
+      expect(count).toBe(0);
+      expect(service.pendingSyncsCount()).toBe(0);
+    });
+
+    it('should resolve to 0 when store name does not exist in db', async () => {
+      const closeSpy = vi.fn();
+      const mockDBWithoutStore = {
+        objectStoreNames: { contains: vi.fn().mockReturnValue(false) },
+        close: closeSpy,
+      };
+
+      (globalThis as any).indexedDB = {
+        open: vi.fn().mockReturnValue({
+          result: mockDBWithoutStore,
+          onsuccess: null,
+          onerror: null,
+        }),
+      };
+
+      const openReq = (globalThis as any).indexedDB.open();
+      const promise = service.checkPendingCount();
+      openReq.onsuccess();
+
+      const count = await promise;
+      expect(count).toBe(0);
+      expect(closeSpy).toHaveBeenCalled();
+    });
+
+    it('should resolve to 0 when countRequest errors', async () => {
+      const closeSpy = vi.fn();
+      const countReq: any = { onsuccess: null, onerror: null };
+      const mockDB = {
+        objectStoreNames: { contains: vi.fn().mockReturnValue(true) },
+        transaction: vi.fn().mockReturnValue({
+          objectStore: vi.fn().mockReturnValue({
+            count: vi.fn().mockReturnValue(countReq),
+          }),
+        }),
+        close: closeSpy,
+      };
+
+      const openReq: any = { result: mockDB, onsuccess: null, onerror: null };
+      (globalThis as any).indexedDB = {
+        open: vi.fn().mockReturnValue(openReq),
+      };
+
+      const promise = service.checkPendingCount();
+      openReq.onsuccess();
+      countReq.onerror();
+
+      const count = await promise;
+      expect(count).toBe(0);
+      expect(closeSpy).toHaveBeenCalled();
+    });
+
+    it('should resolve to 0 when indexedDB.open errors', async () => {
+      const openReq: any = { onsuccess: null, onerror: null };
+      (globalThis as any).indexedDB = {
+        open: vi.fn().mockReturnValue(openReq),
+      };
+
+      const promise = service.checkPendingCount();
+      openReq.onerror();
+
+      const count = await promise;
+      expect(count).toBe(0);
+    });
+
+    it('should resolve to 0 and catch when indexedDB.open throws synchronously', async () => {
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      (globalThis as any).indexedDB = {
+        open: vi.fn().mockImplementation(() => {
+          throw new Error('Database locked');
+        }),
+      };
+
+      const count = await service.checkPendingCount();
+      expect(count).toBe(0);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[OfflineSyncService] Error opening IndexedDB:'),
+        expect.any(Error),
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+  });
+
+  describe('SSR / non-browser environment', () => {
+    it('should initialize gracefully when running outside browser', () => {
+      TestBed.runInInjectionContext(() => {
+        const ssrService = new OfflineSyncService();
+        (ssrService as any).platform = { isBrowser: false, window: null };
+        expect(ssrService.isOnline()).toBe(true);
+      });
+    });
   });
 });

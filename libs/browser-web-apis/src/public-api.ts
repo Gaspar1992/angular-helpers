@@ -153,6 +153,42 @@ export {
 } from './services/credential-management.service';
 export { DeviceOrientationService } from './services/device-orientation.service';
 export { DeviceMotionService } from './services/device-motion.service';
+export {
+  WebBluetoothService,
+  type BluetoothServiceUUID,
+  type BluetoothCharacteristicUUID,
+  type BluetoothDescriptorUUID,
+  type BluetoothLEScanFilterInit,
+  type BluetoothRequestDeviceOptions,
+  type BluetoothCharacteristicProperties,
+  type BluetoothRemoteGATTDescriptor,
+  type BluetoothRemoteGATTCharacteristic,
+  type BluetoothRemoteGATTService,
+  type BluetoothRemoteGATTServer,
+  type BluetoothDevice,
+} from './services/web-bluetooth.service';
+export {
+  WebSerialService,
+  type SerialPortFilter,
+  type SerialPortRequestOptions,
+  type ParityType,
+  type FlowControlType,
+  type SerialOptions,
+  type SerialPortInfo,
+  type SerialPort,
+  type SerialConnectionEvent,
+} from './services/web-serial.service';
+export {
+  WebHidService,
+  type HIDDeviceFilter,
+  type HIDDeviceRequestOptions,
+  type HIDReportItem,
+  type HIDReportInfo,
+  type HIDCollectionInfo,
+  type HIDInputReportEvent,
+  type HIDConnectionEvent,
+  type HIDDevice,
+} from './services/web-hid.service';
 
 // Tokens
 export {
@@ -244,6 +280,9 @@ export {
   type WebTransportSessionInfo,
   type WebTransportStatus,
 } from './fns/inject-web-transport-resource';
+export { injectBluetooth, type BluetoothRef } from './fns/inject-bluetooth';
+export { injectSerial, type SerialRef } from './fns/inject-serial';
+export { injectHid, type HidRef } from './fns/inject-hid';
 
 // Utils and Guards
 export * from './utils/browser-support.util';

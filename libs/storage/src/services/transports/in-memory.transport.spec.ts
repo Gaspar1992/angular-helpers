@@ -15,6 +15,11 @@ describe('InMemoryStorageTransport', () => {
     expect(result).toEqual({ name: 'Angular' });
   });
 
+  it('should return undefined when reading non-existing key', async () => {
+    const result = await transport.read('non_existing');
+    expect(result).toBeUndefined();
+  });
+
   it('should delete a value and verify read returns undefined', async () => {
     await transport.write('key2', 'val2');
     await transport.delete('key2');
@@ -49,6 +54,30 @@ describe('InMemoryStorageTransport', () => {
     expect(decrypted).toEqual(rawData);
   });
 
+  it('should handle encryption error when passphrase is not provided', async () => {
+    const noPassTransport = new InMemoryStorageTransport(); // No passphrase
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await noPassTransport.write('encKey', { a: 1 }, { encrypt: true } as any);
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('[InMemoryStorageTransport] Error writing key:'),
+      'encKey',
+      expect.any(Error),
+    );
+
+    // Store encrypted ciphertext manually and try to read
+    noPassTransport.getInternalMap().set('readEncKey', 'some-encrypted-string');
+    const readRes = await noPassTransport.read('readEncKey', { encrypt: true } as any);
+    expect(readRes).toBeUndefined();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('[InMemoryStorageTransport] Error reading key:'),
+      'readEncKey',
+      expect.any(Error),
+    );
+
+    consoleSpy.mockRestore();
+  });
+
   it('should support subscription events via onChange and unsubscribe function', async () => {
     const callback = vi.fn();
     const unsubscribe = transport.onChange<string>('subKey', callback);
@@ -81,5 +110,35 @@ describe('InMemoryStorageTransport', () => {
     await transport.delete('subKeyDelete');
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(callback).toHaveBeenCalledWith(undefined);
+  });
+
+  it('should handle multiple listeners on the same key and isolate callback failures', async () => {
+    const cb1 = vi.fn().mockImplementation(() => {
+      throw new Error('Listener 1 exploded');
+    });
+    const cb2 = vi.fn();
+
+    const unsub1 = transport.onChange('multiKey', cb1);
+    const unsub2 = transport.onChange('multiKey', cb2);
+
+    await transport.write('multiKey', 'val');
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    expect(cb1).toHaveBeenCalledWith('val');
+    expect(cb2).toHaveBeenCalledWith('val');
+
+    unsub1();
+    unsub2();
+  });
+
+  it('should handle delete listener errors gracefully', async () => {
+    const cb1 = vi.fn().mockImplementation(() => {
+      throw new Error('Delete listener error');
+    });
+    transport.onChange('delKey', cb1);
+
+    await transport.delete('delKey');
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(cb1).toHaveBeenCalledWith(undefined);
   });
 });

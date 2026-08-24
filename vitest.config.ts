@@ -62,6 +62,7 @@ export default defineConfig({
       '@angular-helpers/worker-http/realtime': here('./libs/worker-http/realtime/src/index.ts'),
       '@angular-helpers/security/forms': here('./libs/security/forms/src/index.ts'),
       '@angular-helpers/security/signal-forms': here('./libs/security/signal-forms/src/index.ts'),
+      '@angular-helpers/security': here('./libs/security/src/index.ts'),
       '@angular-helpers/browser-web-apis/experimental': here(
         './libs/browser-web-apis/experimental/src/index.ts',
       ),

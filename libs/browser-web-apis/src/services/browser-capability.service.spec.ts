@@ -62,4 +62,34 @@ describe('BrowserCapabilityService - Device Orientation & Motion', () => {
       }
     }
   });
+
+  it('should detect webBluetooth as supported when navigator.bluetooth is present', () => {
+    vi.stubGlobal('navigator', { bluetooth: {} });
+    expect(service.isSupported('webBluetooth')).toBe(true);
+  });
+
+  it('should detect webBluetooth as unsupported when navigator.bluetooth is absent', () => {
+    vi.stubGlobal('navigator', {});
+    expect(service.isSupported('webBluetooth')).toBe(false);
+  });
+
+  it('should detect webSerial as supported when navigator.serial is present', () => {
+    vi.stubGlobal('navigator', { serial: {} });
+    expect(service.isSupported('webSerial')).toBe(true);
+  });
+
+  it('should detect webSerial as unsupported when navigator.serial is absent', () => {
+    vi.stubGlobal('navigator', {});
+    expect(service.isSupported('webSerial')).toBe(false);
+  });
+
+  it('should detect webHid as supported when navigator.hid is present', () => {
+    vi.stubGlobal('navigator', { hid: {} });
+    expect(service.isSupported('webHid')).toBe(true);
+  });
+
+  it('should detect webHid as unsupported when navigator.hid is absent', () => {
+    vi.stubGlobal('navigator', {});
+    expect(service.isSupported('webHid')).toBe(false);
+  });
 });

@@ -177,6 +177,7 @@ export class EntityStore<Id, Entity> {
             });
             this.setMany(validData);
 
+            this._isRestoring = false;
             // If some items were invalid, trigger auto-repair rewrite
             if (validData.length !== data.length) {
               this.triggerPersist();

@@ -6,6 +6,7 @@ import {
   isUrlSafe,
   sanitizeUrlString,
   sanitizeHtmlString,
+  isHtmlSafe,
 } from './validators-core';
 
 describe('validators-core (shared between Reactive Forms and Signal Forms)', () => {
@@ -24,6 +25,17 @@ describe('validators-core (shared between Reactive Forms and Signal Forms)', () 
       const strong = assessPasswordStrength('xK#9mZ$vLq2@rBnT7');
       expect(strong.score).toBeGreaterThan(weak.score);
       expect(strong.score).toBeGreaterThanOrEqual(3);
+    });
+
+    it('detects repeated characters and keyboard patterns', () => {
+      const repeated = assessPasswordStrength('aaa111AAA!!!');
+      expect(repeated.feedback).toContain('Avoid repeated characters');
+
+      const keyboard = assessPasswordStrength('qwerty123456');
+      expect(keyboard.feedback).toContain('Avoid keyboard patterns (qwerty, asdf)');
+
+      const seq = assessPasswordStrength('abcdef12345');
+      expect(seq.feedback).toContain('Avoid predictable sequences (abc, 123)');
     });
 
     it.each([
@@ -86,23 +98,41 @@ describe('validators-core (shared between Reactive Forms and Signal Forms)', () 
     ])('containsSqlInjectionHints(%j) === %j', (input, expected) => {
       expect(containsSqlInjectionHints(input)).toBe(expected);
     });
+
+    it('returns false for empty string', () => {
+      expect(containsSqlInjectionHints('')).toBe(false);
+    });
   });
 
   describe('sanitizeHtmlString / isHtmlSafe', () => {
+    it('returns empty string for empty input', () => {
+      expect(sanitizeHtmlString('')).toBe('');
+      expect(isHtmlSafe('')).toBe(true);
+    });
+
     it('should clean scripts and on-handlers leaving safe tags', () => {
       const input = '<p>Hola <b>mundo</b><script>alert(1)</script></p>';
       expect(sanitizeHtmlString(input)).toBe('<p>Hola <b>mundo</b>alert(1)</p>');
     });
 
+    it('should strip inline on* event attributes', () => {
+      const input = '<p onclick="alert(1)">Click me</p>';
+      expect(sanitizeHtmlString(input)).toBe('<p>Click me</p>');
+    });
+
     it('should remove disallowed attributes', () => {
       const input = '<a href="https://example.com" class="btn" title="link">Link</a>';
-      // Por defecto solo se permite href en tag 'a'
       expect(sanitizeHtmlString(input)).toBe('<a href="https://example.com">Link</a>');
     });
 
     it('should sanitize malicious href attributes', () => {
       const input = '<a href="javascript:alert(1)">Hack</a>';
       expect(sanitizeHtmlString(input)).toBe('<a>Hack</a>');
+    });
+
+    it('isHtmlSafe returns true for safe content and false for modified content', () => {
+      expect(isHtmlSafe('<p>Safe <b>content</b></p>')).toBe(true);
+      expect(isHtmlSafe('<p>Dangerous <script>alert(1)</script></p>')).toBe(false);
     });
 
     it('should sanitize URL attributes in custom tags to prevent XSS bypass', () => {
@@ -114,19 +144,26 @@ describe('validators-core (shared between Reactive Forms and Signal Forms)', () 
         },
       };
 
-      // 1. Tag personalizado iframe con javascript: URL en src
       const maliciousIframe = '<iframe src="javascript:alert(\'XSS\')"></iframe>';
       expect(sanitizeHtmlString(maliciousIframe, options)).toBe('<iframe></iframe>');
 
-      // 2. Tag personalizado iframe con URL segura en src
       const safeIframe = '<iframe src="https://example.com/embed"></iframe>';
       expect(sanitizeHtmlString(safeIframe, options)).toBe(
         '<iframe src="https://example.com/embed"></iframe>',
       );
 
-      // 3. Tag personalizado form con javascript: URL en action
       const maliciousForm = '<form action="javascript:alert(1)"></form>';
       expect(sanitizeHtmlString(maliciousForm, options)).toBe('<form></form>');
+    });
+
+    it('throws when DOMParser is unavailable', () => {
+      const originalParser = globalThis.DOMParser;
+      try {
+        delete (globalThis as any).DOMParser;
+        expect(() => sanitizeHtmlString('<p>test</p>')).toThrow(/requires a browser environment/);
+      } finally {
+        globalThis.DOMParser = originalParser;
+      }
     });
   });
 });

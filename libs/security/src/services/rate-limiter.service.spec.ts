@@ -159,7 +159,6 @@ describe('RateLimiterService', () => {
 
     it('should persist and load sliding-window state in sessionStorage', async () => {
       const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
-      const getItemSpy = vi.spyOn(Storage.prototype, 'getItem');
 
       await service.configure('session-sw', {
         type: 'sliding-window',
@@ -244,6 +243,24 @@ describe('RateLimiterService', () => {
 
       await secureService.reset('secure-tb');
       expect(mockSecureStorage.remove).toHaveBeenCalledWith('rate-limit:secure-tb');
+    });
+
+    it('throws RangeError when configured with invalid parameters', async () => {
+      await expect(
+        service.configure('invalid-tb', { type: 'token-bucket', capacity: 0, refillPerSecond: 1 }),
+      ).rejects.toThrow(RangeError);
+
+      await expect(
+        service.configure('invalid-tb', { type: 'token-bucket', capacity: 5, refillPerSecond: 0 }),
+      ).rejects.toThrow(RangeError);
+
+      await expect(
+        service.configure('invalid-sw', { type: 'sliding-window', max: 0, windowMs: 1000 }),
+      ).rejects.toThrow(RangeError);
+
+      await expect(
+        service.configure('invalid-sw', { type: 'sliding-window', max: 5, windowMs: 0 }),
+      ).rejects.toThrow(RangeError);
     });
   });
 });
