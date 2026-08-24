@@ -361,6 +361,7 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
         title: 'Signals & State',
         items: [
           { label: 'yjsSignal', route: '/docs/yjs/yjs-signal', hasFn: true },
+          { label: 'YjsTextDirective', route: '/docs/yjs/yjs-text-directive' },
           {
             label: 'injectYjsUndoManager',
             route: '/docs/yjs/inject-yjs-undo-manager',

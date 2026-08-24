@@ -74,4 +74,24 @@ describe('injectYjsAwareness', () => {
       expect(pres.remoteUsers()[0].state).toEqual({ name: 'Remote User' });
     });
   });
+
+  it('should re-announce local presence when document becomes visible', () => {
+    runInInjectionContext(injector, () => {
+      const setLocalStateSpy = vi.spyOn(awareness, 'setLocalState');
+      injectYjsAwareness<{ name: string }>(
+        awareness,
+        { name: 'Gaspar' },
+        { autoResyncOnVisibility: true },
+      );
+
+      // Simulate visibilitychange event
+      Object.defineProperty(document, 'visibilityState', {
+        value: 'visible',
+        configurable: true,
+      });
+
+      document.dispatchEvent(new Event('visibilitychange'));
+      expect(setLocalStateSpy).toHaveBeenCalled();
+    });
+  });
 });

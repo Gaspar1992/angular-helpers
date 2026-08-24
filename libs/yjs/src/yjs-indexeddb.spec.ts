@@ -23,6 +23,9 @@ describe('injectYjsIndexeddb', () => {
       const dbRef = injectYjsIndexeddb('test-db', doc);
 
       expect(dbRef.synced()).toBe(true);
+      expect(dbRef.isHydrated()).toBe(true);
+      expect(dbRef.isHydrating()).toBe(false);
+      expect(dbRef.isSupported).toBe(false);
       expect(dbRef.provider).toBeNull();
     });
 
@@ -52,6 +55,9 @@ describe('injectYjsIndexeddb', () => {
     runInInjectionContext(injector, () => {
       const dbRef = injectYjsIndexeddb('test-db-2', doc);
       expect(dbRef.synced()).toBe(false);
+      expect(dbRef.isHydrated()).toBe(false);
+      expect(dbRef.isHydrating()).toBe(true);
+      expect(dbRef.isSupported).toBe(true);
       expect(dbRef.provider).toBeDefined();
     });
 

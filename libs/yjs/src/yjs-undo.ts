@@ -40,8 +40,9 @@ export function injectYjsUndoManager(
 ): YjsUndoRef {
   const destroyRef = inject(DestroyRef);
 
+  const defaultTracked = new Set<any>([null, undefined, 'yjs-signal', 'yjs-text-directive']);
   const undoManager = new Y.UndoManager(typeScope, {
-    trackedOrigins: options?.trackedOrigins,
+    trackedOrigins: options?.trackedOrigins ?? defaultTracked,
     captureTimeout: options?.captureTimeout,
   });
 

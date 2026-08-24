@@ -76,4 +76,100 @@ describe('yjsSignal', () => {
 
     expect(sigB()).toEqual({ theme: 'dark' });
   });
+
+  it('should synchronize a single property of Y.Map when key option is provided', () => {
+    const doc = new Y.Doc();
+    const yMap = doc.getMap<string>('settings');
+
+    const titleSig = yjsSignal<string>(yMap, {
+      key: 'title',
+      initialValue: 'Default Title',
+    });
+
+    expect(titleSig()).toBe('Default Title');
+    expect(yMap.get('title')).toBe('Default Title');
+
+    // Local signal update
+    titleSig.set('Collaborative Doc');
+    expect(yMap.get('title')).toBe('Collaborative Doc');
+
+    // External Yjs update
+    yMap.set('title', 'Remote Changed Title');
+    expect(titleSig()).toBe('Remote Changed Title');
+
+    // Unrelated key update in Y.Map does not affect titleSig
+    yMap.set('theme', 'dark');
+    expect(titleSig()).toBe('Remote Changed Title');
+  });
+
+  it('should perform minimal array reconciliation without clearing untouched items', () => {
+    const doc = new Y.Doc();
+    const yArray = doc.getArray<string>('list');
+    yArray.push(['item1', 'item2', 'item3']);
+
+    const listSig = yjsSignal<string[]>(yArray);
+    expect(listSig()).toEqual(['item1', 'item2', 'item3']);
+
+    let eventsCount = 0;
+    yArray.observe((event) => {
+      eventsCount++;
+      // Expect delta to show minimal change, not full replacement
+      expect(event.changes.delta.length).toBeGreaterThan(0);
+    });
+
+    // Update only the middle element
+    listSig.set(['item1', 'item2_modified', 'item3']);
+    expect(yArray.toArray()).toEqual(['item1', 'item2_modified', 'item3']);
+    expect(eventsCount).toBe(1);
+  });
+
+  it('should seed initial values when type is empty', () => {
+    const doc = new Y.Doc();
+    const yText = doc.getText('note');
+
+    const noteSig = yjsSignal<string>(yText, { initialValue: 'Initial Note Content' });
+    expect(noteSig()).toBe('Initial Note Content');
+    expect(yText.toString()).toBe('Initial Note Content');
+  });
+
+  it('should preserve nested Y.Map instances during parent signal updates', () => {
+    const doc = new Y.Doc();
+    const rootMap = doc.getMap('root');
+    const nestedMap = new Y.Map();
+    nestedMap.set('role', 'admin');
+    rootMap.set('user', nestedMap);
+
+    const sig = yjsSignal<any>(rootMap);
+    expect(sig()).toEqual({ user: { role: 'admin' } });
+
+    // Update nested property via signal
+    sig.set({ user: { role: 'superadmin', lastSeen: 'today' } });
+
+    // Verify rootMap still holds the exact Y.Map instance (CRDT tree preserved)
+    const retainedNested = rootMap.get('user');
+    expect(retainedNested instanceof Y.Map).toBe(true);
+    expect(retainedNested).toBe(nestedMap);
+    expect((retainedNested as Y.Map<any>).get('role')).toBe('superadmin');
+    expect((retainedNested as Y.Map<any>).get('lastSeen')).toBe('today');
+  });
+
+  it('should batch multiple rapid remote events when microtask batching is enabled', async () => {
+    const doc = new Y.Doc();
+    const yArray = doc.getArray<number>('rapid');
+
+    const sig = yjsSignal<number[]>(yArray, { batching: 'microtask' });
+    expect(sig()).toEqual([]);
+
+    // Push 10 items in a synchronous loop
+    for (let i = 1; i <= 10; i++) {
+      yArray.push([i]);
+    }
+
+    // Immediately after loop, signal is not yet flushed
+    // Wait for microtask tick
+    await Promise.resolve();
+
+    // After microtask, signal has the consolidated latest state
+    expect(sig()).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  });
 });

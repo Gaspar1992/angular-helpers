@@ -7,6 +7,19 @@ export interface AwarenessUser<TState = Record<string, any>> {
   isLocal: boolean;
 }
 
+export interface YjsAwarenessOptions {
+  /**
+   * Whether to automatically clear local presence state (set to null) when host component destroys (default: true).
+   */
+  clearOnDestroy?: boolean;
+
+  /**
+   * Whether to automatically re-announce local presence state when the browser tab regains visibility (default: true).
+   * Prevents peers from timing out awareness heartbeats when background timers are throttled.
+   */
+  autoResyncOnVisibility?: boolean;
+}
+
 export interface YjsAwarenessRef<TState extends Record<string, any> = Record<string, any>> {
   /** Signal emitting the current local user state */
   readonly localState: Signal<TState | null>;
@@ -26,12 +39,15 @@ export interface YjsAwarenessRef<TState extends Record<string, any> = Record<str
  *
  * @param awareness The Yjs Awareness instance (e.g. from y-websocket or custom provider)
  * @param initialLocalState Optional initial presence state for the local user
+ * @param options Configuration options such as clearOnDestroy and autoResyncOnVisibility
  */
 export function injectYjsAwareness<TState extends Record<string, any> = Record<string, any>>(
   awareness: Awareness,
   initialLocalState?: TState,
+  options?: YjsAwarenessOptions,
 ): YjsAwarenessRef<TState> {
   const destroyRef = inject(DestroyRef);
+  const autoResync = options?.autoResyncOnVisibility !== false;
 
   const localStateSig = signal<TState | null>(
     initialLocalState ?? (awareness.getLocalState() as TState | null),
@@ -77,8 +93,29 @@ export function injectYjsAwareness<TState extends Record<string, any> = Record<s
 
   awareness.on('change', handleUpdate);
 
+  // Background tab throttle protection
+  const handleVisibilityChange = () => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+      const current = awareness.getLocalState();
+      if (current) {
+        // Re-announce state to peers
+        awareness.setLocalState(current);
+      }
+    }
+  };
+
+  if (autoResync && typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+  }
+
   destroyRef.onDestroy(() => {
+    if (autoResync && typeof document !== 'undefined') {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }
     awareness.off('change', handleUpdate);
+    if (options?.clearOnDestroy !== false) {
+      awareness.setLocalState(null);
+    }
   });
 
   return {

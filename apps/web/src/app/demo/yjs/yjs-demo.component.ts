@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import {
   YjsDocService,
   yjsSignal,
+  YjsTextDirective,
   injectYjsUndoManager,
   injectYjsAwareness,
   injectYjsIndexeddb,
@@ -16,15 +17,10 @@ interface UserPresence {
   cursor?: { x: number; y: number };
 }
 
-interface DocState {
-  title: string;
-  content: string;
-}
-
 @Component({
   selector: 'app-yjs-demo',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, YjsTextDirective],
   template: `
     <div class="max-w-6xl mx-auto px-4 py-8 space-y-8">
       <!-- Header -->
@@ -42,8 +38,9 @@ interface DocState {
           Real-Time CRDT Collaboration & Signals
         </h1>
         <p class="text-lg text-base-content/70 max-w-2xl mx-auto">
-          Seamlessly synchronize Angular Signals with Yjs shared types, UndoManager stack, presence
-          awareness, and offline IndexedDB persistence with zero feedback loops.
+          Seamlessly synchronize Angular Signals with Yjs shared types, direct textarea directives
+          with cursor preservation, UndoManager stack, presence awareness, and offline IndexedDB
+          persistence with zero feedback loops.
         </p>
       </div>
 
@@ -62,7 +59,9 @@ interface DocState {
                 <span class="text-3xl">📝</span>
                 <div>
                   <h2 class="text-xl font-bold">Collaborative Document</h2>
-                  <p class="text-xs text-base-content/60">Y.Map bound to WritableSignal</p>
+                  <p class="text-xs text-base-content/60">
+                    Y.Map & Y.Text bound to WritableSignal and [yjsText]
+                  </p>
                 </div>
               </div>
 
@@ -102,12 +101,12 @@ interface DocState {
                 <label
                   class="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-2"
                 >
-                  Document Title
+                  Document Title (yjsSignal key: 'title')
                 </label>
                 <input
                   type="text"
-                  [ngModel]="docState().title"
-                  (ngModelChange)="updateTitle($event)"
+                  [value]="title()"
+                  (input)="title.set($any($event.target).value)"
                   placeholder="Enter document title..."
                   class="input input-bordered w-full font-bold text-lg bg-base-100/70 focus:outline-primary"
                 />
@@ -117,12 +116,11 @@ interface DocState {
                 <label
                   class="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-2"
                 >
-                  Content Body
+                  Content Body ([yjsText] Directive with Cursor Preservation)
                 </label>
                 <textarea
                   rows="5"
-                  [ngModel]="docState().content"
-                  (ngModelChange)="updateContent($event)"
+                  [yjsText]="yText"
                   placeholder="Start typing collaborative notes..."
                   class="textarea textarea-bordered w-full font-mono text-sm bg-base-100/70 focus:outline-primary"
                 ></textarea>
@@ -134,12 +132,12 @@ interface DocState {
               <div
                 class="text-xs font-semibold uppercase tracking-wider text-base-content/60 flex items-center justify-between"
               >
-                <span>Signal State Snapshot</span>
-                <span class="badge badge-xs badge-accent">Live Reactive Binding</span>
+                <span>Live State Snapshot</span>
+                <span class="badge badge-xs badge-accent">Reactive Signals</span>
               </div>
               <pre
                 class="text-xs font-mono bg-base-100/80 p-3 rounded-xl overflow-x-auto text-primary"
-                >{{ JSON.stringify(docState(), null, 2) }}
+                >{{ JSON.stringify({ title: title(), textLength: yText.length }, null, 2) }}
               </pre>
             </div>
           </div>
@@ -158,124 +156,138 @@ interface DocState {
                 </div>
               </div>
               <div class="flex items-center justify-between text-xs pt-2">
-                <span>Hydration Status:</span>
+                <span class="text-base-content/70">Hydration Status:</span>
                 <span
-                  class="badge badge-sm font-semibold"
-                  [class.badge-success]="dbRef.synced()"
-                  [class.badge-warning]="!dbRef.synced()"
+                  class="badge badge-sm"
+                  [ngClass]="dbRef.synced() ? 'badge-success gap-1' : 'badge-warning gap-1'"
                 >
-                  {{ dbRef.synced() ? 'Synced & Ready' : 'Hydrating...' }}
+                  <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                  {{ dbRef.synced() ? 'Hydrated from IDB' : 'Hydrating...' }}
                 </span>
               </div>
+              <button
+                class="btn btn-xs btn-outline btn-error w-full font-mono mt-1"
+                (click)="dbRef.clearData()"
+              >
+                Clear IndexedDB Cache
+              </button>
             </div>
 
-            <!-- Network Status Card -->
+            <!-- CRDT Architecture Specs -->
             <div
               class="card bg-base-200/50 backdrop-blur-md border border-base-300 p-5 space-y-3 rounded-2xl"
             >
               <div class="flex items-center gap-3">
                 <span class="text-2xl">⚡</span>
                 <div>
-                  <h3 class="font-bold text-sm">Zero-Feedback Sync</h3>
-                  <span class="text-xs text-base-content/60">Transaction Origin Protection</span>
+                  <h3 class="font-bold text-sm">CRDT Architecture</h3>
+                  <span class="text-xs text-base-content/60">State-based convergence</span>
                 </div>
               </div>
-              <p class="text-xs text-base-content/70">
-                Signal writes tag transactions with local client origins to prevent recursive update
-                cycles.
-              </p>
+              <div class="space-y-1 text-xs text-base-content/70">
+                <div class="flex justify-between">
+                  <span>Client ID:</span>
+                  <span class="font-mono text-primary font-bold">{{ yjs.doc.clientID }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Feedback Prevention:</span>
+                  <span class="font-mono text-success">Active (Origin filter)</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Cursor Tracking:</span>
+                  <span class="font-mono text-accent">Relative Position Map</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Column 3: Presence & Collaborators Panel -->
+        <!-- Column 3: Presence & Active Collaborators -->
         <div class="space-y-6">
-          <!-- Presence Card -->
           <div
             class="card bg-base-200/50 backdrop-blur-md border border-base-300 shadow-xl rounded-3xl p-6 space-y-6"
           >
-            <div class="flex items-center gap-3 pb-4 border-b border-base-300">
-              <span class="text-3xl">👥</span>
-              <div>
-                <h2 class="text-xl font-bold">Presence & Awareness</h2>
-                <p class="text-xs text-base-content/60">injectYjsAwareness</p>
+            <div class="flex items-center justify-between pb-4 border-b border-base-300">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">👥</span>
+                <div>
+                  <h2 class="text-xl font-bold">Awareness & Presence</h2>
+                  <p class="text-xs text-base-content/60">injectYjsAwareness</p>
+                </div>
               </div>
+              <span class="badge badge-sm badge-primary font-mono font-bold">
+                {{ presence.users().length }} online
+              </span>
             </div>
 
-            <!-- Local User Controls -->
-            <div class="space-y-4">
-              <h3 class="text-xs font-semibold uppercase tracking-wider text-base-content/70">
-                Your Local Profile
-              </h3>
-
-              <div class="space-y-3">
-                <div>
-                  <label class="text-xs text-base-content/60 block mb-1">User Name</label>
-                  <input
-                    type="text"
-                    [ngModel]="presence.localState()?.name"
-                    (ngModelChange)="presence.patchLocalState({ name: $event })"
-                    class="input input-sm input-bordered w-full bg-base-100/70"
-                  />
+            <!-- Local User Info -->
+            <div class="bg-base-300/40 p-4 rounded-2xl space-y-3 border border-base-300">
+              <span class="text-xs font-semibold uppercase tracking-wider text-base-content/60">
+                Local Presence
+              </span>
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-md"
+                  [style.background-color]="presence.localState()?.color"
+                >
+                  {{ presence.localState()?.name?.charAt(0) }}
                 </div>
-
-                <div>
-                  <label class="text-xs text-base-content/60 block mb-1">Avatar Color</label>
-                  <div class="flex items-center gap-2">
-                    <input
-                      type="color"
-                      [ngModel]="presence.localState()?.color"
-                      (ngModelChange)="presence.patchLocalState({ color: $event })"
-                      class="w-10 h-9 rounded-xl border border-base-300 cursor-pointer p-1 bg-base-100"
-                    />
-                    <span class="font-mono text-xs text-base-content/70">{{
-                      presence.localState()?.color
-                    }}</span>
+                <div class="flex-1 min-w-0">
+                  <div class="font-bold text-sm truncate">
+                    {{ presence.localState()?.name }}
+                  </div>
+                  <div class="text-xs text-base-content/60 font-mono">
+                    ClientID: {{ yjs.doc.clientID }}
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Active Collaborators List -->
-            <div class="space-y-3 pt-2">
+            <!-- Remote Users List -->
+            <div class="space-y-3">
               <div class="flex items-center justify-between">
-                <h3 class="text-xs font-semibold uppercase tracking-wider text-base-content/70">
-                  Connected Users ({{ presence.users().length }})
-                </h3>
+                <span class="text-xs font-semibold uppercase tracking-wider text-base-content/60">
+                  Active Remote Peers
+                </span>
                 <button
-                  class="btn btn-xs btn-outline btn-primary"
+                  class="btn btn-xs btn-primary gap-1 font-mono"
                   (click)="simulateRemoteUserJoin()"
                 >
-                  + Simulate User
+                  <span>+</span> Simulate Join
                 </button>
               </div>
 
-              <div class="space-y-2">
-                @for (user of presence.users(); track user.clientID) {
+              @if (presence.remoteUsers().length === 0) {
+                <div
+                  class="text-center py-8 px-4 bg-base-300/20 rounded-2xl border border-dashed border-base-300 text-base-content/50 text-xs space-y-1"
+                >
+                  <p>No remote peers connected.</p>
+                  <p class="text-[11px]">Click "Simulate Join" to test live presence awareness.</p>
+                </div>
+              }
+
+              <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                @for (user of presence.remoteUsers(); track user.clientID) {
                   <div
-                    class="flex items-center justify-between p-3 rounded-2xl bg-base-100/80 border border-base-300 transition-all hover:scale-[1.01]"
+                    class="flex items-center justify-between p-3 rounded-2xl bg-base-100/60 border border-base-300 animate-in fade-in zoom-in-95 duration-200"
                   >
                     <div class="flex items-center gap-3">
                       <div
-                        class="w-4 h-4 rounded-full shadow-inner"
+                        class="w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm"
                         [style.background-color]="user.state.color"
-                      ></div>
-                      <div class="text-xs">
-                        <div class="font-bold flex items-center gap-1.5">
-                          <span>{{ user.state.name }}</span>
-                          @if (user.isLocal) {
-                            <span class="badge badge-xs badge-primary font-normal">You</span>
-                          }
-                        </div>
+                      >
+                        {{ user.state.name.charAt(0) }}
+                      </div>
+                      <div>
+                        <div class="text-xs font-bold">{{ user.state.name }}</div>
                         <div class="text-[10px] text-base-content/50 font-mono">
-                          Client #{{ user.clientID }}
+                          ClientID: {{ user.clientID }}
                         </div>
                       </div>
                     </div>
-
                     @if (!user.isLocal) {
                       <button
-                        class="btn btn-xs btn-ghost text-error"
+                        class="btn btn-ghost btn-xs text-error btn-circle"
                         (click)="removeSimulatedUser(user.clientID)"
                         title="Disconnect simulated user"
                       >
@@ -296,50 +308,45 @@ export class YjsDemoComponent {
   protected readonly JSON = JSON;
 
   // Root Yjs Document service
-  private yjs = inject(YjsDocService);
+  protected readonly yjs = inject(YjsDocService);
 
   // Yjs Shared Map for document properties
-  private yMap = this.yjs.doc.getMap<string>('doc_properties');
+  private readonly yMap = this.yjs.doc.getMap<string>('doc_properties');
+
+  // Yjs Shared Text for collaborative content
+  protected readonly yText = this.yjs.doc.getText('doc_content');
 
   constructor() {
-    if (!this.yMap.has('title')) {
-      this.yMap.set('title', 'Collaborative Strategy Roadmap');
-    }
-    if (!this.yMap.has('content')) {
-      this.yMap.set(
-        'content',
-        'Architect reactive Angular applications with CRDT state management. Signals automatically update across users with zero feedback loops.',
+    if (this.yText.length === 0) {
+      this.yText.insert(
+        0,
+        'Architect reactive Angular applications with CRDT state management. Signals and directives automatically synchronize across users with zero feedback loops.',
       );
     }
   }
 
-  // WritableSignal bound to Yjs Shared Map
-  protected docState = yjsSignal<DocState>(this.yMap);
+  // WritableSignal bound to single 'title' key in Yjs Shared Map
+  protected readonly title = yjsSignal<string>(this.yMap, {
+    key: 'title',
+    initialValue: 'Collaborative Strategy Roadmap',
+  });
 
-  updateTitle(newTitle: string): void {
-    this.docState.update((current) => ({ ...current, title: newTitle }));
-  }
-
-  updateContent(newContent: string): void {
-    this.docState.update((current) => ({ ...current, content: newContent }));
-  }
-
-  // UndoManager binding
-  protected undoRef = injectYjsUndoManager(this.yMap);
+  // UndoManager tracking both map and collaborative text
+  protected readonly undoRef = injectYjsUndoManager([this.yMap, this.yText]);
 
   // Awareness binding with mock awareness instance
-  private mockAwarenessDoc = new YjsDocService().doc;
-  private awarenessInstance = new Awareness(this.mockAwarenessDoc);
+  private readonly mockAwarenessDoc = new YjsDocService().doc;
+  private readonly awarenessInstance = new Awareness(this.mockAwarenessDoc);
 
-  protected presence = injectYjsAwareness<UserPresence>(this.awarenessInstance, {
+  protected readonly presence = injectYjsAwareness<UserPresence>(this.awarenessInstance, {
     name: 'Senior Architect',
     color: '#3b82f6',
   });
 
   // IndexedDB persistence binding
-  protected dbRef = injectYjsIndexeddb('angular_helpers_yjs_demo', this.yjs.doc);
+  protected readonly dbRef = injectYjsIndexeddb('angular_helpers_yjs_demo', this.yjs.doc);
 
-  private simulatedCount = signal(1);
+  private readonly simulatedCount = signal(1);
 
   simulateRemoteUserJoin(): void {
     const id = this.simulatedCount();

@@ -1,10 +1,16 @@
-import { DestroyRef, inject, signal, type Signal } from '@angular/core';
+import { computed, DestroyRef, inject, signal, type Signal } from '@angular/core';
 import type * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
 
 export interface YjsIndexeddbRef {
   /** Signal reflecting whether local IndexedDB document hydration has completed */
   readonly synced: Signal<boolean>;
+  /** Alias for synced signal, ideal for @defer (when db.isHydrated()) */
+  readonly isHydrated: Signal<boolean>;
+  /** Signal reflecting whether IndexedDB hydration is currently in progress */
+  readonly isHydrating: Signal<boolean>;
+  /** True if IndexedDB is available in current execution environment */
+  readonly isSupported: boolean;
   /** The underlying y-indexeddb IndexeddbPersistence instance, or null in SSR / unsupported environments */
   readonly provider: IndexeddbPersistence | null;
   /** Clear all persisted data for this document in IndexedDB */
@@ -13,7 +19,7 @@ export interface YjsIndexeddbRef {
 
 /**
  * Reactive Angular adapter for y-indexeddb offline persistence provider.
- * Persists a Y.Doc to IndexedDB and exposes a synced Signal indicating hydration completion.
+ * Persists a Y.Doc to IndexedDB and exposes hydration Signals.
  * SSR-safe: gracefully falls back when indexedDB is unavailable in non-browser environments.
  *
  * @param name The IndexedDB database key name
@@ -28,6 +34,9 @@ export function injectYjsIndexeddb(name: string, doc: Y.Doc): YjsIndexeddbRef {
     const syncedSig = signal<boolean>(true);
     return {
       synced: syncedSig.asReadonly(),
+      isHydrated: syncedSig.asReadonly(),
+      isHydrating: signal(false).asReadonly(),
+      isSupported: false,
       provider: null,
       async clearData() {},
     };
@@ -35,6 +44,8 @@ export function injectYjsIndexeddb(name: string, doc: Y.Doc): YjsIndexeddbRef {
 
   const provider = new IndexeddbPersistence(name, doc);
   const syncedSig = signal<boolean>(provider.synced);
+  const isHydrated = computed(() => syncedSig());
+  const isHydrating = computed(() => !syncedSig());
 
   const handleSynced = (event: { synced: boolean }) => {
     syncedSig.set(event.synced);
@@ -49,6 +60,9 @@ export function injectYjsIndexeddb(name: string, doc: Y.Doc): YjsIndexeddbRef {
 
   return {
     synced: syncedSig.asReadonly(),
+    isHydrated,
+    isHydrating,
+    isSupported: true,
     provider,
     async clearData() {
       await provider.clearData();

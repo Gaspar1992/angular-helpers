@@ -249,6 +249,48 @@ pnpm add @angular-helpers/testing -D
 
 ---
 
+### 🔄 `@angular-helpers/yjs`
+
+_Bidirectional Angular Signal bindings and collaborative CRDT primitives for Yjs_
+
+🌐 **Documentation**: https://gaspar1992.github.io/angular-helpers/docs/yjs
+
+**🎯 What it solves:**
+
+- **Bidirectional synchronization** between Angular `WritableSignals` and Yjs CRDT types with zero feedback loops.
+- **Dangling cursors and text selection jumps** during concurrent collaborative editing.
+- **Zombies / ghost users in presence tracking** when browser tabs unmount or throttle timers in the background.
+- **SSR hydration mismatches** when restoring offline state from IndexedDB.
+
+**✨ Key features:**
+
+- 🔄 **`yjsSignal`** — Bidirectional WritableSignal adapter for `Y.Map`, `Y.Array`, `Y.Text` with non-destructive incremental reconciliation, key filtering, and microtask batching.
+- 📝 **`YjsTextDirective` (`[yjsText]`)** — Collaborative text input/textarea directive preserving relative cursor selection ranges.
+- ↺ **`injectYjsUndoManager`** — Reactive `canUndo()` and `canRedo()` signals with automatic capture of local signal/directive origins.
+- 👥 **`injectYjsAwareness`** — Multi-user presence, active peer signals, and automatic resync on tab visibility.
+- 💾 **`injectYjsIndexeddb`** — SSR-safe IndexedDB offline persistence with `isHydrated` signals for `@defer`.
+- 📋 **Angular Signal Forms** — Native model driver for `@angular/forms/signals` with zero glue code.
+
+**💡 Example usage:**
+
+```typescript
+const yMap = doc.getMap('settings');
+
+// WritableSignal bound to a single Y.Map key with non-destructive reconciliation
+const title = yjsSignal<string>(yMap, { key: 'title', initialValue: 'My Document' });
+
+// Undo/Redo tracking
+const undo = injectYjsUndoManager(yMap);
+```
+
+**📥 Installation:**
+
+```bash
+pnpm add @angular-helpers/yjs yjs
+```
+
+---
+
 ## 🎯 Why Angular Helpers?
 
 ### ⚡ Immediate Productivity
@@ -302,6 +344,7 @@ pnpm add @angular-helpers/browser-web-apis
 pnpm add @angular-helpers/storage
 pnpm add @angular-helpers/worker-http
 pnpm add @angular-helpers/openlayers ol
+pnpm add @angular-helpers/yjs yjs
 pnpm add @angular-helpers/testing -D
 ```
 
@@ -317,6 +360,7 @@ For modern Angular standalone integration, check each package's own README.
 | **Browser APIs**     | ✅ Unified       | ❌ Fragmented         | ⚠️ Limited      |
 | **Worker HTTP**      | ✅ Drop-in       | ❌ Complex            | ❌ None         |
 | **OpenLayers**       | ✅ Declarative   | ❌ Imperative         | ⚠️ Limited      |
+| **Yjs CRDTs**        | ✅ Reactive      | ❌ Complex            | ⚠️ Basic        |
 | **TypeScript**       | ✅ Full support  | ⚠️ Partial            | ❌ Minimal      |
 | **Testing**          | ✅ Included      | ❌ Manual             | ⚠️ Basic        |
 | **Documentation**    | ✅ Comprehensive | ❌ Missing            | ⚠️ Basic        |
@@ -358,16 +402,16 @@ pnpm run lint
 
 ```
 angular-helpers/
-├── packages/
+├── libs/
 │   ├── core/              # 📦 @angular-helpers/core
 │   ├── security/          # 📦 @angular-helpers/security
 │   ├── browser-web-apis/  # 📦 @angular-helpers/browser-web-apis
 │   ├── storage/           # 📦 @angular-helpers/storage
 │   ├── worker-http/       # 📦 @angular-helpers/worker-http
 │   ├── openlayers/        # 📦 @angular-helpers/openlayers
+│   ├── yjs/               # 📦 @angular-helpers/yjs
 │   └── testing/           # 📦 @angular-helpers/testing
-├── src/                   # 🚀 Demo application
-├── public/content/blog/   # ✍️ Blog articles
+├── apps/web/              # 🚀 Demo & Documentation web application
 ├── docs/                  # 📚 Documentation
 └── scripts/               # 🔧 Automation scripts
 ```
