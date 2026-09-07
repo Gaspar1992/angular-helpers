@@ -64,8 +64,8 @@ catalogs:
       specifier: ^0.5.20
       version: 0.5.20
     '@toon-format/toon':
-      specifier: ^2.3.0
-      version: 2.3.0
+      specifier: ^2.3.1
+      version: 2.3.1
     '@types/express':
       specifier: ^5.0.6
       version: 5.0.6
@@ -224,7 +224,7 @@ importers:
         version: 22.1.4(cd9d134be8508be3841f54598132fbb0)
       '@toon-format/toon':
         specifier: 'catalog:'
-        version: 2.3.0
+        version: 2.3.1
       express:
         specifier: 'catalog:'
         version: 5.2.1
@@ -249,7 +249,7 @@ importers:
         version: 2.6.1(@angular-devkit/build-angular@22.1.5(637690cce42e45698066acd9a0b7ed99))(@angular/build@22.1.5(d79031a14159fca87bce3724502303d1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(vite@8.1.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(less@4.6.7)(sass-embedded@1.100.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0))
       '@analogjs/vitest-angular':
         specifier: 'catalog:'
-        version: 2.6.1(@analogjs/vite-plugin-angular@2.6.1(@angular-devkit/build-angular@22.1.5(637690cce42e45698066acd9a0b7ed99))(@angular/build@22.1.5(d79031a14159fca87bce3724502303d1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(vite@8.1.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(less@4.6.7)(sass-embedded@1.100.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0)))(@angular-devkit/architect@0.2201.5(chokidar@5.0.0))(@angular-devkit/schematics@22.1.4(chokidar@5.0.0))(vitest@4.1.10)
+        version: 2.6.1(@analogjs/vite-plugin-angular@2.6.1(@angular-devkit/build-angular@22.1.5(99d19be0fb39b3b35796465ae5f83934))(@angular/build@22.1.5(d79031a14159fca87bce3724502303d1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(vite@8.1.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(less@4.6.7)(sass-embedded@1.100.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0)))(@angular-devkit/architect@0.2201.5(chokidar@5.0.0))(@angular-devkit/schematics@22.1.4(chokidar@5.0.0))(vitest@4.1.10)
       '@angular-devkit/build-angular':
         specifier: ^22.1.3
         version: 22.1.5(637690cce42e45698066acd9a0b7ed99)
@@ -502,7 +502,7 @@ importers:
         version: 2.6.1(@angular-devkit/build-angular@22.1.5(637690cce42e45698066acd9a0b7ed99))(@angular/build@22.1.5(d79031a14159fca87bce3724502303d1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(vite@8.1.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(less@4.6.7)(sass-embedded@1.100.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0))
       '@analogjs/vitest-angular':
         specifier: 'catalog:'
-        version: 2.6.1(@analogjs/vite-plugin-angular@2.6.1(@angular-devkit/build-angular@22.1.5(637690cce42e45698066acd9a0b7ed99))(@angular/build@22.1.5(d79031a14159fca87bce3724502303d1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(vite@8.1.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(less@4.6.7)(sass-embedded@1.100.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0)))(@angular-devkit/architect@0.2201.5(chokidar@5.0.0))(@angular-devkit/schematics@22.1.4(chokidar@5.0.0))(vitest@4.1.10)
+        version: 2.6.1(@analogjs/vite-plugin-angular@2.6.1(@angular-devkit/build-angular@22.1.5(637690cce42e45698066acd9a0b7ed99))(@angular/build@22.1.5(d79031a14159fca87bce3724502303d1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(vite@8.1.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(less@4.6.7)(sass-embedded@1.100.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0)))(@angular-devkit/architect@0.2201.5(chokidar@5.0.0))(@angular-devkit/schematics@22.1.5(chokidar@5.0.0))(vitest@4.1.10)
       '@angular-helpers/testing':
         specifier: workspace:*
         version: link:../testing
@@ -4724,6 +4724,9 @@ packages:
 
   '@toon-format/toon@2.3.0':
     resolution: {integrity: sha512-/Ew9etdRQKVMnm9fDaCG0JjyAOK/O7T0M97oum1aW4W+UR8ZhVVPBanIV7oWgHBiGlnVxV9M55PWQCHofDV07w==}
+
+  '@toon-format/toon@2.3.1':
+    resolution: {integrity: sha512-sWqEMeAJGMda9qRrfPKrX3C4c33CO9SJuvJzzrcBEn5sbDB+k6pSLkDsfN0rVnLQwR97MV3sDgVbcxQNsq8xVw==}
 
   '@ts-morph/common@0.22.0':
     resolution: {integrity: sha512-HqNBuV/oIlMKdkLshXd1zKBqNQCsuPEsgQOkfFQ/eUKjRlwndXW1AjN9LVkBEIukm00gGXSRmfkl0Wv5VXLnlw==}
@@ -10057,7 +10060,14 @@ snapshots:
       - '@emnapi/core'
       - '@emnapi/runtime'
 
-  '@analogjs/vitest-angular@2.6.1(@analogjs/vite-plugin-angular@2.6.1(@angular-devkit/build-angular@22.1.5(637690cce42e45698066acd9a0b7ed99))(@angular/build@22.1.5(d79031a14159fca87bce3724502303d1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(vite@8.1.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(less@4.6.7)(sass-embedded@1.100.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0)))(@angular-devkit/architect@0.2201.5(chokidar@5.0.0))(@angular-devkit/schematics@22.1.4(chokidar@5.0.0))(vitest@4.1.10)':
+  '@analogjs/vitest-angular@2.6.1(@analogjs/vite-plugin-angular@2.6.1(@angular-devkit/build-angular@22.1.5(637690cce42e45698066acd9a0b7ed99))(@angular/build@22.1.5(d79031a14159fca87bce3724502303d1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(vite@8.1.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(less@4.6.7)(sass-embedded@1.100.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0)))(@angular-devkit/architect@0.2201.5(chokidar@5.0.0))(@angular-devkit/schematics@22.1.5(chokidar@5.0.0))(vitest@4.1.10)':
+    dependencies:
+      '@analogjs/vite-plugin-angular': 2.6.1(@angular-devkit/build-angular@22.1.5(637690cce42e45698066acd9a0b7ed99))(@angular/build@22.1.5(d79031a14159fca87bce3724502303d1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(vite@8.1.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(less@4.6.7)(sass-embedded@1.100.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0))
+      '@angular-devkit/architect': 0.2201.5(chokidar@5.0.0)
+      '@angular-devkit/schematics': 22.1.5(chokidar@5.0.0)
+      vitest: 4.1.10(@types/node@20.19.43)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(jsdom@29.1.1)(vite@8.1.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(less@4.6.7)(sass-embedded@1.100.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0))
+
+  '@analogjs/vitest-angular@2.6.1(@analogjs/vite-plugin-angular@2.6.1(@angular-devkit/build-angular@22.1.5(99d19be0fb39b3b35796465ae5f83934))(@angular/build@22.1.5(d79031a14159fca87bce3724502303d1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(vite@8.1.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(less@4.6.7)(sass-embedded@1.100.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0)))(@angular-devkit/architect@0.2201.5(chokidar@5.0.0))(@angular-devkit/schematics@22.1.4(chokidar@5.0.0))(vitest@4.1.10)':
     dependencies:
       '@analogjs/vite-plugin-angular': 2.6.1(@angular-devkit/build-angular@22.1.5(637690cce42e45698066acd9a0b7ed99))(@angular/build@22.1.5(d79031a14159fca87bce3724502303d1))(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(vite@8.1.5(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0)(less@4.6.7)(sass-embedded@1.100.0)(sass@1.101.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0))
       '@angular-devkit/architect': 0.2201.5(chokidar@5.0.0)
@@ -14085,6 +14095,8 @@ snapshots:
       tailwindcss: 4.3.1
 
   '@toon-format/toon@2.3.0': {}
+
+  '@toon-format/toon@2.3.1': {}
 
   '@ts-morph/common@0.22.0':
     dependencies:
