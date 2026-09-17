@@ -94,7 +94,7 @@
     "@nx/workspace": "23.2.1",
     "@oxc-project/runtime": "catalog:",
     "@playwright/test": "catalog:",
-    "@schematics/angular": "^22.1.4",
+    "@schematics/angular": "^22.1.8",
     "@semantic-release/changelog": "catalog:",
     "@semantic-release/commit-analyzer": "catalog:",
     "@semantic-release/git": "catalog:",

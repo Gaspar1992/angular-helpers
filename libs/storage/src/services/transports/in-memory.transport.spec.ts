@@ -40,14 +40,14 @@ describe('InMemoryStorageTransport', () => {
   });
 
   it('should support encryption and decrypt the underlying data in the internal map', async () => {
-    const rawData = { secret: '42' };
+    const rawData = { secret: 'super-secret-payload-xyz' };
     await transport.write('secureKey', rawData, { encrypt: true } as any);
 
     // Verify it is encrypted in the internal store
     const internalMap = transport.getInternalMap();
     const storedString = internalMap.get('secureKey');
     expect(storedString).toBeDefined();
-    expect(storedString).not.toContain('42');
+    expect(storedString).not.toContain('super-secret-payload-xyz');
 
     // Read back and ensure decrypted correctly
     const decrypted = await transport.read<any>('secureKey', { encrypt: true } as any);

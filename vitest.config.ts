@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 import { fileURLToPath } from 'node:url';
 import angular from '@analogjs/vite-plugin-angular';
 
@@ -18,7 +18,7 @@ export default defineConfig({
     reporters: process.env.CI ? ['default', 'github-actions'] : ['default'],
     setupFiles: [here('./apps/web/src/test-setup.ts')],
     include: ['libs/**/*.spec.ts', 'apps/web/src/**/*.spec.ts'],
-    exclude: ['libs/**/schematics/**/*.spec.ts'],
+    exclude: [...configDefaults.exclude, 'libs/**/schematics/**/*.spec.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'json-summary', 'lcov'],
