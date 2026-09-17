@@ -15,12 +15,13 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    reporters: process.env.CI ? ['default', 'github-actions'] : ['default'],
     setupFiles: [here('./apps/web/src/test-setup.ts')],
     include: ['libs/**/*.spec.ts', 'apps/web/src/**/*.spec.ts'],
     exclude: ['libs/**/schematics/**/*.spec.ts'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'json-summary', 'lcov'],
       thresholds: {
         'libs/testing/src/**/*.ts': {
           lines: 80,

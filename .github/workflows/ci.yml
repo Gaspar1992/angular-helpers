@@ -51,8 +51,20 @@ jobs:
       - name: Build schematics
         run: pnpm run build:schematics
 
-      - name: Run unit tests
-        run: pnpm test
+      - name: Run unit tests with coverage
+        run: pnpm run test:ci
+
+      - name: Generate coverage summary
+        if: always()
+        run: node scripts/generate-coverage-summary.js
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14
 
       - name: Build packages
         run: pnpm run build:packages
@@ -100,6 +112,14 @@ jobs:
       - name: Run browser CI suite
         run: pnpm run test:browser:ci
 
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-chromium
+          path: apps/web-e2e/playwright-report/
+          retention-days: 14
+
   cross-browser-smoke:
     name: Cross-browser smoke (firefox + webkit)
     # Only run on pushes to main (post-merge validation) to save PR minutes.
@@ -128,3 +148,11 @@ jobs:
 
       - name: Run cross-browser smoke suite
         run: pnpm run test:browser:cross
+
+      - name: Upload cross-browser Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-cross-browser
+          path: apps/web-e2e/playwright-report/
+          retention-days: 14
