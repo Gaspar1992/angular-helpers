@@ -29,13 +29,13 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup workspace
         uses: ./.github/actions/setup
 
       - name: Cache Nx
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .nx/cache
           key: ${{ runner.os }}-nx-${{ github.sha }}
@@ -60,7 +60,7 @@ jobs:
 
       - name: Upload coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: coverage/
@@ -77,7 +77,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup workspace
         uses: ./.github/actions/setup
@@ -93,7 +93,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup workspace
         uses: ./.github/actions/setup
@@ -114,7 +114,7 @@ jobs:
 
       - name: Upload Playwright report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-chromium
           path: apps/web-e2e/playwright-report/
@@ -130,7 +130,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup workspace
         uses: ./.github/actions/setup
@@ -151,7 +151,7 @@ jobs:
 
       - name: Upload cross-browser Playwright report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-cross-browser
           path: apps/web-e2e/playwright-report/
