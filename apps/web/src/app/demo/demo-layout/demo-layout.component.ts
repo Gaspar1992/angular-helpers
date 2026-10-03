@@ -167,9 +167,28 @@ const DEMO_GROUPS: DemoGroup[] = [
         </nav>
       </header>
 
-      <!-- Main Content -->
+      <!-- Main Content with Error Boundary -->
       <main class="flex-1 w-full pb-24 md:pb-12 overflow-x-hidden">
-        <router-outlet />
+        @boundary {
+          <router-outlet />
+        } @error (let err) {
+          <div class="max-width-container py-12 px-4">
+            <div class="p-6 bg-error/10 border border-error/20 rounded-2xl flex flex-col gap-3">
+              <div class="flex items-center gap-3 text-error">
+                <span class="text-2xl">⚠️</span>
+                <h3 class="text-lg font-bold">Failed to load demo environment</h3>
+              </div>
+              <p class="text-sm text-base-content/80">
+                A runtime exception occurred while executing this browser demo:
+                <code class="px-2 py-0.5 bg-base-300 rounded font-mono text-xs">{{ err.message || err }}</code>
+              </p>
+              <div class="mt-2 flex gap-3">
+                <a routerLink="/demo" class="btn btn-sm btn-outline">Back to Demos</a>
+                <button type="button" (click)="reload()" class="btn btn-sm btn-primary">Retry</button>
+              </div>
+            </div>
+          </div>
+        }
       </main>
     </div>
   `,
@@ -352,5 +371,11 @@ export class DemoLayoutComponent {
     if (!group.items) return false;
     const url = this.router.url;
     return group.items.some((item) => url.startsWith(item.path));
+  }
+
+  protected reload(): void {
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
   }
 }
