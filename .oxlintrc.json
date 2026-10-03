@@ -5,6 +5,7 @@
     "browser": true,
     "es2024": true
   },
+  "ignorePatterns": [".agents/**", "dist/**", "coverage/**"],
   "rules": {
     "eqeqeq": "error",
     "no-debugger": "error",

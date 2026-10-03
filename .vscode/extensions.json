@@ -1,8 +1,12 @@
 {
   "recommendations": [
     "angular.ng-template",
+    "vitest.explorer",
     "oxc.oxc-vscode",
     "dbaeumer.vscode-eslint",
-    "nrwl.angular-console"
+    "bradlc.vscode-tailwindcss",
+    "nrwl.angular-console",
+    "eamodio.gitlens",
+    "esbenp.prettier-vscode"
   ]
 }
