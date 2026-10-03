@@ -1,6 +1,6 @@
 import '@angular/compiler';
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRouteSnapshot, Router } from '@angular/router';
+import { type ActivatedRouteSnapshot, Router } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PermissionsService } from '../services/permissions.service';
 import { createPermissionGuard, permissionGuard } from './permission.guard';
@@ -40,7 +40,9 @@ describe('permissionGuard', () => {
     const result = await TestBed.runInInjectionContext(() => guard(mockRoute, null as any));
 
     expect(result).toBe(true);
-    expect(mockPermissionsService.query).toHaveBeenCalledWith({ name: 'camera' });
+    expect(mockPermissionsService.query).toHaveBeenCalledWith({
+      name: 'camera',
+    });
     expect(mockRouter.navigate).not.toHaveBeenCalled();
   });
 
