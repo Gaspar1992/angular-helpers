@@ -14,6 +14,7 @@ import { DocsVersionService, AngularVersion } from '../services/docs-version.ser
           type="button"
           id="version-combobox-trigger"
           role="combobox"
+          aria-label="Select Angular documentation version"
           aria-haspopup="listbox"
           [attr.aria-expanded]="isOpen()"
           [attr.aria-controls]="isOpen() ? 'version-listbox' : null"
@@ -23,7 +24,7 @@ import { DocsVersionService, AngularVersion } from '../services/docs-version.ser
           style="border-radius: var(--rounded-btn, 0.5rem); transition: all var(--t-fast, 150ms);"
         >
           <span>Angular {{ currentVersionDisplay() }}</span>
-          <span class="text-[10px] opacity-60">▼</span>
+          <span class="text-[10px] opacity-60" aria-hidden="true">▼</span>
         </button>
 
         @if (isOpen()) {

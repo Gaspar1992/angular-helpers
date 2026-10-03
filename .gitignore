@@ -156,3 +156,9 @@ temp/
 .claude/settings.local.json
 .agents/
 .gemini/
+.codex/
+.opencode/
+opencode.json
+.github/agents/
+.github/prompts/
+.github/skills/
