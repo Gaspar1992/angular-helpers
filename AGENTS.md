@@ -2,9 +2,9 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## Available Skills
 
-| Skill                      | Description                                                                                             | Location                                             |
-| -------------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `angular-service-analyzer` | Analyzes Angular services to verify they fulfill their stated purpose and identify architectural issues | [SKILL.md](skills/angular-service-analyzer/SKILL.md) |
+| Skill                       | Description                                                                                                                             | Location                                              |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `angular-performance-tuner` | Guidelines and instructions for tuning Angular application performance, ensuring zoneless safety, and enforcing accessibility standards | [SKILL.md](skills/angular-performance-tuner/SKILL.md) |
 
 ## TypeScript Best Practices
 

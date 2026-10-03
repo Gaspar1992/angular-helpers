@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/browser-web-apis",
-  "version": "22.0.0",
+  "version": "22.7.0",
   "description": "Sistema de servicios Angular para acceso formalizado a Browser Web APIs (cámara, permisos, geolocalización, etc.)",
   "scripts": {
     "prebuild": "node ../../scripts/sync-versions.js . src/public-api.ts",

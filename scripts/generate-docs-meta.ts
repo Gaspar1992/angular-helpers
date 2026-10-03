@@ -43,37 +43,37 @@ const PACKAGES = [
   {
     name: 'core',
     srcDir: 'libs/core/src',
-    dataFile: 'src/app/docs/data/core.data.ts',
+    dataFile: 'apps/web/src/app/docs/data/core.data.ts',
     varName: 'CORE_SERVICES',
   },
   {
     name: 'security',
     srcDir: 'libs/security/src',
-    dataFile: 'src/app/docs/data/security.data.ts',
+    dataFile: 'apps/web/src/app/docs/data/security.data.ts',
     varName: 'SECURITY_SERVICES',
   },
   {
     name: 'browser-web-apis',
     srcDir: 'libs/browser-web-apis/src',
-    dataFile: 'src/app/docs/data/browser-web-apis.data.ts',
+    dataFile: 'apps/web/src/app/docs/data/browser-web-apis.data.ts',
     varName: 'BROWSER_WEB_APIS_SERVICES',
   },
   {
     name: 'worker-http',
     srcDir: 'libs/worker-http',
-    dataFile: 'src/app/docs/data/worker-http.data.ts',
+    dataFile: 'apps/web/src/app/docs/data/worker-http.data.ts',
     varName: 'WORKER_HTTP_ENTRIES',
   },
   {
     name: 'openlayers',
     srcDir: 'libs/openlayers',
-    dataFile: 'src/app/docs/data/openlayers.data.ts',
+    dataFile: 'apps/web/src/app/docs/data/openlayers.data.ts',
     varName: 'OPENLAYERS_SERVICES',
   },
   {
     name: 'storage',
     srcDir: 'libs/storage/src',
-    dataFile: 'src/app/docs/data/storage.data.ts',
+    dataFile: 'apps/web/src/app/docs/data/storage.data.ts',
     varName: 'STORAGE_SERVICES',
   },
 ];

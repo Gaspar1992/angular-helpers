@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/openlayers",
-  "version": "22.0.0",
+  "version": "22.6.0",
   "description": "Modern Angular wrapper for OpenLayers with modular architecture, standalone components, and hybrid template/programmatic API",
   "scripts": {
     "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
