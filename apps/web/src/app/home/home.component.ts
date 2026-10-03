@@ -33,7 +33,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
             <div class="badge badge-outline gap-2 p-4 rounded-full shadow-sm">
               <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
               <span class="text-[11px] font-black uppercase tracking-widest text-base-content/80"
-                >Version 1.41.1 is out</span
+                >Angular v22 Ready</span
               >
             </div>
 

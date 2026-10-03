@@ -4,8 +4,6 @@ import { of, from } from 'rxjs';
 import { switchMap, catchError, tap, finalize } from 'rxjs/operators';
 import { injectWorkerPool, injectPlatform } from '@angular-helpers/core';
 import { PACKAGES } from '../config/packages.data';
-import { BLOG_POSTS } from '../../blog/config/posts.data';
-import { PUBLIC_DEMO_SECTIONS } from '../../demo/config/demo.config';
 
 export interface SearchResult {
   type: 'docs' | 'blog' | 'demo';
@@ -25,7 +23,7 @@ export class SearchService {
   readonly searching = signal(false);
 
   private readonly index: SearchResult[] = [
-    // Packages / Docs
+    // Packages / Docs available synchronously
     ...PACKAGES.map((p) => ({
       type: 'docs' as const,
       title: p.name,
@@ -34,25 +32,40 @@ export class SearchService {
       icon: p.icon,
       tags: p.highlights,
     })),
-    // Blog Posts
-    ...BLOG_POSTS.map((post) => ({
-      type: 'blog' as const,
-      title: post.title,
-      description: post.excerpt,
-      url: `/blog/${post.slug}`,
-      icon: '📄',
-      tags: post.tags,
-    })),
-    // Demos
-    ...PUBLIC_DEMO_SECTIONS.map((demo) => ({
-      type: 'demo' as const,
-      title: demo.title,
-      description: demo.description,
-      url: demo.path,
-      icon: demo.icon,
-      tags: [demo.packageName],
-    })),
   ];
+
+  private loadedExtra = false;
+
+  private async loadExtraIndex(): Promise<void> {
+    if (this.loadedExtra) return;
+    this.loadedExtra = true;
+    try {
+      const [{ BLOG_POSTS }, { PUBLIC_DEMO_SECTIONS }] = await Promise.all([
+        import('../../blog/config/posts.data'),
+        import('../../demo/config/demo.config'),
+      ]);
+      this.index.push(
+        ...BLOG_POSTS.map((post) => ({
+          type: 'blog' as const,
+          title: post.title,
+          description: post.excerpt,
+          url: `/blog/${post.slug}`,
+          icon: '📄',
+          tags: post.tags,
+        })),
+        ...PUBLIC_DEMO_SECTIONS.map((demo) => ({
+          type: 'demo' as const,
+          title: demo.title,
+          description: demo.description,
+          url: demo.path,
+          icon: demo.icon,
+          tags: [demo.packageName],
+        })),
+      );
+    } catch {
+      // Ignore background load error
+    }
+  }
 
   private readonly pool = (() => {
     const { document } = injectPlatform();
@@ -70,6 +83,7 @@ export class SearchService {
         const query = (q || '').toLowerCase().trim();
         if (!query) return [];
 
+        void this.loadExtraIndex();
         return this.index
           .filter((item) => {
             return (
@@ -105,6 +119,7 @@ export class SearchService {
   );
 
   open(): void {
+    void this.loadExtraIndex();
     this.isOpen.set(true);
     this.query.set('');
   }

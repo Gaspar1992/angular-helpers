@@ -157,6 +157,52 @@ export const PACKAGES: readonly PackageInfo[] = [
     promise: 'performance',
     serviceCount: 6,
   },
+  {
+    icon: '⚡',
+    name: 'core',
+    title: 'Core Foundation',
+    npmPackage: '@angular-helpers/core',
+    tagline: 'Injection context utilities, worker pools, and SSR platform detection.',
+    description:
+      'The foundational core of the Angular Helpers ecosystem. Provides type-safe worker pooling with DI lifecycle management, SSR-safe platform tokens, and injection context assertions.',
+    highlights: [
+      'injectWorkerPool: Multi-threaded worker pool with DI lifecycle',
+      'injectPlatform: SSR-safe window, document, and navigator tokens',
+      'assertInInjectionContext: Clean diagnostics for custom inject functions',
+      'Zero external runtime dependencies',
+    ],
+    highlightsLabel: 'Core primitives',
+    installCmd: 'pnpm add @angular-helpers/core',
+    docsLink: '/docs/core',
+    demoLink: null,
+    badge: null,
+    tags: ['Workers', 'Platform', 'Signals'],
+    promise: 'lightweight',
+    serviceCount: 4,
+  },
+  {
+    icon: '🧪',
+    name: 'testing',
+    title: 'Testing Utilities',
+    npmPackage: '@angular-helpers/testing',
+    tagline: 'Mocks, fakes, and test harnesses for workers and browser APIs.',
+    description:
+      'First-class testing helpers to mock Web Workers, fake browser APIs, and assert on Signal state streams without spinning up real threads.',
+    highlights: [
+      'Mock worker pool and off-thread RPC fakes',
+      'In-memory WebCrypto and Storage test harnesses',
+      'Signal state emission assertion utilities',
+      'Zero test-runner friction (Vitest & Jest ready)',
+    ],
+    highlightsLabel: 'Testing helpers',
+    installCmd: 'pnpm add -D @angular-helpers/testing',
+    docsLink: '/docs/core',
+    demoLink: null,
+    badge: null,
+    tags: ['Testing', 'Vitest', 'Mocks'],
+    promise: 'robust',
+    serviceCount: 0,
+  },
 ];
 
 export const TOTAL_SERVICE_COUNT = PACKAGES.reduce((sum, pkg) => sum + (pkg.serviceCount ?? 0), 0);
