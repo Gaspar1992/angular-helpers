@@ -189,3 +189,17 @@ export class CollabSettingsFormComponent {
 - [x] **Non-destructive diffing**: Array and Text signal mutations apply minimal splice operations, maintaining CRDT tree consistency.
 - [x] **Clean lifecycle disposal**: All observers and providers automatically disconnect on host `DestroyRef`.
 - [x] **SSR Graceful Degradation**: Offline IndexedDB fallbacks safely in non-browser execution environments.
+
+---
+
+## Interactive Documentation & Demos
+
+Live interactive collaborative editor demo and API guides:
+👉 **[Angular Helpers Yjs Docs](https://gaspar1992.github.io/angular-helpers/docs/yjs)**
+👉 **[Yjs CRDT & Collaboration Demo](https://gaspar1992.github.io/angular-helpers/demo/yjs)**
+
+---
+
+## License
+
+MIT

@@ -1,111 +1,99 @@
-# 📐 @angular-helpers/storage
+# 💾 @angular-helpers/storage
 
-A premium, high-performance, and secure reactive storage system for Angular. It bridges a fast synchronous L1 memory Signal Cache with async L2 storage backends (Cache API, IndexedDB, Local/SessionStorage) with optional AES-GCM encryption, dynamic TOON compression, and surgical key-level reactive Entity management.
+A high-performance, tiered, and encrypted reactive storage system for Angular. Bridges synchronous L1 memory Signal Cache with persistent async L2 backends (Cache API, IndexedDB, WebStorage, and Web Worker transports) with optional AES-GCM encryption and schema drift auto-repair.
 
 ---
 
-## ⚡ Quick Path
+## Quick Path
 
-### 1. Import and Setup
+### 1. Installation
 
-```typescript
-import { injectStorageSignal, injectEntityStore } from '@angular-helpers/storage';
+```bash
+pnpm add @angular-helpers/storage
 ```
 
 ### 2. Basic Signal Storage (L1 + L2 Cache API)
 
 ```typescript
-// Synchronous L1 Signal, Native Cache API L2 in background
-const userPref = injectStorageSignal('user-pref', 'light-mode', {
-  storageType: 'cacheapi',
-  serializer: 'json',
-});
+import { Component } from '@angular/core';
+import { injectStorageSignal } from '@angular-helpers/storage';
 
-// Read value directly (automatically handles async loading states)
-console.log(userPref()); // 'light-mode'
-
-// Check metadata via sub-signals
-console.log(userPref.loading()); // true | false
-console.log(userPref.error()); // Error | null
-
-// Reactive write - auto-persists to Cache API
-userPref.set('dark-mode');
+@Component({
+  selector: 'app-theme-toggle',
+  template: `
+    <button (click)="theme.set(theme() === 'dark' ? 'light' : 'dark')">
+      Toggle Theme: {{ theme() }}
+    </button>
+    @if (theme.loading()) {
+      <span>Syncing...</span>
+    }
+  `,
+})
+export class ThemeToggleComponent {
+  // Synchronous L1 Signal with native Cache API L2 in background
+  readonly theme = injectStorageSignal<'light' | 'dark'>('app-theme', 'light', {
+    storageType: 'cacheapi',
+    serializer: 'json',
+  });
+}
 ```
 
-### 3. Schema Drift & Safe Validation
+### 3. High-Performance Entity Store
 
 ```typescript
-// Protect your application state against local storage schema changes across versions
-const userPref = injectStorageSignal('user-pref', 'light-mode', {
-  storageType: 'local',
-  serializer: 'json',
-  validator: (data): data is 'light-mode' | 'dark-mode' =>
-    data === 'light-mode' || data === 'dark-mode',
-});
-```
+import { injectEntityStore } from '@angular-helpers/storage';
 
-If L2 storage contains a corrupted or legacy structure that fails the `validator`:
-
-1. The signal falls back safely to the `defaultValue` (`'light-mode'`).
-2. The `userPref.error()` signal emits a detailed schema validation error.
-3. The system **auto-repairs** the local database by rewriting it with the clean default value.
-
----
-
-### 4. High-Performance Entity Store
-
-```typescript
 interface Product {
   id: string;
   name: string;
   price: number;
 }
 
-const productStore = injectEntityStore<string, Product>({
-  idKey: 'id',
-  persistKey: 'products-cache',
-  storageOptions: {
-    storageType: 'indexeddb',
-    serializer: 'toon', // Compresses payload up to 60%!
-  },
+// O(1) key-level reactive reads and surgical updates
+const productStore = injectEntityStore<Product>({
+  name: 'products',
+  selectId: (p) => p.id,
+  storageType: 'indexeddb',
 });
 
-// 1. Write-Once, Freeze-Once O(1) insertion
-productStore.setOne({ id: 'P1', name: 'Laptop', price: 999 });
-
-// 2. Partial Update (Patch)
-productStore.patch('P1', { price: 899 });
-
-// 3. Function-based update
-productStore.update('P1', (p) => ({ ...p, price: p.price * 1.1 }));
-
-// 4. Read entities safely (frozen in runtime, compile-time ReadonlyMap)
-const laptop = productStore.entities().get('P1');
-// laptop.price = 1000; // ❌ Throws TypeError in runtime, compile error in TS!
-
-// 5. Surgical Granular Reactivity
-// This computed signal ONLY evaluates when product 'P1' changes.
-// Updates to product 'P2' will NOT trigger re-evaluation!
-const productSignal = productStore.entitySignal('P1');
-const laptopName = computed(() => productSignal()?.name);
+productStore.addOne({ id: 'p1', name: 'Angular Book', price: 29.99 });
+const product = productStore.selectById('p1'); // WritableSignal<Product | undefined>
 ```
 
 ---
 
-## 🔬 Under the Hood
+## Core Primitives
 
-| Core Feature               | Technical Strategy                               | Cognitive Benefit                                                                      |
-| :------------------------- | :----------------------------------------------- | :------------------------------------------------------------------------------------- |
-| **Strategy Transport**     | Pluggable `StorageTransport` interface           | MVP on main thread today, 100% transparent Shared Worker upgrade tomorrow.             |
-| **Native Cache API**       | Directly utilizes `window.caches`                | Offloads heavy JSON/TOON parsing off the main thread natively via `Response.json()`.   |
-| **Write-Once Freeze-Once** | `Object.freeze` applied only on `set` operations | Guaranteed immutability with near-zero read performance penalty.                       |
-| **TOON Serializer**        | Pluggable token-based serializer                 | Compresses structured array payloads by 30-60%, bypassing standard 5MB storage limits. |
-| **WebCrypto AES-GCM**      | Native asynchronous browser cryptography         | Seamlessly encrypts data at rest with hardware-accelerated algorithms.                 |
+| Primitive                                  | Category         | Description                                                                                       |
+| :----------------------------------------- | :--------------- | :------------------------------------------------------------------------------------------------ |
+| `injectStorageSignal(key, default, opts?)` | **Signals**      | Multi-tier L1/L2 reactive storage signal with `loading()`, `error()`, and `status()` sub-signals. |
+| `injectEntityStore(config)`                | **Entity State** | Key-level reactive entity collection with surgical change notifications and index tracking.       |
+| `STORAGE_TRANSPORT`                        | **Transport DI** | InjectionToken to customize or swap transport engines across the application.                     |
+| `LocalStorageTransport`                    | **Transports**   | Synchronous LocalStorage transport adapter with prefix and quota handling.                        |
+| `SessionStorageTransport`                  | **Transports**   | Transient session transport adapter.                                                              |
+| `IndexedDBTransport`                       | **Transports**   | Large-payload asynchronous database storage.                                                      |
+| `CacheApiTransport`                        | **Transports**   | High-performance origin Cache Storage backend.                                                    |
+| `WorkerTransport`                          | **Transports**   | Off-main-thread storage operations via Web Workers.                                               |
 
 ---
 
-## 🛠️ Verification Checklist
+## Key Features & Guarantees
 
-- [ ] **Runtime immutability**: Bypassing compile safety via `(store.entities() as any).set(...)` throws a runtime `TypeError`.
-- [ ] **Granular updates**: Modifying entity A does not trigger change evaluation on components listening to entity B.
-- [ ] **Incognito boundaries**: Safari private browsing fallback automatically protects active signals when database writes fail.
+- **Two-Tier Architecture (L1 + L2)**: Reads are instantaneous from the L1 in-memory Signal. Persisted writes flush asynchronously to L2 without blocking UI frames.
+- **Schema Drift Auto-Repair**: If stored data in the browser fails runtime validation after an app update, the store automatically falls back to defaults and repairs corrupted records.
+- **Transparent Encryption**: Optional client-side AES-GCM encryption with PBKDF2 salt derivation.
+- **Zoneless & SSR Safe**: Degrades gracefully on the server without breaking hydration.
+
+---
+
+## Interactive Documentation & Demos
+
+Live interactive demonstrations and API guides:
+👉 **[Angular Helpers Storage Docs](https://gaspar1992.github.io/angular-helpers/docs/storage)**
+👉 **[Storage & Entity Demo](https://gaspar1992.github.io/angular-helpers/demo/storage)**
+
+---
+
+## License
+
+MIT

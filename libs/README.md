@@ -4,13 +4,15 @@ This directory contains the publishable packages of the Angular Helpers monorepo
 
 ## Available Packages
 
-- **[@angular-helpers/core](./core)** — Lightweight, high-performance, and SSR-safe timing signal operators and core utilities.
-- **[@angular-helpers/security](./security)** — ReDoS prevention, WebCrypto HMAC signing, and secure storage.
-- **[@angular-helpers/browser-web-apis](./browser-web-apis)** — Unified, reactive wrappers for native Browser APIs with signals support.
-- **[@angular-helpers/storage](./storage)** — Premium, high-performance, and secure reactive storage system with L1/L2 caching, schema drift validation, and encryption.
-- **[@angular-helpers/worker-http](./worker-http)** — Off-main-thread HTTP pipelines using Web Workers.
-- **[@angular-helpers/openlayers](./openlayers)** — Declarative, modular Angular components for OpenLayers.
-- **[@angular-helpers/testing](./testing)** — Streamlined testing utilities and mocks for modern Angular applications.
+- **[@angular-helpers/core](./core)** — Lightweight, high-performance, and SSR-safe timing signal operators, Transferables, and Worker pooling.
+- **[@angular-helpers/browser-web-apis](./browser-web-apis)** — Unified, reactive wrappers for 36+ native Browser APIs with signals support.
+- **[@angular-helpers/security](./security)** — ReDoS prevention, WebCrypto HMAC signing, password entropy, and secure storage.
+- **[@angular-helpers/storage](./storage)** — High-performance reactive storage system with L1/L2 caching, schema drift validation, and encryption.
+- **[@angular-helpers/worker-http](./worker-http)** — Off-main-thread HTTP client pipelines using Web Workers.
+- **[@angular-helpers/openlayers](./openlayers)** — Declarative, modular Angular components for OpenLayers maps and layers.
+- **[@angular-helpers/yjs](./yjs)** — Bidirectional Angular Signal bindings for Yjs CRDT real-time collaborative state.
+- **[@angular-helpers/testing](./testing)** — Streamlined testing utilities, render wrapper, and mocks for modern Angular applications.
+- **[@angular-helpers/schematics](./schematics)** — Code generation and package scaffolding schematics for the monorepo.
 
 ## Package Structure
 

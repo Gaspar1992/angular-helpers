@@ -1,43 +1,51 @@
-# @angular-helpers/openlayers/core
+# 🗺️ @angular-helpers/openlayers/core
 
-Core library for Angular bindings to OpenLayers.
-Provides essential models, services, and the base `<ol-map>` component.
+Core sub-entry point for `@angular-helpers/openlayers`. Provides the foundational `<ol-map>` container component, `OlMapService`, projections setup, and geometric calculation services.
 
-## Installation
+---
 
-\`\`\`bash
-npm install @angular-helpers/openlayers
-\`\`\`
+## Quick Path
 
-## Core Services & Components
+### 1. Installation
 
-- \`OlMapComponent\`: The root map component that manages the core OpenLayers `Map` instance.
-- \`OlMapService\`: A service to retrieve and manage the map instance across child components.
-- \`OlLayerService\`: Manages map layers dynamically.
-- \`OlZoneHelper\`: Optimizes Angular change detection around OpenLayers events.
+```bash
+pnpm add @angular-helpers/openlayers ol
+```
 
-## Usage
+### 2. Usage
 
-\`\`\`typescript
+```typescript
 import { Component } from '@angular/core';
-import { OlMapComponent } from '@angular-helpers/openlayers';
-import { OlTileLayerComponent } from '@angular-helpers/openlayers/layers';
+import { OlMapComponent } from '@angular-helpers/openlayers/core';
 
 @Component({
-selector: 'app-map-demo',
-imports: [OlMapComponent, OlTileLayerComponent],
-template: \`
-<ol-map [center]="[0, 0]" [zoom]="4" class="map-container">
-<ol-tile-layer source="osm"></ol-tile-layer>
-</ol-map>
-\`,
-styles: [\`
-.map-container {
-width: 100%;
-height: 400px;
-display: block;
-}
-\`]
+  selector: 'app-base-map',
+  imports: [OlMapComponent],
+  template: ` <ol-map [center]="[0, 0]" [zoom]="2" class="w-full h-[400px] block" /> `,
 })
-export class MapDemoComponent {}
-\`\`\`
+export class BaseMapComponent {}
+```
+
+---
+
+## Primitives & Services
+
+| Primitive                | Category  | Description                                                                               |
+| :----------------------- | :-------- | :---------------------------------------------------------------------------------------- |
+| `OlMapComponent`         | Component | The root map canvas container with reactive `center`, `zoom`, and `rotation` inputs.      |
+| `OlMapService`           | Service   | Scoped service providing programmatic access to the underlying OpenLayers `Map` instance. |
+| `GeometryService`        | Service   | Geodesic distance, area, and bearing calculations.                                        |
+| `provideOpenLayers(...)` | Provider  | Configures OpenLayers environment providers, projection systems, and feature modules.     |
+
+---
+
+## Documentation
+
+Full documentation and interactive examples:
+👉 **[Angular Helpers OpenLayers Docs](https://gaspar1992.github.io/angular-helpers/docs/openlayers)**
+
+---
+
+## License
+
+MIT
