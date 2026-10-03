@@ -1,12 +1,36 @@
 # Release Workflow
-# This workflow runs on every push to the main branch.
+# Triggered manually via workflow_dispatch or automatically when a package.json version changes on main.
 
 name: Release
 
 on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to release'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - core
+          - browser-web-apis
+          - storage
+          - security
+          - worker-http
+          - openlayers
+          - testing
+          - yjs
+      dry_run:
+        description: 'Dry run (simulate without publishing)'
+        required: false
+        default: false
+        type: boolean
   push:
     branches:
       - main
+    paths:
+      - 'libs/**/package.json'
 
 permissions: {}
 
@@ -16,14 +40,12 @@ concurrency:
 
 jobs:
   release:
-    name: Release
+    name: Build & Publish Packages
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: write
       id-token: write
-      issues: write
-      pull-requests: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
@@ -33,67 +55,8 @@ jobs:
       - name: Setup workspace
         uses: ./.github/actions/setup
 
-      - name: Bootstrap first release to 21.x
-        run: |
-          for pkg in core browser-web-apis storage security worker-http openlayers testing yjs; do
-            if ! git tag --list "@angular-helpers/${pkg}@21.*" | grep -q .; then
-              git tag "@angular-helpers/${pkg}@21.14.0"
-              git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" "refs/tags/@angular-helpers/${pkg}@21.14.0"
-            fi
-          done
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-
       - name: Build all packages in topological order
         run: pnpm run build:packages:prod
-
-      - name: Semantic Release (Core)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm exec semantic-release
-        working-directory: libs/core
-
-      - name: Semantic Release (Browser Web APIs)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm exec semantic-release
-        working-directory: libs/browser-web-apis
-
-      - name: Semantic Release (Storage)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm exec semantic-release
-        working-directory: libs/storage
-
-      - name: Semantic Release (Security)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm exec semantic-release
-        working-directory: libs/security
-
-      - name: Semantic Release (Worker HTTP)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm exec semantic-release
-        working-directory: libs/worker-http
-
-      - name: Semantic Release (OpenLayers)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm exec semantic-release
-        working-directory: libs/openlayers
-
-      - name: Semantic Release (Testing)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm exec semantic-release
-        working-directory: libs/testing
-
-      - name: Semantic Release (Yjs)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm exec semantic-release
-        working-directory: libs/yjs
 
       - name: Strip workspace protocol from built packages dynamically
         run: |
@@ -101,66 +64,9 @@ jobs:
           echo "Replacing workspace:* with ^$core_version"
           find dist -name "package.json" -exec sed -i "s/\"workspace:\*\"/\"^$core_version\"/g" {} +
 
-      - name: Publish to npm with Provenance
-        run: |
-          for pkg in core browser-web-apis storage security worker-http openlayers testing yjs; do
-            if [ -d "dist/$pkg" ]; then
-              echo "Publishing $pkg..."
-              (cd dist/$pkg && npm publish --provenance --access public || echo "Skipped publishing $pkg")
-            fi
-          done
-
-      - name: Detect release artifact changes
-        id: release_changes
-        run: |
-          if git diff --quiet -- \
-            libs/core/CHANGELOG.md libs/core/package.json \
-            libs/browser-web-apis/CHANGELOG.md libs/browser-web-apis/package.json \
-            libs/storage/CHANGELOG.md libs/storage/package.json \
-            libs/security/CHANGELOG.md libs/security/package.json \
-            libs/worker-http/CHANGELOG.md libs/worker-http/package.json \
-            libs/openlayers/CHANGELOG.md libs/openlayers/package.json \
-            libs/testing/CHANGELOG.md libs/testing/package.json \
-            libs/yjs/CHANGELOG.md libs/yjs/package.json \
-            pnpm-lock.yaml; then
-            echo "has_changes=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_changes=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Create release artifacts PR
-        if: steps.release_changes.outputs.has_changes == 'true'
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+      - name: Publish new versions to npm with Provenance
+        run: node scripts/publish-packages.mjs
         env:
-          HUSKY: 0
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          branch: chore/release-artifacts
-          delete-branch: true
-          commit-message: 'chore(release): update changelog and package versions'
-          title: 'chore(release): update changelog and package versions'
-          body: |
-            ## Summary
-            - Update release artifacts generated by `semantic-release`.
-            - Persist `CHANGELOG.md`, `package.json`, and `pnpm-lock.yaml` through PR flow.
-
-            ## Notes
-            - Required because `main` is protected and disallows direct pushes.
-          add-paths: |
-            libs/core/CHANGELOG.md
-            libs/core/package.json
-            libs/browser-web-apis/CHANGELOG.md
-            libs/browser-web-apis/package.json
-            libs/storage/CHANGELOG.md
-            libs/storage/package.json
-            libs/security/CHANGELOG.md
-            libs/security/package.json
-            libs/worker-http/CHANGELOG.md
-            libs/worker-http/package.json
-            libs/openlayers/CHANGELOG.md
-            libs/openlayers/package.json
-            libs/testing/CHANGELOG.md
-            libs/testing/package.json
-            libs/yjs/CHANGELOG.md
-            libs/yjs/package.json
-            pnpm-lock.yaml
+          TARGET_PACKAGE: ${{ github.event.inputs.package || 'all' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
