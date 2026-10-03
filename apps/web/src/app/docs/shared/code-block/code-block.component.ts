@@ -11,6 +11,7 @@ import {
   PLATFORM_ID,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { injectClipboard } from '@angular-helpers/browser-web-apis';
 import hljs from 'highlight.js/lib/core';
 import typescript from 'highlight.js/lib/languages/typescript';
 import bash from 'highlight.js/lib/languages/bash';
@@ -129,6 +130,7 @@ export class CodeBlockComponent implements AfterViewInit {
   protected codeEl = viewChild.required<ElementRef<HTMLElement>>('codeEl');
   protected copied = signal(false);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly clipboard = injectClipboard();
 
   constructor() {
     effect(() => {
@@ -149,10 +151,11 @@ export class CodeBlockComponent implements AfterViewInit {
     }
   }
 
-  protected copy() {
-    navigator.clipboard.writeText(this.code()).then(() => {
+  protected async copy(): Promise<void> {
+    const success = await this.clipboard.writeText(this.code());
+    if (success) {
       this.copied.set(true);
       setTimeout(() => this.copied.set(false), 2000);
-    });
+    }
   }
 }
