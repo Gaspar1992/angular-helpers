@@ -1,5 +1,5 @@
 import type { Routes } from '@angular/router';
-import { blogPostResolver } from './services/blog-post.resolver';
+import { blogPostResolver, blogPostResource } from './services/blog-post.resolver';
 
 export const BLOG_ROUTES: Routes = [
   {
@@ -12,6 +12,7 @@ export const BLOG_ROUTES: Routes = [
     loadComponent: () =>
       import('./feature/blog-post/blog-post.component').then((m) => m.BlogPostComponent),
     resolve: { post: blogPostResolver },
+    resources: (ctx) => ({ post: blogPostResource(ctx) }),
     title: 'Article — Angular Helpers',
   },
 ];

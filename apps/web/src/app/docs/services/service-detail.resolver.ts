@@ -1,5 +1,5 @@
-import { type ResolveFn, Router } from '@angular/router';
-import { inject } from '@angular/core';
+import { type ResolveFn, Router, type ResourceContext } from '@angular/router';
+import { inject, resource } from '@angular/core';
 import { DocsVersionService } from '../services/docs-version.service';
 import {
   type ServiceDetailConfig,
@@ -46,22 +46,14 @@ function getInterfaces(
   return undefined;
 }
 
-export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (route) => {
-  const router = inject(Router);
-  const seo = inject(SeoService);
-  const versionService = inject(DocsVersionService);
-  const isV21 = versionService.version() === 'v21';
-
-  const section = route.url[0]?.path;
-  const paramName =
-    section === 'worker-http'
-      ? 'entry'
-      : section === 'openlayers'
-        ? 'component'
-        : section === 'core'
-          ? 'entry'
-          : 'service';
-  const itemId = route.paramMap.get(paramName) ?? '';
+export async function resolveServiceDetailData(
+  section: string,
+  itemId: string,
+  version: 'v21' | 'v22',
+  router: Router,
+  seo: SeoService,
+): Promise<ServiceDetailConfig | null> {
+  const isV21 = version === 'v21';
 
   const sectionDataMap: Record<
     string,
@@ -109,7 +101,7 @@ export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (rout
   // Safety check for invalid section - redirect to docs
   if (!sectionDataMap[section]) {
     await router.navigate(['/docs']);
-    return null as unknown as ServiceDetailConfig;
+    return null;
   }
 
   const sectionData = sectionDataMap[section];
@@ -118,7 +110,7 @@ export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (rout
   // If service not found, redirect to section overview
   if (!item) {
     await router.navigate([sectionData.backRoute]);
-    return null as unknown as ServiceDetailConfig;
+    return null;
   }
 
   // Update SEO Metadata dynamically
@@ -135,4 +127,64 @@ export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (rout
     backLabel: sectionData.backLabel,
     interfaces: getInterfaces(section, itemId, isV21),
   };
+}
+
+export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (route) => {
+  const router = inject(Router);
+  const seo = inject(SeoService);
+  const versionService = inject(DocsVersionService);
+
+  const section = route.url[0]?.path ?? '';
+  const paramName =
+    section === 'worker-http'
+      ? 'entry'
+      : section === 'openlayers'
+        ? 'component'
+        : section === 'core'
+          ? 'entry'
+          : 'service';
+  const itemId = route.paramMap.get(paramName) ?? '';
+
+  const result = await resolveServiceDetailData(
+    section,
+    itemId,
+    versionService.version(),
+    router,
+    seo,
+  );
+  return result as ServiceDetailConfig;
 };
+
+export function serviceDetailResource(ctx: ResourceContext, section: string) {
+  const router = inject(Router);
+  const seo = inject(SeoService);
+  const versionService = inject(DocsVersionService);
+
+  const paramName =
+    section === 'worker-http'
+      ? 'entry'
+      : section === 'openlayers'
+        ? 'component'
+        : section === 'core'
+          ? 'entry'
+          : 'service';
+
+  return resource({
+    params: () => {
+      const p = ctx.params();
+      const itemId = (p[paramName] as string | undefined) ?? '';
+      const version = versionService.version();
+      return { section, itemId, version };
+    },
+    loader: async ({ params }) => {
+      const result = await resolveServiceDetailData(
+        params.section,
+        params.itemId,
+        params.version,
+        router,
+        seo,
+      );
+      return result as ServiceDetailConfig;
+    },
+  });
+}

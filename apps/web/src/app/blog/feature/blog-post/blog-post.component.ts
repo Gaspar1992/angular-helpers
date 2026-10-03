@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, inject } from '@angular/core';
+import { Component, ViewEncapsulation, inject, input, computed } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
@@ -73,9 +73,13 @@ import type { BlogPostData } from '../../services/blog-post.resolver';
   `,
 })
 export class BlogPostComponent {
+  readonly post = input<BlogPostData | null>(null);
+
   private readonly route = inject(ActivatedRoute);
 
-  readonly data = toSignal(
+  private readonly routeDataPost = toSignal(
     this.route.data.pipe(map((d) => (d['post'] as BlogPostData | null) ?? null)),
   );
+
+  readonly data = computed(() => this.post() ?? this.routeDataPost() ?? null);
 }

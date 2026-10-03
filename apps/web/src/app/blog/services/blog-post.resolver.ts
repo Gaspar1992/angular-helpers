@@ -1,7 +1,8 @@
 import { inject } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
-import { type ResolveFn, ActivatedRouteSnapshot } from '@angular/router';
-import { of } from 'rxjs';
+import { type ResolveFn, ActivatedRouteSnapshot, type ResourceContext } from '@angular/router';
+import { of, type Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { marked } from 'marked';
 import hljs from 'highlight.js';
@@ -61,13 +62,13 @@ function parseFrontmatter(raw: string): { meta: Partial<BlogPost>; body: string 
   return { meta, body };
 }
 
-export const blogPostResolver: ResolveFn<BlogPostData | null> = (route: ActivatedRouteSnapshot) => {
-  const slug = route.paramMap.get('slug');
+export function fetchBlogPost(
+  slug: string,
+  http: HttpClient,
+  sanitizer: DomSanitizer,
+  seo: SeoService,
+): Observable<BlogPostData | null> {
   if (!slug) return of(null);
-
-  const http = inject(HttpClient);
-  const sanitizer = inject(DomSanitizer);
-  const seo = inject(SeoService);
 
   // Use relative path to work with subdirectory deployments (GitHub Pages)
   return http.get(`content/blog/${slug}.md`, { responseType: 'text' }).pipe(
@@ -105,4 +106,23 @@ export const blogPostResolver: ResolveFn<BlogPostData | null> = (route: Activate
     }),
     catchError(() => of(null)),
   );
+}
+
+export const blogPostResolver: ResolveFn<BlogPostData | null> = (route: ActivatedRouteSnapshot) => {
+  const slug = route.paramMap.get('slug') ?? '';
+  const http = inject(HttpClient);
+  const sanitizer = inject(DomSanitizer);
+  const seo = inject(SeoService);
+  return fetchBlogPost(slug, http, sanitizer, seo);
 };
+
+export function blogPostResource(ctx: ResourceContext) {
+  const http = inject(HttpClient);
+  const sanitizer = inject(DomSanitizer);
+  const seo = inject(SeoService);
+
+  return rxResource({
+    params: () => (ctx.params()['slug'] as string | undefined) ?? '',
+    stream: ({ params: slug }) => fetchBlogPost(slug, http, sanitizer, seo),
+  });
+}

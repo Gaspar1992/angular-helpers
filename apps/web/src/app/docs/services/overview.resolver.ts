@@ -1,5 +1,5 @@
-import type { ResolveFn } from '@angular/router';
-import { inject } from '@angular/core';
+import type { ResolveFn, ResourceContext } from '@angular/router';
+import { inject, resource } from '@angular/core';
 import { DocsVersionService } from '../services/docs-version.service';
 import type { OverviewConfig } from '../feature/unified-overview/unified-overview.component';
 import { generateServiceGroups } from './overview.utils';
@@ -196,3 +196,16 @@ export const overviewResolver: ResolveFn<OverviewConfig> = (route) => {
   const section = route.url[0]?.path ?? 'browser-web-apis';
   return getOverviewConfig(section, version);
 };
+
+export function overviewResource(ctx: ResourceContext, defaultSection = 'browser-web-apis') {
+  const versionService = inject(DocsVersionService);
+  return resource({
+    params: () => ({
+      section: defaultSection,
+      version: versionService.version(),
+    }),
+    loader: async ({ params }) => {
+      return getOverviewConfig(params.section, params.version);
+    },
+  });
+}

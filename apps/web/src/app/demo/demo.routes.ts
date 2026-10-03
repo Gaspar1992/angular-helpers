@@ -174,6 +174,14 @@ export const DEMO_ROUTES: Routes = [
         loadComponent: () => import('./yjs/yjs-demo.component').then((m) => m.YjsDemoComponent),
         title: 'Yjs CRDT & Collaboration — Demo',
       },
+      {
+        path: 'router-resources',
+        loadComponent: () =>
+          import('./router-resources/router-resources-demo.component').then(
+            (m) => m.RouterResourcesDemoComponent,
+          ),
+        title: 'Router Resources — Demo',
+      },
     ],
   },
 ];

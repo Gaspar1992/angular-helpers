@@ -78,4 +78,12 @@ export const PUBLIC_DEMO_SECTIONS: readonly DemoSection[] = [
     icon: '🔄',
     packageName: '@angular-helpers/yjs',
   },
+  {
+    path: '/demo/router-resources',
+    title: 'Router Resources',
+    description:
+      'Angular 22.2 parallel data loading, non-blocking navigation, and signal-driven route inputs.',
+    icon: '⚡',
+    packageName: 'Angular v22.2',
+  },
 ];

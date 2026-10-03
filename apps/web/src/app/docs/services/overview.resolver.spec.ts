@@ -1,6 +1,7 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { overviewResolver } from './overview.resolver';
+import { overviewResolver, overviewResource } from './overview.resolver';
 import { DocsVersionService } from './docs-version.service';
 
 describe('overviewResolver', () => {
@@ -45,5 +46,21 @@ describe('overviewResolver', () => {
     // The inject-platform service should NOT have [v21 Legacy] in its description
     const platformService = result.serviceGroups[0].items[0];
     expect(platformService.description).not.toContain('[v21 Legacy]');
+  });
+
+  it('should create reactive overviewResource for route', async () => {
+    versionService.activeVersionSignal.set('v22');
+    const ctx = {
+      params: signal({}),
+      queryParams: signal({}),
+      fragment: signal(undefined),
+      data: signal({}),
+    } as any;
+
+    const res = TestBed.runInInjectionContext(() => overviewResource(ctx, 'core'));
+    expect(res).toBeDefined();
+    TestBed.flushEffects();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(res.value()?.packageName).toBe('core');
   });
 });

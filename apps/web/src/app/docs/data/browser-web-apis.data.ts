@@ -2682,49 +2682,62 @@ export class GameInputComponent {
     category: 'media-device',
     methods: [
       {
-        name: 'requestDevice',
-        signature:
-          'requestDevice(options?: BluetoothRequestDeviceOptions): Promise<BluetoothDeviceRef>',
-        description: 'Opens the Bluetooth device picker dialog.',
-        returns: 'Promise<BluetoothDeviceRef>',
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Public method isSupported.',
+        returns: 'boolean',
       },
       {
-        name: 'connect',
-        signature: 'connect(device: BluetoothDeviceRef): Promise<BluetoothRemoteGATTServer>',
-        description: 'Connects to the GATT server on the given device.',
+        name: 'requestDevice',
+        signature:
+          'requestDevice(options?: BluetoothRequestDeviceOptions): Promise<BluetoothDevice>',
+        description: 'Requests a Bluetooth device from the user matching the specified options.',
+        returns: 'Promise<BluetoothDevice>',
+      },
+      {
+        name: 'getDevices',
+        signature: 'getDevices(): Promise<BluetoothDevice[]>',
+        description: 'Gets a list of permitted Bluetooth devices for this origin.',
+        returns: 'Promise<BluetoothDevice[]>',
+      },
+      {
+        name: 'getAvailability',
+        signature: 'getAvailability(): Promise<boolean>',
+        description: "Queries whether Bluetooth is available on the user's device/adapter.",
+        returns: 'Promise<boolean>',
+      },
+      {
+        name: 'connectGatt',
+        signature: 'connectGatt(device: BluetoothDevice): Promise<BluetoothRemoteGATTServer>',
+        description: 'Connects to the GATT server on the specified device.',
         returns: 'Promise<BluetoothRemoteGATTServer>',
       },
       {
-        name: 'disconnect',
-        signature: 'disconnect(device: BluetoothDeviceRef): void',
-        description: 'Disconnects from the device GATT server.',
+        name: 'disconnectGatt',
+        signature: 'disconnectGatt(device: BluetoothDevice): void',
+        description: 'Disconnects from the GATT server on the specified device.',
         returns: 'void',
       },
       {
         name: 'readCharacteristic',
-        signature: 'readCharacteristic(server, serviceUuid, characteristicUuid): Promise<DataView>',
-        description: 'Reads a value from a BLE characteristic.',
+        signature:
+          'readCharacteristic(characteristic: BluetoothRemoteGATTCharacteristic): Promise<DataView>',
+        description: 'Reads the value of a GATT characteristic.',
         returns: 'Promise<DataView>',
       },
       {
         name: 'writeCharacteristic',
         signature:
-          'writeCharacteristic(server, serviceUuid, characteristicUuid, value): Promise<void>',
-        description: 'Writes a value to a BLE characteristic.',
+          'writeCharacteristic(characteristic: BluetoothRemoteGATTCharacteristic, data: BufferSource, withoutResponse: any): Promise<void>',
+        description: 'Writes data to a GATT characteristic.',
         returns: 'Promise<void>',
       },
       {
-        name: 'watchCharacteristic',
+        name: 'watchCharacteristicNotifications',
         signature:
-          'watchCharacteristic(server, serviceUuid, characteristicUuid): Observable<DataView>',
-        description: 'Subscribes to value notifications from a BLE characteristic.',
+          'watchCharacteristicNotifications(characteristic: BluetoothRemoteGATTCharacteristic): Observable<DataView>',
+        description: 'Observes value changes (notifications/indications) on a GATT characteristic.',
         returns: 'Observable<DataView>',
-      },
-      {
-        name: 'isSupported',
-        signature: 'isSupported(): boolean',
-        description: 'Returns whether the Web Bluetooth API is available.',
-        returns: 'boolean',
       },
     ],
     example: `import { WebBluetoothService } from '@angular-helpers/browser-web-apis/experimental';
@@ -3215,12 +3228,40 @@ export class CompressionComponent {
     category: 'network',
     methods: [
       {
-        name: 'injectWebTransportResource',
-        signature:
-          'injectWebTransportResource(url: Signal<string> | string, options?: WebTransportResourceOptions): WebTransportResourceRef',
-        description:
-          'Creates a reactive WebTransport Signal Resource managing connection, status, and incoming datagrams.',
-        returns: 'WebTransportResourceRef',
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Public method isSupported.',
+        returns: 'boolean',
+      },
+      {
+        name: 'connect',
+        signature: 'connect(url: string | URL, options?: WebTransportOptions): Promise<void>',
+        description: 'Public method connect.',
+        returns: 'Promise<void>',
+      },
+      {
+        name: 'sendDatagram',
+        signature: 'sendDatagram(data: Uint8Array | ArrayBuffer): Promise<void>',
+        description: 'Public method sendDatagram.',
+        returns: 'Promise<void>',
+      },
+      {
+        name: 'createUnidirectionalStream',
+        signature: 'createUnidirectionalStream(): Promise<WritableStream<Uint8Array>>',
+        description: 'Public method createUnidirectionalStream.',
+        returns: 'Promise<WritableStream<Uint8Array>>',
+      },
+      {
+        name: 'createBidirectionalStream',
+        signature: 'createBidirectionalStream(): Promise<WebTransportBidirectionalStream>',
+        description: 'Public method createBidirectionalStream.',
+        returns: 'Promise<WebTransportBidirectionalStream>',
+      },
+      {
+        name: 'close',
+        signature: 'close(closeInfo?: WebTransportCloseInfo): void',
+        description: 'Public method close.',
+        returns: 'void',
       },
     ],
     example: `import { Component, signal } from '@angular/core';

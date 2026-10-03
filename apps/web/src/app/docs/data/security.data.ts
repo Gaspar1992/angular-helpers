@@ -17,12 +17,6 @@ export const SECURITY_SERVICES: ServiceDoc[] = [
     ],
     methods: [
       {
-        name: 'builder',
-        signature: 'builder(): RegexSecurityBuilder',
-        description: 'Builder pattern to construct safe regular expressions',
-        returns: 'RegexSecurityBuilder',
-      },
-      {
         name: 'testRegex',
         signature:
           'testRegex(pattern: string, text: string, config: RegexSecurityConfig): Promise<RegexTestResult>',
@@ -567,6 +561,13 @@ unsupported environments (such as older browsers or SSR).`,
         returns: 'string',
       },
       {
+        name: 'getTrustedHtml',
+        signature: 'getTrustedHtml(input: string): any',
+        description: `Returns a TrustedHTML object (or similar if using a polyfill) if the Trusted Types policy
+is available, otherwise returns the raw input string.`,
+        returns: 'any',
+      },
+      {
         name: 'sanitizeUrl',
         signature: 'sanitizeUrl(input: string): string | null',
         description: `Validates and normalizes a URL string.
@@ -847,9 +848,9 @@ csrf.storeToken(response.csrfToken);
     methods: [
       {
         name: 'configure',
-        signature: 'configure(key: string, policy: RateLimitPolicy): void',
+        signature: 'configure(key: string, policy: RateLimitPolicy): Promise<void>',
         description: `Registers or updates the policy for \`key\`. Re-configuring an existing key resets its state.`,
-        returns: 'void',
+        returns: 'Promise<void>',
       },
       {
         name: 'consume',
@@ -877,9 +878,9 @@ For undeclared keys, returns \`signal(Infinity)\`.`,
       },
       {
         name: 'reset',
-        signature: 'reset(key: string): void',
+        signature: 'reset(key: string): Promise<void>',
         description: `Resets the counter for \`key\` to its maximum. No-op for undeclared keys.`,
-        returns: 'void',
+        returns: 'Promise<void>',
       },
     ],
     example: `import { RateLimiterService, RateLimitExceededError } from '@angular-helpers/security';

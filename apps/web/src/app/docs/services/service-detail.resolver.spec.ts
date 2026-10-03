@@ -1,6 +1,7 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { serviceDetailResolver } from './service-detail.resolver';
+import { serviceDetailResolver, serviceDetailResource } from './service-detail.resolver';
 import { DocsVersionService } from './docs-version.service';
 import { SeoService } from '../../core/services/seo.service';
 
@@ -63,5 +64,21 @@ describe('serviceDetailResolver', () => {
       serviceDetailResolver(route, state),
     )) as any;
     expect(result.service.description).not.toContain('[v21 Legacy]');
+  });
+
+  it('should create reactive serviceDetailResource for route', async () => {
+    versionService.activeVersionSignal.set('v22');
+    const ctx = {
+      params: signal({ entry: 'inject-platform' }),
+      queryParams: signal({}),
+      fragment: signal(undefined),
+      data: signal({}),
+    } as any;
+
+    const res = TestBed.runInInjectionContext(() => serviceDetailResource(ctx, 'core'));
+    expect(res).toBeDefined();
+    TestBed.flushEffects();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(res.value()?.service.id).toBe('inject-platform');
   });
 });
