@@ -1,20 +1,20 @@
-import { Component, type Type } from '@angular/core';
+import { Component, type Provider, type Type } from '@angular/core';
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
 export interface RenderOptions<T> {
-  imports?: any[];
-  providers?: any[];
+  imports?: (Type<unknown> | readonly unknown[])[];
+  providers?: Provider[];
   inputs?: Partial<T>;
-  outputs?: Partial<Record<keyof T, (event: any) => void>>;
-  hostProperties?: Record<string, any>;
+  outputs?: Partial<Record<keyof T, (event: unknown) => void>>;
+  hostProperties?: Record<string, unknown>;
   detectInitialChanges?: boolean;
   template?: string;
 }
 
 export class RenderResult<T> {
   constructor(
-    public fixture: ComponentFixture<any>,
+    public fixture: ComponentFixture<unknown>,
     public component: T,
   ) {
     this.query = this.query.bind(this);
@@ -83,7 +83,7 @@ export async function render<T>(
   componentType: Type<T>,
   options: RenderOptions<T> = {},
 ): Promise<RenderResult<T>> {
-  let fixture: ComponentFixture<any>;
+  let fixture: ComponentFixture<unknown>;
   let componentInstance: T;
 
   if (options.template) {
@@ -91,9 +91,9 @@ export async function render<T>(
     class DynamicHostComponent {}
     const decorator = Component({
       template: options.template,
-      imports: [componentType as any, ...(options.imports || [])],
+      imports: [componentType, ...(options.imports || [])],
     });
-    const HostType = decorator(DynamicHostComponent) as Type<any>;
+    const HostType = decorator(DynamicHostComponent) as Type<unknown>;
 
     await TestBed.configureTestingModule({
       imports: [HostType, ...(options.imports || [])],
@@ -109,32 +109,34 @@ export async function render<T>(
     componentInstance = debugEl.injector.get(componentType);
   } else {
     await TestBed.configureTestingModule({
-      imports: [componentType as any, ...(options.imports || [])],
+      imports: [componentType, ...(options.imports || [])],
       providers: options.providers || [],
     }).compileComponents();
 
     fixture = TestBed.createComponent(componentType);
-    componentInstance = fixture.componentInstance;
+    componentInstance = fixture.componentInstance as T;
   }
 
   if (options.inputs) {
     if (options.template) {
       // In host templates, inputs should be bound natively in the template using hostProperties.
     } else {
-      for (const key of Object.keys(options.inputs)) {
-        fixture.componentRef.setInput(key, (options.inputs as any)[key]);
+      for (const [key, val] of Object.entries(options.inputs)) {
+        fixture.componentRef.setInput(key, val);
       }
     }
   }
 
   if (options.hostProperties && options.template) {
-    Object.assign(fixture.componentInstance, options.hostProperties);
+    Object.assign(fixture.componentInstance as object, options.hostProperties);
   }
 
   // Support for output binding (compatible with EventEmitter and Signal output())
   if (options.outputs) {
     for (const key of Object.keys(options.outputs) as Array<keyof T>) {
-      const outputProp = componentInstance[key] as any;
+      const outputProp = componentInstance[key] as
+        | { subscribe?: (cb: (event: unknown) => void) => void }
+        | undefined;
       const callback = options.outputs[key];
       if (outputProp && typeof outputProp.subscribe === 'function' && callback) {
         outputProp.subscribe(callback);
