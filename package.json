@@ -30,10 +30,10 @@
     "*.{ts,js}": "oxlint",
     "*.{ts,html}": "eslint"
   },
-  "packageManager": "pnpm@11.1.2",
+  "packageManager": "pnpm@11.28.4",
   "engines": {
     "node": ">=24.15.0",
-    "pnpm": ">=11.1.2"
+    "pnpm": ">=11.28.4"
   },
   "devEngines": {
     "runtime": {
@@ -43,7 +43,7 @@
     },
     "packageManager": {
       "name": "pnpm",
-      "version": "11.1.2",
+      "version": "11.28.4",
       "onFail": "download"
     }
   },

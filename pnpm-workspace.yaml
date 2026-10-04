@@ -106,3 +106,11 @@ overrides:
   '@angular/platform-server': 'catalog:'
   '@angular/router': 'catalog:'
   '@angular/ssr': 'catalog:'
+minimumReleaseAgeExclude:
+  - '@pnpm/exe@11.28.4'
+  - '@pnpm/linux-arm64@11.28.4'
+  - '@pnpm/linux-x64@11.28.4'
+  - '@pnpm/linuxstatic-x64@11.28.4'
+  - '@pnpm/macos-arm64@11.28.4'
+  - '@pnpm/win-arm64@11.28.4'
+  - '@pnpm/win-x64@11.28.4'
