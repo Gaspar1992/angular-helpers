@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/yjs",
-  "version": "22.0.0",
+  "version": "22.0.1",
   "description": "Reactive Angular Signal adapters and helpers for Yjs CRDT real-time collaboration",
   "publishConfig": {
     "access": "public"

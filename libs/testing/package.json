@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/testing",
-  "version": "22.1.2",
+  "version": "22.1.3",
   "description": "Streamlined testing utilities for modern Angular applications",
   "publishConfig": {
     "access": "public"

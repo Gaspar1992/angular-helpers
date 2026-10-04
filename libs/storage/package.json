@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/storage",
-  "version": "22.3.0",
+  "version": "22.3.1",
   "description": "Sistema de almacenamiento reactivo premium para Angular con soporte para Cache API, IndexedDB, compresión TOON y blindaje en runtime.",
   "scripts": {
     "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",

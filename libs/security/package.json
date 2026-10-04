@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/security",
-  "version": "22.8.0",
+  "version": "22.8.1",
   "description": "Angular security helpers for preventing ReDoS and other security vulnerabilities",
   "keywords": [
     "angular",
