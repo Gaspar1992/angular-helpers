@@ -2,11 +2,15 @@ packages:
   - 'apps/*'
   - 'libs/*'
 
-shamefully-hoist: true
-strict-peer-dependencies: true
-auto-install-peers: true
-resolve-peers-from-workspace-root: true
-dedupe-peer-dependents: true
+shamefullyHoist: true
+strictPeerDependencies: true
+autoInstallPeers: true
+resolvePeersFromWorkspaceRoot: true
+dedupePeerDependents: true
+engineStrict: true
+peerDependencyRules:
+  allowedVersions:
+    typescript: '*'
 
 catalog:
   '@analogjs/vite-plugin-angular': ^2.8.0

@@ -56,10 +56,27 @@
           "optimization": false,
           "extractLicenses": false,
           "sourceMap": true
+        },
+        "gh-pages": {
+          "baseHref": "/angular-helpers/"
         }
       },
       "defaultConfiguration": "production",
       "outputs": ["{options.outputPath}"]
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run apps/web/src/app"
+      },
+      "configurations": {
+        "watch": {
+          "command": "vitest apps/web/src/app"
+        },
+        "coverage": {
+          "command": "vitest run apps/web/src/app --coverage"
+        }
+      }
     },
     "lint": {
       "executor": "@angular-eslint/builder:lint",
@@ -92,6 +109,18 @@
         }
       },
       "defaultConfiguration": "development"
+    },
+    "generate-docs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/task-runner.js generate:docs"
+      }
+    },
+    "test-docs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/task-runner.js test:docs-consistency"
+      }
     }
   }
 }

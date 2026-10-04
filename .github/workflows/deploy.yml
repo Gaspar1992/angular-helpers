@@ -31,10 +31,10 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Build Web Workers
-        run: pnpm run build:workers
+        run: pnpm nx run web:build-workers
 
       - name: Build for GitHub Pages
-        run: pnpm run build:gh-pages
+        run: pnpm nx build web --configuration gh-pages
 
       - name: Copy index.html → 404.html (SPA routing fallback)
         run: cp dist/angular-helpers/browser/index.html dist/angular-helpers/browser/404.html

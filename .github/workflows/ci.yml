@@ -49,10 +49,10 @@ jobs:
         run: pnpm run lint
 
       - name: Build schematics
-        run: pnpm run build:schematics
+        run: pnpm nx build @angular-helpers/schematics
 
       - name: Run unit tests with coverage
-        run: pnpm run test:ci
+        run: pnpm nx run-many -t test --coverage
 
       - name: Generate coverage summary
         if: always()
@@ -67,7 +67,7 @@ jobs:
           retention-days: 14
 
       - name: Build packages
-        run: pnpm run build:packages
+        run: pnpm nx run-many -t build
 
   docs-consistency:
     name: Documentation consistency
@@ -101,7 +101,7 @@ jobs:
           playwright-cache: 'true'
 
       - name: Build worker files
-        run: pnpm run build:workers
+        run: pnpm nx run web:build-workers
 
       - name: Build web app (SSR)
         run: pnpm nx build web --configuration production
@@ -110,7 +110,7 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run browser CI suite
-        run: pnpm run test:browser:ci
+        run: pnpm nx e2e web-e2e --configuration ci
 
       - name: Upload Playwright report
         if: failure()
@@ -138,7 +138,7 @@ jobs:
           playwright-cache: 'true'
 
       - name: Build worker files
-        run: pnpm run build:workers
+        run: pnpm nx run web:build-workers
 
       - name: Build web app (SSR)
         run: pnpm nx build web --configuration production
@@ -147,7 +147,7 @@ jobs:
         run: pnpm exec playwright install --with-deps firefox webkit
 
       - name: Run cross-browser smoke suite
-        run: pnpm run test:browser:cross
+        run: pnpm nx e2e web-e2e --configuration cross
 
       - name: Upload cross-browser Playwright report
         if: failure()

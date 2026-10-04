@@ -9,7 +9,24 @@
     "e2e": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "playwright test --config=apps/web-e2e/playwright.config.ts"
+        "command": "node scripts/task-runner.js test:browser"
+      },
+      "configurations": {
+        "ci": {
+          "command": "node scripts/task-runner.js test:browser ci"
+        },
+        "smoke": {
+          "command": "node scripts/task-runner.js test:browser smoke"
+        },
+        "cross": {
+          "command": "node scripts/task-runner.js test:browser cross"
+        },
+        "headed": {
+          "command": "node scripts/task-runner.js test:browser headed"
+        },
+        "debug": {
+          "command": "node scripts/task-runner.js test:browser debug"
+        }
       },
       "outputs": ["{workspaceRoot}/apps/web-e2e/playwright-report"]
     },

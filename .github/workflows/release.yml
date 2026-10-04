@@ -56,7 +56,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Build all packages in topological order
-        run: pnpm run build:packages:prod
+        run: pnpm nx run-many -t build:prod
 
       - name: Strip workspace protocol from built packages dynamically
         run: |
