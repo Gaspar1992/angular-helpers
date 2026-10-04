@@ -30,7 +30,7 @@
 
   --color-text-main: rgba(255, 255, 255, 0.9);
   --color-text-secondary: rgba(255, 255, 255, 0.6);
-  --color-text-muted: rgba(255, 255, 255, 0.4);
+  --color-text-muted: rgba(255, 255, 255, 0.55);
 
   --color-border: color-mix(in oklch, white 15%, transparent);
   --color-border-subtle: color-mix(in oklch, white 8%, transparent);

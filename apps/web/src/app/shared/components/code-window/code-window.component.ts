@@ -173,7 +173,7 @@ export interface CodeTab {
                 padding-block: var(--spacing-2);
                 font-family: var(--font-mono);
                 font-size: 11px;
-                color: var(--c-text-muted);
+                color: var(--c-text-secondary);
                 background: transparent;
                 border: none;
                 border-block-end: 2px solid transparent;
@@ -181,7 +181,7 @@ export interface CodeTab {
                 transition: all var(--t-fast);
 
                 &:hover {
-                  color: var(--c-text-secondary);
+                  color: var(--c-text-main);
                   background-color: var(--c-border-subtle);
                 }
 
