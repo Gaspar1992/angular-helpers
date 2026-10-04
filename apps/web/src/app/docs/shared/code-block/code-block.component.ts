@@ -8,9 +8,8 @@ import {
   computed,
   signal,
   inject,
-  PLATFORM_ID,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { injectPlatform } from '@angular-helpers/core';
 import { injectClipboard } from '@angular-helpers/browser-web-apis';
 import hljs from 'highlight.js/lib/core';
 import typescript from 'highlight.js/lib/languages/typescript';
@@ -129,14 +128,14 @@ export class CodeBlockComponent implements AfterViewInit {
 
   protected codeEl = viewChild.required<ElementRef<HTMLElement>>('codeEl');
   protected copied = signal(false);
-  private readonly platformId = inject(PLATFORM_ID);
+  private readonly platform = injectPlatform();
   private readonly clipboard = injectClipboard();
 
   constructor() {
     effect(() => {
       const codeValue = this.code();
       const el = this.codeEl();
-      if (el && isPlatformBrowser(this.platformId)) {
+      if (el && this.platform.isBrowser) {
         el.nativeElement.textContent = codeValue;
         delete el.nativeElement.dataset['highlighted'];
         hljs.highlightElement(el.nativeElement);
@@ -145,7 +144,7 @@ export class CodeBlockComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    if (isPlatformBrowser(this.platformId)) {
+    if (this.platform.isBrowser) {
       delete this.codeEl().nativeElement.dataset['highlighted'];
       hljs.highlightElement(this.codeEl().nativeElement);
     }
