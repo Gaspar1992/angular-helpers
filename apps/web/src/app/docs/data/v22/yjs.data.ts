@@ -1,1 +1,1 @@
-export { YJS_SERVICES } from '../yjs.data';
+export * from '../yjs.data';

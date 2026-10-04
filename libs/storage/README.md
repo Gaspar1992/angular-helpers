@@ -81,7 +81,8 @@ const product = productStore.selectById('p1'); // WritableSignal<Product | undef
 
 - **Two-Tier Architecture (L1 + L2)**: Reads are instantaneous from the L1 in-memory Signal. Persisted writes flush asynchronously to L2 without blocking UI frames.
 - **Schema Drift Auto-Repair**: If stored data in the browser fails runtime validation after an app update, the store automatically falls back to defaults and repairs corrupted records.
-- **Transparent Encryption**: Optional client-side AES-GCM encryption with PBKDF2 salt derivation.
+- **Transparent Encryption**: Client-side authenticated AES-GCM encryption with PBKDF2 salt derivation to protect sensitive cached data.
+- **Pluggable & Compact Serialization**: Built-in support for standard JSON and optional TOON (Token-Oriented Object Notation) binary compression for dense entity stores.
 - **Zoneless & SSR Safe**: Degrades gracefully on the server without breaking hydration.
 
 ---

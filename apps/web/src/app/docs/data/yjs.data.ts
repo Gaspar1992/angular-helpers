@@ -314,8 +314,16 @@ export class PresenceDemoComponent {
           type: 'string',
           description: 'The WebSocket server endpoint (e.g. wss://demos.yjs.dev)',
         },
-        { name: 'roomName', type: 'string', description: 'Room/document identifier key.' },
-        { name: 'doc', type: 'Y.Doc', description: 'Target Y.Doc instance.' },
+        {
+          name: 'roomName',
+          type: 'string',
+          description: 'Room/document identifier key.',
+        },
+        {
+          name: 'doc',
+          type: 'Y.Doc',
+          description: 'Target Y.Doc instance.',
+        },
         {
           name: 'options?',
           type: 'YjsWebsocketOptions',
@@ -371,8 +379,16 @@ export class WsDemoComponent {
       returnType: 'YjsIndexeddbRef',
       description: 'Persists a Y.Doc to IndexedDB and returns reactive hydration signals.',
       fields: [
-        { name: 'name', type: 'string', description: 'IndexedDB key identifier name.' },
-        { name: 'doc', type: 'Y.Doc', description: 'Target Y.Doc instance.' },
+        {
+          name: 'name',
+          type: 'string',
+          description: 'IndexedDB key identifier name.',
+        },
+        {
+          name: 'doc',
+          type: 'Y.Doc',
+          description: 'Target Y.Doc instance.',
+        },
       ],
       example: `import { Component, inject } from '@angular/core';
 import { injectYjsIndexeddb, YjsDocService } from '@angular-helpers/yjs';

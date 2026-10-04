@@ -1,6 +1,6 @@
 # 🌐 @angular-helpers/browser-web-apis
 
-A modular, strongly typed, and reactive Angular suite for native Browser Web APIs. Provides signal-driven access, true tree-shaking, SSR protection, and automatic lifecycle management via `DestroyRef`.
+A modular, strongly typed, and reactive Angular suite for native Browser Web APIs (41 services and 23 inject() primitives). Provides signal-driven access, true tree-shaking, SSR protection, and automatic lifecycle management via `DestroyRef`.
 
 ---
 

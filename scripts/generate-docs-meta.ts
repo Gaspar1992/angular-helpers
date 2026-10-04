@@ -76,6 +76,12 @@ const PACKAGES = [
     dataFile: 'apps/web/src/app/docs/data/storage.data.ts',
     varName: 'STORAGE_SERVICES',
   },
+  {
+    name: 'yjs',
+    srcDir: 'libs/yjs/src',
+    dataFile: 'apps/web/src/app/docs/data/yjs.data.ts',
+    varName: 'YJS_SERVICES',
+  },
 ];
 
 console.log('🤖 Starting Docs-as-Code Metadata Generator...\n');
