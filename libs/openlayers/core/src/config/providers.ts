@@ -4,6 +4,7 @@ import type { Provider } from '@angular/core';
 import { type EnvironmentProviders, makeEnvironmentProviders } from '@angular/core';
 import { OlMapService } from '../services/map.service';
 import { OlZoneHelper } from '../services/zone-helper.service';
+import { OlTimeService } from '../services/time.service';
 
 export type OlFeatureKind =
   | 'layers'
@@ -22,6 +23,7 @@ export function provideOpenLayers(...features: OlFeature<OlFeatureKind>[]): Envi
   return makeEnvironmentProviders([
     OlMapService,
     OlZoneHelper,
+    OlTimeService,
     ...features.flatMap((f) => f.providers),
   ]);
 }

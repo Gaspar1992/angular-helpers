@@ -7,7 +7,7 @@ import { OlZoneHelper } from './zone-helper.service';
  * via requestAnimationFrame, ensuring 60FPS WebGL animations without triggering
  * global change detection.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class OlTimeService {
   private zoneHelper = inject(OlZoneHelper);
 
