@@ -1,40 +1,40 @@
-import type { Routes } from '@angular/router';
-import { provideSecurity } from '@angular-helpers/security';
-import { provideOpenLayers } from '@angular-helpers/openlayers/core';
-import { withLayers } from '@angular-helpers/openlayers/layers';
-import { withControls } from '@angular-helpers/openlayers/controls';
 import {
+  provideBattery,
+  provideBroadcastChannel,
   provideBrowserWebApis,
   provideCamera,
-  provideGeolocation,
-  provideNotifications,
   provideClipboard,
-  provideMediaDevices,
-  provideBattery,
-  provideWebShare,
-  provideWebStorage,
-  provideWebSocket,
-  provideWebWorker,
-  provideIntersectionObserver,
-  provideResizeObserver,
-  providePageVisibility,
-  provideBroadcastChannel,
-  provideNetworkInformation,
-  provideScreenWakeLock,
-  provideScreenOrientation,
-  provideFullscreen,
-  provideFileSystemAccess,
-  provideMediaRecorder,
-  provideServerSentEvents,
-  provideVibration,
-  provideSpeechSynthesis,
-  provideMutationObserver,
-  providePerformanceObserver,
-  provideWebAudio,
-  provideGamepad,
   provideEyeDropper,
+  provideFileSystemAccess,
+  provideFullscreen,
+  provideGamepad,
+  provideGeolocation,
   provideIdleDetector,
+  provideIntersectionObserver,
+  provideMediaDevices,
+  provideMediaRecorder,
+  provideMutationObserver,
+  provideNetworkInformation,
+  provideNotifications,
+  providePageVisibility,
+  providePerformanceObserver,
+  provideResizeObserver,
+  provideScreenOrientation,
+  provideScreenWakeLock,
+  provideServerSentEvents,
+  provideSpeechSynthesis,
+  provideVibration,
+  provideWebAudio,
+  provideWebShare,
+  provideWebSocket,
+  provideWebStorage,
+  provideWebWorker,
 } from '@angular-helpers/browser-web-apis';
+import { withControls } from '@angular-helpers/openlayers/controls';
+import { provideOpenLayers } from '@angular-helpers/openlayers/core';
+import { withLayers } from '@angular-helpers/openlayers/layers';
+import { provideRegexSecurity, provideSecurity } from '@angular-helpers/security';
+import type { Routes } from '@angular/router';
 
 export const DEMO_ROUTES: Routes = [
   {
@@ -100,6 +100,7 @@ export const DEMO_ROUTES: Routes = [
             enableSecureStorage: true,
             enableInputSanitizer: true,
             enablePasswordStrength: true,
+            enableRateLimiter: true,
           }),
         ],
         title: 'Security — Demo',
@@ -161,6 +162,7 @@ export const DEMO_ROUTES: Routes = [
           import('./library-services-harness/library-services-harness').then(
             (m) => m.LibraryServicesHarnessComponent,
           ),
+        providers: [provideRegexSecurity()],
         title: 'QA System Harness — Demo',
       },
       {

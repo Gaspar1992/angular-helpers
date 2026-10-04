@@ -1,7 +1,7 @@
 // Vitest setup for @angular-helpers/openlayers using Analog
 
-import '@angular/compiler';
 import { setupTestBed } from '@analogjs/vitest-angular/setup-testbed';
+import '@angular/compiler';
 
 // Initialize Angular's TestBed once per test environment.
 // Required by specs that use `TestBed.configureTestingModule` and by `createComponent`,
@@ -9,7 +9,7 @@ import { setupTestBed } from '@analogjs/vitest-angular/setup-testbed';
 setupTestBed();
 
 // Mock OpenLayers for unit tests
-global.HTMLElement.prototype.getBoundingClientRect = () => ({
+globalThis.HTMLElement.prototype.getBoundingClientRect = () => ({
   width: 800,
   height: 600,
   top: 0,
@@ -21,8 +21,8 @@ global.HTMLElement.prototype.getBoundingClientRect = () => ({
   toJSON: () => ({}),
 });
 
-if (typeof global.ResizeObserver === 'undefined') {
-  (global as any).ResizeObserver = class ResizeObserver {
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  globalThis.ResizeObserver = class ResizeObserver {
     observe() {}
     unobserve() {}
     disconnect() {}

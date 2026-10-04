@@ -22,7 +22,7 @@ import { inject, Injectable, NgZone } from '@angular/core';
  * });
  * ```
  */
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class OlZoneHelper {
   private ngZone = inject(NgZone, { optional: true });
 
