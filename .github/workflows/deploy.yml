@@ -23,26 +23,61 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Setup workspace
         uses: ./.github/actions/setup
 
+      - name: Check if web app is affected
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+            echo "Triggered manually via workflow_dispatch. Proceeding with deployment."
+          else
+            BASE="${{ github.event.before }}"
+            if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ] || ! git rev-parse --verify "$BASE" >/dev/null 2>&1; then
+              BASE="HEAD~1"
+            fi
+            if ! git rev-parse --verify "$BASE" >/dev/null 2>&1; then
+              echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+              echo "Cannot determine base commit. Proceeding with deployment."
+            else
+              AFFECTED=$(pnpm nx show projects --affected -p web --base="$BASE" --head="${{ github.sha }}")
+              if echo "$AFFECTED" | grep -qw "web"; then
+                echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+                echo "Web app is affected by changes between $BASE and ${{ github.sha }}. Proceeding with deployment."
+              else
+                echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+                echo "Web app is not affected by changes between $BASE and ${{ github.sha }}. Skipping deployment."
+              fi
+            fi
+          fi
+
       - name: Build Web Workers
+        if: steps.check.outputs.should_deploy == 'true'
         run: pnpm nx run web:build-workers
 
       - name: Build for GitHub Pages
+        if: steps.check.outputs.should_deploy == 'true'
         run: pnpm nx build web --configuration gh-pages
 
       - name: Copy index.html → 404.html (SPA routing fallback)
+        if: steps.check.outputs.should_deploy == 'true'
         run: cp dist/angular-helpers/browser/index.html dist/angular-helpers/browser/404.html
 
       - name: Add .nojekyll (prevent Jekyll processing)
+        if: steps.check.outputs.should_deploy == 'true'
         run: touch dist/angular-helpers/browser/.nojekyll
 
       - name: Upload Pages artifact
+        if: steps.check.outputs.should_deploy == 'true'
         uses: actions/upload-pages-artifact@v5
         with:
           path: dist/angular-helpers/browser
@@ -50,6 +85,7 @@ jobs:
   deploy:
     name: Deploy
     needs: build
+    if: needs.build.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
