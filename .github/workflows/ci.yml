@@ -52,7 +52,7 @@ jobs:
         run: pnpm nx build @angular-helpers/schematics
 
       - name: Run unit tests with coverage
-        run: pnpm nx run-many -t test --coverage
+        run: pnpm run test:ci
 
       - name: Generate coverage summary
         if: always()
