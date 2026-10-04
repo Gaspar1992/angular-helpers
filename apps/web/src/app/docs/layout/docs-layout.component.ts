@@ -289,7 +289,26 @@ import { VitalsPanelComponent } from './vitals-panel.component';
           tabindex="-1"
         >
           <div class="w-full">
-            <router-outlet />
+            @boundary {
+              <router-outlet />
+            } @error (let err) {
+              <div class="py-12 px-4 max-w-2xl mx-auto">
+                <div class="p-6 bg-error/10 border border-error/20 rounded-2xl flex flex-col gap-3">
+                  <div class="flex items-center gap-3 text-error">
+                    <span class="text-2xl">⚠️</span>
+                    <h3 class="text-lg font-bold">Failed to load documentation page</h3>
+                  </div>
+                  <p class="text-sm text-base-content/80">
+                    A runtime exception occurred while rendering this section:
+                    <code class="px-2 py-0.5 bg-base-300 rounded font-mono text-xs">{{ err.message || err }}</code>
+                  </p>
+                  <div class="mt-2 flex gap-3">
+                    <a routerLink="/docs" class="btn btn-sm btn-outline">Back to Docs Overview</a>
+                    <button type="button" (click)="reload()" class="btn btn-sm btn-primary">Retry</button>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
         </main>
       </div>
@@ -376,13 +395,21 @@ export class DocsLayoutComponent {
 
   protected getLibraryIcon(id: string): string {
     const icons: Record<string, string> = {
+      core: '⚡',
       'browser-web-apis': '🌐',
       security: '🛡️',
       'worker-http': '🚀',
       openlayers: '🗺️',
       storage: '💾',
+      yjs: '🤝',
     };
     return icons[id] ?? '📦';
+  }
+
+  protected reload(): void {
+    if (this.window?.location) {
+      this.window.location.reload();
+    }
   }
 
   protected toggleSidebar() {
