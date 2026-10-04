@@ -2,6 +2,12 @@ packages:
   - 'apps/*'
   - 'libs/*'
 
+shamefully-hoist: true
+strict-peer-dependencies: true
+auto-install-peers: true
+resolve-peers-from-workspace-root: true
+dedupe-peer-dependents: true
+
 catalog:
   '@analogjs/vite-plugin-angular': ^2.8.0
   '@analogjs/vitest-angular': ^2.8.0
@@ -86,13 +92,13 @@ allowBuilds:
   nx: true
 
 overrides:
-  '@angular/core': 22.2.1
-  '@angular/common': 22.2.1
-  '@angular/compiler': 22.2.1
-  '@angular/compiler-cli': 22.2.1
-  '@angular/forms': 22.2.1
-  '@angular/platform-browser': 22.2.1
-  '@angular/platform-browser-dynamic': 22.2.1
-  '@angular/platform-server': 22.2.1
-  '@angular/router': 22.2.1
-  '@angular/ssr': ^22.2.1
+  '@angular/core': 'catalog:'
+  '@angular/common': 'catalog:'
+  '@angular/compiler': 'catalog:'
+  '@angular/compiler-cli': 'catalog:'
+  '@angular/forms': 'catalog:'
+  '@angular/platform-browser': 'catalog:'
+  '@angular/platform-browser-dynamic': 'catalog:'
+  '@angular/platform-server': 'catalog:'
+  '@angular/router': 'catalog:'
+  '@angular/ssr': 'catalog:'
