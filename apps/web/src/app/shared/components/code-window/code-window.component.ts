@@ -1,5 +1,5 @@
 import { Component, input, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { injectClipboard } from '@angular-helpers/browser-web-apis';
 
 export interface CodeTab {
   title: string;
@@ -9,7 +9,6 @@ export interface CodeTab {
 
 @Component({
   selector: 'app-code-window',
-  imports: [CommonModule],
   template: `
     <div class="code-window-container group">
       <!-- Glossy Top Highlight -->
@@ -264,14 +263,16 @@ export class CodeWindowComponent {
 
   activeTab = signal(0);
   copied = signal(false);
+  private readonly clipboard = injectClipboard();
 
-  copyCode() {
+  async copyCode(): Promise<void> {
     const rawCode = this.tabs()[this.activeTab()].raw;
-    if (!rawCode) return; // In a real app we might extract text from HTML if raw is missing
+    if (!rawCode) return;
 
-    navigator.clipboard.writeText(rawCode).then(() => {
+    const ok = await this.clipboard.writeText(rawCode);
+    if (ok) {
       this.copied.set(true);
       setTimeout(() => this.copied.set(false), 2000);
-    });
+    }
   }
 }

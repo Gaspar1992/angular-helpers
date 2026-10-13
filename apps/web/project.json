@@ -7,6 +7,12 @@
   "sourceRoot": "apps/web/src",
   "prefix": "app",
   "targets": {
+    "generate-llms": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/generate-llms-txt.mjs"
+      }
+    },
     "build-workers": {
       "executor": "nx:run-commands",
       "options": {
@@ -15,7 +21,8 @@
     },
     "build": {
       "executor": "@angular/build:application",
-      "dependsOn": ["build-workers", "^build"],
+      "dependsOn": ["build-workers", "generate-llms", "^build"],
+      "outputs": ["{workspaceRoot}/dist/angular-helpers"],
       "options": {
         "browser": "apps/web/src/main.ts",
         "tsConfig": "apps/web/tsconfig.app.json",
@@ -33,8 +40,7 @@
         },
         "ssr": {
           "entry": "apps/web/src/server.ts"
-        },
-        "outputPath": "dist/angular-helpers"
+        }
       },
       "configurations": {
         "production": {

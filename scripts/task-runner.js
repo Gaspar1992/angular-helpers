@@ -75,6 +75,7 @@ const tasks = {
   // Documentation Generation
   async 'generate:docs'() {
     await runCommand('npx tsx scripts/generate-docs-meta.ts');
+    await runCommand('node scripts/generate-llms-txt.mjs');
     await runCommand('pnpm exec oxfmt apps/web/src/app/docs/data/*.data.ts');
   },
 

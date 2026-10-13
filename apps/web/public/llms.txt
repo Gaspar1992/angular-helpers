@@ -1,0 +1,22 @@
+# @angular-helpers
+
+> Open Source Angular 22+ libraries for Signals, Zoneless reactivity, Web Browser APIs, SSR-safety, Cryptography, Reactive Storage, and Web Workers.
+
+@angular-helpers is a modular suite of lightweight, high-performance libraries built specifically for modern Angular (v22+). Every package is designed around Angular Signals, functional dependency injection (`inject()`), `DestroyRef` lifecycle teardown, strict SSR graceful degradation, and zero unnecessary RxJS dependencies.
+
+## Packages
+
+- [Core](https://gaspar1992.github.io/angular-helpers/docs/core): Essential reactive signal primitives, timing operators, SSR-safe platform detection, and reusable Web Worker pools.
+- [Browser Web APIs](https://gaspar1992.github.io/angular-helpers/docs/browser-web-apis): Reactive Angular 22 Signals wrapping standard browser APIs (ResizeObserver, IntersectionObserver, MutationObserver, Geolocation, Clipboard, BroadcastChannel, etc.) with native Signal<ElementRef | Element> support and debouncing/throttling.
+- [Storage](https://gaspar1992.github.io/angular-helpers/docs/storage): Reactive storage persistence integrating with Angular 22 resource() API (storageResource, persistedResource), supporting IndexedDB, LocalStorage, MemoryStorageDriver, optimistic updates with linkedSignal, and multi-tab synchronization.
+- [Security](https://gaspar1992.github.io/angular-helpers/docs/security): ReDoS prevention offloading regular expression testing to reusable Web Worker pools with timeouts, WebCrypto API helpers (AES encryption, HMAC signing), and reactive security validators.
+- [Worker HTTP](https://gaspar1992.github.io/angular-helpers/docs/worker-http): Off-main-thread HTTP execution via Web Workers and SharedWorkers with zero-copy Transferable ArrayBuffers, offline sync queue, client-side caching, and cryptographic request signing.
+- [OpenLayers](https://gaspar1992.github.io/angular-helpers/docs/openlayers): Zoneless reactive Angular components, directives, and signal bindings for OpenLayers interactive maps, layers, controls, and vector overlays.
+- [Testing](https://gaspar1992.github.io/angular-helpers/docs/testing): Deterministic headless browser mocks (setupHeadlessBrowserMocks, ResizeObserver, IntersectionObserver, BroadcastChannel, WebCrypto, Canvas2D) and Angular Zoneless/Signal testing utilities.
+- [Yjs](https://gaspar1992.github.io/angular-helpers/docs/yjs): Real-time collaborative state management binding Yjs CRDTs directly to Angular Signals with automatic synchronization.
+
+## Technical Specifications & Documentation
+
+- [Full API Specification & Canonical Code](https://gaspar1992.github.io/angular-helpers/llms-full.txt): Comprehensive API signatures, TypeScript interfaces, and canonical Angular 22 examples for all packages.
+- [GitHub Repository](https://github.com/Gaspar1992/angular-helpers): Source code, issues, and contributions.
+- [Online Documentation](https://gaspar1992.github.io/angular-helpers): Live interactive documentation and API reference.

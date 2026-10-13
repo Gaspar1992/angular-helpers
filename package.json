@@ -20,6 +20,7 @@
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
     "generate:package": "nx generate ./dist/libs/schematics/collection.json:create-package",
+    "generate:llms": "node scripts/generate-llms-txt.mjs",
     "release:check": "node scripts/publish-packages.mjs --dry-run",
     "release:publish": "node scripts/publish-packages.mjs",
     "clean": "node scripts/clean.js",
