@@ -11,7 +11,7 @@ import {
   type Signal,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { type Subscription } from 'rxjs';
+import { debounceTime, throttleTime, type Subscription } from 'rxjs';
 
 import { type ElementSize, type ResizeObserverOptions } from '../services/resize-observer.service';
 import { isResizeObserverSupported, resizeObserverStream } from '../utils/resize-observer.utils';
@@ -36,21 +36,43 @@ export function injectResizeObserver(
   const size = signal<ElementSize | null>(null);
 
   if (isPlatformBrowser(platformId) && isResizeObserverSupported()) {
+    const applyTiming = (source$: ReturnType<typeof resizeObserverStream>) => {
+      if (options?.debounceMs && options.debounceMs > 0) {
+        return source$.pipe(debounceTime(options.debounceMs));
+      }
+      if (options?.throttleMs && options.throttleMs > 0) {
+        return source$.pipe(
+          throttleTime(options.throttleMs, undefined, { leading: true, trailing: true }),
+        );
+      }
+      return source$;
+    };
+
     if (isSignal(elementOrRef)) {
       let sub: Subscription | undefined;
       effect((onCleanup) => {
         sub?.unsubscribe();
+        sub = undefined;
         const raw = elementOrRef();
         if (raw) {
           const el = raw instanceof ElementRef ? raw.nativeElement : raw;
-          sub = resizeObserverStream(el, options).subscribe((s) => size.set(s));
+          if (el) {
+            sub = applyTiming(resizeObserverStream(el, options)).subscribe((s) => size.set(s));
+          }
+        } else {
+          size.set(null);
         }
-        onCleanup(() => sub?.unsubscribe());
+        onCleanup(() => {
+          sub?.unsubscribe();
+          sub = undefined;
+        });
       });
     } else {
       const el = elementOrRef instanceof ElementRef ? elementOrRef.nativeElement : elementOrRef;
-      const sub = resizeObserverStream(el, options).subscribe((s) => size.set(s));
-      destroyRef.onDestroy(() => sub.unsubscribe());
+      if (el) {
+        const sub = applyTiming(resizeObserverStream(el, options)).subscribe((s) => size.set(s));
+        destroyRef.onDestroy(() => sub.unsubscribe());
+      }
     }
   }
 

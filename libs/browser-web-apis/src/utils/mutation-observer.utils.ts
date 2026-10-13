@@ -8,6 +8,8 @@ export interface MutationObserverOptions {
   attributeOldValue?: boolean;
   characterDataOldValue?: boolean;
   attributeFilter?: string[];
+  debounceMs?: number;
+  throttleMs?: number;
 }
 
 const DEFAULT_OPTIONS: MutationObserverOptions = {

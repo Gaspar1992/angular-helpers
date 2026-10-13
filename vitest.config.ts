@@ -61,6 +61,12 @@ export default defineConfig({
       ),
       '@angular-helpers/worker-http/crypto': here('./libs/worker-http/crypto/src/index.ts'),
       '@angular-helpers/worker-http/realtime': here('./libs/worker-http/realtime/src/index.ts'),
+      '@angular-helpers/worker-http/streams-polyfill': here(
+        './libs/worker-http/streams-polyfill/src/index.ts',
+      ),
+      '@angular-helpers/worker-http/esbuild-plugin': here(
+        './libs/worker-http/esbuild-plugin/src/index.ts',
+      ),
       '@angular-helpers/security/forms': here('./libs/security/forms/src/index.ts'),
       '@angular-helpers/security/signal-forms': here('./libs/security/signal-forms/src/index.ts'),
       '@angular-helpers/security': here('./libs/security/src/index.ts'),

@@ -60,7 +60,7 @@ describe('injectResizeObserver', () => {
     });
   });
 
-  it('should observe element signal', () => {
+  it('should observe element signal and reset when signal becomes null', () => {
     TestBed.configureTestingModule({
       providers: [{ provide: PLATFORM_ID, useValue: 'browser' }],
     });
@@ -75,6 +75,29 @@ describe('injectResizeObserver', () => {
 
       roCallback([{ contentRect: { width: 100, height: 50 } }]);
       expect(ref.width()).toBe(100);
+
+      // Simulates unmounting via @if / @defer
+      elSignal.set(null);
+      TestBed.flushEffects();
+      expect(ref.size()).toBeNull();
+      expect(ref.width()).toBe(0);
+    });
+  });
+
+  it('should support debouncing resize events when debounceMs is specified', async () => {
+    TestBed.configureTestingModule({
+      providers: [{ provide: PLATFORM_ID, useValue: 'browser' }],
+    });
+
+    await TestBed.runInInjectionContext(async () => {
+      const el = document.createElement('div');
+      const ref = injectResizeObserver(el, { debounceMs: 20 });
+
+      roCallback([{ contentRect: { width: 300, height: 150 } }]);
+      expect(ref.width()).toBe(0); // Not updated immediately due to debounce
+
+      await new Promise((r) => setTimeout(r, 30));
+      expect(ref.width()).toBe(300);
     });
   });
 });

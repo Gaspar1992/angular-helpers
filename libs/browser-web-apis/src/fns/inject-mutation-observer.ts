@@ -11,7 +11,7 @@ import {
   type Signal,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { type Subscription } from 'rxjs';
+import { debounceTime, throttleTime, type Subscription } from 'rxjs';
 
 import { type MutationObserverOptions } from '../services/mutation-observer.service';
 import {
@@ -36,21 +36,47 @@ export function injectMutationObserver(
   const mutations = signal<MutationRecord[]>([]);
 
   if (isPlatformBrowser(platformId) && isMutationObserverSupported()) {
+    const applyTiming = (source$: ReturnType<typeof mutationObserverStream>) => {
+      if (options?.debounceMs && options.debounceMs > 0) {
+        return source$.pipe(debounceTime(options.debounceMs));
+      }
+      if (options?.throttleMs && options.throttleMs > 0) {
+        return source$.pipe(
+          throttleTime(options.throttleMs, undefined, { leading: true, trailing: true }),
+        );
+      }
+      return source$;
+    };
+
     if (isSignal(elementOrRef)) {
       let sub: Subscription | undefined;
       effect((onCleanup) => {
         sub?.unsubscribe();
+        sub = undefined;
         const raw = elementOrRef();
         if (raw) {
           const el = raw instanceof ElementRef ? raw.nativeElement : raw;
-          sub = mutationObserverStream(el, options).subscribe((m) => mutations.set(m));
+          if (el) {
+            sub = applyTiming(mutationObserverStream(el, options)).subscribe((m) =>
+              mutations.set(m),
+            );
+          }
+        } else {
+          mutations.set([]);
         }
-        onCleanup(() => sub?.unsubscribe());
+        onCleanup(() => {
+          sub?.unsubscribe();
+          sub = undefined;
+        });
       });
     } else {
       const el = elementOrRef instanceof ElementRef ? elementOrRef.nativeElement : elementOrRef;
-      const sub = mutationObserverStream(el, options).subscribe((m) => mutations.set(m));
-      destroyRef.onDestroy(() => sub.unsubscribe());
+      if (el) {
+        const sub = applyTiming(mutationObserverStream(el, options)).subscribe((m) =>
+          mutations.set(m),
+        );
+        destroyRef.onDestroy(() => sub.unsubscribe());
+      }
     }
   }
 

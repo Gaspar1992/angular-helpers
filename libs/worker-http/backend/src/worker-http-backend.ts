@@ -1,4 +1,4 @@
-import { Injectable, type OnDestroy, inject } from '@angular/core';
+import { DestroyRef, Injectable, type OnDestroy, inject } from '@angular/core';
 import {
   FetchBackend,
   HttpBackend,
@@ -147,11 +147,19 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
   private readonly telemetry = inject(WORKER_HTTP_TELEMETRY_TOKEN);
   private readonly streamsPolyfill = inject(WORKER_HTTP_STREAMS_POLYFILL_TOKEN);
   private readonly minPayloadSize = inject(WORKER_HTTP_MIN_PAYLOAD_SIZE_TOKEN, { optional: true });
+  private readonly destroyRef = inject(DestroyRef, { optional: true });
 
   private readonly transports = new Map<
     string,
     WorkerTransport<SerializableRequest, SerializableResponse>
   >();
+
+  constructor() {
+    super();
+    this.destroyRef?.onDestroy(() => {
+      this.cleanup();
+    });
+  }
 
   override handle(req: HttpRequest<unknown>): Observable<HttpEvent<unknown>> {
     if (typeof Worker === 'undefined') {
@@ -247,11 +255,15 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
     );
   }
 
-  ngOnDestroy(): void {
+  private cleanup(): void {
     for (const transport of this.transports.values()) {
       transport.terminate();
     }
     this.transports.clear();
+  }
+
+  ngOnDestroy(): void {
+    this.cleanup();
   }
 
   private getOrCreateTransport(
@@ -275,6 +287,7 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
       mode: config.mode,
       sharedWorkerName: config.name ?? config.id,
       maxInstances: config.maxInstances ?? 1,
+      transferDetection: config.transferDetection ?? 'auto',
       initMessage: specs.length > 0 ? { type: 'init-interceptors', specs } : undefined,
       streamsPolyfill: this.streamsPolyfill,
     });

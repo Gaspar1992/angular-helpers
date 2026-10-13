@@ -11,7 +11,7 @@ import {
   type Signal,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { type Subscription } from 'rxjs';
+import { debounceTime, throttleTime, type Subscription } from 'rxjs';
 
 import { type IntersectionObserverOptions } from '../services/intersection-observer.service';
 import {
@@ -36,21 +36,47 @@ export function injectIntersectionObserver(
   const isIntersecting = signal<boolean>(false);
 
   if (isPlatformBrowser(platformId) && isIntersectionObserverSupported()) {
+    const applyTiming = (source$: ReturnType<typeof intersectionObserverStream>) => {
+      if (options?.debounceMs && options.debounceMs > 0) {
+        return source$.pipe(debounceTime(options.debounceMs));
+      }
+      if (options?.throttleMs && options.throttleMs > 0) {
+        return source$.pipe(
+          throttleTime(options.throttleMs, undefined, { leading: true, trailing: true }),
+        );
+      }
+      return source$;
+    };
+
     if (isSignal(elementOrRef)) {
       let sub: Subscription | undefined;
       effect((onCleanup) => {
         sub?.unsubscribe();
+        sub = undefined;
         const raw = elementOrRef();
         if (raw) {
           const el = raw instanceof ElementRef ? raw.nativeElement : raw;
-          sub = intersectionObserverStream(el, options).subscribe((v) => isIntersecting.set(v));
+          if (el) {
+            sub = applyTiming(intersectionObserverStream(el, options)).subscribe((v) =>
+              isIntersecting.set(v),
+            );
+          }
+        } else {
+          isIntersecting.set(false);
         }
-        onCleanup(() => sub?.unsubscribe());
+        onCleanup(() => {
+          sub?.unsubscribe();
+          sub = undefined;
+        });
       });
     } else {
       const el = elementOrRef instanceof ElementRef ? elementOrRef.nativeElement : elementOrRef;
-      const sub = intersectionObserverStream(el, options).subscribe((v) => isIntersecting.set(v));
-      destroyRef.onDestroy(() => sub.unsubscribe());
+      if (el) {
+        const sub = applyTiming(intersectionObserverStream(el, options)).subscribe((v) =>
+          isIntersecting.set(v),
+        );
+        destroyRef.onDestroy(() => sub.unsubscribe());
+      }
     }
   }
 

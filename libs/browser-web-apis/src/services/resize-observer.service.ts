@@ -7,6 +7,8 @@ import { resizeObserverEntriesStream, resizeObserverStream } from '../utils/resi
 
 export interface ResizeObserverOptions {
   box?: ResizeObserverBoxOptions;
+  debounceMs?: number;
+  throttleMs?: number;
 }
 
 export interface ElementSize {

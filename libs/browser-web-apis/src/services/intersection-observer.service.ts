@@ -12,6 +12,8 @@ export interface IntersectionObserverOptions {
   root?: Element | Document | null;
   rootMargin?: string;
   threshold?: number | number[];
+  debounceMs?: number;
+  throttleMs?: number;
 }
 
 @Injectable()

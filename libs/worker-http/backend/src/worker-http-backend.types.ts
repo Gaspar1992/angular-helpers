@@ -45,6 +45,11 @@ export interface WorkerConfig {
    * suffixed with the instance index (e.g. `api-1`, `api-2`).
    */
   name?: string;
+  /**
+   * Transfer strategy for `postMessage` payloads ('auto', 'manual', 'none').
+   * Defaults to 'auto' to enable zero-copy for ArrayBuffer and typed arrays.
+   */
+  transferDetection?: 'auto' | 'manual' | 'none';
 }
 
 /**

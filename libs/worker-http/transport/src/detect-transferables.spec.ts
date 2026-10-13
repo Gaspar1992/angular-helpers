@@ -41,9 +41,10 @@ describe('detectTransferables', () => {
     expect(detectTransferables(payload)).toEqual([]);
   });
 
-  it('does NOT treat typed-array views as transferable (caller must pass .buffer)', () => {
+  it('extracts underlying buffer from typed-array views for zero-copy transfer', () => {
     const view = new Uint8Array(16);
-    expect(detectTransferables({ view })).toEqual([]);
+    expect(detectTransferables(view)).toEqual([view.buffer]);
+    expect(detectTransferables({ view })).toEqual([view.buffer]);
     expect(detectTransferables({ view: view.buffer })).toEqual([view.buffer]);
   });
 

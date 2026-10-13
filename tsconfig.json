@@ -35,6 +35,12 @@
       "@angular-helpers/worker-http/interceptors": ["./libs/worker-http/interceptors/src/index.ts"],
       "@angular-helpers/worker-http/crypto": ["./libs/worker-http/crypto/src/index.ts"],
       "@angular-helpers/worker-http/realtime": ["./libs/worker-http/realtime/src/index.ts"],
+      "@angular-helpers/worker-http/streams-polyfill": [
+        "./libs/worker-http/streams-polyfill/src/index.ts"
+      ],
+      "@angular-helpers/worker-http/esbuild-plugin": [
+        "./libs/worker-http/esbuild-plugin/src/index.ts"
+      ],
       "@angular-helpers/openlayers": ["./libs/openlayers/src/index.ts"],
       "@angular-helpers/openlayers/core": ["./libs/openlayers/core/src/index.ts"],
       "@angular-helpers/openlayers/layers": ["./libs/openlayers/layers/src/index.ts"],

@@ -1,4 +1,4 @@
-import { Injectable, InjectionToken, type OnDestroy, inject } from '@angular/core';
+import { DestroyRef, Injectable, InjectionToken, type OnDestroy, inject } from '@angular/core';
 import { WorkerPool, injectPlatform, injectWorkerPool } from '@angular-helpers/core';
 import type { RegexSecurityConfig, RegexTestResult } from './regex-types';
 import { REGEX_WORKER_INLINE } from '../workers/regex.worker.inline';
@@ -15,7 +15,8 @@ export const REGEX_WORKER_CONFIG = new InjectionToken<RegexWorkerConfig>('REGEX_
  */
 @Injectable()
 export class RegexWorkerPoolService implements OnDestroy {
-  private config = inject(REGEX_WORKER_CONFIG, { optional: true });
+  private readonly config = inject(REGEX_WORKER_CONFIG, { optional: true });
+  private readonly destroyRef = inject(DestroyRef, { optional: true });
   private pool: WorkerPool;
 
   constructor() {
@@ -35,7 +36,7 @@ export class RegexWorkerPoolService implements OnDestroy {
       fallbackWorkerCode: REGEX_WORKER_INLINE,
       fallbackExecutor: async (type, data) => {
         if (type !== 'regex-test') throw new Error(`Unknown task type: ${type}`);
-        const { pattern, text } = data;
+        const { pattern, text } = data as { pattern: string; text: string };
         try {
           const start = Date.now();
           const regex = new RegExp(pattern);
@@ -45,15 +46,19 @@ export class RegexWorkerPoolService implements OnDestroy {
             executionTime: Date.now() - start,
             timeout: false,
           } as RegexTestResult;
-        } catch (e: any) {
+        } catch (e: unknown) {
           return {
             match: false,
             executionTime: 0,
             timeout: false,
-            error: e.message,
+            error: e instanceof Error ? e.message : String(e),
           } as RegexTestResult;
         }
       },
+    });
+
+    this.destroyRef?.onDestroy(() => {
+      this.pool.terminate();
     });
   }
 
@@ -75,12 +80,13 @@ export class RegexWorkerPoolService implements OnDestroy {
         },
         config.timeout || 5000,
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
       return {
         match: false,
         executionTime: 0,
-        timeout: err.message === 'Execution timeout',
-        error: err.message,
+        timeout: message === 'Execution timeout',
+        error: message,
       };
     }
   }

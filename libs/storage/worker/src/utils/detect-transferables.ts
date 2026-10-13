@@ -20,6 +20,17 @@ export function detectTransferables(payload: unknown): Transferable[] {
       return;
     }
 
+    if (ArrayBuffer.isView(value)) {
+      const view = value as ArrayBufferView;
+      if (view.buffer && isTransferable(view.buffer)) {
+        if (!seen.has(view.buffer)) {
+          seen.add(view.buffer);
+          found.push(view.buffer);
+        }
+      }
+      return;
+    }
+
     if (Array.isArray(value)) {
       for (const item of value as unknown[]) scan(item);
     } else {

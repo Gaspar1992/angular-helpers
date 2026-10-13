@@ -22,4 +22,4 @@ export type ErrorCallback = (error: BrowserError) => void;
 export type ElementInput =
   | Element
   | ElementRef<Element>
-  | Signal<Element | ElementRef<Element> | undefined>;
+  | Signal<Element | ElementRef<Element> | undefined | null>;

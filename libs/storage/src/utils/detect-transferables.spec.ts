@@ -32,6 +32,13 @@ describe('detectTransferables', () => {
     expect(result[0]).toBe(buffer);
   });
 
+  it('should find underlying ArrayBuffer from typed arrays (Uint8Array, DataView)', () => {
+    const uint8 = new Uint8Array(16);
+    const result = detectTransferables({ data: uint8 });
+    expect(result).toContain(uint8.buffer);
+    expect(result.length).toBe(1);
+  });
+
   it('should return empty array for plain objects', () => {
     expect(detectTransferables({ a: 1, b: 'string' })).toEqual([]);
   });
