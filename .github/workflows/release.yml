@@ -64,6 +64,9 @@ jobs:
           echo "Replacing workspace:* with ^$core_version"
           find dist -name "package.json" -exec sed -i "s/\"workspace:\*\"/\"^$core_version\"/g" {} +
 
+      - name: Validate built packages with publint and attw
+        run: pnpm run lint:packages
+
       - name: Publish new versions to npm with Provenance
         run: node scripts/publish-packages.mjs
         env:
