@@ -15,7 +15,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    reporters: process.env.CI ? ['default', 'github-actions'] : ['default'],
+    reporters: process.env.CI ? ['default', 'github-actions', 'junit'] : ['default'],
+    outputFile: {
+      junit: './coverage/junit.xml',
+    },
     setupFiles: [here('./apps/web/src/test-setup.ts')],
     include: ['libs/**/*.spec.ts', 'apps/web/src/**/*.spec.ts'],
     exclude: [...configDefaults.exclude, 'libs/**/schematics/**/*.spec.ts'],
