@@ -4,6 +4,13 @@
   "projectType": "library",
   "sourceRoot": "libs/worker-http/src",
   "prefix": "lib",
-  "targets": {},
+  "targets": {
+    "build": {
+      "outputs": ["{workspaceRoot}/dist/worker-http"]
+    },
+    "build:prod": {
+      "outputs": ["{workspaceRoot}/dist/worker-http"]
+    }
+  },
   "tags": ["type:lib", "scope:worker-http"]
 }

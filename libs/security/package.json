@@ -27,12 +27,14 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Gaspar1992/angular-helpers"
+    "url": "git+https://github.com/Gaspar1992/angular-helpers.git",
+    "directory": "libs/security"
   },
   "bugs": {
     "url": "https://github.com/Gaspar1992/angular-helpers/issues"
   },
   "homepage": "https://gaspar1992.github.io/angular-helpers/docs/security",
+  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },

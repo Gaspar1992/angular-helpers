@@ -4,6 +4,13 @@
   "projectType": "library",
   "sourceRoot": "libs/core/src",
   "prefix": "lib",
-  "targets": {},
+  "targets": {
+    "build": {
+      "outputs": ["{workspaceRoot}/dist/core"]
+    },
+    "build:prod": {
+      "outputs": ["{workspaceRoot}/dist/core"]
+    }
+  },
   "tags": ["type:lib", "scope:core"]
 }

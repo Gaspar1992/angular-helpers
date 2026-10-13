@@ -4,6 +4,13 @@
   "projectType": "library",
   "sourceRoot": "libs/testing/src",
   "prefix": "lib",
-  "targets": {},
+  "targets": {
+    "build": {
+      "outputs": ["{workspaceRoot}/dist/testing"]
+    },
+    "build:prod": {
+      "outputs": ["{workspaceRoot}/dist/testing"]
+    }
+  },
   "tags": ["type:lib", "scope:testing"]
 }

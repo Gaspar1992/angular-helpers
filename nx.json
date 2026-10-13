@@ -5,14 +5,12 @@
     "build": {
       "cache": true,
       "dependsOn": ["^build"],
-      "inputs": ["production", "^production"],
-      "outputs": ["{workspaceRoot}/dist"]
+      "inputs": ["production", "^production"]
     },
     "build:prod": {
       "cache": true,
       "dependsOn": ["^build:prod"],
-      "inputs": ["production", "^production"],
-      "outputs": ["{workspaceRoot}/dist"]
+      "inputs": ["production", "^production"]
     },
     "test": {
       "cache": true,

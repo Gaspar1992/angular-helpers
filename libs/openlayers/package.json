@@ -16,7 +16,8 @@
   "homepage": "https://gaspar1992.github.io/angular-helpers/docs/openlayers",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Gaspar1992/angular-helpers"
+    "url": "git+https://github.com/Gaspar1992/angular-helpers.git",
+    "directory": "libs/openlayers"
   },
   "bugs": {
     "url": "https://github.com/Gaspar1992/angular-helpers/issues"

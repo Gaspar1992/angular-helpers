@@ -5,9 +5,14 @@
   "publishConfig": {
     "access": "public"
   },
+  "homepage": "https://gaspar1992.github.io/angular-helpers/docs/testing",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Gaspar1992/angular-helpers"
+    "url": "git+https://github.com/Gaspar1992/angular-helpers.git",
+    "directory": "libs/testing"
+  },
+  "bugs": {
+    "url": "https://github.com/Gaspar1992/angular-helpers/issues"
   },
   "sideEffects": false,
   "scripts": {

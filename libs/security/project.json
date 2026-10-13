@@ -14,6 +14,16 @@
     "build": {
       "executor": "nx:run-commands",
       "dependsOn": ["inline-workers", "^build"],
+      "outputs": ["{workspaceRoot}/dist/security"],
+      "options": {
+        "command": "cross-env NG_BUILD_CACHE_PATH=../../node_modules/.cache/ng-packagr ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/security",
+        "cwd": "libs/security"
+      }
+    },
+    "build:prod": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["inline-workers", "^build:prod"],
+      "outputs": ["{workspaceRoot}/dist/security"],
       "options": {
         "command": "cross-env NG_BUILD_CACHE_PATH=../../node_modules/.cache/ng-packagr ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/security",
         "cwd": "libs/security"

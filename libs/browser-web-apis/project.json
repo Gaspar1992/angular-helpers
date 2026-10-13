@@ -15,8 +15,18 @@
     "build": {
       "executor": "nx:run-commands",
       "dependsOn": ["sync-versions", "^build"],
+      "outputs": ["{workspaceRoot}/dist/browser-web-apis"],
       "options": {
         "command": "cross-env NG_BUILD_CACHE_PATH=../../node_modules/.cache/ng-packagr ng-packagr -p ng-package.json",
+        "cwd": "libs/browser-web-apis"
+      }
+    },
+    "build:prod": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["sync-versions", "^build:prod"],
+      "outputs": ["{workspaceRoot}/dist/browser-web-apis"],
+      "options": {
+        "command": "node ../../scripts/sync-versions.js . src/public-api.ts && ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/browser-web-apis",
         "cwd": "libs/browser-web-apis"
       }
     }

@@ -3,7 +3,14 @@
   "name": "@angular-helpers/openlayers",
   "projectType": "library",
   "sourceRoot": "libs/openlayers/src",
-  "prefix": "ol",
-  "targets": {},
+  "prefix": "lib",
+  "targets": {
+    "build": {
+      "outputs": ["{workspaceRoot}/dist/openlayers"]
+    },
+    "build:prod": {
+      "outputs": ["{workspaceRoot}/dist/openlayers"]
+    }
+  },
   "tags": ["type:lib", "scope:openlayers"]
 }

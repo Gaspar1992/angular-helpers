@@ -4,6 +4,13 @@
   "projectType": "library",
   "sourceRoot": "libs/yjs/src",
   "prefix": "lib",
-  "targets": {},
+  "targets": {
+    "build": {
+      "outputs": ["{workspaceRoot}/dist/yjs"]
+    },
+    "build:prod": {
+      "outputs": ["{workspaceRoot}/dist/yjs"]
+    }
+  },
   "tags": ["type:lib", "scope:yjs"]
 }
