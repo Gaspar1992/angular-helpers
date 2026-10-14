@@ -24,6 +24,7 @@
       "dependsOn": ["build-workers", "generate-llms", "^build"],
       "outputs": ["{workspaceRoot}/dist/angular-helpers"],
       "options": {
+        "outputPath": "dist/angular-helpers",
         "browser": "apps/web/src/main.ts",
         "tsConfig": "apps/web/tsconfig.app.json",
         "assets": [
@@ -67,8 +68,7 @@
           "baseHref": "/angular-helpers/"
         }
       },
-      "defaultConfiguration": "production",
-      "outputs": ["{options.outputPath}"]
+      "defaultConfiguration": "production"
     },
     "test": {
       "executor": "nx:run-commands",
