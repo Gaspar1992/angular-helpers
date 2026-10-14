@@ -47,6 +47,10 @@
     "@angular/ssr": "^22.0.0",
     "rxjs": "^7.0.0"
   },
+  "dependencies": {
+    "@angular-helpers/core": "workspace:*",
+    "tslib": "catalog:"
+  },
   "devDependencies": {
     "@angular-helpers/testing": "workspace:*",
     "jsdom": "catalog:",

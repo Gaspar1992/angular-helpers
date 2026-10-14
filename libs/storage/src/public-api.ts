@@ -13,6 +13,4 @@ export * from './tokens/worker.tokens';
 export * from './tokens/storage.tokens';
 export * from './services/worker-transport';
 export * from './services/offline-sync.service';
-
-// Export all worker-safe interfaces, classes and drivers from the secondary entry point
-export * from '@angular-helpers/storage/worker';
+export * from './utils/detect-transferables';

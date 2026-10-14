@@ -27,6 +27,13 @@ export class OlZoneHelper {
   private ngZone = inject(NgZone, { optional: true });
 
   /**
+   * Whether the application is running in Zoneless mode (without active Zone.js or with NoopNgZone).
+   */
+  get isZoneless(): boolean {
+    return !this.ngZone || typeof (globalThis as any).Zone === 'undefined';
+  }
+
+  /**
    * Runs callback outside Angular zone if available (for performance with NgZone),
    * or directly if zoneless.
    *
@@ -34,7 +41,7 @@ export class OlZoneHelper {
    * (map manipulation, event listeners, animations)
    */
   runOutsideAngular<T>(fn: () => T): T {
-    if (this.ngZone) {
+    if (this.ngZone && typeof this.ngZone.runOutsideAngular === 'function') {
       return this.ngZone.runOutsideAngular(fn);
     }
     return fn();
@@ -47,7 +54,7 @@ export class OlZoneHelper {
    * Use for: Emitting outputs that should be handled by parent components
    */
   runInsideAngular<T>(fn: () => T): T {
-    if (this.ngZone) {
+    if (this.ngZone && typeof this.ngZone.run === 'function') {
       return this.ngZone.run(fn);
     }
     return fn();

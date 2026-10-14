@@ -1,11 +1,11 @@
 // OlZoneHelper unit tests
 import '@angular/compiler';
-import { describe, it, expect, vi } from 'vitest';
 import { Injector, NgZone, runInInjectionContext } from '@angular/core';
+import { describe, expect, it, vi } from 'vitest';
 import { OlZoneHelper } from './zone-helper.service';
 
 describe('OlZoneHelper', () => {
-  it('runs callbacks directly when NgZone is not available (zoneless)', () => {
+  it('runs callbacks directly and reports isZoneless when NgZone is not available (zoneless)', () => {
     const injector = Injector.create({ providers: [] });
     const helper = runInInjectionContext(injector, () => new OlZoneHelper());
 
@@ -13,6 +13,7 @@ describe('OlZoneHelper', () => {
     expect(helper.runOutsideAngular(fn)).toBe(42);
     expect(helper.runInsideAngular(fn)).toBe(42);
     expect(fn).toHaveBeenCalledTimes(2);
+    expect(helper.isZoneless).toBe(true);
   });
 
   it('delegates to NgZone.runOutsideAngular and NgZone.run when NgZone is provided', () => {
