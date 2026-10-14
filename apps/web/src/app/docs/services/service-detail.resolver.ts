@@ -14,6 +14,8 @@ import * as securityV21 from '../data/v21/security.data';
 import * as workerHttpV21 from '../data/v21/worker-http.data';
 import * as openlayersV21 from '../data/v21/openlayers.data';
 import * as storageV21 from '../data/v21/storage.data';
+import * as yjsV21 from '../data/v21/yjs.data';
+import * as testingV21 from '../data/v21/testing.data';
 
 // Import v22 data
 import * as browserWebApisV22 from '../data/v22/browser-web-apis.data';
@@ -23,6 +25,7 @@ import * as workerHttpV22 from '../data/v22/worker-http.data';
 import * as openlayersV22 from '../data/v22/openlayers.data';
 import * as storageV22 from '../data/v22/storage.data';
 import * as yjsV22 from '../data/v22/yjs.data';
+import * as testingV22 from '../data/v22/testing.data';
 
 function getInterfaces(
   section: string,
@@ -92,9 +95,14 @@ export async function resolveServiceDetailData(
       backLabel: 'openlayers',
     },
     yjs: {
-      dataSource: isV21 ? [] : yjsV22.YJS_SERVICES,
+      dataSource: isV21 ? yjsV21.YJS_SERVICES : yjsV22.YJS_SERVICES,
       backRoute: '/docs/yjs',
       backLabel: 'yjs',
+    },
+    testing: {
+      dataSource: isV21 ? testingV21.TESTING_SERVICES : testingV22.TESTING_SERVICES,
+      backRoute: '/docs/testing',
+      backLabel: 'testing',
     },
   };
 

@@ -22,7 +22,7 @@ import { injectPlatform } from '@angular-helpers/core';
 
 @Component({
   selector: 'app-platform-aware',
-  template: \`<p>Running on: {{ platform.isBrowser ? 'Browser' : 'Server' }}</p>\`
+  template: '<p>Running on: {{ platform.isBrowser ? "Browser" : "Server" }}</p>'
 })
 export class PlatformAwareComponent {
   protected readonly platform = injectPlatform();
@@ -154,5 +154,47 @@ export class HighPerformanceComputeService {
 }`,
       },
     ],
+  },
+  {
+    id: 'inject-error-boundary-reporter',
+    name: 'injectErrorBoundaryReporter',
+    description:
+      'Injects an error reporter function that bubbles errors into the nearest Angular 22+ @boundary / ErrorBoundary block, or falls back gracefully to ErrorHandler.',
+    scope: 'provided',
+    importPath: '@angular-helpers/core',
+    requiresSecureContext: false,
+    browserSupport: 'All environments (Angular 22+)',
+    category: 'platform',
+    notes: [
+      'Injects the optional ERROR_BOUNDARY token if present, otherwise delegates to ErrorHandler.',
+      'Enables declarative error bubbling from async tasks, background workers, and signal resources into template @boundary blocks.',
+      'Zoneless and SSR safe.',
+    ],
+    methods: [
+      {
+        name: 'report',
+        signature: 'report(error: unknown): void',
+        description: 'Reports an error to the nearest ErrorBoundary or ErrorHandler.',
+        returns: 'void',
+      },
+    ],
+    example: `import { Component } from '@angular/core';
+import { injectErrorBoundaryReporter } from '@angular-helpers/core';
+
+@Component({
+  selector: 'app-data-loader',
+  template: '<button (click)="loadData()">Fetch Sensitive Data</button>',
+})
+export class DataLoaderComponent {
+  private readonly reportError = injectErrorBoundaryReporter();
+
+  async loadData(): Promise<void> {
+    try {
+      await fetch('/api/data');
+    } catch (err) {
+      this.reportError(err); // Bubbles directly into the nearest @boundary
+    }
+  }
+}`,
   },
 ];

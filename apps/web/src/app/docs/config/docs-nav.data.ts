@@ -28,7 +28,15 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
     sections: [
       {
         title: 'Platform',
-        items: [{ label: 'injectPlatform', route: '/docs/core/inject-platform', hasFn: true }],
+        items: [
+          { label: 'injectPlatform', route: '/docs/core/inject-platform', hasFn: true },
+          {
+            label: 'injectErrorBoundaryReporter',
+            route: '/docs/core/inject-error-boundary-reporter',
+            hasFn: true,
+            since: AngularVersion.v22,
+          },
+        ],
       },
       {
         title: 'Workers',
@@ -377,6 +385,40 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
           { label: 'injectYjsWebsocket', route: '/docs/yjs/inject-yjs-websocket', hasFn: true },
           { label: 'injectYjsIndexeddb', route: '/docs/yjs/inject-yjs-indexeddb', hasFn: true },
           { label: 'YjsDocService', route: '/docs/yjs/yjs-provider' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'testing',
+    label: 'Testing',
+    overviewRoute: '/docs/testing',
+    sections: [
+      {
+        title: 'Mocking & Rendering',
+        items: [
+          { label: 'render', route: '/docs/testing/render', hasFn: true },
+          { label: 'provideMockService', route: '/docs/testing/mock-service', hasFn: true },
+          { label: 'MockComponent', route: '/docs/testing/mock-component' },
+          { label: 'MockPipe', route: '/docs/testing/mock-pipe' },
+        ],
+      },
+      {
+        title: 'Harnesses & Signals',
+        items: [
+          { label: 'provideMockRouter', route: '/docs/testing/mock-router', hasFn: true },
+          {
+            label: 'provideMockActivatedRoute',
+            route: '/docs/testing/mock-activated-route',
+            hasFn: true,
+          },
+          { label: 'provideMockHttp', route: '/docs/testing/mock-http', hasFn: true },
+          { label: 'flushEffects', route: '/docs/testing/signal-testing', hasFn: true },
+          {
+            label: 'setupHeadlessBrowserMocks',
+            route: '/docs/testing/environment-mocks',
+            hasFn: true,
+          },
         ],
       },
     ],

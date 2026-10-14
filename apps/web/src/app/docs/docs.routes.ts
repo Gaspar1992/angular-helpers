@@ -171,6 +171,28 @@ export const DOCS_ROUTES: Routes = [
         title: 'Service — Angular Helpers',
       },
       {
+        path: 'testing',
+        loadComponent: () =>
+          import('./feature/unified-overview/unified-overview.component').then(
+            (m) => m.UnifiedOverviewComponent,
+          ),
+        resolve: { config: overviewResolver },
+        resources: (ctx) => ({ config: overviewResource(ctx, 'testing') }),
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+        title: 'testing — Angular Helpers',
+      },
+      {
+        path: 'testing/:service',
+        loadComponent: () =>
+          import('./feature/unified-service-detail/unified-service-detail.component').then(
+            (m) => m.UnifiedServiceDetailComponent,
+          ),
+        resolve: { config: serviceDetailResolver },
+        resources: (ctx) => ({ config: serviceDetailResource(ctx, 'testing') }),
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+        title: 'Testing Utility — Angular Helpers',
+      },
+      {
         path: '**',
         redirectTo: '',
       },

@@ -137,7 +137,8 @@ export type ServiceCategory =
   | 'ol-overlays'
   | 'ol-controls'
   | 'ol-military'
-  | 'realtime-crdt';
+  | 'realtime-crdt'
+  | 'testing';
 
 export interface PackageDoc {
   id: string;

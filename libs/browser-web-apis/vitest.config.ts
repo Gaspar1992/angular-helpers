@@ -18,13 +18,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
       include: ['src/**/*.ts'],
-      exclude: [
-        'src/**/*.spec.ts',
-        'src/test-setup.ts',
-        'src/public-api.ts',
-        'src/providers.ts',
-        'src/providers/**',
-      ],
+      exclude: ['src/**/*.spec.ts', 'src/public-api.ts', 'src/providers.ts', 'src/providers/**'],
       thresholds: {
         statements: 30,
         branches: 30,

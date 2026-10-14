@@ -11,6 +11,8 @@ import * as securityV21 from '../data/v21/security.data';
 import * as workerHttpV21 from '../data/v21/worker-http.data';
 import * as openlayersV21 from '../data/v21/openlayers.data';
 import * as storageV21 from '../data/v21/storage.data';
+import * as yjsV21 from '../data/v21/yjs.data';
+import * as testingV21 from '../data/v21/testing.data';
 
 // Import v22 data
 import * as browserWebApisV22 from '../data/v22/browser-web-apis.data';
@@ -20,6 +22,7 @@ import * as workerHttpV22 from '../data/v22/worker-http.data';
 import * as openlayersV22 from '../data/v22/openlayers.data';
 import * as storageV22 from '../data/v22/storage.data';
 import * as yjsV22 from '../data/v22/yjs.data';
+import * as testingV22 from '../data/v22/testing.data';
 
 function getOverviewConfig(section: string, version: 'v21' | 'v22'): OverviewConfig {
   const isV21 = version === 'v21';
@@ -36,7 +39,8 @@ function getOverviewConfig(section: string, version: 'v21' | 'v22'): OverviewCon
   const openlayersServices = isV21
     ? openlayersV21.OPENLAYERS_SERVICES
     : openlayersV22.OPENLAYERS_SERVICES;
-  const yjsServices = isV21 ? [] : yjsV22.YJS_SERVICES;
+  const yjsServices = isV21 ? yjsV21.YJS_SERVICES : yjsV22.YJS_SERVICES;
+  const testingServices = isV21 ? testingV21.TESTING_SERVICES : testingV22.TESTING_SERVICES;
 
   const OVERVIEW_CONFIGS: Record<string, OverviewConfig> = {
     core: {
@@ -174,6 +178,26 @@ function getOverviewConfig(section: string, version: 'v21' | 'v22'): OverviewCon
           label: 'Signals & State',
           icon: '🔄',
           items: yjsServices,
+        },
+      ],
+    },
+    testing: {
+      packageName: 'testing',
+      npmPackage: '@angular-helpers/testing',
+      lead: 'Lightweight testing utilities, headless browser mocks, and spy-backed providers for modern Angular.',
+      providerExample: `import { render, provideMockService, setupHeadlessBrowserMocks } from '@angular-helpers/testing';
+
+// Vitest / Jest setup
+setupHeadlessBrowserMocks();
+
+const { getByText } = await render(MyComponent, {
+  providers: [provideMockService(MyService)],
+});`,
+      serviceGroups: [
+        {
+          label: 'Testing Primitives',
+          icon: '🧪',
+          items: testingServices,
         },
       ],
     },

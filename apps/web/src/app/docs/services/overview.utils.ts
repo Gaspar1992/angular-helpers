@@ -30,6 +30,7 @@ const CATEGORY_ICONS: Record<ServiceCategory, string> = {
   'ol-controls': '🎮',
   'ol-military': '🎖️',
   'realtime-crdt': '🔄',
+  testing: '🧪',
 };
 
 const CATEGORY_LABELS: Record<ServiceCategory, string> = {
@@ -49,6 +50,7 @@ const CATEGORY_LABELS: Record<ServiceCategory, string> = {
   'ol-controls': 'Controls',
   'ol-military': 'Military',
   'realtime-crdt': 'Realtime & CRDT',
+  testing: 'Testing Primitives',
 };
 
 /**
@@ -112,6 +114,7 @@ export function generateServiceGroups(
     'ol-controls',
     'ol-military',
     'realtime-crdt',
+    'testing',
   ];
 
   return categoryOrder

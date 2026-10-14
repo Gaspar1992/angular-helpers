@@ -196,12 +196,12 @@ export const PACKAGES: readonly PackageInfo[] = [
     ],
     highlightsLabel: 'Testing helpers',
     installCmd: 'pnpm add -D @angular-helpers/testing',
-    docsLink: '/docs/core',
+    docsLink: '/docs/testing',
     demoLink: null,
     badge: null,
     tags: ['Testing', 'Vitest', 'Mocks'],
     promise: 'robust',
-    serviceCount: 0,
+    serviceCount: 9,
   },
 ];
 
