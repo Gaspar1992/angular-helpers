@@ -12,6 +12,9 @@ export default defineConfig({
       workspaceRoot: here('.'),
     }),
   ],
+  optimizeDeps: {
+    disabled: true,
+  },
   test: {
     globals: true,
     environment: 'jsdom',

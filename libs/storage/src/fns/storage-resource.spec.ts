@@ -38,7 +38,10 @@ describe('storageResource', () => {
       });
 
       await new Promise((r) => setTimeout(r, 10));
-      expect(mockTransport.read).toHaveBeenCalledWith('theme', {});
+      expect(mockTransport.read).toHaveBeenCalledWith('theme', {
+        serializer: 'json',
+        storageType: 'local',
+      });
       expect(res.value()).toBe('light');
     });
   });
@@ -69,11 +72,17 @@ describe('storageResource', () => {
 
       await res.set('dark');
       expect(res.value()).toBe('dark');
-      expect(mockTransport.write).toHaveBeenCalledWith('theme', 'dark', {});
+      expect(mockTransport.write).toHaveBeenCalledWith('theme', 'dark', {
+        serializer: 'json',
+        storageType: 'local',
+      });
 
       await res.update((curr) => `${curr}-mode`);
       expect(res.value()).toBe('dark-mode');
-      expect(mockTransport.write).toHaveBeenCalledWith('theme', 'dark-mode', {});
+      expect(mockTransport.write).toHaveBeenCalledWith('theme', 'dark-mode', {
+        serializer: 'json',
+        storageType: 'local',
+      });
     });
   });
 
@@ -119,7 +128,10 @@ describe('storageResource', () => {
       // Wait for background revalidation
       await new Promise((r) => setTimeout(r, 35));
       expect(res.value()).toBe('fresh-profile-from-api');
-      expect(mockTransport.write).toHaveBeenCalledWith('profile', 'fresh-profile-from-api', {});
+      expect(mockTransport.write).toHaveBeenCalledWith('profile', 'fresh-profile-from-api', {
+        serializer: 'json',
+        storageType: 'local',
+      });
     });
   });
 
@@ -151,11 +163,17 @@ describe('storageResource', () => {
       });
 
       await new Promise((r) => setTimeout(r, 10));
-      expect(mockTransport.read).toHaveBeenCalledWith('user-data-1', {});
+      expect(mockTransport.read).toHaveBeenCalledWith('user-data-1', {
+        serializer: 'json',
+        storageType: 'local',
+      });
 
       userId.set(2);
       await new Promise((r) => setTimeout(r, 10));
-      expect(mockTransport.read).toHaveBeenCalledWith('user-data-2', {});
+      expect(mockTransport.read).toHaveBeenCalledWith('user-data-2', {
+        serializer: 'json',
+        storageType: 'local',
+      });
     });
   });
 

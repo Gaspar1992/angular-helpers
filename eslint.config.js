@@ -40,6 +40,12 @@ export default [
     },
   },
   {
+    files: ['**/vitest.setup.ts', '**/vitest.config.ts', '**/test-setup.ts'],
+    rules: {
+      '@nx/enforce-module-boundaries': 'off',
+    },
+  },
+  {
     files: ['**/*.ts'],
     languageOptions: {
       parser: tsparser,

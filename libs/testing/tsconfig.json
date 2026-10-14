@@ -6,7 +6,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "inlineSources": true,
-    "types": ["vitest"]
+    "types": ["vitest", "node"]
   },
   "files": ["src/public-api.ts"]
 }

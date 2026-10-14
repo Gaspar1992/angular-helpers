@@ -1,5 +1,3 @@
-import { webcrypto } from 'node:crypto';
-
 /**
  * Options for configuring headless browser mocks in test environments.
  */
@@ -199,15 +197,41 @@ export class MockBroadcastChannel implements EventTarget {
 }
 
 /**
- * Polyfills WebCrypto (`crypto.subtle`) using Node.js's built-in `webcrypto`.
+ * Polyfills WebCrypto (`crypto.subtle`) using Node.js's built-in webcrypto when available.
  */
 export function mockWebCrypto(): void {
   if (!globalThis.crypto?.subtle) {
-    Object.defineProperty(globalThis, 'crypto', {
-      value: webcrypto,
-      configurable: true,
-      writable: true,
-    });
+    const proc = (
+      globalThis as unknown as {
+        process?: {
+          getBuiltinModule?: (m: string) => { webcrypto?: Crypto };
+        };
+        require?: (m: string) => { webcrypto?: Crypto };
+      }
+    ).process;
+
+    const nodeCrypto =
+      proc?.getBuiltinModule?.('node:crypto') ??
+      (globalThis as unknown as { require?: (m: string) => { webcrypto?: Crypto } }).require?.(
+        'node:crypto',
+      );
+
+    const webcryptoObj = nodeCrypto?.webcrypto;
+    if (webcryptoObj) {
+      if (!globalThis.crypto) {
+        Object.defineProperty(globalThis, 'crypto', {
+          value: webcryptoObj,
+          configurable: true,
+          writable: true,
+        });
+      } else {
+        Object.defineProperty(globalThis.crypto, 'subtle', {
+          value: webcryptoObj.subtle,
+          configurable: true,
+          writable: true,
+        });
+      }
+    }
   }
 }
 
