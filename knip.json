@@ -16,9 +16,6 @@
   "ignore": ["apps/web/src/styles.css"],
   "ignoreDependencies": [
     "husky",
-    "semantic-release",
-    "semantic-release-monorepo",
-    "@semantic-release/*",
     "@angular-devkit/*",
     "@typescript-eslint/*",
     "@eslint/js",
