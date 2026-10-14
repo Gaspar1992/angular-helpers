@@ -1,10 +1,13 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
+    "outDir": "../../dist/out-tsc/libs/yjs",
+    "rootDir": "./src",
     "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "inlineSources": true,
     "types": ["node"]
   },
-  "include": ["src/**/*.ts"]
+  "files": ["src/index.ts"]
 }
