@@ -12,11 +12,11 @@ const PACKAGES = [
     name: '@angular-helpers/core',
     title: 'Core',
     summary:
-      'Essential reactive signal primitives, timing operators, SSR-safe platform detection, and reusable Web Worker pools.',
+      'Essential reactive signal primitives, timing operators, SSR-safe platform detection, ErrorBoundary reporting, and reusable Web Worker pools.',
     docsUrl: 'https://gaspar1992.github.io/angular-helpers/docs/core',
     readmePath: 'libs/core/README.md',
     canonicalCode: `import { Component, signal } from '@angular/core';
-import { debouncedSignal, throttledSignal, timerSignal, injectPlatform } from '@angular-helpers/core';
+import { debouncedSignal, throttledSignal, timerSignal, injectPlatform, injectErrorBoundaryReporter } from '@angular-helpers/core';
 
 @Component({
   selector: 'app-search-box',
@@ -188,14 +188,14 @@ export const appConfig: ApplicationConfig = {
     docsUrl: 'https://gaspar1992.github.io/angular-helpers/docs/openlayers',
     readmePath: 'libs/openlayers/README.md',
     canonicalCode: `import { Component } from '@angular/core';
-import { OlMapComponent, OlViewDirective, OlTileLayerDirective } from '@angular-helpers/openlayers';
+import { OlMapComponent } from '@angular-helpers/openlayers/core';
+import { OlTileLayerComponent } from '@angular-helpers/openlayers/layers';
 
 @Component({
   selector: 'app-interactive-map',
-  imports: [OlMapComponent, OlViewDirective, OlTileLayerDirective],
+  imports: [OlMapComponent, OlTileLayerComponent],
   template: \`
-    <ol-map class="map-container">
-      <ol-view [center]="[0, 0]" [zoom]="4" />
+    <ol-map [center]="[0, 0]" [zoom]="4" class="map-container block w-full h-[500px]">
       <ol-tile-layer source="osm" />
     </ol-map>
   \`,
@@ -232,14 +232,21 @@ describe('MyComponent', () => {
     docsUrl: 'https://gaspar1992.github.io/angular-helpers/docs/yjs',
     readmePath: 'libs/yjs/README.md',
     canonicalCode: `import { Component, inject } from '@angular/core';
-import { YjsService } from '@angular-helpers/yjs';
+import { YjsDocService, yjsSignal } from '@angular-helpers/yjs';
 
 @Component({
   selector: 'app-collaborative-editor',
-  template: \`<p>Connected peers: {{ yjs.connectedPeers() }}</p>\`,
+  template: \`
+    <input [value]="title()" (input)="title.set($any($event.target).value)" />
+    <p>Title: {{ title() }}</p>
+  \`,
 })
 export class CollaborativeEditorComponent {
-  protected readonly yjs = inject(YjsService);
+  private readonly yjsDoc = inject(YjsDocService);
+  readonly title = yjsSignal<string>(this.yjsDoc.getMap('settings'), {
+    key: 'title',
+    initialValue: 'Default Title',
+  });
 }`,
   },
 ];

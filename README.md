@@ -6,6 +6,19 @@ A suite of Angular libraries that helps you build secure, browser-integrated app
 
 ## 📦 Available Packages
 
+| Package                                                                   | Description                                                                                         | Documentation                                                              |
+| :------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- |
+| [`@angular-helpers/core`](#--angular-helperscore)                         | Reactive timing operators (`debouncedSignal`, `throttledSignal`, `timerSignal`), boundary reporters | [Docs](https://gaspar1992.github.io/angular-helpers/docs/core)             |
+| [`@angular-helpers/security`](#--angular-helperssecurity)                 | ReDoS prevention in Web Workers, WebCrypto, SecureStorage, input sanitization                       | [Docs](https://gaspar1992.github.io/angular-helpers/docs/security)         |
+| [`@angular-helpers/browser-web-apis`](#--angular-helpersbrowser-web-apis) | 14+ signal-based Web API primitives (Camera, Geolocation, WakeLock, Observers, etc.)                | [Docs](https://gaspar1992.github.io/angular-helpers/docs/browser-web-apis) |
+| [`@angular-helpers/worker-http`](#--angular-helpersworker-http)           | Offload HTTP network I/O, encryption, and serialization to dedicated Web Workers                    | [Docs](https://gaspar1992.github.io/angular-helpers/docs/worker-http)      |
+| [`@angular-helpers/openlayers`](#--angular-helpersopenlayers)             | Declarative Signals-first wrapper for OpenLayers with APF secondary entry points                    | [Docs](https://gaspar1992.github.io/angular-helpers/docs/openlayers)       |
+| [`@angular-helpers/storage`](#--angular-helpersstorage)                   | High-performance reactive storage engine (`storageResource`, entity store, workers)                 | [Docs](https://gaspar1992.github.io/angular-helpers/docs/storage)          |
+| [`@angular-helpers/testing`](#--angular-helperstesting)                   | Testing harnesses, mocks (`provideMockService`, `render`, `flushEffects`), headless browser mocks   | [Docs](https://gaspar1992.github.io/angular-helpers/docs/testing)          |
+| [`@angular-helpers/yjs`](#--angular-helpersyjs)                           | Reactive Signal bindings and collaborative CRDT primitives for Yjs (`yjsSignal`, undo, awareness)   | [Docs](https://gaspar1992.github.io/angular-helpers/docs/yjs)              |
+
+---
+
 ### ⚡ `@angular-helpers/core`
 
 _Lightweight, high-performance, and SSR-safe timing signal operators and core utilities_

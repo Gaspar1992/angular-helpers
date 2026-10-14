@@ -6,7 +6,7 @@
 
 ## Packages
 
-- [Core](https://gaspar1992.github.io/angular-helpers/docs/core): Essential reactive signal primitives, timing operators, SSR-safe platform detection, and reusable Web Worker pools.
+- [Core](https://gaspar1992.github.io/angular-helpers/docs/core): Essential reactive signal primitives, timing operators, SSR-safe platform detection, ErrorBoundary reporting, and reusable Web Worker pools.
 - [Browser Web APIs](https://gaspar1992.github.io/angular-helpers/docs/browser-web-apis): Reactive Angular 22 Signals wrapping standard browser APIs (ResizeObserver, IntersectionObserver, MutationObserver, Geolocation, Clipboard, BroadcastChannel, etc.) with native Signal<ElementRef | Element> support and debouncing/throttling.
 - [Storage](https://gaspar1992.github.io/angular-helpers/docs/storage): Reactive storage persistence integrating with Angular 22 resource() API (storageResource, persistedResource), supporting IndexedDB, LocalStorage, MemoryStorageDriver, optimistic updates with linkedSignal, and multi-tab synchronization.
 - [Security](https://gaspar1992.github.io/angular-helpers/docs/security): ReDoS prevention offloading regular expression testing to reusable Web Worker pools with timeouts, WebCrypto API helpers (AES encryption, HMAC signing), and reactive security validators.
