@@ -10,10 +10,13 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
+import { injectErrorBoundaryReporter } from '@angular-helpers/core';
 
 export interface GeolocationResourceOptions extends PositionOptions {
   /** Start watching immediately. Defaults to `false`. */
   watch?: boolean;
+  /** Propagate critical errors declaratively to the nearest ErrorBoundary or ErrorHandler. */
+  reportToBoundary?: boolean;
 }
 
 export interface GeolocationResourceRef {
@@ -36,6 +39,7 @@ export function injectGeolocationResource(
   assertInInjectionContext(injectGeolocationResource);
   const platformId = inject(PLATFORM_ID);
   const isBrowser = isPlatformBrowser(platformId);
+  const reporter = opts.reportToBoundary ? injectErrorBoundaryReporter() : null;
 
   const supported = signal<boolean>(false);
   if (isBrowser) {
@@ -57,7 +61,9 @@ export function injectGeolocationResource(
     params: () => requestState(),
     stream: ({ params: request, abortSignal }) => {
       if (!isBrowser || !supported()) {
-        throw new Error('Geolocation API not supported');
+        const err = new Error('Geolocation API not supported');
+        reporter?.(err);
+        throw err;
       }
 
       return new Observable<GeolocationPosition | null>((subscriber) => {
@@ -67,6 +73,7 @@ export function injectGeolocationResource(
               subscriber.next(pos);
             },
             (err) => {
+              reporter?.(err);
               subscriber.error(err);
             },
             request,
@@ -89,6 +96,7 @@ export function injectGeolocationResource(
               subscriber.complete();
             },
             (err) => {
+              reporter?.(err);
               subscriber.error(err);
             },
             request,

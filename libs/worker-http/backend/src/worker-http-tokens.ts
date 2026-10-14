@@ -142,3 +142,9 @@ export const WORKER_HTTP_MIN_PAYLOAD_SIZE_TOKEN = new InjectionToken<number | nu
   'WorkerHttpMinPayloadSize',
   { factory: () => null },
 );
+
+/**
+ * Per-request HttpContextToken to declaratively report critical HTTP errors
+ * to the nearest Angular ErrorBoundary or ErrorHandler.
+ */
+export const WORKER_HTTP_REPORT_TO_BOUNDARY = new HttpContextToken<boolean>(() => false);

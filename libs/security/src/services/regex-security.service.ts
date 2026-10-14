@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { injectErrorBoundaryReporter } from '@angular-helpers/core';
 import type { RegexSecurityConfig, RegexTestResult, RegexSecurityResult } from './regex-types';
 import { RegexAnalyzerService } from './regex-analyzer.service';
 import { RegexWorkerPoolService } from './regex-worker-pool.service';
@@ -13,6 +14,7 @@ export * from './regex-types';
 export class RegexSecurityService {
   private analyzer = inject(RegexAnalyzerService);
   private workerPool = inject(RegexWorkerPoolService);
+  private errorReporter = injectErrorBoundaryReporter({ rethrow: false });
 
   /**
    * Executes a regular expression safely with a timeout
@@ -30,22 +32,37 @@ export class RegexSecurityService {
       const securityCheck = await this.analyzePatternSecurity(pattern);
 
       if (!securityCheck.safe && !finalConfig.safeMode) {
+        const errorMsg = `Pattern rejected: ${securityCheck.warnings.join(', ')}`;
+        if (finalConfig.reportToBoundary) {
+          this.errorReporter(new Error(`[RegexSecurity] ${errorMsg}`));
+        }
         return {
           match: false,
           executionTime: performance.now() - startTime,
           timeout: false,
-          error: `Pattern rejected: ${securityCheck.warnings.join(', ')}`,
+          error: errorMsg,
         };
       }
 
       // Execute in Web Worker with timeout
       const result = await this.workerPool.executeInWorker(pattern, text, finalConfig);
 
+      if (result.timeout && finalConfig.reportToBoundary) {
+        this.errorReporter(
+          new Error(
+            '[RegexSecurity] Regular expression execution timed out (ReDoS threshold exceeded)',
+          ),
+        );
+      }
+
       return {
         ...result,
         executionTime: performance.now() - startTime,
       };
     } catch (error) {
+      if (finalConfig.reportToBoundary) {
+        this.errorReporter(error);
+      }
       return {
         match: false,
         executionTime: performance.now() - startTime,
@@ -71,6 +88,7 @@ export class RegexSecurityService {
       maxComplexity: config.maxComplexity || 10,
       allowBacktracking: config.allowBacktracking || false,
       safeMode: config.safeMode || false,
+      reportToBoundary: config.reportToBoundary ?? false,
     };
   }
 }

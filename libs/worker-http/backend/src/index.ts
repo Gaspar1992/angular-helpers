@@ -16,6 +16,7 @@ export {
   WORKER_HTTP_INTERCEPTORS_TOKEN,
   WORKER_HTTP_STREAMS_POLYFILL_TOKEN,
   WORKER_HTTP_MIN_PAYLOAD_SIZE_TOKEN,
+  WORKER_HTTP_REPORT_TO_BOUNDARY,
 } from './worker-http-tokens';
 export type { WorkerInterceptorSpecsMap } from './worker-http-tokens';
 

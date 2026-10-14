@@ -1,4 +1,5 @@
 import { DestroyRef, Injectable, type OnDestroy, inject } from '@angular/core';
+import { injectErrorBoundaryReporter } from '@angular-helpers/core';
 import {
   FetchBackend,
   HttpBackend,
@@ -25,6 +26,7 @@ import {
   WORKER_HTTP_TIMEOUT,
   WORKER_TARGET,
   WORKER_HTTP_MIN_PAYLOAD_SIZE_TOKEN,
+  WORKER_HTTP_REPORT_TO_BOUNDARY,
 } from './worker-http-tokens';
 import type { WorkerInterceptorSpec } from '@angular-helpers/worker-http/interceptors';
 import type { WorkerSerializer } from '@angular-helpers/worker-http/serializer';
@@ -148,6 +150,7 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
   private readonly streamsPolyfill = inject(WORKER_HTTP_STREAMS_POLYFILL_TOKEN);
   private readonly minPayloadSize = inject(WORKER_HTTP_MIN_PAYLOAD_SIZE_TOKEN, { optional: true });
   private readonly destroyRef = inject(DestroyRef, { optional: true });
+  private readonly errorReporter = injectErrorBoundaryReporter({ rethrow: false });
 
   private readonly transports = new Map<
     string,
@@ -250,6 +253,9 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
           url: req.urlWithParams,
         });
         this.emitError(base, httpError);
+        if (req.context.get(WORKER_HTTP_REPORT_TO_BOUNDARY)) {
+          this.errorReporter(httpError);
+        }
         return throwError(() => httpError);
       }),
     );
@@ -324,6 +330,9 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
       }),
       catchError((err: unknown) => {
         this.emitError(base, err);
+        if (req.context.get(WORKER_HTTP_REPORT_TO_BOUNDARY)) {
+          this.errorReporter(err);
+        }
         return throwError(() => err);
       }),
     );

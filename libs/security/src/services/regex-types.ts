@@ -3,6 +3,7 @@ export interface RegexSecurityConfig {
   maxComplexity?: number; // Maximum complexity allowed
   allowBacktracking?: boolean; // Allow catastrophic backtracking
   safeMode?: boolean; // Safe mode with secure patterns only
+  reportToBoundary?: boolean; // Declaratively report critical ReDoS / timeout errors to nearest ErrorBoundary
 }
 
 export interface RegexTestResult {
