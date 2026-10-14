@@ -170,14 +170,7 @@ export class HighPerformanceComputeService {
       'Enables declarative error bubbling from async tasks, background workers, and signal resources into template @boundary blocks.',
       'Zoneless and SSR safe.',
     ],
-    methods: [
-      {
-        name: 'report',
-        signature: 'report(error: unknown): void',
-        description: 'Reports an error to the nearest ErrorBoundary or ErrorHandler.',
-        returns: 'void',
-      },
-    ],
+    methods: [],
     example: `import { Component } from '@angular/core';
 import { injectErrorBoundaryReporter } from '@angular-helpers/core';
 

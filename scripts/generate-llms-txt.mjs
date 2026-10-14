@@ -16,7 +16,13 @@ const PACKAGES = [
     docsUrl: 'https://gaspar1992.github.io/angular-helpers/docs/core',
     readmePath: 'libs/core/README.md',
     canonicalCode: `import { Component, signal } from '@angular/core';
-import { debouncedSignal, throttledSignal, timerSignal, injectPlatform, injectErrorBoundaryReporter } from '@angular-helpers/core';
+import {
+  debouncedSignal,
+  timerSignal,
+  injectPlatform,
+  injectErrorBoundaryReporter,
+  injectWorkerPool,
+} from '@angular-helpers/core';
 
 @Component({
   selector: 'app-search-box',
@@ -28,12 +34,25 @@ import { debouncedSignal, throttledSignal, timerSignal, injectPlatform, injectEr
 })
 export class SearchBoxComponent {
   private readonly platform = injectPlatform();
+  // Propagates errors to the nearest ERROR_BOUNDARY provider, falling back to ErrorHandler
+  private readonly reportError = injectErrorBoundaryReporter();
+  // WorkerPool with round-robin dispatch, terminated automatically via DestroyRef
+  private readonly pool = injectWorkerPool(new URL('./search.worker', import.meta.url));
+
   readonly query = signal('');
   readonly debouncedQuery = debouncedSignal(this.query, 300);
   readonly timer = timerSignal(1000);
 
   onInput(event: Event): void {
     this.query.set((event.target as HTMLInputElement).value);
+  }
+
+  async index(payload: ArrayBuffer): Promise<void> {
+    try {
+      await this.pool.execute('index', payload, { timeoutMs: 5000, transfer: [payload] });
+    } catch (error) {
+      this.reportError(error);
+    }
   }
 }`,
   },

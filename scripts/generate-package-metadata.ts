@@ -7,7 +7,7 @@
  *
  * Run: npx tsx scripts/generate-package-metadata.ts
  *
- * Generates: apps/web/src/app/core/config/libs.generated.ts
+ * Generates: apps/web/src/app/core/config/packages.generated.ts
  */
 
 /* oxlint-disable no-console */
@@ -142,14 +142,14 @@ function main(): void {
   console.log(`   - Main: ${mainInjectCount}`);
   console.log(`   - Experimental: ${experimentalInjectCount}\n`);
 
-  const outputPath = 'apps/web/src/app/core/config/libs.generated.ts';
+  const outputPath = 'apps/web/src/app/core/config/packages.generated.ts';
   const content = generateTypeScriptFile(metadata);
 
   fs.writeFileSync(outputPath, content, 'utf-8');
 
   console.log(`✅ Generated: ${outputPath}`);
   console.log('\nNext steps:');
-  console.log('  1. Import from libs.generated.ts in libs.data.ts');
+  console.log('  1. Import from packages.generated.ts in packages.data.ts');
   console.log('  2. Update HOME_STATS to use INJECT_FN_COUNT');
   console.log('  3. Run: npm run test:docs-consistency');
 }
