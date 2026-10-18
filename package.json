@@ -42,11 +42,6 @@
       "name": "node",
       "version": ">=24.15.0",
       "onFail": "download"
-    },
-    "packageManager": {
-      "name": "pnpm",
-      "version": "11.28.4",
-      "onFail": "download"
     }
   },
   "dependencies": {
