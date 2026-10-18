@@ -16,6 +16,9 @@ describe('DeviceMotionService', () => {
       run: vi.fn((fn) => fn()),
     } as unknown as NgZone;
 
+    vi.stubGlobal('DeviceMotionEvent', class {});
+    vi.stubGlobal('isSecureContext', true);
+
     TestBed.configureTestingModule({
       providers: [
         DeviceMotionService,
@@ -24,21 +27,39 @@ describe('DeviceMotionService', () => {
       ],
     });
     service = TestBed.inject(DeviceMotionService);
-
-    vi.stubGlobal('DeviceMotionEvent', class {});
-    vi.stubGlobal('isSecureContext', true);
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
   });
 
-  it('should be created', () => {
+  it('should be created and check isSupported', () => {
     expect(service).toBeTruthy();
+    expect(service.isSupported()).toBe(true);
+    expect(service.permissionState()).toBe('granted');
   });
 
-  it('should check isSupported', () => {
-    expect(service.isSupported()).toBe(true);
+  it('should initialize permissionState to prompt when requestPermission exists and request permission', async () => {
+    const requestPermissionMock = vi.fn().mockResolvedValue('granted');
+    vi.stubGlobal(
+      'DeviceMotionEvent',
+      Object.assign(class {}, { requestPermission: requestPermissionMock }),
+    );
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        DeviceMotionService,
+        BrowserCapabilityService,
+        { provide: NgZone, useValue: mockZone },
+      ],
+    });
+    const promptService = TestBed.inject(DeviceMotionService);
+    expect(promptService.permissionState()).toBe('prompt');
+
+    const state = await promptService.requestPermission();
+    expect(state).toBe('granted');
+    expect(promptService.permissionState()).toBe('granted');
   });
 
   it('should watch events and emit them', async () => {
@@ -72,7 +93,7 @@ describe('DeviceMotionService', () => {
     addEventListenerSpy.mockRestore();
   });
 
-  it('should return null in server environment', () => {
+  it('should return denied permission and null stream in server environment', async () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -83,5 +104,9 @@ describe('DeviceMotionService', () => {
     });
     const ssrService = TestBed.inject(DeviceMotionService);
     expect(ssrService.isSupported()).toBe(false);
+    expect(ssrService.permissionState()).toBe('denied');
+    expect(await ssrService.requestPermission()).toBe('denied');
+    expect(await firstValueFrom(ssrService.watch())).toBeNull();
+    expect(() => (ssrService as any).ensureSupported()).toThrow(/deviceMotion/);
   });
 });

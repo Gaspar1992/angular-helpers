@@ -24,6 +24,7 @@ import ScaleLine from 'ol/control/ScaleLine';
 import Zoom from 'ol/control/Zoom';
 import Control from 'ol/control/Control';
 import Geolocation from 'ol/Geolocation';
+import Polygon from 'ol/geom/Polygon';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 
@@ -163,5 +164,126 @@ describe('Map Control Components', () => {
     expect(layerDisposeSpy).toHaveBeenCalledOnce();
     expect(sourceDisposeSpy).toHaveBeenCalledOnce();
     expect(sourceClearSpy).toHaveBeenCalledWith(true);
+  });
+
+  it('OlGeolocationControlComponent handles toggleTracking, position changes, and accuracyGeometry changes', async () => {
+    const animateSpy = vi.fn();
+    mapMock.getView = () => ({
+      getProjection: () => ({
+        getCode: () => 'EPSG:3857',
+      }),
+      animate: animateSpy,
+    });
+
+    const parent = await ensureRootInjector();
+    const env = createEnvironmentInjector(
+      [
+        { provide: OlMapService, useValue: mapServiceMock },
+        { provide: OlZoneHelper, useValue: passthroughZone },
+      ],
+      parent,
+    );
+
+    const appRef = parent.get(ApplicationRef);
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+
+    const componentRef = createComponent(OlGeolocationControlComponent, {
+      environmentInjector: env,
+      hostElement: host,
+    });
+
+    componentRef.setInput('position', 'bottom-left');
+    const emittedStates: boolean[] = [];
+    componentRef.instance.trackingChange.subscribe((state) => emittedStates.push(state));
+
+    appRef.attachView(componentRef.hostView);
+    componentRef.changeDetectorRef.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const geolocation: Geolocation = (componentRef.instance as any).geolocation;
+    const positionFeature = (componentRef.instance as any).positionFeature;
+    const accuracyFeature = (componentRef.instance as any).accuracyFeature;
+
+    // Trigger accuracyGeometry event with null and with a geometry
+    vi.spyOn(geolocation, 'getAccuracyGeometry').mockReturnValue(null);
+    geolocation.dispatchEvent('change:accuracyGeometry');
+    expect(accuracyFeature.getGeometry()).toBeUndefined();
+
+    const fakeGeom = new Polygon([
+      [
+        [0, 0],
+        [1, 0],
+        [1, 1],
+        [0, 0],
+      ],
+    ]);
+    vi.spyOn(geolocation, 'getAccuracyGeometry').mockReturnValue(fakeGeom);
+    geolocation.dispatchEvent('change:accuracyGeometry');
+    expect(accuracyFeature.getGeometry()).toBe(fakeGeom);
+
+    // Position change when tracking is false
+    vi.spyOn(geolocation, 'getPosition').mockReturnValue([10, 20]);
+    geolocation.dispatchEvent('change:position');
+    expect(positionFeature.getGeometry()).toBeDefined();
+    expect(animateSpy).not.toHaveBeenCalled();
+
+    // Toggle tracking ON when position is available -> animates view with zoom 15
+    componentRef.instance.toggleTracking();
+    expect(emittedStates).toEqual([true]);
+    expect(animateSpy).toHaveBeenCalledWith({ center: [10, 20], zoom: 15, duration: 500 });
+
+    // Position change when tracking is true -> animates view
+    animateSpy.mockClear();
+    vi.spyOn(geolocation, 'getPosition').mockReturnValue([30, 40]);
+    geolocation.dispatchEvent('change:position');
+    expect(animateSpy).toHaveBeenCalledWith({ center: [30, 40], duration: 500 });
+
+    // Position change when coordinates are undefined
+    animateSpy.mockClear();
+    vi.spyOn(geolocation, 'getPosition').mockReturnValue(undefined);
+    geolocation.dispatchEvent('change:position');
+    expect(positionFeature.getGeometry()).toBeUndefined();
+    expect(animateSpy).not.toHaveBeenCalled();
+
+    // Toggle tracking OFF -> clears geometries
+    componentRef.instance.toggleTracking();
+    expect(emittedStates).toEqual([true, false]);
+    expect(positionFeature.getGeometry()).toBeUndefined();
+    expect(accuracyFeature.getGeometry()).toBeUndefined();
+
+    // Toggle tracking ON when position is undefined -> does not animate
+    componentRef.instance.toggleTracking();
+    expect(animateSpy).not.toHaveBeenCalled();
+
+    componentRef.destroy();
+  });
+
+  it('OlGeolocationControlComponent gracefully handles missing map', async () => {
+    mapServiceMock.getMap = () => null;
+    const parent = await ensureRootInjector();
+    const env = createEnvironmentInjector(
+      [
+        { provide: OlMapService, useValue: mapServiceMock },
+        { provide: OlZoneHelper, useValue: passthroughZone },
+      ],
+      parent,
+    );
+
+    const appRef = parent.get(ApplicationRef);
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+
+    const componentRef = createComponent(OlGeolocationControlComponent, {
+      environmentInjector: env,
+      hostElement: host,
+    });
+
+    appRef.attachView(componentRef.hostView);
+    componentRef.changeDetectorRef.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(() => componentRef.instance.toggleTracking()).not.toThrow();
+    expect(() => componentRef.destroy()).not.toThrow();
   });
 });

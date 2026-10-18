@@ -63,4 +63,47 @@ describe('overviewResolver', () => {
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(res.value()?.packageName).toBe('core');
   });
+
+  describe('overview.utils', () => {
+    it('generateServiceGroups groups services, separates experimental items, and defaults missing category', async () => {
+      const { generateServiceGroups, validateServiceCategories } = await import('./overview.utils');
+      const sampleServices: any[] = [
+        {
+          id: 'svc-1',
+          name: 'NormalService',
+          category: 'network',
+          description: 'Network helper',
+          methods: [],
+        },
+        {
+          id: 'svc-exp-fn',
+          name: 'ExpFnService',
+          category: 'network',
+          description: 'Has experimental fn',
+          methods: [],
+          fnVersion: { name: 'injectExperimentalFeature', importPath: 'pkg', fields: [] },
+        },
+        {
+          id: 'svc-exp-note',
+          name: 'ExpNoteService',
+          category: undefined,
+          description: 'Missing category with experimental note',
+          methods: [],
+          notes: ['This is an Experimental API'],
+        },
+      ];
+
+      const groupsSeparated = generateServiceGroups(sampleServices);
+      expect(groupsSeparated.map((g) => g.label)).toEqual([
+        'System APIs',
+        'Network APIs',
+        'Experimental APIs',
+      ]);
+
+      const groupsInline = generateServiceGroups(sampleServices, { separateExperimental: false });
+      expect(groupsInline.map((g) => g.label)).toEqual(['System APIs', 'Network APIs']);
+
+      expect(validateServiceCategories(sampleServices)).toEqual(['svc-exp-note']);
+    });
+  });
 });

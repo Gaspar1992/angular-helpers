@@ -101,4 +101,88 @@ describe('DocsLayoutComponent', () => {
     const vitalsPanel = fixture.nativeElement.querySelector('app-vitals-panel');
     expect(vitalsPanel).toBeTruthy();
   });
+
+  it('should update version when queryParams emit v=21 or v=22', () => {
+    const queryParams$ = new Subject<Record<string, string>>();
+    mockActivatedRoute.queryParams = queryParams$;
+
+    const localFixture = TestBed.createComponent(DocsLayoutComponent);
+    localFixture.detectChanges();
+
+    queryParams$.next({ v: '21' });
+    expect(mockVersionService.setVersion).toHaveBeenCalledWith('v21');
+
+    queryParams$.next({ v: '22' });
+    expect(mockVersionService.setVersion).toHaveBeenCalledWith('v22');
+  });
+
+  it('should compute activeLibrary and activeItem on NavigationEnd events', async () => {
+    const { NavigationEnd } = await import('@angular/router');
+    fixture.detectChanges();
+
+    const cmp = fixture.componentInstance;
+    expect(cmp.activeLibrary()?.id).toBe('core');
+    expect(cmp.activeItem()).toBeNull();
+
+    // Navigate to a specific item inside core
+    const firstItemRoute = cmp.activeLibrary()!.sections[0].items[0].route;
+    routerEvents$.next(new NavigationEnd(1, firstItemRoute, firstItemRoute));
+    fixture.detectChanges();
+
+    expect(cmp.activeItem()?.route).toBe(firstItemRoute);
+
+    // Navigate to non-matching route
+    routerEvents$.next(new NavigationEnd(2, '/other', '/other'));
+    fixture.detectChanges();
+
+    expect(cmp.activeLibrary()).toBeNull();
+    expect(cmp.activeItem()).toBeNull();
+  });
+
+  it('should toggle and close sidebar, reload window, and return library icons', () => {
+    const cmp = fixture.componentInstance as any;
+    expect(cmp.sidebarOpen()).toBe(false);
+
+    cmp.toggleSidebar();
+    expect(cmp.sidebarOpen()).toBe(true);
+
+    cmp.closeSidebar();
+    expect(cmp.sidebarOpen()).toBe(false);
+
+    expect(cmp.getLibraryIcon('core')).toBe('⚡');
+    expect(cmp.getLibraryIcon('openlayers')).toBe('🗺️');
+    expect(cmp.getLibraryIcon('unknown-lib')).toBe('📦');
+
+    // Test reload when location is undefined vs defined
+    cmp.reload();
+    const reloadSpy = vi.fn();
+    cmp.window.location = { reload: reloadSpy };
+    cmp.reload();
+    expect(reloadSpy).toHaveBeenCalledOnce();
+  });
+
+  it('should scroll sidebar when active item is outside sidebar viewport', () => {
+    const cmp = fixture.componentInstance as any;
+    const scrollBySpy = vi.fn();
+
+    const mockActiveItemOut = {
+      getBoundingClientRect: () => ({ top: 500, bottom: 540, height: 40 }),
+    };
+    const mockSidebar = {
+      querySelector: vi.fn().mockReturnValue(mockActiveItemOut),
+      getBoundingClientRect: () => ({ top: 0, bottom: 300, height: 300 }),
+      scrollBy: scrollBySpy,
+    };
+
+    cmp.window.document.querySelectorAll = vi.fn().mockReturnValue([mockSidebar]);
+    cmp.scrollToActiveItem();
+    expect(scrollBySpy).toHaveBeenCalledWith({
+      top: 370,
+      behavior: 'smooth',
+    });
+
+    // When document is missing, should return early without throwing
+    cmp.window.document = undefined;
+    expect(() => cmp.scrollToActiveItem()).not.toThrow();
+  });
 });

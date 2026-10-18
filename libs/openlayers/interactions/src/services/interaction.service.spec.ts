@@ -118,21 +118,29 @@ describe('OlInteractionService', () => {
     expect(ctx.selectService.createSelectInteraction).toHaveBeenCalledOnce();
     expect(ctx.svc.isActive('s1')).toBe(true);
     expect(typeof handle.cleanup).toBe('function');
+
+    handle.cleanup();
+    expect(ctx.svc.isActive('s1')).toBe(false);
   });
 
-  it('enableSelect is idempotent for the same id', () => {
+  it('enableSelect is idempotent for the same id and its cleanup disables the interaction', () => {
     ctx.svc.enableSelect('s1');
-    ctx.svc.enableSelect('s1');
+    const duplicateHandle = ctx.svc.enableSelect('s1');
 
     expect(ctx.selectService.createSelectInteraction).toHaveBeenCalledOnce();
+    duplicateHandle.cleanup();
+    expect(ctx.svc.isActive('s1')).toBe(false);
   });
 
-  it('enableDraw delegates to DrawInteractionService and exposes isActive', () => {
+  it('enableDraw delegates to DrawInteractionService and exposes isActive and cleanup', () => {
     const handle = ctx.svc.enableDraw('d1', { type: 'Point' });
 
     expect(ctx.drawService.createDrawInteraction).toHaveBeenCalledOnce();
     expect(handle.isActive()).toBe(true);
     expect(ctx.svc.isActive('d1')).toBe(true);
+
+    handle.cleanup();
+    expect(ctx.svc.isActive('d1')).toBe(false);
   });
 
   it('enableDraw is idempotent for the same id and isActive() is false on re-call', () => {
@@ -140,18 +148,27 @@ describe('OlInteractionService', () => {
     const handle = ctx.svc.enableDraw('d1', { type: 'Point' });
     expect(handle.isActive()).toBe(false);
     expect(ctx.drawService.createDrawInteraction).toHaveBeenCalledOnce();
+
+    handle.cleanup();
+    expect(ctx.svc.isActive('d1')).toBe(false);
   });
 
   it('enableModify delegates to ModifyInteractionService and tracks state', () => {
-    ctx.svc.enableModify('m1', {});
+    const handle = ctx.svc.enableModify('m1', {});
     expect(ctx.modifyService.createModifyInteraction).toHaveBeenCalledOnce();
     expect(ctx.svc.isActive('m1')).toBe(true);
+
+    handle.cleanup();
+    expect(ctx.svc.isActive('m1')).toBe(false);
   });
 
-  it('enableModify is idempotent for the same id', () => {
+  it('enableModify is idempotent for the same id and its cleanup disables the interaction', () => {
     ctx.svc.enableModify('m1');
-    ctx.svc.enableModify('m1');
+    const duplicateHandle = ctx.svc.enableModify('m1');
     expect(ctx.modifyService.createModifyInteraction).toHaveBeenCalledOnce();
+
+    duplicateHandle.cleanup();
+    expect(ctx.svc.isActive('m1')).toBe(false);
   });
 
   it('disableInteraction calls cleanup, removes from state, and clears selection if it was a select', () => {

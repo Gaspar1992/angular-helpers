@@ -179,4 +179,64 @@ describe('SearchService', () => {
     expect(results.length).toBeGreaterThan(0);
     expect(results[0].title.toLowerCase()).toContain('security');
   });
+
+  it('should handle worker errors gracefully and reset searching state', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const executeMock = vi.fn().mockRejectedValue(new Error('Worker crashed'));
+    vi.mocked(injectWorkerPool).mockImplementation(
+      () =>
+        ({
+          execute: executeMock,
+          terminate: vi.fn(),
+        }) as any,
+    );
+
+    const service = TestBed.inject(SearchService);
+    service.query.set('test-error');
+
+    TestBed.flushEffects();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(consoleSpy).toHaveBeenCalled();
+    expect(service.results()).toEqual([]);
+    expect(service.searching()).toBe(false);
+    consoleSpy.mockRestore();
+  });
+
+  it('should manage modal state via open, close, and toggle and test fallbackExecutor branches', async () => {
+    let capturedFallback: ((type: string, data: any) => Promise<any>) | undefined;
+    vi.mocked(injectWorkerPool).mockImplementation((_url, options: any) => {
+      capturedFallback = options?.fallbackExecutor;
+      return {
+        execute: vi.fn().mockResolvedValue([]),
+        terminate: vi.fn(),
+      } as any;
+    });
+
+    const service = TestBed.inject(SearchService);
+    expect(service.isOpen()).toBe(false);
+
+    service.toggle();
+    expect(service.isOpen()).toBe(true);
+    expect(service.query()).toBe('');
+
+    service.toggle();
+    expect(service.isOpen()).toBe(false);
+
+    service.open();
+    expect(service.isOpen()).toBe(true);
+    // Calling open again when extra index is already loaded hits early return
+    service.open();
+    service.close();
+    expect(service.isOpen()).toBe(false);
+
+    expect(capturedFallback).toBeDefined();
+    await expect(capturedFallback!('invalid', {})).rejects.toThrow('Unknown task type: invalid');
+    expect(await capturedFallback!('search', { q: '   ' })).toEqual([]);
+
+    // Wait for dynamic imports in loadExtraIndex to settle, then search by tag/description
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const tagResults = await capturedFallback!('search', { q: 'worker' });
+    expect(tagResults.length).toBeGreaterThan(0);
+  });
 });

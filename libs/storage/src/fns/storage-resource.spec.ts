@@ -200,4 +200,144 @@ describe('storageResource', () => {
   it('should expose persistedResource as an alias', () => {
     expect(persistedResource).toBe(storageResource);
   });
+
+  it('should support custom transport option, reload(), and non-Error persistence failures', async () => {
+    const customTransport: StorageTransport = {
+      read: vi.fn().mockResolvedValue('custom-val'),
+      write: vi.fn().mockRejectedValue('string-failure'),
+      delete: vi.fn().mockResolvedValue(undefined),
+    };
+
+    await TestBed.runInInjectionContext(async () => {
+      const res = storageResource({
+        key: () => 'custom-key',
+        params: () => ({ id: 1 }),
+        transport: customTransport,
+      });
+
+      await new Promise((r) => setTimeout(r, 15));
+      expect(res.value()).toBe('custom-val');
+      expect(res.status()).toBeDefined();
+      expect(res.isLoading()).toBe(false);
+      expect(res.resource).toBeDefined();
+
+      await expect(res.set('bad')).rejects.toThrow('string-failure');
+      expect(res.error()?.message).toBe('string-failure');
+
+      expect(typeof res.reload()).toBe('boolean');
+    });
+  });
+
+  it('should support network-first success and rethrow when cache is empty on network failure', async () => {
+    const loaderSuccess = vi.fn().mockResolvedValue('network-fresh');
+    await TestBed.runInInjectionContext(async () => {
+      const res = storageResource({
+        key: 'net-ok',
+        strategy: 'network-first',
+        loader: loaderSuccess,
+      });
+
+      await new Promise((r) => setTimeout(r, 15));
+      expect(res.value()).toBe('network-fresh');
+      expect(mockTransport.write).toHaveBeenCalledWith('net-ok', 'network-fresh', {
+        serializer: 'json',
+        storageType: 'local',
+      });
+    });
+
+    mockTransport.read = vi.fn().mockResolvedValue(undefined);
+    const loaderFail = vi.fn().mockRejectedValue(new Error('Fatal Net Error'));
+    await TestBed.runInInjectionContext(async () => {
+      const res = storageResource({
+        key: 'net-fail',
+        strategy: 'network-first',
+        loader: loaderFail,
+      });
+
+      await new Promise((r) => setTimeout(r, 15));
+      expect(res.status()).toBe('error');
+    });
+  });
+
+  it('should handle stale-while-revalidate background error and cache-first with loader', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    mockTransport.read = vi.fn().mockResolvedValue('cached-swr');
+    const failingBgLoader = vi.fn().mockRejectedValue(new Error('BG fail'));
+
+    await TestBed.runInInjectionContext(async () => {
+      const res = storageResource({
+        key: 'swr-err',
+        strategy: 'stale-while-revalidate',
+        loader: failingBgLoader,
+      });
+
+      await new Promise((r) => setTimeout(r, 20));
+      expect(res.value()).toBe('cached-swr');
+      expect(warnSpy).toHaveBeenCalled();
+    });
+    warnSpy.mockRestore();
+
+    // Cache-first with cache hit
+    mockTransport.read = vi.fn().mockResolvedValue('cf-hit');
+    const cfLoader = vi.fn().mockResolvedValue('cf-remote');
+    await TestBed.runInInjectionContext(async () => {
+      const res = storageResource({
+        key: 'cf-key-hit',
+        strategy: 'cache-first',
+        loader: cfLoader,
+      });
+
+      await new Promise((r) => setTimeout(r, 15));
+      expect(res.value()).toBe('cf-hit');
+      expect(cfLoader).not.toHaveBeenCalled();
+    });
+
+    // Cache-first with cache miss
+    mockTransport.read = vi.fn().mockResolvedValue(undefined);
+    await TestBed.runInInjectionContext(async () => {
+      const res = storageResource({
+        key: 'cf-key-miss',
+        strategy: 'cache-first',
+        loader: cfLoader,
+      });
+
+      await new Promise((r) => setTimeout(r, 15));
+      expect(res.value()).toBe('cf-remote');
+      expect(cfLoader).toHaveBeenCalled();
+    });
+  });
+
+  it('should auto-repair schema drift when validator returns false and support crossTabSync', async () => {
+    mockTransport.read = vi.fn().mockResolvedValue('corrupted-data');
+    let onChangeCallback: ((val: string | undefined) => void) | undefined;
+    const unsubscribeSpy = vi.fn();
+    mockTransport.onChange = vi.fn().mockImplementation((_key, cb) => {
+      onChangeCallback = cb;
+      return unsubscribeSpy;
+    });
+
+    await TestBed.runInInjectionContext(async () => {
+      const res = storageResource<string, number>({
+        params: () => 7,
+        key: (id) => `validated-${id}`,
+        defaultValue: 'repaired-default',
+        storageOptions: {
+          validator: (val): val is string => val === 'valid-data',
+          crossTabSync: true,
+        },
+      });
+
+      await new Promise((r) => setTimeout(r, 15));
+      expect(res.value()).toBe('repaired-default');
+      expect(mockTransport.write).toHaveBeenCalledWith(
+        'validated-7',
+        'repaired-default',
+        expect.objectContaining({ crossTabSync: true }),
+      );
+
+      expect(mockTransport.onChange).toHaveBeenCalledWith('validated-7', expect.any(Function));
+      onChangeCallback?.('synced-from-other-tab');
+      expect(res.value()).toBe('synced-from-other-tab');
+    });
+  });
 });

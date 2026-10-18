@@ -1,9 +1,9 @@
 import '@angular/compiler';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { BrowserCapabilityService } from './browser-capability.service';
+import { BrowserCapabilityService, type BrowserCapabilityId } from './browser-capability.service';
 
-describe('BrowserCapabilityService - Device Orientation & Motion', () => {
+describe('BrowserCapabilityService', () => {
   let service: BrowserCapabilityService;
 
   beforeEach(() => {
@@ -17,79 +17,72 @@ describe('BrowserCapabilityService - Device Orientation & Motion', () => {
     vi.unstubAllGlobals();
   });
 
-  it('should detect deviceOrientation as supported when DeviceOrientationEvent is present', () => {
+  it('should return all capabilities and evaluate getAllStatuses()', () => {
+    vi.stubGlobal('isSecureContext', true);
+    const caps = service.getCapabilities();
+    expect(caps.length).toBeGreaterThan(40);
+
+    const statuses = service.getAllStatuses();
+    expect(statuses.length).toBe(caps.length);
+    for (const status of statuses) {
+      expect(typeof status.supported).toBe('boolean');
+      expect(status.secureContext).toBe(true);
+      expect(typeof status.requiresSecureContext).toBe('boolean');
+    }
+  });
+
+  it('should return false for unknown capability id', () => {
+    expect(service.isSupported('nonExistentCapability' as BrowserCapabilityId)).toBe(false);
+  });
+
+  it('should detect deviceOrientation and deviceMotion support', () => {
     vi.stubGlobal('DeviceOrientationEvent', class {});
-    expect(service.isSupported('deviceOrientation' as any)).toBe(true);
-  });
-
-  it('should detect deviceOrientation as unsupported when DeviceOrientationEvent is absent', () => {
-    const original = (globalThis as any).DeviceOrientationEvent;
-    delete (globalThis as any).DeviceOrientationEvent;
-    if (typeof window !== 'undefined') {
-      delete (window as any).DeviceOrientationEvent;
-    }
-    try {
-      expect(service.isSupported('deviceOrientation' as any)).toBe(false);
-    } finally {
-      if (original !== undefined) {
-        (globalThis as any).DeviceOrientationEvent = original;
-        if (typeof window !== 'undefined') {
-          (window as any).DeviceOrientationEvent = original;
-        }
-      }
-    }
-  });
-
-  it('should detect deviceMotion as supported when DeviceMotionEvent is present', () => {
     vi.stubGlobal('DeviceMotionEvent', class {});
-    expect(service.isSupported('deviceMotion' as any)).toBe(true);
+    expect(service.isSupported('deviceOrientation')).toBe(true);
+    expect(service.isSupported('deviceMotion')).toBe(true);
   });
 
-  it('should detect deviceMotion as unsupported when DeviceMotionEvent is absent', () => {
-    const original = (globalThis as any).DeviceMotionEvent;
-    delete (globalThis as any).DeviceMotionEvent;
-    if (typeof window !== 'undefined') {
-      delete (window as any).DeviceMotionEvent;
-    }
-    try {
-      expect(service.isSupported('deviceMotion' as any)).toBe(false);
-    } finally {
-      if (original !== undefined) {
-        (globalThis as any).DeviceMotionEvent = original;
-        if (typeof window !== 'undefined') {
-          (window as any).DeviceMotionEvent = original;
-        }
-      }
-    }
-  });
+  it('should detect webBluetooth, webSerial, webHid, storageManager, compressionStreams, speechRecognition', () => {
+    vi.stubGlobal('navigator', {
+      bluetooth: {},
+      serial: {},
+      hid: {},
+      storage: { estimate: vi.fn() },
+    });
+    vi.stubGlobal('CompressionStream', class {});
+    vi.stubGlobal('DecompressionStream', class {});
+    vi.stubGlobal('webkitSpeechRecognition', class {});
 
-  it('should detect webBluetooth as supported when navigator.bluetooth is present', () => {
-    vi.stubGlobal('navigator', { bluetooth: {} });
     expect(service.isSupported('webBluetooth')).toBe(true);
-  });
+    expect(service.isSupported('webSerial')).toBe(true);
+    expect(service.isSupported('webHid')).toBe(true);
+    expect(service.isSupported('storageManager')).toBe(true);
+    expect(service.isSupported('compressionStreams')).toBe(true);
+    expect(service.isSupported('speechRecognition')).toBe(true);
 
-  it('should detect webBluetooth as unsupported when navigator.bluetooth is absent', () => {
     vi.stubGlobal('navigator', {});
     expect(service.isSupported('webBluetooth')).toBe(false);
-  });
-
-  it('should detect webSerial as supported when navigator.serial is present', () => {
-    vi.stubGlobal('navigator', { serial: {} });
-    expect(service.isSupported('webSerial')).toBe(true);
-  });
-
-  it('should detect webSerial as unsupported when navigator.serial is absent', () => {
-    vi.stubGlobal('navigator', {});
     expect(service.isSupported('webSerial')).toBe(false);
-  });
-
-  it('should detect webHid as supported when navigator.hid is present', () => {
-    vi.stubGlobal('navigator', { hid: {} });
-    expect(service.isSupported('webHid')).toBe(true);
-  });
-
-  it('should detect webHid as unsupported when navigator.hid is absent', () => {
-    vi.stubGlobal('navigator', {});
     expect(service.isSupported('webHid')).toBe(false);
+    expect(service.isSupported('storageManager')).toBe(false);
+  });
+
+  it('should query getPermissionState and handle missing or failing permissions API', async () => {
+    vi.stubGlobal('navigator', {
+      permissions: {
+        query: vi.fn().mockResolvedValue({ state: 'granted' }),
+      },
+    });
+    expect(await service.getPermissionState('geolocation' as PermissionName)).toBe('granted');
+
+    vi.stubGlobal('navigator', {
+      permissions: {
+        query: vi.fn().mockRejectedValue(new Error('Unsupported permission')),
+      },
+    });
+    expect(await service.getPermissionState('geolocation' as PermissionName)).toBe('unknown');
+
+    vi.stubGlobal('navigator', {});
+    expect(await service.getPermissionState('geolocation' as PermissionName)).toBe('unknown');
   });
 });

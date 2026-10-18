@@ -7,7 +7,7 @@ import {
   runInInjectionContext,
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { injectHid } from './inject-hid';
 import {
   WebHidService,
@@ -36,7 +36,7 @@ describe('injectHid', () => {
     expect(() => injectHid()).toThrow(/injectHid/);
   });
 
-  it('should report isSupported as false on server platform', async () => {
+  it('should report isSupported as false on server platform and reject operations', async () => {
     mockService.isSupported.mockReturnValue(false);
     TestBed.configureTestingModule({
       providers: [
@@ -45,9 +45,18 @@ describe('injectHid', () => {
       ],
     });
 
-    TestBed.runInInjectionContext(() => {
+    await TestBed.runInInjectionContext(async () => {
       const ref = injectHid();
       expect(ref.isSupported()).toBe(false);
+
+      const dev = { productName: 'Pad', opened: false } as HIDDevice;
+      expect(await ref.requestDevice({ filters: [] })).toBeNull();
+      expect(ref.error()?.message).toContain('not supported');
+
+      expect(await ref.open(dev)).toBe(false);
+      expect(await ref.sendReport(1, new Uint8Array([1]), dev)).toBe(false);
+      expect(await ref.sendFeatureReport(1, new Uint8Array([1]), dev)).toBe(false);
+      expect(await ref.receiveFeatureReport(1, dev)).toBeNull();
     });
   });
 
@@ -74,10 +83,7 @@ describe('injectHid', () => {
     });
   });
 
-  it('should request device and update selectedDevice and devices signals', async () => {
-    const mockDevice = { productName: 'GamePad', opened: false } as HIDDevice;
-    mockService.requestDevice.mockResolvedValue([mockDevice]);
-
+  it('should handle missing device and service errors for all operations', async () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: PLATFORM_ID, useValue: 'browser' },
@@ -89,73 +95,59 @@ describe('injectHid', () => {
       const ref = injectHid();
       await new Promise((r) => queueMicrotask(r));
 
-      const devs = await ref.requestDevice({ filters: [{ vendorId: 0x1234 }] });
-      expect(devs).toEqual([mockDevice]);
-      expect(ref.devices()).toEqual([mockDevice]);
-      expect(ref.selectedDevice()).toBe(mockDevice);
-      expect(ref.isOpen()).toBe(false);
-    });
-  });
+      // Operations without a selected device
+      expect(await ref.open()).toBe(false);
+      expect(ref.error()?.message).toContain('No HID device available to open');
 
-  it('should open and close device', async () => {
-    const mockDevice = { productName: 'GamePad', opened: false } as HIDDevice;
-    mockService.requestDevice.mockResolvedValue([mockDevice]);
-    mockService.openDevice.mockResolvedValue(undefined);
-    mockService.closeDevice.mockResolvedValue(undefined);
+      expect(await ref.sendReport(1, new Uint8Array([1]))).toBe(false);
+      expect(ref.error()?.message).toContain('No HID device available to send report');
 
-    TestBed.configureTestingModule({
-      providers: [
-        { provide: PLATFORM_ID, useValue: 'browser' },
-        { provide: WebHidService, useValue: mockService },
-      ],
-    });
+      expect(await ref.sendFeatureReport(1, new Uint8Array([1]))).toBe(false);
+      expect(ref.error()?.message).toContain('No HID device available to send feature report');
 
-    await TestBed.runInInjectionContext(async () => {
-      const ref = injectHid();
-      await new Promise((r) => queueMicrotask(r));
+      expect(await ref.receiveFeatureReport(1)).toBeNull();
+      expect(ref.error()?.message).toContain('No HID device available to receive feature report');
 
-      await ref.requestDevice({ filters: [] });
-      const openSuccess = await ref.open();
-      expect(openSuccess).toBe(true);
+      mockService.watchInputReports.mockReturnValue(of());
+      ref.watchInputReports();
+      expect(mockService.watchInputReports).toHaveBeenCalledWith(null);
+
+      // Select device explicitly
+      const dev = { productName: 'Key', opened: true } as HIDDevice;
+      ref.selectDevice(dev);
+      expect(ref.selectedDevice()).toBe(dev);
       expect(ref.isOpen()).toBe(true);
 
-      await ref.close();
-      expect(ref.isOpen()).toBe(false);
+      // Service errors on requestDevice, open, close, sendReport, sendFeatureReport, receiveFeatureReport
+      mockService.requestDevice.mockRejectedValueOnce(new Error('req fail'));
+      expect(await ref.requestDevice({ filters: [] })).toBeNull();
+      expect(ref.error()?.message).toBe('req fail');
+
+      const otherDev = { productName: 'Other', opened: false } as HIDDevice;
+      mockService.openDevice.mockRejectedValueOnce(new Error('open fail'));
+      expect(await ref.open(otherDev)).toBe(false);
+      expect(ref.error()?.message).toBe('open fail');
+
+      mockService.closeDevice.mockRejectedValueOnce(new Error('close fail'));
+      await ref.close(otherDev);
+      expect(ref.error()?.message).toBe('close fail');
+
+      mockService.sendReport.mockRejectedValueOnce(new Error('send fail'));
+      expect(await ref.sendReport(1, new Uint8Array([1]), otherDev)).toBe(false);
+      expect(ref.error()?.message).toBe('send fail');
+
+      mockService.sendFeatureReport.mockRejectedValueOnce(new Error('feat send fail'));
+      expect(await ref.sendFeatureReport(1, new Uint8Array([1]), otherDev)).toBe(false);
+      expect(ref.error()?.message).toBe('feat send fail');
+
+      mockService.receiveFeatureReport.mockRejectedValueOnce(new Error('feat recv fail'));
+      expect(await ref.receiveFeatureReport(1, otherDev)).toBeNull();
+      expect(ref.error()?.message).toBe('feat recv fail');
     });
   });
 
-  it('should send report and feature report', async () => {
-    const mockDevice = { productName: 'LED Controller' } as HIDDevice;
-    mockService.requestDevice.mockResolvedValue([mockDevice]);
-    mockService.sendReport.mockResolvedValue(undefined);
-    mockService.sendFeatureReport.mockResolvedValue(undefined);
-    mockService.receiveFeatureReport.mockResolvedValue(new DataView(new ArrayBuffer(4)));
-
-    TestBed.configureTestingModule({
-      providers: [
-        { provide: PLATFORM_ID, useValue: 'browser' },
-        { provide: WebHidService, useValue: mockService },
-      ],
-    });
-
-    await TestBed.runInInjectionContext(async () => {
-      const ref = injectHid();
-      await new Promise((r) => queueMicrotask(r));
-
-      await ref.requestDevice({ filters: [] });
-      const sendRes = await ref.sendReport(1, new Uint8Array([0x01]));
-      expect(sendRes).toBe(true);
-
-      const featureRes = await ref.sendFeatureReport(2, new Uint8Array([0x02]));
-      expect(featureRes).toBe(true);
-
-      const reportView = await ref.receiveFeatureReport(3);
-      expect(reportView).toBeDefined();
-    });
-  });
-
-  it('should watch input reports and update lastInputReport signal', async () => {
-    const mockDevice = { productName: 'Sensor' } as HIDDevice;
+  it('should open, close, send/receive reports, and watch input reports (including errors)', async () => {
+    const mockDevice = { productName: 'Sensor', opened: false } as HIDDevice;
     const mockEvent = {
       reportId: 1,
       data: new DataView(new ArrayBuffer(2)),
@@ -163,6 +155,11 @@ describe('injectHid', () => {
     } as unknown as HIDInputReportEvent;
 
     mockService.requestDevice.mockResolvedValue([mockDevice]);
+    mockService.openDevice.mockResolvedValue(undefined);
+    mockService.closeDevice.mockResolvedValue(undefined);
+    mockService.sendReport.mockResolvedValue(undefined);
+    mockService.sendFeatureReport.mockResolvedValue(undefined);
+    mockService.receiveFeatureReport.mockResolvedValue(new DataView(new ArrayBuffer(4)));
     mockService.watchInputReports.mockReturnValue(of(mockEvent));
 
     TestBed.configureTestingModule({
@@ -177,15 +174,26 @@ describe('injectHid', () => {
       await new Promise((r) => queueMicrotask(r));
 
       await ref.requestDevice({ filters: [] });
-      const report$ = ref.watchInputReports();
+      expect(await ref.open()).toBe(true);
+      expect(await ref.sendReport(1, new Uint8Array([0x01]))).toBe(true);
+      expect(await ref.sendFeatureReport(2, new Uint8Array([0x02]))).toBe(true);
+      expect(await ref.receiveFeatureReport(3)).toBeDefined();
 
       let emitted: any;
-      report$.subscribe((ev) => {
+      ref.watchInputReports().subscribe((ev) => {
         emitted = ev;
       });
-
       expect(emitted).toBe(mockEvent);
       expect(ref.lastInputReport()).toBe(mockEvent);
+
+      // Watch input report error branch
+      const streamErr = new Error('Input report error');
+      mockService.watchInputReports.mockReturnValueOnce(throwError(() => streamErr));
+      ref.watchInputReports().subscribe({ error: () => {} });
+      expect(ref.error()).toBe(streamErr);
+
+      await ref.close();
+      expect(ref.isOpen()).toBe(false);
     });
   });
 

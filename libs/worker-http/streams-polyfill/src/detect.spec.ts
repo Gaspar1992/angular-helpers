@@ -89,4 +89,102 @@ describe('needsPolyfill', () => {
   it('returns false for unknown user agent', () => {
     expect(needsPolyfill('')).toBe(false);
   });
+
+  it('performs feature detection via ReadableStream and MessageChannel when userAgent is omitted', () => {
+    const savedRS = globalThis.ReadableStream;
+    const savedMC = globalThis.MessageChannel;
+
+    try {
+      // 1. When ReadableStream is undefined
+      // @ts-expect-error Testing missing ReadableStream
+      delete globalThis.ReadableStream;
+      expect(needsPolyfill()).toBe(false);
+
+      // 2. When ReadableStream constructor throws
+      globalThis.ReadableStream = class {
+        constructor() {
+          throw new Error('Cannot construct');
+        }
+      } as unknown as typeof ReadableStream;
+      expect(needsPolyfill()).toBe(true);
+
+      // Provide a working ReadableStream mock that invokes start(controller)
+      globalThis.ReadableStream = class {
+        constructor(underlyingSource?: { start?: (controller: { close: () => void }) => void }) {
+          underlyingSource?.start?.({ close: () => {} });
+        }
+      } as unknown as typeof ReadableStream;
+
+      // 3. When MessageChannel port1.postMessage throws (simulating Safari 16-17)
+      globalThis.MessageChannel = class {
+        port1 = {
+          postMessage: () => {
+            throw new DOMException('ReadableStream is not transferable', 'DataCloneError');
+          },
+          close: () => {},
+        };
+        port2 = {
+          close: () => {},
+        };
+      } as unknown as typeof MessageChannel;
+      expect(needsPolyfill()).toBe(true);
+
+      // 4. When MessageChannel port1.postMessage succeeds (modern browser)
+      globalThis.MessageChannel = class {
+        port1 = {
+          postMessage: () => {},
+          close: () => {},
+        };
+        port2 = {
+          close: () => {},
+        };
+      } as unknown as typeof MessageChannel;
+      expect(needsPolyfill()).toBe(false);
+    } finally {
+      if (savedRS !== undefined) {
+        globalThis.ReadableStream = savedRS;
+      } else {
+        // @ts-expect-error Restore undefined ReadableStream
+        delete globalThis.ReadableStream;
+      }
+      if (savedMC !== undefined) {
+        globalThis.MessageChannel = savedMC;
+      } else {
+        // @ts-expect-error Restore undefined MessageChannel
+        delete globalThis.MessageChannel;
+      }
+    }
+  });
+
+  it('handles Safari UA without Version/ match, Chromium UA, and missing or Safari navigator', () => {
+    const safariWithoutVersion =
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Safari/605.1.15';
+    expect(isLegacySafari(safariWithoutVersion)).toBe(false);
+
+    const chromiumUA = 'Mozilla/5.0 Chromium/120.0.0.0 Safari/537.36';
+    expect(isSafari(chromiumUA)).toBe(false);
+
+    const savedNav = globalThis.navigator;
+    try {
+      Object.defineProperty(globalThis, 'navigator', {
+        value: {
+          userAgent:
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15',
+        },
+        configurable: true,
+        writable: true,
+      });
+      expect(isLegacySafari()).toBe(true);
+
+      // @ts-expect-error Testing missing navigator
+      delete globalThis.navigator;
+      expect(isSafari()).toBe(false);
+    } finally {
+      Object.defineProperty(globalThis, 'navigator', {
+        value: savedNav,
+        configurable: true,
+        writable: true,
+      });
+    }
+  });
 });

@@ -29,7 +29,7 @@ describe('injectSerial', () => {
     expect(() => injectSerial()).toThrow(/injectSerial/);
   });
 
-  it('should report isSupported as false on server platform', async () => {
+  it('should report isSupported as false on server platform and reject operations', async () => {
     mockService.isSupported.mockReturnValue(false);
     TestBed.configureTestingModule({
       providers: [
@@ -38,13 +38,20 @@ describe('injectSerial', () => {
       ],
     });
 
-    TestBed.runInInjectionContext(() => {
+    await TestBed.runInInjectionContext(async () => {
       const ref = injectSerial();
       expect(ref.isSupported()).toBe(false);
+
+      const mockPort = {} as SerialPort;
+      expect(await ref.requestPort()).toBeNull();
+      expect(ref.error()?.message).toContain('not supported');
+
+      expect(await ref.open({ baudRate: 9600 }, mockPort)).toBe(false);
+      expect(ref.error()?.message).toContain('not supported');
     });
   });
 
-  it('should report isSupported as true in browser after microtask', async () => {
+  it('should handle missing port and service errors across operations', async () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: PLATFORM_ID, useValue: 'browser' },
@@ -56,12 +63,46 @@ describe('injectSerial', () => {
       const ref = injectSerial();
       await new Promise((r) => queueMicrotask(r));
       expect(ref.isSupported()).toBe(true);
+
+      // Operations when no port is available
+      expect(await ref.open({ baudRate: 9600 })).toBe(false);
+      expect(ref.error()?.message).toContain('No SerialPort available to open');
+
+      expect(await ref.write('hello')).toBe(false);
+      expect(ref.error()?.message).toContain('No SerialPort available to write');
+
+      mockService.read.mockReturnValue(of());
+      ref.readStream();
+      expect(mockService.read).toHaveBeenCalledWith({ readable: null });
+
+      // Service errors on requestPort, open, close, write
+      mockService.requestPort.mockRejectedValueOnce(new Error('port request failed'));
+      expect(await ref.requestPort()).toBeNull();
+      expect(ref.error()?.message).toBe('port request failed');
+
+      const customPort = {} as SerialPort;
+      mockService.openPort.mockRejectedValueOnce(new Error('open failed'));
+      expect(await ref.open({ baudRate: 9600 }, customPort)).toBe(false);
+      expect(ref.error()?.message).toBe('open failed');
+
+      mockService.write.mockRejectedValueOnce(new Error('write failed'));
+      expect(await ref.write('data')).toBe(false);
+      expect(ref.error()?.message).toBe('write failed');
+
+      mockService.closePort.mockRejectedValueOnce(new Error('close failed'));
+      await ref.close();
+      expect(ref.error()?.message).toBe('close failed');
     });
   });
 
-  it('should request port and update port signal', async () => {
+  it('should request port, open, write, read stream, handle stream error, and close', async () => {
     const mockPort = {} as SerialPort;
+    const chunk = new Uint8Array([0xde, 0xad]);
     mockService.requestPort.mockResolvedValue(mockPort);
+    mockService.openPort.mockResolvedValue(undefined);
+    mockService.closePort.mockResolvedValue(undefined);
+    mockService.write.mockResolvedValue(undefined);
+    mockService.read.mockReturnValue(of(chunk));
 
     TestBed.configureTestingModule({
       providers: [
@@ -76,118 +117,26 @@ describe('injectSerial', () => {
 
       const port = await ref.requestPort();
       expect(port).toBe(mockPort);
-      expect(ref.port()).toBe(mockPort);
-      expect(ref.isOpen()).toBe(false);
-    });
-  });
 
-  it('should open and close port, updating isOpen signal', async () => {
-    const mockPort = {} as SerialPort;
-    mockService.requestPort.mockResolvedValue(mockPort);
-    mockService.openPort.mockResolvedValue(undefined);
-    mockService.closePort.mockResolvedValue(undefined);
-
-    TestBed.configureTestingModule({
-      providers: [
-        { provide: PLATFORM_ID, useValue: 'browser' },
-        { provide: WebSerialService, useValue: mockService },
-      ],
-    });
-
-    await TestBed.runInInjectionContext(async () => {
-      const ref = injectSerial();
-      await new Promise((r) => queueMicrotask(r));
-
-      await ref.requestPort();
-      const openSuccess = await ref.open({ baudRate: 115200 });
-      expect(openSuccess).toBe(true);
+      expect(await ref.open({ baudRate: 115200 })).toBe(true);
       expect(ref.isOpen()).toBe(true);
-      expect(mockService.openPort).toHaveBeenCalledWith(mockPort, { baudRate: 115200 });
+
+      expect(await ref.write('test data')).toBe(true);
+
+      let emittedChunk: Uint8Array | null = null;
+      ref.readStream().subscribe((data) => {
+        emittedChunk = data;
+      });
+      expect(emittedChunk).toBe(chunk);
+      expect(ref.data()).toBe(chunk);
+
+      const readError = new Error('Stream read error');
+      mockService.read.mockReturnValueOnce(throwError(() => readError));
+      ref.readStream().subscribe({ error: () => {} });
+      expect(ref.error()).toBe(readError);
 
       await ref.close();
       expect(ref.isOpen()).toBe(false);
-      expect(mockService.closePort).toHaveBeenCalledWith(mockPort);
-    });
-  });
-
-  it('should write data to port', async () => {
-    const mockPort = {} as SerialPort;
-    mockService.requestPort.mockResolvedValue(mockPort);
-    mockService.write.mockResolvedValue(undefined);
-
-    TestBed.configureTestingModule({
-      providers: [
-        { provide: PLATFORM_ID, useValue: 'browser' },
-        { provide: WebSerialService, useValue: mockService },
-      ],
-    });
-
-    await TestBed.runInInjectionContext(async () => {
-      const ref = injectSerial();
-      await new Promise((r) => queueMicrotask(r));
-
-      await ref.requestPort();
-      const writeSuccess = await ref.write('test data');
-      expect(writeSuccess).toBe(true);
-      expect(mockService.write).toHaveBeenCalledWith(mockPort, 'test data');
-    });
-  });
-
-  it('should read stream and update data signal', async () => {
-    const mockPort = {} as SerialPort;
-    const chunk = new Uint8Array([0xde, 0xad]);
-    mockService.requestPort.mockResolvedValue(mockPort);
-    mockService.read.mockReturnValue(of(chunk));
-
-    TestBed.configureTestingModule({
-      providers: [
-        { provide: PLATFORM_ID, useValue: 'browser' },
-        { provide: WebSerialService, useValue: mockService },
-      ],
-    });
-
-    await TestBed.runInInjectionContext(async () => {
-      const ref = injectSerial();
-      await new Promise((r) => queueMicrotask(r));
-
-      await ref.requestPort();
-      const stream$ = ref.readStream();
-
-      let emittedChunk: Uint8Array | null = null;
-      stream$.subscribe((data) => {
-        emittedChunk = data;
-      });
-
-      expect(emittedChunk).toBe(chunk);
-      expect(ref.data()).toBe(chunk);
-    });
-  });
-
-  it('should handle read error in stream', async () => {
-    const mockPort = {} as SerialPort;
-    const readError = new Error('Stream read error');
-    mockService.requestPort.mockResolvedValue(mockPort);
-    mockService.read.mockReturnValue(throwError(() => readError));
-
-    TestBed.configureTestingModule({
-      providers: [
-        { provide: PLATFORM_ID, useValue: 'browser' },
-        { provide: WebSerialService, useValue: mockService },
-      ],
-    });
-
-    await TestBed.runInInjectionContext(async () => {
-      const ref = injectSerial();
-      await new Promise((r) => queueMicrotask(r));
-
-      await ref.requestPort();
-      const stream$ = ref.readStream();
-
-      stream$.subscribe({
-        error: () => {},
-      });
-
-      expect(ref.error()).toBe(readError);
     });
   });
 

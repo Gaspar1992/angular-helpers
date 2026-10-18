@@ -241,4 +241,133 @@ describe('offlineSyncQueueInterceptor', () => {
     expect(result.body.pendingCount).toBe(0);
     expect(dbStore.size).toBe(0);
   });
+
+  it('bypasses queue when bypass header is present', async () => {
+    (globalThis as any).navigator.onLine = false;
+    const next = vi.fn().mockResolvedValue(makeResponse());
+    const interceptor = offlineSyncQueueInterceptor({ bypassHeader: 'X-Custom-Bypass' });
+
+    const bypassReq: SerializableRequest = {
+      ...req,
+      headers: { 'x-custom-bypass': ['true'] },
+    };
+
+    const result = await interceptor(bypassReq, next);
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(result.status).toBe(201);
+  });
+
+  it('returns 503 when synthetic drain is requested while offline, and 500 when drain fails', async () => {
+    dbStore.set('xyz', { id: 'xyz', timestamp: Date.now(), request: req });
+    const drainReq: SerializableRequest = {
+      ...req,
+      method: 'GET',
+      url: 'https://angular-helpers.local/offline-sync-drain',
+    };
+
+    // Offline drain attempt -> 503
+    (globalThis as any).navigator.onLine = false;
+    const interceptor = offlineSyncQueueInterceptor();
+    const offlineDrainPromise = interceptor(drainReq, vi.fn());
+    await vi.runAllTimersAsync();
+    const offlineRes = await offlineDrainPromise;
+    expect(offlineRes.status).toBe(503);
+    expect((offlineRes.body as any).success).toBe(false);
+
+    // Online drain failure -> 500
+    (globalThis as any).navigator.onLine = true;
+    const failingNext = vi.fn().mockRejectedValue(new Error('Backend 500'));
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const failDrainPromise = interceptor(drainReq, failingNext);
+    await vi.runAllTimersAsync();
+    const failRes = await failDrainPromise;
+    expect(failRes.status).toBe(500);
+    expect((failRes.body as any).message).toBe('Backend 500');
+    errorSpy.mockRestore();
+  });
+
+  it('handles background drain failure gracefully during normal online request and tests DB/navigator edge cases', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    dbStore.set('fail-1', { id: 'fail-1', timestamp: Date.now(), request: req });
+
+    const interceptor = offlineSyncQueueInterceptor();
+    const next = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('Replay failed'))
+      .mockResolvedValueOnce(makeResponse());
+
+    const normalPromise = interceptor({ ...req, method: 'GET' }, next);
+    await vi.runAllTimersAsync();
+    const res = await normalPromise;
+    expect(res.status).toBe(201);
+
+    // Test missing indexedDB when offline mutation occurs -> throws enqueue error
+    delete (globalThis as any).indexedDB;
+    (globalThis as any).navigator.onLine = false;
+    const noDbInterceptor = offlineSyncQueueInterceptor();
+    await expect(noDbInterceptor(req, vi.fn())).rejects.toThrow(/No hay conexión a internet/);
+
+    // Test getQueuedRequests returning [] when indexedDB is missing
+    const statusReq: SerializableRequest = {
+      ...req,
+      method: 'GET',
+      url: 'https://angular-helpers.local/offline-sync-status',
+    };
+    delete (globalThis as any).navigator;
+    const statusRes = await noDbInterceptor(statusReq, vi.fn());
+    expect(statusRes.body).toEqual({ online: true, pendingCount: 0 });
+
+    // Test onupgradeneeded creating object store when not present and IDB error callbacks
+    const createObjectStoreSpy = vi.fn();
+    (globalThis as any).indexedDB = {
+      open: vi.fn().mockImplementation(() => {
+        const openReq: any = {
+          result: {
+            objectStoreNames: { contains: () => false },
+            createObjectStore: createObjectStoreSpy,
+            transaction: () => ({
+              objectStore: () => ({
+                add: () => {
+                  const r: any = { error: new Error('add error') };
+                  queueMicrotask(() => r.onerror?.());
+                  return r;
+                },
+                getAll: () => {
+                  const r: any = { error: new Error('getAll error') };
+                  queueMicrotask(() => r.onerror?.());
+                  return r;
+                },
+              }),
+            }),
+          },
+        };
+        queueMicrotask(() => {
+          openReq.onupgradeneeded?.();
+          openReq.onsuccess?.();
+        });
+        return openReq;
+      }),
+    };
+    Object.defineProperty(globalThis, 'navigator', {
+      value: { onLine: false },
+      configurable: true,
+      writable: true,
+    });
+    const upgradeInterceptor = offlineSyncQueueInterceptor();
+    await expect(upgradeInterceptor(req, vi.fn())).rejects.toThrow(/No hay conexión a internet/);
+    expect(createObjectStoreSpy).toHaveBeenCalledWith('requests', { keyPath: 'id' });
+
+    Object.defineProperty(globalThis, 'navigator', {
+      value: { onLine: true },
+      configurable: true,
+      writable: true,
+    });
+    const normalGetRes = await upgradeInterceptor(
+      { ...req, method: 'GET' },
+      vi.fn().mockResolvedValue(makeResponse()),
+    );
+    expect(normalGetRes.status).toBe(201);
+
+    errorSpy.mockRestore();
+  });
 });

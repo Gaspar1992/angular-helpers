@@ -63,12 +63,28 @@ describe('render', () => {
     expect(result.component.pass).toBe('123');
   });
 
-  it('should support dynamic host templates', async () => {
+  it('should support dynamic host templates with hostProperties', async () => {
     const result = await render(TestComponent, {
-      template: '<app-test></app-test>',
+      template: '<app-test [data]="hostData"></app-test>',
+      hostProperties: { hostData: 42 },
+      inputs: { data: 10 },
     });
 
     expect(result.component).toBeDefined();
-    expect(result.component.val).toBe(1);
+    expect(result.component.data()).toBe(42);
+    expect(result.queryAll('input').length).toBe(2);
+  });
+
+  it('should throw errors when elements are not found', async () => {
+    const result = await render(TestComponent, { detectInitialChanges: false });
+    expect(() => result.click('#non-existent')).toThrow(/Element not found for selector/);
+    expect(() => result.type('#non-existent', 'val')).toThrow(/Element not found for selector/);
+    expect(() => result.fillForm('#non-existent-form', {})).toThrow(/Form not found for selector/);
+  });
+
+  it('should throw error when component is not found in custom template', async () => {
+    await expect(
+      render(TestComponent, { template: '<div>No component here</div>' }),
+    ).rejects.toThrow(/Could not find directive or component/);
   });
 });

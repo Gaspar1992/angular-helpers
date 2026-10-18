@@ -19,7 +19,14 @@ describe('VibrateFeedbackDirective', () => {
 
   beforeEach(async () => {
     result = await render(VibrateFeedbackDirective, {
-      template: '<button vibrateFeedback>Vibrate</button>',
+      template: `
+        <button id="light" vibrateFeedback="light">Light</button>
+        <button id="success" vibrateFeedback="success">Success</button>
+        <button id="error" vibrateFeedback="error">Error</button>
+        <button id="notification" vibrateFeedback="notification">Notification</button>
+        <button id="doubleTap" vibrateFeedback="doubleTap">DoubleTap</button>
+        <button id="custom" [vibrateFeedback]="[100, 50, 100]">Custom</button>
+      `,
       providers: [{ provide: VibrationService, useClass: MockVibrationService }],
     });
 
@@ -28,13 +35,33 @@ describe('VibrateFeedbackDirective', () => {
     ) as unknown as MockVibrationService;
   });
 
-  it('should create and trigger vibration on click', () => {
-    expect(result.fixture.nativeElement.querySelector('button')).toBeTruthy();
-
-    // Simulate DOM click
-    result.click('button');
-
-    // Default light feedback is 50ms
+  it('should trigger default light vibration (50ms) on click', () => {
+    result.click('#light');
     expect(vibrationService.vibrate).toHaveBeenCalledWith(50);
+  });
+
+  it('should trigger preset vibrations (success, error, notification, doubleTap)', () => {
+    result.click('#success');
+    expect(vibrationService.success).toHaveBeenCalledTimes(1);
+
+    result.click('#error');
+    expect(vibrationService.error).toHaveBeenCalledTimes(1);
+
+    result.click('#notification');
+    expect(vibrationService.notification).toHaveBeenCalledTimes(1);
+
+    result.click('#doubleTap');
+    expect(vibrationService.doubleTap).toHaveBeenCalledTimes(1);
+  });
+
+  it('should trigger custom vibration pattern when passed a number or array', () => {
+    result.click('#custom');
+    expect(vibrationService.vibrate).toHaveBeenCalledWith([100, 50, 100]);
+  });
+
+  it('should do nothing when vibration service is not supported', () => {
+    vibrationService.isSupported.mockReturnValue(false);
+    result.click('#light');
+    expect(vibrationService.vibrate).not.toHaveBeenCalled();
   });
 });

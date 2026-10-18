@@ -2,7 +2,7 @@ import '@angular/compiler';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { PLATFORM_ID, NgZone } from '@angular/core';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { DeviceOrientationService } from './device-orientation.service';
 import { BrowserCapabilityService } from './browser-capability.service';
 
@@ -16,6 +16,9 @@ describe('DeviceOrientationService', () => {
       run: vi.fn((fn) => fn()),
     } as unknown as NgZone;
 
+    vi.stubGlobal('DeviceOrientationEvent', class {});
+    vi.stubGlobal('isSecureContext', true);
+
     TestBed.configureTestingModule({
       providers: [
         DeviceOrientationService,
@@ -24,25 +27,42 @@ describe('DeviceOrientationService', () => {
       ],
     });
     service = TestBed.inject(DeviceOrientationService);
-
-    vi.stubGlobal('DeviceOrientationEvent', class {});
-    vi.stubGlobal('isSecureContext', true);
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
   });
 
-  it('should be created', () => {
+  it('should be created and check isSupported', () => {
     expect(service).toBeTruthy();
+    expect(service.isSupported()).toBe(true);
+    expect(service.permissionState()).toBe('granted');
   });
 
-  it('should check isSupported', () => {
-    expect(service.isSupported()).toBe(true);
+  it('should initialize permissionState to prompt when requestPermission exists and request permission', async () => {
+    const requestPermissionMock = vi.fn().mockResolvedValue('granted');
+    vi.stubGlobal(
+      'DeviceOrientationEvent',
+      Object.assign(class {}, { requestPermission: requestPermissionMock }),
+    );
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        DeviceOrientationService,
+        BrowserCapabilityService,
+        { provide: NgZone, useValue: mockZone },
+      ],
+    });
+    const promptService = TestBed.inject(DeviceOrientationService);
+    expect(promptService.permissionState()).toBe('prompt');
+
+    const state = await promptService.requestPermission();
+    expect(state).toBe('granted');
+    expect(promptService.permissionState()).toBe('granted');
   });
 
   it('should watch events and emit them', async () => {
-    // We mock window.addEventListener
     const listeners: Record<string, EventListener> = {};
     const addEventListenerSpy = vi
       .spyOn(window, 'addEventListener')
@@ -53,7 +73,6 @@ describe('DeviceOrientationService', () => {
     const watch$ = service.watch();
     const promise = firstValueFrom(watch$);
 
-    // trigger event
     if (listeners['deviceorientation']) {
       listeners['deviceorientation']({
         alpha: 90,
@@ -74,8 +93,7 @@ describe('DeviceOrientationService', () => {
     addEventListenerSpy.mockRestore();
   });
 
-  it('should return null in server environment', () => {
-    // Configure TestBed for SSR
+  it('should return denied permission and null stream in server environment', async () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -86,5 +104,9 @@ describe('DeviceOrientationService', () => {
     });
     const ssrService = TestBed.inject(DeviceOrientationService);
     expect(ssrService.isSupported()).toBe(false);
+    expect(ssrService.permissionState()).toBe('denied');
+    expect(await ssrService.requestPermission()).toBe('denied');
+    expect(await firstValueFrom(ssrService.watch())).toBeNull();
+    expect(() => (ssrService as any).ensureSupported()).toThrow(/deviceOrientation/);
   });
 });

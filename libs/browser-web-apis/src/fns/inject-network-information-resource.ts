@@ -44,7 +44,6 @@ export function injectNetworkInformationResource(): NetworkInformationResourceRe
   }
 
   const resource = rxResource<NetworkInformation, void>({
-    params: () => undefined,
     stream: () => {
       if (!isBrowser) {
         return new Observable<NetworkInformation>((subscriber) => {
