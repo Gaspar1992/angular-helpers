@@ -111,4 +111,12 @@ describe('crypto.utils', () => {
       }
     }
   });
+
+  it('should encrypt and decrypt payloads larger than 100 KB without stack overflow', async () => {
+    const largeText = 'A'.repeat(120_000);
+    const cipherText = await encrypt(largeText, secret);
+    const decrypted = await decrypt(cipherText, secret);
+    expect(decrypted.length).toBe(120_000);
+    expect(decrypted).toBe(largeText);
+  });
 });

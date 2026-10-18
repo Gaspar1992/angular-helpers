@@ -7,6 +7,7 @@ import {
   type HttpEvent,
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { bufferToHex } from '@angular-helpers/core/utils';
 import { WebCryptoService } from './web-crypto.service';
 
 export type CsrfStorageTarget = 'local' | 'session';
@@ -59,10 +60,7 @@ export class CsrfService {
    * automatically — call {@link storeToken} to save it.
    */
   generateToken(): string {
-    const bytes = this.webCrypto.generateRandomBytes(DEFAULT_TOKEN_BYTES);
-    return Array.from(bytes)
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
+    return bufferToHex(this.webCrypto.generateRandomBytes(DEFAULT_TOKEN_BYTES));
   }
 
   /**

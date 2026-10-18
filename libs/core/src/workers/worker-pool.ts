@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-imports */
 import { DestroyRef, inject } from '@angular/core';
+import { detectTransferables } from '@angular-helpers/core/utils';
 import { injectPlatform } from '../utils/platform';
-import { isTransferable } from '../utils/transferables';
 
 export function injectWorkerPool(
   workerUrl: URL | string,
@@ -274,7 +274,7 @@ export class WorkerPool {
       }
 
       // Determine transferable objects to optimize IPC communication (zero-copy transfer)
-      const transferList = explicitTransfer || findTransferables(data);
+      const transferList = explicitTransfer || detectTransferables(data);
 
       this.worker!.postMessage(
         {
@@ -296,56 +296,4 @@ export class WorkerPool {
     this.workerPromise = null;
     this.initError = null;
   }
-}
-
-/**
- * Recursively scans a value/object structure to collect all Transferable objects (ArrayBuffer, MessagePort, etc.).
- * Guarantees no infinite loops via WeakSet checks and is environment-safe.
- */
-function findTransferables(value: any): Transferable[] {
-  const transfer = new Set<Transferable>();
-  const visited = new WeakSet<any>();
-
-  function scan(val: any): void {
-    if (val === null || val === undefined || typeof val !== 'object') {
-      return;
-    }
-
-    if (visited.has(val)) {
-      return;
-    }
-    visited.add(val);
-
-    if (isTransferable(val)) {
-      transfer.add(val);
-      return;
-    }
-
-    // Handle common typed arrays view buffer transfer
-    if (ArrayBuffer.isView(val)) {
-      if (val.buffer && isTransferable(val.buffer)) {
-        transfer.add(val.buffer);
-      }
-      return;
-    }
-
-    // Handle standard Arrays
-    if (Array.isArray(val)) {
-      for (const item of val) {
-        scan(item);
-      }
-    } else {
-      // Handle plain objects
-      for (const key of Object.keys(val)) {
-        try {
-          scan(val[key]);
-        } catch {
-          // Guard against any getter property crashes
-        }
-      }
-    }
-  }
-
-  scan(value);
-  return Array.from(transfer);
 }

@@ -1,3 +1,5 @@
+import { base64ToBytes, bytesToBase64 } from '@angular-helpers/core/utils';
+
 const ENCRYPTION_SALT = new Uint8Array([7, 21, 14, 9, 3, 18, 5, 12, 1, 20, 16, 2, 8, 15, 6, 11]);
 
 function getCrypto(): Crypto | null {
@@ -59,7 +61,7 @@ export async function encrypt(text: string, secret: string): Promise<string> {
   combined.set(iv, 0);
   combined.set(cipherBytes, iv.length);
 
-  return btoa(String.fromCharCode(...combined));
+  return bytesToBase64(combined);
 }
 
 /**
@@ -69,12 +71,7 @@ export async function decrypt(base64: string, secret: string): Promise<string> {
   const dec = new TextDecoder();
   const key = await getCryptoKey(secret);
 
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-
+  const bytes = base64ToBytes(base64);
   const iv = bytes.slice(0, 12);
   const ciphertext = bytes.slice(12);
 

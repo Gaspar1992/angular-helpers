@@ -1,1 +1,1 @@
-export { isTransferable } from '@angular-helpers/core/utils';
+export { isTransferable, detectTransferables } from '@angular-helpers/core/utils';

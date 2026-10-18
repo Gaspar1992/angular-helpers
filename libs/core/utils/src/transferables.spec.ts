@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { isTransferable } from './transferables';
+import { detectTransferables, isTransferable } from './transferables';
 
 describe('isTransferable', () => {
   describe('primitives, null, undefined, and functions', () => {
@@ -181,5 +181,52 @@ describe('isTransferable', () => {
         if (originalTransformStream) globalThis.TransformStream = originalTransformStream;
       }
     });
+  });
+});
+
+describe('detectTransferables', () => {
+  it('returns empty array for primitives, null, and undefined', () => {
+    expect(detectTransferables(null)).toEqual([]);
+    expect(detectTransferables(undefined)).toEqual([]);
+    expect(detectTransferables('text')).toEqual([]);
+    expect(detectTransferables(123)).toEqual([]);
+  });
+
+  it('collects nested transferables and typed-array buffers with deduplication', () => {
+    const buf1 = new ArrayBuffer(8);
+    const view = new Uint8Array(16);
+    const payload = {
+      a: buf1,
+      b: [buf1, { deep: view }],
+    };
+
+    const result = detectTransferables(payload);
+    expect(result).toEqual([buf1, view.buffer]);
+  });
+
+  it('respects maxDepth parameter', () => {
+    const shallow = new ArrayBuffer(4);
+    const deep = new ArrayBuffer(8);
+    const payload = {
+      top: shallow,
+      nested: { inner: deep },
+    };
+
+    expect(detectTransferables(payload, 1)).toEqual([shallow]);
+    expect(detectTransferables(payload, 2)).toEqual([shallow, deep]);
+  });
+
+  it('safely handles circular references and throwing getters', () => {
+    const buf = new ArrayBuffer(8);
+    const circular: Record<string, unknown> = { buf };
+    circular['self'] = circular;
+    Object.defineProperty(circular, 'explosive', {
+      enumerable: true,
+      get() {
+        throw new Error('getter boom');
+      },
+    });
+
+    expect(detectTransferables(circular)).toEqual([buf]);
   });
 });

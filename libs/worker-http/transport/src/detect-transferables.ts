@@ -1,4 +1,4 @@
-import { isTransferable } from '@angular-helpers/core';
+import { detectTransferables as coreDetectTransferables } from '@angular-helpers/core/utils';
 
 /**
  * Scans a payload one level deep and collects every `Transferable` instance
@@ -19,46 +19,5 @@ import { isTransferable } from '@angular-helpers/core';
  *   no transferable is found; `postMessage` accepts `[]` safely.
  */
 export function detectTransferables(payload: unknown): Transferable[] {
-  if (payload === null || payload === undefined) return [];
-  if (typeof payload !== 'object') return [];
-
-  const found: Transferable[] = [];
-  const seen = new Set<Transferable>();
-
-  const collect = (value: unknown): void => {
-    if (value === null || value === undefined) return;
-    if (isTransferable(value)) {
-      if (!seen.has(value)) {
-        seen.add(value);
-        found.push(value);
-      }
-      return;
-    }
-    if (ArrayBuffer.isView(value)) {
-      const view = value as ArrayBufferView;
-      if (view.buffer && isTransferable(view.buffer)) {
-        if (!seen.has(view.buffer)) {
-          seen.add(view.buffer);
-          found.push(view.buffer);
-        }
-      }
-      return;
-    }
-  };
-
-  if (isTransferable(payload) || ArrayBuffer.isView(payload)) {
-    collect(payload);
-    return found;
-  }
-
-  if (Array.isArray(payload)) {
-    for (const item of payload as unknown[]) collect(item);
-    return found;
-  }
-
-  for (const key of Object.keys(payload as Record<string, unknown>)) {
-    collect((payload as Record<string, unknown>)[key]);
-  }
-
-  return found;
+  return coreDetectTransferables(payload, 1);
 }

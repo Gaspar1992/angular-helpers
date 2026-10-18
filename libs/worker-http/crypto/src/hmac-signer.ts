@@ -1,18 +1,5 @@
+import { bufferToHex, toArrayBuffer } from '@angular-helpers/core/utils';
 import type { HmacSigner, HmacSignerConfig } from './worker-crypto.types';
-
-function toArrayBuffer(data: string | ArrayBuffer | Uint8Array): ArrayBuffer {
-  if (typeof data === 'string') {
-    return new TextEncoder().encode(data).buffer as ArrayBuffer;
-  }
-  if (data instanceof Uint8Array) {
-    return data.buffer as ArrayBuffer;
-  }
-  return data;
-}
-
-function arrayBufferToHex(buffer: ArrayBuffer): string {
-  return [...new Uint8Array(buffer)].map((b) => b.toString(16).padStart(2, '0')).join('');
-}
 
 /**
  * Creates an HMAC signer using the Web Crypto API.
@@ -53,7 +40,7 @@ export async function createHmacSigner(config: HmacSignerConfig): Promise<HmacSi
 
     async signHex(data: string | ArrayBuffer | Uint8Array): Promise<string> {
       const signature = await crypto.subtle.sign('HMAC', cryptoKey, toArrayBuffer(data));
-      return arrayBufferToHex(signature);
+      return bufferToHex(signature);
     },
 
     async verify(

@@ -21,3 +21,62 @@ export function isTransferable(value: unknown): value is Transferable {
 
   return false;
 }
+
+/**
+ * Scans a payload up to `maxDepth` levels deep and collects every unique
+ * `Transferable` instance (including the underlying `ArrayBuffer` of typed-array views)
+ * for zero-copy `postMessage` transfer.
+ *
+ * Uses a `WeakSet` to guard against circular references and ignores getter errors.
+ */
+export function detectTransferables(payload: unknown, maxDepth = Infinity): Transferable[] {
+  if (payload === null || payload === undefined || typeof payload !== 'object') {
+    return [];
+  }
+
+  const transfer = new Set<Transferable>();
+  const visited = new WeakSet<object>();
+
+  const scan = (val: unknown, depth: number): void => {
+    if (val === null || val === undefined || typeof val !== 'object') {
+      return;
+    }
+
+    if (isTransferable(val)) {
+      transfer.add(val);
+      return;
+    }
+
+    if (typeof ArrayBuffer !== 'undefined' && ArrayBuffer.isView(val)) {
+      const view = val as ArrayBufferView;
+      if (view.buffer && isTransferable(view.buffer)) {
+        transfer.add(view.buffer);
+      }
+      return;
+    }
+
+    const obj = val as object;
+    if (depth >= maxDepth || visited.has(obj)) {
+      return;
+    }
+    visited.add(obj);
+
+    if (Array.isArray(val)) {
+      for (const item of val as unknown[]) {
+        scan(item, depth + 1);
+      }
+    } else {
+      const record = val as Record<string, unknown>;
+      for (const key of Object.keys(record)) {
+        try {
+          scan(record[key], depth + 1);
+        } catch {
+          // Guard against getter property crashes
+        }
+      }
+    }
+  };
+
+  scan(payload, 0);
+  return Array.from(transfer);
+}

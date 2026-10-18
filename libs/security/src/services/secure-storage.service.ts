@@ -1,5 +1,6 @@
 import { Injectable, InjectionToken, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { base64ToBytes, bytesToBase64 } from '@angular-helpers/core/utils';
 
 export type StorageTarget = 'local' | 'session';
 
@@ -79,16 +80,16 @@ export class SecureStorageService {
     let salt: Uint8Array<ArrayBuffer>;
 
     if (explicitSalt) {
-      salt = this.base64ToBytes(explicitSalt);
+      salt = base64ToBytes(explicitSalt);
     } else {
       const stored = this.nativeStorage.getItem(SALT_STORAGE_KEY);
       if (stored) {
-        salt = this.base64ToBytes(stored);
+        salt = base64ToBytes(stored);
       } else {
         salt = crypto.getRandomValues(
           new Uint8Array(new ArrayBuffer(16)),
         ) as Uint8Array<ArrayBuffer>;
-        this.nativeStorage.setItem(SALT_STORAGE_KEY, this.bytesToBase64(salt));
+        this.nativeStorage.setItem(SALT_STORAGE_KEY, bytesToBase64(salt));
       }
     }
 
@@ -136,8 +137,8 @@ export class SecureStorageService {
     const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, plaintext);
 
     const entry: StoredEntry = {
-      iv: this.bytesToBase64(iv),
-      ct: this.bytesToBase64(ciphertext),
+      iv: bytesToBase64(iv),
+      ct: bytesToBase64(ciphertext),
     };
 
     this.nativeStorage.setItem(this.buildStorageKey(key, namespace), JSON.stringify(entry));
@@ -167,8 +168,8 @@ export class SecureStorageService {
 
     try {
       const cryptoKey = await this.ensureKey();
-      const iv = this.base64ToBytes(entry.iv);
-      const ciphertext = this.base64ToBytes(entry.ct);
+      const iv = base64ToBytes(entry.iv);
+      const ciphertext = base64ToBytes(entry.ct);
       const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, ciphertext);
       return JSON.parse(new TextDecoder().decode(decrypted)) as T;
     } catch {
@@ -234,18 +235,5 @@ export class SecureStorageService {
         'SecureStorageService is not supported in this environment (requires browser + Web Crypto API)',
       );
     }
-  }
-
-  private bytesToBase64(buffer: ArrayBuffer | Uint8Array): string {
-    const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
-    let binary = '';
-    for (let i = 0; i < bytes.length; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary);
-  }
-
-  private base64ToBytes(base64: string): Uint8Array<ArrayBuffer> {
-    return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0)) as Uint8Array<ArrayBuffer>;
   }
 }

@@ -1,14 +1,5 @@
+import { toArrayBuffer } from '@angular-helpers/core/utils';
 import type { AesEncryptor, AesEncryptorConfig, EncryptedPayload } from './worker-crypto.types';
-
-function toArrayBuffer(data: string | ArrayBuffer | Uint8Array): ArrayBuffer {
-  if (typeof data === 'string') {
-    return new TextEncoder().encode(data).buffer as ArrayBuffer;
-  }
-  if (data instanceof Uint8Array) {
-    return data.buffer as ArrayBuffer;
-  }
-  return data;
-}
 
 /**
  * Creates an AES encryptor using the Web Crypto API.

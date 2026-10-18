@@ -1,5 +1,6 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { bufferToHex, hexToBytes, toArrayBuffer } from '@angular-helpers/core/utils';
 
 export type HashAlgorithm = 'SHA-1' | 'SHA-256' | 'SHA-384' | 'SHA-512';
 
@@ -36,10 +37,8 @@ export class WebCryptoService {
   async hash(data: string | ArrayBuffer, algorithm: HashAlgorithm = 'SHA-256'): Promise<string> {
     this.ensureSecureContext();
 
-    const buffer = typeof data === 'string' ? new TextEncoder().encode(data) : data;
-
-    const hashBuffer = await this.subtle.digest(algorithm, buffer);
-    return this.bufferToHex(hashBuffer);
+    const hashBuffer = await this.subtle.digest(algorithm, toArrayBuffer(data));
+    return bufferToHex(hashBuffer);
   }
 
   async generateAesKey(length: AesKeyLength = 256): Promise<CryptoKey> {
@@ -50,10 +49,8 @@ export class WebCryptoService {
   async encryptAes(key: CryptoKey, data: string | ArrayBuffer): Promise<AesEncryptResult> {
     this.ensureSecureContext();
 
-    const buffer = typeof data === 'string' ? new TextEncoder().encode(data) : data;
-
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    const ciphertext = await this.subtle.encrypt({ name: 'AES-GCM', iv }, key, buffer);
+    const ciphertext = await this.subtle.encrypt({ name: 'AES-GCM', iv }, key, toArrayBuffer(data));
 
     return { ciphertext, iv };
   }
@@ -106,9 +103,8 @@ export class WebCryptoService {
    */
   async sign(key: CryptoKey, data: string | ArrayBuffer): Promise<string> {
     this.ensureSecureContext();
-    const buffer = typeof data === 'string' ? new TextEncoder().encode(data) : data;
-    const signature = await this.subtle.sign('HMAC', key, buffer);
-    return this.bufferToHex(signature);
+    const signature = await this.subtle.sign('HMAC', key, toArrayBuffer(data));
+    return bufferToHex(signature);
   }
 
   /**
@@ -119,14 +115,13 @@ export class WebCryptoService {
 
     let sigBytes: Uint8Array<ArrayBuffer>;
     try {
-      sigBytes = this.hexToBytes(signature);
+      sigBytes = hexToBytes(signature);
     } catch {
       return false;
     }
 
     try {
-      const buffer = typeof data === 'string' ? new TextEncoder().encode(data) : data;
-      return await this.subtle.verify('HMAC', key, sigBytes, buffer);
+      return await this.subtle.verify('HMAC', key, sigBytes, toArrayBuffer(data));
     } catch {
       return false;
     }
@@ -144,23 +139,6 @@ export class WebCryptoService {
       true,
       ['sign', 'verify'],
     );
-  }
-
-  private bufferToHex(buffer: ArrayBuffer): string {
-    return Array.from(new Uint8Array(buffer))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
-  }
-
-  private hexToBytes(hex: string): Uint8Array<ArrayBuffer> {
-    if (hex.length % 2 !== 0) throw new Error('Invalid hex string');
-    const bytes = new Uint8Array(new ArrayBuffer(hex.length / 2));
-    for (let i = 0; i < hex.length; i += 2) {
-      const byte = parseInt(hex.substring(i, i + 2), 16);
-      if (isNaN(byte)) throw new Error('Invalid hex string');
-      bytes[i / 2] = byte;
-    }
-    return bytes;
   }
 
   private hmacHashName(algorithm: HmacAlgorithm): string {

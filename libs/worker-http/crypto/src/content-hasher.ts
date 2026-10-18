@@ -1,18 +1,5 @@
+import { bufferToHex, toArrayBuffer } from '@angular-helpers/core/utils';
 import type { ContentHasher, HashAlgorithm } from './worker-crypto.types';
-
-function toArrayBuffer(data: string | ArrayBuffer | Uint8Array): ArrayBuffer {
-  if (typeof data === 'string') {
-    return new TextEncoder().encode(data).buffer as ArrayBuffer;
-  }
-  if (data instanceof Uint8Array) {
-    return data.buffer as ArrayBuffer;
-  }
-  return data;
-}
-
-function arrayBufferToHex(buffer: ArrayBuffer): string {
-  return [...new Uint8Array(buffer)].map((b) => b.toString(16).padStart(2, '0')).join('');
-}
 
 /**
  * Creates a content hasher using the Web Crypto API.
@@ -34,7 +21,7 @@ export function createContentHasher(algorithm: HashAlgorithm = 'SHA-256'): Conte
 
     async hashHex(data: string | ArrayBuffer | Uint8Array): Promise<string> {
       const hash = await crypto.subtle.digest(algorithm, toArrayBuffer(data));
-      return arrayBufferToHex(hash);
+      return bufferToHex(hash);
     },
   };
 }
