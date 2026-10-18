@@ -31,7 +31,9 @@ export function injectPerformanceObserver(
   const entries = signal<PerformanceEntryList>([]);
 
   if (isPlatformBrowser(platformId) && isPerformanceObserverSupported()) {
-    const sub = performanceObserverStream(config).subscribe((e) => entries.set(e));
+    const sub = performanceObserverStream(config).subscribe((e) =>
+      entries.update((prev) => [...prev, ...e]),
+    );
     destroyRef.onDestroy(() => sub.unsubscribe());
   }
 

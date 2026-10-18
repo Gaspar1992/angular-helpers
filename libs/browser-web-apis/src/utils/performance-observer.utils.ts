@@ -18,6 +18,7 @@ export interface PerformanceObserverConfig {
   entryTypes?: PerformanceEntryType[];
   type?: PerformanceEntryType;
   buffered?: boolean;
+  durationThreshold?: number;
 }
 
 export function isPerformanceObserverSupported(): boolean {
@@ -32,10 +33,20 @@ export function performanceObserverStream(
       subscriber.next(list.getEntries());
     });
 
-    if (config.type) {
-      observer.observe({ type: config.type, buffered: config.buffered ?? true });
-    } else if (config.entryTypes) {
-      observer.observe({ entryTypes: config.entryTypes });
+    try {
+      if (config.type) {
+        observer.observe({
+          type: config.type,
+          buffered: config.buffered ?? true,
+          ...(config.durationThreshold !== undefined
+            ? { durationThreshold: config.durationThreshold }
+            : {}),
+        } as PerformanceObserverInit);
+      } else if (config.entryTypes) {
+        observer.observe({ entryTypes: config.entryTypes });
+      }
+    } catch {
+      // Ignore unsupported entry types in browsers (e.g., Firefox/Safari lacking layout-shift or event)
     }
 
     return () => observer.disconnect();

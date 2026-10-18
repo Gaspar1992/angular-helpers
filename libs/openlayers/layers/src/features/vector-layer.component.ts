@@ -9,6 +9,7 @@ import {
   effect,
   inject,
   input,
+  untracked,
 } from '@angular/core';
 import { type Feature, OlMapService } from '@angular-helpers/openlayers/core';
 import FeatureFormat from 'ol/format/Feature';
@@ -161,12 +162,28 @@ export class OlVectorLayerComponent {
     });
 
     effect(() => {
-      const config = this.resolvedSourceConfig();
+      const src = this.source();
+      const url =
+        typeof src === 'string'
+          ? src
+          : src && !Array.isArray(src) && src.url
+            ? src.url
+            : this.url();
+      const format =
+        src && !Array.isArray(src) && typeof src === 'object' && src.format
+          ? src.format
+          : this.format();
+      const coordinateProjection =
+        src && !Array.isArray(src) && typeof src === 'object' && src.coordinateProjection
+          ? src.coordinateProjection
+          : this.coordinateProjection();
+
       if (this.layerService.getLayer(this.id())) {
         this.layerService.updateVectorLayerConfig(this.id(), {
-          url: config.url,
-          format: config.format,
-          coordinateProjection: config.coordinateProjection,
+          url,
+          format,
+          coordinateProjection,
+          features: untracked(() => this.resolvedSourceConfig().features),
         });
       }
     });

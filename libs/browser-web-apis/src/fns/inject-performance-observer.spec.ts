@@ -43,6 +43,33 @@ describe('injectPerformanceObserver', () => {
       expect(ref.entries()).toEqual(mockEntries);
       expect(ref.entryCount()).toBe(2);
       expect(ref.latestEntry()?.name).toBe('mark2');
+
+      const nextBatch = [{ name: 'mark3' }] as any;
+      poCallback({ getEntries: () => nextBatch });
+
+      expect(ref.entries()).toEqual([...mockEntries, ...nextBatch]);
+      expect(ref.entryCount()).toBe(3);
+      expect(ref.latestEntry()?.name).toBe('mark3');
+    });
+  });
+
+  it('should not throw when browser does not support an observed entry type', () => {
+    class ThrowingPerformanceObserver {
+      observe() {
+        throw new TypeError('Unsupported entry type');
+      }
+      disconnect = vi.fn();
+    }
+    vi.stubGlobal('PerformanceObserver', ThrowingPerformanceObserver);
+
+    TestBed.configureTestingModule({
+      providers: [{ provide: PLATFORM_ID, useValue: 'browser' }],
+    });
+
+    TestBed.runInInjectionContext(() => {
+      expect(() =>
+        injectPerformanceObserver({ type: 'event', durationThreshold: 16 }),
+      ).not.toThrow();
     });
   });
 });
