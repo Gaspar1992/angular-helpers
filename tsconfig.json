@@ -47,6 +47,7 @@
       "@angular-helpers/openlayers/controls": ["./libs/openlayers/controls/src/index.ts"],
       "@angular-helpers/openlayers/interactions": ["./libs/openlayers/interactions/src/index.ts"],
       "@angular-helpers/openlayers/overlays": ["./libs/openlayers/overlays/src/index.ts"],
+      "@angular-helpers/openlayers/testing": ["./libs/openlayers/testing/src/index.ts"],
       "@angular-helpers/yjs": ["./libs/yjs/src/index.ts"],
       "@angular-helpers/schematics": ["./libs/schematics/src/index.ts"],
       "@angular-helpers/*": ["./libs/*/src/index.ts"]

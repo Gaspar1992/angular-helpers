@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/openlayers",
+    "outDir": "../../dist/out-tsc/libs/openlayers",
     "declaration": true,
     "declarationMap": true
   },
@@ -11,8 +11,8 @@
     "controls/**/*",
     "interactions/**/*",
     "layers/**/*",
-    "military/**/*",
-    "overlays/**/*"
+    "overlays/**/*",
+    "testing/**/*"
   ],
   "exclude": ["**/*.spec.ts", "dist"]
 }

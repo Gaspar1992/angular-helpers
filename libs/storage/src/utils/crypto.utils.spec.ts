@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { encrypt, decrypt } from './crypto.utils';
+import { encrypt, decrypt } from '@angular-helpers/storage/worker';
 
 describe('crypto.utils', () => {
   const secret = 'super-secure-passphrase-123!';

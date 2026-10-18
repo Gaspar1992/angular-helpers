@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc/libs/security",
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["src/**/*", "forms/**/*", "signal-forms/**/*"],
+  "exclude": ["**/*.spec.ts", "dist"]
+}

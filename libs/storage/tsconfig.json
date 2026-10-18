@@ -1,11 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist",
+    "outDir": "../../dist/out-tsc/libs/storage",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "worker/**/*"],
   "exclude": ["node_modules", "dist", "tests"]
 }

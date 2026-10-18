@@ -52,8 +52,6 @@
     }
   },
   "devDependencies": {
-    "@analogjs/vite-plugin-angular": "catalog:",
-    "@analogjs/vitest-angular": "catalog:",
     "@angular-helpers/testing": "workspace:*",
     "@vitest/coverage-v8": "catalog:",
     "jsdom": "catalog:",

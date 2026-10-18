@@ -59,15 +59,5 @@
   "dependencies": {
     "@angular-helpers/core": "workspace:*",
     "tslib": "catalog:"
-  },
-  "ngPackage": {
-    "lib": {
-      "entryFile": "src/index.ts"
-    },
-    "dest": "../../dist/security",
-    "allowedNonPeerDependencies": [
-      "tslib",
-      "@angular-helpers/core"
-    ]
   }
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { serializeData, deserializeData } from './serialization.utils';
+import { serializeData, deserializeData } from '@angular-helpers/storage/worker';
 
 describe('serialization.utils', () => {
   it('should serialize and deserialize JSON objects by default', async () => {

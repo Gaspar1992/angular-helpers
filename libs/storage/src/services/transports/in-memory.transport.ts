@@ -1,7 +1,6 @@
 import type { StorageTransport } from '../storage-transport';
 import type { StorageSignalOptions } from '../../interfaces/storage-options.types';
-import { encrypt, decrypt } from '../../utils/crypto.utils';
-import { serializeData, deserializeData } from '../../utils/serialization.utils';
+import { encrypt, decrypt, serializeData, deserializeData } from '@angular-helpers/storage/worker';
 
 export class InMemoryStorageTransport implements StorageTransport {
   private readonly store = new Map<string, string>();

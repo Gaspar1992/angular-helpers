@@ -40,19 +40,13 @@ catalog:
   '@eslint/js': ^10.0.1
   '@oxc-project/runtime': ^0.141.0
   '@playwright/test': ^1.61.0
-  '@semantic-release/changelog': ^6.0.3
-  '@semantic-release/commit-analyzer': ^13.0.1
-  '@semantic-release/git': ^10.0.1
-  '@semantic-release/github': ^12.0.8
-  '@semantic-release/npm': ^13.1.5
-  '@semantic-release/release-notes-generator': ^14.1.1
   '@tailwindcss/postcss': ^4.3.1
   '@tailwindcss/typography': ^0.5.20
   '@toon-format/toon': ^2.3.1
   '@types/express': ^5.0.6
   '@types/node': ^20.19.43
-  '@typescript-eslint/eslint-plugin': ^8.65.0
-  '@typescript-eslint/parser': ^8.65.0
+  '@typescript-eslint/eslint-plugin': ^8.67.0
+  '@typescript-eslint/parser': ^8.67.0
   '@vitest/browser': ^4.1.11
   '@vitest/coverage-v8': ^4.1.11
   '@vitest/ui': ^4.1.11
@@ -60,14 +54,14 @@ catalog:
   'concurrently': ^9.2.3
   'daisyui': ^5.7.0
   'esbuild': ^0.28.1
-  'eslint': ^10.7.0
-  'eslint-plugin-oxlint': ^1.75.0
+  'eslint': ^10.8.1
+  'eslint-plugin-oxlint': ^1.78.0
   'express': ^5.2.1
   'highlight.js': ^11.11.1
   'husky': ^9.1.7
   'jsdom': ^29.1.1
-  'knip': ^6.29.0
-  'lint-staged': ^16.4.0
+  'knip': ^6.32.2
+  'lint-staged': ^17.3.0
   'marked': ^18.0.5
   'ng-packagr': ^22.2.4
   'ol': ^10.10.0
@@ -75,8 +69,6 @@ catalog:
   'oxlint': ^1.83.0
   'proj4': ^2.22.0
   'rxjs': ~7.8.2
-  'semantic-release': ^25.0.5
-  'semantic-release-monorepo': ^8.0.2
   'seroval': ^1.6.7
   'tailwindcss': ^4.3.1
   'tslib': ^2.8.1
