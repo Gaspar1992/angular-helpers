@@ -319,4 +319,4 @@ export { injectPermissionState, type PermissionStateRef } from './fns/inject-per
 export * from './providers';
 
 // Version
-export const version = '22.7.1';
+export const version = '22.8.0';
