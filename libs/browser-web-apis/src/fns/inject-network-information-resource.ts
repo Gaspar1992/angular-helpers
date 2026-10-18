@@ -1,15 +1,7 @@
-import {
-  assertInInjectionContext,
-  inject,
-  PLATFORM_ID,
-  signal,
-  type Signal,
-  computed,
-  type ResourceRef,
-} from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { assertInInjectionContext, type Signal, computed, type ResourceRef } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
+import { createBrowserSignal, injectIsBrowser } from '../tokens/ssr.token';
 
 import {
   type ConnectionType,
@@ -35,13 +27,8 @@ export interface NetworkInformationResourceRef {
 
 export function injectNetworkInformationResource(): NetworkInformationResourceRef {
   assertInInjectionContext(injectNetworkInformationResource);
-  const platformId = inject(PLATFORM_ID);
-  const isBrowser = isPlatformBrowser(platformId);
-
-  const supported = signal<boolean>(false);
-  if (isBrowser) {
-    supported.set(isNetworkInformationSupported());
-  }
+  const isBrowser = injectIsBrowser();
+  const supported = createBrowserSignal(() => isNetworkInformationSupported(), false);
 
   const resource = rxResource<NetworkInformation, void>({
     stream: () => {

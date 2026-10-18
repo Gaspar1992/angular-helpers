@@ -3,17 +3,13 @@ import {
   DestroyRef,
   inject,
   linkedSignal,
-  PLATFORM_ID,
   resource,
   signal,
   type ResourceRef,
   type ResourceStatus,
   type Signal,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
-import { STORAGE_TRANSPORT } from '../tokens/storage.tokens';
-import { LocalStorageTransport } from '../services/local-transport';
-import { InMemoryStorageTransport } from '../services/transports/in-memory.transport';
+import { resolveStorageTransport } from '../utils/resolve-transport';
 import type { StorageTransport } from '../services/storage-transport';
 import type { StorageSignalOptions } from '../interfaces/storage.types';
 
@@ -121,20 +117,10 @@ export function storageResource<T, R = void>(
 ): StorageResourceRef<T> {
   assertInInjectionContext(storageResource);
 
-  const platformId = inject(PLATFORM_ID);
-  const isBrowser = isPlatformBrowser(platformId);
-
-  // SSR Graceful Fallback: use InMemoryStorageTransport in non-browser environments
-  // to avoid touching browser globals (window, localStorage, indexedDB) and prevent blocking Angular SSR stabilization.
-  let activeTransport: StorageTransport;
-  if (!isBrowser) {
-    activeTransport = new InMemoryStorageTransport();
-  } else if (options.transport) {
-    activeTransport = options.transport;
-  } else {
-    activeTransport =
-      inject(STORAGE_TRANSPORT, { optional: true }) ?? inject(LocalStorageTransport);
-  }
+  const activeTransport = resolveStorageTransport({
+    transport: options.transport,
+    ssrInMemory: true,
+  });
 
   const storageOpts: StorageSignalOptions<T> = {
     storageType: options.storageType ?? 'local',

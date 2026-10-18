@@ -1,6 +1,7 @@
 import { DestroyRef, inject, signal, type Signal } from '@angular/core';
 import type * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
+import { YjsDocService } from './yjs-provider.service';
 
 export type YjsWebsocketStatus = 'connecting' | 'connected' | 'disconnected';
 
@@ -32,13 +33,13 @@ export interface YjsWebsocketRef {
  *
  * @param serverUrl The WebSocket server endpoint (e.g. 'wss://demos.yjs.dev')
  * @param roomName The room/document identifier
- * @param doc The target Y.Doc instance
+ * @param doc The target Y.Doc instance (defaults to the injected `YjsDocService.doc`)
  * @param options Configuration options for y-websocket WebsocketProvider
  */
 export function injectYjsWebsocket(
   serverUrl: string,
   roomName: string,
-  doc: Y.Doc,
+  doc: Y.Doc = inject(YjsDocService).doc,
   options?: YjsWebsocketOptions,
 ): YjsWebsocketRef {
   const destroyRef = inject(DestroyRef);

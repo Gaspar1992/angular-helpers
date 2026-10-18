@@ -14,3 +14,5 @@ export * from './tokens/storage.tokens';
 export * from './services/worker-transport';
 export * from './services/offline-sync.service';
 export * from './utils/detect-transferables';
+export * from './providers';
+export * from './providers';

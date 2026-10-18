@@ -1,14 +1,7 @@
-import {
-  assertInInjectionContext,
-  inject,
-  PLATFORM_ID,
-  signal,
-  type Signal,
-  type ResourceRef,
-} from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { assertInInjectionContext, signal, type Signal, type ResourceRef } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
+import { createBrowserSignal, injectIsBrowser } from '../tokens/ssr.token';
 
 interface BatteryManagerLike extends EventTarget {
   charging: boolean;
@@ -37,13 +30,11 @@ export interface BatteryResourceRef {
 
 export function injectBatteryResource(): BatteryResourceRef {
   assertInInjectionContext(injectBatteryResource);
-  const platformId = inject(PLATFORM_ID);
-  const isBrowser = isPlatformBrowser(platformId);
-
-  const supported = signal<boolean>(false);
-  if (isBrowser) {
-    supported.set(typeof navigator !== 'undefined' && 'getBattery' in navigator);
-  }
+  const isBrowser = injectIsBrowser();
+  const supported = createBrowserSignal(
+    () => typeof navigator !== 'undefined' && 'getBattery' in navigator,
+    false,
+  );
 
   const requestState = signal<{ trigger: number }>({ trigger: 0 });
 

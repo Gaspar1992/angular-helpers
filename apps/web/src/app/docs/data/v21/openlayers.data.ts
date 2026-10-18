@@ -82,14 +82,14 @@ export class MapComponent {}`,
             name: 'gis-dashboard.component.ts',
             language: 'ts',
             content: `import { Component, signal, computed } from '@angular/core';
-import { 
-  OlMapComponent, 
-  OlTileLayerComponent, 
-  OlVectorLayerComponent 
+import {
+  OlMapComponent,
+  OlTileLayerComponent,
+  OlVectorLayerComponent
 } from '@angular-helpers/openlayers';
-import { 
-  OlZoomControlComponent, 
-  OlScaleLineControlComponent 
+import {
+  OlZoomControlComponent,
+  OlScaleLineControlComponent
 } from '@angular-helpers/openlayers/controls';
 import { OlPopupComponent } from '@angular-helpers/openlayers/overlays';
 import { Feature } from 'ol';
@@ -162,7 +162,7 @@ export class GisDashboardComponent {
           {
             name: 'gis-dashboard.component.html',
             language: 'html',
-            content: `<div class="relative w-full h-[600px] rounded-3xl overflow-hidden shadow-lg border border-border">
+            content: `<div class="relative w-full h-150 rounded-3xl overflow-hidden shadow-lg border border-border">
   <!-- 1. Root Map Component: sets view, center, zoom, and projection -->
   <ol-map [center]="[2.1734, 41.3851]" [zoom]="12" (mapClick)="onMapClick($event)">
     <!-- 2. Base Satellite/Tile Layer -->
@@ -174,10 +174,10 @@ export class GisDashboardComponent {
     <!-- 4. Interactive Overlay Popup: displays detail card on feature click -->
     <ol-popup [position]="selectedCoords()" [autoPan]="true" [closeButton]="true" (closed)="clearSelection()">
       @if (activeSensor(); as sensor) {
-        <div class="p-4 bg-base-100 rounded-2xl shadow-xl flex flex-col gap-2 min-w-[200px]">
+        <div class="p-4 bg-base-100 rounded-2xl shadow-xl flex flex-col gap-2 min-w-50">
           <h4 class="font-black text-base">{{ sensor.name }}</h4>
-          <p class="text-xs text-base-content/60">Status: 
-            <span class="badge badge-sm" 
+          <p class="text-xs text-base-content/60">Status:
+            <span class="badge badge-sm"
                   [class.badge-success]="sensor.status === 'active'"
                   [class.badge-warning]="sensor.status === 'warning'">
               {{ sensor.status }}
@@ -340,7 +340,7 @@ export class MapComponent {
   features = signal([
     new Feature(new Point([0, 0]))
   ]);
-  
+
   pointStyle = new Style({
     image: new Circle({
       radius: 6,
@@ -672,9 +672,9 @@ export class MapComponent {}`,
   template: \`
     <ol-map>
       <ol-vector-layer id="locations" [features]="locations()">
-        <ol-cluster 
-          [distance]="55" 
-          [minDistance]="20" 
+        <ol-cluster
+          [distance]="55"
+          [minDistance]="20"
           [showCount]="true"
           [spiderfyOnSelect]="true"
           (spiderfyClick)="onFeatureClick($event)" />
@@ -1311,7 +1311,7 @@ export class MapComponent {
   template: \`
     <ol-map [center]="[2.17, 41.38]" [zoom]="12">
       <ol-tile-layer source="osm" />
-      
+
       <ol-timeline
         [startTime]="1700000000000"
         [endTime]="1700086400000"

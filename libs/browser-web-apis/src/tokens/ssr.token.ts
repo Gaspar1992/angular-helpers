@@ -26,6 +26,14 @@ export const NAVIGATOR = new InjectionToken<Navigator>('Safe Navigator Token', {
 });
 
 /**
+ * Returns `true` when executing in a browser platform context, `false` in SSR.
+ * Must be called in an injection context.
+ */
+export function injectIsBrowser(): boolean {
+  return isPlatformBrowser(inject(PLATFORM_ID));
+}
+
+/**
  * Creates a WritableSignal that safely initializes a browser-only API.
  * In a browser environment, it evaluates `browserValueFn()`.
  * In an SSR environment, it returns `ssrFallbackValue` without executing browser APIs.
@@ -39,9 +47,7 @@ export function createBrowserSignal<T>(
   browserValueFn: () => T,
   ssrFallbackValue: T,
 ): WritableSignal<T> {
-  const platformId = inject(PLATFORM_ID);
-
-  if (isPlatformBrowser(platformId)) {
+  if (injectIsBrowser()) {
     return signal<T>(browserValueFn());
   }
 

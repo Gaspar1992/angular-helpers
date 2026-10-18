@@ -11,7 +11,7 @@ import type { Feature, Coordinate } from '../models/types';
  * @param olFeature - The OpenLayers feature to convert
  * @returns The converted Feature with normalized structure
  */
-import { Point, LineString, Polygon } from 'ol/geom';
+import { Point, LineString, Polygon, Circle as CircleGeom } from 'ol/geom';
 import { transform } from 'ol/proj';
 
 export interface ProjectionOptions {
@@ -105,6 +105,9 @@ export function featureToOlFeature(feature: Feature, options?: ProjectionOptions
   } else if (geom.type === 'Polygon') {
     const rings = transformCoords(geom.coordinates, sourceProj, targetProj);
     geometry = new Polygon(rings);
+  } else if (geom.type === 'Circle') {
+    const center = transformCoords(geom.coordinates as [number, number], sourceProj, targetProj);
+    geometry = new CircleGeom(center, (geom as { radius?: number }).radius ?? 1000);
   } else {
     geometry = new Point([0, 0]);
   }

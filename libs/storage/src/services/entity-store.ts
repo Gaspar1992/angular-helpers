@@ -1,13 +1,11 @@
 import {
-  inject,
   signal,
   computed,
   type Signal,
   type WritableSignal,
   assertInInjectionContext,
 } from '@angular/core';
-import { STORAGE_TRANSPORT } from '../tokens/storage.tokens';
-import { LocalStorageTransport } from './local-transport';
+import { resolveStorageTransport } from '../utils/resolve-transport';
 import type { EntityStoreOptions, StorageSignalOptions } from '../interfaces/storage.types';
 
 export class EntityStore<Id, Entity> {
@@ -24,7 +22,7 @@ export class EntityStore<Id, Entity> {
   private readonly _idResolver: (entity: Entity) => Id;
   private _isRestoring = false;
   private _persistTimer: any = null;
-  private readonly _transport = this._resolveTransport();
+  private readonly _transport = resolveStorageTransport({ allowOutsideInjectionContext: true });
 
   constructor(private readonly options: EntityStoreOptions<Id, Entity>) {
     const idKey = options.idKey;
@@ -141,21 +139,6 @@ export class EntityStore<Id, Entity> {
   }
 
   // --- L2 Persistence Auxiliaries ---
-
-  private _resolveTransport() {
-    try {
-      // Since it's called during class initialization (injectors),
-      // inject() will resolve natively and flawlessly.
-      let transport = inject(STORAGE_TRANSPORT, { optional: true });
-      if (!transport) {
-        transport = inject(LocalStorageTransport);
-      }
-      return transport;
-    } catch {
-      // Graceful fallback when executed outside Angular injection context (e.g. unit tests)
-      return new LocalStorageTransport();
-    }
-  }
 
   private initPersistence(key: string): void {
     this._isRestoring = true;

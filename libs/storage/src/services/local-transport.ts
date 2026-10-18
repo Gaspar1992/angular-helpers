@@ -95,8 +95,8 @@ export class LocalStorageTransport implements StorageTransport {
     }
   }
 
-  async read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined> {
-    const mergedOptions = {
+  private mergeOptions(options?: StorageSignalOptions): StorageSignalOptions {
+    return {
       storageType: this.storageType,
       dbName: this.dbName,
       storeName: this.storeName,
@@ -104,6 +104,10 @@ export class LocalStorageTransport implements StorageTransport {
       encrypt: this.encrypt,
       ...options,
     } as StorageSignalOptions;
+  }
+
+  async read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined> {
+    const mergedOptions = this.mergeOptions(options);
 
     if (mergedOptions.encrypt) {
       this.warnOnDefaultPassphrase();
@@ -117,14 +121,7 @@ export class LocalStorageTransport implements StorageTransport {
   }
 
   async write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void> {
-    const mergedOptions = {
-      storageType: this.storageType,
-      dbName: this.dbName,
-      storeName: this.storeName,
-      cacheName: this.cacheName,
-      encrypt: this.encrypt,
-      ...options,
-    } as StorageSignalOptions;
+    const mergedOptions = this.mergeOptions(options);
 
     if (mergedOptions.encrypt) {
       this.warnOnDefaultPassphrase();
@@ -141,13 +138,7 @@ export class LocalStorageTransport implements StorageTransport {
   }
 
   async delete(key: string, options?: StorageSignalOptions): Promise<void> {
-    const mergedOptions = {
-      storageType: this.storageType,
-      dbName: this.dbName,
-      storeName: this.storeName,
-      cacheName: this.cacheName,
-      ...options,
-    } as StorageSignalOptions;
+    const mergedOptions = this.mergeOptions(options);
 
     if (this.workerTransport) {
       await this.workerTransport.delete(key, mergedOptions);

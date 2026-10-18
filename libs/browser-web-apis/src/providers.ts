@@ -1,4 +1,4 @@
-import { makeEnvironmentProviders, type EnvironmentProviders, type Provider } from '@angular/core';
+import { makeEnvironmentProviders, type EnvironmentProviders } from '@angular/core';
 import { PermissionsService } from './services/permissions.service';
 
 export { providePermissions } from './providers/permissions';
@@ -71,11 +71,5 @@ export interface BrowserWebApisConfig {
 export function provideBrowserWebApis(config: BrowserWebApisConfig = {}): EnvironmentProviders {
   const { services = [] } = config;
 
-  return makeEnvironmentProviders([
-    PermissionsService,
-    ...services.reduce<Provider[]>((acc, env) => {
-      const inner = (env as any).ɵproviders;
-      return inner ? acc.concat(inner) : acc;
-    }, []),
-  ]);
+  return makeEnvironmentProviders([PermissionsService, ...services]);
 }

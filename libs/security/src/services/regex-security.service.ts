@@ -1,6 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { injectErrorBoundaryReporter } from '@angular-helpers/core';
-import type { RegexSecurityConfig, RegexTestResult, RegexSecurityResult } from './regex-types';
+import {
+  REGEX_SECURITY_DEFAULTS,
+  type RegexSecurityConfig,
+  type RegexTestResult,
+  type RegexSecurityResult,
+} from './regex-types';
 import { RegexAnalyzerService } from './regex-analyzer.service';
 import { RegexWorkerPoolService } from './regex-worker-pool.service';
 
@@ -14,6 +19,7 @@ export * from './regex-types';
 export class RegexSecurityService {
   private analyzer = inject(RegexAnalyzerService);
   private workerPool = inject(RegexWorkerPoolService);
+  private defaults = inject(REGEX_SECURITY_DEFAULTS, { optional: true });
   private errorReporter = injectErrorBoundaryReporter({ rethrow: false });
 
   /**
@@ -84,10 +90,10 @@ export class RegexSecurityService {
    */
   private mergeConfig(config: RegexSecurityConfig): Required<RegexSecurityConfig> {
     return {
-      timeout: config.timeout || 5000,
+      timeout: config.timeout || this.defaults?.defaultTimeout || 5000,
       maxComplexity: config.maxComplexity || 10,
       allowBacktracking: config.allowBacktracking || false,
-      safeMode: config.safeMode || false,
+      safeMode: config.safeMode ?? this.defaults?.safeMode ?? false,
       reportToBoundary: config.reportToBoundary ?? false,
     };
   }

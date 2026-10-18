@@ -9,6 +9,8 @@ export type {
   WorkerTransportConfig,
   WorkerExecuteOptions,
   WorkerMessage,
+  WorkerBatchMessage,
   WorkerResponse,
+  WorkerBatchResponse,
   WorkerErrorResponse,
 } from './worker-transport.types';

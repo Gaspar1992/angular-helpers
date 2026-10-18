@@ -1,6 +1,10 @@
 import { DestroyRef, Injectable, InjectionToken, type OnDestroy, inject } from '@angular/core';
 import { WorkerPool, injectPlatform, injectWorkerPool } from '@angular-helpers/core';
-import type { RegexSecurityConfig, RegexTestResult } from './regex-types';
+import {
+  REGEX_SECURITY_DEFAULTS,
+  type RegexSecurityConfig,
+  type RegexTestResult,
+} from './regex-types';
 import { REGEX_WORKER_INLINE } from '../workers/regex.worker.inline';
 
 export interface RegexWorkerConfig {
@@ -16,6 +20,7 @@ export const REGEX_WORKER_CONFIG = new InjectionToken<RegexWorkerConfig>('REGEX_
 @Injectable()
 export class RegexWorkerPoolService implements OnDestroy {
   private readonly config = inject(REGEX_WORKER_CONFIG, { optional: true });
+  private readonly defaults = inject(REGEX_SECURITY_DEFAULTS, { optional: true });
   private readonly destroyRef = inject(DestroyRef, { optional: true });
   private pool: WorkerPool;
 
@@ -32,7 +37,7 @@ export class RegexWorkerPoolService implements OnDestroy {
     }
 
     this.pool = injectWorkerPool(workerUrl, {
-      defaultTimeout: 5000,
+      defaultTimeout: this.defaults?.defaultTimeout || 5000,
       fallbackWorkerCode: REGEX_WORKER_INLINE,
       fallbackExecutor: async (type, data) => {
         if (type !== 'regex-test') throw new Error(`Unknown task type: ${type}`);
@@ -70,15 +75,16 @@ export class RegexWorkerPoolService implements OnDestroy {
     text: string,
     config: RegexSecurityConfig,
   ): Promise<RegexTestResult> {
+    const timeout = config.timeout || this.defaults?.defaultTimeout || 5000;
     try {
       return await this.pool.execute<RegexTestResult>(
         'regex-test',
         {
           pattern,
           text,
-          timeout: config.timeout || 5000,
+          timeout,
         },
-        config.timeout || 5000,
+        timeout,
       );
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);

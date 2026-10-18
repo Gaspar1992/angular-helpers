@@ -1,16 +1,14 @@
 import {
   assertInInjectionContext,
   computed,
-  inject,
-  PLATFORM_ID,
   signal,
   type Signal,
   type ResourceRef,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { injectErrorBoundaryReporter } from '@angular-helpers/core';
+import { createBrowserSignal, injectIsBrowser } from '../tokens/ssr.token';
 
 export interface GeolocationResourceOptions extends PositionOptions {
   /** Start watching immediately. Defaults to `false`. */
@@ -37,14 +35,12 @@ export function injectGeolocationResource(
   opts: GeolocationResourceOptions = {},
 ): GeolocationResourceRef {
   assertInInjectionContext(injectGeolocationResource);
-  const platformId = inject(PLATFORM_ID);
-  const isBrowser = isPlatformBrowser(platformId);
+  const isBrowser = injectIsBrowser();
   const reporter = opts.reportToBoundary ? injectErrorBoundaryReporter() : null;
-
-  const supported = signal<boolean>(false);
-  if (isBrowser) {
-    supported.set(typeof navigator !== 'undefined' && 'geolocation' in navigator);
-  }
+  const supported = createBrowserSignal(
+    () => typeof navigator !== 'undefined' && 'geolocation' in navigator,
+    false,
+  );
 
   const requestState = signal<GeolocationResourceOptions & { trigger?: number }>({
     watch: opts.watch ?? false,

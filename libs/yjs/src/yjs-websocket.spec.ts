@@ -6,6 +6,7 @@ import {
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import * as Y from 'yjs';
 import { injectYjsWebsocket } from './yjs-websocket';
+import { YjsDocService } from './yjs-provider.service';
 import { Awareness } from 'y-protocols/awareness';
 
 describe('injectYjsWebsocket', () => {
@@ -14,16 +15,16 @@ describe('injectYjsWebsocket', () => {
 
   beforeEach(() => {
     doc = new Y.Doc();
-    injector = createEnvironmentInjector([]);
+    injector = createEnvironmentInjector([YjsDocService]);
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('should initialize status and synced signals with default disconnected state when connect is false', () => {
+  it('should initialize status and synced signals with default disconnected state when connect is false (and default doc to YjsDocService)', () => {
     runInInjectionContext(injector, () => {
-      const wsRef = injectYjsWebsocket('ws://localhost:1234', 'test-room', doc, {
+      const wsRef = injectYjsWebsocket('ws://localhost:1234', 'test-room', undefined, {
         connect: false,
       });
 

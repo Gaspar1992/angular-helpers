@@ -46,11 +46,13 @@ describe('injectStorageSignal', () => {
 
   it('should initialize with default value if transport has no persisted data', async () => {
     await TestBed.runInInjectionContext(async () => {
-      const opts = { storageType: 'local', serializer: 'json' } as const;
-      const sig = injectStorageSignal('user-pref', 'light-mode', opts);
+      const sig = injectStorageSignal('user-pref', 'light-mode');
 
       expect(sig()).toBe('light-mode');
-      expect(mockTransport.read).toHaveBeenCalledWith('user-pref', opts);
+      expect(mockTransport.read).toHaveBeenCalledWith('user-pref', {
+        storageType: 'local',
+        serializer: 'json',
+      });
     });
   });
 

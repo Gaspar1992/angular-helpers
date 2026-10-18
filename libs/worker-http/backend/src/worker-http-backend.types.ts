@@ -29,7 +29,7 @@ export interface WorkerConfig {
   /** Unique identifier used for routing / explicit selection */
   id: string;
   /** URL of the worker script (passed to `new Worker(url)`) */
-  workerUrl: URL;
+  workerUrl: string | URL;
   /** Maximum worker instances in the pool (default: 1) */
   maxInstances?: number;
   /**

@@ -3,7 +3,24 @@ import XYZ from 'ol/source/XYZ';
 import TileWMS from 'ol/source/TileWMS';
 import ImageWMS from 'ol/source/ImageWMS';
 import ImageStatic from 'ol/source/ImageStatic';
-import type { SourceConfig, ImageSourceConfig } from '../models/layer.types';
+import type { Feature } from '@angular-helpers/openlayers/core';
+import type { SourceConfig, ImageSourceConfig, VectorSourceConfig } from '../models/layer.types';
+
+export function resolveVectorSourceConfig(
+  src: VectorSourceConfig | string | Feature[] | undefined,
+  fallback: VectorSourceConfig,
+): VectorSourceConfig {
+  if (typeof src === 'string') {
+    return { ...fallback, url: src };
+  }
+  if (Array.isArray(src)) {
+    return { ...fallback, features: src };
+  }
+  if (src && typeof src === 'object') {
+    return { ...fallback, ...src };
+  }
+  return fallback;
+}
 
 export function buildTileSource(config: SourceConfig) {
   switch (config.type) {

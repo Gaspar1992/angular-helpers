@@ -158,6 +158,8 @@ export {
   type BluetoothServiceUUID,
   type BluetoothCharacteristicUUID,
   type BluetoothDescriptorUUID,
+  type BluetoothManufacturerDataFilter,
+  type BluetoothServiceDataFilter,
   type BluetoothLEScanFilterInit,
   type BluetoothRequestDeviceOptions,
   type BluetoothCharacteristicProperties,
@@ -203,7 +205,7 @@ export {
   warnExperimental,
   type ExperimentalWarnContext,
 } from './tokens/experimental.token';
-export { WINDOW, NAVIGATOR, createBrowserSignal } from './tokens/ssr.token';
+export { WINDOW, NAVIGATOR, createBrowserSignal, injectIsBrowser } from './tokens/ssr.token';
 
 // Base classes
 export { BrowserApiBaseService } from './services/base/browser-api-base.service';

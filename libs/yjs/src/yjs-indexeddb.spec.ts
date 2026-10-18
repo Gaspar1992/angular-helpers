@@ -6,6 +6,7 @@ import {
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import * as Y from 'yjs';
 import { injectYjsIndexeddb } from './yjs-indexeddb';
+import { YjsDocService } from './yjs-provider.service';
 
 describe('injectYjsIndexeddb', () => {
   let doc: Y.Doc;
@@ -13,7 +14,7 @@ describe('injectYjsIndexeddb', () => {
 
   beforeEach(() => {
     doc = new Y.Doc();
-    injector = createEnvironmentInjector([]);
+    injector = createEnvironmentInjector([YjsDocService]);
   });
 
   afterEach(() => {
@@ -21,11 +22,11 @@ describe('injectYjsIndexeddb', () => {
     vi.restoreAllMocks();
   });
 
-  it('should return fallback synced=true and null provider when indexedDB is unsupported', async () => {
+  it('should return fallback synced=true and null provider when indexedDB is unsupported (and default doc to YjsDocService)', async () => {
     vi.stubGlobal('indexedDB', undefined);
 
     await runInInjectionContext(injector, async () => {
-      const dbRef = injectYjsIndexeddb('test-db', doc);
+      const dbRef = injectYjsIndexeddb('test-db');
 
       expect(dbRef.synced()).toBe(true);
       expect(dbRef.isHydrated()).toBe(true);

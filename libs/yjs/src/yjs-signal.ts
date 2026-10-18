@@ -77,6 +77,26 @@ function reconcileMap(yMap: Y.Map<any>, nextValue: Record<string, any>) {
   }
 }
 
+function computeSpliceBounds(
+  currentLen: number,
+  nextLen: number,
+  isEqualAt: (oldIndex: number, newIndex: number) => boolean,
+): { start: number; deleteCount: number; newEnd: number } {
+  let start = 0;
+  while (start < currentLen && start < nextLen && isEqualAt(start, start)) {
+    start++;
+  }
+
+  let oldEnd = currentLen;
+  let newEnd = nextLen;
+  while (oldEnd > start && newEnd > start && isEqualAt(oldEnd - 1, newEnd - 1)) {
+    oldEnd--;
+    newEnd--;
+  }
+
+  return { start, deleteCount: oldEnd - start, newEnd };
+}
+
 function reconcileArray(yArray: Y.Array<any>, nextArray: any[]) {
   const currentArray = yArray.toArray();
   if (currentArray.length === 0) {
@@ -90,23 +110,11 @@ function reconcileArray(yArray: Y.Array<any>, nextArray: any[]) {
     return;
   }
 
-  let start = 0;
-  while (
-    start < currentArray.length &&
-    start < nextArray.length &&
-    currentArray[start] === nextArray[start]
-  ) {
-    start++;
-  }
-
-  let oldEnd = currentArray.length;
-  let newEnd = nextArray.length;
-  while (oldEnd > start && newEnd > start && currentArray[oldEnd - 1] === nextArray[newEnd - 1]) {
-    oldEnd--;
-    newEnd--;
-  }
-
-  const deleteCount = oldEnd - start;
+  const { start, deleteCount, newEnd } = computeSpliceBounds(
+    currentArray.length,
+    nextArray.length,
+    (i, j) => currentArray[i] === nextArray[j],
+  );
   const insertItems = nextArray.slice(start, newEnd);
 
   if (deleteCount > 0) {
@@ -133,27 +141,11 @@ function reconcileText(yText: Y.Text, nextText: string) {
     return;
   }
 
-  let start = 0;
-  while (
-    start < currentText.length &&
-    start < nextText.length &&
-    currentText.charCodeAt(start) === nextText.charCodeAt(start)
-  ) {
-    start++;
-  }
-
-  let oldEnd = currentText.length;
-  let newEnd = nextText.length;
-  while (
-    oldEnd > start &&
-    newEnd > start &&
-    currentText.charCodeAt(oldEnd - 1) === nextText.charCodeAt(newEnd - 1)
-  ) {
-    oldEnd--;
-    newEnd--;
-  }
-
-  const deleteCount = oldEnd - start;
+  const { start, deleteCount, newEnd } = computeSpliceBounds(
+    currentText.length,
+    nextText.length,
+    (i, j) => currentText.charCodeAt(i) === nextText.charCodeAt(j),
+  );
   const insertString = nextText.slice(start, newEnd);
 
   if (deleteCount > 0) {

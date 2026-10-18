@@ -1,6 +1,5 @@
 import { inject, signal, DestroyRef, assertInInjectionContext } from '@angular/core';
-import { STORAGE_TRANSPORT } from '../tokens/storage.tokens';
-import { LocalStorageTransport } from '../services/local-transport';
+import { resolveStorageTransport } from '../utils/resolve-transport';
 import type { StorageSignalOptions, StorageSignal } from '../interfaces/storage.types';
 
 /**
@@ -8,16 +7,22 @@ import type { StorageSignalOptions, StorageSignal } from '../interfaces/storage.
  *
  * @param key Unique storage key.
  * @param defaultValue Initial default value.
- * @param options Storage options (type, encryption, synchronization).
+ * @param options Storage options (type, encryption, synchronization). Defaults to `{ storageType: 'local', serializer: 'json' }`.
  * @returns A `StorageSignal<T>` that allows reading/writing data directly and querying metadata.
  */
 export function injectStorageSignal<T>(
   key: string,
   defaultValue: T,
-  options: StorageSignalOptions<T>,
+  options: StorageSignalOptions<T> = {},
 ): StorageSignal<T> {
   assertInInjectionContext(injectStorageSignal);
-  const isAsync = options.storageType === 'indexeddb' || options.storageType === 'cacheapi';
+  const resolvedOptions: StorageSignalOptions<T> = {
+    storageType: 'local',
+    serializer: 'json',
+    ...options,
+  };
+  const isAsync =
+    resolvedOptions.storageType === 'indexeddb' || resolvedOptions.storageType === 'cacheapi';
 
   const dataSignal = signal<T>(defaultValue, {
     equal: (a, b) => JSON.stringify(a) === JSON.stringify(b),
@@ -29,18 +34,14 @@ export function injectStorageSignal<T>(
   const originalSet = dataSignal.set.bind(dataSignal);
   const originalUpdate = dataSignal.update.bind(dataSignal);
 
-  // Resolve injected transport or instantiate LocalStorageTransport
-  let transport = inject(STORAGE_TRANSPORT, { optional: true });
-  if (!transport) {
-    transport = inject(LocalStorageTransport);
-  }
+  const transport = resolveStorageTransport();
 
   // 1. Load initial value from L2
   transport
-    .read<T>(key, options)
+    .read<T>(key, resolvedOptions)
     .then((value) => {
       if (value !== undefined) {
-        if (options.validator && !options.validator(value)) {
+        if (resolvedOptions.validator && !resolvedOptions.validator(value)) {
           const driftError = new Error(
             `[injectStorageSignal] Schema drift detected for key: ${key}. Data failed validation.`,
           );
@@ -48,8 +49,8 @@ export function injectStorageSignal<T>(
           errorSignal.set(driftError);
           originalSet(defaultValue);
           // Auto-repair storage with default value
-          transport!
-            .write(key, defaultValue, options)
+          transport
+            .write(key, defaultValue, resolvedOptions)
             .catch((err) =>
               console.error(`[injectStorageSignal] Error repairing storage key: ${key}`, err),
             );
@@ -65,8 +66,8 @@ export function injectStorageSignal<T>(
     });
 
   const persist = (newData: T) => {
-    transport!
-      .write(key, newData, options)
+    transport
+      .write(key, newData, resolvedOptions)
       .catch((err) => console.error(`[injectStorageSignal] Error writing key: ${key}`, err));
   };
 
@@ -92,7 +93,7 @@ export function injectStorageSignal<T>(
   customSignal.error = errorSignal.asReadonly();
 
   // 3. Multi-tab synchronization (only if configured and transport supports it)
-  if (options.crossTabSync && transport.onChange) {
+  if (resolvedOptions.crossTabSync && transport.onChange) {
     const unsubscribe = transport.onChange<T>(key, (newValue) => {
       originalSet(newValue);
     });

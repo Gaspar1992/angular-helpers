@@ -46,12 +46,14 @@ describe('injectStorageResource', () => {
 
   it('should initialize with default value if transport has no persisted data', async () => {
     await TestBed.runInInjectionContext(async () => {
-      const opts = { storageType: 'local', serializer: 'json' } as const;
-      const { resource } = injectStorageResource('user-pref', 'light-mode', opts);
+      const { resource } = injectStorageResource('user-pref', 'light-mode');
 
       // Wait for the resource to resolve the loader
       await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(mockTransport.read).toHaveBeenCalledWith('user-pref', opts);
+      expect(mockTransport.read).toHaveBeenCalledWith('user-pref', {
+        storageType: 'local',
+        serializer: 'json',
+      });
       expect(resource.value()).toBe('light-mode');
     });
   });

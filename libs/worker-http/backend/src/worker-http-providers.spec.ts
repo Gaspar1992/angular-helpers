@@ -26,8 +26,11 @@ describe('withWorkerConfigs', () => {
     expect(feature.kind).toBe('WorkerConfigs');
   });
 
-  it('provides WORKER_HTTP_CONFIGS_TOKEN with the given configs', () => {
-    const configs = [{ id: 'public', workerUrl: new URL('https://example.com/worker.js') }];
+  it('provides WORKER_HTTP_CONFIGS_TOKEN with the given configs (URL and string workerUrl)', () => {
+    const configs = [
+      { id: 'public', workerUrl: new URL('https://example.com/worker.js') },
+      { id: 'assets', workerUrl: '/assets/workers/http.worker.js' },
+    ];
     const feature = withWorkerConfigs(configs);
 
     expect(feature.providers).toHaveLength(1);

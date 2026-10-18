@@ -1,5 +1,9 @@
 import { makeEnvironmentProviders, type EnvironmentProviders, type Provider } from '@angular/core';
-import { RegexSecurityService } from './services/regex-security.service';
+import {
+  RegexSecurityService,
+  REGEX_SECURITY_DEFAULTS,
+  type RegexSecurityDefaults,
+} from './services/regex-security.service';
 import { RegexAnalyzerService } from './services/regex-analyzer.service';
 import { RegexWorkerPoolService } from './services/regex-worker-pool.service';
 import { WebCryptoService } from './services/web-crypto.service';
@@ -65,35 +69,52 @@ export const defaultSecurityConfig: SecurityConfig = {
 
 export function provideSecurity(config: SecurityConfig = {}): EnvironmentProviders {
   const mergedConfig = { ...defaultSecurityConfig, ...config };
-  const providers: Provider[] = [];
+  const services = new Set<Provider>();
+  const extraProviders: Provider[] = [];
 
-  if (mergedConfig.enableRegexSecurity)
-    providers.push(RegexAnalyzerService, RegexWorkerPoolService, RegexSecurityService);
-  if (mergedConfig.enableWebCrypto) providers.push(WebCryptoService);
-  if (mergedConfig.enableSecureStorage) providers.push(SecureStorageService);
-  if (mergedConfig.enableInputSanitizer) providers.push(InputSanitizerService);
-  if (mergedConfig.enablePasswordStrength) providers.push(PasswordStrengthService);
-  if (mergedConfig.enableJwt) providers.push(JwtService);
-  if (mergedConfig.enableSensitiveClipboard) providers.push(SensitiveClipboardService);
+  if (mergedConfig.enableRegexSecurity) {
+    services.add(RegexAnalyzerService);
+    services.add(RegexWorkerPoolService);
+    services.add(RegexSecurityService);
+    extraProviders.push({
+      provide: REGEX_SECURITY_DEFAULTS,
+      useValue: {
+        defaultTimeout: mergedConfig.defaultTimeout,
+        safeMode: mergedConfig.safeMode,
+      },
+    });
+  }
+  if (mergedConfig.enableWebCrypto) services.add(WebCryptoService);
+  if (mergedConfig.enableSecureStorage) services.add(SecureStorageService);
+  if (mergedConfig.enableInputSanitizer) services.add(InputSanitizerService);
+  if (mergedConfig.enablePasswordStrength) services.add(PasswordStrengthService);
+  if (mergedConfig.enableJwt) services.add(JwtService);
+  if (mergedConfig.enableSensitiveClipboard) services.add(SensitiveClipboardService);
   if (mergedConfig.enableHibp) {
-    providers.push(WebCryptoService, HibpService);
+    services.add(WebCryptoService);
+    services.add(HibpService);
   }
-  if (mergedConfig.enableRateLimiter) providers.push(RateLimiterService);
+  if (mergedConfig.enableRateLimiter) services.add(RateLimiterService);
   if (mergedConfig.enableCsrf) {
-    providers.push(WebCryptoService, CsrfService);
+    services.add(WebCryptoService);
+    services.add(CsrfService);
   }
-  if (mergedConfig.enableSessionIdle) providers.push(SessionIdleService);
-  if (mergedConfig.enableSecureMessage) providers.push(SecureMessageService);
-  if (mergedConfig.enableWebAuthn) providers.push(WebAuthnService);
+  if (mergedConfig.enableSessionIdle) services.add(SessionIdleService);
+  if (mergedConfig.enableSecureMessage) {
+    services.add(WebCryptoService);
+    services.add(SecureMessageService);
+  }
+  if (mergedConfig.enableWebAuthn) services.add(WebAuthnService);
 
-  return makeEnvironmentProviders(providers);
+  return makeEnvironmentProviders([...services, ...extraProviders]);
 }
 
-export function provideRegexSecurity(): EnvironmentProviders {
+export function provideRegexSecurity(config?: RegexSecurityDefaults): EnvironmentProviders {
   return makeEnvironmentProviders([
     RegexAnalyzerService,
     RegexWorkerPoolService,
     RegexSecurityService,
+    ...(config ? [{ provide: REGEX_SECURITY_DEFAULTS, useValue: config }] : []),
   ]);
 }
 

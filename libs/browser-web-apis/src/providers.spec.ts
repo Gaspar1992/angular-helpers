@@ -1,99 +1,99 @@
 import '@angular/compiler';
 import { describe, expect, it } from 'vitest';
 import {
-  BrowserWebApisConfig,
+  type BrowserWebApisConfig,
+  provideBarcodeDetector,
+  provideBattery,
+  provideBroadcastChannel,
   provideBrowserWebApis,
   provideCamera,
-  provideGeolocation,
-  provideBattery,
-  provideWebStorage,
-  provideDeviceOrientation,
-  provideDeviceMotion,
-  providePermissions,
-  provideNotifications,
   provideClipboard,
-  provideMediaDevices,
-  provideScreenWakeLock,
+  provideCommunicationApis,
+  provideCompression,
+  provideCredentialManagement,
+  provideDeviceMotion,
+  provideDeviceOrientation,
+  provideEyeDropper,
   provideFileSystemAccess,
+  provideFullscreen,
+  provideGamepad,
+  provideGeolocation,
+  provideIdleDetector,
+  provideIntersectionObserver,
+  provideLocationApis,
+  provideMediaApis,
+  provideMediaDevices,
   provideMediaRecorder,
+  provideMutationObserver,
+  provideNetworkInformation,
+  provideNotifications,
+  providePageVisibility,
+  providePerformanceObserver,
+  providePermissions,
+  provideResizeObserver,
+  provideScreenOrientation,
+  provideScreenWakeLock,
+  provideServerSentEvents,
+  provideSpeechRecognition,
+  provideSpeechSynthesis,
+  provideStorageApis,
+  provideStorageManager,
+  provideVibration,
+  provideWebAudio,
+  provideWebBluetooth,
+  provideWebHid,
+  provideWebLocks,
+  provideWebSerial,
   provideWebShare,
   provideWebSocket,
+  provideWebStorage,
   provideWebTransport,
   provideWebWorker,
-  provideIntersectionObserver,
-  provideResizeObserver,
-  providePageVisibility,
-  provideBroadcastChannel,
-  provideNetworkInformation,
-  provideScreenOrientation,
-  provideFullscreen,
-  provideServerSentEvents,
-  provideVibration,
-  provideSpeechSynthesis,
-  provideSpeechRecognition,
-  provideMutationObserver,
-  providePerformanceObserver,
-  provideWebAudio,
-  provideGamepad,
-  provideWebLocks,
-  provideStorageManager,
-  provideCompression,
-  provideEyeDropper,
-  provideIdleDetector,
-  provideBarcodeDetector,
-  provideCredentialManagement,
-  provideWebBluetooth,
-  provideWebSerial,
-  provideWebHid,
-  provideMediaApis,
-  provideLocationApis,
-  provideStorageApis,
-  provideCommunicationApis,
   WEB_TRANSPORT_SUPPORTED,
   WEB_TRANSPORT_TOKEN,
 } from './providers';
-import { PermissionsService } from './services/permissions.service';
-import { CameraService } from './services/camera.service';
-import { GeolocationService } from './services/geolocation.service';
+import { BarcodeDetectorService } from './services/barcode-detector.service';
 import { BatteryService } from './services/battery.service';
-import { WebStorageService } from './services/web-storage.service';
-import { DeviceOrientationService } from './services/device-orientation.service';
-import { DeviceMotionService } from './services/device-motion.service';
-import { NotificationService } from './services/notification.service';
+import { BroadcastChannelService } from './services/broadcast-channel.service';
+import { CameraService } from './services/camera.service';
 import { ClipboardService } from './services/clipboard.service';
-import { MediaDevicesService } from './services/media-devices.service';
-import { ScreenWakeLockService } from './services/screen-wake-lock.service';
+import { CompressionService } from './services/compression.service';
+import { CredentialManagementService } from './services/credential-management.service';
+import { DeviceMotionService } from './services/device-motion.service';
+import { DeviceOrientationService } from './services/device-orientation.service';
+import { EyeDropperService } from './services/eye-dropper.service';
 import { FileSystemAccessService } from './services/file-system-access.service';
+import { FullscreenService } from './services/fullscreen.service';
+import { GamepadService } from './services/gamepad.service';
+import { GeolocationService } from './services/geolocation.service';
+import { IdleDetectorService } from './services/idle-detector.service';
+import { IntersectionObserverService } from './services/intersection-observer.service';
+import { MediaDevicesService } from './services/media-devices.service';
 import { MediaRecorderService } from './services/media-recorder.service';
+import { MutationObserverService } from './services/mutation-observer.service';
+import { NetworkInformationService } from './services/network-information.service';
+import { NotificationService } from './services/notification.service';
+import { PageVisibilityService } from './services/page-visibility.service';
+import { PerformanceObserverService } from './services/performance-observer.service';
+import { PermissionsService } from './services/permissions.service';
+import { ResizeObserverService } from './services/resize-observer.service';
+import { ScreenOrientationService } from './services/screen-orientation.service';
+import { ScreenWakeLockService } from './services/screen-wake-lock.service';
+import { ServerSentEventsService } from './services/server-sent-events.service';
+import { SpeechRecognitionService } from './services/speech-recognition.service';
+import { SpeechSynthesisService } from './services/speech-synthesis.service';
+import { StorageManagerService } from './services/storage-manager.service';
+import { VibrationService } from './services/vibration.service';
+import { WebAudioService } from './services/web-audio.service';
+import { WebBluetoothService } from './services/web-bluetooth.service';
+import { WebHidService } from './services/web-hid.service';
+import { WebLocksService } from './services/web-locks.service';
+import { WebSerialService } from './services/web-serial.service';
 import { WebShareService } from './services/web-share.service';
 import { WebSocketService } from './services/web-socket.service';
+import { WebStorageService } from './services/web-storage.service';
 import { WebTransportService } from './services/web-transport.service';
 import { WebWorkerService } from './services/web-worker.service';
-import { IntersectionObserverService } from './services/intersection-observer.service';
-import { ResizeObserverService } from './services/resize-observer.service';
-import { PageVisibilityService } from './services/page-visibility.service';
-import { BroadcastChannelService } from './services/broadcast-channel.service';
-import { NetworkInformationService } from './services/network-information.service';
-import { ScreenOrientationService } from './services/screen-orientation.service';
-import { FullscreenService } from './services/fullscreen.service';
-import { ServerSentEventsService } from './services/server-sent-events.service';
-import { VibrationService } from './services/vibration.service';
-import { SpeechSynthesisService } from './services/speech-synthesis.service';
-import { SpeechRecognitionService } from './services/speech-recognition.service';
-import { MutationObserverService } from './services/mutation-observer.service';
-import { PerformanceObserverService } from './services/performance-observer.service';
-import { WebAudioService } from './services/web-audio.service';
-import { GamepadService } from './services/gamepad.service';
-import { WebLocksService } from './services/web-locks.service';
-import { StorageManagerService } from './services/storage-manager.service';
-import { CompressionService } from './services/compression.service';
-import { EyeDropperService } from './services/eye-dropper.service';
-import { IdleDetectorService } from './services/idle-detector.service';
-import { BarcodeDetectorService } from './services/barcode-detector.service';
-import { CredentialManagementService } from './services/credential-management.service';
-import { WebBluetoothService } from './services/web-bluetooth.service';
-import { WebSerialService } from './services/web-serial.service';
-import { WebHidService } from './services/web-hid.service';
 
 type EnvironmentProvidersLike = {
   ɵproviders: unknown[];
@@ -104,7 +104,12 @@ function extractProviders(config?: BrowserWebApisConfig): unknown[] {
 }
 
 function hasProvider(providers: unknown[], service: unknown): boolean {
-  return providers.some((p: any) => p === service || p?.provide === service);
+  return providers.some(
+    (p: any) =>
+      p === service ||
+      p?.provide === service ||
+      (Array.isArray(p?.ɵproviders) && hasProvider(p.ɵproviders, service)),
+  );
 }
 
 describe('Browser Web APIs Providers', () => {

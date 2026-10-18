@@ -20,6 +20,7 @@ import type {
   VectorLayerConfig,
   VectorSourceConfig,
 } from '../models/layer.types';
+import { resolveVectorSourceConfig } from '../utils/source-builders.util';
 import { OlClusterComponent } from './cluster.component';
 
 @Component({
@@ -44,26 +45,15 @@ export class OlVectorLayerComponent {
   coordinateProjection = input<string>('EPSG:4326');
   autoFit = input<boolean | AutoFitOptions>(false);
 
-  readonly resolvedSourceConfig = computed<VectorSourceConfig>(() => {
-    const src = this.source();
-    const fallback: VectorSourceConfig = {
+  readonly resolvedSourceConfig = computed<VectorSourceConfig>(() =>
+    resolveVectorSourceConfig(this.source(), {
       features: this.features(),
       url: this.url(),
       format: this.format(),
       coordinateProjection: this.coordinateProjection(),
       autoFit: this.autoFit(),
-    };
-    if (typeof src === 'string') {
-      return { ...fallback, url: src };
-    }
-    if (Array.isArray(src)) {
-      return { ...fallback, features: src };
-    }
-    if (src && typeof src === 'object') {
-      return { ...fallback, ...src };
-    }
-    return fallback;
-  });
+    }),
+  );
 
   constructor() {
     // Initialize layer after DOM is ready

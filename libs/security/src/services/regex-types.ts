@@ -1,3 +1,14 @@
+import { InjectionToken } from '@angular/core';
+
+export interface RegexSecurityDefaults {
+  defaultTimeout?: number;
+  safeMode?: boolean;
+}
+
+export const REGEX_SECURITY_DEFAULTS = new InjectionToken<RegexSecurityDefaults>(
+  'REGEX_SECURITY_DEFAULTS',
+);
+
 export interface RegexSecurityConfig {
   timeout?: number; // Timeout in milliseconds (default: 5000)
   maxComplexity?: number; // Maximum complexity allowed

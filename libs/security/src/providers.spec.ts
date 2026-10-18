@@ -17,7 +17,7 @@ import {
   provideSecureMessage,
   provideWebAuthn,
 } from './providers';
-import { RegexSecurityService } from './services/regex-security.service';
+import { RegexSecurityService, REGEX_SECURITY_DEFAULTS } from './services/regex-security.service';
 import { RegexAnalyzerService } from './services/regex-analyzer.service';
 import { RegexWorkerPoolService } from './services/regex-worker-pool.service';
 import { WebCryptoService } from './services/web-crypto.service';
@@ -44,6 +44,40 @@ describe('Security Providers', () => {
       expect(TestBed.inject(RegexWorkerPoolService)).toBeTruthy();
       expect(TestBed.inject(RegexSecurityService)).toBeTruthy();
       expect(TestBed.inject(WebCryptoService)).toBeTruthy();
+      expect(TestBed.inject(REGEX_SECURITY_DEFAULTS)).toEqual({
+        defaultTimeout: 5000,
+        safeMode: false,
+      });
+    });
+
+    it('propagates custom defaultTimeout and safeMode to REGEX_SECURITY_DEFAULTS', () => {
+      TestBed.configureTestingModule({
+        providers: [
+          provideSecurity({
+            defaultTimeout: 1500,
+            safeMode: true,
+          }),
+        ],
+      });
+
+      expect(TestBed.inject(REGEX_SECURITY_DEFAULTS)).toEqual({
+        defaultTimeout: 1500,
+        safeMode: true,
+      });
+    });
+
+    it('provides WebCryptoService automatically when enableSecureMessage is true even if enableWebCrypto is false', () => {
+      TestBed.configureTestingModule({
+        providers: [
+          provideSecurity({
+            enableWebCrypto: false,
+            enableSecureMessage: true,
+          }),
+        ],
+      });
+
+      expect(TestBed.inject(WebCryptoService)).toBeTruthy();
+      expect(TestBed.inject(SecureMessageService)).toBeTruthy();
     });
 
     it('can disable default services via config', () => {
@@ -58,6 +92,7 @@ describe('Security Providers', () => {
 
       expect(TestBed.inject(RegexSecurityService, null)).toBeNull();
       expect(TestBed.inject(WebCryptoService, null)).toBeNull();
+      expect(TestBed.inject(REGEX_SECURITY_DEFAULTS, null)).toBeNull();
     });
 
     it('provides all optional services when enabled via config', () => {
@@ -94,11 +129,22 @@ describe('Security Providers', () => {
   });
 
   describe('individual provider functions', () => {
-    it('provideRegexSecurity', () => {
-      TestBed.configureTestingModule({ providers: [provideRegexSecurity()] });
+    it('provideRegexSecurity with and without config', () => {
+      TestBed.configureTestingModule({
+        providers: [provideRegexSecurity({ defaultTimeout: 2500, safeMode: true })],
+      });
       expect(TestBed.inject(RegexSecurityService)).toBeTruthy();
       expect(TestBed.inject(RegexAnalyzerService)).toBeTruthy();
       expect(TestBed.inject(RegexWorkerPoolService)).toBeTruthy();
+      expect(TestBed.inject(REGEX_SECURITY_DEFAULTS)).toEqual({
+        defaultTimeout: 2500,
+        safeMode: true,
+      });
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({ providers: [provideRegexSecurity()] });
+      expect(TestBed.inject(RegexSecurityService)).toBeTruthy();
+      expect(TestBed.inject(REGEX_SECURITY_DEFAULTS, null)).toBeNull();
     });
 
     it('provideWebCrypto', () => {
