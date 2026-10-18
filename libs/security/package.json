@@ -40,7 +40,7 @@
   },
   "scripts": {
     "prebuild": "node ../../scripts/inline-workers.js",
-    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
+    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/security",
     "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/security",
     "clean": "node ../../scripts/clean.js",
     "test": "vitest run --root ../.. libs/security"

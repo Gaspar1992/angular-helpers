@@ -3,7 +3,7 @@
   "version": "22.7.0",
   "description": "Modern Angular wrapper for OpenLayers with modular architecture, standalone components, and hybrid template/programmatic API",
   "scripts": {
-    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
+    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/openlayers",
     "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/openlayers",
     "build:watch": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json --watch",
     "test": "vitest run --root ../.. libs/openlayers",

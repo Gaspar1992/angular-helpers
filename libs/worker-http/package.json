@@ -4,7 +4,7 @@
   "description": "Angular HTTP over Web Workers — off-main-thread HTTP pipelines with configurable interceptors, WebCrypto security, and pluggable serialization",
   "schematics": "./schematics/collection.json",
   "scripts": {
-    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json",
+    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/worker-http",
     "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/worker-http",
     "build:watch": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json --watch",
     "build:schematics": "tsc -p tsconfig.schematics.json && node scripts/rename-to-cjs.mjs",

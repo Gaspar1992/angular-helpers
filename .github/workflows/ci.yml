@@ -67,7 +67,7 @@ jobs:
           retention-days: 14
 
       - name: Build packages
-        run: pnpm nx run-many -t build
+        run: pnpm nx run-many -t build:prod
 
       - name: Validate package metadata and APF exports
         run: pnpm run lint:packages
