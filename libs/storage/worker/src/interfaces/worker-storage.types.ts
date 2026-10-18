@@ -1,3 +1,5 @@
+import type { StorageSignalOptions } from './storage-options.types';
+
 export type WorkerStorageAction = 'read' | 'write' | 'delete';
 
 export interface WorkerStorageRequest {
@@ -5,7 +7,7 @@ export interface WorkerStorageRequest {
   requestId: string;
   key?: string;
   payload?: any;
-  options?: {
+  options?: StorageSignalOptions & {
     useToon?: boolean;
   };
 }

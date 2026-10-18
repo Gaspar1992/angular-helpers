@@ -15,6 +15,7 @@
     "target": "ES2024",
     "module": "preserve",
     "moduleResolution": "bundler",
+    "rootDir": ".",
     "paths": {
       "@angular-helpers/core": ["./libs/core/src/index.ts"],
       "@angular-helpers/core/utils": ["./libs/core/utils/src/index.ts"],

@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 import { IndexedDBTransport } from '../services/transports/indexeddb.transport';
-import { WorkerStorageRequest } from '../interfaces/worker-storage.types';
+import type { WorkerStorageRequest } from '../interfaces/worker-storage.types';
 
 // Instantiate our environment-agnostic L2 storage transport
 const storageEngine = new IndexedDBTransport('fallback-passphrase-angular-helpers-default-key-sec');

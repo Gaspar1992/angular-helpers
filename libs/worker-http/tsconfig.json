@@ -4,7 +4,8 @@
     "outDir": "../../dist/out-tsc/libs/worker-http",
     "declaration": true,
     "declarationMap": true,
-    "lib": ["ES2022", "dom", "webworker"]
+    "lib": ["ES2022", "dom", "webworker"],
+    "types": ["node"]
   },
   "include": [
     "src/**/*",
