@@ -5,7 +5,6 @@ import {
   inject,
   type OnInit,
   type OnDestroy,
-  NgZone,
   effect,
 } from '@angular/core';
 import { form, required, disabled, FormRoot, FormField } from '@angular/forms/signals';
@@ -162,7 +161,6 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
   // Dependency Injections
   private readonly workerTransport = inject(WorkerStorageTransport);
   private readonly localTransport = inject(LocalStorageTransport);
-  private readonly ngZone = inject(NgZone);
   private syncSubscription?: () => void;
   private benchmarkTimeout?: any;
 
@@ -174,13 +172,11 @@ export class StorageDemoComponent implements OnInit, OnDestroy {
 
     // Handle incoming Multi-Tab Sync changes from the Web Worker BroadcastChannel
     this.syncSubscription = this.workerTransport.onChange('user_profile', (newValue: any) => {
-      this.ngZone.run(() => {
-        if (newValue) {
-          this.activeProfile.set(newValue);
-          this.profileModel.set(newValue);
-          this.triggerToast(`Profile for "${newValue.name}" synced in the background.`);
-        }
-      });
+      if (newValue) {
+        this.activeProfile.set(newValue);
+        this.profileModel.set(newValue);
+        this.triggerToast(`Profile for "${newValue.name}" synced in the background.`);
+      }
     });
   }
 

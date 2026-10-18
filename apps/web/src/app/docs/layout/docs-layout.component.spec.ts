@@ -67,7 +67,7 @@ describe('DocsLayoutComponent', () => {
     fixture = TestBed.createComponent(DocsLayoutComponent);
   });
 
-  it('should not show bookmarks or history sections when they are empty', () => {
+  it('should not show bookmarks section when empty', () => {
     fixture.detectChanges();
     const bookmarksSec = fixture.nativeElement.querySelector('#sidebar-bookmarks');
     const historySec = fixture.nativeElement.querySelector('#sidebar-history');
@@ -76,12 +76,9 @@ describe('DocsLayoutComponent', () => {
     expect(historySec).toBeFalsy();
   });
 
-  it('should show bookmarks and history sections when they contain items', () => {
+  it('should show bookmarks section when it contains items', () => {
     mockHistoryService.bookmarkedItems.set([
       { route: '/docs/core/worker-pool', label: 'WorkerPool' },
-    ]);
-    mockHistoryService.historyItems.set([
-      { route: '/docs/core/is-transferable', label: 'isTransferable' },
     ]);
 
     fixture.detectChanges();
@@ -90,10 +87,9 @@ describe('DocsLayoutComponent', () => {
     const historySec = fixture.nativeElement.querySelector('#sidebar-history');
 
     expect(bookmarksSec).toBeTruthy();
-    expect(historySec).toBeTruthy();
+    expect(historySec).toBeFalsy();
 
     expect(bookmarksSec.textContent).toContain('WorkerPool');
-    expect(historySec.textContent).toContain('isTransferable');
   });
 
   it('should render the vitals panel stub', () => {

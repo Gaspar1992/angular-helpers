@@ -357,13 +357,6 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
           },
         ],
       },
-      {
-        title: 'Military',
-        items: [
-          { label: 'Military Service', route: '/docs/openlayers/military' },
-          { label: 'Tactical Graphics', route: '/docs/openlayers/tactical-graphics' },
-        ],
-      },
     ],
   },
   {

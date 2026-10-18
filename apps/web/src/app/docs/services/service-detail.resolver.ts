@@ -7,46 +7,102 @@ import {
 } from '../feature/unified-service-detail/unified-service-detail.component';
 import { SeoService } from '../../core/services/seo.service';
 
-// Import v21 data
-import * as browserWebApisV21 from '../data/v21/browser-web-apis.data';
-import * as coreV21 from '../data/v21/core.data';
-import * as securityV21 from '../data/v21/security.data';
-import * as workerHttpV21 from '../data/v21/worker-http.data';
-import * as openlayersV21 from '../data/v21/openlayers.data';
-import * as storageV21 from '../data/v21/storage.data';
-import * as yjsV21 from '../data/v21/yjs.data';
-import * as testingV21 from '../data/v21/testing.data';
-
-// Import v22 data
-import * as browserWebApisV22 from '../data/v22/browser-web-apis.data';
-import * as coreV22 from '../data/v22/core.data';
-import * as securityV22 from '../data/v22/security.data';
-import * as workerHttpV22 from '../data/v22/worker-http.data';
-import * as openlayersV22 from '../data/v22/openlayers.data';
-import * as storageV22 from '../data/v22/storage.data';
-import * as yjsV22 from '../data/v22/yjs.data';
-import * as testingV22 from '../data/v22/testing.data';
-
-function getInterfaces(
+async function loadSectionData(
   section: string,
-  itemId: string,
   isV21: boolean,
-): InterfaceDoc[] | undefined {
-  if (section === 'security') {
-    const interfaces = isV21 ? securityV21.SECURITY_INTERFACES : securityV22.SECURITY_INTERFACES;
-    return (interfaces as unknown as Record<string, InterfaceDoc[]>)[itemId];
+): Promise<{
+  dataSource: any[];
+  backRoute: string;
+  backLabel: string;
+  interfacesMap?: Record<string, InterfaceDoc[]>;
+} | null> {
+  switch (section) {
+    case 'core': {
+      const mod = isV21
+        ? await import('../data/v21/core.data')
+        : await import('../data/v22/core.data');
+      return {
+        dataSource: mod.CORE_SERVICES,
+        backRoute: '/docs/core',
+        backLabel: 'core',
+      };
+    }
+    case 'browser-web-apis': {
+      const mod = isV21
+        ? await import('../data/v21/browser-web-apis.data')
+        : await import('../data/v22/browser-web-apis.data');
+      return {
+        dataSource: mod.BROWSER_WEB_APIS_SERVICES,
+        backRoute: '/docs/browser-web-apis',
+        backLabel: 'browser-web-apis',
+      };
+    }
+    case 'security': {
+      const mod = isV21
+        ? await import('../data/v21/security.data')
+        : await import('../data/v22/security.data');
+      return {
+        dataSource: mod.SECURITY_SERVICES,
+        backRoute: '/docs/security',
+        backLabel: 'security',
+        interfacesMap: mod.SECURITY_INTERFACES as unknown as Record<string, InterfaceDoc[]>,
+      };
+    }
+    case 'worker-http': {
+      const mod = isV21
+        ? await import('../data/v21/worker-http.data')
+        : await import('../data/v22/worker-http.data');
+      return {
+        dataSource: mod.WORKER_HTTP_ENTRIES,
+        backRoute: '/docs/worker-http',
+        backLabel: 'worker-http',
+        interfacesMap: mod.WORKER_HTTP_INTERFACES as unknown as Record<string, InterfaceDoc[]>,
+      };
+    }
+    case 'storage': {
+      const mod = isV21
+        ? await import('../data/v21/storage.data')
+        : await import('../data/v22/storage.data');
+      return {
+        dataSource: mod.STORAGE_SERVICES,
+        backRoute: '/docs/storage',
+        backLabel: 'storage',
+        interfacesMap: mod.STORAGE_INTERFACES as Record<string, InterfaceDoc[]>,
+      };
+    }
+    case 'openlayers': {
+      const mod = isV21
+        ? await import('../data/v21/openlayers.data')
+        : await import('../data/v22/openlayers.data');
+      return {
+        dataSource: mod.OPENLAYERS_SERVICES,
+        backRoute: '/docs/openlayers',
+        backLabel: 'openlayers',
+      };
+    }
+    case 'yjs': {
+      const mod = isV21
+        ? await import('../data/v21/yjs.data')
+        : await import('../data/v22/yjs.data');
+      return {
+        dataSource: mod.YJS_SERVICES,
+        backRoute: '/docs/yjs',
+        backLabel: 'yjs',
+      };
+    }
+    case 'testing': {
+      const mod = isV21
+        ? await import('../data/v21/testing.data')
+        : await import('../data/v22/testing.data');
+      return {
+        dataSource: mod.TESTING_SERVICES,
+        backRoute: '/docs/testing',
+        backLabel: 'testing',
+      };
+    }
+    default:
+      return null;
   }
-  if (section === 'worker-http') {
-    const interfaces = isV21
-      ? workerHttpV21.WORKER_HTTP_INTERFACES
-      : workerHttpV22.WORKER_HTTP_INTERFACES;
-    return (interfaces as unknown as Record<string, InterfaceDoc[]>)[itemId];
-  }
-  if (section === 'storage') {
-    const interfaces = isV21 ? storageV21.STORAGE_INTERFACES : storageV22.STORAGE_INTERFACES;
-    return (interfaces as Record<string, InterfaceDoc[]>)[itemId];
-  }
-  return undefined;
 }
 
 export async function resolveServiceDetailData(
@@ -57,62 +113,14 @@ export async function resolveServiceDetailData(
   seo: SeoService,
 ): Promise<ServiceDetailConfig | null> {
   const isV21 = version === 'v21';
-
-  const sectionDataMap: Record<
-    string,
-    { dataSource: any[]; backRoute: string; backLabel: string }
-  > = {
-    core: {
-      dataSource: isV21 ? coreV21.CORE_SERVICES : coreV22.CORE_SERVICES,
-      backRoute: '/docs/core',
-      backLabel: 'core',
-    },
-    'browser-web-apis': {
-      dataSource: isV21
-        ? browserWebApisV21.BROWSER_WEB_APIS_SERVICES
-        : browserWebApisV22.BROWSER_WEB_APIS_SERVICES,
-      backRoute: '/docs/browser-web-apis',
-      backLabel: 'browser-web-apis',
-    },
-    security: {
-      dataSource: isV21 ? securityV21.SECURITY_SERVICES : securityV22.SECURITY_SERVICES,
-      backRoute: '/docs/security',
-      backLabel: 'security',
-    },
-    'worker-http': {
-      dataSource: isV21 ? workerHttpV21.WORKER_HTTP_ENTRIES : workerHttpV22.WORKER_HTTP_ENTRIES,
-      backRoute: '/docs/worker-http',
-      backLabel: 'worker-http',
-    },
-    storage: {
-      dataSource: isV21 ? storageV21.STORAGE_SERVICES : storageV22.STORAGE_SERVICES,
-      backRoute: '/docs/storage',
-      backLabel: 'storage',
-    },
-    openlayers: {
-      dataSource: isV21 ? openlayersV21.OPENLAYERS_SERVICES : openlayersV22.OPENLAYERS_SERVICES,
-      backRoute: '/docs/openlayers',
-      backLabel: 'openlayers',
-    },
-    yjs: {
-      dataSource: isV21 ? yjsV21.YJS_SERVICES : yjsV22.YJS_SERVICES,
-      backRoute: '/docs/yjs',
-      backLabel: 'yjs',
-    },
-    testing: {
-      dataSource: isV21 ? testingV21.TESTING_SERVICES : testingV22.TESTING_SERVICES,
-      backRoute: '/docs/testing',
-      backLabel: 'testing',
-    },
-  };
+  const sectionData = await loadSectionData(section, isV21);
 
   // Safety check for invalid section - redirect to docs
-  if (!sectionDataMap[section]) {
+  if (!sectionData) {
     await router.navigate(['/docs']);
     return null;
   }
 
-  const sectionData = sectionDataMap[section];
   const item = sectionData.dataSource.find((s) => s.id === itemId);
 
   // If service not found, redirect to section overview
@@ -133,7 +141,7 @@ export async function resolveServiceDetailData(
     section: section as ServiceDetailConfig['section'],
     backRoute: sectionData.backRoute,
     backLabel: sectionData.backLabel,
-    interfaces: getInterfaces(section, itemId, isV21),
+    interfaces: sectionData.interfacesMap?.[itemId],
   };
 }
 

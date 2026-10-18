@@ -48,7 +48,26 @@ describe('overviewResolver', () => {
     expect(platformService.description).not.toContain('[v21 Legacy]');
   });
 
-  it('should create reactive overviewResource for route', async () => {
+  it('should create reactive overviewResource for route and resolve all sections in v21 and v22', async () => {
+    const { getOverviewConfig } = await import('./overview.resolver');
+    const sections = [
+      'core',
+      'browser-web-apis',
+      'security',
+      'worker-http',
+      'storage',
+      'openlayers',
+      'yjs',
+      'testing',
+      'unknown-pkg',
+    ];
+    for (const version of ['v21', 'v22'] as const) {
+      for (const sec of sections) {
+        const cfg = await getOverviewConfig(sec, version);
+        expect(cfg.packageName).toBe(sec);
+      }
+    }
+
     versionService.activeVersionSignal.set('v22');
     const ctx = {
       params: signal({}),

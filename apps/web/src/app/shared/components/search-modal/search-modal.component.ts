@@ -299,12 +299,13 @@ export class SearchModalComponent {
   }
 
   onWindowKeydown(e: KeyboardEvent) {
-    if (!this.search.isOpen()) return;
-
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
       this.search.toggle();
+      return;
     }
+
+    if (!this.search.isOpen()) return;
     if (e.key === 'Escape') {
       e.preventDefault();
       this.close();

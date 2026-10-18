@@ -4,6 +4,7 @@ import { of, from } from 'rxjs';
 import { switchMap, catchError, tap, finalize } from 'rxjs/operators';
 import { injectWorkerPool, injectPlatform } from '@angular-helpers/core';
 import { PACKAGES } from '../config/packages.data';
+import { DOCS_NAV_LIBRARIES } from '../../docs/config/docs-nav.data';
 
 export interface SearchResult {
   type: 'docs' | 'blog' | 'demo';
@@ -13,6 +14,9 @@ export interface SearchResult {
   icon: string;
   tags?: string[];
 }
+
+const packageUrls = new Set(PACKAGES.map((p) => p.docsLink));
+const packageIcons = new Map(PACKAGES.map((p) => [p.name, p.icon]));
 
 @Injectable({
   providedIn: 'root',
@@ -32,6 +36,27 @@ export class SearchService {
       icon: p.icon,
       tags: p.highlights,
     })),
+    // Individual API Doc Pages
+    ...DOCS_NAV_LIBRARIES.flatMap((lib) =>
+      lib.sections.flatMap((section) =>
+        section.items
+          .filter((item) => !packageUrls.has(item.route))
+          .map((item) => ({
+            type: 'docs' as const,
+            title: item.label,
+            description: `${lib.label} — ${section.title}`,
+            url: item.route,
+            icon: packageIcons.get(lib.id) ?? '📘',
+            tags: [
+              lib.id,
+              lib.label,
+              section.title,
+              ...(item.hasFn ? ['inject', 'function'] : []),
+              ...(item.experimental ? ['experimental'] : []),
+            ],
+          })),
+      ),
+    ),
   ];
 
   private loadedExtra = false;

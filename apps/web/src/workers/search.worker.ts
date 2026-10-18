@@ -1,5 +1,6 @@
 /// <reference lib="webworker" />
 import { PACKAGES } from '../app/core/config/packages.data';
+import { DOCS_NAV_LIBRARIES } from '../app/docs/config/docs-nav.data';
 import { BLOG_POSTS } from '../app/blog/config/posts.data';
 import { PUBLIC_DEMO_SECTIONS } from '../app/demo/config/demo.config';
 
@@ -12,6 +13,9 @@ export interface SearchResult {
   tags?: string[];
 }
 
+const packageUrls = new Set(PACKAGES.map((p) => p.docsLink));
+const packageIcons = new Map(PACKAGES.map((p) => [p.name, p.icon]));
+
 const index: SearchResult[] = [
   // Packages / Docs
   ...PACKAGES.map((p) => ({
@@ -22,6 +26,27 @@ const index: SearchResult[] = [
     icon: p.icon,
     tags: p.highlights,
   })),
+  // Individual API Doc Pages
+  ...DOCS_NAV_LIBRARIES.flatMap((lib) =>
+    lib.sections.flatMap((section) =>
+      section.items
+        .filter((item) => !packageUrls.has(item.route))
+        .map((item) => ({
+          type: 'docs' as const,
+          title: item.label,
+          description: `${lib.label} — ${section.title}`,
+          url: item.route,
+          icon: packageIcons.get(lib.id) ?? '📘',
+          tags: [
+            lib.id,
+            lib.label,
+            section.title,
+            ...(item.hasFn ? ['inject', 'function'] : []),
+            ...(item.experimental ? ['experimental'] : []),
+          ],
+        })),
+    ),
+  ),
   // Blog Posts
   ...BLOG_POSTS.map((post) => ({
     type: 'blog' as const,

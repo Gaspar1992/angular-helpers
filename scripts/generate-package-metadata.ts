@@ -58,7 +58,7 @@ function countInjectFunctionsInDirectory(dirPath: string): { functions: string[]
   const files = fs.readdirSync(dirPath);
 
   for (const file of files) {
-    if (file.startsWith('inject-') && file.endsWith('.ts')) {
+    if (file.startsWith('inject-') && file.endsWith('.ts') && !file.endsWith('.spec.ts')) {
       const fnName = file.replace('.ts', '');
       functions.push(fnName);
     }

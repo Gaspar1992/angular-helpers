@@ -105,8 +105,8 @@ import { PACKAGES } from '../../../core/config/packages.data';
           ><code class="font-mono text-sm leading-relaxed text-base-content/90">bootstrapApplication(AppComponent, &#123;
   providers: [
     provideBrowserWebApis(),
-    provideWorkerHttp(&#123;
-      worker: <span class="text-primary font-bold">new</span> Worker(<span class="text-green-400">'./app.worker'</span>, &#123; type: <span class="text-green-400">'module'</span> &#125;),
+    provideWorkerHttpClient(&#123;
+      workerUrl: <span class="text-green-400">'/assets/workers/http-api.worker.js'</span>,
     &#125;),
   ],
 &#125;);</code></pre>

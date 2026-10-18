@@ -238,5 +238,8 @@ describe('SearchService', () => {
     await new Promise((resolve) => setTimeout(resolve, 20));
     const tagResults = await capturedFallback!('search', { q: 'worker' });
     expect(tagResults.length).toBeGreaterThan(0);
+
+    const apiDocResults = await capturedFallback!('search', { q: 'injectPlatform' });
+    expect(apiDocResults.some((item: any) => item.url === '/docs/core/inject-platform')).toBe(true);
   });
 });

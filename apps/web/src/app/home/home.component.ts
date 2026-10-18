@@ -67,7 +67,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
                 class="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2 shadow-inner relative"
               >
                 <code class="font-mono text-sm text-base-content/90 font-semibold"
-                  >pnpm add angular-helpers</code
+                  >pnpm add @angular-helpers/browser-web-apis</code
                 >
                 <button
                   class="btn btn-square btn-sm btn-ghost text-base-content/70 hover:text-base-content focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-1 transition-colors"
@@ -151,7 +151,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
             id="packages-title"
             class="text-[2.5rem] sm:text-[3.5rem] font-black text-base-content tracking-tighter leading-none m-0 mb-16 text-center text-balance"
           >
-            Five tools. <br class="sm:hidden" />Zero bloat.
+            Eight packages. <br class="sm:hidden" />Zero bloat.
           </h2>
 
           <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-8">
@@ -326,7 +326,7 @@ export class HomeComponent {
   protected readonly copied = signal(false);
 
   copyInstallCommand() {
-    navigator.clipboard.writeText('pnpm add angular-helpers');
+    navigator.clipboard.writeText('pnpm add @angular-helpers/browser-web-apis');
     this.copied.set(true);
     setTimeout(() => this.copied.set(false), 2000);
   }

@@ -4,71 +4,48 @@ import { DocsVersionService } from '../services/docs-version.service';
 import type { OverviewConfig } from '../feature/unified-overview/unified-overview.component';
 import { generateServiceGroups } from './overview.utils';
 
-// Import v21 data
-import * as browserWebApisV21 from '../data/v21/browser-web-apis.data';
-import * as coreV21 from '../data/v21/core.data';
-import * as securityV21 from '../data/v21/security.data';
-import * as workerHttpV21 from '../data/v21/worker-http.data';
-import * as openlayersV21 from '../data/v21/openlayers.data';
-import * as storageV21 from '../data/v21/storage.data';
-import * as yjsV21 from '../data/v21/yjs.data';
-import * as testingV21 from '../data/v21/testing.data';
-
-// Import v22 data
-import * as browserWebApisV22 from '../data/v22/browser-web-apis.data';
-import * as coreV22 from '../data/v22/core.data';
-import * as securityV22 from '../data/v22/security.data';
-import * as workerHttpV22 from '../data/v22/worker-http.data';
-import * as openlayersV22 from '../data/v22/openlayers.data';
-import * as storageV22 from '../data/v22/storage.data';
-import * as yjsV22 from '../data/v22/yjs.data';
-import * as testingV22 from '../data/v22/testing.data';
-
-function getOverviewConfig(section: string, version: 'v21' | 'v22'): OverviewConfig {
+export async function getOverviewConfig(
+  section: string,
+  version: 'v21' | 'v22',
+): Promise<OverviewConfig> {
   const isV21 = version === 'v21';
 
-  const coreServices = isV21 ? coreV21.CORE_SERVICES : coreV22.CORE_SERVICES;
-  const browserWebApisServices = isV21
-    ? browserWebApisV21.BROWSER_WEB_APIS_SERVICES
-    : browserWebApisV22.BROWSER_WEB_APIS_SERVICES;
-  const securityServices = isV21 ? securityV21.SECURITY_SERVICES : securityV22.SECURITY_SERVICES;
-  const workerHttpEntries = isV21
-    ? workerHttpV21.WORKER_HTTP_ENTRIES
-    : workerHttpV22.WORKER_HTTP_ENTRIES;
-  const storageServices = isV21 ? storageV21.STORAGE_SERVICES : storageV22.STORAGE_SERVICES;
-  const openlayersServices = isV21
-    ? openlayersV21.OPENLAYERS_SERVICES
-    : openlayersV22.OPENLAYERS_SERVICES;
-  const yjsServices = isV21 ? yjsV21.YJS_SERVICES : yjsV22.YJS_SERVICES;
-  const testingServices = isV21 ? testingV21.TESTING_SERVICES : testingV22.TESTING_SERVICES;
-
-  const OVERVIEW_CONFIGS: Record<string, OverviewConfig> = {
-    core: {
-      packageName: 'core',
-      npmPackage: '@angular-helpers/core',
-      lead: 'Shared primitives used across all Angular Helpers packages — platform detection, Transferable helpers, and Worker pooling.',
-      providerExample: `import { injectPlatform, injectWorkerPool, isTransferable } from '@angular-helpers/core';
+  switch (section) {
+    case 'core': {
+      const { CORE_SERVICES: coreServices } = isV21
+        ? await import('../data/v21/core.data')
+        : await import('../data/v22/core.data');
+      return {
+        packageName: 'core',
+        npmPackage: '@angular-helpers/core',
+        lead: 'Shared primitives used across all Angular Helpers packages — platform detection, Transferable helpers, and Worker pooling.',
+        providerExample: `import { injectPlatform, injectWorkerPool, isTransferable } from '@angular-helpers/core';
   
   // No provider setup required — all utilities are standalone inject() functions.
   // pnpm add @angular-helpers/core`,
-      serviceGroups: [
-        {
-          label: 'Platform',
-          icon: '🖥️',
-          items: coreServices.filter((s) => s.category === 'platform'),
-        },
-        {
-          label: 'Workers & Transferables',
-          icon: '⚙️',
-          items: coreServices.filter((s) => s.category === 'workers'),
-        },
-      ],
-    },
-    'browser-web-apis': {
-      packageName: 'browser-web-apis',
-      npmPackage: '@angular-helpers/browser-web-apis',
-      lead: 'Angular services for structured, secure, and reactive access to Browser Web APIs.',
-      providerExample: `import { provideBrowserWebApis, provideCamera, provideGeolocation } from '@angular-helpers/browser-web-apis';
+        serviceGroups: [
+          {
+            label: 'Platform',
+            icon: '🖥️',
+            items: coreServices.filter((s) => s.category === 'platform'),
+          },
+          {
+            label: 'Workers & Transferables',
+            icon: '⚙️',
+            items: coreServices.filter((s) => s.category === 'workers'),
+          },
+        ],
+      };
+    }
+    case 'browser-web-apis': {
+      const { BROWSER_WEB_APIS_SERVICES: browserWebApisServices } = isV21
+        ? await import('../data/v21/browser-web-apis.data')
+        : await import('../data/v22/browser-web-apis.data');
+      return {
+        packageName: 'browser-web-apis',
+        npmPackage: '@angular-helpers/browser-web-apis',
+        lead: 'Angular services for structured, secure, and reactive access to Browser Web APIs.',
+        providerExample: `import { provideBrowserWebApis, provideCamera, provideGeolocation } from '@angular-helpers/browser-web-apis';
   
   bootstrapApplication(AppComponent, {
     providers: [
@@ -77,13 +54,18 @@ function getOverviewConfig(section: string, version: 'v21' | 'v22'): OverviewCon
       }),
     ],
   });`,
-      serviceGroups: generateServiceGroups(browserWebApisServices),
-    },
-    security: {
-      packageName: 'security',
-      npmPackage: '@angular-helpers/security',
-      lead: 'Security-focused Angular services for validation, crypto, and safe storage.',
-      providerExample: `import { provideSecurity } from '@angular-helpers/security';
+        serviceGroups: generateServiceGroups(browserWebApisServices),
+      };
+    }
+    case 'security': {
+      const { SECURITY_SERVICES: securityServices } = isV21
+        ? await import('../data/v21/security.data')
+        : await import('../data/v22/security.data');
+      return {
+        packageName: 'security',
+        npmPackage: '@angular-helpers/security',
+        lead: 'Security-focused Angular services for validation, crypto, and safe storage.',
+        providerExample: `import { provideSecurity } from '@angular-helpers/security';
   
   bootstrapApplication(AppComponent, {
     providers: [
@@ -93,19 +75,24 @@ function getOverviewConfig(section: string, version: 'v21' | 'v22'): OverviewCon
       }),
     ],
   });`,
-      serviceGroups: [
-        {
-          label: 'Security Services',
-          icon: '🔐',
-          items: securityServices,
-        },
-      ],
-    },
-    'worker-http': {
-      packageName: 'worker-http',
-      npmPackage: '@angular-helpers/worker-http',
-      lead: 'HTTP client for Web Workers with interceptors, retry logic, and caching.',
-      providerExample: `import { provideWorkerHttpClient } from '@angular-helpers/worker-http/backend';
+        serviceGroups: [
+          {
+            label: 'Security Services',
+            icon: '🔐',
+            items: securityServices,
+          },
+        ],
+      };
+    }
+    case 'worker-http': {
+      const { WORKER_HTTP_ENTRIES: workerHttpEntries } = isV21
+        ? await import('../data/v21/worker-http.data')
+        : await import('../data/v22/worker-http.data');
+      return {
+        packageName: 'worker-http',
+        npmPackage: '@angular-helpers/worker-http',
+        lead: 'HTTP client for Web Workers with interceptors, retry logic, and caching.',
+        providerExample: `import { provideWorkerHttpClient } from '@angular-helpers/worker-http/backend';
   
   bootstrapApplication(AppComponent, {
     providers: [
@@ -114,19 +101,24 @@ function getOverviewConfig(section: string, version: 'v21' | 'v22'): OverviewCon
       }),
     ],
   });`,
-      serviceGroups: [
-        {
-          label: 'Entry Points',
-          icon: '⚙',
-          items: workerHttpEntries,
-        },
-      ],
-    },
-    storage: {
-      packageName: 'storage',
-      npmPackage: '@angular-helpers/storage',
-      lead: 'High-performance, client-side, encrypted, and dynamically compressed reactive state and storage utilities.',
-      providerExample: `import { STORAGE_TRANSPORT, LocalStorageTransport } from '@angular-helpers/storage';
+        serviceGroups: [
+          {
+            label: 'Entry Points',
+            icon: '⚙',
+            items: workerHttpEntries,
+          },
+        ],
+      };
+    }
+    case 'storage': {
+      const { STORAGE_SERVICES: storageServices } = isV21
+        ? await import('../data/v21/storage.data')
+        : await import('../data/v22/storage.data');
+      return {
+        packageName: 'storage',
+        npmPackage: '@angular-helpers/storage',
+        lead: 'High-performance, client-side, encrypted, and dynamically compressed reactive state and storage utilities.',
+        providerExample: `import { STORAGE_TRANSPORT, LocalStorageTransport } from '@angular-helpers/storage';
   
   bootstrapApplication(AppComponent, {
     providers: [
@@ -134,24 +126,29 @@ function getOverviewConfig(section: string, version: 'v21' | 'v22'): OverviewCon
       { provide: STORAGE_TRANSPORT, useClass: LocalStorageTransport }
     ],
   });`,
-      serviceGroups: [
-        {
-          label: 'Core Primitives',
-          icon: '💾',
-          items: storageServices.filter((s) => s.id.startsWith('inject-')),
-        },
-        {
-          label: 'Transports & Protocols',
-          icon: '⚙',
-          items: storageServices.filter((s) => !s.id.startsWith('inject-')),
-        },
-      ],
-    },
-    openlayers: {
-      packageName: 'openlayers',
-      npmPackage: '@angular-helpers/openlayers',
-      lead: 'Modern Angular wrapper for OpenLayers with modular architecture and standalone components.',
-      providerExample: `import { OlMapComponent, OlTileLayerComponent } from '@angular-helpers/openlayers';
+        serviceGroups: [
+          {
+            label: 'Core Primitives',
+            icon: '💾',
+            items: storageServices.filter((s) => s.id.startsWith('inject-')),
+          },
+          {
+            label: 'Transports & Protocols',
+            icon: '⚙',
+            items: storageServices.filter((s) => !s.id.startsWith('inject-')),
+          },
+        ],
+      };
+    }
+    case 'openlayers': {
+      const { OPENLAYERS_SERVICES: openlayersServices } = isV21
+        ? await import('../data/v21/openlayers.data')
+        : await import('../data/v22/openlayers.data');
+      return {
+        packageName: 'openlayers',
+        npmPackage: '@angular-helpers/openlayers',
+        lead: 'Modern Angular wrapper for OpenLayers with modular architecture and standalone components.',
+        providerExample: `import { OlMapComponent, OlTileLayerComponent } from '@angular-helpers/openlayers';
   
   @Component({
     imports: [OlMapComponent, OlTileLayerComponent],
@@ -162,30 +159,40 @@ function getOverviewConfig(section: string, version: 'v21' | 'v22'): OverviewCon
     \`,
   })
   export class MapComponent {}`,
-      serviceGroups: generateServiceGroups(openlayersServices),
-    },
-    yjs: {
-      packageName: 'yjs',
-      npmPackage: '@angular-helpers/yjs',
-      lead: 'Bidirectional Angular Signal bindings for Yjs CRDT real-time collaborative state.',
-      providerExample: `import { yjsSignal, YjsDocService } from '@angular-helpers/yjs';
+        serviceGroups: generateServiceGroups(openlayersServices),
+      };
+    }
+    case 'yjs': {
+      const { YJS_SERVICES: yjsServices } = isV21
+        ? await import('../data/v21/yjs.data')
+        : await import('../data/v22/yjs.data');
+      return {
+        packageName: 'yjs',
+        npmPackage: '@angular-helpers/yjs',
+        lead: 'Bidirectional Angular Signal bindings for Yjs CRDT real-time collaborative state.',
+        providerExample: `import { yjsSignal, YjsDocService } from '@angular-helpers/yjs';
   
   const yjs = inject(YjsDocService);
   const yMap = yjs.doc.getMap('doc');
   const title = yjsSignal(yMap, { key: 'title' });`,
-      serviceGroups: [
-        {
-          label: 'Signals & State',
-          icon: '🔄',
-          items: yjsServices,
-        },
-      ],
-    },
-    testing: {
-      packageName: 'testing',
-      npmPackage: '@angular-helpers/testing',
-      lead: 'Lightweight testing utilities, headless browser mocks, and spy-backed providers for modern Angular.',
-      providerExample: `import { render, provideMockService, setupHeadlessBrowserMocks } from '@angular-helpers/testing';
+        serviceGroups: [
+          {
+            label: 'Signals & State',
+            icon: '🔄',
+            items: yjsServices,
+          },
+        ],
+      };
+    }
+    case 'testing': {
+      const { TESTING_SERVICES: testingServices } = isV21
+        ? await import('../data/v21/testing.data')
+        : await import('../data/v22/testing.data');
+      return {
+        packageName: 'testing',
+        npmPackage: '@angular-helpers/testing',
+        lead: 'Lightweight testing utilities, headless browser mocks, and spy-backed providers for modern Angular.',
+        providerExample: `import { render, provideMockService, setupHeadlessBrowserMocks } from '@angular-helpers/testing';
 
 // Vitest / Jest setup
 setupHeadlessBrowserMocks();
@@ -193,25 +200,24 @@ setupHeadlessBrowserMocks();
 const { getByText } = await render(MyComponent, {
   providers: [provideMockService(MyService)],
 });`,
-      serviceGroups: [
-        {
-          label: 'Testing Primitives',
-          icon: '🧪',
-          items: testingServices,
-        },
-      ],
-    },
-  };
-
-  return (
-    OVERVIEW_CONFIGS[section] ?? {
-      packageName: section,
-      npmPackage: `@angular-helpers/${section}`,
-      lead: '',
-      providerExample: '',
-      serviceGroups: [],
+        serviceGroups: [
+          {
+            label: 'Testing Primitives',
+            icon: '🧪',
+            items: testingServices,
+          },
+        ],
+      };
     }
-  );
+    default:
+      return {
+        packageName: section,
+        npmPackage: `@angular-helpers/${section}`,
+        lead: '',
+        providerExample: '',
+        serviceGroups: [],
+      };
+  }
 }
 
 export const overviewResolver: ResolveFn<OverviewConfig> = (route) => {

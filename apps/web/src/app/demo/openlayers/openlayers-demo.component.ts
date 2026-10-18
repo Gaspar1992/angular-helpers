@@ -373,7 +373,7 @@ const BASEMAPS: BasemapConfig[] = [
               [variables]="{ time: timeSvc.currentTime(), baseRadius: webglPointRadius() }"
             >
             </ol-webgl-vector-layer>
-          } @else if (webglFeatures().length > 0) {
+          } @else {
             <ol-vector-layer id="webgl-perf-canvas" [features]="webglFeatures()" [zIndex]="15">
             </ol-vector-layer>
           }

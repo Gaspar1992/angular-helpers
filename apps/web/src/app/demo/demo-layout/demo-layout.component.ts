@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 interface DemoSubItem {
@@ -21,6 +21,7 @@ const DEMO_GROUPS: DemoGroup[] = [
     icon: '🌐',
   },
   {
+    path: '/demo/security',
     label: 'Security',
     icon: '🛡️',
     items: [
@@ -30,6 +31,7 @@ const DEMO_GROUPS: DemoGroup[] = [
     ],
   },
   {
+    path: '/demo/worker-http',
     label: 'Worker HTTP',
     icon: '⚡',
     items: [
@@ -39,6 +41,8 @@ const DEMO_GROUPS: DemoGroup[] = [
   },
   { path: '/demo/openlayers', label: 'OpenLayers', icon: '🗺️' },
   { path: '/demo/storage', label: 'Storage', icon: '💾' },
+  { path: '/demo/yjs', label: 'Yjs', icon: '🔄' },
+  { path: '/demo/router-resources', label: 'Router', icon: '🧭' },
   { path: '/demo/library-services', label: 'QA Harness', icon: '🛠️' },
 ];
 
@@ -50,8 +54,8 @@ const DEMO_GROUPS: DemoGroup[] = [
       class="min-h-screen bg-base-100 text-base-content flex flex-col font-sans selection:bg-primary/30"
     >
       <!-- Header -->
-      <header class="demo-header sticky top-0 z-[100]">
-        <div class="max-width-container h-[60px] flex items-center justify-between gap-4">
+      <header class="demo-header sticky top-0 z-100">
+        <div class="max-width-container h-15 flex items-center justify-between gap-4">
           <!-- Logo -->
           <a routerLink="/" class="demo-logo-link group">
             <div class="demo-logo-icon">
@@ -73,11 +77,15 @@ const DEMO_GROUPS: DemoGroup[] = [
                   class="relative"
                   (mouseenter)="openDropdown(group.label)"
                   (mouseleave)="scheduleClose(group.label)"
+                  (keydown.escape)="dropdownOpen.set(null)"
                 >
                   <button
                     type="button"
                     class="demo-nav-item"
                     [class.demo-nav-item--active]="isActiveGroup(group)"
+                    [attr.aria-expanded]="openGroup() === group.label"
+                    aria-haspopup="menu"
+                    (click)="toggleGroup(group.label)"
                   >
                     <span>{{ group.icon }}</span>
                     <span>{{ group.label }}</span>
@@ -99,17 +107,18 @@ const DEMO_GROUPS: DemoGroup[] = [
                   </button>
                   @if (dropdownOpen() === group.label) {
                     <div
-                      class="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-[110]"
+                      class="absolute top-full left-1/2 -translate-x-1/2 pt-3 z-110"
                       (mouseenter)="cancelClose()"
                       (mouseleave)="scheduleClose(group.label)"
                     >
-                      <div class="demo-dropdown">
+                      <div class="demo-dropdown" role="menu">
                         <div class="demo-dropdown__label">{{ group.label }}</div>
                         @for (item of group.items; track item.path) {
                           <a
                             [routerLink]="item.path"
                             routerLinkActive="demo-dropdown__item--active"
                             class="demo-dropdown__item"
+                            role="menuitem"
                             (click)="dropdownOpen.set(null)"
                           >
                             <span class="demo-dropdown__dot"></span>
@@ -147,15 +156,15 @@ const DEMO_GROUPS: DemoGroup[] = [
 
         <!-- Mobile Bottom Nav -->
         <nav
-          class="fixed bottom-0 left-0 right-0 bg-base-200/90 backdrop-blur-lg border-t border-base-content/10 md:hidden z-[100] px-2 py-1 shadow-2xl"
+          class="fixed bottom-0 left-0 right-0 bg-base-200/90 backdrop-blur-lg border-t border-base-content/10 md:hidden z-100 px-2 py-1 shadow-2xl"
         >
           <div class="flex justify-around py-1 overflow-x-auto no-scrollbar">
             @for (group of groups; track group.label) {
-              @if (group.path) {
+              @if (group.path || group.items?.[0]?.path; as targetPath) {
                 <a
-                  [routerLink]="group.path"
+                  [routerLink]="targetPath"
                   routerLinkActive="text-primary bg-primary/10 rounded-xl"
-                  [routerLinkActiveOptions]="{ exact: group.path === '/demo' }"
+                  [routerLinkActiveOptions]="{ exact: targetPath === '/demo' }"
                   class="flex flex-col items-center gap-1 px-4 py-2 text-[10px] font-black uppercase tracking-tighter text-base-content/40 hover:text-base-content no-underline whitespace-nowrap transition-all"
                 >
                   <span class="text-xl">{{ group.icon }}</span>
@@ -345,8 +354,14 @@ const DEMO_GROUPS: DemoGroup[] = [
 export class DemoLayoutComponent {
   protected readonly groups = DEMO_GROUPS;
   protected dropdownOpen = signal<string | null>(null);
+  protected readonly openGroup = this.dropdownOpen;
   private closeTimeout: ReturnType<typeof setTimeout> | null = null;
   private readonly router = inject(Router);
+
+  protected toggleGroup(label: string): void {
+    this.cancelClose();
+    this.dropdownOpen.update((current) => (current === label ? null : label));
+  }
 
   protected openDropdown(label: string): void {
     this.cancelClose();

@@ -121,7 +121,7 @@ export const PACKAGES: readonly PackageInfo[] = [
     highlights: [
       'OlMapComponent with reactive [center] / [zoom] inputs',
       'Tile, Vector, and Image layers with signal-driven features',
-      'Military symbology: MIL-STD-2525 symbols, Ellipses, Sectors, Donuts',
+      'Geodesic geometry helpers: Ellipses, Sectors, Donuts',
       'Built-in controls: Zoom, Attribution, Scale, Fullscreen, Rotate, Layer Switcher',
       'Runs OL operations outside NgZone — no change detection storms',
     ],

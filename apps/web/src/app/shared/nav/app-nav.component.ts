@@ -22,6 +22,7 @@ import { OfflineBadgeComponent } from '../components/offline-badge/offline-badge
           alt=""
           width="28"
           height="28"
+          priority
           class="object-contain"
           aria-hidden="true"
         />

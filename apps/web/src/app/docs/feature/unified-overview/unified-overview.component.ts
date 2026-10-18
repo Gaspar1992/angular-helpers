@@ -2,7 +2,6 @@ import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 import { DocsPageHeaderComponent } from '../../../docs/shared/page-header/docs-page-header.component';
-import type { BreadcrumbItem } from '../../../docs/models/doc-meta.model';
 
 export interface ServiceGroupItem {
   id: string;
@@ -86,8 +85,4 @@ export interface OverviewConfig {
 })
 export class UnifiedOverviewComponent {
   readonly config = input.required<OverviewConfig>();
-
-  protected get breadcrumbs(): BreadcrumbItem[] {
-    return [{ label: 'docs', route: '/docs' }, { label: this.config().packageName }];
-  }
 }
