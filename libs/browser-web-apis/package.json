@@ -1,28 +1,7 @@
 {
   "name": "@angular-helpers/browser-web-apis",
   "version": "22.8.1",
-  "description": "Sistema de servicios Angular para acceso formalizado a Browser Web APIs (cámara, permisos, geolocalización, etc.)",
-  "scripts": {
-    "prebuild": "node ../../scripts/sync-versions.js . src/public-api.ts",
-    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/browser-web-apis",
-    "build:prod": "node ../../scripts/sync-versions.js . src/public-api.ts && ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/browser-web-apis",
-    "build:watch": "ng-packagr -p ng-package.json --watch",
-    "test": "vitest run --root ../.. libs/browser-web-apis",
-    "test:watch": "vitest --watch",
-    "test:coverage": "vitest --coverage",
-    "clean": "node ../../scripts/clean.js",
-    "lint": "oxlint src",
-    "prepublishOnly": "pnpm run build"
-  },
-  "homepage": "https://gaspar1992.github.io/angular-helpers/docs/browser-web-apis",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Gaspar1992/angular-helpers.git",
-    "directory": "libs/browser-web-apis"
-  },
-  "bugs": {
-    "url": "https://github.com/Gaspar1992/angular-helpers/issues"
-  },
+  "description": "Type-safe Angular services and directives for Browser Web APIs (camera, permissions, geolocation, media, sensors, WebAuthn, and more)",
   "keywords": [
     "angular",
     "typescript",
@@ -34,11 +13,28 @@
     "media",
     "sensors"
   ],
-  "author": "",
+  "author": "Angular Helpers Team",
   "license": "MIT",
+  "homepage": "https://gaspar1992.github.io/angular-helpers/docs/browser-web-apis",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gaspar1992/angular-helpers.git",
+    "directory": "libs/browser-web-apis"
+  },
+  "bugs": {
+    "url": "https://github.com/Gaspar1992/angular-helpers/issues"
+  },
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "prebuild": "node ../../scripts/sync-versions.js . src/public-api.ts",
+    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/browser-web-apis",
+    "build:prod": "node ../../scripts/sync-versions.js . src/public-api.ts && ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/browser-web-apis",
+    "clean": "node ../../scripts/clean.js",
+    "test": "vitest run --root ../.. libs/browser-web-apis",
+    "lint": "oxlint src"
   },
   "peerDependencies": {
     "@angular/core": "^22.0.0",
@@ -50,10 +46,5 @@
   "dependencies": {
     "@angular-helpers/core": "workspace:*",
     "tslib": "catalog:"
-  },
-  "devDependencies": {
-    "@angular-helpers/testing": "workspace:*",
-    "jsdom": "catalog:",
-    "vitest": "catalog:"
   }
 }

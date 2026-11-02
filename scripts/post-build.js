@@ -64,7 +64,7 @@ function sanitizePackageJson(dir) {
   const pkgJsonPath = path.join(dir, 'package.json');
   if (!fs.existsSync(pkgJsonPath)) return;
 
-  const rootDir = process.cwd();
+  const rootDir = path.resolve(import.meta.dirname, '..');
   const catalog = getCatalogVersions(rootDir);
   const workspaceVersions = getWorkspaceVersions(rootDir);
 

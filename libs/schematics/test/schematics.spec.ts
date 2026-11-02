@@ -49,9 +49,10 @@ describe('create-package schematic', () => {
       './libs/my-test-lib/src/index.ts',
     ]);
 
-    // Assert package.json has catalog dependencies
+    // Assert package.json has peerDependencies and catalog dependencies
     const packageJson = JSON.parse(resultTree.readContent('/libs/my-test-lib/package.json'));
-    expect(packageJson.dependencies['@angular/core']).toBe('catalog:');
+    expect(packageJson.peerDependencies['@angular/core']).toBe('^22.0.0');
+    expect(packageJson.dependencies['tslib']).toBe('catalog:');
     expect(packageJson.scripts['clean']).toBe('node ../../scripts/clean.js');
   });
 

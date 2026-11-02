@@ -3,18 +3,6 @@
   "version": "22.4.1",
   "description": "Angular HTTP over Web Workers — off-main-thread HTTP pipelines with configurable interceptors, WebCrypto security, and pluggable serialization",
   "schematics": "./schematics/collection.json",
-  "scripts": {
-    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/worker-http",
-    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/worker-http",
-    "build:watch": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json --watch",
-    "build:schematics": "tsc -p tsconfig.schematics.json && node scripts/rename-to-cjs.mjs",
-    "test": "vitest run --root ../.. libs/worker-http",
-    "test:watch": "vitest --watch",
-    "test:coverage": "vitest --coverage",
-    "clean": "node ../../scripts/clean.js",
-    "lint": "oxlint src",
-    "prepublishOnly": "pnpm run build"
-  },
   "keywords": [
     "angular",
     "web-worker",
@@ -27,6 +15,8 @@
     "toon",
     "performance"
   ],
+  "author": "Angular Helpers Team",
+  "license": "MIT",
   "homepage": "https://gaspar1992.github.io/angular-helpers/docs/worker-http",
   "repository": {
     "type": "git",
@@ -37,10 +27,16 @@
     "url": "https://github.com/Gaspar1992/angular-helpers/issues"
   },
   "sideEffects": false,
-  "author": "",
-  "license": "MIT",
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/worker-http",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/worker-http",
+    "build:schematics": "tsc -p tsconfig.schematics.json && node scripts/rename-to-cjs.mjs",
+    "clean": "node ../../scripts/clean.js",
+    "test": "vitest run --root ../.. libs/worker-http",
+    "lint": "oxlint src"
   },
   "peerDependencies": {
     "@angular/common": "^22.0.0",

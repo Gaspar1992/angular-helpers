@@ -2,9 +2,17 @@
   "name": "@angular-helpers/testing",
   "version": "22.1.5",
   "description": "Streamlined testing utilities for modern Angular applications",
-  "publishConfig": {
-    "access": "public"
-  },
+  "keywords": [
+    "angular",
+    "typescript",
+    "testing",
+    "vitest",
+    "mocks",
+    "signals",
+    "zoneless"
+  ],
+  "author": "Angular Helpers Team",
+  "license": "MIT",
   "homepage": "https://gaspar1992.github.io/angular-helpers/docs/testing",
   "repository": {
     "type": "git",
@@ -15,6 +23,9 @@
     "url": "https://github.com/Gaspar1992/angular-helpers/issues"
   },
   "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/testing",
     "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/testing",
