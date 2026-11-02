@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
-      contents: read
+      contents: write
       id-token: write
     steps:
       - name: Checkout Repository
@@ -69,8 +69,9 @@ jobs:
       - name: Validate built packages with publint and attw
         run: pnpm run lint:packages
 
-      - name: Publish new versions to npm with Provenance
+      - name: Publish new versions to npm with Provenance & Create GitHub Releases
         run: node scripts/publish-packages.mjs
         env:
           TARGET_PACKAGE: ${{ github.event.inputs.package || 'all' }}
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          GH_TOKEN: ${{ github.token }}

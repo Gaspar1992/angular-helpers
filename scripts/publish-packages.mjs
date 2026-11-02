@@ -100,10 +100,11 @@ async function main() {
     const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
     const name = pkgJson.name;
     const version = pkgJson.version;
+    const tag = `${name}@${version}`;
 
     let isPublished = false;
     try {
-      const res = await runCommand('npm', ['view', `${name}@${version}`, 'version']);
+      const res = await runCommand('npm', ['view', tag, 'version']);
       if (res.code === 0 && res.stdout === version) {
         isPublished = true;
       }
@@ -112,18 +113,18 @@ async function main() {
     }
 
     if (isPublished) {
-      console.log(`⏭️  [SKIP] ${name}@${version} is already published on npm.`);
+      console.log(`⏭️  [SKIP] ${tag} is already published on npm.`);
     } else {
-      console.log(`🚀 [NEW RELEASE DETECTED] ${name}@${version} is NOT yet published on npm.`);
+      console.log(`🚀 [NEW RELEASE DETECTED] ${tag} is NOT yet published on npm.`);
       const distPath = path.resolve(`dist/${pkg}`);
       if (!fs.existsSync(distPath)) {
         console.warn(`⚠️  Warning: ${distPath} does not exist. Ensure build ran first.`);
       }
 
       if (isDryRun) {
-        console.log(`🔍 [DRY-RUN] Would publish ${name}@${version} from ${distPath}`);
+        console.log(`🔍 [DRY-RUN] Would publish ${tag} from ${distPath}`);
       } else {
-        console.log(`📤 Publishing ${name}@${version} with Provenance...`);
+        console.log(`📤 Publishing ${tag} with Provenance...`);
         try {
           const pubRes = await runCommand(
             'npm',
@@ -136,16 +137,56 @@ async function main() {
           );
 
           if (pubRes.code === 0) {
-            console.log(`✅ Successfully published ${name}@${version}`);
+            console.log(`✅ Successfully published ${tag}`);
+            isPublished = true;
+          } else {
+            console.error(`❌ Failed to publish ${tag} with exit code ${pubRes.code}:`, pubRes.stderr);
+            process.exitCode = 1;
+          }
+        } catch (err) {
+          console.error(`❌ Failed to publish ${tag}:`, err.message);
+          process.exitCode = 1;
+        }
+      }
+    }
+
+    if (isPublished || isDryRun) {
+      let hasGhRelease = false;
+      try {
+        const ghCheck = await runCommand('gh', ['release', 'view', tag]);
+        if (ghCheck.code === 0) {
+          hasGhRelease = true;
+        }
+      } catch {
+        hasGhRelease = false;
+      }
+
+      if (hasGhRelease) {
+        console.log(`⏭️  [SKIP] GitHub Release ${tag} already exists.`);
+      } else if (isDryRun) {
+        console.log(`🔍 [DRY-RUN] Would create GitHub Release ${tag}`);
+      } else {
+        console.log(`🏷️  Creating GitHub Release ${tag}...`);
+        try {
+          const ghRes = await runCommand(
+            'gh',
+            ['release', 'create', tag, '--title', tag, '--generate-notes'],
+            {
+              echoStdout: true,
+              echoStderr: true,
+            },
+          );
+          if (ghRes.code === 0) {
+            console.log(`✅ Successfully created GitHub Release ${tag}`);
           } else {
             console.error(
-              `❌ Failed to publish ${name}@${version} with exit code ${pubRes.code}:`,
-              pubRes.stderr,
+              `❌ Failed to create GitHub Release ${tag} with exit code ${ghRes.code}:`,
+              ghRes.stderr,
             );
             process.exitCode = 1;
           }
         } catch (err) {
-          console.error(`❌ Failed to publish ${name}@${version}:`, err.message);
+          console.error(`❌ Failed to create GitHub Release ${tag}:`, err.message);
           process.exitCode = 1;
         }
       }
