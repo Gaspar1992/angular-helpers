@@ -40,7 +40,7 @@ import { OfflineBadgeComponent } from '../components/offline-badge/offline-badge
           type="button"
           class="group flex items-center gap-2 px-3 py-1.5 text-xs text-base-content/60 hover:text-base-content bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] hover:border-white/[0.15] rounded-lg transition-all duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
           (click)="search.open()"
-          aria-label="Open search modal"
+          aria-keyshortcuts="Control+K"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -52,13 +52,15 @@ import { OfflineBadgeComponent } from '../components/offline-badge/offline-badge
             stroke-width="2.5"
             stroke-linecap="round"
             stroke-linejoin="round"
+            aria-hidden="true"
             class="text-base-content/30 group-hover:text-primary transition-colors duration-200"
           >
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.3-4.3" />
           </svg>
-          <span class="font-bold tracking-tight hidden sm:inline">Search...</span>
+          <span class="font-bold tracking-tight sr-only sm:not-sr-only">Search...</span>
           <kbd
+            aria-hidden="true"
             class="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-base-content/5 border border-base-content/5 text-[9px] font-black text-base-content/30"
           >
             <span>Ctrl</span><span>K</span>
