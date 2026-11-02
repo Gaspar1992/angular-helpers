@@ -46,7 +46,7 @@ describe('CacheApiTransport', () => {
 
       expect(mockCacheStorage.open).toHaveBeenCalledWith('ah_cache');
       const expectedUrl = 'https://angular-helpers.local/storage-cache/settings';
-      expect(mockCache.put).toHaveBeenCalled();
+      expect(mockCache.put).toHaveBeenCalledWith(expectedUrl, expect.any(Response));
 
       const result = await transport.read<typeof payload>('settings');
       expect(result).toEqual(payload);

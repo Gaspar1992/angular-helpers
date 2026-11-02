@@ -156,7 +156,7 @@ describe('storageResource', () => {
     const userId = signal(1);
 
     await TestBed.runInInjectionContext(async () => {
-      const res = storageResource({
+      storageResource({
         request: () => userId(),
         key: (id) => `user-data-${id}`,
         defaultValue: 'none',

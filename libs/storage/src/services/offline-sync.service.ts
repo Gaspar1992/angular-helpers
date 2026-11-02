@@ -1,3 +1,4 @@
+/* oxlint-disable no-console */
 import { inject, Injectable, signal, DestroyRef } from '@angular/core';
 import { HttpBackend, HttpRequest } from '@angular/common/http';
 import { fromEvent } from 'rxjs';
@@ -45,10 +46,6 @@ export class OfflineSyncService {
       console.warn('[OfflineSyncService] Cannot trigger sync while offline.');
       return;
     }
-
-    console.log(
-      '[OfflineSyncService] Conectividad recuperada o trigger manual. Iniciando drenado de cola...',
-    );
 
     if (this.httpBackend) {
       const req = new HttpRequest(

@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { WebStorageTransport } from './web-storage.transport';
-import { injectPlatform } from '@angular-helpers/core';
 
 describe('WebStorageTransport', () => {
   let mockLocalStorage: any;

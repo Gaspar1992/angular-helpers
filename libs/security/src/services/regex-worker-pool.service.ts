@@ -5,6 +5,7 @@ import {
   type RegexSecurityConfig,
   type RegexTestResult,
 } from './regex-types';
+import { RegexAnalyzerService } from './regex-analyzer.service';
 import { REGEX_WORKER_INLINE } from '../workers/regex.worker.inline';
 
 export interface RegexWorkerConfig {
@@ -22,6 +23,8 @@ export class RegexWorkerPoolService implements OnDestroy {
   private readonly config = inject(REGEX_WORKER_CONFIG, { optional: true });
   private readonly defaults = inject(REGEX_SECURITY_DEFAULTS, { optional: true });
   private readonly destroyRef = inject(DestroyRef, { optional: true });
+  private readonly analyzer =
+    inject(RegexAnalyzerService, { optional: true }) ?? new RegexAnalyzerService();
   private pool: WorkerPool;
 
   constructor() {
@@ -43,6 +46,12 @@ export class RegexWorkerPoolService implements OnDestroy {
         if (type !== 'regex-test') throw new Error(`Unknown task type: ${type}`);
         const { pattern, text } = data as { pattern: string; text: string };
         try {
+          const analysis = await this.analyzer.analyzePatternSecurity(pattern);
+          if (!analysis.safe) {
+            throw new Error(
+              `Unsafe pattern blocked on main-thread fallback: ${analysis.warnings.join(', ')}`,
+            );
+          }
           const start = Date.now();
           const regex = new RegExp(pattern);
           const match = regex.test(text);

@@ -12,6 +12,7 @@ export function attachRealtimeWorker(
 
   const wsReconnectTimers = new Map<string, any>();
   const wsHeartbeatTimers = new Map<string, any>();
+  const wsCleanups = new Map<string, () => void>();
 
   globalScope.addEventListener('message', (event: MessageEvent) => {
     const msg = event.data;
@@ -168,7 +169,7 @@ export function attachRealtimeWorker(
 
     openSocket();
 
-    globalScope[`_cleanup_ws_${connectionId}`] = () => {
+    wsCleanups.set(connectionId, () => {
       disposed = true;
       const timer = wsReconnectTimers.get(connectionId);
       if (timer) {
@@ -180,7 +181,7 @@ export function attachRealtimeWorker(
         clearInterval(hb);
         wsHeartbeatTimers.delete(connectionId);
       }
-    };
+    });
   }
 
   function computeBackoffDelay(attempt: number, interval: number, maxDelay: number): number {
@@ -189,10 +190,10 @@ export function attachRealtimeWorker(
   }
 
   function closeWebSocket(connectionId: string) {
-    const cleanup = globalScope[`_cleanup_ws_${connectionId}`];
+    const cleanup = wsCleanups.get(connectionId);
     if (cleanup) {
       cleanup();
-      delete globalScope[`_cleanup_ws_${connectionId}`];
+      wsCleanups.delete(connectionId);
     }
 
     const socket = wsConnections.get(connectionId);

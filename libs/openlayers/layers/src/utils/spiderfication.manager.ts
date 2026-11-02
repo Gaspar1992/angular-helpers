@@ -75,7 +75,7 @@ export class SpiderficationManager {
             }
           }
         });
-      } catch (error) {
+      } catch {
         // Suppress errors from layers with disabled hit detection (e.g., WebGL layers)
       }
 

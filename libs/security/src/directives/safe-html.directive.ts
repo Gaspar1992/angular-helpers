@@ -24,7 +24,7 @@ export class SafeHtmlDirective {
         const trusted = this.sanitizer.getTrustedHtml(sanitized);
         this.elementRef.nativeElement.innerHTML = trusted;
       } else {
-        this.elementRef.nativeElement.innerHTML = htmlVal;
+        this.elementRef.nativeElement.innerHTML = '';
       }
     });
   }

@@ -52,4 +52,12 @@ describe('SafeHtmlDirective', () => {
     expect(getTrustedHtmlSpy).toHaveBeenCalledWith('<b>Bold</b>');
     expect(element.innerHTML).toBe('<b>Bold</b>');
   });
+
+  it('should fail closed and render empty string when sanitizer is not supported', () => {
+    vi.spyOn(sanitizer, 'isSupported').mockReturnValue(false);
+    component.htmlValue.set('<img src=x onerror=alert(1)>');
+    fixture.detectChanges();
+
+    expect(element.innerHTML).toBe('');
+  });
 });

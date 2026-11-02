@@ -1,4 +1,4 @@
-import { Injectable, type Signal, signal, NgZone, inject, PLATFORM_ID } from '@angular/core';
+import { Injectable, type Signal, signal, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { Observable, Subject } from 'rxjs';
 import { WebCryptoService } from './web-crypto.service';
@@ -24,19 +24,20 @@ interface SignedEnvelope {
 }
 
 const REPLAY_WINDOW_MS = 30_000;
+const MAX_FUTURE_SKEW_MS = 5_000;
 
 @Injectable({
   providedIn: 'root',
 })
 export class SecureMessageService {
-  private readonly ngZone = inject(NgZone);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
   private readonly crypto = inject(WebCryptoService);
 
   private config: SecureMessageConfig | null = null;
-  private _lastMessage = signal<SecureMessage | null>(null);
-  private _messages$ = new Subject<SecureMessage>();
+  private readonly _lastMessage = signal<SecureMessage | null>(null);
+  private readonly _messages$ = new Subject<SecureMessage>();
+  private readonly seenNonces = new Map<string, number>();
   private messageHandler: ((event: MessageEvent) => void) | null = null;
 
   private get targetWindow(): Window & typeof globalThis {
@@ -58,10 +59,8 @@ export class SecureMessageService {
 
     if (!isPlatformBrowser(this.platformId)) return;
 
-    this.ngZone.runOutsideAngular(() => {
-      this.messageHandler = (event: MessageEvent) => this.handleMessage(event);
-      this.targetWindow.addEventListener('message', this.messageHandler);
-    });
+    this.messageHandler = (event: MessageEvent) => this.handleMessage(event);
+    this.targetWindow.addEventListener('message', this.messageHandler);
   }
 
   /**
@@ -96,13 +95,22 @@ export class SecureMessageService {
     return this._lastMessage as Signal<SecureMessage<T> | null>;
   }
 
-  /** Removes the window listener and completes the internal Subject. */
+  /** Removes the window listener and clears internal state. */
   destroy(): void {
     if (this.messageHandler && isPlatformBrowser(this.platformId)) {
       this.targetWindow.removeEventListener('message', this.messageHandler);
       this.messageHandler = null;
     }
+    this.seenNonces.clear();
     this.config = null;
+  }
+
+  private pruneExpiredNonces(now: number): void {
+    for (const [nonce, ts] of this.seenNonces.entries()) {
+      if (now - ts > REPLAY_WINDOW_MS) {
+        this.seenNonces.delete(nonce);
+      }
+    }
   }
 
   private async handleMessage(event: MessageEvent): Promise<void> {
@@ -116,21 +124,27 @@ export class SecureMessageService {
     if (env?.__signed !== true) return;
 
     const { payload, timestamp, nonce, signature } = env;
-    if (!payload || !timestamp || !nonce || !signature) return;
+    if (payload === undefined || !timestamp || !nonce || !signature) return;
 
-    // 3. Replay window
-    if (Date.now() - timestamp > REPLAY_WINDOW_MS) return;
+    // 3. Replay window & nonce deduplication
+    const now = Date.now();
+    const age = now - timestamp;
+    if (age > REPLAY_WINDOW_MS || age < -MAX_FUTURE_SKEW_MS) return;
+
+    this.pruneExpiredNonces(now);
+    if (this.seenNonces.has(nonce)) return;
 
     // 4. Signature verification
     const body = { payload, timestamp, nonce };
     const valid = await this.crypto.verify(this.config.signingKey, JSON.stringify(body), signature);
     if (!valid) return;
 
-    // 5. Emit inside NgZone so signals trigger CD
-    this.ngZone.run(() => {
-      const message: SecureMessage = { data: payload, origin: event.origin, timestamp };
-      this._lastMessage.set(message);
-      this._messages$.next(message);
-    });
+    if (this.seenNonces.has(nonce)) return;
+    this.seenNonces.set(nonce, now);
+
+    // 5. Emit verified message
+    const message: SecureMessage = { data: payload, origin: event.origin, timestamp };
+    this._lastMessage.set(message);
+    this._messages$.next(message);
   }
 }

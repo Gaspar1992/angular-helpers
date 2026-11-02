@@ -13,12 +13,16 @@ describe('StorageWorker', () => {
       postedMessages.push(msg);
     });
 
+    const registerSyncChannel = (instance: unknown) => {
+      syncChannelInstance = instance;
+    };
+
     class MockBroadcastChannel {
       name: string;
       onmessage: any = null;
       constructor(name: string) {
         this.name = name;
-        syncChannelInstance = this;
+        registerSyncChannel(this);
       }
       postMessage(data: any) {
         broadcastMessages.push(data);
@@ -174,6 +178,23 @@ describe('StorageWorker', () => {
       type: 'change',
       key: 'external-tab-key',
       payload: 'synced-val',
+    });
+  });
+
+  it('should support dynamic passphrase initialization via init action', async () => {
+    const onmessage = (globalThis as any).onmessage;
+
+    await onmessage({
+      data: {
+        type: 'init',
+        requestId: 'req-init',
+        payload: { passphrase: 'custom-worker-passphrase' },
+      },
+    } as MessageEvent);
+
+    expect(postedMessages).toContainEqual({
+      type: 'response',
+      requestId: 'req-init',
     });
   });
 });

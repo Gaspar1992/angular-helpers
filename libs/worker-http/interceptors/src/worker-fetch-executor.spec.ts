@@ -1,10 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { buildChain, executeFetch } from './worker-fetch-executor';
-import type {
-  SerializableRequest,
-  SerializableResponse,
-  WorkerInterceptorFn,
-} from './worker-interceptor.types';
+import type { SerializableRequest, WorkerInterceptorFn } from './worker-interceptor.types';
 
 describe('worker-fetch-executor', () => {
   describe('buildChain', () => {

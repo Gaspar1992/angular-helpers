@@ -129,6 +129,14 @@ describe('RegexWorkerPoolService', () => {
     expect(invalidPattern.match).toBe(false);
     expect(invalidPattern.error).toBeDefined();
 
+    // Unsafe ReDoS pattern blocked on main thread
+    const unsafePattern = await capturedOptions.fallbackExecutor('regex-test', {
+      pattern: '(a**)+',
+      text: 'aaaaaaaaaaaaaaaa',
+    });
+    expect(unsafePattern.match).toBe(false);
+    expect(unsafePattern.error).toContain('Unsafe pattern blocked on main-thread fallback');
+
     // Unknown type
     await expect(capturedOptions.fallbackExecutor('unknown-task', {})).rejects.toThrow(
       /Unknown task type/,

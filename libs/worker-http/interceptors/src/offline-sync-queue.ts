@@ -1,3 +1,4 @@
+/* oxlint-disable no-console */
 import type { SerializableRequest, WorkerInterceptorFn } from './worker-interceptor.types';
 import { OFFLINE_SYNC_DEFAULTS } from './offline-sync-queue.constants';
 import type { OfflineSyncConfig, QueuedRequest } from './offline-sync-queue.types';

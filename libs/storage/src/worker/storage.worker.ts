@@ -1,9 +1,12 @@
 /// <reference lib="webworker" />
+/* oxlint-disable no-console */
 import { IndexedDBTransport } from '../services/transports/indexeddb.transport';
 import type { WorkerStorageRequest } from '../interfaces/worker-storage.types';
 
+const DEFAULT_WORKER_PASSPHRASE = 'fallback-passphrase-angular-helpers-default-key-sec';
+
 // Instantiate our environment-agnostic L2 storage transport
-const storageEngine = new IndexedDBTransport('fallback-passphrase-angular-helpers-default-key-sec');
+const storageEngine = new IndexedDBTransport(DEFAULT_WORKER_PASSPHRASE);
 
 // BroadcastChannel for ultra-fast, native multi-tab sync
 const syncChannel = new BroadcastChannel('ah-storage-sync-channel');
@@ -30,7 +33,20 @@ self.onmessage = async (event: MessageEvent<WorkerStorageRequest>) => {
   const { type, requestId, key, payload, options } = event.data;
 
   try {
+    if (options?.passphrase) {
+      storageEngine.setPassphrase(options.passphrase);
+    }
+
     switch (type) {
+      case 'init': {
+        const nextPassphrase =
+          typeof payload?.passphrase === 'string' ? payload.passphrase : options?.passphrase;
+        if (nextPassphrase) {
+          storageEngine.setPassphrase(nextPassphrase);
+        }
+        self.postMessage({ type: 'response', requestId });
+        break;
+      }
       case 'read': {
         const result = await storageEngine.read(key!, options);
         self.postMessage({ type: 'response', requestId, payload: result });

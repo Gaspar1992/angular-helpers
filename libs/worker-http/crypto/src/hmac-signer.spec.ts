@@ -58,4 +58,20 @@ describe('createHmacSigner', () => {
     const sigB = await b.signHex('same-payload');
     expect(sigA).not.toBe(sigB);
   });
+
+  it('uses only the sliced bytes when keyMaterial is a Uint8Array subarray view', async () => {
+    const key32 = new Uint8Array(32).fill(0x42);
+    const largeBuffer = new ArrayBuffer(64);
+    const fullBytes = new Uint8Array(largeBuffer);
+    fullBytes.fill(0xaa);
+    const view = new Uint8Array(largeBuffer, 16, 32);
+    view.set(key32);
+
+    const viewSigner = await createHmacSigner({ keyMaterial: view });
+    const exactSigner = await createHmacSigner({ keyMaterial: key32 });
+
+    expect(await viewSigner.signHex('subarray-test')).toBe(
+      await exactSigner.signHex('subarray-test'),
+    );
+  });
 });

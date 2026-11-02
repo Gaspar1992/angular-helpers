@@ -1,3 +1,4 @@
+/* oxlint-disable no-console */
 import { inject, signal, DestroyRef, assertInInjectionContext } from '@angular/core';
 import { resolveStorageTransport } from '../utils/resolve-transport';
 import type { StorageSignalOptions, StorageSignal } from '../interfaces/storage.types';

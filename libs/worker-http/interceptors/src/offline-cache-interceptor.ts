@@ -1,3 +1,4 @@
+/* oxlint-disable no-console */
 import type { SerializableResponse, WorkerInterceptorFn } from './worker-interceptor.types';
 import { OFFLINE_CACHE_DEFAULTS } from './offline-cache.constants';
 import type { OfflineCacheConfig } from './offline-cache.types';

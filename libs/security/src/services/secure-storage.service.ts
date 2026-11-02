@@ -110,7 +110,7 @@ export class SecureStorageService {
       },
       keyMaterial,
       { name: 'AES-GCM', length: 256 },
-      true,
+      false,
       ['encrypt', 'decrypt'],
     );
   }
@@ -221,7 +221,7 @@ export class SecureStorageService {
   private async ensureKey(): Promise<CryptoKey> {
     if (this.activeKey) return this.activeKey;
 
-    this.activeKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, [
+    this.activeKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, [
       'encrypt',
       'decrypt',
     ]);

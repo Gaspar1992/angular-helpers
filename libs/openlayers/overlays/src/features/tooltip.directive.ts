@@ -59,6 +59,7 @@ export class OlTooltipDirective {
       this.currentMap = map;
       this.zoneHelper.runOutsideAngular(() => {
         const viewport = map.getViewport();
+        if (!viewport) return;
         const tooltip = document.createElement('div');
         tooltip.setAttribute('role', 'tooltip');
         tooltip.className = 'ol-tooltip';
@@ -107,7 +108,7 @@ export class OlTooltipDirective {
             : undefined,
         },
       );
-    } catch (error) {
+    } catch {
       // Suppress errors from layers with disabled hit detection (e.g., WebGL layers)
     }
 

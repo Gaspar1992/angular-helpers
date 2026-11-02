@@ -222,4 +222,50 @@ describe('WorkerStorageTransport', () => {
       writable: true,
     });
   });
+
+  it('should fallback to crypto.getRandomValues when crypto.randomUUID is not defined', async () => {
+    const origRandomUUID = globalThis.crypto.randomUUID;
+    Object.defineProperty(globalThis.crypto, 'randomUUID', {
+      value: undefined,
+      configurable: true,
+      writable: true,
+    });
+
+    try {
+      const readPromise = transport.read('random_values_key');
+      expect(lastMessageSent.requestId).toMatch(/^[0-9a-f]{32}$/);
+
+      mockWorker.onmessage({
+        data: {
+          type: 'response',
+          requestId: lastMessageSent.requestId,
+          payload: 'ok',
+        },
+      } as MessageEvent);
+
+      expect(await readPromise).toBe('ok');
+    } finally {
+      Object.defineProperty(globalThis.crypto, 'randomUUID', {
+        value: origRandomUUID,
+        configurable: true,
+        writable: true,
+      });
+    }
+  });
+
+  it('should forward custom passphrase in options when encrypt is enabled', async () => {
+    const customTransport = WorkerStorageTransport.create(factory, 'custom-secret-passphrase');
+    const writePromise = customTransport.write('sec_key', { token: 'abc' }, { encrypt: true });
+
+    expect(lastMessageSent.options.passphrase).toBe('custom-secret-passphrase');
+
+    mockWorker.onmessage({
+      data: {
+        type: 'response',
+        requestId: lastMessageSent.requestId,
+      },
+    } as MessageEvent);
+
+    await expect(writePromise).resolves.toBeUndefined();
+  });
 });

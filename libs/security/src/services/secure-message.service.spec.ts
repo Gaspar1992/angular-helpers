@@ -213,6 +213,81 @@ describe('SecureMessageService', () => {
     expect(cryptoSpy.verify).not.toHaveBeenCalled();
   });
 
+  // ─── 4.8b future timestamp & nonce replay discarded + falsy payloads allowed ──
+  it('should accept valid falsy payloads (0, false, "")', async () => {
+    const config: SecureMessageConfig = {
+      allowedOrigins: ['https://trusted.com'],
+      signingKey: fakeKey,
+    };
+    service.configure(config);
+
+    const handler = (
+      mockDoc._win.addEventListener.mock.calls.find((c: string[]) => c[0] === 'message') as any
+    )?.[1];
+
+    for (const [idx, falsyPayload] of [0, false, ''].entries()) {
+      await handler({
+        origin: 'https://trusted.com',
+        data: {
+          __signed: true,
+          payload: falsyPayload,
+          timestamp: Date.now(),
+          nonce: `falsy-nonce-${idx}`,
+          signature: 'mock-signature',
+        },
+      } as MessageEvent);
+
+      expect(service.lastMessage()()?.data).toBe(falsyPayload);
+    }
+  });
+
+  it('should discard messages with future timestamps beyond allowed skew or duplicate nonces', async () => {
+    const config: SecureMessageConfig = {
+      allowedOrigins: ['https://trusted.com'],
+      signingKey: fakeKey,
+    };
+    service.configure(config);
+
+    const handler = (
+      mockDoc._win.addEventListener.mock.calls.find((c: string[]) => c[0] === 'message') as any
+    )?.[1];
+
+    // Future timestamp (> 5s ahead)
+    await handler({
+      origin: 'https://trusted.com',
+      data: {
+        __signed: true,
+        payload: { future: true },
+        timestamp: Date.now() + 60_000,
+        nonce: 'future-nonce',
+        signature: 'mock-signature',
+      },
+    } as MessageEvent);
+
+    expect(service.lastMessage()()).toBeNull();
+
+    // First message with nonce-1 succeeds
+    const validEnvelope = {
+      __signed: true,
+      payload: { seq: 1 },
+      timestamp: Date.now(),
+      nonce: 'nonce-1',
+      signature: 'mock-signature',
+    };
+    await handler({
+      origin: 'https://trusted.com',
+      data: validEnvelope,
+    } as MessageEvent);
+    expect(service.lastMessage()()?.data).toEqual({ seq: 1 });
+
+    // Replayed message with same nonce-1 is rejected
+    await handler({
+      origin: 'https://trusted.com',
+      data: { ...validEnvelope, payload: { seq: 2 } },
+    } as MessageEvent);
+    expect(service.lastMessage()()?.data).toEqual({ seq: 1 });
+  });
+
   // ─── 4.9 SSR safety ───────────────────────────────────────────────────────
   it('should not register any listener when running in SSR (server platform)', () => {
     TestBed.resetTestingModule();

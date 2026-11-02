@@ -13,6 +13,54 @@ export interface SanitizerConfig {
   enableDefaultTrustedTypesPolicy?: boolean;
 }
 
+export interface TrustedHTML {
+  toString(): string;
+}
+
+export interface TrustedScript {
+  toString(): string;
+}
+
+export interface TrustedScriptURL {
+  toString(): string;
+}
+
+export interface TrustedTypePolicyOptions {
+  createHTML?: (input: string) => string;
+  createScript?: (input: string) => string;
+  createScriptURL?: (input: string) => string;
+}
+
+export interface TrustedTypePolicy {
+  readonly name?: string;
+  createHTML(input: string): TrustedHTML | string;
+  createScript?(input: string): TrustedScript | string;
+  createScriptURL?(input: string): TrustedScriptURL | string;
+}
+
+interface TrustedTypePolicyFactory {
+  createPolicy(policyName: string, policyOptions?: TrustedTypePolicyOptions): TrustedTypePolicy;
+}
+
+interface SanitizerElementConfig {
+  allowElements: string[];
+  allowAttributes: Record<string, string[]>;
+}
+
+interface LegacySanitizer {
+  sanitizeToString(input: string): string;
+}
+
+interface ElementWithSetHTML extends Omit<HTMLElement, 'setHTML'> {
+  setHTML(input: string, options?: { sanitizer?: SanitizerElementConfig }): void;
+}
+
+interface WindowWithSanitizerApis extends Omit<Window, 'trustedTypes' | 'Sanitizer'> {
+  trustedTypes?: TrustedTypePolicyFactory;
+  __ttPolicies?: Map<string, TrustedTypePolicy>;
+  Sanitizer?: new (config: SanitizerElementConfig) => LegacySanitizer;
+}
+
 export const SANITIZER_CONFIG = new InjectionToken<SanitizerConfig>('SANITIZER_CONFIG');
 
 /**
@@ -38,27 +86,29 @@ export class InputSanitizerService {
 
   private readonly allowedTags: readonly string[];
   private readonly allowedAttributes: Readonly<Record<string, readonly string[]>>;
-  private readonly trustedTypesPolicy?: any;
+  private readonly trustedTypesPolicy?: TrustedTypePolicy;
 
   constructor() {
     const config = inject(SANITIZER_CONFIG, { optional: true }) ?? {};
     this.allowedTags = config.allowedTags ?? DEFAULT_ALLOWED_TAGS;
     this.allowedAttributes = config.allowedAttributes ?? DEFAULT_ALLOWED_ATTRIBUTES;
 
-    if (typeof window !== 'undefined' && (window as any).trustedTypes) {
-      const tt = (window as any).trustedTypes;
+    const win =
+      typeof window !== 'undefined' ? (window as unknown as WindowWithSanitizerApis) : undefined;
+    if (win?.trustedTypes) {
+      const tt = win.trustedTypes;
       const policyName = config.enableDefaultTrustedTypesPolicy
         ? 'default'
         : '@angular-helpers/security';
 
-      const globalTtPolicies = (window as any).__ttPolicies || new Map();
-      (window as any).__ttPolicies = globalTtPolicies;
+      const globalTtPolicies = win.__ttPolicies ?? new Map<string, TrustedTypePolicy>();
+      win.__ttPolicies = globalTtPolicies;
 
       if (globalTtPolicies.has(policyName)) {
         this.trustedTypesPolicy = globalTtPolicies.get(policyName);
       } else {
         try {
-          const policyOptions: any = {
+          const policyOptions: TrustedTypePolicyOptions = {
             createHTML: (input: string) => {
               return sanitizeHtmlString(input, {
                 allowedTags: this.allowedTags,
@@ -68,8 +118,20 @@ export class InputSanitizerService {
           };
 
           if (policyName === 'default') {
-            policyOptions.createScript = (input: string) => input;
-            policyOptions.createScriptURL = (input: string) => input;
+            policyOptions.createScript = () => {
+              throw new TypeError(
+                'TrustedTypes default policy: dynamic script evaluation is blocked by @angular-helpers/security',
+              );
+            };
+            policyOptions.createScriptURL = (input: string) => {
+              const sanitized = sanitizeUrlString(input);
+              if (sanitized === null) {
+                throw new TypeError(
+                  'TrustedTypes default policy: unsafe script URL blocked by @angular-helpers/security',
+                );
+              }
+              return sanitized;
+            };
           }
 
           this.trustedTypesPolicy = tt.createPolicy(policyName, policyOptions);
@@ -101,16 +163,12 @@ export class InputSanitizerService {
     // 1. Try native Element.prototype.setHTML (modern standard in Firefox 148+, etc.)
     if (typeof Element !== 'undefined' && 'setHTML' in Element.prototype) {
       try {
-        const tempDiv = document.createElement('div');
-        const config = {
+        const tempDiv = document.createElement('div') as unknown as ElementWithSetHTML;
+        const config: SanitizerElementConfig = {
           allowElements: this.allowedTags as string[],
           allowAttributes: this.allowedAttributes as Record<string, string[]>,
         };
-        try {
-          (tempDiv as any).setHTML(input, { sanitizer: config });
-        } catch {
-          (tempDiv as any).setHTML(input);
-        }
+        tempDiv.setHTML(input, { sanitizer: config });
         return tempDiv.innerHTML;
       } catch {
         // Fallback on error
@@ -118,14 +176,16 @@ export class InputSanitizerService {
     }
 
     // 2. Try older Sanitizer API spec draft (implemented in some Chrome versions)
-    if (typeof (window as any).Sanitizer !== 'undefined') {
+    const win =
+      typeof window !== 'undefined' ? (window as unknown as WindowWithSanitizerApis) : undefined;
+    if (win?.Sanitizer !== undefined) {
       try {
         const tempDiv = document.createElement('div');
-        const config = {
+        const config: SanitizerElementConfig = {
           allowElements: this.allowedTags as string[],
           allowAttributes: this.allowedAttributes as Record<string, string[]>,
         };
-        const sanitizer = new (window as any).Sanitizer(config);
+        const sanitizer = new win.Sanitizer(config);
         tempDiv.innerHTML = sanitizer.sanitizeToString(input);
         return tempDiv.innerHTML;
       } catch {
@@ -144,7 +204,7 @@ export class InputSanitizerService {
    * Returns a TrustedHTML object (or similar if using a polyfill) if the Trusted Types policy
    * is available, otherwise returns the raw input string.
    */
-  getTrustedHtml(input: string): any {
+  getTrustedHtml(input: string): TrustedHTML | string {
     if (this.trustedTypesPolicy) {
       return this.trustedTypesPolicy.createHTML(input);
     }

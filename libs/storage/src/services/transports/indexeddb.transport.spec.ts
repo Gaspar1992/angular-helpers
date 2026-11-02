@@ -134,7 +134,7 @@ describe('IndexedDBTransport', () => {
     });
 
     it('should evict from cache and close db when onversionchange is triggered', async () => {
-      const db = await (transport as any).openDB('test-db', 'store-name');
+      await (transport as any).openDB('test-db', 'store-name');
       expect(openCount).toBe(1);
 
       if (mockDb.onversionchange) {
@@ -149,7 +149,7 @@ describe('IndexedDBTransport', () => {
     });
 
     it('should evict from cache when onclose is triggered', async () => {
-      const db = await (transport as any).openDB('test-db', 'store-name');
+      await (transport as any).openDB('test-db', 'store-name');
       expect(openCount).toBe(1);
 
       if (mockDb.onclose) {
@@ -162,7 +162,7 @@ describe('IndexedDBTransport', () => {
     });
 
     it('should evict from cache and close db when onerror is triggered', async () => {
-      const db = await (transport as any).openDB('test-db', 'store-name');
+      await (transport as any).openDB('test-db', 'store-name');
       expect(openCount).toBe(1);
 
       if (mockDb.onerror) {

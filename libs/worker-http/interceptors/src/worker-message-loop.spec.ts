@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { attachRequestLoop } from './worker-message-loop';
 
 vi.mock('./worker-port-loop', () => ({
@@ -11,6 +11,7 @@ describe('worker-message-loop', () => {
   const originalSelf = globalThis.self;
 
   afterEach(() => {
+    (globalThis as any).self = originalSelf;
     vi.clearAllMocks();
   });
 

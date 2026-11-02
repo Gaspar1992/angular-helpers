@@ -61,7 +61,7 @@ interface BucketState {
   timestamps: number[];
   // Reactive signal — current remaining units
   remaining: ReturnType<typeof signal<number>>;
-  timerId?: any;
+  timerId?: ReturnType<typeof setTimeout>;
 }
 
 /**
@@ -250,8 +250,8 @@ export class RateLimiterService {
           const storage = storageType === 'local' ? localStorage : sessionStorage;
           storage.removeItem(storageKey);
         }
-      } catch (e) {
-        console.warn(`Failed to clear rate limiter state for key "${key}":`, e);
+      } catch {
+        // Ignore storage removal errors in restricted or quota-exceeded environments
       }
     }
   }
@@ -275,8 +275,8 @@ export class RateLimiterService {
           state = JSON.parse(raw);
         }
       }
-    } catch (e) {
-      console.warn(`Failed to load rate limiter state for key "${key}":`, e);
+    } catch {
+      // Ignore storage read errors in restricted or corrupted environments
     }
 
     if (state) {
@@ -316,8 +316,8 @@ export class RateLimiterService {
         const storage = storageType === 'local' ? localStorage : sessionStorage;
         storage.setItem(storageKey, JSON.stringify(state));
       }
-    } catch (e) {
-      console.warn(`Failed to save rate limiter state for key "${key}":`, e);
+    } catch {
+      // Ignore storage write errors in restricted or quota-exceeded environments
     }
   }
 

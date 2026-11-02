@@ -22,8 +22,13 @@ export async function createHmacSigner(config: HmacSignerConfig): Promise<HmacSi
   const algorithm = config.algorithm ?? 'SHA-256';
   const keyMaterial =
     config.keyMaterial instanceof Uint8Array
-      ? new Uint8Array(config.keyMaterial.buffer.slice(0))
-      : new Uint8Array(config.keyMaterial);
+      ? new Uint8Array(
+          config.keyMaterial.buffer.slice(
+            config.keyMaterial.byteOffset,
+            config.keyMaterial.byteOffset + config.keyMaterial.byteLength,
+          ),
+        )
+      : new Uint8Array(config.keyMaterial.slice(0));
 
   const cryptoKey = await crypto.subtle.importKey(
     'raw',

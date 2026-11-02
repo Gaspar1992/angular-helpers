@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import type { StorageTransport } from './storage-transport';
+import { SECURE_STORAGE_PASSPHRASE } from '../tokens/storage.tokens';
 import { STORAGE_WORKER_FACTORY } from '../tokens/worker.tokens';
 import type {
   WorkerStorageAction,
@@ -14,6 +15,8 @@ import { detectTransferables } from '../utils/detect-transferables';
 export class WorkerStorageTransport implements StorageTransport {
   private worker?: Worker;
   private workerFactory?: () => Worker;
+  private secretPassphrase?: string;
+  private nextFallbackId = 0;
   private readonly pendingRequests = new Map<
     string,
     { resolve: (value: any) => void; reject: (err: Error) => void }
@@ -24,6 +27,8 @@ export class WorkerStorageTransport implements StorageTransport {
     try {
       this.workerFactory =
         inject<(() => Worker) | null>(STORAGE_WORKER_FACTORY, { optional: true }) ?? undefined;
+      this.secretPassphrase =
+        inject<string | null>(SECURE_STORAGE_PASSPHRASE, { optional: true }) ?? undefined;
     } catch {
       // Graceful fallback when instantiated outside an injection context
     }
@@ -42,10 +47,20 @@ export class WorkerStorageTransport implements StorageTransport {
   }
 
   /**
+   * Configures a custom encryption passphrase for worker operations.
+   */
+  public setPassphrase(passphrase: string): void {
+    this.secretPassphrase = passphrase;
+  }
+
+  /**
    * Factory method for creating an instance with an explicit worker factory (e.g. in unit tests).
    */
-  public static create(workerFactory: () => Worker): WorkerStorageTransport {
+  public static create(workerFactory: () => Worker, passphrase?: string): WorkerStorageTransport {
     const transport = new WorkerStorageTransport();
+    if (passphrase !== undefined) {
+      transport.setPassphrase(passphrase);
+    }
     transport.setWorkerFactory(workerFactory);
     return transport;
   }
@@ -95,13 +110,25 @@ export class WorkerStorageTransport implements StorageTransport {
   read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined> {
     this.ensureWorker();
     const useToon = options?.serializer === 'toon';
-    return this.postRequest<T | undefined>('read', key, undefined, { ...options, useToon });
+    const passphrase =
+      options?.passphrase ?? (options?.encrypt ? this.secretPassphrase : undefined);
+    return this.postRequest<T | undefined>('read', key, undefined, {
+      ...options,
+      useToon,
+      ...(passphrase !== undefined ? { passphrase } : {}),
+    });
   }
 
   write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void> {
     this.ensureWorker();
     const useToon = options?.serializer === 'toon';
-    return this.postRequest<void>('write', key, data, { ...options, useToon });
+    const passphrase =
+      options?.passphrase ?? (options?.encrypt ? this.secretPassphrase : undefined);
+    return this.postRequest<void>('write', key, data, {
+      ...options,
+      useToon,
+      ...(passphrase !== undefined ? { passphrase } : {}),
+    });
   }
 
   delete(key: string, options?: StorageSignalOptions): Promise<void> {
@@ -140,12 +167,16 @@ export class WorkerStorageTransport implements StorageTransport {
   }
 
   private generateId(): string {
-    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-      return crypto.randomUUID();
+    if (typeof crypto !== 'undefined') {
+      if (typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+      }
+      if (typeof crypto.getRandomValues === 'function') {
+        const bytes = crypto.getRandomValues(new Uint8Array(16));
+        return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+      }
     }
-    return (
-      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-    );
+    return `req-${++this.nextFallbackId}-${Date.now()}`;
   }
 
   private postRequest<T>(

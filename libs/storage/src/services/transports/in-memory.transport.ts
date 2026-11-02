@@ -1,3 +1,4 @@
+/* oxlint-disable no-console */
 import type { StorageTransport } from '../storage-transport';
 import type { StorageSignalOptions } from '../../interfaces/storage-options.types';
 import { encrypt, decrypt, serializeData, deserializeData } from '@angular-helpers/storage/worker';

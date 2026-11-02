@@ -90,6 +90,34 @@ describe('InputSanitizerService', () => {
       }
     });
 
+    it('sanitizeHtml falls back to DOMParser allowlist when setHTML with config throws', () => {
+      const originalSetHTML = (Element.prototype as any).setHTML;
+      const setHTMLSpy = vi.fn().mockImplementation(() => {
+        throw new TypeError('Unsupported sanitizer config');
+      });
+      try {
+        Object.defineProperty(Element.prototype, 'setHTML', {
+          value: setHTMLSpy,
+          configurable: true,
+          writable: true,
+        });
+
+        const result = service.sanitizeHtml('<p>Safe</p><script>alert(1)</script>');
+        expect(setHTMLSpy).toHaveBeenCalledTimes(1);
+        expect(result).toBe('<p>Safe</p>alert(1)');
+      } finally {
+        if (originalSetHTML) {
+          Object.defineProperty(Element.prototype, 'setHTML', {
+            value: originalSetHTML,
+            configurable: true,
+            writable: true,
+          });
+        } else {
+          delete (Element.prototype as any).setHTML;
+        }
+      }
+    });
+
     it('sanitizeHtml uses window.Sanitizer when available and setHTML is unavailable', () => {
       const originalSetHTML = (Element.prototype as any).setHTML;
       const originalSanitizer = (window as any).Sanitizer;
@@ -228,6 +256,15 @@ describe('InputSanitizerService', () => {
       service = TestBed.inject(InputSanitizerService);
 
       expect(mockTT.createPolicy).toHaveBeenCalledWith('default', expect.any(Object));
+
+      const defaultPolicy = createdPolicies.get('default');
+      expect(() => defaultPolicy.createScript('alert(1)').toString()).toThrow(TypeError);
+      expect(defaultPolicy.createScriptURL('https://example.com/app.js').toString()).toBe(
+        'https://example.com/app.js',
+      );
+      expect(() => defaultPolicy.createScriptURL('javascript:alert(1)').toString()).toThrow(
+        TypeError,
+      );
     });
 
     it('should reuse existing policy from __ttPolicies map if already registered', () => {

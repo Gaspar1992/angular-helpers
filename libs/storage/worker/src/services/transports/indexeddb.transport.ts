@@ -4,7 +4,11 @@ import { encrypt, decrypt } from '../../utils/crypto.utils';
 import { serializeData, deserializeData } from '../../utils/serialization.utils';
 
 export class IndexedDBTransport implements StorageTransport {
-  constructor(private readonly secretPassphrase?: string) {}
+  constructor(private secretPassphrase?: string) {}
+
+  setPassphrase(passphrase: string): void {
+    this.secretPassphrase = passphrase;
+  }
 
   private dbCache = new Map<string, Promise<IDBDatabase>>();
 
@@ -65,8 +69,9 @@ export class IndexedDBTransport implements StorageTransport {
           try {
             if (request.result) {
               if (options?.encrypt) {
-                if (!this.secretPassphrase) throw new Error('Encryption passphrase not provided');
-                const decrypted = await decrypt(request.result, this.secretPassphrase);
+                const passphrase = options.passphrase ?? this.secretPassphrase;
+                if (!passphrase) throw new Error('Encryption passphrase not provided');
+                const decrypted = await decrypt(request.result, passphrase);
                 resolve(deserializeData<T>(decrypted, options?.serializer === 'toon'));
               } else {
                 resolve(deserializeData<T>(request.result, options?.serializer === 'toon'));
@@ -97,8 +102,9 @@ export class IndexedDBTransport implements StorageTransport {
       let payload = await serializeData(data, useToon);
 
       if (encryptData) {
-        if (!this.secretPassphrase) throw new Error('Encryption passphrase not provided');
-        payload = await encrypt(payload, this.secretPassphrase);
+        const passphrase = options?.passphrase ?? this.secretPassphrase;
+        if (!passphrase) throw new Error('Encryption passphrase not provided');
+        payload = await encrypt(payload, passphrase);
       }
 
       const db = await this.openDB(dbName, storeName);

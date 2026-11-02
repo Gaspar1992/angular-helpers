@@ -246,7 +246,11 @@ export class WorkerPool {
     const explicitTransfer = options.transfer;
 
     return new Promise<T>((resolve, reject) => {
-      const taskId = `${type}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const randomPart =
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : Math.random().toString(36).substring(2, 9);
+      const taskId = `${type}_${Date.now()}_${randomPart}`;
       const activeTimeout = timeoutMs ?? this.options.defaultTimeout ?? 5000;
 
       const task: WorkerTaskConfig<T> = {

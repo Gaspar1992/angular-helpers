@@ -82,4 +82,19 @@ describe('createAesEncryptor', () => {
     expect(new TextDecoder().decode(await enc.decrypt(fromString))).toBe('same-input');
     expect(new TextDecoder().decode(await enc.decrypt(fromBytes))).toBe('same-input');
   });
+
+  it('uses only the sliced bytes when keyMaterial is a Uint8Array subarray view', async () => {
+    const largeBuffer = new ArrayBuffer(64);
+    const fullBytes = new Uint8Array(largeBuffer);
+    fullBytes.fill(0xff);
+    const view = new Uint8Array(largeBuffer, 16, 32);
+    view.set(KEY_256);
+
+    const viewEnc = await createAesEncryptor({ keyMaterial: view });
+    const exactEnc = await createAesEncryptor({ keyMaterial: KEY_256 });
+
+    const encrypted = await viewEnc.encrypt('view-key-payload');
+    const decrypted = new TextDecoder().decode(await exactEnc.decrypt(encrypted));
+    expect(decrypted).toBe('view-key-payload');
+  });
 });
