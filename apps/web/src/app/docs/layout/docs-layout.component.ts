@@ -270,11 +270,15 @@ import { VitalsPanelComponent } from './vitals-panel.component';
                   </div>
                   <p class="text-sm text-base-content/80">
                     A runtime exception occurred while rendering this section:
-                    <code class="px-2 py-0.5 bg-base-300 rounded font-mono text-xs">{{ err.message || err }}</code>
+                    <code class="px-2 py-0.5 bg-base-300 rounded font-mono text-xs">{{
+                      err.message || err
+                    }}</code>
                   </p>
                   <div class="mt-2 flex gap-3">
                     <a routerLink="/docs" class="btn btn-sm btn-outline">Back to Docs Overview</a>
-                    <button type="button" (click)="reload()" class="btn btn-sm btn-primary">Retry</button>
+                    <button type="button" (click)="reload()" class="btn btn-sm btn-primary">
+                      Retry
+                    </button>
                   </div>
                 </div>
               </div>

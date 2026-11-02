@@ -37,8 +37,9 @@ self.onmessage = async (event: MessageEvent<WorkerStorageRequest>) => {
     switch (type) {
       case 'read': {
         const result = await storageEngine.read(key!, {
+          ...options,
           storageType: 'indexeddb',
-          serializer: options?.useToon ? 'toon' : 'json',
+          serializer: options?.serializer ?? (options?.useToon ? 'toon' : 'json'),
         });
         const transferables = detectTransferables(result);
         self.postMessage({ type: 'response', requestId, payload: result }, transferables);
@@ -46,15 +47,16 @@ self.onmessage = async (event: MessageEvent<WorkerStorageRequest>) => {
       }
       case 'write': {
         await storageEngine.write(key!, payload, {
+          ...options,
           storageType: 'indexeddb',
-          serializer: options?.useToon ? 'toon' : 'json',
+          serializer: options?.serializer ?? (options?.useToon ? 'toon' : 'json'),
         });
         self.postMessage({ type: 'response', requestId });
         broadcastChange(key!, payload);
         break;
       }
       case 'delete': {
-        await storageEngine.delete(key!);
+        await storageEngine.delete(key!, options);
         self.postMessage({ type: 'response', requestId });
         broadcastChange(key!, null);
         break;

@@ -29,7 +29,6 @@ import { injectStorageSignal } from '@angular-helpers/storage';
 
 @Component({
   selector: 'app-user-preferences',
-  standalone: true,
   template: \`
     @if (prefs.loading()) {
       <div class="loading-spinner">Loading preferences...</div>
@@ -79,7 +78,6 @@ interface UserPreferences {
 
 @Component({
   selector: 'app-offline-settings',
-  standalone: true,
   templateUrl: './offline-settings.component.html'
 })
 export class OfflineSettingsComponent {
@@ -181,7 +179,6 @@ interface User {
 
 @Component({
   selector: 'app-users-admin',
-  standalone: true,
   template: \`
     <ul class="user-list">
       @for (user of users.list(); track user.id) {
@@ -297,7 +294,6 @@ import { Product } from './product.model';
 
 @Component({
   selector: 'app-product-list',
-  standalone: true,
   templateUrl: './product-list.component.html'
 })
 export class ProductListComponent {
@@ -439,7 +435,6 @@ import { OfflineSyncService } from '@angular-helpers/storage';
 
 @Component({
   selector: 'app-offline-status',
-  standalone: true,
   template: \`
     <div class="network-badge" [class.online]="syncService.isOnline()">
       Status: {{ syncService.isOnline() ? 'Online' : 'Offline' }}

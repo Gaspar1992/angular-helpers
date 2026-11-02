@@ -7,7 +7,6 @@ import {
   effect,
   computed,
   signal,
-  inject,
 } from '@angular/core';
 import { injectPlatform } from '@angular-helpers/core';
 import { injectClipboard } from '@angular-helpers/browser-web-apis';

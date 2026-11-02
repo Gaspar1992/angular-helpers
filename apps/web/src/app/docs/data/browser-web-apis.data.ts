@@ -415,7 +415,6 @@ import { CameraService } from '@angular-helpers/browser-web-apis';
 
 @Component({
   selector: 'app-avatar-capture',
-  standalone: true,
   templateUrl: './avatar-capture.component.html'
 })
 export class AvatarCaptureComponent implements OnInit, OnDestroy {
@@ -458,7 +457,7 @@ export class AvatarCaptureComponent implements OnInit, OnDestroy {
       const photoBlob = await this.cameraService.takePhoto(this.videoElement.nativeElement);
       const url = URL.createObjectURL(photoBlob);
       this.capturedImage.set(url);
-      
+
       this.disableCamera();
     } catch (err) {
       console.error('Failed to capture frame:', err);
@@ -478,12 +477,12 @@ export class AvatarCaptureComponent implements OnInit, OnDestroy {
           {
             name: 'avatar-capture.component.html',
             language: 'html',
-            content: `<div class="flex flex-col items-center gap-6 p-8 bg-base-200/50 backdrop-blur-md rounded-3xl border border-border-subtle shadow-sm max-w-[600px]">
+            content: `<div class="flex flex-col items-center gap-6 p-8 bg-base-200/50 backdrop-blur-md rounded-3xl border border-border-subtle shadow-sm max-w-150">
   <h3 class="text-xl font-bold">Profile Photo Capture</h3>
 
   <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-border">
     <video #videoEl autoplay playsinline class="w-full h-full object-cover" [class.hidden]="!stream()"></video>
-    
+
     @if (!stream()) {
       <div class="absolute inset-0 flex flex-col items-center justify-center text-base-content/40 gap-2">
         <span class="text-3xl">📷</span>
@@ -3415,7 +3414,6 @@ export class CompressionComponent {
 import { injectWebTransportResource } from '@angular-helpers/browser-web-apis';
 
 @Component({
-  standalone: true,
   template: \`
     <p>Status: {{ wt.status() }}</p>
     <p>Datagram: {{ wt.datagram() }}</p>

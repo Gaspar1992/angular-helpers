@@ -1,6 +1,6 @@
-import { Component, ViewEncapsulation, inject, input, computed } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Component, ViewEncapsulation, computed, inject, input } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { SiteFooterComponent } from '../../../shared/components/site-footer/site-footer.component';
 import type { BlogPostData } from '../../services/blog-post.resolver';
@@ -15,7 +15,10 @@ import type { BlogPostData } from '../../services/blog-post.resolver';
       class="min-h-screen bg-base-100 text-base-content font-sans selection:bg-primary/30"
     >
       @if (data(); as d) {
-        <article class="max-width-container py-16 sm:py-24 max-w-[860px]">
+        <article
+          class="max-width-container py-16 sm:py-24 max-w-215"
+          (click)="onArticleClick($event)"
+        >
           <nav class="mb-12" aria-label="Breadcrumb">
             <a
               routerLink="/blog"
@@ -82,4 +85,21 @@ export class BlogPostComponent {
   );
 
   readonly data = computed(() => this.post() ?? this.routeDataPost() ?? null);
+
+  onArticleClick(event: Event): void {
+    const target = event.target as HTMLElement | null;
+    const copyBtn = target?.closest('.copy-btn') as HTMLElement | null;
+    if (!copyBtn) return;
+
+    const codeText = copyBtn.parentElement?.nextElementSibling?.textContent ?? '';
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      void navigator.clipboard.writeText(codeText).then(() => {
+        const originalText = copyBtn.textContent ?? 'Copy';
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => {
+          copyBtn.textContent = originalText;
+        }, 2000);
+      });
+    }
+  }
 }

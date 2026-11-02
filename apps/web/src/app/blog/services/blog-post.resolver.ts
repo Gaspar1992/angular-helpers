@@ -15,7 +15,8 @@ import { SeoService } from '../../core/services/seo.service';
 // Configure marked to use highlight.js for syntax highlighting
 const renderer = new marked.Renderer();
 renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
-  const language = lang || 'plaintext';
+  const rawLang = (lang || 'plaintext').trim();
+  const language = /^[a-z0-9_-]+$/i.test(rawLang) ? rawLang : 'plaintext';
   const highlighted = hljs.getLanguage(language)
     ? hljs.highlight(text, { language }).value
     : hljs.highlightAuto(text).value;
@@ -24,13 +25,24 @@ renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
   return `<div class="code-block-wrapper">
   <div class="code-header">
     <span class="lang-badge">${displayLang}</span>
-    <button class="copy-btn" onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.innerText).then(() => { const t = this.innerText; this.innerText = 'Copied!'; setTimeout(() => this.innerText = t, 2000); })">Copy</button>
+    <button type="button" class="copy-btn">Copy</button>
   </div>
   <pre><code class="hljs language-${language}">${highlighted}</code></pre>
 </div>`;
 };
 
 marked.use({ renderer });
+
+export function sanitizeBlogHtml(html: string): string {
+  return html
+    .replace(/<(script|iframe|object|embed)\b[^<]*(?:(?!<\/\1>)<[^<]*)*<\/\1>/gi, '')
+    .replace(/<\/?(script|iframe|object|embed)\b[^>]*>/gi, '')
+    .replace(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(
+      /(\s+(?:href|src|xlink:href|action|formaction)\s*=\s*)(?:"\s*(?:javascript|vbscript|data\s*:\s*text\/html)[^"]*"|'\s*(?:javascript|vbscript|data\s*:\s*text\/html)[^']*'|(?:\s*(?:javascript|vbscript|data\s*:\s*text\/html)[^\s>]*))/gi,
+      '$1"#"',
+    );
+}
 
 export interface BlogPostData {
   meta: BlogPost;
@@ -68,7 +80,7 @@ export function fetchBlogPost(
   sanitizer: DomSanitizer,
   seo: SeoService,
 ): Observable<BlogPostData | null> {
-  if (!slug) return of(null);
+  if (!slug || !/^[a-z0-9-]+$/i.test(slug)) return of(null);
 
   // Use relative path to work with subdirectory deployments (GitHub Pages)
   return http.get(`content/blog/${slug}.md`, { responseType: 'text' }).pipe(
@@ -81,7 +93,8 @@ export function fetchBlogPost(
       }
 
       const { meta, body } = parseFrontmatter(raw);
-      const html = marked.parse(body, { async: false }) as string;
+      const rawHtml = marked.parse(body, { async: false }) as string;
+      const html = sanitizeBlogHtml(rawHtml);
       const data = {
         meta: {
           slug,

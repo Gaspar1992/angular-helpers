@@ -72,13 +72,12 @@ import { RegexSecurityService } from '@angular-helpers/security';
 
 @Component({
   selector: 'app-secure-validator',
-  standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './secure-validator.component.html'
 })
 export class SecureValidatorComponent {
   private readonly securityService = inject(RegexSecurityService);
-  
+
   protected readonly isProcessing = signal<boolean>(false);
   protected readonly evaluationResult = signal<any | null>(null);
 
@@ -97,7 +96,7 @@ export class SecureValidatorComponent {
     try {
       // 1. Analyze regular expression pattern for structural ReDoS vulnerabilities without executing it
       const analysis = await this.securityService.analyzePatternSecurity(val.pattern);
-      
+
       if (!analysis.safe && analysis.riskLevel === 'high') {
         this.evaluationResult.set({
           safe: false,
@@ -137,7 +136,7 @@ export class SecureValidatorComponent {
           {
             name: 'secure-validator.component.html',
             language: 'html',
-            content: `<form [formGroup]="form" class="flex flex-col gap-4 max-w-[500px] p-6 bg-base-200/50 backdrop-blur-md rounded-3xl border border-border-subtle shadow-sm">
+            content: `<form [formGroup]="form" class="flex flex-col gap-4 max-w-125 p-6 bg-base-200/50 backdrop-blur-md rounded-3xl border border-border-subtle shadow-sm">
   <div class="form-control">
     <label class="label">
       <span class="label-text font-bold">Pattern to test (e.g. ^(a+)+$)</span>
@@ -152,20 +151,20 @@ export class SecureValidatorComponent {
     <textarea class="textarea textarea-bordered h-24" formControlName="payload"></textarea>
   </div>
 
-  <button type="button" class="btn btn-primary w-full" 
-          [disabled]="form.invalid || isProcessing()" 
+  <button type="button" class="btn btn-primary w-full"
+          [disabled]="form.invalid || isProcessing()"
           (click)="evaluateInput()">
     {{ isProcessing() ? 'Running in Web Worker...' : 'Run Security Evaluation' }}
   </button>
 
   @if (evaluationResult(); as res) {
-    <div class="alert mt-4 shadow-sm" 
-         [class.alert-error]="!res.safe || res.timeout" 
+    <div class="alert mt-4 shadow-sm"
+         [class.alert-error]="!res.safe || res.timeout"
          [class.alert-success]="res.safe && !res.timeout">
       <div>
         <h4 class="font-bold">{{ res.safe ? 'Safe Pattern' : 'ReDoS Risk Detected!' }}</h4>
         <p class="text-sm">
-          Execution Time: {{ res.executionTime?.toFixed(2) }}ms | 
+          Execution Time: {{ res.executionTime?.toFixed(2) }}ms |
           Timeout triggered: {{ res.timeout ? 'YES' : 'NO' }}
         </p>
         @if (res.warnings?.length) {

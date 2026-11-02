@@ -1,14 +1,14 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import {
+  injectYjsAwareness,
+  injectYjsIndexeddb,
+  injectYjsUndoManager,
   YjsDocService,
   yjsSignal,
   YjsTextDirective,
-  injectYjsUndoManager,
-  injectYjsAwareness,
-  injectYjsIndexeddb,
 } from '@angular-helpers/yjs';
+import { CommonModule } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Awareness } from 'y-protocols/awareness';
 
 interface UserPresence {
@@ -32,7 +32,7 @@ interface UserPresence {
           <span class="badge badge-sm badge-primary">v22.0.0</span>
         </div>
         <h1
-          class="text-4xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent"
+          class="text-4xl sm:text-5xl font-black tracking-tight bg-linear-to-r from-primary via-secondary to-accent bg-clip-text text-transparent"
         >
           Real-Time CRDT Collaboration & Signals
         </h1>
@@ -157,8 +157,9 @@ interface UserPresence {
               <div class="flex items-center justify-between text-xs pt-2">
                 <span class="text-base-content/70">Hydration Status:</span>
                 <span
-                  class="badge badge-sm"
-                  [ngClass]="dbRef.synced() ? 'badge-success gap-1' : 'badge-warning gap-1'"
+                  class="badge badge-sm gap-1"
+                  [class.badge-success]="dbRef.synced()"
+                  [class.badge-warning]="!dbRef.synced()"
                 >
                   <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
                   {{ dbRef.synced() ? 'Hydrated from IDB' : 'Hydrating...' }}

@@ -119,11 +119,7 @@ function computeInp(entries: PerformanceEntryList): number | null {
       bottom: 16px;
       right: 16px;
       z-index: 9999;
-      font-family:
-        'Inter',
-        system-ui,
-        -apple-system,
-        sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       font-size: 12px;
     }
 

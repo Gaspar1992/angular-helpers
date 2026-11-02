@@ -105,7 +105,6 @@ interface SensorLocation {
 
 @Component({
   selector: 'app-gis-dashboard',
-  standalone: true,
   imports: [
     OlMapComponent,
     OlTileLayerComponent,

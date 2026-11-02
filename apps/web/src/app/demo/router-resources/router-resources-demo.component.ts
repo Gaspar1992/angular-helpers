@@ -1,5 +1,4 @@
-import { Component, signal, resource } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, resource, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 interface SimulatedItem {
@@ -13,7 +12,7 @@ interface SimulatedItem {
 
 @Component({
   selector: 'app-router-resources-demo',
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
     <div class="max-w-6xl mx-auto px-4 py-8 space-y-8">
       <!-- Header -->
@@ -26,7 +25,7 @@ interface SimulatedItem {
           <span class="badge badge-sm badge-primary">Router Resources</span>
         </div>
         <h1
-          class="text-4xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent"
+          class="text-4xl sm:text-5xl font-black tracking-tight bg-linear-to-r from-primary via-secondary to-accent bg-clip-text text-transparent"
         >
           Signal-Driven Route Resources
         </h1>
@@ -176,7 +175,7 @@ interface SimulatedItem {
           <div class="p-4 bg-base-300/40 border border-base-300 rounded-2xl space-y-1">
             <span class="text-xs font-bold text-base-content/50 uppercase">resource.status()</span>
             <div class="flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full" [ngClass]="statusColor()"></span>
+              <span [class]="'w-3 h-3 rounded-full ' + statusColor()"></span>
               <span class="font-mono font-bold text-lg">{{ demoResource.status() }}</span>
             </div>
           </div>
@@ -186,10 +185,9 @@ interface SimulatedItem {
               >resource.isLoading()</span
             >
             <div class="flex items-center gap-2">
-              <span
-                *ngIf="demoResource.isLoading()"
-                class="loading loading-spinner loading-sm text-primary"
-              ></span>
+              @if (demoResource.isLoading()) {
+                <span class="loading loading-spinner loading-sm text-primary"></span>
+              }
               <span class="font-mono font-bold text-lg">{{ demoResource.isLoading() }}</span>
             </div>
           </div>
@@ -208,15 +206,15 @@ interface SimulatedItem {
             <span class="text-xs font-black uppercase tracking-wider text-base-content/50"
               >Simulated Route Component View</span
             >
-            <span
-              *ngIf="demoResource.isLoading()"
-              class="text-xs text-primary font-bold animate-pulse"
-              >Fetching in background...</span
-            >
+            @if (demoResource.isLoading()) {
+              <span class="text-xs text-primary font-bold animate-pulse"
+                >Fetching in background...</span
+              >
+            }
           </div>
 
           <div
-            class="p-6 bg-base-300/30 border border-base-300 rounded-2xl min-h-[160px] flex items-center justify-center"
+            class="p-6 bg-base-300/30 border border-base-300 rounded-2xl min-h-40 flex items-center justify-center"
           >
             @if (demoResource.isLoading() && !demoResource.value()) {
               <div class="flex flex-col items-center gap-3">

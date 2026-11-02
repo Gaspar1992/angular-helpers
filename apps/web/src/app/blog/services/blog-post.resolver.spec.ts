@@ -99,4 +99,67 @@ Article Body`);
 
     expect(res.value()?.meta.title).toBe('Test Article');
   });
+
+  it('should reject invalid slugs (path traversal or non-alphanumeric characters)', async () => {
+    const route = {
+      paramMap: {
+        get: vi.fn().mockReturnValue('../../etc/passwd'),
+      },
+    } as any;
+
+    const result = await new Promise((resolve) => {
+      TestBed.runInInjectionContext(() => {
+        const obs = blogPostResolver(route, {} as any) as any;
+        obs.subscribe(resolve);
+      });
+    });
+
+    httpTesting.expectNone('content/blog/../../etc/passwd.md');
+    expect(result).toBeNull();
+  });
+
+  it('should sanitize dangerous HTML tags, inline event handlers, javascript URLs, and code fence languages', async () => {
+    const route = {
+      paramMap: {
+        get: vi.fn().mockReturnValue('security-test'),
+      },
+    } as any;
+
+    const promise = new Promise((resolve) => {
+      TestBed.runInInjectionContext(() => {
+        const obs = blogPostResolver(route, {} as any) as any;
+        obs.subscribe(resolve);
+      });
+    });
+
+    const req = httpTesting.expectOne('content/blog/security-test.md');
+    const maliciousMarkdown = `---
+title: Security Test
+publishedAt: 2026-10-03
+tags: [security]
+excerpt: XSS prevention
+---
+<script>alert('xss')</script>
+<iframe src="https://evil.example.com"></iframe>
+<img src="x" onerror="alert(1)">
+<a href="javascript:alert(2)">Bad Link</a>
+
+\`\`\`ts" onload="alert(3)
+const x = 1;
+\`\`\`
+`;
+
+    req.flush(maliciousMarkdown);
+
+    const result = (await promise) as any;
+    expect(result).not.toBeNull();
+    expect(result.html).not.toContain('<script');
+    expect(result.html).not.toContain('<iframe');
+    expect(result.html).not.toContain('onerror=');
+    expect(result.html).not.toContain('onload=');
+    expect(result.html).not.toContain('onclick=');
+    expect(result.html).not.toContain('javascript:');
+    expect(result.html).toContain('class="copy-btn"');
+    expect(result.html).toContain('language-plaintext');
+  });
 });
