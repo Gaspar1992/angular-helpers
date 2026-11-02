@@ -12,5 +12,13 @@
     "no-console": "warn",
     "no-unused-vars": "warn",
     "prefer-const": "error"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["scripts/**", "libs/*/scripts/**", "apps/web/src/server.ts"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
 }

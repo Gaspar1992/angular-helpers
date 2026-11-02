@@ -1,3 +1,4 @@
+/* oxlint-disable no-console */
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync } from 'node:fs';
 import { argv, env, exit } from 'node:process';

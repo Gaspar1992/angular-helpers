@@ -3,7 +3,7 @@ import tsparser from '@typescript-eslint/parser';
 import angularTemplateEslint from '@angular-eslint/eslint-plugin-template';
 import angularTemplateParser from '@angular-eslint/template-parser';
 import nxEslintPlugin from '@nx/eslint-plugin';
-import { configs } from 'angular-eslint';
+import { configs, processInlineTemplates } from 'angular-eslint';
 
 export default [
   {
@@ -47,6 +47,7 @@ export default [
   },
   {
     files: ['**/*.ts'],
+    processor: processInlineTemplates,
     languageOptions: {
       parser: tsparser,
     },

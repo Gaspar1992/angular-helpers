@@ -36,11 +36,15 @@ jobs:
 
       - name: Check affected
         id: check
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          BASE="${{ github.event.before }}"
+          BASE="$BEFORE_SHA"
           [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ] && BASE="HEAD~1"
-          AFFECTED=$(pnpm nx show projects --affected -p web --base="$BASE" --head="${{ github.sha }}")
-          [ -n "$AFFECTED" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ] && echo "deploy=true" >> "$GITHUB_OUTPUT" || echo "deploy=false" >> "$GITHUB_OUTPUT"
+          AFFECTED=$(pnpm nx show projects --affected -p web --base="$BASE" --head="$CURRENT_SHA")
+          [ -n "$AFFECTED" ] || [ "$EVENT_NAME" = "workflow_dispatch" ] && echo "deploy=true" >> "$GITHUB_OUTPUT" || echo "deploy=false" >> "$GITHUB_OUTPUT"
 
       - name: Build Web Workers
         if: steps.check.outputs.deploy == 'true'

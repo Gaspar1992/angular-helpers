@@ -80,6 +80,12 @@ function runCommand(command, args, options = {}) {
 async function main() {
   console.log(`📦 Publish check started. Target: ${targetPkg} | Dry run: ${isDryRun}`);
 
+  if (targetPkg !== 'all' && !PACKAGES.includes(targetPkg)) {
+    throw new Error(
+      `Invalid TARGET_PACKAGE "${targetPkg}". Allowed values: all, ${PACKAGES.join(', ')}`,
+    );
+  }
+
   const packagesToProcess = targetPkg === 'all' ? PACKAGES : [targetPkg];
 
   for (const pkg of packagesToProcess) {

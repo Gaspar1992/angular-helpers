@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
-      contents: write
+      contents: read
       id-token: write
     steps:
       - name: Checkout Repository
@@ -54,6 +54,8 @@ jobs:
 
       - name: Setup workspace
         uses: ./.github/actions/setup
+        with:
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Build all packages in topological order
         run: pnpm nx run-many -t build:prod
@@ -72,4 +74,3 @@ jobs:
         env:
           TARGET_PACKAGE: ${{ github.event.inputs.package || 'all' }}
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}

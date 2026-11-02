@@ -1,11 +1,17 @@
+/* oxlint-disable no-console */
 import fs from 'node:fs';
 import path from 'node:path';
 
 const defaultFolders = ['.angular', 'dist', 'out-tsc', 'coverage', '.vitest'];
+const cwd = process.cwd();
 
 const args = process.argv.slice(2);
 
 function deletePath(targetPath) {
+  const rel = path.relative(cwd, targetPath);
+  if (!rel || rel.startsWith('..') || path.isAbsolute(rel)) {
+    throw new Error(`Refusing to delete path outside workspace root: ${targetPath}`);
+  }
   if (fs.existsSync(targetPath)) {
     console.log(`Deleting: ${targetPath}`);
     fs.rmSync(targetPath, { recursive: true, force: true });
@@ -14,12 +20,10 @@ function deletePath(targetPath) {
 
 if (args.length > 0) {
   for (const arg of args) {
-    const targetPath = path.resolve(arg);
+    const targetPath = path.resolve(cwd, arg);
     deletePath(targetPath);
   }
 } else {
-  const cwd = process.cwd();
-
   // Clean in root (cwd)
   for (const folder of defaultFolders) {
     deletePath(path.join(cwd, folder));
