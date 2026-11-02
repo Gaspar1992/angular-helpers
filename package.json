@@ -1,6 +1,6 @@
 {
   "name": "angular-helpers",
-  "version": "1.42.0",
+  "version": "1.42.1",
   "type": "module",
   "scripts": {
     "start": "nx serve web",
@@ -80,7 +80,7 @@
     "@commitlint/cli": "catalog:",
     "@commitlint/config-conventional": "catalog:",
     "@eslint/js": "catalog:",
-    "@nx/eslint-plugin": "23.2.1",
+    "@nx/eslint-plugin": "24.0.3",
     "@oxc-project/runtime": "catalog:",
     "@playwright/test": "catalog:",
     "@tailwindcss/postcss": "catalog:",
@@ -104,7 +104,7 @@
     "knip": "catalog:",
     "lint-staged": "catalog:",
     "ng-packagr": "catalog:",
-    "nx": "23.2.1",
+    "nx": "24.0.3",
     "ol": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",

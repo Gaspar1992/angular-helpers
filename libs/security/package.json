@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/security",
-  "version": "22.9.0",
+  "version": "22.9.1",
   "description": "Angular security helpers for preventing ReDoS and other security vulnerabilities",
   "keywords": [
     "angular",
@@ -43,6 +43,7 @@
     "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/security",
     "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/security",
     "clean": "node ../../scripts/clean.js",
+    "lint": "oxlint src",
     "test": "vitest run --root ../.. libs/security"
   },
   "peerDependencies": {
