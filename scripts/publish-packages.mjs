@@ -140,7 +140,10 @@ async function main() {
             console.log(`✅ Successfully published ${tag}`);
             isPublished = true;
           } else {
-            console.error(`❌ Failed to publish ${tag} with exit code ${pubRes.code}:`, pubRes.stderr);
+            console.error(
+              `❌ Failed to publish ${tag} with exit code ${pubRes.code}:`,
+              pubRes.stderr,
+            );
             process.exitCode = 1;
           }
         } catch (err) {

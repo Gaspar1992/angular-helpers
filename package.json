@@ -26,9 +26,9 @@
   },
   "private": true,
   "lint-staged": {
-    "*.{ts,js,json,css,html,md}": "oxfmt",
-    "*.{ts,js}": "oxlint",
-    "*.{ts,html}": "eslint"
+    "*.{ts,mts,js,mjs,json,css,html,md,yml,yaml}": "oxfmt",
+    "*.{ts,mts,js,mjs}": "oxlint",
+    "*.{ts,mts,html}": "eslint"
   },
   "packageManager": "pnpm@11.28.4",
   "engines": {
