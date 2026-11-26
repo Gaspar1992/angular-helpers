@@ -15,6 +15,7 @@ export interface WakeLockStatus {
 export class ScreenWakeLockService extends BrowserApiBaseService {
   private sentinel: WakeLockSentinel | null = null;
   private releaseRegistered = false;
+  private explicitlyReleased = false;
 
   protected override getApiName(): string {
     return 'screen-wake-lock';
@@ -38,6 +39,7 @@ export class ScreenWakeLockService extends BrowserApiBaseService {
     }
 
     try {
+      this.explicitlyReleased = false;
       this.sentinel = await navigator.wakeLock.request(type);
 
       this.sentinel.addEventListener('release', () => {
@@ -58,6 +60,7 @@ export class ScreenWakeLockService extends BrowserApiBaseService {
   }
 
   async release(): Promise<void> {
+    this.explicitlyReleased = true;
     if (this.sentinel && !this.sentinel.released) {
       try {
         await this.sentinel.release();
@@ -71,10 +74,16 @@ export class ScreenWakeLockService extends BrowserApiBaseService {
 
   watchStatus(): Observable<WakeLockStatus> {
     return new Observable<WakeLockStatus>((observer) => {
+      if (!this.isBrowserEnvironment()) {
+        observer.next({ active: false, released: true });
+        observer.complete();
+        return undefined;
+      }
+
       const emit = () => observer.next({ active: this.isActive, released: !this.isActive });
 
       const handleVisibilityChange = async () => {
-        if (document.visibilityState === 'visible' && !this.isActive) {
+        if (document.visibilityState === 'visible' && !this.isActive && !this.explicitlyReleased) {
           try {
             await this.request();
           } catch {

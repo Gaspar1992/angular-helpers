@@ -1,18 +1,18 @@
 import {
   Directive,
+  effect,
   ElementRef,
+  inject,
   input,
   type OnInit,
-  type OnDestroy,
-  inject,
   PLATFORM_ID,
-  NgZone,
   Renderer2,
+  untracked,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { NgControl } from '@angular/forms';
 import { injectSpeechRecognition } from '../fns/inject-speech-recognition';
-import { effect } from '@angular/core';
+import { LiveAnnouncerService } from '../services/live-announcer.service';
 
 @Directive({
   selector: '[voiceInput]',
@@ -20,36 +20,28 @@ import { effect } from '@angular/core';
     '(keydown)': 'handleKeyDown($event)',
   },
 })
-export class VoiceInputDirective implements OnInit, OnDestroy {
+export class VoiceInputDirective implements OnInit {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly elementRef = inject(ElementRef);
   private readonly ngControl = inject(NgControl, { optional: true });
-  private readonly ngZone = inject(NgZone);
   private readonly renderer = inject(Renderer2);
+  private readonly liveAnnouncer = inject(LiveAnnouncerService);
 
-  readonly voiceLang = input<string>('es-ES');
+  readonly voiceLang = input<string>('en-US');
   readonly voiceHotkey = input<string>('KeyV'); // Default is 'KeyV' triggered with Alt
 
   private readonly speech = injectSpeechRecognition();
-  private liveRegion: HTMLDivElement | null = null;
-  private isBrowser = false;
-  private announceTimeout: any = null;
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
 
   constructor() {
-    this.isBrowser = isPlatformBrowser(this.platformId);
-
     if (this.isBrowser) {
-      // Effect to sync transcript with the form control or value property
       effect(() => {
         const text = this.speech.transcript();
         if (text) {
-          this.ngZone.run(() => {
-            this.updateValue(text);
-          });
+          this.updateValue(text);
         }
       });
 
-      // Effect to update accessibility live announcements and ARIA attributes
       effect(() => {
         const listening = this.speech.isListening();
         this.renderer.setAttribute(
@@ -59,11 +51,11 @@ export class VoiceInputDirective implements OnInit, OnDestroy {
         );
 
         if (listening) {
-          this.announce('Listening... Speak now.');
+          this.liveAnnouncer.announce('Listening... Speak now.');
         } else {
-          const text = this.speech.transcript();
+          const text = untracked(() => this.speech.transcript());
           if (text) {
-            this.announce(`Listening stopped. Text inserted: ${text}`);
+            this.liveAnnouncer.announce(`Listening stopped. Text inserted: ${text}`);
           }
         }
       });
@@ -71,7 +63,7 @@ export class VoiceInputDirective implements OnInit, OnDestroy {
       effect(() => {
         const err = this.speech.error();
         if (err) {
-          this.announce(`Speech recognition error: ${err.message}`);
+          this.liveAnnouncer.announce(`Speech recognition error: ${err.message}`);
         }
       });
     }
@@ -79,17 +71,7 @@ export class VoiceInputDirective implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.isBrowser) {
-      this.createLiveRegion();
       this.renderer.setAttribute(this.elementRef.nativeElement, 'aria-autocomplete', 'list');
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this.announceTimeout) {
-      clearTimeout(this.announceTimeout);
-    }
-    if (this.liveRegion) {
-      this.liveRegion.remove();
     }
   }
 
@@ -128,37 +110,6 @@ export class VoiceInputDirective implements OnInit, OnDestroy {
       // Dispatch input event for external integrations
       const event = new Event('input', { bubbles: true });
       inputEl.dispatchEvent(event);
-    }
-  }
-
-  private createLiveRegion(): void {
-    this.liveRegion = this.renderer.createElement('div');
-    if (this.liveRegion) {
-      this.renderer.setAttribute(this.liveRegion, 'aria-live', 'polite');
-      this.renderer.setAttribute(this.liveRegion, 'aria-atomic', 'true');
-      this.renderer.setStyle(this.liveRegion, 'position', 'absolute');
-      this.renderer.setStyle(this.liveRegion, 'width', '1px');
-      this.renderer.setStyle(this.liveRegion, 'height', '1px');
-      this.renderer.setStyle(this.liveRegion, 'overflow', 'hidden');
-      this.renderer.setStyle(this.liveRegion, 'clip', 'rect(1px, 1px, 1px, 1px)');
-
-      // Append to body to avoid layout pollution
-      this.renderer.appendChild(document.body, this.liveRegion);
-    }
-  }
-
-  private announce(message: string): void {
-    if (this.liveRegion) {
-      this.renderer.setProperty(this.liveRegion, 'textContent', '');
-      // Delay slightly to trigger DOM updates for the screen reader
-      if (this.announceTimeout) {
-        clearTimeout(this.announceTimeout);
-      }
-      this.announceTimeout = setTimeout(() => {
-        if (this.liveRegion) {
-          this.renderer.setProperty(this.liveRegion, 'textContent', message);
-        }
-      }, 50);
     }
   }
 }

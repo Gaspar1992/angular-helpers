@@ -39,16 +39,17 @@ export class SearchBoxComponent {
 
 ## Core Primitives
 
-| Primitive                                  | Category          | Description                                                                             |
-| :----------------------------------------- | :---------------- | :-------------------------------------------------------------------------------------- |
-| `debouncedSignal(source, delay, opts?)`    | **Signals**       | Delays emitting values from source signal until a silence window elapses.               |
-| `throttledSignal(source, cooldown, opts?)` | **Signals**       | Rate-limits emissions to at most once per time window (leading & trailing).             |
-| `timerSignal(delay, interval?, opts?)`     | **Signals**       | Native interval/timeout signal without RxJS subscription boilerplate.                   |
-| `injectPlatform()`                         | **Platform**      | Injects reactive and typed platform detection (`isBrowser`, `isServer`).                |
-| `injectWorkerPool(options)`                | **Workers**       | Manages a pooled pool of Web Workers with automatic load balancing and cleanup.         |
-| `isTransferable(value)`                    | **Transferables** | Checks if an object implements `Transferable` (ArrayBuffer, ImageBitmap, etc.).         |
-| `packTransferable(data)`                   | **Transferables** | Automatically discovers and extracts transferables for zero-copy postMessage transfers. |
-| `unpackTransferable(payload)`              | **Transferables** | Restores transferred payloads in the destination thread.                                |
+| Primitive                                  | Category          | Description                                                                           |
+| :----------------------------------------- | :---------------- | :------------------------------------------------------------------------------------ |
+| `debouncedSignal(source, delay, opts?)`    | **Signals**       | Delays emitting values from source signal until a silence window elapses.             |
+| `throttledSignal(source, cooldown, opts?)` | **Signals**       | Rate-limits emissions to at most once per time window (leading & trailing).           |
+| `timerSignal(delay, interval?, opts?)`     | **Signals**       | Native interval/timeout signal without RxJS subscription boilerplate.                 |
+| `injectPlatform()`                         | **Platform**      | Injects reactive and typed platform detection (`isBrowser`, `isServer`).              |
+| `injectWorkerPool(workerUrl, options?)`    | **Workers**       | Manages a Web Worker runner with timeout, crash recovery, and cleanup.                |
+| `injectErrorBoundaryReporter()`            | **Errors**        | Injects an error boundary reporter for structured runtime error capture.              |
+| `detectTransferables(data)`                | **Transferables** | Automatically discovers `Transferable` objects for zero-copy `postMessage` transfers. |
+| `isTransferable(value)`                    | **Transferables** | Checks if an object implements `Transferable` (`ArrayBuffer`, `ImageBitmap`, etc.).   |
+| `@angular-helpers/core/utils`              | **Sub-entry**     | Pure worker-safe binary/hex/base64 helpers and `detectTransferables`.                 |
 
 ---
 

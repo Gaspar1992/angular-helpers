@@ -1,7 +1,7 @@
-import { inject, Injectable, signal } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { fromEvent, Observable } from 'rxjs';
-import { distinctUntilChanged, filter } from 'rxjs/operators';
+import { inject, Injectable } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { fromEvent, Observable, Subject } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { BrowserApiBaseService } from './base/browser-api-base.service';
 import type { BrowserCapabilityId } from './browser-capability.service';
 import { BROWSER_API_LOGGER } from '../tokens/logger.token';
@@ -37,7 +37,7 @@ let legacyDeprecationLogged = false;
 @Injectable()
 export class WebStorageService extends BrowserApiBaseService {
   private readonly storageLogger = inject(BROWSER_API_LOGGER);
-  private storageEvents = signal<StorageEvent | null>(null);
+  private readonly storageEvents$ = new Subject<StorageEvent>();
 
   private readonly eventBus: {
     emit: (event: StorageEvent) => void;
@@ -52,18 +52,20 @@ export class WebStorageService extends BrowserApiBaseService {
 
   constructor() {
     super();
+    this.destroyRef.onDestroy(() => this.storageEvents$.complete());
     this.eventBus = {
-      emit: (event: StorageEvent) => this.storageEvents.set(event),
-      events$: toObservable(this.storageEvents).pipe(
-        filter((event): event is StorageEvent => event !== null),
-        distinctUntilChanged(
-          (a, b) =>
-            a.key === b.key &&
-            a.newValue === b.newValue &&
-            a.oldValue === b.oldValue &&
-            a.storageArea === b.storageArea,
+      emit: (event: StorageEvent) => this.storageEvents$.next(event),
+      events$: this.storageEvents$
+        .asObservable()
+        .pipe(
+          distinctUntilChanged(
+            (a, b) =>
+              a.key === b.key &&
+              a.newValue === b.newValue &&
+              a.oldValue === b.oldValue &&
+              a.storageArea === b.storageArea,
+          ),
         ),
-      ),
     };
 
     this.local = new StorageNamespaceImpl('localStorage', this.eventBus, this.storageLogger);
@@ -97,7 +99,7 @@ export class WebStorageService extends BrowserApiBaseService {
       .subscribe((event) => {
         const area: 'localStorage' | 'sessionStorage' =
           event.storageArea === window.localStorage ? 'localStorage' : 'sessionStorage';
-        this.storageEvents.set({
+        this.storageEvents$.next({
           key: event.key,
           newValue: event.newValue ? this.safeParse(event.newValue) : null,
           oldValue: event.oldValue ? this.safeParse(event.oldValue) : null,

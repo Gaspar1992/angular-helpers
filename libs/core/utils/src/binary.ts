@@ -39,16 +39,12 @@ export function bufferToHex(buffer: ArrayBuffer | Uint8Array): string {
  * Throws an `Error('Invalid hex string')` if length is odd or contains non-hex characters.
  */
 export function hexToBytes(hex: string): Uint8Array<ArrayBuffer> {
-  if (hex.length % 2 !== 0) {
+  if (hex.length % 2 !== 0 || !/^[0-9a-fA-F]*$/.test(hex)) {
     throw new Error('Invalid hex string');
   }
   const bytes = new Uint8Array(new ArrayBuffer(hex.length / 2));
   for (let i = 0; i < hex.length; i += 2) {
-    const byte = parseInt(hex.substring(i, i + 2), 16);
-    if (Number.isNaN(byte)) {
-      throw new Error('Invalid hex string');
-    }
-    bytes[i / 2] = byte;
+    bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
   }
   return bytes;
 }
@@ -63,9 +59,7 @@ export function bytesToBase64(buffer: ArrayBuffer | Uint8Array): string {
   let binary = '';
   for (let i = 0; i < bytes.length; i += chunkSize) {
     const chunk = bytes.subarray(i, i + chunkSize);
-    for (let j = 0; j < chunk.length; j++) {
-      binary += String.fromCharCode(chunk[j]);
-    }
+    binary += String.fromCharCode(...chunk);
   }
   return btoa(binary);
 }
