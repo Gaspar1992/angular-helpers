@@ -57,14 +57,14 @@ jobs:
         with:
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Check formatting and lint
+        run: pnpm run format:check && pnpm run lint
+
+      - name: Run unit tests
+        run: pnpm run test:ci
+
       - name: Build all packages in topological order
         run: pnpm nx run-many -t build:prod
-
-      - name: Strip workspace protocol from built packages dynamically
-        run: |
-          core_version=$(node -p "require('./libs/core/package.json').version")
-          echo "Replacing workspace:* with ^$core_version"
-          find dist -name "package.json" -exec sed -i "s/\"workspace:\*\"/\"^$core_version\"/g" {} +
 
       - name: Validate built packages with publint and attw
         run: pnpm run lint:packages

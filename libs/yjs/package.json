@@ -31,7 +31,7 @@
     "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/yjs",
     "clean": "node ../../scripts/clean.js",
     "test": "vitest run --root ../.. libs/yjs",
-    "lint": "oxlint src"
+    "lint": "eslint ."
   },
   "dependencies": {
     "tslib": "catalog:"

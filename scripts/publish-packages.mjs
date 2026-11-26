@@ -103,13 +103,11 @@ async function main() {
     const tag = `${name}@${version}`;
 
     let isPublished = false;
-    try {
-      const res = await runCommand('npm', ['view', tag, 'version']);
-      if (res.code === 0 && res.stdout === version) {
-        isPublished = true;
-      }
-    } catch {
-      isPublished = false;
+    const res = await runCommand('npm', ['view', tag, 'version']);
+    if (res.code === 0 && res.stdout === version) {
+      isPublished = true;
+    } else if (res.code !== 0 && !res.stderr.includes('E404')) {
+      throw new Error(`Unexpected npm view failure for ${tag} (exit ${res.code}): ${res.stderr}`);
     }
 
     if (isPublished) {
@@ -118,42 +116,31 @@ async function main() {
       console.log(`🚀 [NEW RELEASE DETECTED] ${tag} is NOT yet published on npm.`);
       const distPath = path.resolve(`dist/${pkg}`);
       if (!fs.existsSync(distPath)) {
-        console.warn(`⚠️  Warning: ${distPath} does not exist. Ensure build ran first.`);
+        throw new Error(`Build output directory missing: ${distPath}. Run build:prod first.`);
       }
 
       if (isDryRun) {
         console.log(`🔍 [DRY-RUN] Would publish ${tag} from ${distPath}`);
       } else {
         console.log(`📤 Publishing ${tag} with Provenance...`);
-        try {
-          const pubRes = await runCommand(
-            'npm',
-            ['publish', '--provenance', '--access', 'public'],
-            {
-              cwd: distPath,
-              echoStdout: true,
-              echoStderr: true,
-            },
-          );
+        const pubRes = await runCommand('npm', ['publish', '--provenance', '--access', 'public'], {
+          cwd: distPath,
+          echoStdout: true,
+          echoStderr: true,
+        });
 
-          if (pubRes.code === 0) {
-            console.log(`✅ Successfully published ${tag}`);
-            isPublished = true;
-          } else {
-            console.error(
-              `❌ Failed to publish ${tag} with exit code ${pubRes.code}:`,
-              pubRes.stderr,
-            );
-            process.exitCode = 1;
-          }
-        } catch (err) {
-          console.error(`❌ Failed to publish ${tag}:`, err.message);
-          process.exitCode = 1;
+        if (pubRes.code === 0) {
+          console.log(`✅ Successfully published ${tag}`);
+          isPublished = true;
+        } else {
+          throw new Error(
+            `Failed to publish ${tag} (exit ${pubRes.code}): ${pubRes.stderr}. Aborting remaining packages.`,
+          );
         }
       }
     }
 
-    if (isPublished || isDryRun) {
+    if (isPublished) {
       let hasGhRelease = false;
       try {
         const ghCheck = await runCommand('gh', ['release', 'view', tag]);
@@ -166,33 +153,26 @@ async function main() {
 
       if (hasGhRelease) {
         console.log(`⏭️  [SKIP] GitHub Release ${tag} already exists.`);
-      } else if (isDryRun) {
-        console.log(`🔍 [DRY-RUN] Would create GitHub Release ${tag}`);
       } else {
         console.log(`🏷️  Creating GitHub Release ${tag}...`);
-        try {
-          const ghRes = await runCommand(
-            'gh',
-            ['release', 'create', tag, '--title', tag, '--generate-notes'],
-            {
-              echoStdout: true,
-              echoStderr: true,
-            },
+        const ghRes = await runCommand(
+          'gh',
+          ['release', 'create', tag, '--title', tag, '--generate-notes'],
+          {
+            echoStdout: true,
+            echoStderr: true,
+          },
+        );
+        if (ghRes.code === 0) {
+          console.log(`✅ Successfully created GitHub Release ${tag}`);
+        } else {
+          throw new Error(
+            `Failed to create GitHub Release ${tag} (exit ${ghRes.code}): ${ghRes.stderr}`,
           );
-          if (ghRes.code === 0) {
-            console.log(`✅ Successfully created GitHub Release ${tag}`);
-          } else {
-            console.error(
-              `❌ Failed to create GitHub Release ${tag} with exit code ${ghRes.code}:`,
-              ghRes.stderr,
-            );
-            process.exitCode = 1;
-          }
-        } catch (err) {
-          console.error(`❌ Failed to create GitHub Release ${tag}:`, err.message);
-          process.exitCode = 1;
         }
       }
+    } else if (isDryRun) {
+      console.log(`🔍 [DRY-RUN] Would check/create GitHub Release ${tag}`);
     }
   }
 }

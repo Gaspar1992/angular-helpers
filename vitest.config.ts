@@ -13,7 +13,13 @@ export default defineConfig({
     }),
   ],
   optimizeDeps: {
-    disabled: true,
+    noDiscovery: true,
+    include: [],
+  },
+  server: {
+    watch: {
+      ignored: ['**/dist/**'],
+    },
   },
   test: {
     globals: true,
@@ -24,7 +30,7 @@ export default defineConfig({
     },
     setupFiles: [here('./apps/web/src/test-setup.ts')],
     include: ['libs/**/*.spec.ts', 'apps/web/src/**/*.spec.ts'],
-    exclude: [...configDefaults.exclude, 'libs/**/schematics/**/*.spec.ts'],
+    exclude: [...configDefaults.exclude, 'dist/**', 'libs/**/schematics/**/*.spec.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'json-summary', 'lcov'],
@@ -140,7 +146,7 @@ export default defineConfig({
       ),
       '@angular-helpers/openlayers/overlays': here('./libs/openlayers/overlays/src/index.ts'),
       '@angular-helpers/openlayers/testing': here('./libs/openlayers/testing/src/index.ts'),
-      '@angular-helpers/openlayers': here('./libs/openlayers/src/index.ts'),
+      '@angular-helpers/openlayers': here('./libs/openlayers/src/public-api.ts'),
       '@angular-helpers/yjs': here('./libs/yjs/src/index.ts'),
     },
   },

@@ -14,7 +14,13 @@
     },
     "test": {
       "cache": true,
-      "inputs": ["default", "^production", "{workspaceRoot}/vitest.config.ts"]
+      "inputs": [
+        "default",
+        "^production",
+        "{workspaceRoot}/vitest.config.ts",
+        "{workspaceRoot}/apps/web/src/test-setup.ts",
+        "{workspaceRoot}/tsconfig.json"
+      ]
     },
     "lint": {
       "cache": true,
@@ -22,13 +28,18 @@
     }
   },
   "namedInputs": {
-    "sharedGlobals": [],
+    "sharedGlobals": [
+      "{workspaceRoot}/package.json",
+      "{workspaceRoot}/pnpm-lock.yaml",
+      "{workspaceRoot}/tsconfig.json",
+      "{workspaceRoot}/tsconfig.build.json",
+      "{workspaceRoot}/scripts/post-build.js"
+    ],
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
       "!{projectRoot}/**/*.spec.ts",
       "!{projectRoot}/**/*.md",
-      "!{projectRoot}/.eslintrc.json",
       "!{projectRoot}/eslint.config.js",
       "!{projectRoot}/.oxlintrc.json",
       "!{projectRoot}/.oxfmtrc.json"

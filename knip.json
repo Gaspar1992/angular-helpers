@@ -1,5 +1,5 @@
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": [
     "apps/web/src/main.ts",
     "apps/web/src/main.server.ts",
@@ -8,21 +8,21 @@
     "vitest.config.ts",
     "apps/web-e2e/playwright.config.ts",
     "scripts/*.js",
+    "scripts/*.mjs",
     "scripts/*.ts",
     "apps/web/src/workers/*.ts",
     "**/*.spec.ts"
   ],
-  "project": ["apps/**/*.ts", "libs/**/*.ts", "scripts/**/*.js", "scripts/**/*.ts"],
-  "ignore": ["apps/web/src/styles.css"],
+  "project": [
+    "apps/**/*.ts",
+    "libs/**/*.ts",
+    "scripts/**/*.js",
+    "scripts/**/*.mjs",
+    "scripts/**/*.ts"
+  ],
   "ignoreDependencies": [
-    "husky",
     "@angular-devkit/*",
-    "@typescript-eslint/*",
-    "@eslint/js",
-    "eslint-plugin-oxlint",
     "@oxc-project/runtime",
-    "@angular/compiler-cli",
-    "@angular/platform-browser-dynamic",
     "vite-tsconfig-paths",
     "web-streams-polyfill",
     "concurrently",

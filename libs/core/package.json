@@ -30,9 +30,13 @@
     "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/core",
     "clean": "node ../../scripts/clean.js",
     "test": "vitest run --root ../.. libs/core",
-    "lint": "oxlint src"
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "tslib": "catalog:"
   },
   "peerDependencies": {
+    "@angular/common": "^22.0.0",
     "@angular/core": "^22.0.0"
   }
 }

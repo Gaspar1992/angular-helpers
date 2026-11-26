@@ -4,9 +4,8 @@
     "paths": {
       "@angular-helpers/*": ["./dist/*"]
     },
-    "types": ["node"],
-    "sourceMap": false,
-    "declarationMap": false
+    "sourceMap": true,
+    "declarationMap": true
   },
   "angularCompilerOptions": {
     "compilationMode": "partial"

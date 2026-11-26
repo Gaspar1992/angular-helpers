@@ -36,14 +36,16 @@
     "build:schematics": "tsc -p tsconfig.schematics.json && node scripts/rename-to-cjs.mjs",
     "clean": "node ../../scripts/clean.js",
     "test": "vitest run --root ../.. libs/worker-http",
-    "lint": "oxlint src"
+    "lint": "eslint ."
   },
   "peerDependencies": {
     "@angular/common": "^22.0.0",
     "@angular/core": "^22.0.0",
-    "rxjs": "^7.0.0",
+    "rxjs": "^7.0.0 || ^8.0.0",
     "seroval": "^1.0.0",
-    "@toon-format/toon": "^2.0.0"
+    "@toon-format/toon": "^2.0.0",
+    "esbuild": ">=0.20.0",
+    "web-streams-polyfill": "^4.0.0"
   },
   "peerDependenciesMeta": {
     "@angular/common": {

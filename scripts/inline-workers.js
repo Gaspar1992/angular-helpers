@@ -16,7 +16,7 @@ try {
     bundle: true,
     write: false,
     format: 'iife',
-    target: 'es2020',
+    target: 'es2024',
     platform: 'browser',
   });
 
