@@ -48,6 +48,7 @@ export class SecureStorageService {
   private readonly storageConfig: Required<SecureStorageConfig>;
 
   private activeKey: CryptoKey | null = null;
+  private pendingKeyPromise: Promise<CryptoKey> | null = null;
 
   constructor() {
     const config = inject(SECURE_STORAGE_CONFIG, { optional: true }) ?? {};
@@ -58,11 +59,13 @@ export class SecureStorageService {
   }
 
   isSupported(): boolean {
+    const storageProp =
+      this.storageConfig.storage === 'session' ? 'sessionStorage' : 'localStorage';
     return (
       isPlatformBrowser(this.platformId) &&
       'crypto' in window &&
       'subtle' in crypto &&
-      'localStorage' in window
+      storageProp in window
     );
   }
 
@@ -193,7 +196,11 @@ export class SecureStorageService {
     this.assertSupported();
 
     if (!namespace) {
+      const preservedSalt = this.nativeStorage.getItem(SALT_STORAGE_KEY);
       this.nativeStorage.clear();
+      if (preservedSalt !== null) {
+        this.nativeStorage.setItem(SALT_STORAGE_KEY, preservedSalt);
+      }
       return;
     }
 
@@ -220,13 +227,18 @@ export class SecureStorageService {
 
   private async ensureKey(): Promise<CryptoKey> {
     if (this.activeKey) return this.activeKey;
-
-    this.activeKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, [
-      'encrypt',
-      'decrypt',
-    ]);
-
-    return this.activeKey;
+    if (!this.pendingKeyPromise) {
+      this.pendingKeyPromise = crypto.subtle
+        .generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt'])
+        .then((key) => {
+          this.activeKey = key;
+          return key;
+        })
+        .finally(() => {
+          this.pendingKeyPromise = null;
+        });
+    }
+    return this.pendingKeyPromise;
   }
 
   private assertSupported(): void {

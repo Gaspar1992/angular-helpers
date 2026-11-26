@@ -245,7 +245,7 @@ export function sanitizeHtmlString(input: string, options: HtmlSanitizerOptions 
   const parser = new DOMParser();
   const doc = parser.parseFromString(input, 'text/html');
 
-  processHtmlNode(doc.body, allowedTags, allowedAttributes);
+  processHtmlNode(doc.body, doc, allowedTags, allowedAttributes);
 
   return doc.body.innerHTML;
 }
@@ -261,8 +261,11 @@ export function isHtmlSafe(input: string, options: HtmlSanitizerOptions = {}): b
   return sanitizeHtmlString(input, options) === input;
 }
 
+const STRIP_SUBTREE_TAGS = new Set(['script', 'style', 'iframe', 'object', 'embed']);
+
 function processHtmlNode(
   node: Element,
+  doc: Document,
   allowedTags: Set<string>,
   allowedAttributes: Readonly<Record<string, readonly string[]>>,
 ): void {
@@ -275,13 +278,17 @@ function processHtmlNode(
     const tagName = element.tagName.toLowerCase();
 
     if (!allowedTags.has(tagName)) {
-      const text = element.textContent ?? '';
-      node.replaceChild(document.createTextNode(text), element);
+      if (STRIP_SUBTREE_TAGS.has(tagName)) {
+        element.remove();
+      } else {
+        processHtmlNode(element, doc, allowedTags, allowedAttributes);
+        element.replaceWith(...Array.from(element.childNodes));
+      }
       continue;
     }
 
     sanitizeElementAttributes(element, tagName, allowedAttributes);
-    processHtmlNode(element, allowedTags, allowedAttributes);
+    processHtmlNode(element, doc, allowedTags, allowedAttributes);
   }
 }
 

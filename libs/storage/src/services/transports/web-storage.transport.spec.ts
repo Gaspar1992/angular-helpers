@@ -121,28 +121,17 @@ describe('WebStorageTransport', () => {
     });
   });
 
-  it('should handle encryption error when passphrase is missing', async () => {
+  it('should throw on write and return undefined on read when passphrase is missing', async () => {
     await TestBed.runInInjectionContext(async () => {
       const transport = new WebStorageTransport(); // No passphrase
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      await transport.write('secure_key', { secret: 123 }, { encrypt: true });
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('[WebStorageTransport] Error writing key:'),
-        'secure_key',
-        expect.any(Error),
-      );
+      await expect(
+        transport.write('secure_key', { secret: 123 }, { encrypt: true }),
+      ).rejects.toThrow('Encryption passphrase not provided');
 
       localStore['encrypted_data'] = 'some-cipher';
       const readRes = await transport.read('encrypted_data', { encrypt: true });
       expect(readRes).toBeUndefined();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('[WebStorageTransport] Error reading key:'),
-        'encrypted_data',
-        expect.any(Error),
-      );
-
-      consoleSpy.mockRestore();
     });
   });
 

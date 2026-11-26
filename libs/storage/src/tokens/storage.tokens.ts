@@ -3,7 +3,7 @@ import type { StorageTransport } from '../services/storage-transport';
 
 /**
  * Injection token to configure the AES-GCM encryption passphrase for StorageTransports.
- * Defaults to the legacy string for seamless backward compatibility.
+ * Must be provided explicitly by the application when encryption is enabled.
  */
 export const SECURE_STORAGE_PASSPHRASE = new InjectionToken<string>('SECURE_STORAGE_PASSPHRASE', {
   providedIn: 'root',

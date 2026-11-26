@@ -47,7 +47,8 @@ const DEFAULT_ENDPOINT = 'https://api.pwnedpasswords.com/range/';
 })
 export class HibpService {
   private readonly platformId = inject(PLATFORM_ID);
-  private readonly webCrypto = inject(WebCryptoService);
+  private readonly webCrypto =
+    inject(WebCryptoService, { optional: true }) ?? new WebCryptoService();
 
   private readonly endpoint: string;
 

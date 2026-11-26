@@ -71,13 +71,20 @@ export class JwtService {
       );
     }
 
+    let parsed: unknown;
     try {
-      return JSON.parse(json) as T;
+      parsed = JSON.parse(json);
     } catch (cause) {
       throw new InvalidJwtError(
         `JWT payload is not valid JSON: ${cause instanceof Error ? cause.message : 'unknown'}`,
       );
     }
+
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+      throw new InvalidJwtError('JWT payload must be a JSON object');
+    }
+
+    return parsed as T;
   }
 
   /**

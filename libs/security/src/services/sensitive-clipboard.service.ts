@@ -17,7 +17,7 @@ export interface SensitiveCopyOptions {
   clearAfterMs?: number;
 }
 
-export type CopyStatus = 'copied' | 'cleared' | 'read-denied' | 'error';
+export type CopyStatus = 'copied' | 'cleared' | 'changed' | 'read-denied' | 'error';
 
 const DEFAULT_CLEAR_MS = 15_000;
 
@@ -92,12 +92,14 @@ export class SensitiveClipboardService {
       }
 
       const clearAfterMs = options.clearAfterMs ?? DEFAULT_CLEAR_MS;
+      let unsubscribed = false;
       let cleared = false;
       let timer: ReturnType<typeof setTimeout> | null = null;
 
       navigator.clipboard
         .writeText(text)
         .then(() => {
+          if (unsubscribed) return;
           subscriber.next('copied');
           if (clearAfterMs <= 0) {
             subscriber.complete();
@@ -105,18 +107,24 @@ export class SensitiveClipboardService {
           }
 
           timer = setTimeout(async () => {
+            if (unsubscribed) return;
             const status = await this.safeClear(text);
             cleared = true;
-            subscriber.next(status);
-            subscriber.complete();
+            if (!unsubscribed) {
+              subscriber.next(status);
+              subscriber.complete();
+            }
           }, clearAfterMs);
         })
         .catch(() => {
-          subscriber.next('error');
-          subscriber.complete();
+          if (!unsubscribed) {
+            subscriber.next('error');
+            subscriber.complete();
+          }
         });
 
       return () => {
+        unsubscribed = true;
         if (!cleared && timer !== null) clearTimeout(timer);
       };
     });
@@ -135,7 +143,7 @@ export class SensitiveClipboardService {
   private async safeClear(expected: string): Promise<CopyStatus> {
     try {
       const current = await navigator.clipboard.readText();
-      if (current !== expected) return 'read-denied';
+      if (current !== expected) return 'changed';
       await navigator.clipboard.writeText('');
       return 'cleared';
     } catch {

@@ -6,10 +6,11 @@ import {
   inject,
   Injector,
   DestroyRef,
+  PLATFORM_ID,
 } from '@angular/core';
 import { Observable, Subject, fromEvent, merge, Subscription } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { SecureStorageService } from './secure-storage.service';
 import { SensitiveClipboardService } from './sensitive-clipboard.service';
 
@@ -29,6 +30,7 @@ const DEFAULT_EVENTS = ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scro
 export class SessionIdleService {
   private ngZone = inject(NgZone);
   private document = inject(DOCUMENT);
+  private platformId = inject(PLATFORM_ID);
   private injector = inject(Injector);
   private destroyRef = inject(DestroyRef);
 
@@ -58,6 +60,10 @@ export class SessionIdleService {
     this._isWarning.set(false);
     this._timeRemaining.set(config.timeoutMs);
     this.lastActivityTime = Date.now();
+
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
 
     const eventsToTrack = config.events || DEFAULT_EVENTS;
 

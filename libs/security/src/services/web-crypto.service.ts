@@ -29,6 +29,9 @@ export class WebCryptoService {
   }
 
   private ensureSecureContext(): void {
+    if (!this.isSupported()) {
+      throw new Error('Web Crypto API not supported in this environment');
+    }
     if (!window.isSecureContext) {
       throw new Error('Web Crypto API requires a secure context (HTTPS)');
     }

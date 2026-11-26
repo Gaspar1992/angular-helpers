@@ -112,7 +112,7 @@ describe('validators-core (shared between Reactive Forms and Signal Forms)', () 
 
     it('should clean scripts and on-handlers leaving safe tags', () => {
       const input = '<p>Hola <b>mundo</b><script>alert(1)</script></p>';
-      expect(sanitizeHtmlString(input)).toBe('<p>Hola <b>mundo</b>alert(1)</p>');
+      expect(sanitizeHtmlString(input)).toBe('<p>Hola <b>mundo</b></p>');
     });
 
     it('should strip inline on* event attributes', () => {

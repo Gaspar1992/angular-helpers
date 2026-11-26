@@ -213,9 +213,11 @@ describe('IndexedDBTransport', () => {
       expect(decrypted).toEqual(secret);
     });
 
-    it('should handle missing passphrase when encryption is requested on read or write', async () => {
+    it('should throw on missing passphrase when encryption is requested on write and return undefined on read', async () => {
       const noSecretTransport = new IndexedDBTransport(); // No passphrase
-      await noSecretTransport.write('enc_key', { a: 1 }, { encrypt: true });
+      await expect(noSecretTransport.write('enc_key', { a: 1 }, { encrypt: true })).rejects.toThrow(
+        'Encryption passphrase not provided',
+      );
 
       objectStoreData.set('enc_key', 'encrypted-text');
       const result = await noSecretTransport.read('enc_key', { encrypt: true });
@@ -237,7 +239,7 @@ describe('IndexedDBTransport', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should handle write request error gracefully without throwing', async () => {
+    it('should propagate write request error so callers can roll back optimistic state', async () => {
       mockStore.put = vi.fn(() => {
         const req: any = {
           error: new Error('Quota exceeded'),
@@ -248,10 +250,10 @@ describe('IndexedDBTransport', () => {
         return req;
       });
 
-      await expect(transport.write('quota_key', 'data')).resolves.toBeUndefined();
+      await expect(transport.write('quota_key', 'data')).rejects.toThrow('Quota exceeded');
     });
 
-    it('should handle delete request error gracefully without throwing', async () => {
+    it('should propagate delete request error', async () => {
       mockStore.delete = vi.fn(() => {
         const req: any = {
           error: new Error('Delete failed'),
@@ -262,7 +264,7 @@ describe('IndexedDBTransport', () => {
         return req;
       });
 
-      await expect(transport.delete('del_key')).resolves.toBeUndefined();
+      await expect(transport.delete('del_key')).rejects.toThrow('Delete failed');
     });
 
     it('should return undefined or do nothing when indexedDB is undefined (SSR fallback)', async () => {

@@ -136,15 +136,23 @@ export class WebAuthnService {
     const transports = response.getTransports
       ? (response.getTransports() as AuthenticatorTransport[])
       : undefined;
-    const publicKey = (response as any).getPublicKey
-      ? this.bufferToBase64url((response as any).getPublicKey())
-      : undefined;
+    const rawPublicKey =
+      typeof (response as unknown as { getPublicKey?: () => ArrayBuffer | null }).getPublicKey ===
+      'function'
+        ? (response as unknown as { getPublicKey: () => ArrayBuffer | null }).getPublicKey()
+        : null;
+    const publicKey = rawPublicKey ? this.bufferToBase64url(rawPublicKey) : undefined;
     const publicKeyAlgorithm = (response as any).getPublicKeyAlgorithm
       ? (response as any).getPublicKeyAlgorithm()
       : undefined;
-    const authenticatorData = (response as any).getAuthenticatorData
-      ? this.bufferToBase64url((response as any).getAuthenticatorData())
-      : undefined;
+    const rawAuthData =
+      typeof (response as unknown as { getAuthenticatorData?: () => ArrayBuffer | null })
+        .getAuthenticatorData === 'function'
+        ? (
+            response as unknown as { getAuthenticatorData: () => ArrayBuffer | null }
+          ).getAuthenticatorData()
+        : null;
+    const authenticatorData = rawAuthData ? this.bufferToBase64url(rawAuthData) : undefined;
 
     return {
       id: credential.id,

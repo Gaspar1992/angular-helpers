@@ -18,30 +18,20 @@ describe('LocalStorageTransport', () => {
     vi.unstubAllGlobals();
   });
 
-  it('should resolve with the default encryption passphrase and warn when encryption is enabled', async () => {
-    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  it('should throw when encryption is enabled without SECURE_STORAGE_PASSPHRASE or options.passphrase', async () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({});
 
     const transport = TestBed.inject(LocalStorageTransport);
-    expect((transport as any).secretPassphrase).toBe('angular-helpers-secure-storage-passphrase');
-
-    // Trigger encryption write to activate warning
-    await transport.write('warn-key', 'secret', { encrypt: true });
-    expect(consoleWarnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('[LocalStorageTransport] WARNING: Encryption is enabled'),
+    await expect(transport.write('warn-key', 'secret', { encrypt: true })).rejects.toThrow(
+      'Encryption is enabled, but no custom passphrase was provided',
     );
-
-    // Should not warn twice
-    consoleWarnSpy.mockClear();
-    await transport.read('warn-key', { encrypt: true });
-    expect(consoleWarnSpy).not.toHaveBeenCalled();
-
-    consoleWarnSpy.mockRestore();
+    await expect(transport.read('warn-key', { encrypt: true })).rejects.toThrow(
+      'Encryption is enabled, but no custom passphrase was provided',
+    );
   });
 
-  it('should allow configuring a custom encryption passphrase without warning', async () => {
-    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  it('should allow configuring a custom encryption passphrase', async () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [{ provide: SECURE_STORAGE_PASSPHRASE, useValue: 'my-custom-secret-passphrase' }],
@@ -50,14 +40,14 @@ describe('LocalStorageTransport', () => {
     expect((transport as any).secretPassphrase).toBe('my-custom-secret-passphrase');
 
     await transport.write('custom-pass-key', 'val', { encrypt: true });
-    expect(consoleWarnSpy).not.toHaveBeenCalled();
-
-    consoleWarnSpy.mockRestore();
+    expect(await transport.read('custom-pass-key', { encrypt: true })).toBe('val');
   });
 
   it('should read and write in a stateless way with variable options', async () => {
     TestBed.resetTestingModule();
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [{ provide: SECURE_STORAGE_PASSPHRASE, useValue: 'test-passphrase-123' }],
+    });
     const transport = TestBed.inject(LocalStorageTransport);
 
     // Write an encrypted value

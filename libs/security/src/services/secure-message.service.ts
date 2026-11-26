@@ -1,4 +1,4 @@
-import { Injectable, type Signal, signal, inject, PLATFORM_ID } from '@angular/core';
+import { DestroyRef, Injectable, type Signal, signal, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { Observable, Subject } from 'rxjs';
 import { WebCryptoService } from './web-crypto.service';
@@ -32,7 +32,12 @@ const MAX_FUTURE_SKEW_MS = 5_000;
 export class SecureMessageService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
-  private readonly crypto = inject(WebCryptoService);
+  private readonly crypto = inject(WebCryptoService, { optional: true }) ?? new WebCryptoService();
+  private readonly destroyRef = inject(DestroyRef);
+
+  constructor() {
+    this.destroyRef.onDestroy(() => this.destroy());
+  }
 
   private config: SecureMessageConfig | null = null;
   private readonly _lastMessage = signal<SecureMessage | null>(null);
@@ -59,7 +64,9 @@ export class SecureMessageService {
 
     if (!isPlatformBrowser(this.platformId)) return;
 
-    this.messageHandler = (event: MessageEvent) => this.handleMessage(event);
+    this.messageHandler = (event: MessageEvent) => {
+      void this.handleMessage(event).catch(() => {});
+    };
     this.targetWindow.addEventListener('message', this.messageHandler);
   }
 

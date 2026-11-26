@@ -31,9 +31,9 @@ describe('InputSanitizerService', () => {
       expect(service).toBeTruthy();
     });
 
-    it('should return raw string from getTrustedHtml', () => {
-      const html = '<div>hello</div>';
-      expect(service.getTrustedHtml(html)).toBe(html);
+    it('should return sanitized string from getTrustedHtml', () => {
+      const html = '<div><b>hello</b><script>alert(1)</script></div>';
+      expect(service.getTrustedHtml(html)).toBe('<b>hello</b>');
     });
 
     it('isSupported returns true in browser and false in SSR', () => {
@@ -50,7 +50,7 @@ describe('InputSanitizerService', () => {
     it('sanitizeHtml uses DOMParser fallback', () => {
       const dirty = '<p>Test <b>bold</b><script>alert(1)</script></p>';
       const clean = service.sanitizeHtml(dirty);
-      expect(clean).toBe('<p>Test <b>bold</b>alert(1)</p>');
+      expect(clean).toBe('<p>Test <b>bold</b></p>');
     });
 
     it('sanitizeHtml throws when not supported in non-browser', () => {
@@ -104,7 +104,7 @@ describe('InputSanitizerService', () => {
 
         const result = service.sanitizeHtml('<p>Safe</p><script>alert(1)</script>');
         expect(setHTMLSpy).toHaveBeenCalledTimes(1);
-        expect(result).toBe('<p>Safe</p>alert(1)');
+        expect(result).toBe('<p>Safe</p>');
       } finally {
         if (originalSetHTML) {
           Object.defineProperty(Element.prototype, 'setHTML', {
