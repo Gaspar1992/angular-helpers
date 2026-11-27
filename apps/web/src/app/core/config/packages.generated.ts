@@ -2,11 +2,11 @@
 // Do not edit manually - run: npx tsx scripts/generate-package-metadata.ts
 
 export const GENERATED_METADATA = {
-  version: '22.7.1',
+  version: '22.9.0',
   browserWebApis: {
-    serviceCount: 46,
+    serviceCount: 47,
     injectFnCount: 34,
-    experimentalServiceCount: 6,
+    experimentalServiceCount: 3,
     services: [
       'BarcodeDetectorService',
       'BatteryService',
@@ -25,6 +25,7 @@ export const GENERATED_METADATA = {
       'GeolocationService',
       'IdleDetectorService',
       'IntersectionObserverService',
+      'LiveAnnouncerService',
       'MediaDevicesService',
       'MediaRecorderService',
       'MutationObserverService',
@@ -88,14 +89,7 @@ export const GENERATED_METADATA = {
       'inject-web-transport-resource',
       'inject-window-scroll',
     ],
-    experimentalServices: [
-      'BarcodeDetectorService',
-      'CredentialManagementService',
-      'PaymentRequestService',
-      'WebBluetoothService',
-      'WebNfcService',
-      'WebUsbService',
-    ],
+    experimentalServices: ['PaymentRequestService', 'WebNfcService', 'WebUsbService'],
   },
 } as const;
 

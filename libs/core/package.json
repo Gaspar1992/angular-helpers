@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/core",
-  "version": "22.5.1",
+  "version": "22.6.0",
   "description": "Shared internal utilities and core logic for Angular Helpers packages",
   "keywords": [
     "angular",
