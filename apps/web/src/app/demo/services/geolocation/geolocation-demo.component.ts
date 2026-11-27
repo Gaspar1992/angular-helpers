@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component, type OnDestroy, signal } from '@angular/core';
+import { Component, type OnDestroy, signal } from '@angular/core';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-geolocation-demo',
   styleUrls: ['../demo.styles.css'],
   template: `

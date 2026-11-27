@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { NotificationService } from '@angular-helpers/browser-web-apis';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-notification-demo',
   providers: [NotificationService],
   styleUrls: ['../demo.styles.css'],

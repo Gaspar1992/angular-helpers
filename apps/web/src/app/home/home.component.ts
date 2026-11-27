@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
 import { SeoService } from '../core/services/seo.service';
@@ -10,7 +10,6 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
 
 @Component({
   selector: 'app-home',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
     NgOptimizedImage,

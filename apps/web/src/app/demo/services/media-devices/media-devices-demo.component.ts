@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-media-devices-demo',
   styleUrls: ['../demo.styles.css'],
   template: `

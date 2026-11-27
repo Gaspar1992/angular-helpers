@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  signal,
-  effect,
-  inject,
-  computed,
-} from '@angular/core';
+import { Component, signal, effect, inject, computed } from '@angular/core';
 import {
   RouterLink,
   RouterLinkActive,
@@ -25,7 +18,6 @@ import { VitalsPanelComponent } from './vitals-panel.component';
 
 @Component({
   selector: 'app-docs-layout',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterOutlet,
     RouterLink,

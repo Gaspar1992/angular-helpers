@@ -1,6 +1,5 @@
 import {
   afterNextRender,
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -22,7 +21,6 @@ import type { ControlPosition } from '../models/control.types';
 
 @Component({
   selector: 'ol-geolocation-control',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       #controlElement

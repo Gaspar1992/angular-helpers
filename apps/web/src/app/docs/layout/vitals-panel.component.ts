@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { injectPerformanceObserver } from '@angular-helpers/browser-web-apis';
 
 interface LayoutShiftEntry extends PerformanceEntry {
@@ -63,7 +63,6 @@ function computeInp(entries: PerformanceEntryList): number | null {
 }
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-vitals-panel',
   template: `
     <button

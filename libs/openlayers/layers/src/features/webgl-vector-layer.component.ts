@@ -10,7 +10,6 @@ import {
   effect,
   inject,
   input,
-  ChangeDetectionStrategy,
 } from '@angular/core';
 import type { Feature } from '@angular-helpers/openlayers/core';
 import { featureToOlFeature, OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
@@ -49,7 +48,6 @@ export const DEFAULT_WEBGL_FLAT_STYLE: FlatStyleLike = {
  * ```
  */
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'ol-webgl-vector-layer',
   template: '',
 })

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, resource, signal } from '@angular/core';
+import { Component, resource, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 interface SimulatedItem {
@@ -11,7 +11,6 @@ interface SimulatedItem {
 }
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-router-resources-demo',
   imports: [FormsModule],
   template: `

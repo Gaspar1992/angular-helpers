@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SiteFooterComponent } from '../shared/components/site-footer/site-footer.component';
 import { SeoService } from '../core/services/seo.service';
@@ -6,7 +6,6 @@ import { BLOG_POSTS } from './config/posts.data';
 
 @Component({
   selector: 'app-blog',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, SiteFooterComponent],
   template: `
     <main

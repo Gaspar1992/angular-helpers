@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, type OnDestroy, inject, signal } from '@angular/core';
+import { Component, type OnDestroy, inject, signal } from '@angular/core';
 import { ScreenWakeLockService } from '@angular-helpers/browser-web-apis';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-screen-wake-lock-demo',
   providers: [ScreenWakeLockService],
   styleUrls: ['../demo.styles.css'],

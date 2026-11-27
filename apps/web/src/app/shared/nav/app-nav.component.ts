@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
 import { SearchService } from '../../core/services/search.service';
@@ -6,7 +6,6 @@ import { OfflineBadgeComponent } from '../components/offline-badge/offline-badge
 
 @Component({
   selector: 'app-nav',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive, NgOptimizedImage, OfflineBadgeComponent],
   template: `
     <header

@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, type OnDestroy, signal } from '@angular/core';
+import { Component, type OnDestroy, signal } from '@angular/core';
 import { MediaRecorderService } from '@angular-helpers/browser-web-apis';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-media-recorder-demo',
   providers: [MediaRecorderService],
   styleUrls: ['../demo.styles.css'],

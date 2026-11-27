@@ -2,7 +2,6 @@
 
 import {
   afterNextRender,
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   effect,
@@ -32,7 +31,6 @@ export interface MapClickEvent {
 
 @Component({
   selector: 'ol-map',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [OlMapService],
   template: `<div class="ol-map-container" #mapContainer></div>
     <ng-content />`,

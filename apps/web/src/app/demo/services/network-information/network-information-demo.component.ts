@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, type OnDestroy, inject, signal } from '@angular/core';
+import { Component, type OnDestroy, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import {
   NetworkInformationService,
@@ -8,7 +8,6 @@ import {
 import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-network-information-demo',
   providers: [NetworkInformationService],
   imports: [CodeBlockComponent],

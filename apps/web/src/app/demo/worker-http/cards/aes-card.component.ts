@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { createAesEncryptor } from '@angular-helpers/worker-http/crypto';
 import type { AesEncryptor, EncryptedPayload } from '@angular-helpers/worker-http/crypto';
 import { WorkerHttpDemoLogService } from '../shared/log.service';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-worker-http-aes-card',
   template: `
     <div class="svc-card h-full flex flex-col">

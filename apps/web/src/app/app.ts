@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AppNavComponent } from './shared/nav/app-nav.component';
 import { SearchModalComponent } from './shared/components/search-modal/search-modal.component';
 
 @Component({
   selector: 'app-root',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, AppNavComponent, SearchModalComponent],
   templateUrl: './app.html',
 })

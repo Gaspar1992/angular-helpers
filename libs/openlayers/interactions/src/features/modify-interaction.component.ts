@@ -1,11 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  effect,
-  inject,
-  input,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, DestroyRef, effect, inject, input } from '@angular/core';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 import { OlInteractionService } from '../services/interaction.service';
@@ -14,7 +7,6 @@ import { OlInteractionService } from '../services/interaction.service';
  * Declarative component to configure an OpenLayers Modify Interaction.
  */
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'ol-modify-interaction',
   template: '',
 })

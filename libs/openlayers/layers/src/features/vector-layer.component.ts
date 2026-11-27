@@ -10,7 +10,6 @@ import {
   inject,
   input,
   untracked,
-  ChangeDetectionStrategy,
 } from '@angular/core';
 import { type Feature, OlMapService } from '@angular-helpers/openlayers/core';
 import FeatureFormat from 'ol/format/Feature';
@@ -25,7 +24,6 @@ import { resolveVectorSourceConfig } from '../utils/source-builders.util';
 import { OlClusterComponent } from './cluster.component';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'ol-vector-layer',
   template: '',
 })

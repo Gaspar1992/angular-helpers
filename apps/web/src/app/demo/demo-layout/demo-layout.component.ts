@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 interface DemoSubItem {
@@ -47,7 +47,6 @@ const DEMO_GROUPS: DemoGroup[] = [
 ];
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-demo-layout',
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
   template: `

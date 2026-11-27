@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { SecurityValidators } from '@angular-helpers/security/forms';
@@ -19,7 +19,6 @@ interface DemoLog {
 }
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-security-utilities-demo',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   styleUrls: ['../services/demo.styles.css'],

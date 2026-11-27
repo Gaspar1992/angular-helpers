@@ -1,20 +1,11 @@
 // OlTileLayerComponent
 
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  effect,
-  inject,
-  input,
-} from '@angular/core';
+import { afterNextRender, Component, DestroyRef, effect, inject, input } from '@angular/core';
 import { OlLayerService } from '../services/layer.service';
 import type { TileLayerConfig } from '../models/layer.types';
 
 @Component({
   selector: 'ol-tile-layer',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: '',
 })
 export class OlTileLayerComponent {

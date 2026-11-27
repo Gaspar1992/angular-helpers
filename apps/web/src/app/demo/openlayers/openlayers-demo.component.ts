@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   computed,
   effect,
@@ -79,7 +78,6 @@ const BASEMAPS: BasemapConfig[] = [
 ];
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   selector: 'app-openlayers-demo',
   imports: [

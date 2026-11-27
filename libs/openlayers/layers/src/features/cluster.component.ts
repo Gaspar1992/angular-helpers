@@ -1,8 +1,7 @@
-import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import type { Feature, Style } from '@angular-helpers/openlayers/core';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'ol-cluster',
   template: '',
 })

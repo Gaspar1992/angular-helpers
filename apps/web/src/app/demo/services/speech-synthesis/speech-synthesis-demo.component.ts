@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, type OnDestroy, inject, signal } from '@angular/core';
+import { Component, type OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SpeechSynthesisService } from '@angular-helpers/browser-web-apis';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-speech-synthesis-demo',
   providers: [SpeechSynthesisService],
   imports: [FormsModule],

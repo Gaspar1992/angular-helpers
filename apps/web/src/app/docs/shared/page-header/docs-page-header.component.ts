@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, input, inject } from '@angular/core';
+import { Component, input, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { DocsHistoryService } from '../../services/docs-history.service';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-docs-page-header',
   imports: [],
   template: `

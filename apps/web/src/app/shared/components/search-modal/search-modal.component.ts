@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  ElementRef,
-  viewChild,
-  effect,
-  linkedSignal,
-} from '@angular/core';
+import { Component, inject, ElementRef, viewChild, effect, linkedSignal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { DOCUMENT, NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -15,7 +7,6 @@ import { DocsHistoryService } from '../../../docs/services/docs-history.service'
 
 @Component({
   selector: 'app-search-modal',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, FormsModule, NgOptimizedImage],
   host: {
     '(window:keydown)': 'onWindowKeydown($event)',

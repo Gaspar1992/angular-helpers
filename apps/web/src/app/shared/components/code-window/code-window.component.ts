@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { injectClipboard } from '@angular-helpers/browser-web-apis';
 
 export interface CodeTab {
@@ -8,7 +8,6 @@ export interface CodeTab {
 }
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-code-window',
   template: `
     <div class="code-window-container group">

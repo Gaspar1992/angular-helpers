@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  input,
-  computed,
-  linkedSignal,
-  signal,
-} from '@angular/core';
+import { Component, input, computed, linkedSignal, signal } from '@angular/core';
 import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 import { DocsPageHeaderComponent } from '../../../docs/shared/page-header/docs-page-header.component';
 import { DocsApiTableComponent } from '../../../docs/shared/api-table/docs-api-table.component';
@@ -51,7 +44,6 @@ const INTERFACE_COLUMNS = [
 
 @Component({
   selector: 'app-unified-service-detail',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DocsPageHeaderComponent, DocsApiTableComponent, CodeBlockComponent, DocsTabsComponent],
   template: `
     <div class="max-width-container py-12 sm:py-16 max-w-[900px]">

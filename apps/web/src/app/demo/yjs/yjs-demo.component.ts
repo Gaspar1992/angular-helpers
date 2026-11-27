@@ -7,7 +7,7 @@ import {
 import { injectYjsAwareness } from '@angular-helpers/yjs/awareness';
 import { injectYjsIndexeddb } from '@angular-helpers/yjs/indexeddb';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Awareness } from 'y-protocols/awareness';
 
@@ -19,7 +19,6 @@ interface UserPresence {
 
 @Component({
   selector: 'app-yjs-demo',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule, YjsTextDirective],
   template: `
     <div class="max-w-6xl mx-auto px-4 py-8 space-y-8">

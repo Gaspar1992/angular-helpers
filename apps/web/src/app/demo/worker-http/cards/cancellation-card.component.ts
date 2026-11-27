@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, type OnDestroy, inject, signal } from '@angular/core';
+import { Component, type OnDestroy, inject, signal } from '@angular/core';
 import {
   createWorkerTransport,
   WorkerHttpAbortError,
@@ -9,7 +9,6 @@ import { ECHO_WORKER_URL } from '../shared/samples';
 import { WorkerHttpDemoLogService } from '../shared/log.service';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-worker-http-cancellation-card',
   template: `
     <div class="svc-card h-full flex flex-col">

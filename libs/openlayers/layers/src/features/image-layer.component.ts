@@ -1,18 +1,10 @@
 // OlImageLayerComponent
 
-import {
-  afterNextRender,
-  Component,
-  DestroyRef,
-  inject,
-  input,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { afterNextRender, Component, DestroyRef, inject, input } from '@angular/core';
 import { OlLayerService } from '../services/layer.service';
 import type { ImageLayerConfig } from '../models/layer.types';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'ol-image-layer',
   template: '',
 })

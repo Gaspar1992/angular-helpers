@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  input,
-  ElementRef,
-  viewChild,
-  effect,
-  computed,
-  signal,
-} from '@angular/core';
+import { Component, input, ElementRef, viewChild, effect, computed, signal } from '@angular/core';
 import { injectPlatform } from '@angular-helpers/core';
 import { injectClipboard } from '@angular-helpers/browser-web-apis';
 import hljs from 'highlight.js/lib/core';
@@ -33,7 +24,6 @@ const LANGUAGE_ALIASES: Record<string, string> = {
 
 @Component({
   selector: 'app-code-block',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="code-block-wrapper">
       <header class="code-header">

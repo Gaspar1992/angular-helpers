@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -23,7 +23,6 @@ interface LogEntry {
 }
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-security-demo',
   imports: [DecimalPipe, FormsModule, SafeHtmlDirective],
   styleUrls: ['../services/demo.styles.css'],

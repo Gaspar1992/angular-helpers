@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  type OnDestroy,
-  inject,
-  signal,
-  viewChild,
-  ElementRef,
-} from '@angular/core';
+import { Component, type OnDestroy, inject, signal, viewChild, ElementRef } from '@angular/core';
 import { Subscription } from 'rxjs';
 import {
   IntersectionObserverService,
@@ -15,7 +7,6 @@ import {
 import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-intersection-observer-demo',
   providers: [IntersectionObserverService],
   imports: [CodeBlockComponent],
