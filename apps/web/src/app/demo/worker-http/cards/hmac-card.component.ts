@@ -1,9 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { createHmacSigner } from '@angular-helpers/worker-http/crypto';
 import type { HmacSigner } from '@angular-helpers/worker-http/crypto';
 import { WorkerHttpDemoLogService } from '../shared/log.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-worker-http-hmac-card',
   template: `
     <div class="svc-card h-full flex flex-col">

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TransportCardComponent } from './cards/transport-card.component';
 import { HmacCardComponent } from './cards/hmac-card.component';
@@ -12,6 +12,7 @@ import { StreamsPolyfillCardComponent } from './cards/streams-polyfill-card.comp
 import { WorkerHttpDemoLogService } from './shared/log.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-worker-http-demo',
   providers: [WorkerHttpDemoLogService],
   imports: [

@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { injectNetworkInformation } from '@angular-helpers/browser-web-apis';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-offline-badge',
   template: `
     @if (!network.online()) {

@@ -1,5 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 import { AngularVersion } from '../models/angular-version.model';
 
@@ -13,18 +15,26 @@ export class DocsVersionService {
   readonly version = computed(() => this.activeVersionSignal());
 
   constructor() {
-    this.initializeFromUrl();
+    this.syncFromUrl(this.router.url);
+    this.router.events
+      ?.pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe((event) => {
+        this.syncFromUrl(event.urlAfterRedirects);
+      });
   }
 
-  private initializeFromUrl() {
-    if (typeof window !== 'undefined') {
-      const searchParams = new URLSearchParams(window.location.search);
-      const v = searchParams.get('v');
-      if (v === '21') {
-        this.activeVersionSignal.set(AngularVersion.v21);
-      } else {
-        this.activeVersionSignal.set(AngularVersion.v22);
-      }
+  private syncFromUrl(url: string | undefined): void {
+    if (!url) return;
+    const queryIndex = url.indexOf('?');
+    if (queryIndex === -1) return;
+    const v = new URLSearchParams(url.slice(queryIndex)).get('v');
+    if (v === '21') {
+      this.activeVersionSignal.set(AngularVersion.v21);
+    } else if (v === '22') {
+      this.activeVersionSignal.set(AngularVersion.v22);
     }
   }
 

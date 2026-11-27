@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
 import { SeoService } from '../core/services/seo.service';
@@ -10,6 +10,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
 
 @Component({
   selector: 'app-home',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
     NgOptimizedImage,
@@ -20,7 +21,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
   ],
   template: `
     <!-- MAIN WRAPPER -->
-    <main class="min-h-screen">
+    <main id="main-content" class="min-h-screen">
       <!-- HERO SECTION -->
       <section class="hero-section @container">
         <!-- Ambient Background -->
@@ -37,7 +38,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
               >
             </div>
 
-            <!-- Título Directo y Claro -->
+            <!-- Hero Headline -->
             <h1
               class="text-5xl @3xl:text-[5rem] font-black leading-[1.1] tracking-tight text-balance text-base-content m-0"
             >
@@ -62,7 +63,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
               >
                 Get started
               </a>
-              <!-- Snippet interactivo -->
+              <!-- Interactive install snippet -->
               <div
                 class="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2 shadow-inner relative"
               >
@@ -70,6 +71,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
                   >pnpm add @angular-helpers/browser-web-apis</code
                 >
                 <button
+                  type="button"
                   class="btn btn-square btn-sm btn-ghost text-base-content/70 hover:text-base-content focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-1 transition-colors"
                   [class.text-success]="copied()"
                   [attr.aria-label]="copied() ? 'Command copied to clipboard' : 'Copy command'"
@@ -279,6 +281,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
             <a
               href="https://github.com/Gaspar1992/angular-helpers"
               target="_blank"
+              rel="noopener noreferrer"
               class="btn btn-outline btn-lg border-base-300 hover:border-base-content/30 hover:bg-base-content/5 text-base-content font-bold px-10 rounded-2xl focus-visible:outline-2 focus-visible:outline-primary"
             >
               GitHub
@@ -286,9 +289,9 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
           </div>
         </div>
       </section>
-
-      <app-site-footer />
     </main>
+
+    <app-site-footer />
   `,
   styles: `
     @reference "../../styles.css";

@@ -1,4 +1,4 @@
-import { Component, type OnDestroy, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, type OnDestroy, inject, signal } from '@angular/core';
 import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
 import type { WorkerTransport } from '@angular-helpers/worker-http/transport';
 import { matchWorkerRoute } from '@angular-helpers/worker-http/backend';
@@ -7,6 +7,7 @@ import { DEMO_ROUTES, HTTP_API_WORKER_URL, ROUTING_TEST_URLS } from '../shared/s
 import { WorkerHttpDemoLogService } from '../shared/log.service';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-worker-http-backend-card',
   template: `
     <div class="svc-card col-span-full">

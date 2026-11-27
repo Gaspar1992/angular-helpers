@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   computed,
   effect,
@@ -8,6 +9,7 @@ import {
   outputBinding,
   signal,
   viewChild,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -77,6 +79,8 @@ const BASEMAPS: BasemapConfig[] = [
 ];
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   selector: 'app-openlayers-demo',
   imports: [
     CommonModule,
@@ -100,6 +104,8 @@ const BASEMAPS: BasemapConfig[] = [
   ],
   styles: [
     `
+      @import 'ol/ol.css';
+
       @keyframes subMenuEnter {
         from {
           opacity: 0;
@@ -767,10 +773,14 @@ const BASEMAPS: BasemapConfig[] = [
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <!-- Cities Layer Card -->
                 <div
+                  role="button"
+                  tabindex="0"
                   class="rounded-2xl p-6 cursor-pointer transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[180px] border border-base-content/5 bg-base-content/5 hover:border-primary/40 hover:bg-white/[0.08]"
                   [class.ring-2]="activeLayerId() === 'cities'"
                   [class.ring-primary]="activeLayerId() === 'cities'"
                   (click)="setActiveLayer('cities')"
+                  (keydown.enter)="setActiveLayer('cities')"
+                  (keydown.space)="$event.preventDefault(); setActiveLayer('cities')"
                 >
                   <div class="flex justify-between items-start mb-2 relative z-10">
                     <div class="flex items-center gap-3">
@@ -831,10 +841,14 @@ const BASEMAPS: BasemapConfig[] = [
 
                 <!-- Drawn Layer Card -->
                 <div
+                  role="button"
+                  tabindex="0"
                   class="rounded-2xl p-6 cursor-pointer transition-all duration-300 relative overflow-hidden group flex flex-col justify-between min-h-[180px] border border-base-content/5 bg-base-content/5 hover:border-secondary/40 hover:bg-white/[0.08]"
                   [class.ring-2]="activeLayerId() === 'drawn-features'"
                   [class.ring-secondary]="activeLayerId() === 'drawn-features'"
                   (click)="setActiveLayer('drawn-features')"
+                  (keydown.enter)="setActiveLayer('drawn-features')"
+                  (keydown.space)="$event.preventDefault(); setActiveLayer('drawn-features')"
                 >
                   <div class="flex justify-between items-start mb-2 relative z-10">
                     <div class="flex items-center gap-3">

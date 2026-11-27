@@ -1,4 +1,11 @@
-import { Component, ViewEncapsulation, computed, inject, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+  computed,
+  inject,
+  input,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs/operators';
@@ -7,18 +14,19 @@ import type { BlogPostData } from '../../services/blog-post.resolver';
 
 @Component({
   selector: 'app-blog-post',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   imports: [RouterLink, SiteFooterComponent],
+  host: {
+    '(click)': 'onArticleClick($event)',
+  },
   template: `
     <main
       id="main-content"
       class="min-h-screen bg-base-100 text-base-content font-sans selection:bg-primary/30"
     >
       @if (data(); as d) {
-        <article
-          class="max-width-container py-16 sm:py-24 max-w-215"
-          (click)="onArticleClick($event)"
-        >
+        <article class="max-width-container py-16 sm:py-24 max-w-215">
           <nav class="mb-12" aria-label="Breadcrumb">
             <a
               routerLink="/blog"
@@ -70,9 +78,9 @@ import type { BlogPostData } from '../../services/blog-post.resolver';
           <a routerLink="/blog" class="btn btn-primary font-bold px-8 rounded-xl">Back to Blog</a>
         </div>
       }
-
-      <app-site-footer />
     </main>
+
+    <app-site-footer />
   `,
 })
 export class BlogPostComponent {

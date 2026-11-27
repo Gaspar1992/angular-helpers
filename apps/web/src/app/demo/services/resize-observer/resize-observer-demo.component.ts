@@ -1,4 +1,12 @@
-import { Component, type OnDestroy, inject, signal, viewChild, ElementRef } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  type OnDestroy,
+  inject,
+  signal,
+  viewChild,
+  ElementRef,
+} from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -6,6 +14,7 @@ import { ResizeObserverService, injectResizeObserver } from '@angular-helpers/br
 import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-resize-observer-demo',
   providers: [ResizeObserverService],
   imports: [CommonModule, CodeBlockComponent, FormsModule, DecimalPipe],

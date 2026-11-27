@@ -797,12 +797,16 @@
         >
           @for (task of taskStore.list(); track task.id) {
             <div
+              role="button"
+              tabindex="0"
               class="p-4 rounded-2xl border transition-all duration-300 cursor-pointer relative overflow-hidden flex items-center justify-between"
               [class.bg-purple-500\/5]="selectedTaskId() === task.id"
               [class.border-purple-500\/40]="selectedTaskId() === task.id"
               [class.bg-white\/2]="selectedTaskId() !== task.id"
               [class.border-white\/5]="selectedTaskId() !== task.id"
               (click)="selectTaskForTelemetry(task.id)"
+              (keydown.enter)="selectTaskForTelemetry(task.id)"
+              (keydown.space)="$event.preventDefault(); selectTaskForTelemetry(task.id)"
             >
               <div class="flex items-center gap-3.5">
                 <input

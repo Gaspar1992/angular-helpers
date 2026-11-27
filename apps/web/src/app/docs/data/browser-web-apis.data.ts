@@ -3429,4 +3429,190 @@ export class RealtimeComponent {
   }
 }`,
   },
+  {
+    id: 'device-motion',
+    name: 'DeviceMotionService',
+    description:
+      'Provides reactive access to the DeviceMotionEvent API for accelerometer and gyroscope motion data with iOS permission support.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Firefox ✓ · Safari ✓ (permission) · Edge ✓',
+    category: 'media-device',
+    notes: [],
+    methods: [
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Checks whether DeviceMotionEvent is supported in the current browser.',
+        returns: 'boolean',
+      },
+      {
+        name: 'requestPermission',
+        signature: 'requestPermission(): Promise<PermissionState>',
+        description: 'Requests motion sensor permission on platforms that require it (iOS Safari).',
+        returns: 'Promise<PermissionState>',
+      },
+      {
+        name: 'watch',
+        signature: 'watch(): Observable<DeviceMotionData>',
+        description: 'Streams device acceleration and rotation rate updates.',
+        returns: 'Observable<DeviceMotionData>',
+      },
+    ],
+    example: `import { inject } from '@angular/core';
+import { DeviceMotionService } from '@angular-helpers/browser-web-apis';
+
+const motion = inject(DeviceMotionService);
+motion.watch().subscribe((data) => console.log(data.acceleration));`,
+  },
+  {
+    id: 'device-orientation',
+    name: 'DeviceOrientationService',
+    description:
+      'Provides reactive access to the DeviceOrientationEvent API for compass heading and physical device tilt (alpha, beta, gamma).',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Firefox ✓ · Safari ✓ (permission) · Edge ✓',
+    category: 'media-device',
+    notes: [],
+    methods: [
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Checks whether DeviceOrientationEvent is supported.',
+        returns: 'boolean',
+      },
+      {
+        name: 'requestPermission',
+        signature: 'requestPermission(): Promise<PermissionState>',
+        description: 'Requests orientation sensor permission on platforms that require it.',
+        returns: 'Promise<PermissionState>',
+      },
+      {
+        name: 'watch',
+        signature: 'watch(): Observable<DeviceOrientationData>',
+        description: 'Streams alpha, beta, and gamma orientation updates.',
+        returns: 'Observable<DeviceOrientationData>',
+      },
+    ],
+    example: `import { inject } from '@angular/core';
+import { DeviceOrientationService } from '@angular-helpers/browser-web-apis';
+
+const orientation = inject(DeviceOrientationService);
+orientation.watch().subscribe((data) => console.log(data.alpha, data.beta, data.gamma));`,
+  },
+  {
+    id: 'speech-recognition',
+    name: 'SpeechRecognitionService',
+    description:
+      'Wraps the Web Speech Recognition API with reactive transcript streams and lifecycle-safe cleanup.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Firefox ✗ · Safari ✓ · Edge ✓',
+    category: 'media-device',
+    notes: [],
+    methods: [
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Checks whether SpeechRecognition or webkitSpeechRecognition is available.',
+        returns: 'boolean',
+      },
+      {
+        name: 'listen',
+        signature:
+          'listen(options?: SpeechRecognitionOptions): Observable<SpeechRecognitionResult>',
+        description: 'Starts speech recognition and emits interim and final transcripts.',
+        returns: 'Observable<SpeechRecognitionResult>',
+      },
+      {
+        name: 'stop',
+        signature: 'stop(): void',
+        description: 'Stops the active speech recognition session.',
+        returns: 'void',
+      },
+    ],
+    example: `import { inject } from '@angular/core';
+import { SpeechRecognitionService } from '@angular-helpers/browser-web-apis';
+
+const speech = inject(SpeechRecognitionService);
+speech.listen({ lang: 'en-US', interimResults: true }).subscribe((res) => console.log(res.transcript));`,
+  },
+  {
+    id: 'web-hid',
+    name: 'WebHidService',
+    description:
+      'Provides typed Angular integration for the WebHID API to connect and communicate with Human Interface Devices.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Firefox ✗ · Safari ✗ · Edge ✓',
+    category: 'media-device',
+    notes: [],
+    methods: [
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Checks whether navigator.hid is available.',
+        returns: 'boolean',
+      },
+      {
+        name: 'requestDevice',
+        signature: 'requestDevice(options: HIDDeviceRequestOptions): Promise<HIDDevice[]>',
+        description: 'Prompts the user to select a HID device.',
+        returns: 'Promise<HIDDevice[]>',
+      },
+      {
+        name: 'getDevices',
+        signature: 'getDevices(): Promise<HIDDevice[]>',
+        description: 'Returns previously paired HID devices.',
+        returns: 'Promise<HIDDevice[]>',
+      },
+    ],
+    example: `import { inject } from '@angular/core';
+import { WebHidService } from '@angular-helpers/browser-web-apis';
+
+const hid = inject(WebHidService);
+const devices = await hid.requestDevice({ filters: [] });`,
+  },
+  {
+    id: 'web-serial',
+    name: 'WebSerialService',
+    description:
+      'Provides typed Angular integration for the Web Serial API to open, read, and write to serial ports.',
+    scope: 'provided',
+    importPath: '@angular-helpers/browser-web-apis',
+    requiresSecureContext: true,
+    browserSupport: 'Chrome ✓ · Firefox ✗ · Safari ✗ · Edge ✓',
+    category: 'media-device',
+    notes: [],
+    methods: [
+      {
+        name: 'isSupported',
+        signature: 'isSupported(): boolean',
+        description: 'Checks whether navigator.serial is available.',
+        returns: 'boolean',
+      },
+      {
+        name: 'requestPort',
+        signature: 'requestPort(options?: SerialPortRequestOptions): Promise<SerialPort>',
+        description: 'Prompts the user to select a serial port.',
+        returns: 'Promise<SerialPort>',
+      },
+      {
+        name: 'getPorts',
+        signature: 'getPorts(): Promise<SerialPort[]>',
+        description: 'Returns previously authorized serial ports.',
+        returns: 'Promise<SerialPort[]>',
+      },
+    ],
+    example: `import { inject } from '@angular/core';
+import { WebSerialService } from '@angular-helpers/browser-web-apis';
+
+const serial = inject(WebSerialService);
+const port = await serial.requestPort();`,
+  },
 ];

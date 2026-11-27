@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-clipboard-demo',
   styleUrls: ['../demo.styles.css'],
   template: `

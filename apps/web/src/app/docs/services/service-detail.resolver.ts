@@ -5,13 +5,14 @@ import {
   type ServiceDetailConfig,
   type InterfaceDoc,
 } from '../feature/unified-service-detail/unified-service-detail.component';
+import type { ServiceDoc } from '../models/doc-meta.model';
 import { SeoService } from '../../core/services/seo.service';
 
 async function loadSectionData(
   section: string,
   isV21: boolean,
 ): Promise<{
-  dataSource: any[];
+  dataSource: ServiceDoc[];
   backRoute: string;
   backLabel: string;
   interfacesMap?: Record<string, InterfaceDoc[]>;
@@ -100,6 +101,16 @@ async function loadSectionData(
         backLabel: 'testing',
       };
     }
+    case 'schematics': {
+      const mod = isV21
+        ? await import('../data/v21/schematics.data')
+        : await import('../data/v22/schematics.data');
+      return {
+        dataSource: mod.SCHEMATICS_SERVICES,
+        backRoute: '/docs/schematics',
+        backLabel: 'schematics',
+      };
+    }
     default:
       return null;
   }
@@ -152,13 +163,11 @@ export const serviceDetailResolver: ResolveFn<ServiceDetailConfig> = async (rout
 
   const section = route.url[0]?.path ?? '';
   const paramName =
-    section === 'worker-http'
+    section === 'worker-http' || section === 'core' || section === 'schematics'
       ? 'entry'
       : section === 'openlayers'
         ? 'component'
-        : section === 'core'
-          ? 'entry'
-          : 'service';
+        : 'service';
   const itemId = route.paramMap.get(paramName) ?? '';
 
   const result = await resolveServiceDetailData(
@@ -177,13 +186,11 @@ export function serviceDetailResource(ctx: ResourceContext, section: string) {
   const versionService = inject(DocsVersionService);
 
   const paramName =
-    section === 'worker-http'
+    section === 'worker-http' || section === 'core' || section === 'schematics'
       ? 'entry'
       : section === 'openlayers'
         ? 'component'
-        : section === 'core'
-          ? 'entry'
-          : 'service';
+        : 'service';
 
   return resource({
     params: () => {

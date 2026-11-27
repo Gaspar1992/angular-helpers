@@ -209,6 +209,24 @@ const { getByText } = await render(MyComponent, {
         ],
       };
     }
+    case 'schematics': {
+      const { SCHEMATICS_SERVICES: schematicsServices } = isV21
+        ? await import('../data/v21/schematics.data')
+        : await import('../data/v22/schematics.data');
+      return {
+        packageName: 'schematics',
+        npmPackage: '@angular-helpers/schematics',
+        lead: 'CLI generators for scaffolding new @angular-helpers packages with strict TypeScript and ng-packagr config.',
+        providerExample: `pnpm exec schematics @angular-helpers/schematics:create-package --name=my-feature`,
+        serviceGroups: [
+          {
+            label: 'Generators',
+            icon: '🛠️',
+            items: schematicsServices,
+          },
+        ],
+      };
+    }
     default:
       return {
         packageName: section,

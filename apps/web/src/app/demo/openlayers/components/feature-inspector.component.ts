@@ -1,7 +1,8 @@
-import { Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-feature-inspector',
   imports: [CommonModule],
   template: `
@@ -54,10 +55,12 @@ import { CommonModule } from '@angular/common';
 
                 <div>
                   <label
-                    class="text-[10px] font-black uppercase tracking-widest text-base-content/30 block mb-2 px-1"
+                    for="fi-label"
+                    class="text-[10px] font-black uppercase tracking-widest text-base-content/70 block mb-2 px-1"
                     >Label / Annotation</label
                   >
                   <input
+                    id="fi-label"
                     type="text"
                     [value]="feature.properties?.['name'] || ''"
                     (input)="onUpdate(feature.id, { name: $any($event.target).value })"
@@ -69,11 +72,13 @@ import { CommonModule } from '@angular/common';
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <label
-                      class="text-[10px] font-black uppercase tracking-widest text-base-content/30 block mb-2 px-1"
+                      for="fi-stroke"
+                      class="text-[10px] font-black uppercase tracking-widest text-base-content/70 block mb-2 px-1"
                       >Stroke Color</label
                     >
                     <div class="flex items-center gap-2">
                       <input
+                        id="fi-stroke"
                         type="color"
                         [value]="feature.properties?.['strokeColor'] || '#3b82f6'"
                         (input)="onUpdate(feature.id, { strokeColor: $any($event.target).value })"
@@ -87,11 +92,13 @@ import { CommonModule } from '@angular/common';
 
                   <div>
                     <label
-                      class="text-[10px] font-black uppercase tracking-widest text-base-content/30 block mb-2 px-1"
+                      for="fi-fill"
+                      class="text-[10px] font-black uppercase tracking-widest text-base-content/70 block mb-2 px-1"
                       >Fill Color</label
                     >
                     <div class="flex items-center gap-2">
                       <input
+                        id="fi-fill"
                         type="color"
                         [value]="feature.properties?.['fillColor'] || '#3b82f6'"
                         (input)="onUpdate(feature.id, { fillColor: $any($event.target).value })"

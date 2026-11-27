@@ -1,4 +1,5 @@
 import { RenderMode, type ServerRoute } from '@angular/ssr';
+import { BLOG_POSTS } from './blog/config/posts.data';
 import { DOCS_NAV_LIBRARIES } from './docs/config/docs-nav.data';
 
 function getDocSlugs(libId: string): string[] {
@@ -70,8 +71,22 @@ export const serverRoutes: ServerRoute[] = [
     },
   },
   {
-    path: 'blog/:slug',
+    path: 'docs/schematics/:entry',
+    renderMode: RenderMode.Prerender,
+    async getPrerenderParams() {
+      return getDocSlugs('schematics').map((entry) => ({ entry }));
+    },
+  },
+  {
+    path: 'demo/**',
     renderMode: RenderMode.Client,
+  },
+  {
+    path: 'blog/:slug',
+    renderMode: RenderMode.Prerender,
+    async getPrerenderParams() {
+      return BLOG_POSTS.map((post) => ({ slug: post.slug }));
+    },
   },
   {
     path: '**',

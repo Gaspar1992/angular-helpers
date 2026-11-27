@@ -1,12 +1,21 @@
-import { Component, inject, ElementRef, viewChild, effect, linkedSignal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  ElementRef,
+  viewChild,
+  effect,
+  linkedSignal,
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { NgOptimizedImage } from '@angular/common';
+import { DOCUMENT, NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SearchService, type SearchResult } from '../../../core/services/search.service';
 import { DocsHistoryService } from '../../../docs/services/docs-history.service';
 
 @Component({
   selector: 'app-search-modal',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, FormsModule, NgOptimizedImage],
   host: {
     '(window:keydown)': 'onWindowKeydown($event)',
@@ -16,21 +25,22 @@ import { DocsHistoryService } from '../../../docs/services/docs-history.service'
       @let results = search.results();
       <div
         class="fixed inset-0 z-[200] flex items-start justify-center pt-[15vh] px-4"
-        (click)="close()"
+        (click)="onBackdropClick($event)"
+        (keydown.escape)="close()"
+        tabindex="-1"
         role="dialog"
         aria-modal="true"
         aria-labelledby="search-modal-title"
       >
         <!-- Backdrop -->
         <div
-          class="fixed inset-0 bg-black/60 backdrop-blur-md animate-in fade-in duration-300"
+          class="fixed inset-0 bg-black/60 backdrop-blur-md animate-in fade-in duration-300 pointer-events-none"
         ></div>
 
         <!-- Modal Container -->
         <div
           #modalContainer
           class="relative w-full max-w-[650px] bg-base-200 border border-base-content/10 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
-          (click)="$event.stopPropagation()"
         >
           <h2 id="search-modal-title" class="sr-only">Search Ecosystem</h2>
 
@@ -56,14 +66,14 @@ import { DocsHistoryService } from '../../../docs/services/docs-history.service'
             <input
               #searchInput
               type="text"
-              class="flex-1 bg-transparent border-none outline-none text-base-content text-lg font-bold placeholder:text-base-content/45"
+              class="flex-1 bg-transparent border-none focus-visible:outline-2 focus-visible:outline-primary rounded text-base-content text-lg font-bold placeholder:text-base-content/60"
               placeholder="Search documentation, blog, demos..."
               [ngModel]="search.query()"
               (ngModelChange)="search.query.set($event)"
               (keydown.esc)="close()"
               (keydown.enter)="selectActiveResult()"
-              (keydown.arrowDown)="navigateResults(1)"
-              (keydown.arrowUp)="navigateResults(-1)"
+              (keydown.arrowDown)="$event.preventDefault(); navigateResults(1)"
+              (keydown.arrowUp)="$event.preventDefault(); navigateResults(-1)"
               aria-label="Search documentation, blog, and demos"
               role="combobox"
               [attr.aria-expanded]="results.length > 0 ? 'true' : 'false'"
@@ -72,7 +82,7 @@ import { DocsHistoryService } from '../../../docs/services/docs-history.service'
               [attr.aria-activedescendant]="results.length > 0 ? 'result-' + activeIndex() : null"
             />
             <div
-              class="flex items-center gap-2 px-2 py-1 rounded bg-base-content/5 border border-base-content/10 text-[10px] font-black uppercase text-base-content/30 tracking-widest"
+              class="flex items-center gap-2 px-2 py-1 rounded bg-base-content/5 border border-base-content/10 text-[10px] font-black uppercase text-base-content/70 tracking-widest"
             >
               ESC
             </div>
@@ -91,7 +101,7 @@ import { DocsHistoryService } from '../../../docs/services/docs-history.service'
           >
             @if (results.length > 0) {
               <div
-                class="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-base-content/20"
+                class="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-base-content/70"
               >
                 Found {{ results.length }} results
               </div>
@@ -281,6 +291,8 @@ export class SearchModalComponent {
   protected readonly search = inject(SearchService);
   protected readonly historyService = inject(DocsHistoryService);
   private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
+  private previousFocus: HTMLElement | null = null;
 
   private inputEl = viewChild<ElementRef<HTMLInputElement>>('searchInput');
   private modalContainer = viewChild<ElementRef<HTMLDivElement>>('modalContainer');
@@ -290,12 +302,20 @@ export class SearchModalComponent {
   });
 
   constructor() {
-    // Auto-focus input when modal opens
-    effect(() => {
+    // Auto-focus input when modal opens and restore focus on close
+    effect((onCleanup) => {
       if (this.search.isOpen()) {
-        setTimeout(() => this.inputEl()?.nativeElement.focus(), 50);
+        this.previousFocus = this.document.activeElement as HTMLElement | null;
+        const timer = setTimeout(() => this.inputEl()?.nativeElement.focus(), 50);
+        onCleanup(() => clearTimeout(timer));
       }
     });
+  }
+
+  protected onBackdropClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.close();
+    }
   }
 
   onWindowKeydown(e: KeyboardEvent) {
@@ -335,6 +355,8 @@ export class SearchModalComponent {
 
   close() {
     this.search.close();
+    this.previousFocus?.focus();
+    this.previousFocus = null;
   }
 
   navigateResults(delta: number) {

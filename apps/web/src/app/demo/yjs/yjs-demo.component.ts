@@ -1,13 +1,13 @@
 import {
-  injectYjsAwareness,
-  injectYjsIndexeddb,
   injectYjsUndoManager,
   YjsDocService,
   yjsSignal,
   YjsTextDirective,
 } from '@angular-helpers/yjs';
+import { injectYjsAwareness } from '@angular-helpers/yjs/awareness';
+import { injectYjsIndexeddb } from '@angular-helpers/yjs/indexeddb';
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Awareness } from 'y-protocols/awareness';
 
@@ -19,6 +19,7 @@ interface UserPresence {
 
 @Component({
   selector: 'app-yjs-demo',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule, YjsTextDirective],
   template: `
     <div class="max-w-6xl mx-auto px-4 py-8 space-y-8">
@@ -98,11 +99,13 @@ interface UserPresence {
             <div class="space-y-4">
               <div>
                 <label
+                  for="yjs-doc-title"
                   class="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-2"
                 >
                   Document Title (yjsSignal key: 'title')
                 </label>
                 <input
+                  id="yjs-doc-title"
                   type="text"
                   [value]="title()"
                   (input)="title.set($any($event.target).value)"
@@ -113,11 +116,13 @@ interface UserPresence {
 
               <div>
                 <label
+                  for="yjs-doc-body"
                   class="block text-xs font-semibold text-base-content/70 uppercase tracking-wider mb-2"
                 >
                   Content Body ([yjsText] Directive with Cursor Preservation)
                 </label>
                 <textarea
+                  id="yjs-doc-body"
                   rows="5"
                   [yjsText]="yText"
                   placeholder="Start typing collaborative notes..."

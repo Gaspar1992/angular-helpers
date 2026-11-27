@@ -1,7 +1,7 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   input,
-  type AfterViewInit,
   ElementRef,
   viewChild,
   effect,
@@ -12,10 +12,15 @@ import { injectPlatform } from '@angular-helpers/core';
 import { injectClipboard } from '@angular-helpers/browser-web-apis';
 import hljs from 'highlight.js/lib/core';
 import typescript from 'highlight.js/lib/languages/typescript';
+import javascript from 'highlight.js/lib/languages/javascript';
+import xml from 'highlight.js/lib/languages/xml';
 import bash from 'highlight.js/lib/languages/bash';
 import json from 'highlight.js/lib/languages/json';
 
 hljs.registerLanguage('typescript', typescript);
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('xml', xml);
+hljs.registerLanguage('html', xml);
 hljs.registerLanguage('bash', bash);
 hljs.registerLanguage('json', json);
 hljs.configure({ ignoreUnescapedHTML: true });
@@ -23,10 +28,12 @@ hljs.configure({ ignoreUnescapedHTML: true });
 const LANGUAGE_ALIASES: Record<string, string> = {
   ts: 'typescript',
   js: 'javascript',
+  html: 'xml',
 };
 
 @Component({
   selector: 'app-code-block',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="code-block-wrapper">
       <header class="code-header">
@@ -47,7 +54,7 @@ const LANGUAGE_ALIASES: Record<string, string> = {
           {{ copied() ? 'Copied!' : 'Copy' }}
         </button>
       </header>
-      <pre><code #codeEl class="language-{{ normalizedLanguage() }}">{{ code() }}</code></pre>
+      <pre><code #codeEl class="language-{{ normalizedLanguage() }}" [textContent]="code()"></code></pre>
     </div>
   `,
   styles: [
@@ -108,7 +115,7 @@ const LANGUAGE_ALIASES: Record<string, string> = {
     `,
   ],
 })
-export class CodeBlockComponent implements AfterViewInit {
+export class CodeBlockComponent {
   readonly code = input.required<string>();
   readonly language = input<string>('typescript');
   readonly filename = input<string | undefined>(undefined);
@@ -140,13 +147,6 @@ export class CodeBlockComponent implements AfterViewInit {
         hljs.highlightElement(el.nativeElement);
       }
     });
-  }
-
-  ngAfterViewInit() {
-    if (this.platform.isBrowser) {
-      delete this.codeEl().nativeElement.dataset['highlighted'];
-      hljs.highlightElement(this.codeEl().nativeElement);
-    }
   }
 
   protected async copy(): Promise<void> {

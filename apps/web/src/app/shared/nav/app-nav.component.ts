@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
 import { SearchService } from '../../core/services/search.service';
@@ -6,6 +6,7 @@ import { OfflineBadgeComponent } from '../components/offline-badge/offline-badge
 
 @Component({
   selector: 'app-nav',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive, NgOptimizedImage, OfflineBadgeComponent],
   template: `
     <header
@@ -53,7 +54,7 @@ import { OfflineBadgeComponent } from '../components/offline-badge/offline-badge
             stroke-linecap="round"
             stroke-linejoin="round"
             aria-hidden="true"
-            class="text-base-content/30 group-hover:text-primary transition-colors duration-200"
+            class="text-base-content/70 group-hover:text-primary transition-colors duration-200"
           >
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.3-4.3" />
@@ -61,7 +62,7 @@ import { OfflineBadgeComponent } from '../components/offline-badge/offline-badge
           <span class="font-bold tracking-tight sr-only sm:not-sr-only">Search...</span>
           <kbd
             aria-hidden="true"
-            class="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-base-content/5 border border-base-content/5 text-[9px] font-black text-base-content/30"
+            class="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-base-content/5 border border-base-content/5 text-[9px] font-black text-base-content/70"
           >
             <span>Ctrl</span><span>K</span>
           </kbd>

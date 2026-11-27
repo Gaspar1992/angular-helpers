@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { SecurityValidators } from '@angular-helpers/security/forms';
@@ -19,6 +19,7 @@ interface DemoLog {
 }
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-security-utilities-demo',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   styleUrls: ['../services/demo.styles.css'],
@@ -226,8 +227,9 @@ interface DemoLog {
 
           <div class="space-y-6">
             <div class="space-y-2">
-              <label>Password to check</label>
+              <label for="hibp-password-input">Password to check</label>
               <input
+                id="hibp-password-input"
                 type="password"
                 [(ngModel)]="hibpInput"
                 placeholder="Check your sensitive data..."
@@ -407,8 +409,9 @@ interface DemoLog {
 
           <div class="space-y-6">
             <div class="space-y-2">
-              <label>Secret Value</label>
+              <label for="clipboard-secret-input">Secret Value</label>
               <input
+                id="clipboard-secret-input"
                 type="text"
                 [(ngModel)]="clipboardInput"
                 placeholder="Enter password to copy..."

@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   signal,
   computed,
@@ -45,6 +46,7 @@ interface TaskEntity {
 }
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-storage-demo',
   imports: [FormField, FormRoot, JsonPipe],
   templateUrl: './storage-demo.component.html',

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 interface DemoSubItem {
@@ -47,6 +47,7 @@ const DEMO_GROUPS: DemoGroup[] = [
 ];
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-demo-layout',
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
   template: `
@@ -75,6 +76,7 @@ const DEMO_GROUPS: DemoGroup[] = [
                 <!-- Dropdown Group -->
                 <div
                   class="relative"
+                  tabindex="-1"
                   (mouseenter)="openDropdown(group.label)"
                   (mouseleave)="scheduleClose(group.label)"
                   (keydown.escape)="dropdownOpen.set(null)"

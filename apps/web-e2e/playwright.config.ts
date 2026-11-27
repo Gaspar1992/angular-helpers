@@ -6,9 +6,7 @@ const port = Number(process.env['BROWSER_TEST_PORT'] ?? '4200');
 const protocol = useHttps ? 'https' : 'http';
 const baseUrl = `${protocol}://${host}:${port}`;
 
-const defaultStartCommand = useHttps
-  ? `pnpm run start:https --host ${host} --port ${port}`
-  : 'pnpm run start:test';
+const defaultStartCommand = `pnpm nx serve web --host ${host} --port ${port}`;
 const startCommand = process.env['BROWSER_TEST_SERVER_CMD']
   ? `PORT=${port} HOST=${host} NG_ALLOWED_HOSTS=${host} ${process.env['BROWSER_TEST_SERVER_CMD']}`
   : defaultStartCommand;

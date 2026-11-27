@@ -1,9 +1,10 @@
-import { Component, type OnDestroy, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, type OnDestroy, inject, signal } from '@angular/core';
 import { UpperCasePipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { IdleDetectorService } from '@angular-helpers/browser-web-apis';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-idle-detector-demo',
   providers: [IdleDetectorService],
   imports: [UpperCasePipe],

@@ -64,6 +64,23 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
           { label: 'Vibration', route: '/docs/browser-web-apis/vibration' },
           { label: 'Speech Synthesis', route: '/docs/browser-web-apis/speech-synthesis' },
           {
+            label: 'Speech Recognition',
+            route: '/docs/browser-web-apis/speech-recognition',
+            experimental: true,
+          },
+          {
+            label: 'Device Motion',
+            route: '/docs/browser-web-apis/device-motion',
+            experimental: true,
+          },
+          {
+            label: 'Device Orientation',
+            route: '/docs/browser-web-apis/device-orientation',
+            experimental: true,
+          },
+          { label: 'Web HID', route: '/docs/browser-web-apis/web-hid', experimental: true },
+          { label: 'Web Serial', route: '/docs/browser-web-apis/web-serial', experimental: true },
+          {
             label: 'Idle Detector',
             route: '/docs/browser-web-apis/idle-detector',
             hasFn: true,
@@ -413,6 +430,17 @@ export const DOCS_NAV_LIBRARIES: readonly LibraryNav[] = [
             hasFn: true,
           },
         ],
+      },
+    ],
+  },
+  {
+    id: 'schematics',
+    label: 'Schematics',
+    overviewRoute: '/docs/schematics',
+    sections: [
+      {
+        title: 'Generators',
+        items: [{ label: 'create-package', route: '/docs/schematics/create-package' }],
       },
     ],
   },

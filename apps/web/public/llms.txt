@@ -14,6 +14,7 @@
 - [OpenLayers](https://gaspar1992.github.io/angular-helpers/docs/openlayers): Zoneless reactive Angular components, directives, and signal bindings for OpenLayers interactive maps, layers, controls, and vector overlays.
 - [Testing](https://gaspar1992.github.io/angular-helpers/docs/testing): Deterministic headless browser mocks (setupHeadlessBrowserMocks, ResizeObserver, IntersectionObserver, BroadcastChannel, WebCrypto, Canvas2D) and Angular Zoneless/Signal testing utilities.
 - [Yjs](https://gaspar1992.github.io/angular-helpers/docs/yjs): Real-time collaborative state management binding Yjs CRDTs directly to Angular Signals with automatic synchronization.
+- [Schematics](https://gaspar1992.github.io/angular-helpers/docs/schematics): Angular DevKit schematics to scaffold new @angular-helpers packages with ng-packagr config, strict TypeScript, and tsconfig.json path mappings.
 
 ## Technical Specifications & Documentation
 

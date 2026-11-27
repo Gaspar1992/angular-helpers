@@ -192,7 +192,7 @@ export class UndoDemoComponent {
     description:
       'Connects an Angular component or service to a Yjs Awareness protocol instance. Exposes reactive signals for local presence, active remote collaborators, and cursor/state updates with automatic tab visibility resync and phantom cleanup.',
     scope: 'provided',
-    importPath: '@angular-helpers/yjs',
+    importPath: '@angular-helpers/yjs/awareness',
     requiresSecureContext: false,
     browserSupport: 'All modern browsers',
     category: 'realtime-crdt',
@@ -206,7 +206,7 @@ export class UndoDemoComponent {
     methods: [],
     fnVersion: {
       name: 'injectYjsAwareness',
-      importPath: '@angular-helpers/yjs',
+      importPath: '@angular-helpers/yjs/awareness',
       returnType: 'YjsAwarenessRef<TState>',
       description: 'Connects to a Yjs Awareness instance and returns reactive presence signals.',
       fields: [
@@ -227,7 +227,7 @@ export class UndoDemoComponent {
         },
       ],
       example: `import { Component } from '@angular/core';
-import { injectYjsAwareness } from '@angular-helpers/yjs';
+import { injectYjsAwareness } from '@angular-helpers/yjs/awareness';
 import { Awareness } from 'y-protocols/awareness';
 
 interface UserPresence {
@@ -265,7 +265,7 @@ export class CollabCursorsComponent {
 }`,
     },
     example: `import { Component } from '@angular/core';
-import { injectYjsAwareness } from '@angular-helpers/yjs';
+import { injectYjsAwareness } from '@angular-helpers/yjs/awareness';
 import { Awareness } from 'y-protocols/awareness';
 
 interface UserPresence {
@@ -292,7 +292,7 @@ export class PresenceDemoComponent {
     description:
       'Connects a Y.Doc to a y-websocket server. Exposes status() and isSynced() read-only Signals to track real-time WebSocket connection state.',
     scope: 'provided',
-    importPath: '@angular-helpers/yjs',
+    importPath: '@angular-helpers/yjs/websocket',
     requiresSecureContext: false,
     browserSupport: 'All modern browsers with WebSockets support',
     category: 'realtime-crdt',
@@ -304,7 +304,7 @@ export class PresenceDemoComponent {
     methods: [],
     fnVersion: {
       name: 'injectYjsWebsocket',
-      importPath: '@angular-helpers/yjs',
+      importPath: '@angular-helpers/yjs/websocket',
       returnType: 'YjsWebsocketRef',
       description:
         'Connects a Y.Doc to a y-websocket server endpoint and returns reactive connection signals.',
@@ -331,7 +331,8 @@ export class PresenceDemoComponent {
         },
       ],
       example: `import { Component, inject } from '@angular/core';
-import { injectYjsWebsocket, YjsDocService } from '@angular-helpers/yjs';
+import { injectYjsWebsocket } from '@angular-helpers/yjs/websocket';
+import { YjsDocService } from '@angular-helpers/yjs';
 
 @Component({
   selector: 'app-websocket-collab',
@@ -345,7 +346,8 @@ export class WebsocketCollabComponent {
 }`,
     },
     example: `import { Component, inject } from '@angular/core';
-import { injectYjsWebsocket, YjsDocService } from '@angular-helpers/yjs';
+import { injectYjsWebsocket } from '@angular-helpers/yjs/websocket';
+import { YjsDocService } from '@angular-helpers/yjs';
 
 @Component({
   selector: 'app-ws-demo',
@@ -362,7 +364,7 @@ export class WsDemoComponent {
     description:
       'Persists a Y.Doc to local IndexedDB storage using y-indexeddb. Exposes reactive isHydrated, isHydrating, and synced Signals to easily guard SSR hydration and @defer blocks.',
     scope: 'provided',
-    importPath: '@angular-helpers/yjs',
+    importPath: '@angular-helpers/yjs/indexeddb',
     requiresSecureContext: false,
     browserSupport: 'All modern browsers with IndexedDB support',
     category: 'realtime-crdt',
@@ -375,7 +377,7 @@ export class WsDemoComponent {
     methods: [],
     fnVersion: {
       name: 'injectYjsIndexeddb',
-      importPath: '@angular-helpers/yjs',
+      importPath: '@angular-helpers/yjs/indexeddb',
       returnType: 'YjsIndexeddbRef',
       description: 'Persists a Y.Doc to IndexedDB and returns reactive hydration signals.',
       fields: [
@@ -391,7 +393,8 @@ export class WsDemoComponent {
         },
       ],
       example: `import { Component, inject } from '@angular/core';
-import { injectYjsIndexeddb, YjsDocService } from '@angular-helpers/yjs';
+import { injectYjsIndexeddb } from '@angular-helpers/yjs/indexeddb';
+import { YjsDocService } from '@angular-helpers/yjs';
 
 @Component({
   selector: 'app-offline-persistence',
@@ -409,7 +412,8 @@ export class OfflinePersistenceComponent {
 }`,
     },
     example: `import { Component, inject } from '@angular/core';
-import { injectYjsIndexeddb, YjsDocService } from '@angular-helpers/yjs';
+import { injectYjsIndexeddb } from '@angular-helpers/yjs/indexeddb';
+import { YjsDocService } from '@angular-helpers/yjs';
 
 @Component({
   selector: 'app-db-demo',

@@ -1,7 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { injectWebTransportResource } from '@angular-helpers/browser-web-apis';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-web-transport-demo',
   styleUrls: ['../demo.styles.css'],
   template: `

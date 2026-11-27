@@ -1,7 +1,8 @@
-import { Component, type OnDestroy, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, type OnDestroy, inject, signal } from '@angular/core';
 import { ServerSentEventsService } from '@angular-helpers/browser-web-apis';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-server-sent-events-demo',
   providers: [ServerSentEventsService],
   styleUrls: ['../demo.styles.css'],
@@ -40,7 +41,9 @@ import { ServerSentEventsService } from '@angular-helpers/browser-web-apis';
       </div>
 
       <div class="space-y-4">
-        <label>Inbound Events</label>
+        <span class="block text-xs font-bold uppercase tracking-wider text-base-content/70"
+          >Inbound Events</span
+        >
         @if (messages().length === 0) {
           <div
             class="py-12 text-center bg-base-content/5 rounded-2xl border border-dashed border-base-content/10 shadow-inner italic text-xs text-base-content/20"
