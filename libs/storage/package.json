@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/storage",
-  "version": "22.5.0",
+  "version": "22.6.0",
   "description": "Reactive Angular storage system with support for Web Storage, IndexedDB, Cache API, TOON compression, and AES-GCM encryption",
   "keywords": [
     "angular",

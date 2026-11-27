@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/openlayers",
-  "version": "22.8.0",
+  "version": "22.9.0",
   "description": "Modern Angular wrapper for OpenLayers with modular architecture, standalone components, and hybrid template/programmatic API",
   "keywords": [
     "angular",

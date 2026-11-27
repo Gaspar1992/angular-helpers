@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [22.3.0 – 22.11.0] - 2026-11-27
 
 ### Features & DX Modernization (`22.x` Series)
 

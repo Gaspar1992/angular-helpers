@@ -2,10 +2,10 @@
 // Do not edit manually - run: npx tsx scripts/generate-package-metadata.ts
 
 export const GENERATED_METADATA = {
-  version: '22.9.0',
+  version: '22.10.0',
   browserWebApis: {
     serviceCount: 47,
-    injectFnCount: 34,
+    injectFnCount: 37,
     experimentalServiceCount: 3,
     services: [
       'BarcodeDetectorService',
@@ -64,6 +64,7 @@ export const GENERATED_METADATA = {
       'inject-device-orientation',
       'inject-document-title',
       'inject-eye-dropper',
+      'inject-fullscreen',
       'inject-gamepad',
       'inject-geolocation-resource',
       'inject-geolocation',
@@ -76,6 +77,7 @@ export const GENERATED_METADATA = {
       'inject-mutation-observer',
       'inject-network-information-resource',
       'inject-network-information',
+      'inject-notifications',
       'inject-page-visibility',
       'inject-performance-observer',
       'inject-permission-state',
@@ -86,6 +88,7 @@ export const GENERATED_METADATA = {
       'inject-serial',
       'inject-speech-recognition',
       'inject-wake-lock',
+      'inject-web-share',
       'inject-web-transport-resource',
       'inject-window-scroll',
     ],

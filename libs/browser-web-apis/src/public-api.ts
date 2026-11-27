@@ -322,4 +322,4 @@ export { injectWebShare, type WebShareRef, type WebShareResult } from './fns/inj
 export * from './providers';
 
 // Version
-export const version = '22.9.0';
+export const version = '22.10.0';
