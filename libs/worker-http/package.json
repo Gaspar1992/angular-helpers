@@ -31,8 +31,8 @@
     "access": "public"
   },
   "scripts": {
-    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/worker-http",
-    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/worker-http",
+    "build": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/worker-http && pnpm run build:schematics",
+    "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/worker-http && pnpm run build:schematics",
     "build:schematics": "tsc -p tsconfig.schematics.json && node scripts/rename-to-cjs.mjs",
     "clean": "node ../../scripts/clean.js",
     "test": "vitest run --root ../.. libs/worker-http",

@@ -179,19 +179,34 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
       return this.handleFallback(req, null, `No worker route matched for URL: ${req.url}`);
     }
 
+    let preSerializedBody: unknown;
+    let hasPreSerializedBody = false;
+
     // Check if we should bypass the worker based on the payload size threshold
     let bypassWorker = false;
     if (this.minPayloadSize !== null && this.fallback === 'main-thread') {
       const hasExplicitTarget = req.context.get(WORKER_TARGET) !== null;
       if (!hasExplicitTarget) {
         const isGetOrHead = req.method === 'GET' || req.method === 'HEAD';
-        if (isGetOrHead) {
-          const matchesRoute = matchWorkerRoute(req.url, this.routes) !== null;
-          if (!matchesRoute) {
-            bypassWorker = true;
+        if (!isGetOrHead) {
+          let bodySize: number;
+          if (
+            this.serializer !== null &&
+            req.body !== null &&
+            req.body !== undefined &&
+            typeof req.body === 'object' &&
+            !(req.body instanceof Blob) &&
+            !(req.body instanceof ArrayBuffer) &&
+            !ArrayBuffer.isView(req.body) &&
+            !(req.body instanceof URLSearchParams) &&
+            !(req.body instanceof FormData)
+          ) {
+            preSerializedBody = this.serializer.serialize(req.body).data;
+            hasPreSerializedBody = true;
+            bodySize = getRequestBodySize(preSerializedBody, null);
+          } else {
+            bodySize = getRequestBodySize(req.body, this.serializer);
           }
-        } else {
-          const bodySize = getRequestBodySize(req.body, this.serializer);
           if (bodySize < this.minPayloadSize) {
             bypassWorker = true;
           }
@@ -222,8 +237,9 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
     const transport = this.getOrCreateTransport(config);
     const serializable = toSerializableRequest(req);
 
-    const body =
-      this.serializer !== null && serializable.body !== null && serializable.body !== undefined
+    const body = hasPreSerializedBody
+      ? preSerializedBody
+      : this.serializer !== null && serializable.body !== null && serializable.body !== undefined
         ? this.serializer.serialize(serializable.body).data
         : serializable.body;
     const payload = body !== serializable.body ? { ...serializable, body } : serializable;
@@ -246,10 +262,17 @@ export class WorkerHttpBackend extends HttpBackend implements OnDestroy {
         }
       }),
       catchError((err: unknown) => {
+        const errName = err instanceof Error ? err.name : '';
+        const statusText =
+          errName === 'WorkerHttpTimeoutError'
+            ? 'Gateway Timeout'
+            : errName === 'WorkerHttpAbortError'
+              ? 'Request Aborted'
+              : 'Worker Error';
         const httpError = new HttpErrorResponse({
           error: err,
           status: 0,
-          statusText: 'Worker Error',
+          statusText,
           url: req.urlWithParams,
         });
         this.emitError(base, httpError);

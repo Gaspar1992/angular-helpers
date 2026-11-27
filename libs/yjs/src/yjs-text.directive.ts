@@ -15,6 +15,8 @@ import * as Y from 'yjs';
   selector: 'input[yjsText], textarea[yjsText]',
   host: {
     '(input)': 'onInput($event)',
+    '(compositionstart)': 'onCompositionStart()',
+    '(compositionend)': 'onCompositionEnd($event)',
   },
 })
 export class YjsTextDirective {
@@ -33,6 +35,7 @@ export class YjsTextDirective {
 
   private currentYText: Y.Text | null = null;
   private observer: ((event: Y.YTextEvent, transaction: Y.Transaction) => void) | null = null;
+  private isComposing = false;
 
   constructor() {
     effect(() => {
@@ -65,26 +68,20 @@ export class YjsTextDirective {
         return;
       }
 
-      const doc = yText.doc;
+      const isFocused = el.ownerDocument?.activeElement === el;
       const start = el.selectionStart ?? 0;
       const end = el.selectionEnd ?? 0;
 
-      let rStart: Y.RelativePosition | null = null;
-      let rEnd: Y.RelativePosition | null = null;
-
-      if (doc) {
-        rStart = Y.createRelativePositionFromTypeIndex(yText, start);
-        rEnd = Y.createRelativePositionFromTypeIndex(yText, end);
-      }
+      const nextStart = transformIndexByDelta(start, event.delta);
+      const nextEnd = transformIndexByDelta(end, event.delta);
 
       el.value = yText.toString();
 
-      if (doc && rStart && rEnd) {
-        const absStart = Y.createAbsolutePositionFromRelativePosition(rStart, doc);
-        const absEnd = Y.createAbsolutePositionFromRelativePosition(rEnd, doc);
-
-        if (absStart !== null && absEnd !== null) {
-          el.setSelectionRange(absStart.index, absEnd.index);
+      if (isFocused) {
+        try {
+          el.setSelectionRange(nextStart, nextEnd);
+        } catch {
+          // Non-text input types (e.g. email, number) do not support setSelectionRange
         }
       }
     };
@@ -92,7 +89,23 @@ export class YjsTextDirective {
     yText.observe(this.observer);
   }
 
-  protected onInput(_event: Event): void {
+  protected onCompositionStart(): void {
+    this.isComposing = true;
+  }
+
+  protected onCompositionEnd(event: Event): void {
+    this.isComposing = false;
+    this.syncInputToYText(event);
+  }
+
+  protected onInput(event: Event): void {
+    if (this.isComposing || (event as InputEvent).isComposing) {
+      return;
+    }
+    this.syncInputToYText(event);
+  }
+
+  private syncInputToYText(_event: Event): void {
     const yText = this.currentYText;
     if (!yText) return;
 
@@ -143,4 +156,31 @@ export class YjsTextDirective {
       applyDiff();
     }
   }
+}
+
+function transformIndexByDelta(
+  index: number,
+  delta: Array<{ retain?: number; insert?: unknown; delete?: number }>,
+): number {
+  let cursor = 0;
+  let shifted = index;
+
+  for (const op of delta) {
+    if (typeof op.retain === 'number') {
+      cursor += op.retain;
+    } else if (op.insert !== undefined) {
+      const insertLen = typeof op.insert === 'string' ? op.insert.length : 1;
+      if (cursor <= shifted) {
+        shifted += insertLen;
+      }
+      cursor += insertLen;
+    } else if (typeof op.delete === 'number') {
+      if (cursor < shifted) {
+        const removedBefore = Math.min(op.delete, shifted - cursor);
+        shifted -= removedBefore;
+      }
+    }
+  }
+
+  return Math.max(0, shifted);
 }

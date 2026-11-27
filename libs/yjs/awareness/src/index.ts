@@ -15,7 +15,6 @@ export interface YjsAwarenessOptions {
 
   /**
    * Whether to automatically re-announce local presence state when the browser tab regains visibility (default: true).
-   * Prevents peers from timing out awareness heartbeats when background timers are throttled.
    */
   autoResyncOnVisibility?: boolean;
 }
@@ -35,11 +34,6 @@ export interface YjsAwarenessRef<TState extends Record<string, any> = Record<str
 
 /**
  * Connects an Angular component or service to a Yjs Awareness protocol instance.
- * Exposes reactive signals for local presence and active remote collaborators.
- *
- * @param awareness The Yjs Awareness instance (e.g. from y-websocket or custom provider)
- * @param initialLocalState Optional initial presence state for the local user
- * @param options Configuration options such as clearOnDestroy and autoResyncOnVisibility
  */
 export function injectYjsAwareness<TState extends Record<string, any> = Record<string, any>>(
   awareness: Awareness,
@@ -84,7 +78,6 @@ export function injectYjsAwareness<TState extends Record<string, any> = Record<s
     localStateSig.set((awareness.getLocalState() as TState | null) ?? null);
   };
 
-  // Initial sync
   syncUsers();
 
   const handleUpdate = () => {
@@ -93,12 +86,10 @@ export function injectYjsAwareness<TState extends Record<string, any> = Record<s
 
   awareness.on('change', handleUpdate);
 
-  // Background tab throttle protection
   const handleVisibilityChange = () => {
     if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
       const current = awareness.getLocalState();
       if (current) {
-        // Re-announce state to peers
         awareness.setLocalState(current);
       }
     }

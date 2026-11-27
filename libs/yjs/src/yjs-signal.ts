@@ -236,9 +236,12 @@ export function yjsSignal<T>(
 
   // Batching scheduler state
   let isBatchPending = false;
-  let debounceTimeoutId: any = null;
+  let destroyed = false;
+  let rafId: number | null = null;
+  let debounceTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   const applyRemoteUpdate = () => {
+    if (destroyed) return;
     if (key !== undefined && yType instanceof Y.Map) {
       const val = yType.has(key) ? (yType.get(key) as T) : (options.initialValue as T);
       sig.set(val);
@@ -248,6 +251,7 @@ export function yjsSignal<T>(
   };
 
   const scheduleRemoteUpdate = () => {
+    if (destroyed) return;
     if (batching === 'none') {
       applyRemoteUpdate();
     } else if (batching === 'microtask') {
@@ -261,7 +265,8 @@ export function yjsSignal<T>(
     } else if (batching === 'animationFrame' && typeof requestAnimationFrame !== 'undefined') {
       if (!isBatchPending) {
         isBatchPending = true;
-        requestAnimationFrame(() => {
+        rafId = requestAnimationFrame(() => {
+          rafId = null;
           isBatchPending = false;
           applyRemoteUpdate();
         });
@@ -271,6 +276,7 @@ export function yjsSignal<T>(
         clearTimeout(debounceTimeoutId);
       }
       debounceTimeoutId = setTimeout(() => {
+        debounceTimeoutId = null;
         applyRemoteUpdate();
       }, batching);
     } else {
@@ -278,9 +284,9 @@ export function yjsSignal<T>(
     }
   };
 
-  // Observer callback for external Yjs changes
-  const observer = (event: Y.YEvent<any>, transaction: Y.Transaction) => {
-    // Ignore updates originated by this signal's local transactions
+  const useDeep = key === undefined;
+
+  const shallowObserver = (event: Y.YEvent<any>, transaction: Y.Transaction) => {
     if (transaction.origin === origin) {
       return;
     }
@@ -295,7 +301,18 @@ export function yjsSignal<T>(
     }
   };
 
-  yType.observe(observer);
+  const deepObserver = (_events: Y.YEvent<any>[], transaction: Y.Transaction) => {
+    if (transaction.origin === origin) {
+      return;
+    }
+    scheduleRemoteUpdate();
+  };
+
+  if (useDeep) {
+    yType.observeDeep(deepObserver);
+  } else {
+    yType.observe(shallowObserver);
+  }
 
   // Setup automatic cleanup when host component/service destroys
   let cleanupRef = options.destroyRef;
@@ -309,10 +326,20 @@ export function yjsSignal<T>(
   }
 
   cleanupRef?.onDestroy(() => {
+    destroyed = true;
     if (debounceTimeoutId) {
       clearTimeout(debounceTimeoutId);
+      debounceTimeoutId = null;
     }
-    yType.unobserve(observer);
+    if (rafId !== null && typeof cancelAnimationFrame !== 'undefined') {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    if (useDeep) {
+      yType.unobserveDeep(deepObserver);
+    } else {
+      yType.unobserve(shallowObserver);
+    }
   });
 
   const writable: WritableSignal<T> = Object.assign(() => sig(), {
@@ -355,6 +382,13 @@ export function yjsSignal<T>(
 
     asReadonly: () => sig.asReadonly(),
   }) as WritableSignal<T>;
+
+  // Preserve Angular's internal [SIGNAL] symbol so isSignal(writable) returns true
+  for (const sym of Object.getOwnPropertySymbols(sig)) {
+    Object.defineProperty(writable, sym, {
+      value: (sig as unknown as Record<symbol, unknown>)[sym],
+    });
+  }
 
   return writable;
 }

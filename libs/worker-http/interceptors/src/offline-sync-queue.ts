@@ -19,7 +19,7 @@ export function offlineSyncQueueInterceptor(config?: OfflineSyncConfig): WorkerI
 
   const getDB = (): Promise<IDBDatabase> => {
     if (!dbPromise) {
-      dbPromise = new Promise((resolve, reject) => {
+      const pending = new Promise<IDBDatabase>((resolve, reject) => {
         if (typeof indexedDB === 'undefined') {
           reject(new Error('IndexedDB is not supported in this environment'));
           return;
@@ -32,8 +32,16 @@ export function offlineSyncQueueInterceptor(config?: OfflineSyncConfig): WorkerI
           }
         };
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
+        request.onerror = () => {
+          dbPromise = null;
+          reject(request.error);
+        };
+      }).catch((err) => {
+        dbPromise = null;
+        throw err;
       });
+      dbPromise = pending;
+      return pending;
     }
     return dbPromise;
   };
@@ -99,7 +107,9 @@ export function offlineSyncQueueInterceptor(config?: OfflineSyncConfig): WorkerI
     return true; // Fallback
   };
 
-  const drainQueue = async (next: any, throwOnError = false): Promise<void> => {
+  let drainInFlight: Promise<void> | null = null;
+
+  const drainQueueInternal = async (next: any, throwOnError = false): Promise<void> => {
     try {
       const pending = await getQueuedRequests();
       if (pending.length > 0) {
@@ -137,6 +147,16 @@ export function offlineSyncQueueInterceptor(config?: OfflineSyncConfig): WorkerI
         throw err;
       }
     }
+  };
+
+  const drainQueue = (next: any, throwOnError = false): Promise<void> => {
+    if (drainInFlight) {
+      return drainInFlight;
+    }
+    drainInFlight = drainQueueInternal(next, throwOnError).finally(() => {
+      drainInFlight = null;
+    });
+    return drainInFlight;
   };
 
   return async (req, next) => {

@@ -50,6 +50,9 @@
       "@angular-helpers/openlayers/overlays": ["./libs/openlayers/overlays/src/index.ts"],
       "@angular-helpers/openlayers/testing": ["./libs/openlayers/testing/src/index.ts"],
       "@angular-helpers/yjs": ["./libs/yjs/src/index.ts"],
+      "@angular-helpers/yjs/websocket": ["./libs/yjs/websocket/src/index.ts"],
+      "@angular-helpers/yjs/indexeddb": ["./libs/yjs/indexeddb/src/index.ts"],
+      "@angular-helpers/yjs/awareness": ["./libs/yjs/awareness/src/index.ts"],
       "@angular-helpers/*": ["./libs/*/src/index.ts"]
     }
   },

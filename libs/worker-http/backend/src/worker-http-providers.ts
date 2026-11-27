@@ -1,5 +1,12 @@
 import { type EnvironmentProviders, type Provider, makeEnvironmentProviders } from '@angular/core';
-import { FetchBackend, HttpBackend, provideHttpClient, withFetch } from '@angular/common/http';
+import {
+  FetchBackend,
+  HttpBackend,
+  type HttpFeature,
+  type HttpFeatureKind,
+  provideHttpClient,
+  withFetch,
+} from '@angular/common/http';
 
 import { WorkerHttpBackend } from './worker-http-backend';
 import { WorkerHttpClient } from './worker-http-client';
@@ -51,12 +58,23 @@ import type {
  * ```
  */
 export function provideWorkerHttpClient(
-  ...features: WorkerHttpFeature<WorkerHttpFeatureKind>[]
+  ...features: Array<WorkerHttpFeature<WorkerHttpFeatureKind> | HttpFeature<HttpFeatureKind>>
 ): EnvironmentProviders {
-  const featureProviders: Provider[] = features.flatMap((f) => f.providers);
+  const workerFeatures: WorkerHttpFeature<WorkerHttpFeatureKind>[] = [];
+  const httpFeatures: HttpFeature<HttpFeatureKind>[] = [];
+
+  for (const feature of features) {
+    if ('kind' in feature) {
+      workerFeatures.push(feature);
+    } else {
+      httpFeatures.push(feature);
+    }
+  }
+
+  const featureProviders: Provider[] = workerFeatures.flatMap((f) => f.providers);
 
   return makeEnvironmentProviders([
-    provideHttpClient(withFetch()),
+    provideHttpClient(withFetch(), ...httpFeatures),
     FetchBackend,
     { provide: HttpBackend, useClass: WorkerHttpBackend },
     WorkerHttpClient,

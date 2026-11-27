@@ -91,6 +91,7 @@ export class WorkerSseClient {
 
     this.worker.removeEventListener('message', this.listener as EventListener);
     this._status.set({ state: 'closed', error: null });
+    this._events$.complete();
   }
 
   private connect(): void {

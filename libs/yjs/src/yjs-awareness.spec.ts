@@ -6,7 +6,7 @@ import {
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Awareness, encodeAwarenessUpdate, applyAwarenessUpdate } from 'y-protocols/awareness';
 import * as Y from 'yjs';
-import { injectYjsAwareness } from './yjs-awareness';
+import { injectYjsAwareness } from '@angular-helpers/yjs/awareness';
 
 describe('injectYjsAwareness', () => {
   let doc: Y.Doc;

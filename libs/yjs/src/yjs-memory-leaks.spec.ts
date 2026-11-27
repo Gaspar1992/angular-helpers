@@ -13,9 +13,9 @@ import { Awareness } from 'y-protocols/awareness';
 import { yjsSignal } from './yjs-signal';
 import { YjsTextDirective } from './yjs-text.directive';
 import { injectYjsUndoManager } from './yjs-undo';
-import { injectYjsAwareness } from './yjs-awareness';
-import { injectYjsWebsocket } from './yjs-websocket';
-import { injectYjsIndexeddb } from './yjs-indexeddb';
+import { injectYjsAwareness } from '@angular-helpers/yjs/awareness';
+import { injectYjsWebsocket } from '@angular-helpers/yjs/websocket';
+import { injectYjsIndexeddb } from '@angular-helpers/yjs/indexeddb';
 import { YjsDocService } from './yjs-provider.service';
 
 describe('Yjs Memory Leaks & Lifecycle Disposal Battery', () => {
@@ -32,7 +32,7 @@ describe('Yjs Memory Leaks & Lifecycle Disposal Battery', () => {
         },
       };
 
-      const unobserveSpy = vi.spyOn(yMap, 'unobserve');
+      const unobserveSpy = vi.spyOn(yMap, 'unobserveDeep');
       const sig = yjsSignal<Record<string, string>>(yMap, {
         destroyRef: mockDestroyRef,
       });
@@ -56,7 +56,7 @@ describe('Yjs Memory Leaks & Lifecycle Disposal Battery', () => {
     it('should cleanly unobserve when repeatedly mounting and unmounting signals', () => {
       const doc = new Y.Doc();
       const yText = doc.getText('stream');
-      const unobserveSpy = vi.spyOn(yText, 'unobserve');
+      const unobserveSpy = vi.spyOn(yText, 'unobserveDeep');
 
       for (let i = 0; i < 50; i++) {
         let destroyCb: (() => void) | null = null;

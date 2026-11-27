@@ -1,7 +1,7 @@
 import { computed, DestroyRef, inject, signal, type Signal } from '@angular/core';
 import type * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
-import { YjsDocService } from './yjs-provider.service';
+import { YjsDocService } from '@angular-helpers/yjs';
 
 export interface YjsIndexeddbRef {
   /** Signal reflecting whether local IndexedDB document hydration has completed */
@@ -22,9 +22,6 @@ export interface YjsIndexeddbRef {
  * Reactive Angular adapter for y-indexeddb offline persistence provider.
  * Persists a Y.Doc to IndexedDB and exposes hydration Signals.
  * SSR-safe: gracefully falls back when indexedDB is unavailable in non-browser environments.
- *
- * @param name The IndexedDB database key name
- * @param doc The target Y.Doc instance (defaults to the injected `YjsDocService.doc`)
  */
 export function injectYjsIndexeddb(
   name: string,
