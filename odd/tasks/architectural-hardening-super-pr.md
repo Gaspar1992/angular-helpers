@@ -21,16 +21,17 @@ Base `main` commit: `a6e188027c2c1b2be4072069d1eacb44683a977e`
 
 ## Tasks
 
-| ID  | Task                                                                                                        | Specs | Route             | Risk                                   | Commit | Status  |
-| --- | ----------------------------------------------------------------------------------------------------------- | ----- | ----------------- | -------------------------------------- | ------ | ------- |
-| T1  | Workspace, Dependencies, CI/CD, Release & Tooling Hardening                                                 | S1    | inline            | item 5 (delivery/environment)          | —      | pending |
-| T2  | `@angular-helpers/core` & `@angular-helpers/browser-web-apis` Hardening + Tests                             | S2    | inline            | item 3 (shared public contracts)       | —      | pending |
-| T3  | `@angular-helpers/storage` & `@angular-helpers/security` Hardening + Tests                                  | S3    | inline            | item 2 (security/crypto)               | —      | pending |
-| T4a | `@angular-helpers/worker-http` & `@angular-helpers/yjs` Hardening + Tests                                   | S4    | inline            | item 3, 4 (entrypoints, concurrency)   | —      | pending |
-| T4b | `@angular-helpers/openlayers`, `@angular-helpers/testing` & `@angular-helpers/schematics` Hardening + Tests | S4    | inline            | item 3 (public component/testing APIs) | —      | pending |
-| T5  | `apps/web` & `apps/web-e2e` Hardening, Docs Completeness & Tests                                            | S5    | inline            | item 2, 3 (XSS sanitizer, SSR, docs)   | —      | pending |
-| T6  | Final Full Verification & Independent Verifier Gate                                                         | S6    | inline + verifier | —                                      | —      | pending |
+| ID  | Task                                                                                                        | Specs | Route             | Risk                                   | Commit             | Status |
+| --- | ----------------------------------------------------------------------------------------------------------- | ----- | ----------------- | -------------------------------------- | ------------------ | ------ |
+| T1  | Workspace, Dependencies, CI/CD, Release & Tooling Hardening                                                 | S1    | inline            | item 5 (delivery/environment)          | `4411118`          | done   |
+| T2  | `@angular-helpers/core` & `@angular-helpers/browser-web-apis` Hardening + Tests                             | S2    | inline            | item 3 (shared public contracts)       | `ab67cf1`          | done   |
+| T3  | `@angular-helpers/storage` & `@angular-helpers/security` Hardening + Tests                                  | S3    | inline            | item 2 (security/crypto)               | `ce493e1`          | done   |
+| T4a | `@angular-helpers/worker-http` & `@angular-helpers/yjs` Hardening + Tests                                   | S4    | inline            | item 3, 4 (entrypoints, concurrency)   | `bbcc996`          | done   |
+| T4b | `@angular-helpers/openlayers`, `@angular-helpers/testing` & `@angular-helpers/schematics` Hardening + Tests | S4    | inline            | item 3 (public component/testing APIs) | `e1f40e5`          | done   |
+| T5  | `apps/web` & `apps/web-e2e` Hardening, Docs Completeness & Tests                                            | S5    | inline            | item 2, 3 (XSS sanitizer, SSR, docs)   | `bf3cc3a`          | done   |
+| T6  | Final Full Verification & Independent Verifier Gate                                                         | S6    | inline + verifier | —                                      | `0d91412..38545cf` | done   |
 
 ## Log
 
 - **L1 (2026-11-26):** User request verbatim: `"Quiero que lo ataques todo en una Super PR, genera tambien todos los test que necesites y adelante"`.
+- **L2 (2026-11-27):** Full verification gate passed (`pnpm format:check` 981 files, `pnpm lint`, `pnpm build:packages:prod` 8/8 libs, `pnpm lint:packages` publint+attw 8/8, `pnpm nx build web` SSR + 151 prerendered routes, `pnpm test:ci` 274/274 Vitest suites / 1989/1989 tests + coverage thresholds + `@angular-helpers/schematics` 3/3 suites / 5/5 tests, `pnpm exec knip --exclude types,exports,duplicates,optionalPeerDependencies`, `pnpm exec tsx scripts/verify-docs-consistency.ts`). Independent read-only verifier (`cd1c5099-4299-445a-8edd-6ab0204b5fc0`) returned `PASS` for `S1`–`S6` with zero blockers.
