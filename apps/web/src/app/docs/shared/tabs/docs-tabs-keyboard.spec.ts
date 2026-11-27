@@ -41,5 +41,13 @@ describe('DocsTabsComponent keyboard navigation', () => {
     buttons[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
     fixture.detectChanges();
     expect(fixture.componentInstance.active()).toBe('api');
+
+    buttons[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.active()).toBe('guides');
+
+    buttons[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.active()).toBe('guides');
   });
 });

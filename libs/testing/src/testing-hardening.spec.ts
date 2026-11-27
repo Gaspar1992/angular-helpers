@@ -74,11 +74,34 @@ describe('testing hardening regressions', () => {
     });
     const restoreIdb = mockIndexedDB();
     try {
-      const opened = await new Promise<boolean>((resolve) => {
+      const opened = await new Promise<IDBDatabase>((resolve) => {
         const req = globalThis.indexedDB.open('test-db', 1);
-        req.onsuccess = () => resolve(true);
+        req.onupgradeneeded = () => {
+          req.result.objectStoreNames.contains('store');
+          req.result.createObjectStore('store');
+        };
+        req.onsuccess = () => resolve(req.result);
       });
-      expect(opened).toBe(true);
+      const tx = opened.transaction('store', 'readwrite');
+      const store = tx.objectStore('store');
+      store.get('k');
+      store.getAll();
+      store.getAllKeys();
+      store.put({});
+      store.add({});
+      store.delete('k');
+      store.clear();
+      store.count();
+      store.openCursor();
+      store.openKeyCursor();
+      tx.abort();
+      opened.close();
+      globalThis.indexedDB.deleteDatabase('test-db');
+      expect(globalThis.indexedDB.cmp('a', 'b')).toBe(-1);
+      expect(globalThis.IDBKeyRange.lowerBound(1)).toEqual({ lower: 1 });
+      expect(globalThis.IDBKeyRange.upperBound(5)).toEqual({ upper: 5 });
+      expect(globalThis.IDBKeyRange.bound(1, 5)).toEqual({ lower: 1, upper: 5 });
+      expect(globalThis.IDBKeyRange.only(3)).toEqual({ lower: 3, upper: 3 });
     } finally {
       restoreIdb();
       Object.defineProperty(globalThis, 'indexedDB', {

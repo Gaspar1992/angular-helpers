@@ -32,4 +32,15 @@ describe('sanitizeBlogHtml', () => {
     expect(clean).toContain('<div class="code-block-wrapper">');
     expect(clean).toContain('<code class="hljs language-ts">const x = 1;</code>');
   });
+
+  it('handles comments, style blocks, self-closing tags, and data:text/html src attributes', () => {
+    const html =
+      '<!-- secret --><style>body{display:none}</style><unknown>drop</unknown><p>Keep<br/><img src="data:text/html,<script>" alt="x"/></p>';
+    const clean = sanitizeBlogHtml(html);
+
+    expect(clean).not.toContain('secret');
+    expect(clean).not.toContain('display:none');
+    expect(clean).not.toContain('<unknown>');
+    expect(clean).toContain('<p>Keep<br><img src="#" alt="x"></p>');
+  });
 });

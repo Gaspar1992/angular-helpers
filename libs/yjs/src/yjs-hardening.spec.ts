@@ -68,6 +68,39 @@ describe('yjs hardening regressions', () => {
     expect(input.selectionEnd).toBe(8);
   });
 
+  it('handles IME composition and remote delete before cursor in YjsTextDirective', () => {
+    @Component({
+      imports: [YjsTextDirective],
+      template: `<input [yjsText]="yText" />`,
+    })
+    class CompositionHostComponent {
+      doc = new Y.Doc();
+      yText = this.doc.getText('editor');
+    }
+
+    TestBed.configureTestingModule({ imports: [CompositionHostComponent] });
+    const fixture = TestBed.createComponent(CompositionHostComponent);
+    fixture.componentInstance.yText.insert(0, 'abcdef');
+    fixture.detectChanges();
+
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.focus();
+    input.setSelectionRange(4, 4);
+
+    input.dispatchEvent(new Event('compositionstart'));
+    input.value = 'abcdXef';
+    input.dispatchEvent(new Event('input'));
+    expect(fixture.componentInstance.yText.toString()).toBe('abcdef');
+
+    input.dispatchEvent(new Event('compositionend'));
+    expect(fixture.componentInstance.yText.toString()).toBe('abcdXef');
+
+    fixture.componentInstance.doc.transact(() => {
+      fixture.componentInstance.yText.delete(0, 2);
+    }, 'remote');
+    expect(input.value).toBe('cdXef');
+  });
+
   it('guards SSR safely in injectYjsWebsocket', () => {
     TestBed.configureTestingModule({
       providers: [{ provide: PLATFORM_ID, useValue: 'server' }],
