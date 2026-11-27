@@ -155,7 +155,7 @@ import { SiteFooterComponent } from '../shared/components/site-footer/site-foote
               id="packages-title"
               class="text-[2.5rem] sm:text-[3.5rem] font-black text-base-content tracking-tighter leading-none m-0 mb-16 text-center text-balance"
             >
-              Eight packages. <br class="sm:hidden" />Zero bloat.
+              Nine packages. <br class="sm:hidden" />Zero bloat.
             </h2>
 
             <div class="grid grid-cols-1 @4xl:grid-cols-2 gap-8">
