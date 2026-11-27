@@ -1,5 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
+  "rules": {
+    "types": "off",
+    "exports": "off",
+    "duplicates": "off",
+    "optionalPeerDependencies": "off"
+  },
   "workspaces": {
     ".": {
       "entry": [

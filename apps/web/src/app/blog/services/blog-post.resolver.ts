@@ -118,10 +118,19 @@ const BLOCKED_CONTENT_TAGS = new Set([
 
 function isSafeUrl(value: string): boolean {
   const normalized = value.replace(/[\u0000-\u0020\u007f]+/g, '').toLowerCase();
+  if (!normalized || normalized.startsWith('#') || normalized.startsWith('/')) {
+    return true;
+  }
+  const colonIdx = normalized.indexOf(':');
+  const slashIdx = normalized.indexOf('/');
+  if (colonIdx === -1 || (slashIdx !== -1 && slashIdx < colonIdx)) {
+    return true;
+  }
   return (
-    !normalized.startsWith('javascript:') &&
-    !normalized.startsWith('vbscript:') &&
-    !normalized.startsWith('data:text/html')
+    normalized.startsWith('https://') ||
+    normalized.startsWith('http://') ||
+    normalized.startsWith('mailto:') ||
+    normalized.startsWith('tel:')
   );
 }
 
