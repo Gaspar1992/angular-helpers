@@ -8,7 +8,7 @@ describe('worker-http ng-add schematic', () => {
   it('ng-add creates tsconfig.worker.json without polluting root tsconfig.json and handles nested providers', async () => {
     const collectionPath = path.resolve(
       process.cwd(),
-      'libs/worker-http/schematics/collection.json',
+      'dist/worker-http/schematics/collection.json',
     );
     const runner = new SchematicTestRunner('@angular-helpers/worker-http', collectionPath);
     const tree = Tree.empty();
@@ -37,6 +37,6 @@ describe('worker-http ng-add schematic', () => {
     expect(appConfig).toContain('provideRouter([])');
 
     const workerFile = resultTree.readContent('src/app/custom/my.worker.ts');
-    expect(workerFile).toContain('@angular-helpers/worker-http/interceptors');
+    expect(workerFile).toContain('@angular-helpers/worker-http/backend');
   });
 });
