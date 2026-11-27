@@ -11,7 +11,7 @@ test.describe('Docs navigation, blog, and search modal', () => {
     const firstArticleLink = page.locator('article h2 a').first();
     await expect(firstArticleLink).toBeVisible();
     await firstArticleLink.click();
-    await expect(page.locator('article h1')).toBeVisible();
+    await expect(page.locator('article header h1')).toBeVisible();
   });
 
   test('opens search modal with keyboard shortcut and closes with Escape', async ({ page }) => {
