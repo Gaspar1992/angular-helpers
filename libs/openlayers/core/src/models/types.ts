@@ -5,10 +5,10 @@ export type Extent = [number, number, number, number];
 export type Pixel = [number, number];
 export type FeatureId = string;
 
-export interface Feature {
+export interface Feature<P extends Record<string, unknown> = Record<string, unknown>> {
   id: FeatureId;
   geometry: Geometry;
-  properties?: Record<string, unknown>;
+  properties?: P;
   style?: Style;
 }
 

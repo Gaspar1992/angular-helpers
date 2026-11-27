@@ -6,4 +6,6 @@
 </a>
 <app-nav />
 <router-outlet />
+@defer (when search.isOpen()) {
 <app-search-modal />
+}

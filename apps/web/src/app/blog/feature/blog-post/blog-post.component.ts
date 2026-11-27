@@ -9,6 +9,7 @@ import type { BlogPostData } from '../../services/blog-post.resolver';
   selector: 'app-blog-post',
   encapsulation: ViewEncapsulation.None,
   imports: [RouterLink, SiteFooterComponent],
+  styleUrl: './blog-post.component.css',
   host: {
     '(click)': 'onArticleClick($event)',
   },
@@ -41,16 +42,48 @@ import type { BlogPostData } from '../../services/blog-post.resolver';
             >
               {{ d.meta.title }}
             </h1>
-            <time
-              [attr.datetime]="d.meta.publishedAt"
-              class="text-[10px] font-black text-base-content/50 uppercase tracking-[0.2em] flex items-center gap-3"
-            >
-              <span
-                class="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(59,130,246,0.5)]"
-              ></span>
-              Published {{ d.meta.publishedAt }}
-            </time>
+            <div class="flex flex-wrap items-center gap-4">
+              <time
+                [attr.datetime]="d.meta.publishedAt"
+                class="text-[10px] font-black text-base-content/50 uppercase tracking-[0.2em] flex items-center gap-3"
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                ></span>
+                Published {{ d.meta.publishedAt }}
+              </time>
+              @if (d.readingTimeMinutes) {
+                <span
+                  class="text-[10px] font-black text-base-content/50 uppercase tracking-[0.2em]"
+                >
+                  · {{ d.readingTimeMinutes }} min read
+                </span>
+              }
+            </div>
           </header>
+
+          @if (d.toc && d.toc.length > 1) {
+            <nav
+              aria-label="Table of contents"
+              class="mb-12 p-5 rounded-2xl bg-base-200/60 border border-base-content/10"
+            >
+              <div class="text-xs font-black uppercase tracking-[0.18em] text-base-content/60 mb-3">
+                On this page
+              </div>
+              <ul class="list-none p-0 m-0 flex flex-col gap-1.5 text-sm">
+                @for (heading of d.toc; track heading.id) {
+                  <li [class.pl-4]="heading.level === 3">
+                    <a
+                      [href]="'#' + heading.id"
+                      class="text-base-content/75 hover:text-primary no-underline font-medium transition-colors"
+                    >
+                      {{ heading.text }}
+                    </a>
+                  </li>
+                }
+              </ul>
+            </nav>
+          }
 
           <div class="prose-angular" [innerHTML]="d.html"></div>
         </article>

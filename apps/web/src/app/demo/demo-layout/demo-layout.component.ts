@@ -43,7 +43,6 @@ const DEMO_GROUPS: DemoGroup[] = [
   { path: '/demo/storage', label: 'Storage', icon: '💾' },
   { path: '/demo/yjs', label: 'Yjs', icon: '🔄' },
   { path: '/demo/router-resources', label: 'Router', icon: '🧭' },
-  { path: '/demo/library-services', label: 'QA Harness', icon: '🛠️' },
 ];
 
 @Component({
@@ -54,7 +53,7 @@ const DEMO_GROUPS: DemoGroup[] = [
       class="min-h-screen bg-base-100 text-base-content flex flex-col font-sans selection:bg-primary/30"
     >
       <!-- Header -->
-      <header class="demo-header sticky top-0 z-100">
+      <header class="demo-header sticky top-[56px] z-[90]">
         <div class="max-width-container h-15 flex items-center justify-between gap-4">
           <!-- Logo -->
           <a routerLink="/" class="demo-logo-link group">

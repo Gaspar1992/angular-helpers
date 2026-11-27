@@ -28,7 +28,7 @@ const DEFAULT_EVENTS = ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scro
   providedIn: 'root',
 })
 export class SessionIdleService {
-  private ngZone = inject(NgZone);
+  private ngZone = inject(NgZone, { optional: true });
   private document = inject(DOCUMENT);
   private platformId = inject(PLATFORM_ID);
   private injector = inject(Injector);
@@ -67,7 +67,9 @@ export class SessionIdleService {
 
     const eventsToTrack = config.events || DEFAULT_EVENTS;
 
-    this.ngZone.runOutsideAngular(() => {
+    const runOutside = (fn: () => void) => (this.ngZone ? this.ngZone.runOutsideAngular(fn) : fn());
+
+    runOutside(() => {
       const observables = eventsToTrack.map((ev) => fromEvent(this.document, ev));
       this.eventSubscription = merge(...observables)
         .pipe(throttleTime(500))
@@ -114,7 +116,8 @@ export class SessionIdleService {
       const warningThreshold = this.config.warningThresholdMs || 0;
       const shouldBeWarning = remaining <= warningThreshold;
 
-      this.ngZone.run(() => {
+      const runIn = (fn: () => void) => (this.ngZone ? this.ngZone.run(fn) : fn());
+      runIn(() => {
         this._timeRemaining.set(remaining);
         if (this._isWarning() !== shouldBeWarning) {
           this._isWarning.set(shouldBeWarning);
@@ -129,7 +132,8 @@ export class SessionIdleService {
     // Restore config temporarily to check for autoClear flags
     this.config = config;
 
-    this.ngZone.run(() => {
+    const runIn = (fn: () => void) => (this.ngZone ? this.ngZone.run(fn) : fn());
+    runIn(() => {
       this._timeRemaining.set(0);
       this._isIdle.set(true);
       this._timeoutSubject.next();

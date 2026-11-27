@@ -11,7 +11,7 @@ import {
 
 @Injectable()
 export class DeviceOrientationService extends BrowserApiBaseService {
-  private readonly ngZone = inject(NgZone);
+  private readonly ngZone = inject(NgZone, { optional: true });
   private readonly permission = signal<'prompt' | 'granted' | 'denied'>(
     !this.isSupported()
       ? 'denied'

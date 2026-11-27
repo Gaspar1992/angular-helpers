@@ -1,6 +1,6 @@
 # 🧪 @angular-helpers/testing
 
-Streamlined testing utilities and intuitive mocks for modern Angular applications. Provides a lightweight, ergonomic `render()` wrapper over `TestBed` designed specifically for Angular Signals, Standalone Components, and Zoneless testing with Vitest.
+Lightweight, zoneless-first Angular 22+ component and signal testing utilities — `render()` with strongly typed `ComponentInputs<T>` / `ComponentOutputs<T>`, semantic DOM queries (`getByRole`, `getByText`, `getByLabelText`), `rerender()`, and async signal flush helpers.
 
 ---
 
@@ -9,75 +9,52 @@ Streamlined testing utilities and intuitive mocks for modern Angular application
 ### 1. Installation
 
 ```bash
-pnpm add @angular-helpers/testing -D
+pnpm add -D @angular-helpers/testing
 ```
 
-### 2. Component Testing with `render()`
+### 2. Rendering & Semantic Queries
 
 ```typescript
-import { Component, input, output } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { render } from '@angular-helpers/testing';
+import { vi, expect, it } from 'vitest';
+import { ProfileCardComponent } from './profile-card.component';
 
-@Component({
-  selector: 'app-user-card',
-  template: `
-    <h2>{{ name() }}</h2>
-    <button (click)="select.emit(name())">Select</button>
-  `,
-})
-export class UserCardComponent {
-  readonly name = input.required<string>();
-  readonly select = output<string>();
-}
+it('renders inputs, handles semantic queries, and emits typed outputs', async () => {
+  const onSave = vi.fn<(id: string) => void>();
 
-// In test suite:
-describe('UserCardComponent', () => {
-  it('should render and interact seamlessly', async () => {
-    let selectedName = '';
-    const { query, click } = await render(UserCardComponent, {
-      inputs: { name: 'Alice' },
-      outputs: { select: (val: string) => (selectedName = val) },
-    });
-
-    expect(query('h2')?.textContent).toBe('Alice');
-    click('button');
-    expect(selectedName).toBe('Alice');
+  const view = await render(ProfileCardComponent, {
+    providers: [provideZonelessChangeDetection()],
+    inputs: { name: 'Ada' },
+    outputs: { saved: onSave },
   });
+
+  expect(view.getByText('Ada')).toBeTruthy();
+  view.getByRole('button', { name: 'Save' }).click();
+  expect(onSave).toHaveBeenCalledWith('ada-1');
+
+  await view.rerender({ name: 'Grace' });
+  expect(view.getByText('Grace')).toBeTruthy();
 });
 ```
 
 ---
 
-## Testing Utilities Matrix
+## Core Primitives
 
-| Utility                                | Domain                | Description                                                                                           |
-| :------------------------------------- | :-------------------- | :---------------------------------------------------------------------------------------------------- |
-| `render(component, options)`           | **Component Testing** | Instantiates component, binds Signal `input()` and `output()`, and returns query/interaction helpers. |
-| `MockComponent(component, options)`    | **Mocking**           | Creates lightweight standalone mock representations of child components (supporting CVA).             |
-| `MockPipe(pipe, transformFn)`          | **Mocking**           | Generates mock pipes with custom transform behavior.                                                  |
-| `provideMockService(serviceClass)`     | **DI Mocks**          | Auto-spies on every method of an Angular service (Vitest & Jest compatible).                          |
-| `provideMockRouter(options)`           | **Routing Mocks**     | Simulates `Router` navigation without loading route trees.                                            |
-| `provideMockActivatedRoute(state)`     | **Routing Mocks**     | Simulates `paramMap`, `queryParams`, and route data observables/signals.                              |
-| `mockHttpRoute(controller, url, resp)` | **HTTP Mocks**        | Expressive single-line HTTP mock responder for `HttpTestingController`.                               |
-| `flushEffects()`                       | **Signals**           | Synchronously evaluates pending `effect()` notification queues in the test environment.               |
+| Primitive                                    | Description                                                                                       |
+| :------------------------------------------- | :------------------------------------------------------------------------------------------------ |
+| `render(component, options?)`                | Renders standalone components with typed `inputs`, `outputs`, and optional projection `template`. |
+| `getByText` / `getByRole` / `getByLabelText` | Semantic, accessibility-friendly DOM queries on `RenderResult<T>`.                                |
+| `rerender(inputs)`                           | Updates signal inputs via `ComponentRef.setInput()` and stabilizes the fixture.                   |
+| `createSignalHarness()`                      | Reactive signal testing harness and `flushMicrotasks()` utilities.                                |
+| `mockBrowserApis()`                          | SSR/Vitest-safe mocks for `matchMedia`, observers, clipboard, and storage.                        |
 
 ---
 
-## Key Guarantees
+## Interactive Documentation
 
-- **Signals-First**: Seamlessly sets both classic `@Input()` and modern `input()` signals.
-- **Content Projection**: Pass inline template with `<ng-content>` projection and test wrapper hosts automatically.
-- **Zero Boilerplate**: Replaces repetitive `TestBed.configureTestingModule`, `createComponent`, and `detectChanges` with one `render()` call.
-- **Runner Agnostic**: Built for Vitest, Jest, and Karma test environments.
-
----
-
-## Interactive Documentation & Demos
-
-API guides and testing patterns:
-👉 **[Angular Helpers Testing Docs](https://gaspar1992.github.io/angular-helpers/docs/testing)**
-
----
+👉 **[Testing Docs](https://gaspar1992.github.io/angular-helpers/docs/testing)**
 
 ## License
 

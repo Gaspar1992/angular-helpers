@@ -44,7 +44,19 @@ export class EntityStore<Id, Entity> {
       sig = signal(this._rawMap.get(id));
       this._entitySignals.set(id, sig);
     }
-    return computed(() => this._entitySignals.get(id)?.() ?? this.entities().get(id));
+    return computed(() => {
+      let currentSig = this._entitySignals.get(id);
+      if (currentSig) {
+        return currentSig();
+      }
+      const value = this.entities().get(id);
+      if (value !== undefined) {
+        currentSig = signal(value);
+        this._entitySignals.set(id, currentSig);
+        return currentSig();
+      }
+      return undefined;
+    });
   }
 
   /**

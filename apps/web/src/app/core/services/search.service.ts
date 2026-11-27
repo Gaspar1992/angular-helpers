@@ -11,7 +11,6 @@ import {
 } from 'rxjs/operators';
 import { injectWorkerPool, injectPlatform } from '@angular-helpers/core';
 import { PACKAGES } from '../config/packages.data';
-import { DOCS_NAV_LIBRARIES } from '../../docs/config/docs-nav.data';
 
 export interface SearchResult {
   type: 'docs' | 'blog' | 'demo';
@@ -43,27 +42,6 @@ export class SearchService {
       icon: p.icon,
       tags: p.highlights,
     })),
-    // Individual API Doc Pages
-    ...DOCS_NAV_LIBRARIES.flatMap((lib) =>
-      lib.sections.flatMap((section) =>
-        section.items
-          .filter((item) => !packageUrls.has(item.route))
-          .map((item) => ({
-            type: 'docs' as const,
-            title: item.label,
-            description: `${lib.label} — ${section.title}`,
-            url: item.route,
-            icon: packageIcons.get(lib.id) ?? '📘',
-            tags: [
-              lib.id,
-              lib.label,
-              section.title,
-              ...(item.hasFn ? ['inject', 'function'] : []),
-              ...(item.experimental ? ['experimental'] : []),
-            ],
-          })),
-      ),
-    ),
   ];
 
   private loadedExtra = false;
@@ -72,11 +50,32 @@ export class SearchService {
     if (this.loadedExtra) return;
     this.loadedExtra = true;
     try {
-      const [{ BLOG_POSTS }, { PUBLIC_DEMO_SECTIONS }] = await Promise.all([
+      const [{ DOCS_NAV_LIBRARIES }, { BLOG_POSTS }, { PUBLIC_DEMO_SECTIONS }] = await Promise.all([
+        import('../../docs/config/docs-nav.data'),
         import('../../blog/config/posts.data'),
         import('../../demo/config/demo.config'),
       ]);
       this.index.push(
+        ...DOCS_NAV_LIBRARIES.flatMap((lib) =>
+          lib.sections.flatMap((section) =>
+            section.items
+              .filter((item) => !packageUrls.has(item.route))
+              .map((item) => ({
+                type: 'docs' as const,
+                title: item.label,
+                description: `${lib.label} — ${section.title}`,
+                url: item.route,
+                icon: packageIcons.get(lib.id) ?? '📘',
+                tags: [
+                  lib.id,
+                  lib.label,
+                  section.title,
+                  ...(item.hasFn ? ['inject', 'function'] : []),
+                  ...(item.experimental ? ['experimental'] : []),
+                ],
+              })),
+          ),
+        ),
         ...BLOG_POSTS.map((post) => ({
           type: 'blog' as const,
           title: post.title,
@@ -117,14 +116,29 @@ export class SearchService {
 
         void this.loadExtraIndex();
         return this.index
-          .filter((item) => {
-            return (
-              item.title.toLowerCase().includes(query) ||
-              item.description.toLowerCase().includes(query) ||
-              item.tags?.some((tag) => tag.toLowerCase().includes(query))
-            );
+          .map((item) => {
+            const title = item.title.toLowerCase();
+            const desc = item.description.toLowerCase();
+            const tags = (item.tags ?? []).map((t) => t.toLowerCase());
+            let score = 0;
+
+            if (title === query) score += 100;
+            else if (title.startsWith(query)) score += 60;
+            else if (title.includes(query)) score += 40;
+
+            if (tags.some((t) => t === query)) score += 30;
+            else if (tags.some((t) => t.includes(query))) score += 20;
+
+            if (desc.includes(query)) score += 10;
+
+            if (score > 0 && item.type === 'docs') score += 5;
+
+            return { item, score };
           })
-          .slice(0, 8);
+          .filter((entry) => entry.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .map((entry) => entry.item)
+          .slice(0, 10);
       },
     });
   })();

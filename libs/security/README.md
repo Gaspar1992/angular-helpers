@@ -1,6 +1,6 @@
 # 🛡️ @angular-helpers/security
 
-A comprehensive client-side security suite for Angular applications — ReDoS prevention via Web Workers, WebCrypto encryption & HMAC signing, encrypted storage, input sanitization, password entropy scoring, and Reactive & Signal Forms validators.
+Tree-shakable client-side security suite for Angular 22+ — ReDoS-safe Web Worker regexes, WebCrypto AES-GCM/HMAC, encrypted storage, XSS sanitization, rate limiting, session idle tracking, and Signal/Reactive Forms validators.
 
 ---
 
@@ -12,54 +12,54 @@ A comprehensive client-side security suite for Angular applications — ReDoS pr
 pnpm add @angular-helpers/security
 ```
 
-### 2. Provider Setup
+### 2. Tree-Shakable Provider Setup
 
-Configure security capabilities centrally at bootstrap:
+Import only the security features your app needs using `with*()` helpers:
 
 ```typescript
-// app.config.ts
 import { ApplicationConfig } from '@angular/core';
-import { provideSecurity } from '@angular-helpers/security';
+import {
+  provideSecurity,
+  withWebCrypto,
+  withInputSanitizer,
+  withRateLimiter,
+  withSessionIdle,
+} from '@angular-helpers/security';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideSecurity({
-      enableRegexSecurity: true,
-      enableWebCrypto: true,
-      enableSecureStorage: true,
-      enableInputSanitizer: true,
-      enablePasswordStrength: true,
-      enableJwt: true,
-    }),
+    provideSecurity(
+      withWebCrypto(),
+      withInputSanitizer(),
+      withRateLimiter({
+        defaults: {
+          login: { type: 'sliding-window', max: 5, windowMs: 60_000 },
+        },
+      }),
+      withSessionIdle(),
+    ),
   ],
 };
 ```
 
-### 3. Usage Example
+### 3. Signal-First Component Usage
 
 ```typescript
-import { Component, inject, signal } from '@angular/core';
-import {
-  RegexSecurityService,
-  WebCryptoService,
-  PasswordStrengthService,
-} from '@angular-helpers/security';
+import { Component } from '@angular/core';
+import { injectRateLimiter, injectSessionIdle } from '@angular-helpers/security';
 
 @Component({
-  selector: 'app-security-demo',
+  selector: 'app-login-guard',
   template: `
-    <input (input)="checkPassword($any($event.target).value)" placeholder="Enter password" />
-    <p>Password Strength: {{ strengthScore() }} / 4</p>
+    <p>Attempts left: {{ limiter.remaining('login')() }}</p>
+    @if (idle.isWarning()) {
+      <p>Session expiring soon!</p>
+    }
   `,
 })
-export class SecurityDemoComponent {
-  private readonly passwordService = inject(PasswordStrengthService);
-  readonly strengthScore = signal(0);
-
-  checkPassword(pwd: string) {
-    const analysis = this.passwordService.evaluate(pwd);
-    this.strengthScore.set(analysis.score);
-  }
+export class LoginGuardComponent {
+  readonly limiter = injectRateLimiter();
+  readonly idle = injectSessionIdle({ timeoutMs: 300_000, warningThresholdMs: 30_000 });
 }
 ```
 
@@ -67,37 +67,24 @@ export class SecurityDemoComponent {
 
 ## Core Primitives
 
-| Service / Entry Point                    | Domain                | Description                                                                                                   |
-| :--------------------------------------- | :-------------------- | :------------------------------------------------------------------------------------------------------------ |
-| `RegexSecurityService`                   | **ReDoS Defense**     | Executes regex in isolated Web Workers with configurable timeout to prevent catastrophic backtracking.        |
-| `WebCryptoService`                       | **Cryptography**      | AES-GCM encryption/decryption, SHA-256 hashing, HMAC signing, and cryptographic UUIDs.                        |
-| `SecureStorageService`                   | **Encrypted Storage** | Transparent AES-GCM encrypted `localStorage` / `sessionStorage` with passphrase or ephemeral keys.            |
-| `InputSanitizerService`                  | **XSS Prevention**    | Strips dangerous tags, attributes, and scripts from user-supplied HTML and URLs.                              |
-| `PasswordStrengthService`                | **Auth Security**     | NIST-compliant entropy scoring (0–4), sequence detection, and common password blocking.                       |
-| `JwtInspectorService`                    | **Tokens**            | Client-side JWT payload inspection, claims extraction, and expiration verification without full parser bloat. |
-| `RateLimiterService`                     | **Client Throttling** | Sliding-window client-side rate limiting for sensitive operations.                                            |
-| `SensitiveClipboardService`              | **Data Protection**   | Auto-clears sensitive copied data (passwords, tokens) from clipboard after a configurable delay.              |
-| `@angular-helpers/security/forms`        | **Reactive Forms**    | `SecurityValidators` for Reactive Forms (`strongPassword`, `safeHtml`, `safeUrl`, `noScriptInjection`).       |
-| `@angular-helpers/security/signal-forms` | **Signal Forms**      | Native Angular Signal Forms integration with synchronous and async `hibpPassword` validation.                 |
+| Primitive / Entry Point                  | Domain                | Description                                                                                        |
+| :--------------------------------------- | :-------------------- | :------------------------------------------------------------------------------------------------- |
+| `provideSecurity(...features)`           | **DI / Tree-Shaking** | Registers only selected `with*()` security capabilities.                                           |
+| `injectRateLimiter()`                    | **Throttling**        | Signal-first sliding-window / token-bucket rate limiter (`tryConsume`, `remaining`, `canExecute`). |
+| `injectSessionIdle()`                    | **Session**           | Zoneless idle & warning signal monitor with automatic `DestroyRef` cleanup.                        |
+| `RegexSecurityService`                   | **ReDoS Defense**     | Evaluates regex patterns in an isolated Web Worker with timeout protection.                        |
+| `WebCryptoService`                       | **Cryptography**      | Native AES-GCM encryption, SHA-256 hashing, and HMAC signing.                                      |
+| `InputSanitizerService`                  | **XSS Defense**       | Allowlist HTML/URL sanitization.                                                                   |
+| `PasswordStrengthService`                | **Auth**              | NIST-aligned entropy scoring and breach checks (`HibpService`).                                    |
+| `@angular-helpers/security/forms`        | **Reactive Forms**    | `SecurityValidators` (`strongPassword`, `safeHtml`, `safeUrl`).                                    |
+| `@angular-helpers/security/signal-forms` | **Signal Forms**      | Native Angular Signal Forms validators including async HIBP checks.                                |
 
 ---
 
-## Architecture Guarantees
+## Interactive Documentation & Demo
 
-- **Non-Blocking Crypto & Regex**: Expensive operations are delegated to Web Workers or native browser Crypto API threads, preserving 60fps UI performance.
-- **Zoneless Ready**: Built with Angular Signals; no Zone.js dependencies.
-- **SSR Safe**: Transparently no-ops or provides safe fallbacks when executing on the server.
-- **Zero Heavy Dependencies**: Pure TypeScript and native Web APIs; no external crypto packages bundled.
-
----
-
-## Interactive Documentation & Demos
-
-Live interactive demonstrations and API guides:
-👉 **[Angular Helpers Security Docs](https://gaspar1992.github.io/angular-helpers/docs/security)**
-👉 **[Security Utilities Demo](https://gaspar1992.github.io/angular-helpers/demo/security)**
-
----
+👉 **[Security Docs](https://gaspar1992.github.io/angular-helpers/docs/security)**
+👉 **[Security Live Demo](https://gaspar1992.github.io/angular-helpers/demo/security)**
 
 ## License
 

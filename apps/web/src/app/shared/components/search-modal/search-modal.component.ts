@@ -1,13 +1,12 @@
 import { Component, inject, ElementRef, viewChild, effect, linkedSignal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { DOCUMENT, NgOptimizedImage } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { SearchService, type SearchResult } from '../../../core/services/search.service';
 import { DocsHistoryService } from '../../../docs/services/docs-history.service';
 
 @Component({
   selector: 'app-search-modal',
-  imports: [RouterLink, FormsModule, NgOptimizedImage],
+  imports: [RouterLink, NgOptimizedImage],
   host: {
     '(window:keydown)': 'onWindowKeydown($event)',
   },
@@ -59,8 +58,8 @@ import { DocsHistoryService } from '../../../docs/services/docs-history.service'
               type="text"
               class="flex-1 bg-transparent border-none focus-visible:outline-2 focus-visible:outline-primary rounded text-base-content text-lg font-bold placeholder:text-base-content/60"
               placeholder="Search documentation, blog, demos..."
-              [ngModel]="search.query()"
-              (ngModelChange)="search.query.set($event)"
+              [value]="search.query()"
+              (input)="onQueryInput($event)"
               (keydown.esc)="close()"
               (keydown.enter)="selectActiveResult()"
               (keydown.arrowDown)="$event.preventDefault(); navigateResults(1)"
@@ -303,6 +302,11 @@ export class SearchModalComponent {
     });
   }
 
+  protected onQueryInput(event: Event): void {
+    const value = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.search.query.set(value);
+  }
+
   protected onBackdropClick(event: MouseEvent): void {
     if (event.target === event.currentTarget) {
       this.close();
@@ -310,12 +314,6 @@ export class SearchModalComponent {
   }
 
   onWindowKeydown(e: KeyboardEvent) {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-      e.preventDefault();
-      this.search.toggle();
-      return;
-    }
-
     if (!this.search.isOpen()) return;
     if (e.key === 'Escape') {
       e.preventDefault();

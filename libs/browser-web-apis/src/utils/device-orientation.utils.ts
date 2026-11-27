@@ -51,7 +51,7 @@ export async function requestDeviceMotionPermission(): Promise<PermissionState> 
 
 export function createDeviceOrientationStream(
   config?: DeviceSensorConfig,
-  zone?: NgZone,
+  zone?: NgZone | null,
 ): Observable<DeviceOrientationData | null> {
   if (!isDeviceOrientationSupported()) {
     return of(null);
@@ -91,7 +91,7 @@ export function createDeviceOrientationStream(
 
 export function createDeviceMotionStream(
   config?: DeviceSensorConfig,
-  zone?: NgZone,
+  zone?: NgZone | null,
 ): Observable<DeviceMotionData | null> {
   if (!isDeviceMotionSupported()) {
     return of(null);

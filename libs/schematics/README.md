@@ -1,49 +1,41 @@
 # 🛠️ @angular-helpers/schematics
 
-Developer tooling and code generation schematics for the `@angular-helpers` ecosystem. Provides automated generators to scaffold new monorepo helper libraries with strict Angular best practices, path mappings, and testing setup.
+Angular CLI schematics and workspace generators for `@angular-helpers/*` — scaffold browser API services, security configurations, and zoneless signal components.
 
 ---
 
 ## Quick Path
 
-### 1. Execution
-
-Generate a new library package within the monorepo workspace:
+### 1. Installation
 
 ```bash
-# Using Nx
-pnpm nx g @angular-helpers/schematics:create-package --name=my-new-lib
-
-# Or using Angular CLI
-ng g @angular-helpers/schematics:create-package --name=my-new-lib
+pnpm add -D @angular-helpers/schematics
 ```
 
-### 2. Available Options
+### 2. Available Schematics
 
-| Option          | Type     | Required | Description                                                         |
-| :-------------- | :------- | :------- | :------------------------------------------------------------------ |
-| `--name`        | `string` | **Yes**  | Name of the new package (kebab-case, e.g. `audio-engine`).          |
-| `--description` | `string` | No       | Package summary added to the generated `package.json` and `README`. |
-| `--author`      | `string` | No       | Package author string for metadata.                                 |
+```bash
+# Add @angular-helpers/browser-web-apis to an Angular project
+ng add @angular-helpers/schematics
 
----
-
-## Schematics Collection
-
-| Schematic        | Factory                      | Description                                                                              |
-| :--------------- | :--------------------------- | :--------------------------------------------------------------------------------------- |
-| `create-package` | `./create-package/index.cjs` | Scaffolds a new helper package under `libs/<name>`, configures tsconfig, and links pnpm. |
+# Generate a browser-API-backed service
+ng generate @angular-helpers/schematics:api-service --name location --api geolocation
+```
 
 ---
 
-## Architecture & Guarantees
+## Schematics Reference
 
-- **Automated Monorepo Wiring**: Generates the package directory under `libs/<name>` with standard `tsconfig.json`, `package.json`, and initial entry points.
-- **Path Mapping Integration**: Safely modifies the root `tsconfig.json` paths mapping (`@angular-helpers/<name>`) without breaking existing aliases or duplicate registrations.
-- **Dependency Installation**: Schedules an automated `pnpm install` lifecycle task upon schematic completion to link workspace packages immediately.
-- **Strict Linting & Formats**: Output files adhere directly to the repository's oxlint, oxfmt, and Angular standalone/signals standards.
+| Schematic     | Purpose                                                                                                |
+| :------------ | :----------------------------------------------------------------------------------------------------- |
+| `ng-add`      | Installs `@angular-helpers/browser-web-apis` and wires `provideBrowserWebApis()` into `app.config.ts`. |
+| `api-service` | Scaffolds a typed service wrapping a selected Browser Web API with unit tests.                         |
 
 ---
+
+## Interactive Documentation
+
+👉 **[Schematics Docs](https://gaspar1992.github.io/angular-helpers/docs/schematics)**
 
 ## License
 

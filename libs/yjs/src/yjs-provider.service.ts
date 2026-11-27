@@ -1,18 +1,55 @@
-import { Injectable, type OnDestroy } from '@angular/core';
+import { Injectable, InjectionToken, type OnDestroy, type Provider } from '@angular/core';
 import * as Y from 'yjs';
 
+export const YJS_DOC = new InjectionToken<Y.Doc>('YJS_DOC');
+
 /**
- * Service providing a managed Y.Doc instance bound to the Angular dependency injection container lifecycle.
+ * Provides a `YJS_DOC` instance backed by {@link YjsDocService}.
+ * When `name` is omitted, provides the default shared `Y.Doc`.
+ */
+export function provideYjsDoc(name?: string): Provider {
+  return {
+    provide: YJS_DOC,
+    useFactory: (service: YjsDocService) => (name ? service.getDoc(name) : service.doc),
+    deps: [YjsDocService],
+  };
+}
+
+/**
+ * Service providing managed `Y.Doc` instances bound to the Angular DI lifecycle.
+ * Supports both the default `doc` and named multi-document rooms via `getDoc(name)`.
  */
 @Injectable({ providedIn: 'root' })
 export class YjsDocService implements OnDestroy {
   readonly doc = new Y.Doc();
+  private readonly namedDocs = new Map<string, Y.Doc>();
 
-  getMap<T = any>(name: string): Y.Map<T> {
+  getDoc(name: string): Y.Doc {
+    let named = this.namedDocs.get(name);
+    if (!named) {
+      named = new Y.Doc();
+      this.namedDocs.set(name, named);
+    }
+    return named;
+  }
+
+  hasDoc(name: string): boolean {
+    return this.namedDocs.has(name);
+  }
+
+  destroyDoc(name: string): void {
+    const named = this.namedDocs.get(name);
+    if (named) {
+      named.destroy();
+      this.namedDocs.delete(name);
+    }
+  }
+
+  getMap<T = unknown>(name: string): Y.Map<T> {
     return this.doc.getMap(name);
   }
 
-  getArray<T = any>(name: string): Y.Array<T> {
+  getArray<T = unknown>(name: string): Y.Array<T> {
     return this.doc.getArray(name);
   }
 
@@ -22,5 +59,9 @@ export class YjsDocService implements OnDestroy {
 
   ngOnDestroy(): void {
     this.doc.destroy();
+    for (const named of this.namedDocs.values()) {
+      named.destroy();
+    }
+    this.namedDocs.clear();
   }
 }

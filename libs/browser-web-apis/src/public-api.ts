@@ -315,6 +315,9 @@ export {
 export { injectMousePosition, type MousePosition } from './fns/inject-mouse-position';
 export { injectWindowScroll, type ScrollPosition } from './fns/inject-window-scroll';
 export { injectPermissionState, type PermissionStateRef } from './fns/inject-permission-state';
+export { injectFullscreen, type FullscreenRef } from './fns/inject-fullscreen';
+export { injectNotifications, type NotificationsRef } from './fns/inject-notifications';
+export { injectWebShare, type WebShareRef, type WebShareResult } from './fns/inject-web-share';
 
 export * from './providers';
 

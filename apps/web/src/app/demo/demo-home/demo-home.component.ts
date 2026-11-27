@@ -22,7 +22,7 @@ import { PUBLIC_DEMO_SECTIONS } from '../config/demo.config';
           Live, interactive demonstrations built with signals, OnPush, and modern Angular patterns.
         </p>
         <div class="flex gap-3 justify-center flex-wrap">
-          <span class="badge badge-primary font-bold px-4">Angular 20+</span>
+          <span class="badge badge-primary font-bold px-4">Angular 22+</span>
           <span class="badge badge-secondary font-bold px-4">Signals</span>
           <span class="badge badge-accent font-bold px-4">OnPush</span>
         </div>

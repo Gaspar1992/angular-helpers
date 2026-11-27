@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, PLATFORM_ID, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { NgOptimizedImage } from '@angular/common';
+import { NgOptimizedImage, isPlatformBrowser } from '@angular/common';
 import { SearchService } from '../../core/services/search.service';
 import { OfflineBadgeComponent } from '../components/offline-badge/offline-badge.component';
 
@@ -63,7 +63,8 @@ import { OfflineBadgeComponent } from '../components/offline-badge/offline-badge
             aria-hidden="true"
             class="hidden md:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-base-content/5 border border-base-content/5 text-[9px] font-black text-base-content/70"
           >
-            <span>Ctrl</span><span>K</span>
+            <span>{{ isMac ? '⌘' : 'Ctrl' }}</span
+            ><span>K</span>
           </kbd>
         </button>
 
@@ -88,7 +89,10 @@ import { OfflineBadgeComponent } from '../components/offline-badge/offline-badge
   `,
 })
 export class AppNavComponent {
+  private readonly platformId = inject(PLATFORM_ID);
   protected readonly search = inject(SearchService);
+  protected readonly isMac =
+    isPlatformBrowser(this.platformId) && /mac/i.test(navigator.platform ?? '');
   protected readonly navItems = [
     { label: 'Docs', path: '/docs' },
     { label: 'Demo', path: '/demo' },

@@ -102,8 +102,6 @@ const BASEMAPS: BasemapConfig[] = [
   ],
   styles: [
     `
-      @import 'ol/ol.css';
-
       @keyframes subMenuEnter {
         from {
           opacity: 0;

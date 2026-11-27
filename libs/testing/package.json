@@ -44,5 +44,16 @@
     "@angular/router": "^22.0.0",
     "rxjs": "^7.0.0 || ^8.0.0",
     "vitest": "^3.0.0 || ^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@angular/forms": {
+      "optional": true
+    },
+    "@angular/router": {
+      "optional": true
+    },
+    "vitest": {
+      "optional": true
+    }
   }
 }
