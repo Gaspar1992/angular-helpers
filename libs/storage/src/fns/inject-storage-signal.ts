@@ -1,16 +1,16 @@
 /* oxlint-disable no-console */
-import { inject, signal, DestroyRef, assertInInjectionContext } from '@angular/core';
+import {
+  inject,
+  signal,
+  effect,
+  untracked,
+  DestroyRef,
+  assertInInjectionContext,
+  type Signal,
+} from '@angular/core';
 import { resolveStorageTransport } from '../utils/resolve-transport';
 import type { StorageSignalOptions, StorageSignal } from '../interfaces/storage.types';
 
-/**
- * Injects a Signal that automatically synchronizes with a storage medium (L2).
- *
- * @param key Unique storage key.
- * @param defaultValue Initial default value.
- * @param options Storage options (type, encryption, synchronization). Defaults to `{ storageType: 'local', serializer: 'json' }`.
- * @returns A `StorageSignal<T>` that allows reading/writing data directly and querying metadata.
- */
 function safeEqual<T>(a: T, b: T): boolean {
   if (Object.is(a, b)) return true;
   if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) {
@@ -23,8 +23,17 @@ function safeEqual<T>(a: T, b: T): boolean {
   }
 }
 
+/**
+ * Injects a Signal that automatically synchronizes with a storage medium (L2).
+ * Accepts either a static `string` key or a reactive `Signal<string>` key.
+ *
+ * @param key Unique storage key or Signal emitting the active storage key.
+ * @param defaultValue Initial default value.
+ * @param options Storage options (type, encryption, synchronization). Defaults to `{ storageType: 'local', serializer: 'json' }`.
+ * @returns A `StorageSignal<T>` that allows reading/writing data directly and querying metadata.
+ */
 export function injectStorageSignal<T>(
-  key: string,
+  key: string | Signal<string>,
   defaultValue: T,
   options: StorageSignalOptions<T> = {},
 ): StorageSignal<T> {
@@ -49,77 +58,105 @@ export function injectStorageSignal<T>(
   const originalUpdate = dataSignal.update.bind(dataSignal);
 
   const transport = resolveStorageTransport();
-  const initialGeneration = writeGeneration;
+  const resolveKey = (): string => (typeof key === 'function' ? untracked(key) : key);
 
-  // 1. Load initial value from L2
-  transport
-    .read<T>(key, resolvedOptions)
-    .then((value) => {
-      if (writeGeneration !== initialGeneration) {
-        loadingSignal.set(false);
-        return;
-      }
-      if (value !== undefined) {
-        if (resolvedOptions.validator && !resolvedOptions.validator(value)) {
-          const driftError = new Error(
-            `[injectStorageSignal] Schema drift detected for key: ${key}. Data failed validation.`,
-          );
-          console.warn(driftError.message);
-          errorSignal.set(driftError);
-          originalSet(defaultValue);
-          // Auto-repair storage with default value
-          transport
-            .write(key, defaultValue, resolvedOptions)
-            .catch((err) =>
-              console.error(`[injectStorageSignal] Error repairing storage key: ${key}`, err),
-            );
-        } else {
-          originalSet(value);
-        }
-      }
-      loadingSignal.set(false);
-    })
-    .catch((error) => {
-      errorSignal.set(error instanceof Error ? error : new Error(String(error)));
-      loadingSignal.set(false);
-    });
+  const loadKey = (currentKey: string): void => {
+    const loadGeneration = ++writeGeneration;
+    if (isAsync) {
+      loadingSignal.set(true);
+    }
 
-  const persist = (newData: T) => {
     transport
-      .write(key, newData, resolvedOptions)
-      .catch((err) => console.error(`[injectStorageSignal] Error writing key: ${key}`, err));
+      .read<T>(currentKey, resolvedOptions)
+      .then((value) => {
+        if (writeGeneration !== loadGeneration) {
+          loadingSignal.set(false);
+          return;
+        }
+        if (value !== undefined) {
+          if (resolvedOptions.validator && !resolvedOptions.validator(value)) {
+            const driftError = new Error(
+              `[injectStorageSignal] Schema drift detected for key: ${currentKey}. Data failed validation.`,
+            );
+            console.warn(driftError.message);
+            errorSignal.set(driftError);
+            originalSet(defaultValue);
+            transport
+              .write(currentKey, defaultValue, resolvedOptions)
+              .catch((err) =>
+                console.error(
+                  `[injectStorageSignal] Error repairing storage key: ${currentKey}`,
+                  err,
+                ),
+              );
+          } else {
+            errorSignal.set(null);
+            originalSet(value);
+          }
+        } else {
+          originalSet(defaultValue);
+        }
+        loadingSignal.set(false);
+      })
+      .catch((error) => {
+        if (writeGeneration !== loadGeneration) {
+          return;
+        }
+        errorSignal.set(error instanceof Error ? error : new Error(String(error)));
+        loadingSignal.set(false);
+      });
   };
 
-  const customSignal = dataSignal as any;
+  if (typeof key === 'function') {
+    effect((onCleanup) => {
+      const currentKey = key();
+      loadKey(currentKey);
+      if (resolvedOptions.crossTabSync && transport.onChange) {
+        const unsubscribe = transport.onChange<T>(currentKey, (newValue) => {
+          originalSet(newValue);
+        });
+        onCleanup(() => unsubscribe());
+      }
+    });
+  } else {
+    loadKey(key);
+    if (resolvedOptions.crossTabSync && transport.onChange) {
+      const unsubscribe = transport.onChange<T>(key, (newValue) => {
+        originalSet(newValue);
+      });
+      inject(DestroyRef).onDestroy(() => unsubscribe());
+    }
+  }
+
+  const persist = (targetKey: string, newData: T) => {
+    transport
+      .write(targetKey, newData, resolvedOptions)
+      .catch((err) => console.error(`[injectStorageSignal] Error writing key: ${targetKey}`, err));
+  };
+
+  const customSignal = dataSignal as unknown as StorageSignal<T>;
 
   customSignal.set = (newValue: T) => {
     writeGeneration++;
-    persist(newValue);
+    persist(resolveKey(), newValue);
     originalSet(newValue);
-    errorSignal.set(null); // Clear errors on manual writes
+    errorSignal.set(null);
   };
 
   customSignal.update = (updater: (value: T) => T) => {
     writeGeneration++;
+    const targetKey = resolveKey();
     originalUpdate((current) => {
       const next = updater(current);
-      persist(next);
+      persist(targetKey, next);
       return next;
     });
     errorSignal.set(null);
   };
 
   // Expose metadata as read-only Signals
-  customSignal.loading = loadingSignal.asReadonly();
-  customSignal.error = errorSignal.asReadonly();
+  (customSignal as { loading: Signal<boolean> }).loading = loadingSignal.asReadonly();
+  (customSignal as { error: Signal<Error | null> }).error = errorSignal.asReadonly();
 
-  // 3. Multi-tab synchronization (only if configured and transport supports it)
-  if (resolvedOptions.crossTabSync && transport.onChange) {
-    const unsubscribe = transport.onChange<T>(key, (newValue) => {
-      originalSet(newValue);
-    });
-    inject(DestroyRef).onDestroy(() => unsubscribe());
-  }
-
-  return customSignal as StorageSignal<T>;
+  return customSignal;
 }

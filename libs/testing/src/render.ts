@@ -4,6 +4,8 @@ import {
   type InputSignal,
   type InputSignalWithTransform,
   type ModelSignal,
+  type OutputEmitterRef,
+  type OutputRef,
   type OutputRefSubscription,
   type Provider,
   type Type,
@@ -20,18 +22,36 @@ export type UnwrapSignalInput<V> =
         ? T
         : V;
 
+export type UnwrapOutput<V> =
+  V extends OutputEmitterRef<infer E>
+    ? E
+    : V extends OutputRef<infer E>
+      ? E
+      : V extends { subscribe(next: (value: infer E) => void): unknown }
+        ? E
+        : unknown;
+
 export type ComponentInputs<T> = {
   [K in keyof T]?: UnwrapSignalInput<T[K]>;
+};
+
+export type ComponentOutputs<T> = {
+  [K in keyof T]?: (event: UnwrapOutput<T[K]>) => void;
 };
 
 export interface RenderOptions<T> {
   imports?: (Type<unknown> | readonly unknown[])[];
   providers?: (Provider | EnvironmentProviders)[];
   inputs?: ComponentInputs<T>;
-  outputs?: Partial<Record<keyof T, (event: unknown) => void>>;
+  outputs?: ComponentOutputs<T>;
   hostProperties?: Record<string, unknown>;
   detectInitialChanges?: boolean;
   template?: string;
+}
+
+function matchesText(content: string | null | undefined, matcher: string | RegExp): boolean {
+  const normalized = (content ?? '').trim();
+  return typeof matcher === 'string' ? normalized.includes(matcher) : matcher.test(normalized);
 }
 
 export class RenderResult<T> {
@@ -41,6 +61,10 @@ export class RenderResult<T> {
   ) {
     this.query = this.query.bind(this);
     this.queryAll = this.queryAll.bind(this);
+    this.getByText = this.getByText.bind(this);
+    this.getByRole = this.getByRole.bind(this);
+    this.getByLabelText = this.getByLabelText.bind(this);
+    this.rerender = this.rerender.bind(this);
     this.click = this.click.bind(this);
     this.type = this.type.bind(this);
     this.fillForm = this.fillForm.bind(this);
@@ -52,6 +76,85 @@ export class RenderResult<T> {
 
   queryAll(selector: string): NodeListOf<Element> {
     return this.fixture.nativeElement.querySelectorAll(selector);
+  }
+
+  getByText(text: string | RegExp): HTMLElement {
+    const root = this.fixture.nativeElement as HTMLElement;
+    const all = Array.from(root.querySelectorAll<HTMLElement>('*'));
+    const match = all.find((el) => {
+      if (el.children.length > 0) {
+        const directText = Array.from(el.childNodes)
+          .filter((n) => n.nodeType === Node.TEXT_NODE)
+          .map((n) => n.textContent ?? '')
+          .join(' ');
+        return matchesText(directText, text);
+      }
+      return matchesText(el.textContent, text);
+    });
+    if (!match) {
+      throw new Error(`Unable to find element with text: ${String(text)}`);
+    }
+    return match;
+  }
+
+  getByRole(role: string, options?: { name?: string | RegExp }): HTMLElement {
+    const root = this.fixture.nativeElement as HTMLElement;
+    const implicitSelectors: Record<string, string> = {
+      button: 'button, input[type="button"], input[type="submit"], [role="button"]',
+      link: 'a[href], [role="link"]',
+      textbox:
+        'input:not([type]), input[type="text"], input[type="email"], input[type="search"], textarea, [role="textbox"]',
+      checkbox: 'input[type="checkbox"], [role="checkbox"]',
+      heading: 'h1, h2, h3, h4, h5, h6, [role="heading"]',
+    };
+    const selector = implicitSelectors[role] ?? `[role="${role}"]`;
+    const candidates = Array.from(root.querySelectorAll<HTMLElement>(selector));
+    const match = options?.name
+      ? candidates.find((el) =>
+          matchesText(el.getAttribute('aria-label') ?? el.textContent, options.name!),
+        )
+      : candidates[0];
+    if (!match) {
+      throw new Error(
+        `Unable to find element with role "${role}"${options?.name ? ` and name "${String(options.name)}"` : ''}`,
+      );
+    }
+    return match;
+  }
+
+  getByLabelText(text: string | RegExp): HTMLElement {
+    const root = this.fixture.nativeElement as HTMLElement;
+    const ariaMatch = Array.from(root.querySelectorAll<HTMLElement>('[aria-label]')).find((el) =>
+      matchesText(el.getAttribute('aria-label'), text),
+    );
+    if (ariaMatch) {
+      return ariaMatch;
+    }
+
+    const labels = Array.from(root.querySelectorAll<HTMLLabelElement>('label'));
+    for (const label of labels) {
+      if (!matchesText(label.textContent, text)) continue;
+      if (label.htmlFor) {
+        const escapedId =
+          typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
+            ? CSS.escape(label.htmlFor)
+            : label.htmlFor.replace(/([^\w-])/g, '\\$1');
+        const target = root.querySelector<HTMLElement>(`#${escapedId}`);
+        if (target) return target;
+      }
+      const nested = label.querySelector<HTMLElement>('input, textarea, select');
+      if (nested) return nested;
+    }
+
+    throw new Error(`Unable to find form control with label: ${String(text)}`);
+  }
+
+  async rerender(inputs: ComponentInputs<T>): Promise<void> {
+    for (const [key, val] of Object.entries(inputs)) {
+      this.fixture.componentRef.setInput(key, val);
+    }
+    this.fixture.detectChanges();
+    await this.fixture.whenStable();
   }
 
   click(selector: string): void {
@@ -156,7 +259,7 @@ export async function render<T>(
       const outputProp = componentInstance[key] as
         | { subscribe?: (cb: (event: unknown) => void) => OutputRefSubscription | void }
         | undefined;
-      const callback = options.outputs[key];
+      const callback = options.outputs[key] as ((event: unknown) => void) | undefined;
       if (outputProp && typeof outputProp.subscribe === 'function' && callback) {
         const sub = outputProp.subscribe(callback);
         if (sub && typeof sub.unsubscribe === 'function') {
