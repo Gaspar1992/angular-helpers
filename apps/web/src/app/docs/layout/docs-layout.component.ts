@@ -10,6 +10,7 @@ import {
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map, filter } from 'rxjs/operators';
 import { getNavLibrariesForVersion } from '../config/docs-nav.data';
+import { PACKAGES } from '../../core/config/packages.data';
 import { WINDOW } from '@angular-helpers/browser-web-apis';
 import { DocsVersionService, AngularVersion } from '../services/docs-version.service';
 import { VersionDropdownComponent } from '../shared/version-dropdown.component';
@@ -27,7 +28,7 @@ import { VitalsPanelComponent } from './vitals-panel.component';
   ],
   template: `
     <div
-      class="flex h-[calc(100dvh-60px)] overflow-hidden bg-base-100 text-base-content font-sans selection:bg-primary/30"
+      class="flex h-[calc(100dvh-56px)] overflow-hidden bg-base-100 text-base-content font-sans selection:bg-primary/30"
     >
       <!-- First Sidebar - Libraries -->
       <aside
@@ -249,7 +250,35 @@ import { VitalsPanelComponent } from './vitals-panel.component';
               }
             }
           </nav>
-          <app-version-dropdown />
+          <div class="flex items-center gap-2">
+            @if (activeDemoLink(); as demoUrl) {
+              <a
+                [routerLink]="demoUrl"
+                class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 no-underline transition-colors"
+              >
+                <span>▶</span>
+                <span>Live Demo</span>
+              </a>
+            }
+            <button
+              type="button"
+              class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold text-base-content/70 hover:text-base-content hover:bg-base-content/5 border border-border-subtle transition-colors cursor-pointer"
+              (click)="copyPageMarkdown()"
+              [attr.aria-label]="copiedMd() ? 'Markdown copied' : 'Copy page as Markdown'"
+            >
+              <span>{{ copiedMd() ? '✓ Copied MD' : 'Copy MD' }}</span>
+            </button>
+            <a
+              href="llms.txt"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="hidden xl:inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold text-base-content/60 hover:text-primary hover:bg-base-content/5 no-underline transition-colors"
+              title="LLM-friendly full documentation index"
+            >
+              llms.txt
+            </a>
+            <app-version-dropdown />
+          </div>
         </header>
 
         <!-- Page Content -->
@@ -282,6 +311,67 @@ import { VitalsPanelComponent } from './vitals-panel.component';
                   </div>
                 </div>
               </div>
+            }
+            @if (activeLibrary(); as lib) {
+              <footer
+                class="max-w-[900px] mx-auto mt-12 pt-8 border-t border-border-subtle flex flex-col gap-6"
+              >
+                @if (prevNextItems(); as nav) {
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    @if (nav.prev; as prev) {
+                      <a
+                        [routerLink]="prev.route"
+                        queryParamsHandling="merge"
+                        class="flex flex-col gap-1 p-4 rounded-2xl bg-base-200/60 border border-border-subtle hover:border-primary/40 no-underline transition-colors"
+                      >
+                        <span
+                          class="text-[10px] font-black uppercase tracking-widest text-base-content/50"
+                        >
+                          ← Previous
+                        </span>
+                        <span class="text-sm font-bold text-base-content">{{ prev.label }}</span>
+                      </a>
+                    } @else {
+                      <div></div>
+                    }
+                    @if (nav.next; as next) {
+                      <a
+                        [routerLink]="next.route"
+                        queryParamsHandling="merge"
+                        class="flex flex-col items-end gap-1 p-4 rounded-2xl bg-base-200/60 border border-border-subtle hover:border-primary/40 no-underline transition-colors text-right"
+                      >
+                        <span
+                          class="text-[10px] font-black uppercase tracking-widest text-base-content/50"
+                        >
+                          Next →
+                        </span>
+                        <span class="text-sm font-bold text-base-content">{{ next.label }}</span>
+                      </a>
+                    }
+                  </div>
+                }
+
+                <div
+                  class="flex flex-wrap items-center justify-between gap-4 text-xs text-base-content/60"
+                >
+                  <a
+                    [href]="editOnGithubUrl()"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="hover:text-primary no-underline font-medium transition-colors"
+                  >
+                    Edit this page on GitHub ↗
+                  </a>
+                  <a
+                    href="llms.txt"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="hover:text-primary no-underline font-mono transition-colors"
+                  >
+                    View llms.txt
+                  </a>
+                </div>
+              </footer>
             }
           </div>
         </main>
@@ -329,6 +419,53 @@ export class DocsLayoutComponent {
   });
 
   protected sidebarOpen = signal(false);
+  protected copiedMd = signal(false);
+
+  readonly activeDemoLink = computed(() => {
+    const lib = this.activeLibrary();
+    if (!lib) return null;
+    const pkg = PACKAGES.find((p) => p.docsLink === lib.overviewRoute);
+    return pkg?.demoLink ?? null;
+  });
+
+  readonly prevNextItems = computed(() => {
+    const lib = this.activeLibrary();
+    if (!lib) return null;
+    const url = this.currentUrl().split(/[?#]/)[0];
+    const items = [
+      { label: `${lib.label} Overview`, route: lib.overviewRoute },
+      ...lib.sections.flatMap((s) => s.items.map((i) => ({ label: i.label, route: i.route }))),
+    ];
+    const idx = items.findIndex((item) => item.route === url);
+    if (idx === -1) return null;
+    return {
+      prev: idx > 0 ? items[idx - 1] : null,
+      next: idx < items.length - 1 ? items[idx + 1] : null,
+    };
+  });
+
+  readonly editOnGithubUrl = computed(() => {
+    const lib = this.activeLibrary();
+    const base = 'https://github.com/Gaspar1992/angular-helpers/edit/main';
+    if (!lib) return `${base}/apps/web/src/app/docs`;
+    return `${base}/apps/web/src/app/docs/data/${lib.id}.data.ts`;
+  });
+
+  protected copyPageMarkdown(): void {
+    const lib = this.activeLibrary();
+    const item = this.activeItem();
+    const title = item ? `${lib?.label ?? ''} — ${item.label}` : (lib?.label ?? 'Documentation');
+    const url = this.window?.location?.href ?? this.currentUrl();
+    const pkgName = lib ? `@angular-helpers/${lib.id}` : '@angular-helpers/core';
+    const md = `# ${title}\n\n- Package: \`${pkgName}\`\n- URL: ${url}\n\n\`\`\`bash\npnpm add ${pkgName}\n\`\`\`\n`;
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      void navigator.clipboard.writeText(md).then(() => {
+        this.copiedMd.set(true);
+        setTimeout(() => this.copiedMd.set(false), 1800);
+      });
+    }
+  }
 
   constructor() {
     this.route.queryParams.pipe(takeUntilDestroyed()).subscribe((params) => {

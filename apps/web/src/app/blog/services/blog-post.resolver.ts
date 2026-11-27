@@ -56,7 +56,72 @@ renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
 </div>`;
 };
 
-marked.use({ renderer });
+function slugifyHeading(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/<[^>]+>/g, '')
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
+export interface BlogTocItem {
+  id: string;
+  text: string;
+  level: 2 | 3;
+}
+
+const CALLOUT_LABELS: Record<string, { label: string; icon: string }> = {
+  NOTE: { label: 'Note', icon: 'ℹ️' },
+  TIP: { label: 'Tip', icon: '💡' },
+  IMPORTANT: { label: 'Important', icon: '📌' },
+  WARNING: { label: 'Warning', icon: '⚠️' },
+  CAUTION: { label: 'Caution', icon: '🚨' },
+};
+
+function renderMarkedWithEnhancements(markdown: string): {
+  html: string;
+  toc: BlogTocItem[];
+} {
+  const toc: BlogTocItem[] = [];
+  const localRenderer = new marked.Renderer();
+
+  localRenderer.code = renderer.code;
+  localRenderer.heading = function ({ tokens, depth }) {
+    const htmlContent = this.parser.parseInline(tokens);
+    const plainText = htmlContent.replace(/<[^>]+>/g, '').trim();
+    const id = slugifyHeading(plainText);
+    if (depth === 2 || depth === 3) {
+      toc.push({ id, text: plainText, level: depth });
+    }
+    return `<h${depth} id="${escapeHtml(id)}">${htmlContent}<a class="heading-anchor" href="#${escapeHtml(id)}" aria-label="Link to ${escapeHtml(plainText)}">#</a></h${depth}>\n`;
+  };
+
+  localRenderer.blockquote = function ({ tokens }) {
+    const inner = this.parser.parse(tokens);
+    const calloutMatch = inner.match(
+      /^<p>\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(?:<br\s*\/?>|\n)?/i,
+    );
+    if (calloutMatch) {
+      const kind = calloutMatch[1].toUpperCase();
+      const meta = CALLOUT_LABELS[kind] ?? { label: kind, icon: 'ℹ️' };
+      const cleaned = inner.replace(calloutMatch[0], '<p>');
+      return `<div class="markdown-callout callout-${kind.toLowerCase()}" role="note">
+  <div class="callout-title"><span>${meta.icon}</span><span>${meta.label}</span></div>
+  ${cleaned}
+</div>\n`;
+    }
+    return `<blockquote>\n${inner}</blockquote>\n`;
+  };
+
+  localRenderer.table = function (token) {
+    const tableHtml = marked.Renderer.prototype.table.call(this, token);
+    return `<div class="table-scroll-wrapper">${tableHtml}</div>\n`;
+  };
+
+  const html = marked.parse(markdown, { async: false, renderer: localRenderer }) as string;
+  return { html, toc };
+}
 
 const ALLOWED_TAGS = new Set([
   'a',
@@ -98,7 +163,7 @@ const ALLOWED_TAGS = new Set([
   'ul',
 ]);
 
-const GLOBAL_ALLOWED_ATTRS = new Set(['class', 'id', 'title', 'aria-label', 'aria-hidden']);
+const GLOBAL_ALLOWED_ATTRS = new Set(['class', 'id', 'title', 'role', 'aria-label', 'aria-hidden']);
 const TAG_ALLOWED_ATTRS: Record<string, Set<string>> = {
   a: new Set(['href', 'target', 'rel']),
   button: new Set(['type']),
@@ -234,6 +299,8 @@ export function sanitizeBlogHtml(html: string): string {
 export interface BlogPostData {
   meta: BlogPost;
   html: SafeHtml | string;
+  readingTimeMinutes?: number;
+  toc?: BlogTocItem[];
 }
 
 function parseFrontmatter(raw: string): { meta: Partial<BlogPost>; body: string } {
@@ -243,18 +310,46 @@ function parseFrontmatter(raw: string): { meta: Partial<BlogPost>; body: string 
   const yamlBlock = match[1];
   const body = match[2];
   const meta: Partial<BlogPost> = {};
+  const lines = yamlBlock.split(/\r?\n/);
 
-  for (const line of yamlBlock.split('\n')) {
+  for (let idx = 0; idx < lines.length; idx++) {
+    const line = lines[idx];
     const colonIdx = line.indexOf(':');
     if (colonIdx === -1) continue;
-    const key = line.slice(0, colonIdx).trim() as keyof BlogPost;
+
+    const rawKey = line.slice(0, colonIdx).trim();
     const rawValue = line.slice(colonIdx + 1).trim();
 
-    if (key === 'tags') {
-      const inner = rawValue.replace(/^\[|\]$/g, '');
-      (meta as Record<string, unknown>)[key] = inner.split(',').map((t) => t.trim());
+    if (rawKey === 'tags') {
+      if (rawValue === '') {
+        const listTags: string[] = [];
+        while (idx + 1 < lines.length && /^\s*-\s+/.test(lines[idx + 1])) {
+          idx++;
+          listTags.push(
+            lines[idx]
+              .replace(/^\s*-\s+/, '')
+              .replace(/^['"]|['"]$/g, '')
+              .trim(),
+          );
+        }
+        meta.tags = listTags;
+      } else {
+        const inner = rawValue.replace(/^\[|\]$/g, '');
+        meta.tags = inner
+          .split(',')
+          .map((t) => t.replace(/^['"]|['"]$/g, '').trim())
+          .filter(Boolean);
+      }
+      continue;
+    }
+
+    const cleanVal = rawValue.replace(/^['"]|['"]$/g, '');
+    if (rawKey === 'date' && !meta.publishedAt) {
+      meta.publishedAt = cleanVal;
+    } else if (rawKey === 'description' && !meta.excerpt) {
+      meta.excerpt = cleanVal;
     } else {
-      (meta as Record<string, unknown>)[key] = rawValue.replace(/^['"]|['"]$/g, '');
+      (meta as Record<string, unknown>)[rawKey] = cleanVal;
     }
   }
 
@@ -280,9 +375,12 @@ export function fetchBlogPost(
       }
 
       const { meta, body } = parseFrontmatter(raw);
-      const rawHtml = marked.parse(body, { async: false }) as string;
+      const bodyWithoutLeadingH1 = body.replace(/^\s*#\s+[^\r\n]+\r?\n+/, '');
+      const wordCount = bodyWithoutLeadingH1.trim().split(/\s+/).filter(Boolean).length;
+      const readingTimeMinutes = Math.max(1, Math.ceil(wordCount / 220));
+      const { html: rawHtml, toc } = renderMarkedWithEnhancements(bodyWithoutLeadingH1);
       const html = sanitizeBlogHtml(rawHtml);
-      const data = {
+      const data: BlogPostData = {
         meta: {
           slug,
           title: meta.title ?? slug,
@@ -291,6 +389,8 @@ export function fetchBlogPost(
           excerpt: meta.excerpt ?? '',
         } satisfies BlogPost,
         html: sanitizer.bypassSecurityTrustHtml(html),
+        readingTimeMinutes,
+        toc,
       };
 
       // Update SEO Metadata dynamically

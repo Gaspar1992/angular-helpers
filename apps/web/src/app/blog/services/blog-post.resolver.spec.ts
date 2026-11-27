@@ -78,4 +78,46 @@ describe('sanitizeBlogHtml', () => {
     expect(post?.meta.title).toBe('Test Post');
     expect(post?.meta.tags).toEqual(['angular', 'signals']);
   });
+
+  it('fetchBlogPost strips leading H1, parses multiline tags, GFM callouts, TOC and reading time', async () => {
+    TestBed.configureTestingModule({});
+    const sanitizer = TestBed.inject(DomSanitizer);
+    const seo = TestBed.inject(SeoService);
+    const md = `---
+title: Modern Angular
+date: 2026-07-01
+description: Short desc
+tags:
+  - angular
+  - dx
+---
+
+# Modern Angular
+
+## Overview
+
+> [!NOTE]
+> Important detail here.
+
+| Col A | Col B |
+| --- | --- |
+| 1 | 2 |
+`;
+    const http = {
+      get: vi.fn().mockReturnValueOnce(of(md)),
+    } as unknown as HttpClient;
+
+    const post = await firstValueFrom(fetchBlogPost('modern-angular', http, sanitizer, seo));
+    expect(post?.meta.publishedAt).toBe('2026-07-01');
+    expect(post?.meta.excerpt).toBe('Short desc');
+    expect(post?.meta.tags).toEqual(['angular', 'dx']);
+    expect(post?.readingTimeMinutes).toBe(1);
+    expect(post?.toc).toEqual([{ id: 'overview', text: 'Overview', level: 2 }]);
+
+    const htmlStr = String(post?.html ?? '');
+    expect(htmlStr).not.toContain('<h1');
+    expect(htmlStr).toContain('markdown-callout callout-note');
+    expect(htmlStr).toContain('table-scroll-wrapper');
+    expect(htmlStr).toContain('heading-anchor');
+  });
 });
