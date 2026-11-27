@@ -75,7 +75,7 @@ const tasks = {
 
   // Documentation Generation
   async 'generate:docs'() {
-    await runCommand('npx tsx scripts/generate-docs-meta.ts');
+    await runCommand('pnpm exec tsx scripts/generate-docs-meta.ts');
     await runCommand('node scripts/generate-llms-txt.mjs');
     await runCommand('pnpm exec oxfmt apps/web/src/app/docs/data/*.data.ts');
   },
@@ -83,7 +83,7 @@ const tasks = {
   // Documentation Consistency verification
   async 'test:docs-consistency'() {
     await this['generate:docs']();
-    await runCommand('npx tsx scripts/verify-docs-consistency.ts');
+    await runCommand('pnpm exec tsx scripts/verify-docs-consistency.ts');
     await runCommand('git diff --exit-code');
   },
 };

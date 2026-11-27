@@ -1,4 +1,4 @@
-import { Component, input, signal, computed, effect, untracked } from '@angular/core';
+import { Component, input, computed, linkedSignal, signal } from '@angular/core';
 import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 import { DocsPageHeaderComponent } from '../../../docs/shared/page-header/docs-page-header.component';
 import { DocsApiTableComponent } from '../../../docs/shared/api-table/docs-api-table.component';
@@ -29,11 +29,18 @@ export interface ServiceDetailConfig {
     | 'openlayers'
     | 'storage'
     | 'yjs'
-    | 'testing';
+    | 'testing'
+    | 'schematics';
   backRoute: string;
   backLabel: string;
   interfaces?: InterfaceDoc[];
 }
+
+const INTERFACE_COLUMNS = [
+  { key: 'name', header: 'Property', cellClass: '' },
+  { key: 'type', header: 'Type', cellClass: '' },
+  { key: 'description', header: 'Description', cellClass: 'docs-cell-desc' },
+];
 
 @Component({
   selector: 'app-unified-service-detail',
@@ -47,7 +54,7 @@ export interface ServiceDetailConfig {
           <div
             class="flex items-center gap-4 p-5 mb-10 bg-base-200 border border-border-subtle rounded-3xl shadow-sm"
           >
-            <span class="text-xs font-black uppercase tracking-widest text-base-content/30 ml-2"
+            <span class="text-xs font-black uppercase tracking-widest text-base-content/70 ml-2"
               >API Variant</span
             >
             <div
@@ -59,8 +66,8 @@ export interface ServiceDetailConfig {
                 [class.bg-primary]="apiVariant() === 'service'"
                 [class.text-primary-content]="apiVariant() === 'service'"
                 [class.shadow-lg]="apiVariant() === 'service'"
-                [class.text-base-content/40]="apiVariant() !== 'service'"
-                [class.hover:text-base-content/70]="apiVariant() !== 'service'"
+                [class.text-base-content/70]="apiVariant() !== 'service'"
+                [class.hover:text-base-content]="apiVariant() !== 'service'"
                 [attr.aria-pressed]="apiVariant() === 'service'"
                 (click)="apiVariant.set('service')"
               >
@@ -72,8 +79,8 @@ export interface ServiceDetailConfig {
                 [class.bg-primary]="apiVariant() === 'fn'"
                 [class.text-primary-content]="apiVariant() === 'fn'"
                 [class.shadow-lg]="apiVariant() === 'fn'"
-                [class.text-base-content/40]="apiVariant() !== 'fn'"
-                [class.hover:text-base-content/70]="apiVariant() !== 'fn'"
+                [class.text-base-content/70]="apiVariant() !== 'fn'"
+                [class.hover:text-base-content]="apiVariant() !== 'fn'"
                 [attr.aria-pressed]="apiVariant() === 'fn'"
                 (click)="apiVariant.set('fn')"
               >
@@ -100,50 +107,43 @@ export interface ServiceDetailConfig {
               <app-code-block language="ts" filename="example.ts" [code]="importExample()" />
 
               @if (hasInputs()) {
-                <h3
+                <h2
                   class="text-xl font-black text-base-content mt-16 mb-6 tracking-tight flex items-center gap-2"
                 >
                   <span class="text-primary/60">#</span> Inputs
-                </h3>
+                </h2>
                 <app-docs-api-table [columns]="INPUTS_COLUMNS" [rows]="inputRows()" />
               }
 
               @if (hasOutputs()) {
-                <h3
+                <h2
                   class="text-xl font-black text-base-content mt-16 mb-6 tracking-tight flex items-center gap-2"
                 >
                   <span class="text-primary/60">#</span> Outputs
-                </h3>
+                </h2>
                 <app-docs-api-table [columns]="OUTPUTS_COLUMNS" [rows]="outputRows()" />
               }
 
               @if (hasMethods()) {
-                <h3
+                <h2
                   class="text-xl font-black text-base-content mt-16 mb-6 tracking-tight flex items-center gap-2"
                 >
                   <span class="text-primary/60">#</span>
                   {{ apiVariant() === 'fn' ? 'Properties' : 'Methods' }}
-                </h3>
+                </h2>
                 <app-docs-api-table [columns]="currentColumns()" [rows]="methodRows()" />
               }
 
               @if (config()?.interfaces; as interfaces) {
                 @for (iface of interfaces; track iface.name) {
                   <div class="mt-20">
-                    <h4 class="text-lg font-black text-base-content mb-3 tracking-tight">
+                    <h3 class="text-lg font-black text-base-content mb-3 tracking-tight">
                       {{ iface.name }}
-                    </h4>
-                    <p class="text-base text-base-content/50 mb-6 font-medium leading-relaxed">
+                    </h3>
+                    <p class="text-base text-base-content/70 mb-6 font-medium leading-relaxed">
                       {{ iface.description }}
                     </p>
-                    <app-docs-api-table
-                      [columns]="[
-                        { key: 'name', header: 'Property', cellClass: '' },
-                        { key: 'type', header: 'Type', cellClass: '' },
-                        { key: 'description', header: 'Description', cellClass: 'docs-cell-desc' },
-                      ]"
-                      [rows]="iface.properties"
-                    />
+                    <app-docs-api-table [columns]="INTERFACE_COLUMNS" [rows]="iface.properties" />
                   </div>
                 }
               }
@@ -174,7 +174,7 @@ export interface ServiceDetailConfig {
                     class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl pointer-events-none"
                   ></div>
 
-                  <h3
+                  <h2
                     class="text-xl sm:text-2xl font-black text-base-content tracking-tight mb-4 flex items-center gap-3"
                   >
                     <span
@@ -182,7 +182,7 @@ export interface ServiceDetailConfig {
                       >{{ idx + 1 }}</span
                     >
                     {{ guide.title }}
-                  </h3>
+                  </h2>
 
                   <p
                     class="text-base text-base-content/75 font-medium leading-relaxed mb-8 max-w-[800px] whitespace-pre-line"
@@ -295,8 +295,17 @@ export class UnifiedServiceDetailComponent {
   });
 
   /** First tab selected by default */
-  protected activeTab = signal<string>('api');
-  protected apiVariant = signal<'service' | 'fn'>('service');
+  protected activeTab = linkedSignal({
+    source: () => this.config(),
+    computation: () => 'api',
+  });
+  protected apiVariant = linkedSignal<ServiceDetailConfig | undefined, 'service' | 'fn'>({
+    source: () => this.config(),
+    computation: (cfg) => {
+      const s = cfg?.service;
+      return s?.fnVersion && s.methods.length === 0 ? 'fn' : 'service';
+    },
+  });
 
   protected service = computed(() => this.config()?.service);
 
@@ -393,18 +402,5 @@ export class UnifiedServiceDetailComponent {
     return s.example;
   });
 
-  constructor() {
-    effect(() => {
-      this.config();
-      untracked(() => {
-        const s = this.service();
-        if (s?.fnVersion && s.methods.length === 0) {
-          this.apiVariant.set('fn');
-        } else {
-          this.apiVariant.set('service');
-        }
-        this.activeTab.set('api');
-      });
-    });
-  }
+  protected readonly INTERFACE_COLUMNS = INTERFACE_COLUMNS;
 }

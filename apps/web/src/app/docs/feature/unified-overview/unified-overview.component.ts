@@ -1,5 +1,6 @@
-import { Component, input } from '@angular/core';
+import { Component, effect, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { SeoService } from '../../../core/services/seo.service';
 import { CodeBlockComponent } from '../../../docs/shared/code-block/code-block.component';
 import { DocsPageHeaderComponent } from '../../../docs/shared/page-header/docs-page-header.component';
 
@@ -85,4 +86,15 @@ export interface OverviewConfig {
 })
 export class UnifiedOverviewComponent {
   readonly config = input.required<OverviewConfig>();
+  private readonly seo = inject(SeoService);
+
+  constructor() {
+    effect(() => {
+      const cfg = this.config();
+      this.seo.updateMetadata({
+        title: cfg.packageName,
+        description: cfg.lead,
+      });
+    });
+  }
 }

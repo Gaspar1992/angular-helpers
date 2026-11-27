@@ -39,13 +39,14 @@ export class FullscreenService extends BrowserApiBaseService {
     );
   }
 
-  async request(element: Element = document.documentElement): Promise<void> {
+  async request(element?: Element): Promise<void> {
     if (!this.isSupported()) {
       throw new Error('Fullscreen API not supported in this browser');
     }
 
+    const target = element ?? document.documentElement;
     try {
-      const el = element as Element & { webkitRequestFullscreen?: () => Promise<void> };
+      const el = target as Element & { webkitRequestFullscreen?: () => Promise<void> };
       if (el.requestFullscreen) {
         await el.requestFullscreen();
       } else if (el.webkitRequestFullscreen) {
@@ -72,7 +73,7 @@ export class FullscreenService extends BrowserApiBaseService {
     }
   }
 
-  async toggle(element: Element = document.documentElement): Promise<void> {
+  async toggle(element?: Element): Promise<void> {
     if (this.isFullscreen) {
       await this.exit();
     } else {

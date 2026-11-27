@@ -38,8 +38,9 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .nx/cache
-          key: ${{ runner.os }}-nx-${{ github.sha }}
+          key: ${{ runner.os }}-nx-${{ hashFiles('pnpm-lock.yaml', 'nx.json') }}-${{ github.sha }}
           restore-keys: |
+            ${{ runner.os }}-nx-${{ hashFiles('pnpm-lock.yaml', 'nx.json') }}-
             ${{ runner.os }}-nx-
 
       - name: Check formatting
@@ -47,6 +48,9 @@ jobs:
 
       - name: Run linter
         run: pnpm run lint
+
+      - name: Check unused code and dependencies (knip)
+        run: pnpm exec knip
 
       - name: Build schematics
         run: pnpm nx build @angular-helpers/schematics
@@ -99,18 +103,21 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Setup workspace
+        id: setup
         uses: ./.github/actions/setup
         with:
           playwright-cache: 'true'
-
-      - name: Build worker files
-        run: pnpm nx run web:build-workers
 
       - name: Build web app (SSR)
         run: pnpm nx build web --configuration production
 
       - name: Install Playwright Chromium
+        if: steps.setup.outputs.playwright-cache-hit != 'true'
         run: pnpm exec playwright install --with-deps chromium
+
+      - name: Install Playwright Chromium OS dependencies
+        if: steps.setup.outputs.playwright-cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
 
       - name: Run browser CI suite
         run: pnpm nx e2e web-e2e --configuration ci
@@ -136,18 +143,21 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Setup workspace
+        id: setup
         uses: ./.github/actions/setup
         with:
           playwright-cache: 'true'
-
-      - name: Build worker files
-        run: pnpm nx run web:build-workers
 
       - name: Build web app (SSR)
         run: pnpm nx build web --configuration production
 
       - name: Install Playwright Firefox and WebKit
+        if: steps.setup.outputs.playwright-cache-hit != 'true'
         run: pnpm exec playwright install --with-deps firefox webkit
+
+      - name: Install Playwright Firefox and WebKit OS dependencies
+        if: steps.setup.outputs.playwright-cache-hit == 'true'
+        run: pnpm exec playwright install-deps firefox webkit
 
       - name: Run cross-browser smoke suite
         run: pnpm nx e2e web-e2e --configuration cross

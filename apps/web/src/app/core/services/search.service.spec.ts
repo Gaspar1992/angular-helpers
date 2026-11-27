@@ -50,7 +50,7 @@ describe('SearchService', () => {
     service.query.set('angular');
 
     TestBed.flushEffects();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 170));
 
     expect(executeMock).toHaveBeenCalledWith('search', { q: 'angular' });
     expect(service.results()).toEqual(mockResults);
@@ -108,9 +108,11 @@ describe('SearchService', () => {
 
     service.query.set('a');
     TestBed.flushEffects();
+    await new Promise((resolve) => setTimeout(resolve, 170));
 
     service.query.set('ab');
     TestBed.flushEffects();
+    await new Promise((resolve) => setTimeout(resolve, 170));
 
     await secondPromise;
     resolveFirst([]);
@@ -146,6 +148,7 @@ describe('SearchService', () => {
 
     service.query.set('angular');
     TestBed.flushEffects();
+    await new Promise((resolve) => setTimeout(resolve, 170));
 
     expect(service.searching()).toBe(true);
 
@@ -171,8 +174,8 @@ describe('SearchService', () => {
     service.query.set('security');
 
     TestBed.flushEffects();
-    // Wait for the synchronous microtask queue to process
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    // Wait for debounce + microtask queue to process
+    await new Promise((resolve) => setTimeout(resolve, 170));
 
     // Results should be populated synchronously using the fallbackExecutor
     const results = service.results();
@@ -195,7 +198,7 @@ describe('SearchService', () => {
     service.query.set('test-error');
 
     TestBed.flushEffects();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 170));
 
     expect(consoleSpy).toHaveBeenCalled();
     expect(service.results()).toEqual([]);

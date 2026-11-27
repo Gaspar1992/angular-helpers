@@ -29,8 +29,8 @@ export async function ponyfillStreams(): Promise<StreamPonyfillExports> {
   const { ReadableStream, TransformStream, WritableStream } = await import('web-streams-polyfill');
 
   cachedPonyfill = {
-    ReadableStream: ReadableStream as typeof globalThis.ReadableStream,
-    TransformStream,
+    ReadableStream: ReadableStream as unknown as typeof globalThis.ReadableStream,
+    TransformStream: TransformStream as unknown as typeof globalThis.TransformStream,
     WritableStream,
   };
 

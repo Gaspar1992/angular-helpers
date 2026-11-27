@@ -5,7 +5,7 @@ import {
 } from '@angular/core';
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import * as Y from 'yjs';
-import { injectYjsIndexeddb } from './yjs-indexeddb';
+import { injectYjsIndexeddb } from '@angular-helpers/yjs/indexeddb';
 import { YjsDocService } from './yjs-provider.service';
 
 describe('injectYjsIndexeddb', () => {

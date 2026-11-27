@@ -1,34 +1,30 @@
 import { makeEnvironmentProviders, type EnvironmentProviders, type Provider } from '@angular/core';
 
-import { WebBluetoothService } from './web-bluetooth.service';
 import { WebUsbService } from './web-usb.service';
 import { WebNfcService } from './web-nfc.service';
 import { PaymentRequestService } from './payment-request.service';
 
 // Main entry point imports
 import {
-  PermissionsService,
   BarcodeDetectorService,
   CredentialManagementService,
-  provideBarcodeDetector,
-  provideCredentialManagement,
+  WebBluetoothService,
   IdleDetectorService,
   EyeDropperService,
+  provideBarcodeDetector,
+  provideCredentialManagement,
+  provideWebBluetooth,
+  provideIdleDetector,
+  provideEyeDropper,
 } from '@angular-helpers/browser-web-apis';
 
-export { provideBarcodeDetector, provideCredentialManagement };
-
-export function provideIdleDetector(): EnvironmentProviders {
-  return makeEnvironmentProviders([PermissionsService, IdleDetectorService]);
-}
-
-export function provideEyeDropper(): EnvironmentProviders {
-  return makeEnvironmentProviders([EyeDropperService]);
-}
-
-export function provideWebBluetooth(): EnvironmentProviders {
-  return makeEnvironmentProviders([WebBluetoothService]);
-}
+export {
+  provideBarcodeDetector,
+  provideCredentialManagement,
+  provideWebBluetooth,
+  provideIdleDetector,
+  provideEyeDropper,
+};
 
 export function provideWebUsb(): EnvironmentProviders {
   return makeEnvironmentProviders([WebUsbService]);

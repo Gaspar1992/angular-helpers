@@ -1,13 +1,14 @@
-import { DestroyRef, inject, signal, type Signal } from '@angular/core';
+import { DestroyRef, inject, PLATFORM_ID, signal, type Signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import type * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
-import { YjsDocService } from './yjs-provider.service';
+import { YjsDocService } from '@angular-helpers/yjs';
 
 export type YjsWebsocketStatus = 'connecting' | 'connected' | 'disconnected';
 
 export interface YjsWebsocketOptions {
   params?: Record<string, string>;
-  awareness?: any;
+  awareness?: unknown;
   connect?: boolean;
   resyncInterval?: number;
   maxBackoffTime?: number;
@@ -19,8 +20,8 @@ export interface YjsWebsocketRef {
   readonly status: Signal<YjsWebsocketStatus>;
   /** Signal reflecting whether initial document synchronization has completed */
   readonly isSynced: Signal<boolean>;
-  /** The underlying y-websocket WebsocketProvider instance */
-  readonly provider: WebsocketProvider;
+  /** The underlying y-websocket WebsocketProvider instance, or null in SSR */
+  readonly provider: WebsocketProvider | null;
   /** Manually establish connection */
   connect(): void;
   /** Manually disconnect from server */
@@ -30,11 +31,7 @@ export interface YjsWebsocketRef {
 /**
  * Reactive Angular adapter for y-websocket provider.
  * Connects a Y.Doc to a WebSocket server and exposes connection status and synced state as Signals.
- *
- * @param serverUrl The WebSocket server endpoint (e.g. 'wss://demos.yjs.dev')
- * @param roomName The room/document identifier
- * @param doc The target Y.Doc instance (defaults to the injected `YjsDocService.doc`)
- * @param options Configuration options for y-websocket WebsocketProvider
+ * SSR-safe: returns an inert disconnected ref when WebSocket is unavailable.
  */
 export function injectYjsWebsocket(
   serverUrl: string,
@@ -43,8 +40,24 @@ export function injectYjsWebsocket(
   options?: YjsWebsocketOptions,
 ): YjsWebsocketRef {
   const destroyRef = inject(DestroyRef);
+  const platformId = inject(PLATFORM_ID, { optional: true });
+  const isBrowser = platformId ? isPlatformBrowser(platformId) : typeof window !== 'undefined';
+  const hasWebSocket =
+    (isBrowser && typeof WebSocket !== 'undefined') || Boolean(options?.WebSocketPolyfill);
 
-  const provider = new WebsocketProvider(serverUrl, roomName, doc, options);
+  if (!hasWebSocket) {
+    const statusSig = signal<YjsWebsocketStatus>('disconnected');
+    const isSyncedSig = signal<boolean>(false);
+    return {
+      status: statusSig.asReadonly(),
+      isSynced: isSyncedSig.asReadonly(),
+      provider: null,
+      connect() {},
+      disconnect() {},
+    };
+  }
+
+  const provider = new WebsocketProvider(serverUrl, roomName, doc, options as never);
 
   const statusSig = signal<YjsWebsocketStatus>(
     provider.wsconnected ? 'connected' : provider.wsconnecting ? 'connecting' : 'disconnected',

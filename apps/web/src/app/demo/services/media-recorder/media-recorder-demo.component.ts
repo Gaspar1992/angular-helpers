@@ -49,7 +49,9 @@ import { MediaRecorderService } from '@angular-helpers/browser-web-apis';
 
         @if (videoUrl()) {
           <div class="svc-result space-y-4 animate-in zoom-in-95 duration-500">
-            <label class="m-0">Recording Preview</label>
+            <span class="block text-xs font-bold uppercase tracking-wider text-base-content/70 m-0"
+              >Recording Preview</span
+            >
             <video
               [src]="videoUrl()"
               controls

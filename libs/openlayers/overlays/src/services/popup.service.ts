@@ -190,7 +190,9 @@ export class OlPopupService {
     }
 
     this.zoneHelper.runOutsideAngular(() => {
-      const hostElement = document.createElement('div');
+      const doc = typeof document !== 'undefined' ? document : undefined;
+      if (!doc) return;
+      const hostElement = doc.createElement('div');
       if (options.className) hostElement.className = options.className;
 
       const ref: ComponentRef<C> = createComponent(options.component, {
@@ -236,7 +238,11 @@ function generateId(prefix: string): string {
 }
 
 function buildContentElement(content: string | HTMLElement, className?: string): HTMLElement {
-  const wrapper = document.createElement('div');
+  const doc = typeof document !== 'undefined' ? document : undefined;
+  if (!doc) {
+    throw new Error('OlPopupService requires a browser DOM document.');
+  }
+  const wrapper = doc.createElement('div');
   if (className) wrapper.className = className;
   replaceElementContent(wrapper, content);
   return wrapper;

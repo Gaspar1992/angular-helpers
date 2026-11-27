@@ -5,7 +5,7 @@ import {
 } from '@angular/core';
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import * as Y from 'yjs';
-import { injectYjsWebsocket } from './yjs-websocket';
+import { injectYjsWebsocket } from '@angular-helpers/yjs/websocket';
 import { YjsDocService } from './yjs-provider.service';
 import { Awareness } from 'y-protocols/awareness';
 

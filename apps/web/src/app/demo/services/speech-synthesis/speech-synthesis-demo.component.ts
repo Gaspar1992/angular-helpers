@@ -30,8 +30,9 @@ import { SpeechSynthesisService } from '@angular-helpers/browser-web-apis';
 
       <div class="space-y-6">
         <div class="space-y-2">
-          <label>Text to Synthesize</label>
+          <label for="speech-text-input">Text to Synthesize</label>
           <textarea
+            id="speech-text-input"
             [(ngModel)]="text"
             placeholder="What should I say?"
             class="demo-input w-full min-h-[120px] leading-relaxed font-bold"
@@ -40,8 +41,12 @@ import { SpeechSynthesisService } from '@angular-helpers/browser-web-apis';
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
           <div class="space-y-2">
-            <label>Select Voice</label>
-            <select [(ngModel)]="selectedVoiceIndex" class="demo-select w-full">
+            <label for="speech-voice-select">Select Voice</label>
+            <select
+              id="speech-voice-select"
+              [(ngModel)]="selectedVoiceIndex"
+              class="demo-select w-full"
+            >
               @for (v of voices(); track v.name) {
                 <option [value]="$index">{{ v.name }} ({{ v.lang }})</option>
               }

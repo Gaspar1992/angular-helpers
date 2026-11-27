@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/storage",
-  "version": "22.4.1",
+  "version": "22.5.0",
   "description": "Reactive Angular storage system with support for Web Storage, IndexedDB, Cache API, TOON compression, and AES-GCM encryption",
   "keywords": [
     "angular",
@@ -33,13 +33,19 @@
     "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/storage",
     "clean": "node ../../scripts/clean.js",
     "test": "vitest run --root ../.. libs/storage",
-    "lint": "oxlint src"
+    "lint": "eslint ."
   },
   "peerDependencies": {
     "@angular/core": "^22.0.0",
     "@angular/common": "^22.0.0",
     "@angular/platform-browser": "^22.0.0",
-    "rxjs": "^7.0.0"
+    "@toon-format/toon": "^2.0.0",
+    "rxjs": "^7.0.0 || ^8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@toon-format/toon": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@angular-helpers/core": "workspace:*",

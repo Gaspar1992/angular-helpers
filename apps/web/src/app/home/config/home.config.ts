@@ -1,4 +1,4 @@
-import { PACKAGES, TOTAL_SERVICE_COUNT, INJECT_FN_COUNT } from '../../core/config/packages.data';
+import { PACKAGES, SERVICE_COUNT, INJECT_FN_COUNT } from '../../core/config/packages.data';
 import type { Feature } from '../models/feature.model';
 import type { Stat } from '../models/stat.model';
 
@@ -36,7 +36,7 @@ export const HOME_FEATURES: readonly Feature[] = [
 ];
 
 export const HOME_STATS: readonly Stat[] = [
-  { value: String(TOTAL_SERVICE_COUNT), label: 'Browser API services' },
+  { value: String(SERVICE_COUNT), label: 'Browser API services' },
   { value: String(PACKAGES.length), label: 'Focused packages' },
   { value: String(INJECT_FN_COUNT), label: 'Signal primitives' },
   { value: 'MIT', label: 'Open source' },
@@ -91,30 +91,34 @@ export class MapComponent {
   },
   {
     title: 'security.ts',
-    raw: `import { Component, computed } from '@angular/core';
+    raw: `import { Component, signal } from '@angular/core';
 import { form, required } from '@angular/forms/signals';
-import { strongPassword, hibpPassword, safeHtml } from '@angular-helpers/security';
+import { strongPassword, hibpPassword, safeHtml } from '@angular-helpers/security/signal-forms';
 
 @Component({ /* ... */ })
 export class SecurityDemoComponent {
-  model = { password: '', bio: '' };
+  readonly model = signal({ password: '', bio: '' });
 
-  login = form({
-    password: ['', [required, strongPassword(), hibpPassword()]],
-    bio: ['', [safeHtml()]]
+  readonly login = form(this.model, (p) => {
+    required(p.password);
+    strongPassword(p.password);
+    hibpPassword(p.password);
+    safeHtml(p.bio);
   });
 }`,
-    html: `<span class="c-kw">import</span> <span class="c-brace">{</span> Component, computed <span class="c-brace">}</span> <span class="c-kw">from</span> <span class="c-str">'@angular/core'</span><span class="c-punc">;</span>
+    html: `<span class="c-kw">import</span> <span class="c-brace">{</span> Component, signal <span class="c-brace">}</span> <span class="c-kw">from</span> <span class="c-str">'@angular/core'</span><span class="c-punc">;</span>
 <span class="c-kw">import</span> <span class="c-brace">{</span> form, required <span class="c-brace">}</span> <span class="c-kw">from</span> <span class="c-str">'@angular/forms/signals'</span><span class="c-punc">;</span>
-<span class="c-kw">import</span> <span class="c-brace">{</span> strongPassword, hibpPassword, safeHtml <span class="c-brace">}</span> <span class="c-kw">from</span> <span class="c-str">'@angular-helpers/security'</span><span class="c-punc">;</span>
+<span class="c-kw">import</span> <span class="c-brace">{</span> strongPassword, hibpPassword, safeHtml <span class="c-brace">}</span> <span class="c-kw">from</span> <span class="c-str">'@angular-helpers/security/signal-forms'</span><span class="c-punc">;</span>
 
 <span class="c-kw">@Component</span><span class="c-punc">({</span> <span class="c-com">/* ... */</span> <span class="c-punc">})</span>
 <span class="c-kw">export class</span> <span class="c-type">SecurityDemoComponent</span> <span class="c-brace">{</span>
-  model <span class="c-punc">=</span> <span class="c-brace">{</span> password<span class="c-punc">:</span> <span class="c-str">''</span><span class="c-punc">,</span> bio<span class="c-punc">:</span> <span class="c-str">''</span> <span class="c-brace">}</span><span class="c-punc">;</span>
+  <span class="c-kw">readonly</span> model <span class="c-punc">=</span> signal<span class="c-punc">({</span> password<span class="c-punc">:</span> <span class="c-str">''</span><span class="c-punc">,</span> bio<span class="c-punc">:</span> <span class="c-str">''</span> <span class="c-brace">}</span><span class="c-punc">);</span>
 
-  <span class="c-var bg-base-content/5 px-1 rounded">login <span class="c-punc">=</span> form<span class="c-punc">({</span>
-    password<span class="c-punc">:</span> <span class="c-punc">[</span><span class="c-str">''</span><span class="c-punc">,</span> <span class="c-punc">[</span>required<span class="c-punc">,</span> strongPassword<span class="c-punc">(),</span> hibpPassword<span class="c-punc">()]],</span>
-    bio<span class="c-punc">:</span> <span class="c-punc">[</span><span class="c-str">''</span><span class="c-punc">,</span> <span class="c-punc">[</span>safeHtml<span class="c-punc">()]]</span>
+  <span class="c-var bg-base-content/5 px-1 rounded"><span class="c-kw">readonly</span> login <span class="c-punc">=</span> form<span class="c-punc">(</span><span class="c-kw">this</span><span class="c-punc">.</span>model<span class="c-punc">, (</span>p<span class="c-punc">) =&gt; {</span>
+    required<span class="c-punc">(</span>p<span class="c-punc">.</span>password<span class="c-punc">);</span>
+    strongPassword<span class="c-punc">(</span>p<span class="c-punc">.</span>password<span class="c-punc">);</span>
+    hibpPassword<span class="c-punc">(</span>p<span class="c-punc">.</span>password<span class="c-punc">);</span>
+    safeHtml<span class="c-punc">(</span>p<span class="c-punc">.</span>bio<span class="c-punc">);</span>
   <span class="c-punc">});</span></span>
 <span class="c-brace">}</span>`,
   },

@@ -1,5 +1,6 @@
 import {
   assertInInjectionContext,
+  computed,
   DestroyRef,
   effect,
   inject,
@@ -30,8 +31,8 @@ export function throttledSignal<T>(
   const platform = executeInContext(() => injectPlatform());
 
   if (!platform.isBrowser) {
-    // SSR context: return source value immediately (no scheduling)
-    return signal<T>(source()).asReadonly();
+    // SSR context: reflect latest source value without scheduling timers
+    return computed(() => source());
   }
 
   const destroyRef = executeInContext(() => inject(DestroyRef));
@@ -40,7 +41,7 @@ export function throttledSignal<T>(
   const leading = options?.leading ?? true;
   const trailing = options?.trailing ?? true;
 
-  let timeoutId: any = null;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
   let inCooldown = false;
   let hasTrailingVal = false;
   let trailingVal: T;
@@ -77,7 +78,7 @@ export function throttledSignal<T>(
     effect(
       () => {
         const val = source();
-        if (val === lastValue) {
+        if (Object.is(val, lastValue)) {
           return;
         }
         lastValue = val;

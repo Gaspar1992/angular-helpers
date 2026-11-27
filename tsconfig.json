@@ -42,7 +42,7 @@
       "@angular-helpers/worker-http/esbuild-plugin": [
         "./libs/worker-http/esbuild-plugin/src/index.ts"
       ],
-      "@angular-helpers/openlayers": ["./libs/openlayers/src/index.ts"],
+      "@angular-helpers/openlayers": ["./libs/openlayers/src/public-api.ts"],
       "@angular-helpers/openlayers/core": ["./libs/openlayers/core/src/index.ts"],
       "@angular-helpers/openlayers/layers": ["./libs/openlayers/layers/src/index.ts"],
       "@angular-helpers/openlayers/controls": ["./libs/openlayers/controls/src/index.ts"],
@@ -50,7 +50,9 @@
       "@angular-helpers/openlayers/overlays": ["./libs/openlayers/overlays/src/index.ts"],
       "@angular-helpers/openlayers/testing": ["./libs/openlayers/testing/src/index.ts"],
       "@angular-helpers/yjs": ["./libs/yjs/src/index.ts"],
-      "@angular-helpers/schematics": ["./libs/schematics/src/index.ts"],
+      "@angular-helpers/yjs/websocket": ["./libs/yjs/websocket/src/index.ts"],
+      "@angular-helpers/yjs/indexeddb": ["./libs/yjs/indexeddb/src/index.ts"],
+      "@angular-helpers/yjs/awareness": ["./libs/yjs/awareness/src/index.ts"],
       "@angular-helpers/*": ["./libs/*/src/index.ts"]
     }
   },

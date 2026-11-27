@@ -44,9 +44,12 @@ import { DocsVersionService, AngularVersion } from '../services/docs-version.ser
             @for (option of options; track option.value; let idx = $index) {
               <li
                 role="option"
+                tabindex="-1"
                 [id]="'version-option-' + option.value"
                 [attr.aria-selected]="versionService.version() === option.value"
                 (click)="selectOption(option.value)"
+                (keydown.enter)="selectOption(option.value)"
+                (keydown.space)="$event.preventDefault(); selectOption(option.value)"
                 [class.bg-primary/20]="highlightedIndex() === idx"
                 [class.text-primary]="versionService.version() === option.value"
                 class="px-4 py-2 text-xs font-bold cursor-pointer hover:bg-base-content/10 transition-colors select-none flex items-center justify-between"

@@ -34,10 +34,10 @@ describe('create-package schematic', () => {
     expect(resultTree.files).toContain('/libs/my-test-lib/project.json');
     expect(resultTree.files).toContain('/libs/my-test-lib/tsconfig.json');
     expect(resultTree.files).toContain('/libs/my-test-lib/README.md');
-    expect(resultTree.files).toContain('/libs/my-test-lib/vitest.config.ts');
+    expect(resultTree.files).not.toContain('/libs/my-test-lib/vitest.config.ts');
     expect(resultTree.files).toContain('/libs/my-test-lib/src/index.ts');
     expect(resultTree.files).toContain('/libs/my-test-lib/src/public-api.ts');
-    expect(resultTree.files).toContain('/libs/my-test-lib/src/test-setup.ts');
+    expect(resultTree.files).not.toContain('/libs/my-test-lib/src/test-setup.ts');
     expect(resultTree.files).toContain('/libs/my-test-lib/src/services/index.ts');
     expect(resultTree.files).toContain('/libs/my-test-lib/src/interfaces/index.ts');
     expect(resultTree.files).toContain('/libs/my-test-lib/src/utils/index.ts');

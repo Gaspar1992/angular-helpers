@@ -10,20 +10,19 @@ export {
   type ScreenIdleState,
   EyeDropperService,
   type EyeDropperResult as ColorSelectionResult,
-} from '@angular-helpers/browser-web-apis';
-
-export {
   BarcodeDetectorService,
   type BarcodeFormat,
   type DetectedBarcode,
-} from './barcode-detector.service';
-
-export {
   WebBluetoothService,
   type BluetoothRequestDeviceOptions,
-  type BluetoothDeviceRef,
   type BluetoothRemoteGATTServer,
-} from './web-bluetooth.service';
+  CredentialManagementService,
+  type PasswordCredentialData,
+  type PublicKeyCredentialOptions,
+  type CredentialResult,
+  injectIdleDetector,
+  type IdleDetectorRef,
+} from '@angular-helpers/browser-web-apis';
 
 export { WebUsbService, type UsbDeviceFilterDef, type UsbDeviceRef } from './web-usb.service';
 
@@ -42,15 +41,9 @@ export {
   type PaymentResult,
 } from './payment-request.service';
 
-export {
-  CredentialManagementService,
-  type PasswordCredentialData,
-  type PublicKeyCredentialOptions,
-  type CredentialResult,
-} from './credential-management.service';
-
 // --- Experimental API Types ---
 export type {
+  BluetoothDeviceRef,
   BluetoothRemoteGATTService,
   BluetoothRemoteGATTCharacteristic,
   BluetoothApi,
@@ -62,9 +55,6 @@ export type {
   NdefReaderConstructor,
   NavigatorWithExperimentalApis,
 } from './experimental-apis.types';
-
-// --- Signal-based injection functions ---
-export { injectIdleDetector, type IdleDetectorRef } from './inject-idle-detector';
 
 // --- Providers ---
 export {

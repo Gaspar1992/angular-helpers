@@ -201,14 +201,14 @@ export class InputSanitizerService {
   }
 
   /**
-   * Returns a TrustedHTML object (or similar if using a polyfill) if the Trusted Types policy
-   * is available, otherwise returns the raw input string.
+   * Returns a TrustedHTML object if a Trusted Types policy is available,
+   * otherwise returns the sanitized HTML string.
    */
   getTrustedHtml(input: string): TrustedHTML | string {
     if (this.trustedTypesPolicy) {
       return this.trustedTypesPolicy.createHTML(input);
     }
-    return input;
+    return this.sanitizeHtml(input);
   }
 
   /**

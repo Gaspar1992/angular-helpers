@@ -30,8 +30,9 @@ import { FormsModule } from '@angular/forms';
 
       <div class="svc-controls mb-8">
         <div class="flex-1 min-w-[200px]">
-          <label>Select Device</label>
+          <label for="camera-device-select">Select Device</label>
           <select
+            id="camera-device-select"
             [ngModel]="selectedCamera"
             (ngModelChange)="selectedCamera = $event"
             class="demo-select w-full"

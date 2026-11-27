@@ -308,3 +308,18 @@ export class CollaborativeEditorComponent {
 
 ---
 
+## @angular-helpers/schematics (`schematics`)
+
+**Documentation:** https://gaspar1992.github.io/angular-helpers/docs/schematics
+
+**Summary:** Angular DevKit schematics to scaffold new @angular-helpers packages with ng-packagr config, strict TypeScript, and tsconfig.json path mappings.
+
+### Canonical Usage Example (Angular 22)
+
+```typescript
+// Generate a new @angular-helpers library package:
+// pnpm exec schematics @angular-helpers/schematics:create-package --name=my-feature
+```
+
+---
+

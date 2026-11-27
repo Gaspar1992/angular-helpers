@@ -1,6 +1,8 @@
 import {
   assertInInjectionContext,
+  computed,
   DestroyRef,
+  effect,
   inject,
   linkedSignal,
   resource,
@@ -136,6 +138,7 @@ export function storageResource<T, R = void>(
   const res = resource<T | undefined, R>({
     params: requestFn,
     loader: async (loaderContext: any) => {
+      revalidatedValue.set(undefined);
       const currentReq: R =
         loaderContext?.params ??
         loaderContext?.request ??
@@ -231,21 +234,38 @@ export function storageResource<T, R = void>(
     await set(next);
   };
 
-  // Cross-tab synchronization
+  // Cross-tab synchronization (reactive to dynamic key functions)
   if (storageOpts.crossTabSync && activeTransport.onChange) {
-    const initialReq = requestFn ? requestFn() : (undefined as unknown as R);
-    const key = typeof options.key === 'function' ? options.key(initialReq) : options.key;
-    const unsubscribe = activeTransport.onChange<T>(key, (remoteVal) => {
-      optimisticValue.set(remoteVal);
+    const destroyRef = inject(DestroyRef);
+    let currentUnsub: (() => void) | undefined;
+    effect((onCleanup) => {
+      const currentReq = requestFn ? requestFn() : (undefined as unknown as R);
+      const key = typeof options.key === 'function' ? options.key(currentReq) : options.key;
+      currentUnsub?.();
+      currentUnsub = activeTransport.onChange!<T>(key, (remoteVal) => {
+        optimisticValue.set(remoteVal);
+      });
+      onCleanup(() => {
+        currentUnsub?.();
+        currentUnsub = undefined;
+      });
     });
-    inject(DestroyRef).onDestroy(() => unsubscribe());
+    destroyRef.onDestroy(() => currentUnsub?.());
   }
+
+  const combinedError = computed<Error | null>(() => {
+    const writeErr = persistingError();
+    if (writeErr) return writeErr;
+    const readErr = res.error();
+    if (!readErr) return null;
+    return readErr instanceof Error ? readErr : new Error(String(readErr));
+  });
 
   return {
     value: optimisticValue,
     status: res.status,
     isLoading: res.isLoading,
-    error: persistingError,
+    error: combinedError,
     resource: res,
     set,
     update,

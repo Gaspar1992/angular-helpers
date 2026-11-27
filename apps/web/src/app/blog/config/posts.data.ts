@@ -67,6 +67,15 @@ export const BLOG_POSTS: readonly BlogPost[] = [
       'Introducing @angular-helpers/storage v21.12.0, a high-performance reactive storage system for Angular. It bridges a fast synchronous L1 memory Signal Cache with async L2 storage backends (Cache API, IndexedDB, Local/SessionStorage) with dynamic TOON compression, AES-GCM encryption, and surgical key-level reactive Entity management.',
   },
   {
+    slug: 'openlayers-v0-5-0',
+    title:
+      'openlayers v0.5.0: Proj4 projections, Geodesic precision, and WebGL Mapbox Vector Tiles',
+    publishedAt: '2026-05-16',
+    tags: ['openlayers', 'release', 'webgl', 'proj4', 'geodesic'],
+    excerpt:
+      'Custom coordinate systems via withProjections() and proj4, zero-distortion geodesic geometry helpers, and GPU-accelerated Mapbox Vector Tiles (MVT) with WebGL.',
+  },
+  {
     slug: 'openlayers-overlays',
     title:
       'openlayers v0.3.0: Overlays — Popups, Tooltips, and Dynamic Angular Components on the Map',

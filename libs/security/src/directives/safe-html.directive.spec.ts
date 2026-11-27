@@ -41,7 +41,7 @@ describe('SafeHtmlDirective', () => {
   it('should render sanitized HTML', () => {
     component.htmlValue.set('<p>Hello <script>alert(1)</script>World</p>');
     fixture.detectChanges();
-    expect(element.innerHTML).toBe('<p>Hello alert(1)World</p>');
+    expect(element.innerHTML).toBe('<p>Hello World</p>');
   });
 
   it('should utilize getTrustedHtml when rendering', () => {

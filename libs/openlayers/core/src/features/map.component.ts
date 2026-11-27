@@ -17,7 +17,9 @@ import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
 import OLMap from 'ol/Map';
 import View from 'ol/View';
-import { transform } from 'ol/proj';
+import { unByKey } from 'ol/Observable';
+import type { EventsKey } from 'ol/events';
+import { get as getProjection, transform } from 'ol/proj';
 import type { Coordinate, Pixel, ViewState } from '../models/types';
 import { OlMapService } from '../services/map.service';
 import { OlZoneHelper } from '../services/zone-helper.service';
@@ -29,6 +31,7 @@ export interface MapClickEvent {
 
 @Component({
   selector: 'ol-map',
+  providers: [OlMapService],
   template: `<div class="ol-map-container" #mapContainer></div>
     <ng-content />`,
   styles: [
@@ -70,6 +73,8 @@ export class OlMapComponent {
     viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
   private map?: OLMap;
   private resizeObserver?: ResizeObserver;
+  private resizeRafId: number | null = null;
+  private readonly listenerKeys: EventsKey[] = [];
 
   constructor() {
     afterNextRender(() => this.initMap());
@@ -120,9 +125,9 @@ export class OlMapComponent {
       // Add ResizeObserver to handle container size changes (e.g. sidebars, window resize)
       if (typeof ResizeObserver !== 'undefined') {
         this.resizeObserver = new ResizeObserver(() => {
-          if (this.map) {
-            // Using requestAnimationFrame prevents "ResizeObserver loop limit exceeded" errors
-            requestAnimationFrame(() => {
+          if (this.map && this.resizeRafId === null) {
+            this.resizeRafId = requestAnimationFrame(() => {
+              this.resizeRafId = null;
               if (this.map) this.map.updateSize();
             });
           }
@@ -130,42 +135,54 @@ export class OlMapComponent {
         this.resizeObserver.observe(container);
       }
 
-      view.on('change:center', () => {
-        this.zoneHelper.runInsideAngular(() => this.emitViewChange());
-      });
-      view.on('change:resolution', () => {
-        this.mapService.setResolution(view.getResolution() ?? 1);
-        this.zoneHelper.runInsideAngular(() => this.emitViewChange());
-      });
-
-      this.map.on('click', (e) => {
-        if (this.mapClick$.observed) {
-          this.zoneHelper.runInsideAngular(() =>
-            this.mapClick$.next({
-              coordinate: this.getExternalCoordinate(e.coordinate) as Coordinate,
-              pixel: e.pixel as Pixel,
-            }),
-          );
-        }
-      });
-      this.map.on('dblclick', (e) => {
-        if (this.mapDblClick$.observed) {
-          this.zoneHelper.runInsideAngular(() =>
-            this.mapDblClick$.next({
-              coordinate: this.getExternalCoordinate(e.coordinate) as Coordinate,
-              pixel: e.pixel as Pixel,
-            }),
-          );
-        }
-      });
+      this.listenerKeys.push(
+        view.on('change:center', () => {
+          this.zoneHelper.runInsideAngular(() => this.emitViewChange());
+        }),
+        view.on('change:resolution', () => {
+          this.mapService.setResolution(view.getResolution() ?? 1);
+          this.zoneHelper.runInsideAngular(() => this.emitViewChange());
+        }),
+        view.on('change:rotation', () => {
+          this.zoneHelper.runInsideAngular(() => this.emitViewChange());
+        }),
+        this.map.on('click', (e) => {
+          if (this.mapClick$.observed) {
+            this.zoneHelper.runInsideAngular(() =>
+              this.mapClick$.next({
+                coordinate: this.getExternalCoordinate(e.coordinate) as Coordinate,
+                pixel: e.pixel as Pixel,
+              }),
+            );
+          }
+        }),
+        this.map.on('dblclick', (e) => {
+          if (this.mapDblClick$.observed) {
+            this.zoneHelper.runInsideAngular(() =>
+              this.mapDblClick$.next({
+                coordinate: this.getExternalCoordinate(e.coordinate) as Coordinate,
+                pixel: e.pixel as Pixel,
+              }),
+            );
+          }
+        }),
+      );
     });
     this.emitViewChange();
   }
 
   private destroyMap(): void {
+    if (this.resizeRafId !== null && typeof cancelAnimationFrame !== 'undefined') {
+      cancelAnimationFrame(this.resizeRafId);
+      this.resizeRafId = null;
+    }
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
       this.resizeObserver = undefined;
+    }
+    if (this.listenerKeys.length > 0) {
+      unByKey(this.listenerKeys);
+      this.listenerKeys.length = 0;
     }
     if (this.map) {
       this.zoneHelper.runOutsideAngular(() => {
@@ -175,6 +192,9 @@ export class OlMapComponent {
       this.map = undefined;
       this.mapService.setMap(null);
     }
+    this.viewChange$.complete();
+    this.mapClick$.complete();
+    this.mapDblClick$.complete();
   }
 
   private updateCenter(center: Coordinate): void {
@@ -182,11 +202,13 @@ export class OlMapComponent {
     const view = this.map.getView();
     const projectedCenter = this.getProjectedCoordinate(center);
     const currentCenter = view.getCenter();
+    const units = getProjection(this.projection())?.getUnits();
+    const tolerance = units === 'degrees' ? 1e-6 : 1;
     // Only update if center is significantly different (prevents interfering with animations)
     if (
       !currentCenter ||
-      Math.abs(currentCenter[0] - projectedCenter[0]) > 1 ||
-      Math.abs(currentCenter[1] - projectedCenter[1]) > 1
+      Math.abs(currentCenter[0] - projectedCenter[0]) > tolerance ||
+      Math.abs(currentCenter[1] - projectedCenter[1]) > tolerance
     ) {
       this.zoneHelper.runOutsideAngular(() => view.setCenter(projectedCenter));
     }

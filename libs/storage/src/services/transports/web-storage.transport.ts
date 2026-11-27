@@ -26,8 +26,9 @@ export class WebStorageTransport implements StorageTransport {
 
     try {
       if (encryptData) {
-        if (!this.secretPassphrase) throw new Error('Encryption passphrase not provided');
-        const plainText = await decrypt(raw, this.secretPassphrase);
+        const passphrase = options?.passphrase ?? this.secretPassphrase;
+        if (!passphrase) throw new Error('Encryption passphrase not provided');
+        const plainText = await decrypt(raw, passphrase);
         return await deserializeData<T>(plainText, useToon);
       }
       return await deserializeData<T>(raw, useToon);
@@ -49,18 +50,15 @@ export class WebStorageTransport implements StorageTransport {
     const storage =
       storageType === 'session' ? globalWindow.sessionStorage : globalWindow.localStorage;
 
-    try {
-      let payload = await serializeData(data, useToon);
+    let payload = await serializeData(data, useToon);
 
-      if (encryptData) {
-        if (!this.secretPassphrase) throw new Error('Encryption passphrase not provided');
-        payload = await encrypt(payload, this.secretPassphrase);
-      }
-
-      storage.setItem(key, payload);
-    } catch (err) {
-      console.error(`[WebStorageTransport] Error writing key:`, key, err);
+    if (encryptData) {
+      const passphrase = options?.passphrase ?? this.secretPassphrase;
+      if (!passphrase) throw new Error('Encryption passphrase not provided');
+      payload = await encrypt(payload, passphrase);
     }
+
+    storage.setItem(key, payload);
   }
 
   async delete(key: string, options?: StorageSignalOptions): Promise<void> {

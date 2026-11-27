@@ -1,6 +1,6 @@
 // OlTooltipDirective — feature hover tooltip on a vector layer.
 
-import { DestroyRef, Directive, inject, input } from '@angular/core';
+import { DestroyRef, Directive, DOCUMENT, inject, input } from '@angular/core';
 import type { Feature as OLFeature } from 'ol';
 import type BaseLayer from 'ol/layer/Base';
 import type OLMap from 'ol/Map';
@@ -41,6 +41,7 @@ type EventfulMap = OLMap & {
 export class OlTooltipDirective {
   private readonly mapService = inject(OlMapService);
   private readonly zoneHelper = inject(OlZoneHelper);
+  private readonly document = inject(DOCUMENT);
 
   /** Property key to read from the hovered feature. */
   readonly olTooltip = input.required<string>();
@@ -60,7 +61,7 @@ export class OlTooltipDirective {
       this.zoneHelper.runOutsideAngular(() => {
         const viewport = map.getViewport();
         if (!viewport) return;
-        const tooltip = document.createElement('div');
+        const tooltip = this.document.createElement('div');
         tooltip.setAttribute('role', 'tooltip');
         tooltip.className = 'ol-tooltip';
         Object.assign(tooltip.style, {

@@ -164,16 +164,12 @@ export default [
       ],
     },
   },
-  {
+  ...configs.templateRecommended.map((cfg) => ({
+    ...cfg,
     files: ['**/*.html'],
-    languageOptions: {
-      parser: angularTemplateParser,
-    },
-    plugins: {
-      '@angular-eslint/template': angularTemplateEslint,
-    },
-    rules: {
-      ...configs.templateRecommended[1].rules,
-    },
-  },
+  })),
+  ...configs.templateAccessibility.map((cfg) => ({
+    ...cfg,
+    files: ['**/*.html'],
+  })),
 ];

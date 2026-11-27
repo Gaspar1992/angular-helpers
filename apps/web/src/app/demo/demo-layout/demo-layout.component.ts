@@ -75,6 +75,7 @@ const DEMO_GROUPS: DemoGroup[] = [
                 <!-- Dropdown Group -->
                 <div
                   class="relative"
+                  tabindex="-1"
                   (mouseenter)="openDropdown(group.label)"
                   (mouseleave)="scheduleClose(group.label)"
                   (keydown.escape)="dropdownOpen.set(null)"

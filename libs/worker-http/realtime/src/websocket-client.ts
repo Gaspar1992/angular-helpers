@@ -176,6 +176,7 @@ export class WorkerWebSocketClient {
     this.worker.removeEventListener('message', this.listener as EventListener);
     this.rejectAllPending(new Error('WebSocket closed'));
     this.updateStatus({ state: 'closed', error: null });
+    this._messages$.complete();
   }
 
   private connect(): void {

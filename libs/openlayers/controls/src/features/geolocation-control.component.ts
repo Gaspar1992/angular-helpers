@@ -124,73 +124,75 @@ export class OlGeolocationControlComponent {
   private accuracyFeature?: Feature;
   private layer?: VectorLayer<VectorSource>;
 
+  private unsubReady?: () => void;
+
   constructor() {
     afterNextRender(() => {
-      const map = this.mapService.getMap();
-      if (!map) return;
+      this.unsubReady = this.mapService.onReady((map) => {
+        this.zoneHelper.runOutsideAngular(() => {
+          // Create the Control
+          this.control = new Control({
+            element: this.controlElement().nativeElement,
+          });
+          map.addControl(this.control);
 
-      this.zoneHelper.runOutsideAngular(() => {
-        // Create the Control
-        this.control = new Control({
-          element: this.controlElement().nativeElement,
-        });
-        map.addControl(this.control);
+          // Setup Geolocation
+          const view = map.getView();
+          this.geolocation = new Geolocation({
+            trackingOptions: {
+              enableHighAccuracy: true,
+            },
+            projection: view.getProjection(),
+          });
 
-        // Setup Geolocation
-        const view = map.getView();
-        this.geolocation = new Geolocation({
-          trackingOptions: {
-            enableHighAccuracy: true,
-          },
-          projection: view.getProjection(),
-        });
-
-        // Setup Features
-        this.accuracyFeature = new Feature();
-        this.positionFeature = new Feature();
-        this.positionFeature.setStyle(
-          new Style({
-            image: new CircleStyle({
-              radius: 6,
-              fill: new Fill({
-                color: '#3b82f6',
-              }),
-              stroke: new Stroke({
-                color: '#fff',
-                width: 2,
+          // Setup Features
+          this.accuracyFeature = new Feature();
+          this.positionFeature = new Feature();
+          this.positionFeature.setStyle(
+            new Style({
+              image: new CircleStyle({
+                radius: 6,
+                fill: new Fill({
+                  color: '#3b82f6',
+                }),
+                stroke: new Stroke({
+                  color: '#fff',
+                  width: 2,
+                }),
               }),
             }),
-          }),
-        );
+          );
 
-        // Setup Vector Layer to show position
-        const vectorSource = new VectorSource({
-          features: [this.accuracyFeature, this.positionFeature],
-        });
+          // Setup Vector Layer to show position
+          const vectorSource = new VectorSource({
+            features: [this.accuracyFeature, this.positionFeature],
+          });
 
-        this.layer = new VectorLayer({
-          source: vectorSource,
-          zIndex: 9999, // Always on top
-        });
-        map.addLayer(this.layer);
+          this.layer = new VectorLayer({
+            source: vectorSource,
+            zIndex: 9999, // Always on top
+          });
+          map.addLayer(this.layer);
 
-        // Listeners
-        this.geolocation.on('change:accuracyGeometry', () => {
-          this.accuracyFeature?.setGeometry(this.geolocation?.getAccuracyGeometry() ?? undefined);
-        });
+          // Listeners
+          this.geolocation.on('change:accuracyGeometry', () => {
+            this.accuracyFeature?.setGeometry(this.geolocation?.getAccuracyGeometry() ?? undefined);
+          });
 
-        this.geolocation.on('change:position', () => {
-          const coordinates = this.geolocation?.getPosition();
-          this.positionFeature?.setGeometry(coordinates ? new Point(coordinates) : undefined);
+          this.geolocation.on('change:position', () => {
+            const coordinates = this.geolocation?.getPosition();
+            this.positionFeature?.setGeometry(coordinates ? new Point(coordinates) : undefined);
 
-          if (coordinates && this.tracking()) {
-            map.getView().animate({ center: coordinates, duration: 500 });
-          }
+            if (coordinates && this.tracking()) {
+              map.getView().animate({ center: coordinates, duration: 500 });
+            }
+          });
         });
       });
     });
 
     this.destroyRef.onDestroy(() => {
+      this.unsubReady?.();
       const map = this.mapService.getMap();
       this.zoneHelper.runOutsideAngular(() => {
         if (map) {

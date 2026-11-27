@@ -6,7 +6,8 @@ export const LEGACY_ENCRYPTION_SALT = new Uint8Array([
 const V2_PREFIX = 'v2:';
 const SALT_BYTE_LENGTH = 16;
 const IV_BYTE_LENGTH = 12;
-const PBKDF2_ITERATIONS = 100000;
+export const PBKDF2_ITERATIONS = 600_000;
+const LEGACY_PBKDF2_ITERATIONS = 100_000;
 const MAX_KEY_CACHE_SIZE = 64;
 
 const keyCache = new Map<string, Promise<CryptoKey>>();
@@ -18,10 +19,25 @@ function getCrypto(): Crypto | null {
   return null;
 }
 
+async function computeCacheKey(
+  cryptoContext: Crypto,
+  password: string,
+  salt: Uint8Array,
+): Promise<string> {
+  const enc = new TextEncoder();
+  const pwBytes = enc.encode(password);
+  const combined = new Uint8Array(pwBytes.length + salt.length);
+  combined.set(pwBytes, 0);
+  combined.set(salt, pwBytes.length);
+  const digest = await cryptoContext.subtle.digest('SHA-256', combined);
+  return bytesToBase64(digest);
+}
+
 async function deriveCryptoKey(
   cryptoContext: Crypto,
   password: string,
   salt: Uint8Array,
+  iterations: number,
 ): Promise<CryptoKey> {
   const enc = new TextEncoder();
   const keyMaterial = await cryptoContext.subtle.importKey(
@@ -36,7 +52,7 @@ async function deriveCryptoKey(
     {
       name: 'PBKDF2',
       salt: salt as Uint8Array<ArrayBuffer>,
-      iterations: PBKDF2_ITERATIONS,
+      iterations,
       hash: 'SHA-256',
     },
     keyMaterial,
@@ -49,13 +65,19 @@ async function deriveCryptoKey(
 async function getCryptoKey(
   password: string,
   salt: Uint8Array = LEGACY_ENCRYPTION_SALT,
+  useCache = true,
+  iterations = PBKDF2_ITERATIONS,
 ): Promise<CryptoKey> {
   const cryptoContext = getCrypto();
   if (!cryptoContext) {
     throw new Error('WebCrypto API is not supported in this environment');
   }
 
-  const cacheKey = `${password}:${bytesToBase64(salt)}`;
+  if (!useCache) {
+    return deriveCryptoKey(cryptoContext, password, salt, iterations);
+  }
+
+  const cacheKey = `${iterations}:${await computeCacheKey(cryptoContext, password, salt)}`;
   const cached = keyCache.get(cacheKey);
   if (cached) {
     return cached;
@@ -68,7 +90,7 @@ async function getCryptoKey(
     }
   }
 
-  const keyPromise = deriveCryptoKey(cryptoContext, password, salt).catch((err) => {
+  const keyPromise = deriveCryptoKey(cryptoContext, password, salt, iterations).catch((err) => {
     keyCache.delete(cacheKey);
     throw err;
   });
@@ -89,7 +111,8 @@ export async function encrypt(text: string, secret: string): Promise<string> {
   const enc = new TextEncoder();
   const salt = cryptoContext.getRandomValues(new Uint8Array(SALT_BYTE_LENGTH));
   const iv = cryptoContext.getRandomValues(new Uint8Array(IV_BYTE_LENGTH));
-  const key = await getCryptoKey(secret, salt);
+  // Fresh per-message salt never hits cache; skip keyCache to avoid evicting decrypt keys
+  const key = await getCryptoKey(secret, salt, false);
 
   const encrypted = await cryptoContext.subtle.encrypt(
     { name: 'AES-GCM', iv },
@@ -121,6 +144,8 @@ export async function decrypt(encoded: string, secret: string): Promise<string> 
   let iv: Uint8Array;
   let ciphertext: Uint8Array;
 
+  let iterations = PBKDF2_ITERATIONS;
+
   if (encoded.startsWith(V2_PREFIX)) {
     const bytes = base64ToBytes(encoded.slice(V2_PREFIX.length));
     salt = bytes.slice(0, SALT_BYTE_LENGTH);
@@ -131,9 +156,10 @@ export async function decrypt(encoded: string, secret: string): Promise<string> 
     salt = LEGACY_ENCRYPTION_SALT;
     iv = bytes.slice(0, IV_BYTE_LENGTH);
     ciphertext = bytes.slice(IV_BYTE_LENGTH);
+    iterations = LEGACY_PBKDF2_ITERATIONS;
   }
 
-  const key = await getCryptoKey(secret, salt);
+  const key = await getCryptoKey(secret, salt, true, iterations);
   const decrypted = await cryptoContext.subtle.decrypt(
     { name: 'AES-GCM', iv: iv as Uint8Array<ArrayBuffer> },
     key,

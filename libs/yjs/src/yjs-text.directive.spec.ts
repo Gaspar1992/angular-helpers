@@ -92,6 +92,7 @@ describe('YjsTextDirective', () => {
     component.text.set(yTextA);
     fixture.detectChanges();
 
+    textarea.focus();
     const setSelectionRangeSpy = vi.spyOn(textarea, 'setSelectionRange');
 
     // Remote user inserts text
@@ -108,6 +109,7 @@ describe('YjsTextDirective', () => {
     component.text.set(yText);
     fixture.detectChanges();
 
+    textarea.focus();
     const setSelectionRangeSpy = vi.spyOn(textarea, 'setSelectionRange');
 
     // Transact with matching origin

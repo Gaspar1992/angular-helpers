@@ -27,15 +27,17 @@ import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
 
       <div class="space-y-6">
         <div class="space-y-2">
-          <label>Broadcast Message</label>
+          <label for="broadcast-message-input">Broadcast Message</label>
           <div class="flex gap-3">
             <input
+              id="broadcast-message-input"
               type="text"
               [(ngModel)]="message"
               placeholder="Type to sync across tabs..."
               class="demo-input flex-1 font-bold"
             />
             <button
+              type="button"
               class="btn btn-primary font-black px-8"
               (click)="send()"
               [disabled]="!message().trim() || !supported"
@@ -47,8 +49,14 @@ import { BroadcastChannelService } from '@angular-helpers/browser-web-apis';
 
         <div class="space-y-4 pt-4">
           <div class="flex items-center justify-between">
-            <label class="m-0">Inbound Stream</label>
-            <button class="btn btn-secondary btn-xs font-black" (click)="clearMessages()">
+            <span class="text-xs font-bold uppercase tracking-wider text-base-content/70 m-0"
+              >Inbound Stream</span
+            >
+            <button
+              type="button"
+              class="btn btn-secondary btn-xs font-black"
+              (click)="clearMessages()"
+            >
               Clear
             </button>
           </div>

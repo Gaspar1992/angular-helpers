@@ -44,6 +44,8 @@ export class OlMapService {
       for (const cb of callbacks) {
         cb(map);
       }
+    } else {
+      this.readyCallbacks.length = 0;
     }
   }
 
@@ -61,12 +63,18 @@ export class OlMapService {
     return this.map;
   }
 
-  onReady(callback: (map: OLMap) => void): void {
+  onReady(callback: (map: OLMap) => void): () => void {
     if (this.map) {
       callback(this.map);
-    } else {
-      this.readyCallbacks.push(callback);
+      return () => {};
     }
+    this.readyCallbacks.push(callback);
+    return () => {
+      const idx = this.readyCallbacks.indexOf(callback);
+      if (idx !== -1) {
+        this.readyCallbacks.splice(idx, 1);
+      }
+    };
   }
   getView(): View | null {
     return this.map?.getView() ?? null;
@@ -89,6 +97,7 @@ export class OlMapService {
 
     // Defer to next macrotask to ensure DOM layout is complete
     setTimeout(() => {
+      if (this.map !== map) return;
       this.zoneHelper.runOutsideAngular(() => {
         // Force size recalculation before fitting
         map.updateSize();

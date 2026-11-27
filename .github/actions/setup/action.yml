@@ -3,7 +3,7 @@ description: Checkout, install Node.js (from .nvmrc) and npm dependencies, with 
 
 inputs:
   playwright-cache:
-    description: When "true", restore/save Playwright browser cache keyed on package-lock.json.
+    description: When "true", restore/save Playwright browser cache keyed on pnpm-lock.yaml.
     required: false
     default: 'false'
   registry-url:

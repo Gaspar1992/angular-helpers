@@ -132,7 +132,9 @@ export class MeasurementInteractionService {
     if (this.measureTooltipElement) {
       this.measureTooltipElement.parentNode?.removeChild(this.measureTooltipElement);
     }
-    this.measureTooltipElement = document.createElement('div');
+    const doc = typeof document !== 'undefined' ? document : undefined;
+    if (!doc) return;
+    this.measureTooltipElement = doc.createElement('div');
     this.measureTooltipElement.className = 'ol-tooltip ol-tooltip-measure';
     this.measureTooltipElement.style.backgroundColor = 'rgba(0,0,0,0.7)';
     this.measureTooltipElement.style.color = 'white';

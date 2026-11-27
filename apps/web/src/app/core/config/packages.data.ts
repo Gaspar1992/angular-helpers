@@ -203,6 +203,28 @@ export const PACKAGES: readonly PackageInfo[] = [
     promise: 'robust',
     serviceCount: 9,
   },
+  {
+    icon: '🛠️',
+    name: 'schematics',
+    title: 'Workspace Schematics',
+    npmPackage: '@angular-helpers/schematics',
+    tagline: 'CLI generators for scaffolding new @angular-helpers packages.',
+    description:
+      'Angular DevKit schematics to scaffold new library packages with ng-packagr configuration, strict TypeScript mappings, and workspace conventions.',
+    highlights: [
+      'create-package: Scaffold new library with ng-packagr & project.json',
+      'Automatic root tsconfig.json path mapping registration',
+      'Collision-safe directory & package-name validation',
+    ],
+    highlightsLabel: 'Included schematics',
+    installCmd: 'pnpm add -D @angular-helpers/schematics',
+    docsLink: '/docs/schematics',
+    demoLink: null,
+    badge: null,
+    tags: ['CLI', 'Schematics', 'Generators'],
+    promise: 'robust',
+    serviceCount: 1,
+  },
 ];
 
 export const TOTAL_SERVICE_COUNT = PACKAGES.reduce((sum, pkg) => sum + (pkg.serviceCount ?? 0), 0);

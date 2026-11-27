@@ -11,6 +11,18 @@ import type { StorageSignalOptions, StorageSignal } from '../interfaces/storage.
  * @param options Storage options (type, encryption, synchronization). Defaults to `{ storageType: 'local', serializer: 'json' }`.
  * @returns A `StorageSignal<T>` that allows reading/writing data directly and querying metadata.
  */
+function safeEqual<T>(a: T, b: T): boolean {
+  if (Object.is(a, b)) return true;
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) {
+    return false;
+  }
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch {
+    return false;
+  }
+}
+
 export function injectStorageSignal<T>(
   key: string,
   defaultValue: T,
@@ -26,21 +38,27 @@ export function injectStorageSignal<T>(
     resolvedOptions.storageType === 'indexeddb' || resolvedOptions.storageType === 'cacheapi';
 
   const dataSignal = signal<T>(defaultValue, {
-    equal: (a, b) => JSON.stringify(a) === JSON.stringify(b),
+    equal: safeEqual,
   });
   const loadingSignal = signal<boolean>(isAsync);
   const errorSignal = signal<Error | null>(null);
+  let writeGeneration = 0;
 
   // Extract original signal methods immediately to prevent TDZ and duplicate writes on initial load
   const originalSet = dataSignal.set.bind(dataSignal);
   const originalUpdate = dataSignal.update.bind(dataSignal);
 
   const transport = resolveStorageTransport();
+  const initialGeneration = writeGeneration;
 
   // 1. Load initial value from L2
   transport
     .read<T>(key, resolvedOptions)
     .then((value) => {
+      if (writeGeneration !== initialGeneration) {
+        loadingSignal.set(false);
+        return;
+      }
       if (value !== undefined) {
         if (resolvedOptions.validator && !resolvedOptions.validator(value)) {
           const driftError = new Error(
@@ -75,12 +93,14 @@ export function injectStorageSignal<T>(
   const customSignal = dataSignal as any;
 
   customSignal.set = (newValue: T) => {
+    writeGeneration++;
     persist(newValue);
     originalSet(newValue);
     errorSignal.set(null); // Clear errors on manual writes
   };
 
   customSignal.update = (updater: (value: T) => T) => {
+    writeGeneration++;
     originalUpdate((current) => {
       const next = updater(current);
       persist(next);

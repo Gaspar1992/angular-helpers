@@ -46,10 +46,6 @@ jobs:
           AFFECTED=$(pnpm nx show projects --affected -p web --base="$BASE" --head="$CURRENT_SHA")
           [ -n "$AFFECTED" ] || [ "$EVENT_NAME" = "workflow_dispatch" ] && echo "deploy=true" >> "$GITHUB_OUTPUT" || echo "deploy=false" >> "$GITHUB_OUTPUT"
 
-      - name: Build Web Workers
-        if: steps.check.outputs.deploy == 'true'
-        run: pnpm nx run web:build-workers
-
       - name: Build for GitHub Pages
         if: steps.check.outputs.deploy == 'true'
         run: pnpm nx build web --configuration gh-pages

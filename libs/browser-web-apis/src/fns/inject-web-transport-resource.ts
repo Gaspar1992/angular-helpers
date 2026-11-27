@@ -26,7 +26,7 @@ export interface WebTransportResourceOptions extends WebTransportOptions {
 }
 
 export interface WebTransportSessionInfo {
-  transport: any;
+  transport: unknown;
   url: string;
 }
 
@@ -42,7 +42,9 @@ export interface WebTransportResourceRef {
   /** Send datagram payload over datagrams.writable */
   sendDatagram(data: Uint8Array | ArrayBuffer): Promise<void>;
   /** Create outgoing unidirectional stream */
-  createUnidirectionalStream(options?: any): Promise<WritableStream<Uint8Array>>;
+  createUnidirectionalStream(
+    options?: Record<string, unknown>,
+  ): Promise<WritableStream<Uint8Array>>;
   /** Create outgoing bidirectional stream */
   createBidirectionalStream(): Promise<WebTransportBidirectionalStream>;
   /** Incoming unidirectional streams */
@@ -96,14 +98,16 @@ export function injectWebTransportResource(
       const targetUrl = (param as any).request ?? (param as any).params;
       const abortSignal = param.abortSignal;
       if (targetUrl === 'UNSUPPORTED') {
-        internalStatus.set('error');
-        throw new Error('WebTransport is not supported in this environment');
+        return new Observable<WebTransportSessionInfo | null>((subscriber) => {
+          subscriber.error(new Error('WebTransport is not supported in this environment'));
+        });
       }
 
       internalStatus.set('connecting');
 
       return new Observable<WebTransportSessionInfo | null>((subscriber) => {
         let transport: any = null;
+        let datagramReader: ReadableStreamDefaultReader<Uint8Array> | null = null;
         let active = true;
 
         const WebTransportCtor = (globalThis as any).WebTransport;
@@ -120,7 +124,9 @@ export function injectWebTransportResource(
           const listenDatagrams = async (t: any) => {
             if (!t.datagrams?.readable) return;
             try {
-              const reader = t.datagrams.readable.getReader();
+              const reader: ReadableStreamDefaultReader<Uint8Array> =
+                t.datagrams.readable.getReader();
+              datagramReader = reader;
               while (active && currentTransport === t) {
                 const { value, done } = await reader.read();
                 if (done) break;
@@ -130,6 +136,13 @@ export function injectWebTransportResource(
               }
             } catch {
               // Ignore reader cancellation errors
+            } finally {
+              try {
+                datagramReader?.releaseLock();
+              } catch {
+                // Ignore if already released
+              }
+              datagramReader = null;
             }
           };
 
@@ -174,6 +187,9 @@ export function injectWebTransportResource(
 
         const cleanup = () => {
           active = false;
+          if (typeof datagramReader?.cancel === 'function') {
+            void datagramReader.cancel().catch(() => {});
+          }
           if (currentTransport === transport) {
             currentTransport = null;
           }
@@ -246,7 +262,7 @@ export function injectWebTransportResource(
   };
 
   const createUnidirectionalStream = async (
-    streamOptions?: any,
+    streamOptions?: Record<string, unknown>,
   ): Promise<WritableStream<Uint8Array>> => {
     if (!currentTransport || status() !== 'connected') {
       throw new Error('WebTransport is not connected');

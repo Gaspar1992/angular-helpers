@@ -176,6 +176,7 @@ export class WebSocketClient {
     }
     this.rejectAllPending(new Error('WebSocket closed'));
     this.updateStatus({ state: 'closed', error: null });
+    this._messages$.complete();
   }
 
   /** Internal handle for tests and advanced usage. */

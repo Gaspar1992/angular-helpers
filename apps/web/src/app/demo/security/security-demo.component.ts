@@ -76,8 +76,9 @@ interface LogEntry {
           <div class="space-y-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="space-y-2">
-                <label>Pattern</label>
+                <label for="sec-regex-pattern">Pattern</label>
                 <input
+                  id="sec-regex-pattern"
                   type="text"
                   [(ngModel)]="regexPattern"
                   placeholder="Pattern"
@@ -85,8 +86,9 @@ interface LogEntry {
                 />
               </div>
               <div class="space-y-2">
-                <label>Test Input</label>
+                <label for="sec-regex-input">Test Input</label>
                 <input
+                  id="sec-regex-input"
                   type="text"
                   [(ngModel)]="regexInput"
                   placeholder="Test input"
@@ -191,8 +193,9 @@ interface LogEntry {
           <div class="space-y-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="space-y-2">
-                <label>Storage Key</label>
+                <label for="sec-storage-key">Storage Key</label>
                 <input
+                  id="sec-storage-key"
                   type="text"
                   [(ngModel)]="storageKey"
                   placeholder="Key"
@@ -200,8 +203,9 @@ interface LogEntry {
                 />
               </div>
               <div class="space-y-2">
-                <label>Value (JSON)</label>
+                <label for="sec-storage-value">Value (JSON)</label>
                 <input
+                  id="sec-storage-value"
                   type="text"
                   [(ngModel)]="storageValue"
                   placeholder="Value (JSON)"
@@ -258,8 +262,9 @@ interface LogEntry {
 
           <div class="space-y-6">
             <div class="space-y-2">
-              <label>Unsafe HTML Input</label>
+              <label for="sec-html-input">Unsafe HTML Input</label>
               <input
+                id="sec-html-input"
                 type="text"
                 [(ngModel)]="htmlInput"
                 placeholder="<b>Bold</b><script>alert(1)</script>"
@@ -267,13 +272,18 @@ interface LogEntry {
               />
             </div>
             <div class="flex gap-4">
-              <button (click)="sanitizeHtml()" class="btn btn-primary flex-1">Sanitize</button>
-              <button (click)="escapeHtml()" class="btn btn-secondary flex-1">Escape HTML</button>
+              <button type="button" (click)="sanitizeHtml()" class="btn btn-primary flex-1">
+                Sanitize
+              </button>
+              <button type="button" (click)="escapeHtml()" class="btn btn-secondary flex-1">
+                Escape HTML
+              </button>
             </div>
 
             <div class="space-y-2 pt-4">
-              <label>URL to Validate</label>
+              <label for="sec-url-input">URL to Validate</label>
               <input
+                id="sec-url-input"
                 type="text"
                 [(ngModel)]="urlInput"
                 placeholder="https://example.com"

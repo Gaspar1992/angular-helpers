@@ -1,5 +1,6 @@
 import type { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
+import * as fs from 'node:fs';
 import * as path from 'node:path';
 import type { Schema } from './schema';
 
@@ -85,14 +86,21 @@ function getDefaultProject(tree: Tree): string {
  * Copies the worker template to the target path
  */
 function copyWorkerTemplate(tree: Tree, options: NormalizedOptions): void {
-  const templatePath = path.join(__dirname, 'files', 'http-api.worker.ts.template');
+  if (tree.exists(options.workerPath)) {
+    return;
+  }
 
-  if (!tree.exists(templatePath)) {
-    // Fallback: create worker file with basic content
-    const workerContent = `import {
+  const templatePath = path.join(__dirname, 'files', 'http-api.worker.ts.template');
+  if (fs.existsSync(templatePath)) {
+    const templateContent = fs.readFileSync(templatePath, 'utf8');
+    tree.create(options.workerPath, templateContent);
+    return;
+  }
+
+  const workerContent = `import {
   createWorkerMessageLoop,
   type WorkerMessageLoopConfig,
-} from '@angular-helpers/worker-http/backend';
+} from '@angular-helpers/worker-http/interceptors';
 
 /**
  * HTTP API Worker
@@ -108,49 +116,29 @@ const config: WorkerMessageLoopConfig = {
 createWorkerMessageLoop(config);
 `;
 
-    if (!tree.exists(options.workerPath)) {
-      tree.create(options.workerPath, workerContent);
-    }
-    return;
-  }
-
-  // If file already exists, don't overwrite
-  if (tree.exists(options.workerPath)) {
-    return;
-  }
-
-  const templateContent = tree.read(templatePath);
-  if (templateContent) {
-    tree.create(options.workerPath, templateContent.toString());
-  }
+  tree.create(options.workerPath, workerContent);
 }
 
 /**
- * Updates tsconfig.json with web worker lib
+ * Creates tsconfig.worker.json instead of polluting root tsconfig.json with conflicting webworker/dom globals
  */
 function updateTsConfig(tree: Tree): void {
-  const tsConfigPaths = ['tsconfig.json', 'tsconfig.app.json'];
-
-  for (const tsConfigPath of tsConfigPaths) {
-    if (!tree.exists(tsConfigPath)) {
-      continue;
-    }
-
-    const tsConfig = readJson(tree, tsConfigPath) as { compilerOptions?: { lib?: string[] } };
-
-    // Ensure compilerOptions exists
-    tsConfig.compilerOptions = tsConfig.compilerOptions ?? {};
-
-    // Add webworker lib if not present
-    const lib = tsConfig.compilerOptions.lib ?? [];
-    if (!lib.includes('webworker')) {
-      lib.push('webworker');
-      tsConfig.compilerOptions.lib = lib;
-    }
-
-    tree.overwrite(tsConfigPath, JSON.stringify(tsConfig, null, 2));
-    break; // Only update the first found config
+  const workerTsConfigPath = 'tsconfig.worker.json';
+  if (tree.exists(workerTsConfigPath)) {
+    return;
   }
+
+  const extendsTarget = tree.exists('tsconfig.json') ? './tsconfig.json' : undefined;
+  const workerTsConfig: Record<string, unknown> = {
+    ...(extendsTarget ? { extends: extendsTarget } : {}),
+    compilerOptions: {
+      lib: ['es2024', 'webworker'],
+      types: [],
+    },
+    include: ['src/**/*.worker.ts'],
+  };
+
+  tree.create(workerTsConfigPath, JSON.stringify(workerTsConfig, null, 2) + '\n');
 }
 
 /**
@@ -226,32 +214,56 @@ function addImport(content: string, importStatement: string): string {
 /**
  * Adds the worker HTTP provider to the application config
  */
-function addProviderToConfig(content: string, _workerPath: string): string {
+function addProviderToConfig(content: string, workerPath: string): string {
+  const normalizedWorkerImport = workerPath
+    .replace(/^src\/app\//, './')
+    .replace(/^projects\/[^/]+\/src\/app\//, './')
+    .replace(/\.ts$/, '');
+  const relativeWorkerSpec = normalizedWorkerImport.startsWith('.')
+    ? normalizedWorkerImport
+    : `./${normalizedWorkerImport}`;
+
   const workerConfig = `provideWorkerHttpClient(
     withWorkerConfigs([
       {
         id: 'http',
-        workerUrl: new URL('./workers/http-api.worker', import.meta.url),
+        workerUrl: new URL('${relativeWorkerSpec}', import.meta.url),
         maxInstances: 2,
       },
     ]),
-  ),`;
+  )`;
 
-  // Find providers array and add the config
-  const providersMatch = content.match(/providers:\s*\[([^\]]*)\]/s);
+  const providersKeyMatch = content.match(/providers:\s*\[/);
+  if (providersKeyMatch && providersKeyMatch.index !== undefined) {
+    const openBracketIdx = providersKeyMatch.index + providersKeyMatch[0].length - 1;
+    let depth = 0;
+    let closeBracketIdx = -1;
+    for (let i = openBracketIdx; i < content.length; i++) {
+      if (content[i] === '[') depth++;
+      else if (content[i] === ']') {
+        depth--;
+        if (depth === 0) {
+          closeBracketIdx = i;
+          break;
+        }
+      }
+    }
 
-  if (providersMatch) {
-    const providersContent = providersMatch[1];
-    const newProvidersContent = providersContent.trim()
-      ? `${providersContent.trim()}\n    ${workerConfig}`
-      : workerConfig;
-
-    return content.replace(providersMatch[0], `providers: [${newProvidersContent}]`);
+    if (closeBracketIdx !== -1) {
+      const inner = content.slice(openBracketIdx + 1, closeBracketIdx);
+      const trimmed = inner.trim();
+      const separator = trimmed.length === 0 ? '' : trimmed.endsWith(',') ? '\n    ' : ',\n    ';
+      const updatedInner =
+        trimmed.length === 0
+          ? `\n    ${workerConfig},\n  `
+          : `${inner.trimEnd()}${separator}${workerConfig},\n  `;
+      return content.slice(0, openBracketIdx + 1) + updatedInner + content.slice(closeBracketIdx);
+    }
   }
 
   // If no providers array found, look for export const appConfig
   const appConfigMatch = content.match(/export const appConfig[^=]*=\s*{/);
-  if (appConfigMatch) {
+  if (appConfigMatch && appConfigMatch.index !== undefined) {
     const insertIndex = content.indexOf('{', appConfigMatch.index) + 1;
     return (
       content.slice(0, insertIndex) +

@@ -20,12 +20,22 @@ export function injectWorkerPool(
 
       const urlString = workerUrl instanceof URL ? workerUrl.toString() : workerUrl;
 
-      // Reject insecure HTTP URLs to prevent loading sensitive worker code over an unencrypted connection
-      if (urlString.startsWith('http://') && !urlString.startsWith('http://localhost')) {
-        throw new Error(
-          `WorkerPool: worker URL must use HTTPS (received: ${urlString}). ` +
-            `Loading workers over HTTP exposes sensitive code to network interception.`,
-        );
+      // Reject insecure HTTP URLs (except loopback hosts) to prevent MITM on worker code
+      if (urlString.startsWith('http://')) {
+        let hostname = '';
+        try {
+          hostname = new URL(urlString).hostname;
+        } catch {
+          hostname = '';
+        }
+        const isLoopback =
+          hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+        if (!isLoopback) {
+          throw new Error(
+            `WorkerPool: worker URL must use HTTPS (received: ${urlString}). ` +
+              `Loading workers over HTTP exposes sensitive code to network interception.`,
+          );
+        }
       }
 
       if (options?.fallbackWorkerCode) {
@@ -42,15 +52,15 @@ export function injectWorkerPool(
                 type: 'application/javascript',
               });
               const blobUrl = URL.createObjectURL(blob);
-              const w = new Worker(blobUrl);
-              // Revoke the object URL immediately — the Worker has already resolved it synchronously
-              URL.revokeObjectURL(blobUrl);
+              const w = new Worker(blobUrl, { type: 'module' });
+              queueMicrotask(() => URL.revokeObjectURL(blobUrl));
               return w;
-            } catch (blobError: any) {
+            } catch (blobError: unknown) {
+              const msg = blobError instanceof Error ? blobError.message : String(blobError);
               throw new Error(
                 `Failed to create fallback Blob worker (possibly blocked by Content Security Policy). ` +
-                  `Original error: ${blobError.message || blobError}. ` +
-                  `Please configure a custom workerUrl using REGEX_WORKER_CONFIG to bypass this policy.`,
+                  `Original error: ${msg}. ` +
+                  `Configure a custom workerUrl or fallbackExecutor to bypass this policy.`,
               );
             }
           });
@@ -75,10 +85,10 @@ export function injectWorkerPool(
 export interface WorkerTaskConfig<T> {
   id: string;
   type: string;
-  data: any;
+  data: unknown;
   timeout?: number;
   resolve: (value: T) => void;
-  reject: (reason?: any) => void;
+  reject: (reason?: unknown) => void;
 }
 
 export interface WorkerPoolOptions {
@@ -87,21 +97,21 @@ export interface WorkerPoolOptions {
   /** Default timeout in milliseconds for tasks. Default: 5000 */
   defaultTimeout?: number;
   /** Callback when a worker crashes */
-  onCrash?: (error: any) => void;
+  onCrash?: (error: unknown) => void;
   /** Callback for a fallback execution if worker is not available (e.g. SSR) */
-  fallbackExecutor?: (type: string, data: any) => Promise<any>;
+  fallbackExecutor?: (type: string, data: unknown) => Promise<unknown>;
 }
 
 /**
- * A generic reusable Web Worker Pool for heavy off-main-thread computations.
+ * A generic reusable Web Worker runner for heavy off-main-thread computations.
  * Handles task queuing, timeouts, worker crashes, and SSR fallbacks.
  */
 export class WorkerPool {
   private worker: Worker | null = null;
   private workerPromise: Promise<Worker | null> | null = null;
-  private initError: any = null;
-  private pendingTasks = new Map<string, WorkerTaskConfig<any>>();
-  private activeTimeoutIds = new Map<string, any>();
+  private initError: unknown = null;
+  private pendingTasks = new Map<string, WorkerTaskConfig<unknown>>();
+  private activeTimeoutIds = new Map<string, ReturnType<typeof setTimeout>>();
   private consecutiveCrashes = 0;
 
   constructor(private options: WorkerPoolOptions) {
@@ -161,10 +171,11 @@ export class WorkerPool {
     };
   }
 
-  private handleInitError(err: any): void {
+  private handleInitError(err: unknown): void {
     this.worker = null;
     this.initError = err;
-    this.failAllTasks(err.message || String(err));
+    const message = err instanceof Error ? err.message : String(err);
+    this.failAllTasks(message);
   }
 
   private restartWorker(): void {
@@ -179,7 +190,7 @@ export class WorkerPool {
     this.initWorker();
   }
 
-  private handleTaskSuccess(taskId: string, result: any): void {
+  private handleTaskSuccess(taskId: string, result: unknown): void {
     const task = this.pendingTasks.get(taskId);
     if (task) {
       this.clearTaskTimeout(taskId);
@@ -188,7 +199,7 @@ export class WorkerPool {
     }
   }
 
-  private handleTaskError(taskId: string, error: any): void {
+  private handleTaskError(taskId: string, error: unknown): void {
     const task = this.pendingTasks.get(taskId);
     if (task) {
       this.clearTaskTimeout(taskId);
@@ -216,9 +227,9 @@ export class WorkerPool {
   /**
    * Executes a task in the worker
    */
-  async execute<T = any>(
+  async execute<T = unknown>(
     type: string,
-    data: any,
+    data: unknown,
     timeoutMsOrOptions?: number | { timeoutMs?: number; transfer?: Transferable[] },
   ): Promise<T> {
     if (this.workerPromise) {
@@ -229,7 +240,7 @@ export class WorkerPool {
       // Prefer fallbackExecutor over throwing — allows graceful degradation (e.g. main-thread regex)
       // even when worker initialization failed (CSP block, SSR, network error).
       if (this.options.fallbackExecutor) {
-        return this.options.fallbackExecutor(type, data);
+        return this.options.fallbackExecutor(type, data) as Promise<T>;
       }
       if (this.initError) {
         throw this.initError;
@@ -253,12 +264,12 @@ export class WorkerPool {
       const taskId = `${type}_${Date.now()}_${randomPart}`;
       const activeTimeout = timeoutMs ?? this.options.defaultTimeout ?? 5000;
 
-      const task: WorkerTaskConfig<T> = {
+      const task: WorkerTaskConfig<unknown> = {
         id: taskId,
         type,
         data,
         timeout: activeTimeout,
-        resolve,
+        resolve: resolve as (value: unknown) => void,
         reject,
       };
 
@@ -277,17 +288,23 @@ export class WorkerPool {
         this.activeTimeoutIds.set(taskId, timeoutId);
       }
 
-      // Determine transferable objects to optimize IPC communication (zero-copy transfer)
-      const transferList = explicitTransfer || detectTransferables(data);
+      try {
+        // Determine transferable objects to optimize IPC communication (zero-copy transfer)
+        const transferList = explicitTransfer || detectTransferables(data);
 
-      this.worker!.postMessage(
-        {
-          id: taskId,
-          type,
-          data,
-        },
-        transferList,
-      );
+        this.worker!.postMessage(
+          {
+            id: taskId,
+            type,
+            data,
+          },
+          transferList,
+        );
+      } catch (postError) {
+        this.clearTaskTimeout(taskId);
+        this.pendingTasks.delete(taskId);
+        reject(postError);
+      }
     });
   }
 

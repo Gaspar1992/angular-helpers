@@ -40,7 +40,9 @@ export function injectSpeechRecognition(): SpeechRecognitionRef {
 
   if (isBrowser) {
     queueMicrotask(() => {
-      supported.set(service.isSupported());
+      if (typeof service?.isSupported === 'function') {
+        supported.set(service.isSupported());
+      }
     });
 
     destroyRef.onDestroy(() => {

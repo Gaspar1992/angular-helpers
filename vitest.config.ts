@@ -13,18 +13,29 @@ export default defineConfig({
     }),
   ],
   optimizeDeps: {
-    disabled: true,
+    noDiscovery: true,
+    include: [],
+  },
+  server: {
+    watch: {
+      ignored: ['**/dist/**'],
+    },
   },
   test: {
     globals: true,
     environment: 'jsdom',
+    server: {
+      deps: {
+        inline: ['magic-string', '@angular-devkit/schematics', '@angular-devkit/core'],
+      },
+    },
     reporters: process.env.CI ? ['default', 'github-actions', 'junit'] : ['default'],
     outputFile: {
       junit: './coverage/junit.xml',
     },
     setupFiles: [here('./apps/web/src/test-setup.ts')],
     include: ['libs/**/*.spec.ts', 'apps/web/src/**/*.spec.ts'],
-    exclude: [...configDefaults.exclude, 'libs/**/schematics/**/*.spec.ts'],
+    exclude: [...configDefaults.exclude, 'dist/**', 'libs/**/schematics/**/*.spec.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'json-summary', 'lcov'],
@@ -140,7 +151,10 @@ export default defineConfig({
       ),
       '@angular-helpers/openlayers/overlays': here('./libs/openlayers/overlays/src/index.ts'),
       '@angular-helpers/openlayers/testing': here('./libs/openlayers/testing/src/index.ts'),
-      '@angular-helpers/openlayers': here('./libs/openlayers/src/index.ts'),
+      '@angular-helpers/openlayers': here('./libs/openlayers/src/public-api.ts'),
+      '@angular-helpers/yjs/websocket': here('./libs/yjs/websocket/src/index.ts'),
+      '@angular-helpers/yjs/indexeddb': here('./libs/yjs/indexeddb/src/index.ts'),
+      '@angular-helpers/yjs/awareness': here('./libs/yjs/awareness/src/index.ts'),
       '@angular-helpers/yjs': here('./libs/yjs/src/index.ts'),
     },
   },

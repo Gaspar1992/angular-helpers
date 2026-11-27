@@ -93,6 +93,7 @@ export class RateLimiterService {
   private readonly secureStorage = inject(SecureStorageService, { optional: true });
 
   private readonly buckets = new Map<string, BucketState>();
+  private readonly consumeLocks = new Map<string, Promise<void>>();
 
   constructor() {
     const config = inject(RATE_LIMITER_CONFIG, { optional: true });
@@ -155,6 +156,20 @@ export class RateLimiterService {
    * (fail-open behaviour — intentional to avoid silent failures when a policy is missing).
    */
   async consume(key: string, tokens = 1): Promise<void> {
+    const prev = this.consumeLocks.get(key) ?? Promise.resolve();
+    const run = prev.catch(() => {}).then(() => this.consumeInternal(key, tokens));
+    const lockMarker = run.catch(() => {});
+    this.consumeLocks.set(key, lockMarker);
+    try {
+      return await run;
+    } finally {
+      if (this.consumeLocks.get(key) === lockMarker) {
+        this.consumeLocks.delete(key);
+      }
+    }
+  }
+
+  private async consumeInternal(key: string, tokens: number): Promise<void> {
     const bucket = this.buckets.get(key);
     if (!bucket) return;
 
@@ -246,8 +261,8 @@ export class RateLimiterService {
           if (this.secureStorage) {
             await this.secureStorage.remove(storageKey);
           }
-        } else {
-          const storage = storageType === 'local' ? localStorage : sessionStorage;
+        } else if (typeof window !== 'undefined') {
+          const storage = storageType === 'local' ? window.localStorage : window.sessionStorage;
           storage.removeItem(storageKey);
         }
       } catch {

@@ -44,7 +44,7 @@ export class EntityStore<Id, Entity> {
       sig = signal(this._rawMap.get(id));
       this._entitySignals.set(id, sig);
     }
-    return sig.asReadonly();
+    return computed(() => this._entitySignals.get(id)?.() ?? this.entities().get(id));
   }
 
   /**

@@ -13,7 +13,7 @@
     "noUnusedParameters": true,
     "noUnusedLocals": true,
     "rootDir": "schematics",
-    "outDir": "../../dist/libs/worker-http/schematics",
+    "outDir": "../../dist/worker-http/schematics",
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
     "strictNullChecks": true,

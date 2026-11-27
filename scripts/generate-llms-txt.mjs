@@ -268,6 +268,17 @@ export class CollaborativeEditorComponent {
   });
 }`,
   },
+  {
+    id: 'schematics',
+    name: '@angular-helpers/schematics',
+    title: 'Schematics',
+    summary:
+      'Angular DevKit schematics to scaffold new @angular-helpers packages with ng-packagr config, strict TypeScript, and tsconfig.json path mappings.',
+    docsUrl: 'https://gaspar1992.github.io/angular-helpers/docs/schematics',
+    readmePath: 'libs/schematics/README.md',
+    canonicalCode: `// Generate a new @angular-helpers library package:
+// pnpm exec schematics @angular-helpers/schematics:create-package --name=my-feature`,
+  },
 ];
 
 export function generateLlmsTxt() {

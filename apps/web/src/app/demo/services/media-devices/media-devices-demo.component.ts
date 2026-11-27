@@ -29,7 +29,9 @@ import { Component, signal } from '@angular/core';
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 mt-4">
         <div class="space-y-4">
-          <label>Audio Inputs</label>
+          <span class="block text-xs font-bold uppercase tracking-wider text-base-content/70"
+            >Audio Inputs</span
+          >
           @if (audioInputs().length === 0) {
             <div
               class="p-5 bg-base-content/5 rounded-2xl border border-base-content/5 shadow-inner italic text-xs text-base-content/20"
@@ -53,7 +55,9 @@ import { Component, signal } from '@angular/core';
         </div>
 
         <div class="space-y-4">
-          <label>Video Inputs</label>
+          <span class="block text-xs font-bold uppercase tracking-wider text-base-content/70"
+            >Video Inputs</span
+          >
           @if (videoInputs().length === 0) {
             <div
               class="p-5 bg-base-content/5 rounded-2xl border border-base-content/5 shadow-inner italic text-xs text-base-content/20"

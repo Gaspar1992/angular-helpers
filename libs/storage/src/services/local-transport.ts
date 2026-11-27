@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { DestroyRef, Injectable, inject } from '@angular/core';
 import { injectPlatform } from '@angular-helpers/core';
 import type { StorageTransport } from './storage-transport';
 import { SECURE_STORAGE_PASSPHRASE } from '../tokens/storage.tokens';
@@ -19,7 +19,7 @@ import { InMemoryStorageTransport } from './transports/in-memory.transport';
  */
 @Injectable({ providedIn: 'root' })
 export class LocalStorageTransport implements StorageTransport {
-  private readonly secretPassphrase: string;
+  private readonly secretPassphrase?: string;
   private readonly workerFactory?: () => Worker;
 
   private readonly webStorage: WebStorageTransport;
@@ -37,12 +37,16 @@ export class LocalStorageTransport implements StorageTransport {
   public cacheName = 'ah_cache';
 
   constructor() {
-    let secret = 'fallback-passphrase-angular-helpers-default-key-sec';
+    let secret: string | undefined;
     let factory: (() => Worker) | undefined = undefined;
+    let injectedWorkerTransport: WorkerStorageTransport | undefined;
 
     try {
-      secret = inject(SECURE_STORAGE_PASSPHRASE, { optional: true }) ?? secret;
+      secret = inject(SECURE_STORAGE_PASSPHRASE, { optional: true }) ?? undefined;
       factory = inject(STORAGE_WORKER_FACTORY, { optional: true }) ?? undefined;
+      injectedWorkerTransport = inject(WorkerStorageTransport, { optional: true }) ?? undefined;
+      const destroyRef = inject(DestroyRef, { optional: true });
+      destroyRef?.onDestroy(() => this.broadcastChannel?.close());
     } catch {
       // Graceful fallback when executed outside Angular injection context (e.g. unit tests doing new LocalStorageTransport())
     }
@@ -59,7 +63,7 @@ export class LocalStorageTransport implements StorageTransport {
     this.inMemory = new InMemoryStorageTransport(this.secretPassphrase);
 
     if (isBrowser && this.workerFactory) {
-      this.workerTransport = new WorkerStorageTransport();
+      this.workerTransport = injectedWorkerTransport ?? new WorkerStorageTransport();
     }
 
     // Default to in-memory in SSR/Server environments to avoid failures when browser APIs are missing
@@ -72,25 +76,17 @@ export class LocalStorageTransport implements StorageTransport {
     }
   }
 
-  private hasWarnedAboutPassphrase = false;
-
-  private warnOnDefaultPassphrase() {
-    if (this.hasWarnedAboutPassphrase) return;
-
-    const isDefault =
-      this.secretPassphrase === 'fallback-passphrase-angular-helpers-default-key-sec' ||
-      this.secretPassphrase === 'angular-helpers-secure-storage-passphrase';
-
-    if (isDefault) {
-      this.hasWarnedAboutPassphrase = true;
-      // oxlint-disable-next-line no-console
-      console.warn(
-        `[LocalStorageTransport] WARNING: Encryption is enabled, but you are using a public or default fallback passphrase. ` +
-          `This is a severe security risk as anyone can easily decrypt your stored local data. ` +
-          `Please configure a custom passphrase by providing SECURE_STORAGE_PASSPHRASE in your application configuration:\n\n` +
-          `providers: [\n` +
-          `  { provide: SECURE_STORAGE_PASSPHRASE, useValue: 'YOUR_CUSTOM_SECURE_PASSPHRASE' }\n` +
-          `]`,
+  private assertPassphraseIfEncrypted(options: StorageSignalOptions): void {
+    if (!options.encrypt) return;
+    const passphrase = options.passphrase ?? this.secretPassphrase;
+    if (
+      !passphrase ||
+      passphrase === 'angular-helpers-secure-storage-passphrase' ||
+      passphrase === 'fallback-passphrase-angular-helpers-default-key-sec'
+    ) {
+      throw new Error(
+        '[LocalStorageTransport] Encryption is enabled, but no custom passphrase was provided. ' +
+          'Configure SECURE_STORAGE_PASSPHRASE or pass options.passphrase.',
       );
     }
   }
@@ -108,10 +104,7 @@ export class LocalStorageTransport implements StorageTransport {
 
   async read<T>(key: string, options?: StorageSignalOptions): Promise<T | undefined> {
     const mergedOptions = this.mergeOptions(options);
-
-    if (mergedOptions.encrypt) {
-      this.warnOnDefaultPassphrase();
-    }
+    this.assertPassphraseIfEncrypted(mergedOptions);
 
     if (this.workerTransport) {
       return this.workerTransport.read<T>(key, mergedOptions);
@@ -122,10 +115,7 @@ export class LocalStorageTransport implements StorageTransport {
 
   async write<T>(key: string, data: T, options?: StorageSignalOptions): Promise<void> {
     const mergedOptions = this.mergeOptions(options);
-
-    if (mergedOptions.encrypt) {
-      this.warnOnDefaultPassphrase();
-    }
+    this.assertPassphraseIfEncrypted(mergedOptions);
 
     if (this.workerTransport) {
       await this.workerTransport.write<T>(key, data, mergedOptions);
@@ -150,13 +140,17 @@ export class LocalStorageTransport implements StorageTransport {
     this.broadcastChannel?.postMessage({ type: 'delete', key });
   }
 
-  onChange<T>(key: string, callback: (value: T) => void): () => void {
+  onChange<T>(
+    key: string,
+    callback: (value: T) => void,
+    options?: StorageSignalOptions,
+  ): () => void {
     const unsubs: (() => void)[] = [];
 
     if (this.workerTransport) {
       unsubs.push(this.workerTransport.onChange(key, callback));
     } else {
-      const transport = this.resolveTransport(this.storageType);
+      const transport = this.resolveTransport(options?.storageType ?? this.storageType);
       if (transport.onChange) {
         unsubs.push(transport.onChange(key, callback));
       }
@@ -166,9 +160,13 @@ export class LocalStorageTransport implements StorageTransport {
       const listener = (event: MessageEvent) => {
         if (event.data?.key === key) {
           if (event.data.type === 'write') {
-            this.read<T>(key).then((val) => {
-              if (val !== undefined) callback(val);
-            });
+            this.read<T>(key, options)
+              .then((val) => {
+                if (val !== undefined) callback(val);
+              })
+              .catch(() => {});
+          } else if (event.data.type === 'delete') {
+            callback(undefined as unknown as T);
           }
         }
       };

@@ -59,14 +59,16 @@ describe('crypto.utils', () => {
   it('should cache derived CryptoKey when decrypting the same salt and passphrase repeatedly', async () => {
     const uniqueSecret = 'cached-key-test-passphrase-xyz';
     const cipherText = await encrypt('Repeated read test', uniqueSecret);
+    // Warm up decrypt cache on first read
+    expect(await decrypt(cipherText, uniqueSecret)).toBe('Repeated read test');
     const deriveKeySpy = vi.spyOn(crypto.subtle, 'deriveKey');
 
     try {
-      const first = await decrypt(cipherText, uniqueSecret);
       const second = await decrypt(cipherText, uniqueSecret);
+      const third = await decrypt(cipherText, uniqueSecret);
 
-      expect(first).toBe('Repeated read test');
       expect(second).toBe('Repeated read test');
+      expect(third).toBe('Repeated read test');
       expect(deriveKeySpy).not.toHaveBeenCalled();
     } finally {
       deriveKeySpy.mockRestore();

@@ -275,9 +275,10 @@ export function mockBroadcastChannel(): () => void {
 /**
  * Mocks HTMLCanvasElement 2D rendering context for headless tests.
  */
-export function mockCanvas2D(): void {
-  if (typeof HTMLCanvasElement === 'undefined') return;
+export function mockCanvas2D(): () => void {
+  if (typeof HTMLCanvasElement === 'undefined') return () => {};
 
+  const originalGetContext = HTMLCanvasElement.prototype.getContext;
   const mockContext = {
     createLinearGradient: () => ({ addColorStop: () => {} }),
     createRadialGradient: () => ({ addColorStop: () => {} }),
@@ -310,6 +311,10 @@ export function mockCanvas2D(): void {
   HTMLCanvasElement.prototype.getContext = function () {
     return mockContext as unknown as RenderingContext;
   } as unknown as typeof HTMLCanvasElement.prototype.getContext;
+
+  return () => {
+    HTMLCanvasElement.prototype.getContext = originalGetContext;
+  };
 }
 
 /**
@@ -320,14 +325,69 @@ export function mockIndexedDB(): () => void {
   if (typeof globalThis.indexedDB === 'undefined') {
     const mockFactory: Partial<IDBFactory> = {
       open: () => {
+        const makeRequest = (result: unknown = undefined) => {
+          const idbReq: Record<string, unknown> = {
+            result,
+            error: null,
+            readyState: 'pending',
+            onsuccess: null,
+            onerror: null,
+            addEventListener: () => {},
+            removeEventListener: () => {},
+          };
+          queueMicrotask(() => {
+            idbReq['readyState'] = 'done';
+            if (typeof idbReq['onsuccess'] === 'function') {
+              (idbReq['onsuccess'] as (ev: unknown) => void)({ target: idbReq });
+            }
+          });
+          return idbReq;
+        };
+        const mockStore = {
+          get: () => makeRequest(undefined),
+          getAll: () => makeRequest([]),
+          getAllKeys: () => makeRequest([]),
+          put: () => makeRequest(undefined),
+          add: () => makeRequest(undefined),
+          delete: () => makeRequest(undefined),
+          clear: () => makeRequest(undefined),
+          count: () => makeRequest(0),
+          openCursor: () => makeRequest(null),
+          openKeyCursor: () => makeRequest(null),
+          createIndex: () => ({}),
+        };
+        const mockDb = {
+          objectStoreNames: { contains: () => false },
+          createObjectStore: () => mockStore,
+          transaction: () => ({
+            objectStore: () => mockStore,
+            oncomplete: null,
+            onerror: null,
+            onabort: null,
+            abort: () => {},
+          }),
+          close: () => {},
+        };
         const req: Record<string, unknown> = {
-          result: null,
+          result: mockDb,
           error: null,
-          readyState: 'done',
+          readyState: 'pending',
+          onsuccess: null,
+          onerror: null,
+          onupgradeneeded: null,
           addEventListener: () => {},
           removeEventListener: () => {},
           dispatchEvent: () => true,
         };
+        queueMicrotask(() => {
+          req['readyState'] = 'done';
+          if (typeof req['onupgradeneeded'] === 'function') {
+            (req['onupgradeneeded'] as (ev: unknown) => void)({ target: req });
+          }
+          if (typeof req['onsuccess'] === 'function') {
+            (req['onsuccess'] as (ev: unknown) => void)({ target: req });
+          }
+        });
         return req as unknown as IDBOpenDBRequest;
       },
       deleteDatabase: () => {
@@ -346,7 +406,30 @@ export function mockIndexedDB(): () => void {
       writable: true,
     });
   }
+  const originalKeyRange = globalThis.IDBKeyRange;
+  if (typeof globalThis.IDBKeyRange === 'undefined') {
+    Object.defineProperty(globalThis, 'IDBKeyRange', {
+      value: {
+        lowerBound: (lower: unknown) => ({ lower }),
+        upperBound: (upper: unknown) => ({ upper }),
+        bound: (lower: unknown, upper: unknown) => ({ lower, upper }),
+        only: (value: unknown) => ({ lower: value, upper: value }),
+      },
+      configurable: true,
+      writable: true,
+    });
+  }
   return () => {
+    if (originalKeyRange !== undefined) {
+      Object.defineProperty(globalThis, 'IDBKeyRange', {
+        value: originalKeyRange,
+        configurable: true,
+        writable: true,
+      });
+    } else {
+      // @ts-expect-error Safe deletion for mock restoration
+      delete globalThis.IDBKeyRange;
+    }
     if (original !== undefined) {
       Object.defineProperty(globalThis, 'indexedDB', {
         value: original,

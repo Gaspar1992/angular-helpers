@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { DestroyRef, Injectable, inject } from '@angular/core';
 import type { StorageTransport } from './storage-transport';
 import { SECURE_STORAGE_PASSPHRASE } from '../tokens/storage.tokens';
 import { STORAGE_WORKER_FACTORY } from '../tokens/worker.tokens';
@@ -17,9 +17,14 @@ export class WorkerStorageTransport implements StorageTransport {
   private workerFactory?: () => Worker;
   private secretPassphrase?: string;
   private nextFallbackId = 0;
+  private requestTimeoutMs = 10_000;
   private readonly pendingRequests = new Map<
     string,
-    { resolve: (value: any) => void; reject: (err: Error) => void }
+    {
+      resolve: (value: any) => void;
+      reject: (err: Error) => void;
+      timer: ReturnType<typeof setTimeout>;
+    }
   >();
   private readonly changeCallbacks = new Map<string, Set<(value: any) => void>>();
 
@@ -29,12 +34,26 @@ export class WorkerStorageTransport implements StorageTransport {
         inject<(() => Worker) | null>(STORAGE_WORKER_FACTORY, { optional: true }) ?? undefined;
       this.secretPassphrase =
         inject<string | null>(SECURE_STORAGE_PASSPHRASE, { optional: true }) ?? undefined;
+      const destroyRef = inject(DestroyRef, { optional: true });
+      destroyRef?.onDestroy(() => this.terminate());
     } catch {
       // Graceful fallback when instantiated outside an injection context
     }
 
     if (this.workerFactory) {
       this.initWorker();
+    }
+  }
+
+  public terminate(): void {
+    this.pendingRequests.forEach((pending) => {
+      clearTimeout(pending.timer);
+      pending.reject(new Error('WorkerStorageTransport terminated'));
+    });
+    this.pendingRequests.clear();
+    if (this.worker) {
+      this.worker.terminate?.();
+      this.worker = undefined;
     }
   }
 
@@ -77,12 +96,13 @@ export class WorkerStorageTransport implements StorageTransport {
       if (type === 'response' && requestId) {
         const pending = this.pendingRequests.get(requestId);
         if (pending) {
+          clearTimeout(pending.timer);
+          this.pendingRequests.delete(requestId);
           if (error) {
             pending.reject(new Error(error));
           } else {
             pending.resolve(payload);
           }
-          this.pendingRequests.delete(requestId);
         }
       } else if (type === 'change' && key) {
         const callbacks = this.changeCallbacks.get(key);
@@ -92,8 +112,9 @@ export class WorkerStorageTransport implements StorageTransport {
       } else if (type === 'error' && requestId) {
         const pending = this.pendingRequests.get(requestId);
         if (pending) {
-          pending.reject(new Error(error || 'Unknown Worker Error'));
+          clearTimeout(pending.timer);
           this.pendingRequests.delete(requestId);
+          pending.reject(new Error(error || 'Unknown Worker Error'));
         }
       }
     };
@@ -101,6 +122,7 @@ export class WorkerStorageTransport implements StorageTransport {
     this.worker.onerror = (event: ErrorEvent) => {
       const errorMsg = event.message || 'Worker syntax or runtime error';
       this.pendingRequests.forEach((pending) => {
+        clearTimeout(pending.timer);
         pending.reject(new Error(errorMsg));
       });
       this.pendingRequests.clear();
@@ -187,9 +209,22 @@ export class WorkerStorageTransport implements StorageTransport {
   ): Promise<T> {
     const requestId = this.generateId();
     return new Promise<T>((resolve, reject) => {
-      this.pendingRequests.set(requestId, { resolve, reject });
-      const transferables = detectTransferables(payload);
-      this.worker!.postMessage({ type, requestId, key, payload, options }, transferables);
+      const timer = setTimeout(() => {
+        this.pendingRequests.delete(requestId);
+        reject(
+          new Error(`Worker storage request "${type}" timed out after ${this.requestTimeoutMs}ms`),
+        );
+      }, this.requestTimeoutMs);
+
+      this.pendingRequests.set(requestId, { resolve, reject, timer });
+      try {
+        const transferables = detectTransferables(payload);
+        this.worker!.postMessage({ type, requestId, key, payload, options }, transferables);
+      } catch (err) {
+        clearTimeout(timer);
+        this.pendingRequests.delete(requestId);
+        reject(err instanceof Error ? err : new Error(String(err)));
+      }
     });
   }
 }

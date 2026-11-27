@@ -17,6 +17,13 @@ import type {
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
 
+function generateRequestId(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') {
+    return globalThis.crypto.randomUUID();
+  }
+  return `req-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+}
+
 /**
  * Creates a typed, Observable-based transport for communicating with a web worker.
  */
@@ -32,10 +39,15 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
   let flushScheduled = false;
 
   function scheduleFlush() {
-    if (flushScheduled) return;
+    if (flushScheduled || terminated) return;
     flushScheduled = true;
     queueMicrotask(() => {
       flushScheduled = false;
+      if (terminated) {
+        batchBuffer.clear();
+        batchTransferables.clear();
+        return;
+      }
 
       for (const [instance, messages] of batchBuffer.entries()) {
         const transferables = batchTransferables.get(instance) || [];
@@ -78,13 +90,57 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
   const transferDetection = config.transferDetection ?? 'none';
   const streamsPolyfill = config.streamsPolyfill ?? false;
   let polyfillLoaded = false;
+  let polyfillPromise: Promise<void> | null = null;
   let deserializeFn: ((port: MessagePort) => ReadableStream) | null = null;
 
-  // Active requests mapped by request ID to track execution routing per instance
+  // Active requests mapped by request ID for O(1) demuxing
   const activeRequests = new Map<
     string,
-    { subscriber: any; instance: TransportPort; cleanup: () => void }
+    {
+      subscriber: any;
+      instance: TransportPort;
+      cleanup: () => void;
+      onResponse: (data: WorkerResponse<TResponse> | WorkerErrorResponse) => void;
+      onError: (event: ErrorEvent) => void;
+    }
   >();
+
+  const instanceDemuxListeners = new Map<
+    TransportPort,
+    {
+      message: (event: MessageEvent) => void;
+      error: (event: ErrorEvent) => void;
+    }
+  >();
+
+  function ensureDemuxListeners(instance: TransportPort) {
+    if (instanceDemuxListeners.has(instance)) return;
+    const message = (
+      event: MessageEvent<WorkerResponse<TResponse> | WorkerErrorResponse | WorkerBatchResponse>,
+    ) => {
+      const data = event.data;
+      if (!data) return;
+      if (data.type === 'batch-response') {
+        for (const item of data.responses) {
+          const entry = activeRequests.get(item.requestId);
+          entry?.onResponse(item as any);
+        }
+      } else if ('requestId' in data && data.requestId) {
+        const entry = activeRequests.get(data.requestId);
+        entry?.onResponse(data as any);
+      }
+    };
+    const error = (event: ErrorEvent) => {
+      for (const entry of Array.from(activeRequests.values())) {
+        if (entry.instance === instance) {
+          entry.onError(event);
+        }
+      }
+    };
+    instance.addEventListener('message', message);
+    instance.addEventListener('error', error);
+    instanceDemuxListeners.set(instance, { message, error });
+  }
 
   const statusSubject = new BehaviorSubject<'healthy' | 'degraded' | 'unsupported'>(
     typeof Worker === 'undefined' ? 'unsupported' : 'healthy',
@@ -126,7 +182,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
     const intervalHandle = setInterval(() => {
       if (heartbeatTimeouts.has(instance)) return;
 
-      const pingRequestId = crypto.randomUUID();
+      const pingRequestId = generateRequestId();
 
       const timeoutHandle = setTimeout(() => {
         handleInstanceCrash(
@@ -240,7 +296,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
       });
     }
 
-    const requestId = crypto.randomUUID();
+    const requestId = generateRequestId();
     const externalSignal = options?.signal;
     const effectiveTimeout = options?.timeout ?? requestTimeout;
 
@@ -250,21 +306,20 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
         return () => undefined;
       }
 
-      if (streamsPolyfill && !polyfillLoaded) {
-        loadStreamsPolyfill().catch((err) => {
+      if (streamsPolyfill && !polyfillLoaded && !polyfillPromise) {
+        polyfillPromise = loadStreamsPolyfill().catch((err) => {
           // oxlint-disable-next-line no-console
           console.warn('[worker-http] Streams polyfill failed to load:', err);
         });
       }
 
       const instance = getOrCreateInstance();
+      ensureDemuxListeners(instance);
       let settled = false;
       let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
       let abortListener: (() => void) | undefined;
 
       const cleanup = () => {
-        instance.removeEventListener('message', messageHandler);
-        instance.removeEventListener('error', errorHandler);
         if (timeoutHandle !== undefined) {
           clearTimeout(timeoutHandle);
           timeoutHandle = undefined;
@@ -276,12 +331,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
         activeRequests.delete(requestId);
       };
 
-      const handleResponse = (data: WorkerResponse<TResponse> | WorkerErrorResponse) => {
-        if (data.requestId !== requestId) return;
-        if (settled) return;
-        settled = true;
-        cleanup();
-
+      const deliverResponse = (data: WorkerResponse<TResponse> | WorkerErrorResponse) => {
         if (data.type === 'error') {
           subscriber.error(new Error(data.error.message));
         } else {
@@ -307,16 +357,17 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
         }
       };
 
-      const messageHandler = (
-        event: MessageEvent<WorkerResponse<TResponse> | WorkerErrorResponse | WorkerBatchResponse>,
-      ) => {
-        const data = event.data;
-        if (data.type === 'batch-response') {
-          const match = data.responses.find((r) => r.requestId === requestId);
-          if (match) handleResponse(match as any);
-        } else {
-          handleResponse(data as any);
+      const handleResponse = (data: WorkerResponse<TResponse> | WorkerErrorResponse) => {
+        if (data.requestId !== requestId) return;
+        if (settled) return;
+        settled = true;
+        cleanup();
+
+        if (streamsPolyfill && !polyfillLoaded && polyfillPromise) {
+          void polyfillPromise.then(() => deliverResponse(data));
+          return;
         }
+        deliverResponse(data);
       };
 
       const errorHandler = (event: ErrorEvent) => {
@@ -326,10 +377,7 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
         subscriber.error(new Error(event.message ?? 'Worker error'));
       };
 
-      instance.addEventListener('message', messageHandler);
-      instance.addEventListener('error', errorHandler);
-
-      // Register this active request
+      // Register this active request for O(1) demux
       activeRequests.set(requestId, {
         subscriber,
         instance,
@@ -337,6 +385,8 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
           settled = true;
           cleanup();
         },
+        onResponse: handleResponse,
+        onError: errorHandler,
       });
 
       let finalRequest = request as any;
@@ -431,11 +481,26 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
 
   function terminate(): void {
     terminated = true;
+    batchBuffer.clear();
+    batchTransferables.clear();
     for (const instance of instances) {
       const intervalHandle = heartbeatIntervals.get(instance);
       if (intervalHandle) clearInterval(intervalHandle);
       const timeoutHandle = heartbeatTimeouts.get(instance);
       if (timeoutHandle) clearTimeout(timeoutHandle);
+
+      if ((instance as any)._pongListener) {
+        instance.removeEventListener('message', (instance as any)._pongListener);
+      }
+      if ((instance as any)._errorCrashListener) {
+        instance.removeEventListener('error', (instance as any)._errorCrashListener);
+      }
+
+      const demux = instanceDemuxListeners.get(instance);
+      if (demux) {
+        instance.removeEventListener('message', demux.message);
+        instance.removeEventListener('error', demux.error);
+      }
 
       try {
         if (instance.terminate) instance.terminate();
@@ -446,11 +511,13 @@ export function createWorkerTransport<TRequest = unknown, TResponse = unknown>(
     instances.length = 0;
     heartbeatIntervals.clear();
     heartbeatTimeouts.clear();
+    instanceDemuxListeners.clear();
 
     for (const [, req] of activeRequests.entries()) {
       req.cleanup();
     }
     activeRequests.clear();
+    statusSubject.complete();
   }
 
   return {

@@ -1,7 +1,14 @@
 import { Injectable, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { of, from } from 'rxjs';
-import { switchMap, catchError, tap, finalize } from 'rxjs/operators';
+import {
+  switchMap,
+  catchError,
+  tap,
+  finalize,
+  debounceTime,
+  distinctUntilChanged,
+} from 'rxjs/operators';
 import { injectWorkerPool, injectPlatform } from '@angular-helpers/core';
 import { PACKAGES } from '../config/packages.data';
 import { DOCS_NAV_LIBRARIES } from '../../docs/config/docs-nav.data';
@@ -104,7 +111,7 @@ export class SearchService {
         if (type !== 'search') {
           throw new Error(`Unknown task type: ${type}`);
         }
-        const { q } = data;
+        const { q } = (data ?? {}) as { q?: string };
         const query = (q || '').toLowerCase().trim();
         if (!query) return [];
 
@@ -124,6 +131,8 @@ export class SearchService {
 
   readonly results = toSignal(
     toObservable(this.query).pipe(
+      debounceTime(150),
+      distinctUntilChanged(),
       switchMap((q) => {
         const query = q.toLowerCase().trim();
         if (!query) {

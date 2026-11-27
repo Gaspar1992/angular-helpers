@@ -76,11 +76,21 @@ function sanitizePackageJson(dir) {
       for (const [depName, versionSpec] of Object.entries(pkgJson[depField])) {
         if (typeof versionSpec === 'string') {
           if (versionSpec.startsWith('workspace:')) {
-            const resolvedVer = workspaceVersions[depName] || '22.0.0';
+            const resolvedVer = workspaceVersions[depName];
+            if (!resolvedVer) {
+              throw new Error(
+                `Failed to resolve workspace dependency "${depName}" in ${pkgJsonPath}`,
+              );
+            }
             pkgJson[depField][depName] = `^${resolvedVer}`;
             modified = true;
           } else if (versionSpec.startsWith('catalog:')) {
-            const resolvedVer = catalog[depName] || '^2.8.1';
+            const resolvedVer = catalog[depName];
+            if (!resolvedVer) {
+              throw new Error(
+                `Failed to resolve catalog dependency "${depName}" in ${pkgJsonPath}`,
+              );
+            }
             pkgJson[depField][depName] = resolvedVer;
             modified = true;
           }
@@ -100,47 +110,13 @@ function sanitizePackageJson(dir) {
   }
 }
 
-function processDirectory(dir) {
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      processDirectory(fullPath);
-    } else if (entry.isFile()) {
-      if (entry.name.endsWith('.map')) {
-        console.log(`Deleting source map file: ${fullPath}`);
-        fs.rmSync(fullPath, { force: true });
-      } else if (
-        entry.name.endsWith('.js') ||
-        entry.name.endsWith('.mjs') ||
-        entry.name.endsWith('.cjs') ||
-        entry.name.endsWith('.css')
-      ) {
-        let content = fs.readFileSync(fullPath, 'utf8');
-        let modified = false;
-
-        // Remove JS source map reference comments
-        const jsMapRegex = /\/\/#\s*sourceMappingURL=.*/g;
-        if (jsMapRegex.test(content)) {
-          content = content.replace(jsMapRegex, '');
-          modified = true;
-        }
-
-        // Remove CSS source map reference comments
-        const cssMapRegex = /\/\*#\s*sourceMappingURL=.*?\*\//g;
-        if (cssMapRegex.test(content)) {
-          content = content.replace(cssMapRegex, '');
-          modified = true;
-        }
-
-        if (modified) {
-          console.log(`Stripped source map comments from: ${fullPath}`);
-          fs.writeFileSync(fullPath, content, 'utf8');
-        }
-      }
-    }
+function copyRootLicense(dir) {
+  const rootDir = path.resolve(import.meta.dirname, '..');
+  const rootLicense = path.join(rootDir, 'LICENSE');
+  if (fs.existsSync(rootLicense)) {
+    fs.copyFileSync(rootLicense, path.join(dir, 'LICENSE'));
   }
 }
 
-processDirectory(resolvedTargetDir);
 sanitizePackageJson(resolvedTargetDir);
+copyRootLicense(resolvedTargetDir);

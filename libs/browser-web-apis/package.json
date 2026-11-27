@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/browser-web-apis",
-  "version": "22.8.1",
+  "version": "22.9.0",
   "description": "Type-safe Angular services and directives for Browser Web APIs (camera, permissions, geolocation, media, sensors, WebAuthn, and more)",
   "keywords": [
     "angular",
@@ -34,14 +34,19 @@
     "build:prod": "node ../../scripts/sync-versions.js . src/public-api.ts && ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/browser-web-apis",
     "clean": "node ../../scripts/clean.js",
     "test": "vitest run --root ../.. libs/browser-web-apis",
-    "lint": "oxlint src"
+    "lint": "eslint ."
   },
   "peerDependencies": {
-    "@angular/core": "^22.0.0",
     "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0",
     "@angular/platform-browser": "^22.0.0",
-    "@angular/ssr": "^22.0.0",
-    "rxjs": "^7.0.0"
+    "rxjs": "^7.0.0 || ^8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@angular/forms": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@angular-helpers/core": "workspace:*",

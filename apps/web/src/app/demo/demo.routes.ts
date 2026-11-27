@@ -1,39 +1,3 @@
-import {
-  provideBattery,
-  provideBroadcastChannel,
-  provideBrowserWebApis,
-  provideCamera,
-  provideClipboard,
-  provideEyeDropper,
-  provideFileSystemAccess,
-  provideFullscreen,
-  provideGamepad,
-  provideGeolocation,
-  provideIdleDetector,
-  provideIntersectionObserver,
-  provideMediaDevices,
-  provideMediaRecorder,
-  provideMutationObserver,
-  provideNetworkInformation,
-  provideNotifications,
-  providePageVisibility,
-  providePerformanceObserver,
-  provideResizeObserver,
-  provideScreenOrientation,
-  provideScreenWakeLock,
-  provideServerSentEvents,
-  provideSpeechSynthesis,
-  provideVibration,
-  provideWebAudio,
-  provideWebShare,
-  provideWebSocket,
-  provideWebStorage,
-  provideWebWorker,
-} from '@angular-helpers/browser-web-apis';
-import { withControls } from '@angular-helpers/openlayers/controls';
-import { provideOpenLayers } from '@angular-helpers/openlayers/core';
-import { withLayers } from '@angular-helpers/openlayers/layers';
-import { provideRegexSecurity, provideSecurity } from '@angular-helpers/security';
 import type { Routes } from '@angular/router';
 
 export const DEMO_ROUTES: Routes = [
@@ -50,89 +14,26 @@ export const DEMO_ROUTES: Routes = [
       },
       {
         path: 'browser-apis',
-        loadComponent: () =>
-          import('./browser-apis/browser-apis').then((m) => m.BrowserApisComponent),
-        providers: [
-          provideBrowserWebApis({
-            services: [
-              provideCamera(),
-              provideGeolocation(),
-              provideNotifications(),
-              provideClipboard(),
-              provideMediaDevices(),
-              provideBattery(),
-              provideWebShare(),
-              provideWebStorage(),
-              provideWebSocket(),
-              provideWebWorker(),
-              provideIntersectionObserver(),
-              provideResizeObserver(),
-              providePageVisibility(),
-              provideBroadcastChannel(),
-              provideNetworkInformation(),
-              provideScreenWakeLock(),
-              provideScreenOrientation(),
-              provideFullscreen(),
-              provideFileSystemAccess(),
-              provideMediaRecorder(),
-              provideServerSentEvents(),
-              provideVibration(),
-              provideSpeechSynthesis(),
-              provideMutationObserver(),
-              providePerformanceObserver(),
-              provideWebAudio(),
-              provideGamepad(),
-              provideEyeDropper(),
-              provideIdleDetector(),
-            ],
-          }),
-        ],
+        loadChildren: () =>
+          import('./browser-apis/browser-apis.routes').then((m) => m.BROWSER_APIS_ROUTES),
         title: 'Browser APIs — Demo',
       },
       {
         path: 'security',
-        loadComponent: () =>
-          import('./security/security-demo.component').then((m) => m.SecurityDemoComponent),
-        providers: [
-          provideSecurity({
-            enableRegexSecurity: true,
-            enableWebCrypto: true,
-            enableSecureStorage: true,
-            enableInputSanitizer: true,
-            enablePasswordStrength: true,
-            enableRateLimiter: true,
-          }),
-        ],
+        loadChildren: () =>
+          import('./security/security.routes').then((m) => m.SECURITY_DEMO_ROUTES),
         title: 'Security — Demo',
       },
       {
         path: 'security-utilities',
-        loadComponent: () =>
-          import('./security-utilities/security-utilities-demo.component').then(
-            (m) => m.SecurityUtilitiesDemoComponent,
-          ),
-        providers: [
-          provideSecurity({
-            enableJwt: true,
-            enableHibp: true,
-            enableRateLimiter: true,
-            enableCsrf: true,
-            enableSensitiveClipboard: true,
-          }),
-        ],
+        loadChildren: () =>
+          import('./security/security.routes').then((m) => m.SECURITY_UTILITIES_ROUTES),
         title: 'Security Utilities — Demo',
       },
       {
         path: 'security-signal-forms',
-        loadComponent: () =>
-          import('./security-signal-forms/security-signal-forms-demo.component').then(
-            (m) => m.SecuritySignalFormsDemoComponent,
-          ),
-        providers: [
-          provideSecurity({
-            enableHibp: true,
-          }),
-        ],
+        loadChildren: () =>
+          import('./security/security.routes').then((m) => m.SECURITY_SIGNAL_FORMS_ROUTES),
         title: 'Security Signal Forms — Demo',
       },
       {
@@ -151,18 +52,14 @@ export const DEMO_ROUTES: Routes = [
       },
       {
         path: 'openlayers',
-        loadComponent: () =>
-          import('./openlayers/openlayers-demo.component').then((m) => m.OpenLayersDemoComponent),
-        providers: [provideOpenLayers(withLayers(), withControls())],
+        loadChildren: () =>
+          import('./openlayers/openlayers.routes').then((m) => m.OPENLAYERS_DEMO_ROUTES),
         title: 'OpenLayers — Demo',
       },
       {
         path: 'library-services',
-        loadComponent: () =>
-          import('./library-services-harness/library-services-harness').then(
-            (m) => m.LibraryServicesHarnessComponent,
-          ),
-        providers: [provideRegexSecurity()],
+        loadChildren: () =>
+          import('./security/security.routes').then((m) => m.LIBRARY_SERVICES_ROUTES),
         title: 'QA System Harness — Demo',
       },
       {

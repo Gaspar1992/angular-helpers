@@ -18,13 +18,13 @@ export class SeoService {
   private readonly document = inject(DOCUMENT);
 
   private readonly baseTitle = 'Angular Helpers';
-  private readonly baseUrl = 'https://angular-helpers.dev';
+  private readonly baseUrl = 'https://gaspar1992.github.io/angular-helpers';
 
   updateMetadata(config: SeoMetadata): void {
     const fullTitle = config.title ? `${config.title} — ${this.baseTitle}` : this.baseTitle;
     const description =
       config.description ||
-      '37 typed Browser Web API services, ReDoS prevention, and off-main-thread HTTP for Angular.';
+      'Nine focused Angular libraries for Browser Web APIs, Security, Storage, Worker HTTP, OpenLayers, Yjs CRDT, Core signals, Testing, and Schematics.';
     const url = config.url ? `${this.baseUrl}${config.url}` : this.baseUrl;
 
     // 1. Title
@@ -49,6 +49,9 @@ export class SeoService {
     this.meta.updateTag({ name: 'twitter:title', content: fullTitle });
     this.meta.updateTag({ name: 'twitter:description', content: description });
     this.meta.updateTag({ name: 'twitter:url', content: url });
+    if (config.image) {
+      this.meta.updateTag({ name: 'twitter:image', content: `${this.baseUrl}${config.image}` });
+    }
 
     // 5. Canonical URL
     this.updateCanonicalUrl(url);

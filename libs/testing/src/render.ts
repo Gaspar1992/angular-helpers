@@ -1,11 +1,33 @@
-import { Component, type Provider, type Type } from '@angular/core';
+import {
+  Component,
+  type EnvironmentProviders,
+  type InputSignal,
+  type InputSignalWithTransform,
+  type ModelSignal,
+  type OutputRefSubscription,
+  type Provider,
+  type Type,
+} from '@angular/core';
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
+export type UnwrapSignalInput<V> =
+  V extends InputSignalWithTransform<infer _T, infer TTransform>
+    ? TTransform
+    : V extends InputSignal<infer T>
+      ? T
+      : V extends ModelSignal<infer T>
+        ? T
+        : V;
+
+export type ComponentInputs<T> = {
+  [K in keyof T]?: UnwrapSignalInput<T[K]>;
+};
+
 export interface RenderOptions<T> {
   imports?: (Type<unknown> | readonly unknown[])[];
-  providers?: Provider[];
-  inputs?: Partial<T>;
+  providers?: (Provider | EnvironmentProviders)[];
+  inputs?: ComponentInputs<T>;
   outputs?: Partial<Record<keyof T, (event: unknown) => void>>;
   hostProperties?: Record<string, unknown>;
   detectInitialChanges?: boolean;
@@ -117,13 +139,9 @@ export async function render<T>(
     componentInstance = fixture.componentInstance as T;
   }
 
-  if (options.inputs) {
-    if (options.template) {
-      // In host templates, inputs should be bound natively in the template using hostProperties.
-    } else {
-      for (const [key, val] of Object.entries(options.inputs)) {
-        fixture.componentRef.setInput(key, val);
-      }
+  if (options.inputs && !options.template) {
+    for (const [key, val] of Object.entries(options.inputs)) {
+      fixture.componentRef.setInput(key, val);
     }
   }
 
@@ -132,20 +150,33 @@ export async function render<T>(
   }
 
   // Support for output binding (compatible with EventEmitter and Signal output())
+  const outputSubs: OutputRefSubscription[] = [];
   if (options.outputs) {
     for (const key of Object.keys(options.outputs) as Array<keyof T>) {
       const outputProp = componentInstance[key] as
-        | { subscribe?: (cb: (event: unknown) => void) => void }
+        | { subscribe?: (cb: (event: unknown) => void) => OutputRefSubscription | void }
         | undefined;
       const callback = options.outputs[key];
       if (outputProp && typeof outputProp.subscribe === 'function' && callback) {
-        outputProp.subscribe(callback);
+        const sub = outputProp.subscribe(callback);
+        if (sub && typeof sub.unsubscribe === 'function') {
+          outputSubs.push(sub);
+        }
       }
     }
   }
 
+  if (outputSubs.length > 0) {
+    fixture.componentRef.onDestroy(() => {
+      for (const sub of outputSubs) {
+        sub.unsubscribe();
+      }
+    });
+  }
+
   if (options.detectInitialChanges !== false) {
     fixture.detectChanges();
+    await fixture.whenStable();
   }
 
   return new RenderResult(fixture, componentInstance);

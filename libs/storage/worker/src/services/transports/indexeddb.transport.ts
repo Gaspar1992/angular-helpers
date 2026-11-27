@@ -14,6 +14,46 @@ export class IndexedDBTransport implements StorageTransport {
 
   private async openDB(dbName: string, storeName: string): Promise<IDBDatabase> {
     let cached = this.dbCache.get(dbName);
+    if (cached) {
+      const existing = await cached;
+      if (existing.objectStoreNames.contains(storeName)) {
+        return existing;
+      }
+      // Re-open with bumped version if a different storeName is requested on the same dbName
+      const nextVersion = existing.version + 1;
+      existing.close();
+      this.dbCache.delete(dbName);
+      cached = new Promise<IDBDatabase>((resolve, reject) => {
+        const request = indexedDB.open(dbName, nextVersion);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains(storeName)) {
+            db.createObjectStore(storeName);
+          }
+        };
+        request.onsuccess = () => {
+          const db = request.result;
+          db.onversionchange = () => {
+            db.close();
+            this.dbCache.delete(dbName);
+          };
+          db.onclose = () => {
+            this.dbCache.delete(dbName);
+          };
+          db.onerror = () => {
+            db.close();
+            this.dbCache.delete(dbName);
+          };
+          resolve(db);
+        };
+        request.onerror = () => {
+          this.dbCache.delete(dbName);
+          reject(request.error);
+        };
+      });
+      this.dbCache.set(dbName, cached);
+      return cached;
+    }
     if (!cached) {
       cached = new Promise<IDBDatabase>((resolve, reject) => {
         if (typeof indexedDB === 'undefined') {
@@ -98,27 +138,23 @@ export class IndexedDBTransport implements StorageTransport {
     const encryptData = options?.encrypt ?? false;
     const useToon = options?.serializer === 'toon';
 
-    try {
-      let payload = await serializeData(data, useToon);
+    let payload = await serializeData(data, useToon);
 
-      if (encryptData) {
-        const passphrase = options?.passphrase ?? this.secretPassphrase;
-        if (!passphrase) throw new Error('Encryption passphrase not provided');
-        payload = await encrypt(payload, passphrase);
-      }
-
-      const db = await this.openDB(dbName, storeName);
-      return await new Promise<void>((resolve, reject) => {
-        const transaction = db.transaction(storeName, 'readwrite');
-        const store = transaction.objectStore(storeName);
-        const request = store.put(payload, key);
-
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-      });
-    } catch {
-      // Intentionally suppressed
+    if (encryptData) {
+      const passphrase = options?.passphrase ?? this.secretPassphrase;
+      if (!passphrase) throw new Error('Encryption passphrase not provided');
+      payload = await encrypt(payload, passphrase);
     }
+
+    const db = await this.openDB(dbName, storeName);
+    return await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction(storeName, 'readwrite');
+      const store = transaction.objectStore(storeName);
+      const request = store.put(payload, key);
+
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
   }
 
   async delete(key: string, options?: StorageSignalOptions): Promise<void> {
@@ -127,18 +163,14 @@ export class IndexedDBTransport implements StorageTransport {
     const dbName = options?.dbName ?? 'ah_db';
     const storeName = options?.storeName ?? 'kv';
 
-    try {
-      const db = await this.openDB(dbName, storeName);
-      return await new Promise<void>((resolve, reject) => {
-        const transaction = db.transaction(storeName, 'readwrite');
-        const store = transaction.objectStore(storeName);
-        const request = store.delete(key);
+    const db = await this.openDB(dbName, storeName);
+    return await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction(storeName, 'readwrite');
+      const store = transaction.objectStore(storeName);
+      const request = store.delete(key);
 
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-      });
-    } catch {
-      // Intentionally suppressed
-    }
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
   }
 }

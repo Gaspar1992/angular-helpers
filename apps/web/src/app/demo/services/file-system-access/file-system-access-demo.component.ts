@@ -45,7 +45,9 @@ import { FileSystemAccessService, PermissionsService } from '@angular-helpers/br
               <span class="kv-val text-secondary">{{ file.size | number }} bytes</span>
             </div>
 
-            <label class="mt-6">Content Buffer Preview</label>
+            <span class="block mt-6 text-xs font-bold uppercase tracking-wider text-base-content/70"
+              >Content Buffer Preview</span
+            >
             <div
               class="mono-block font-black text-xs text-base-content/70 italic bg-base-content/5 p-5 rounded-xl border border-base-content/5 shadow-inner"
             >

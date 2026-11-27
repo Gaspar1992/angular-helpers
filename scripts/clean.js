@@ -29,15 +29,16 @@ if (args.length > 0) {
     deletePath(path.join(cwd, folder));
   }
 
-  // Clean in libs/*/
-  const libsDir = path.join(cwd, 'libs');
-  if (fs.existsSync(libsDir) && fs.statSync(libsDir).isDirectory()) {
-    const libs = fs.readdirSync(libsDir);
-    for (const pkg of libs) {
-      const pkgDir = path.join(libsDir, pkg);
-      if (fs.statSync(pkgDir).isDirectory()) {
-        for (const folder of defaultFolders) {
-          deletePath(path.join(pkgDir, folder));
+  // Clean in libs/*/ and apps/*/
+  for (const parent of ['libs', 'apps']) {
+    const parentDir = path.join(cwd, parent);
+    if (fs.existsSync(parentDir) && fs.statSync(parentDir).isDirectory()) {
+      for (const pkg of fs.readdirSync(parentDir)) {
+        const pkgDir = path.join(parentDir, pkg);
+        if (fs.statSync(pkgDir).isDirectory()) {
+          for (const folder of defaultFolders) {
+            deletePath(path.join(pkgDir, folder));
+          }
         }
       }
     }

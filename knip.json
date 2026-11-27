@@ -1,48 +1,51 @@
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
-  "entry": [
-    "apps/web/src/main.ts",
-    "apps/web/src/main.server.ts",
-    "apps/web/src/server.ts",
-    "vite.config.ts",
-    "vitest.config.ts",
-    "apps/web-e2e/playwright.config.ts",
-    "scripts/*.js",
-    "scripts/*.ts",
-    "apps/web/src/workers/*.ts",
-    "**/*.spec.ts"
-  ],
-  "project": ["apps/**/*.ts", "libs/**/*.ts", "scripts/**/*.js", "scripts/**/*.ts"],
-  "ignore": ["apps/web/src/styles.css"],
-  "ignoreDependencies": [
-    "husky",
-    "@angular-devkit/*",
-    "@typescript-eslint/*",
-    "@eslint/js",
-    "eslint-plugin-oxlint",
-    "@oxc-project/runtime",
-    "@angular/compiler-cli",
-    "@angular/platform-browser-dynamic",
-    "vite-tsconfig-paths",
-    "web-streams-polyfill",
-    "concurrently",
-    "daisyui",
-    "@tailwindcss/typography"
-  ],
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "rules": {
+    "types": "off",
+    "exports": "off",
+    "duplicates": "off",
+    "optionalPeerDependencies": "off"
+  },
   "workspaces": {
+    ".": {
+      "entry": [
+        "vite.config.ts",
+        "vitest.config.ts",
+        "scripts/*.js",
+        "scripts/*.mjs",
+        "scripts/*.ts"
+      ],
+      "project": ["scripts/**/*.js", "scripts/**/*.mjs", "scripts/**/*.ts"],
+      "ignoreDependencies": [
+        "@analogjs/vitest-angular",
+        "@angular-devkit/*",
+        "@oxc-project/runtime",
+        "@tailwindcss/typography",
+        "@toon-format/toon",
+        "concurrently",
+        "daisyui",
+        "seroval",
+        "vite-tsconfig-paths",
+        "web-streams-polyfill",
+        "y-indexeddb",
+        "y-websocket"
+      ]
+    },
     "libs/*": {
       "entry": [
         "src/index.ts",
         "src/public-api.ts",
         "**/src/index.ts",
+        "**/src/public-api.ts",
+        "src/create-package/index.ts",
         "src/workers/*.ts",
-        "src/worker/*.ts",
-        "src/**/*.spec.ts"
+        "src/**/*.spec.ts",
+        "test/**/*.spec.ts"
       ],
-      "project": ["src/**/*.ts", "**/src/**/*.ts"],
-      "ignoreDependencies": ["tslib"]
+      "project": ["src/**/*.ts", "**/src/**/*.ts", "test/**/*.ts"],
+      "ignoreDependencies": ["@angular-helpers/testing"]
     },
-    "apps/*": {
+    "apps/web": {
       "entry": [
         "src/main.ts",
         "src/main.server.ts",
@@ -51,6 +54,10 @@
         "src/**/*.spec.ts"
       ],
       "project": ["src/**/*.ts"]
+    },
+    "apps/web-e2e": {
+      "entry": ["playwright.config.ts", "src/**/*.spec.ts"],
+      "project": ["**/*.ts"]
     }
   }
 }

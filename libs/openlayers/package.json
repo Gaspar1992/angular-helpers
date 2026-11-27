@@ -1,6 +1,6 @@
 {
   "name": "@angular-helpers/openlayers",
-  "version": "22.7.1",
+  "version": "22.8.0",
   "description": "Modern Angular wrapper for OpenLayers with modular architecture, standalone components, and hybrid template/programmatic API",
   "keywords": [
     "angular",
@@ -11,9 +11,7 @@
     "cartography",
     "standalone",
     "signals",
-    "modular",
-    "military",
-    "milsymbol"
+    "modular"
   ],
   "author": "Angular Helpers Team",
   "license": "MIT",
@@ -35,7 +33,10 @@
     "build:prod": "ng-packagr -p ng-package.json -c ../../tsconfig.build.json && node ../../scripts/post-build.js ../../dist/openlayers",
     "clean": "node ../../scripts/clean.js",
     "test": "vitest run --root ../.. libs/openlayers",
-    "lint": "oxlint src"
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "tslib": "catalog:"
   },
   "peerDependencies": {
     "@angular/common": "^22.0.0",

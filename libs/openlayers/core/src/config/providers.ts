@@ -6,13 +6,7 @@ import { OlMapService } from '../services/map.service';
 import { OlZoneHelper } from '../services/zone-helper.service';
 import { OlTimeService } from '../services/time.service';
 
-export type OlFeatureKind =
-  | 'layers'
-  | 'controls'
-  | 'interactions'
-  | 'overlays'
-  | 'military'
-  | 'projections';
+export type OlFeatureKind = 'layers' | 'controls' | 'interactions' | 'overlays' | 'projections';
 
 export interface OlFeature<Kind extends OlFeatureKind> {
   kind: Kind;

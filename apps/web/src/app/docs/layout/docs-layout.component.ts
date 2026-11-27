@@ -7,7 +7,7 @@ import {
   ActivatedRoute,
   NavigationEnd,
 } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map, filter } from 'rxjs/operators';
 import { getNavLibrariesForVersion } from '../config/docs-nav.data';
 import { WINDOW } from '@angular-helpers/browser-web-apis';
@@ -27,7 +27,7 @@ import { VitalsPanelComponent } from './vitals-panel.component';
   ],
   template: `
     <div
-      class="flex h-[calc(100vh-60px)] overflow-hidden bg-base-100 text-base-content font-sans selection:bg-primary/30"
+      class="flex h-[calc(100dvh-60px)] overflow-hidden bg-base-100 text-base-content font-sans selection:bg-primary/30"
     >
       <!-- First Sidebar - Libraries -->
       <aside
@@ -121,7 +121,7 @@ import { VitalsPanelComponent } from './vitals-panel.component';
             @for (section of lib.sections; track section.title) {
               <div class="mt-6 mb-2">
                 <div
-                  class="px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-base-content/30 mb-3"
+                  class="px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-base-content/70 mb-3"
                 >
                   {{ section.title }}
                 </div>
@@ -132,7 +132,7 @@ import { VitalsPanelComponent } from './vitals-panel.component';
                       <a
                         [routerLink]="item.route"
                         queryParamsHandling="merge"
-                        routerLinkActive="bg-base-300 text-base-content font-bold"
+                        routerLinkActive="active bg-base-300 text-base-content font-bold"
                         [routerLinkActiveOptions]="{ exact: true }"
                         class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-base-content/60 hover:text-base-content hover:bg-base-content/5 transition-all duration-200 no-underline group"
                         (click)="closeSidebar()"
@@ -160,7 +160,7 @@ import { VitalsPanelComponent } from './vitals-panel.component';
             @if (bookmarkedItems().length > 0) {
               <div class="mt-6 mb-2" id="sidebar-bookmarks">
                 <div
-                  class="px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-base-content/30 mb-3"
+                  class="px-3 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-base-content/70 mb-3"
                 >
                   ⭐ Bookmarks
                 </div>
@@ -170,7 +170,7 @@ import { VitalsPanelComponent } from './vitals-panel.component';
                       <a
                         [routerLink]="item.route"
                         queryParamsHandling="merge"
-                        routerLinkActive="bg-base-300 text-base-content font-bold"
+                        routerLinkActive="active bg-base-300 text-base-content font-bold"
                         [routerLinkActiveOptions]="{ exact: true }"
                         class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-base-content/60 hover:text-base-content hover:bg-base-content/5 transition-all duration-200 no-underline group"
                         (click)="closeSidebar()"
@@ -311,13 +311,13 @@ export class DocsLayoutComponent {
   );
 
   readonly activeLibrary = computed(() => {
-    const url = this.currentUrl();
+    const url = this.currentUrl().split(/[?#]/)[0];
     return this.libraries().find((lib) => url.startsWith(lib.overviewRoute)) ?? null;
   });
 
   /** Find the active item within the current library based on URL */
   readonly activeItem = computed(() => {
-    const url = this.currentUrl();
+    const url = this.currentUrl().split(/[?#]/)[0];
     const lib = this.activeLibrary();
     if (!lib) return null;
 
@@ -331,17 +331,17 @@ export class DocsLayoutComponent {
   protected sidebarOpen = signal(false);
 
   constructor() {
-    const versionService = inject(DocsVersionService);
-    this.route.queryParams.subscribe((params) => {
+    this.route.queryParams.pipe(takeUntilDestroyed()).subscribe((params) => {
       const v = params['v'];
       if (v === '21') {
-        versionService.setVersion(AngularVersion.v21);
+        this.versionService.setVersion(AngularVersion.v21);
       } else if (v === '22') {
-        versionService.setVersion(AngularVersion.v22);
+        this.versionService.setVersion(AngularVersion.v22);
       }
     });
 
     effect(() => {
+      this.currentUrl();
       // Wait for DOM update after navigation
       queueMicrotask(() => {
         this.scrollToActiveItem();
@@ -376,6 +376,7 @@ export class DocsLayoutComponent {
       storage: '💾',
       yjs: '🤝',
       testing: '🧪',
+      schematics: '🛠️',
     };
     return icons[id] ?? '📦';
   }
