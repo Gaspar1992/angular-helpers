@@ -1,4 +1,4 @@
-import type { Provider } from '@angular/core';
+import { ENVIRONMENT_INITIALIZER, inject } from '@angular/core';
 import type { OlFeature } from '@angular-helpers/openlayers/core';
 import { OlLayerService } from '@angular-helpers/openlayers/layers';
 import { OlInteractionService } from '../services/interaction.service';
@@ -43,14 +43,21 @@ export function provideInteractions(): OlFeature<'interactions'> {
  * @param config Select interaction configuration
  * @returns Provider function that enables select interaction
  */
-export function withSelectInteraction(id: string, config: SelectConfig = {}): Provider {
+export function withSelectInteraction(
+  id: string,
+  config: SelectConfig = {},
+): OlFeature<'interactions'> {
   return {
-    provide: 'SELECT_INTERACTION_CONFIG',
-    useFactory: (service: OlInteractionService) => {
-      service.enableSelect(id, config);
-      return { id, config };
-    },
-    deps: [OlInteractionService],
+    kind: 'interactions',
+    providers: [
+      {
+        provide: ENVIRONMENT_INITIALIZER,
+        multi: true,
+        useValue: () => {
+          inject(OlInteractionService).enableSelect(id, config);
+        },
+      },
+    ],
   };
 }
 
@@ -58,16 +65,20 @@ export function withSelectInteraction(id: string, config: SelectConfig = {}): Pr
  * Enable draw interaction when providing the interactions feature.
  * @param id Unique identifier for this interaction
  * @param config Draw interaction configuration
- * @returns Provider function that enables draw interaction
+ * @returns OlFeature configuration that enables draw interaction
  */
-export function withDrawInteraction(id: string, config: DrawConfig): Provider {
+export function withDrawInteraction(id: string, config: DrawConfig): OlFeature<'interactions'> {
   return {
-    provide: 'DRAW_INTERACTION_CONFIG',
-    useFactory: (service: OlInteractionService) => {
-      service.enableDraw(id, config);
-      return { id, config };
-    },
-    deps: [OlInteractionService],
+    kind: 'interactions',
+    providers: [
+      {
+        provide: ENVIRONMENT_INITIALIZER,
+        multi: true,
+        useValue: () => {
+          inject(OlInteractionService).enableDraw(id, config);
+        },
+      },
+    ],
   };
 }
 
@@ -75,29 +86,41 @@ export function withDrawInteraction(id: string, config: DrawConfig): Provider {
  * Enable modify interaction when providing the interactions feature.
  * @param id Unique identifier for this interaction
  * @param config Modify interaction configuration
- * @returns Provider function that enables modify interaction
+ * @returns OlFeature configuration that enables modify interaction
  */
-export function withModifyInteraction(id: string, config: ModifyConfig = {}): Provider {
+export function withModifyInteraction(
+  id: string,
+  config: ModifyConfig = {},
+): OlFeature<'interactions'> {
   return {
-    provide: 'MODIFY_INTERACTION_CONFIG',
-    useFactory: (service: OlInteractionService) => {
-      service.enableModify(id, config);
-      return { id, config };
-    },
-    deps: [OlInteractionService],
+    kind: 'interactions',
+    providers: [
+      {
+        provide: ENVIRONMENT_INITIALIZER,
+        multi: true,
+        useValue: () => {
+          inject(OlInteractionService).enableModify(id, config);
+        },
+      },
+    ],
   };
 }
 
 /**
  * Enable measurement interaction when providing the interactions feature.
- * @returns Provider function that enables measurement interaction
+ * @returns OlFeature configuration that initializes measurement interaction service
  */
-export function withMeasurementInteraction(): Provider {
+export function withMeasurementInteraction(): OlFeature<'interactions'> {
   return {
-    provide: 'MEASUREMENT_INTERACTION_CONFIG',
-    useFactory: (service: MeasurementInteractionService) => {
-      return service;
-    },
-    deps: [MeasurementInteractionService],
+    kind: 'interactions',
+    providers: [
+      {
+        provide: ENVIRONMENT_INITIALIZER,
+        multi: true,
+        useValue: () => {
+          inject(MeasurementInteractionService);
+        },
+      },
+    ],
   };
 }

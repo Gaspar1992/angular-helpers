@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { Injector } from '@angular/core';
+import { createEnvironmentInjector, EnvironmentInjector, Injector } from '@angular/core';
 import {
   provideInteractions,
   withSelectInteraction,
@@ -48,12 +48,17 @@ describe('Interactions Providers', () => {
       enableSelect: vi.fn(),
     };
 
-    const provider = withSelectInteraction('sel-1', { multi: true });
-    const factory = (provider as any).useFactory;
-    const result = factory(mockInteractionService);
+    const feature = withSelectInteraction('sel-1', { multi: true });
+    expect(feature.kind).toBe('interactions');
+
+    const parent = Injector.create({ providers: [] }) as EnvironmentInjector;
+    const injector = createEnvironmentInjector(
+      [{ provide: OlInteractionService, useValue: mockInteractionService }, ...feature.providers],
+      parent,
+    );
 
     expect(mockInteractionService.enableSelect).toHaveBeenCalledWith('sel-1', { multi: true });
-    expect(result).toEqual({ id: 'sel-1', config: { multi: true } });
+    injector.destroy();
   });
 
   it('withDrawInteraction initializes draw config on OlInteractionService', () => {
@@ -61,12 +66,17 @@ describe('Interactions Providers', () => {
       enableDraw: vi.fn(),
     };
 
-    const provider = withDrawInteraction('draw-1', { type: 'Point' });
-    const factory = (provider as any).useFactory;
-    const result = factory(mockInteractionService);
+    const feature = withDrawInteraction('draw-1', { type: 'Point' });
+    expect(feature.kind).toBe('interactions');
+
+    const parent = Injector.create({ providers: [] }) as EnvironmentInjector;
+    const injector = createEnvironmentInjector(
+      [{ provide: OlInteractionService, useValue: mockInteractionService }, ...feature.providers],
+      parent,
+    );
 
     expect(mockInteractionService.enableDraw).toHaveBeenCalledWith('draw-1', { type: 'Point' });
-    expect(result).toEqual({ id: 'draw-1', config: { type: 'Point' } });
+    injector.destroy();
   });
 
   it('withModifyInteraction initializes modify config on OlInteractionService', () => {
@@ -74,22 +84,36 @@ describe('Interactions Providers', () => {
       enableModify: vi.fn(),
     };
 
-    const provider = withModifyInteraction('mod-1', { snapTolerance: 20 });
-    const factory = (provider as any).useFactory;
-    const result = factory(mockInteractionService);
+    const feature = withModifyInteraction('mod-1', { snapTolerance: 20 });
+    expect(feature.kind).toBe('interactions');
+
+    const parent = Injector.create({ providers: [] }) as EnvironmentInjector;
+    const injector = createEnvironmentInjector(
+      [{ provide: OlInteractionService, useValue: mockInteractionService }, ...feature.providers],
+      parent,
+    );
 
     expect(mockInteractionService.enableModify).toHaveBeenCalledWith('mod-1', {
       snapTolerance: 20,
     });
-    expect(result).toEqual({ id: 'mod-1', config: { snapTolerance: 20 } });
+    injector.destroy();
   });
 
-  it('withMeasurementInteraction returns measurement service', () => {
+  it('withMeasurementInteraction injects MeasurementInteractionService', () => {
     const mockMeasurementService = {};
-    const provider = withMeasurementInteraction();
-    const factory = (provider as any).useFactory;
-    const result = factory(mockMeasurementService);
+    const feature = withMeasurementInteraction();
+    expect(feature.kind).toBe('interactions');
 
-    expect(result).toBe(mockMeasurementService);
+    const parent = Injector.create({ providers: [] }) as EnvironmentInjector;
+    const injector = createEnvironmentInjector(
+      [
+        { provide: MeasurementInteractionService, useValue: mockMeasurementService },
+        ...feature.providers,
+      ],
+      parent,
+    );
+
+    expect(injector.get(MeasurementInteractionService)).toBe(mockMeasurementService);
+    injector.destroy();
   });
 });

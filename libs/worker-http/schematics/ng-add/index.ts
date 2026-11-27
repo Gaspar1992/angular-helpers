@@ -100,7 +100,7 @@ function copyWorkerTemplate(tree: Tree, options: NormalizedOptions): void {
   const workerContent = `import {
   createWorkerMessageLoop,
   type WorkerMessageLoopConfig,
-} from '@angular-helpers/worker-http/interceptors';
+} from '@angular-helpers/worker-http/backend';
 
 /**
  * HTTP API Worker
@@ -170,7 +170,7 @@ async function addProvidersToAppConfig(
     }
 
     // Add import statement
-    const importStatement = `import { provideWorkerHttpClient, withWorkerConfigs } from '@angular-helpers/worker-http/backend';`;
+    const importStatement = `import { provideWorkerHttpClient, withWorkerConfigs, withWorkerRoutes } from '@angular-helpers/worker-http/backend';`;
     if (!content.includes(importStatement)) {
       content = addImport(content, importStatement);
     }
@@ -229,6 +229,12 @@ function addProviderToConfig(content: string, workerPath: string): string {
         id: 'http',
         workerUrl: new URL('${relativeWorkerSpec}', import.meta.url),
         maxInstances: 2,
+      },
+    ]),
+    withWorkerRoutes([
+      {
+        pattern: /^\\/api\\//,
+        worker: 'http',
       },
     ]),
   )`;

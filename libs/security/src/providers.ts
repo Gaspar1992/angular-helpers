@@ -31,6 +31,7 @@ import { SessionIdleService } from './services/session-idle.service';
 import { SecureMessageService } from './services/secure-message.service';
 import { WebAuthnService } from './services/web-authn.service';
 import { CspService } from './services/csp.service';
+import type { SecurityFeature } from './features';
 
 export interface SecurityConfig {
   enableRegexSecurity?: boolean;
@@ -70,7 +71,32 @@ export const defaultSecurityConfig: SecurityConfig = {
   safeMode: false,
 };
 
-export function provideSecurity(config: SecurityConfig = {}): EnvironmentProviders {
+function isSecurityFeature(value: unknown): value is SecurityFeature {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'kind' in value &&
+    'providers' in value &&
+    Array.isArray((value as SecurityFeature).providers)
+  );
+}
+
+/**
+ * Configures `@angular-helpers/security` using tree-shakable `with*()` feature functions.
+ */
+export function provideSecurity(...features: SecurityFeature[]): EnvironmentProviders;
+/**
+ * @deprecated Prefer `provideSecurity(withWebCrypto(), withRateLimiter(), ...)` for tree-shaking.
+ */
+export function provideSecurity(config?: SecurityConfig): EnvironmentProviders;
+export function provideSecurity(
+  ...args: (SecurityFeature | SecurityConfig | undefined)[]
+): EnvironmentProviders {
+  if (args.length > 0 && args.every((arg) => isSecurityFeature(arg))) {
+    return makeEnvironmentProviders(args.flatMap((feature) => feature.providers));
+  }
+
+  const config = (args[0] as SecurityConfig | undefined) ?? {};
   const mergedConfig = { ...defaultSecurityConfig, ...config };
   const services = new Set<Provider>();
   const extraProviders: Provider[] = [];

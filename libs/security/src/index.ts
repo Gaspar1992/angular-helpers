@@ -11,6 +11,9 @@ export * from './services/csrf.service';
 export * from './services/session-idle.service';
 export * from './services/secure-message.service';
 export * from './providers';
+export * from './features';
+export * from './fns/inject-session-idle';
+export * from './fns/inject-rate-limiter';
 export {
   assessPasswordStrength,
   containsScriptInjection,

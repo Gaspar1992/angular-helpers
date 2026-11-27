@@ -42,6 +42,8 @@ describe('worker-http ng-add schematic', () => {
 
     const appConfig = resultTree.readContent('src/app/app.config.ts');
     expect(appConfig).toContain("new URL('./custom/my.worker', import.meta.url)");
+    expect(appConfig).toContain('withWorkerRoutes');
+    expect(appConfig).toContain("worker: 'http'");
     expect(appConfig).toContain('provideRouter([])');
 
     const workerFile = resultTree.readContent('src/app/custom/my.worker.ts');
