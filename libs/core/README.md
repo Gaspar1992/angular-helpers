@@ -1,6 +1,6 @@
 # ⚡ @angular-helpers/core
 
-Lightweight, high-performance, and SSR-safe foundational primitives for Angular applications — timing signal operators, zero-copy Transferable helpers, Web Worker pooling, and safe platform inspection.
+Shared signal primitives, worker pools, error boundaries, and platform utilities for modern zoneless Angular 22+ applications.
 
 ---
 
@@ -12,26 +12,24 @@ Lightweight, high-performance, and SSR-safe foundational primitives for Angular 
 pnpm add @angular-helpers/core
 ```
 
-### 2. Basic Example
+### 2. Signal & Utility Primitives
 
 ```typescript
-import { Component, signal, inject } from '@angular/core';
-import { debouncedSignal, injectPlatform, injectWorkerPool } from '@angular-helpers/core';
+import { Component, signal } from '@angular/core';
+import { debouncedSignal, previousSignal, injectPlatform } from '@angular-helpers/core';
 
 @Component({
   selector: 'app-search-box',
   template: `
-    <input (input)="query.set($any($event.target).value)" placeholder="Search..." />
-    <p>Debounced Query: {{ debouncedQuery() }}</p>
+    <input [value]="query()" (input)="query.set($any($event.target).value)" />
+    <p>Debounced: {{ debounced() }} (Previous: {{ prev() }})</p>
   `,
 })
 export class SearchBoxComponent {
-  // Safe platform detection without checking PLATFORM_ID manually
-  readonly platform = injectPlatform();
-
   readonly query = signal('');
-  // Native timing operator without RxJS interop overhead
-  readonly debouncedQuery = debouncedSignal(this.query, 300);
+  readonly debounced = debouncedSignal(this.query, 250);
+  readonly prev = previousSignal(this.debounced);
+  readonly platform = injectPlatform();
 }
 ```
 
@@ -39,35 +37,29 @@ export class SearchBoxComponent {
 
 ## Core Primitives
 
-| Primitive                                  | Category          | Description                                                                           |
-| :----------------------------------------- | :---------------- | :------------------------------------------------------------------------------------ |
-| `debouncedSignal(source, delay, opts?)`    | **Signals**       | Delays emitting values from source signal until a silence window elapses.             |
-| `throttledSignal(source, cooldown, opts?)` | **Signals**       | Rate-limits emissions to at most once per time window (leading & trailing).           |
-| `timerSignal(delay, interval?, opts?)`     | **Signals**       | Native interval/timeout signal without RxJS subscription boilerplate.                 |
-| `injectPlatform()`                         | **Platform**      | Injects reactive and typed platform detection (`isBrowser`, `isServer`).              |
-| `injectWorkerPool(workerUrl, options?)`    | **Workers**       | Manages a Web Worker runner with timeout, crash recovery, and cleanup.                |
-| `injectErrorBoundaryReporter()`            | **Errors**        | Injects an error boundary reporter for structured runtime error capture.              |
-| `detectTransferables(data)`                | **Transferables** | Automatically discovers `Transferable` objects for zero-copy `postMessage` transfers. |
-| `isTransferable(value)`                    | **Transferables** | Checks if an object implements `Transferable` (`ArrayBuffer`, `ImageBitmap`, etc.).   |
-| `@angular-helpers/core/utils`              | **Sub-entry**     | Pure worker-safe binary/hex/base64 helpers and `detectTransferables`.                 |
+| Primitive / Entry Point         | Category           | Description                                                             |
+| :------------------------------ | :----------------- | :---------------------------------------------------------------------- |
+| `debouncedSignal(source, ms)`   | **Signals**        | Delays propagation of signal updates until idle for `ms` milliseconds.  |
+| `throttledSignal(source, ms)`   | **Signals**        | Limits signal emissions to at most once per `ms` window.                |
+| `previousSignal(source)`        | **Signals**        | Tracks the previous emitted value of a signal without `effect()`.       |
+| `timerSignal(ms)`               | **Signals**        | Reactive interval/countdown signal with automatic `DestroyRef` cleanup. |
+| `injectPlatform()`              | **SSR / Platform** | SSR-safe access to `isBrowser`, `window`, and `document`.               |
+| `injectWorkerPool(url, opts?)`  | **Workers**        | Typed Web Worker pool with timeout, queueing, and main-thread fallback. |
+| `injectErrorBoundaryReporter()` | **Resilience**     | Structured error reporting helper for Angular `@boundary` blocks.       |
+| `@angular-helpers/core/utils`   | **Utilities**      | Shared retry, assertion, and functional helpers.                        |
 
 ---
 
-## Architecture Guarantees
+## Guarantees
 
-- **Zoneless Ready**: Fully decoupled from `zone.js`. Every operator is built directly on Angular Signals primitives.
-- **SSR Safe**: Safe timer registration and platform checks prevent server hydration hangs.
-- **DestroyRef Lifecycle**: Automatically unregisters pending intervals, timeouts, and workers when the enclosing injection context destroys.
-- **Tree-shakeable**: Zero side-effects; consumers bundle only the specific functions they import.
+- **Zoneless & SSR Ready**: Zero Zone.js assumptions; safe under Angular SSR and incremental hydration.
+- **Tree-Shakable**: Pure functions and `sideEffects: false`.
 
 ---
 
-## Interactive Documentation & Demos
+## Interactive Documentation
 
-Interactive guides, API explorer, and benchmarks are available at:
 👉 **[Angular Helpers Core Docs](https://gaspar1992.github.io/angular-helpers/docs/core)**
-
----
 
 ## License
 

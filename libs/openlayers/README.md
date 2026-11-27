@@ -1,6 +1,6 @@
 # 🗺️ @angular-helpers/openlayers
 
-A modern, declarative Angular wrapper for OpenLayers with a modular sub-entry point architecture, standalone components, reactive Signal inputs, and GPU-accelerated layer rendering.
+Modular, signal-first Angular 22+ wrapper for OpenLayers — standalone map, layer, control, interaction, and overlay components with tree-shakable entry points and typed `Feature<P>` generics.
 
 ---
 
@@ -12,82 +12,69 @@ A modern, declarative Angular wrapper for OpenLayers with a modular sub-entry po
 pnpm add @angular-helpers/openlayers ol
 ```
 
-### 2. Provider Configuration
-
-Configure features via functional providers:
+### 2. Provider Setup (`app.config.ts`)
 
 ```typescript
-// app.config.ts
 import { ApplicationConfig } from '@angular/core';
 import { provideOpenLayers } from '@angular-helpers/openlayers/core';
-import { withLayers } from '@angular-helpers/openlayers/layers';
 import { withControls } from '@angular-helpers/openlayers/controls';
+import { withInteractions, withSelectInteraction } from '@angular-helpers/openlayers/interactions';
+import { withLayers } from '@angular-helpers/openlayers/layers';
+import { withOverlays } from '@angular-helpers/openlayers/overlays';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideOpenLayers(withLayers(), withControls())],
+  providers: [
+    provideOpenLayers(
+      withLayers(),
+      withControls(),
+      withInteractions(),
+      withSelectInteraction('main-select', { multi: true }),
+      withOverlays(),
+    ),
+  ],
 };
 ```
 
-### 3. Declarative Map Component
+### 3. Component Usage
 
 ```typescript
 import { Component } from '@angular/core';
 import { OlMapComponent } from '@angular-helpers/openlayers/core';
-import { OlTileLayerComponent } from '@angular-helpers/openlayers/layers';
-import {
-  OlZoomControlComponent,
-  OlScaleLineControlComponent,
-} from '@angular-helpers/openlayers/controls';
+import { OlVectorLayerComponent } from '@angular-helpers/openlayers/layers';
+import { OlZoomControlComponent } from '@angular-helpers/openlayers/controls';
 
 @Component({
-  selector: 'app-interactive-map',
-  imports: [
-    OlMapComponent,
-    OlTileLayerComponent,
-    OlZoomControlComponent,
-    OlScaleLineControlComponent,
-  ],
+  selector: 'app-map-view',
+  imports: [OlMapComponent, OlVectorLayerComponent, OlZoomControlComponent],
   template: `
-    <ol-map [center]="[0, 0]" [zoom]="3" class="w-full h-[500px] block">
-      <ol-tile-layer source="osm" />
+    <ol-map [center]="[-3.7038, 40.4168]" [zoom]="6" class="block h-96 w-full">
+      <ol-vector-layer />
       <ol-zoom-control />
-      <ol-scale-line-control />
     </ol-map>
   `,
 })
-export class InteractiveMapComponent {}
+export class MapViewComponent {}
 ```
 
 ---
 
-## Entry Points Architecture
+## Secondary Entry Points
 
-| Entry Point                                | Content                                                                                  |
-| :----------------------------------------- | :--------------------------------------------------------------------------------------- |
-| `@angular-helpers/openlayers/core`         | Root `<ol-map>`, `OlMapService`, `GeometryService`, projection setup, and base types.    |
-| `@angular-helpers/openlayers/layers`       | Tile layers (`<ol-tile-layer>`), Vector layers (`<ol-vector-layer>`), and WebGL shaders. |
-| `@angular-helpers/openlayers/controls`     | Zoom, scale line, full screen, layer switcher, and custom HUD controls.                  |
-| `@angular-helpers/openlayers/interactions` | Draw, select, modify, translate, and drag interactions managed via Signals.              |
-| `@angular-helpers/openlayers/overlays`     | Contextual popups and HTML marker overlays pinned to coordinates.                        |
-
----
-
-## Key Guarantees
-
-- **True Tree-Shaking**: Sub-entry points ensure only components and OpenLayers modules you use are bundled.
-- **Signals-First**: Map viewport (`zoom`, `center`, `rotation`) and layer properties bind to native Angular Signal inputs.
-- **Zoneless & SSR Safe**: Map initialization runs safely in browser contexts, isolating canvas rendering from SSR hydration.
-- **Military & Geodesic Precision**: Geodesic geometry algorithms for ellipsoids, range rings, and NATO symbology.
+| Entry Point                                | Description                                                                                                                |
+| :----------------------------------------- | :------------------------------------------------------------------------------------------------------------------------- |
+| `@angular-helpers/openlayers/core`         | `provideOpenLayers`, `OlMapComponent`, `OlMapService`, `OlTimeService`, generic `Feature<P>`.                              |
+| `@angular-helpers/openlayers/layers`       | `withLayers`, `OlVectorLayerComponent`, `OlClusterComponent`, `OlHeatmapLayerComponent`, `OlWebGLVectorLayerComponent`.    |
+| `@angular-helpers/openlayers/controls`     | `withControls`, zoom, attribution, scale-line, fullscreen, rotate, basemap switcher, `<ol-timeline>`.                      |
+| `@angular-helpers/openlayers/interactions` | `withInteractions`, `withSelectInteraction`, `withDrawInteraction`, `withModifyInteraction`, `withMeasurementInteraction`. |
+| `@angular-helpers/openlayers/overlays`     | `withOverlays`, `OlPopupComponent`, `OlTooltipDirective`.                                                                  |
+| `@angular-helpers/openlayers/testing`      | Test harnesses and mocks for OpenLayers specs.                                                                             |
 
 ---
 
-## Interactive Documentation & Demos
+## Interactive Documentation & Demo
 
-Live interactive map demos and component API references:
-👉 **[Angular Helpers OpenLayers Docs](https://gaspar1992.github.io/angular-helpers/docs/openlayers)**
-👉 **[OpenLayers Interactive Demo](https://gaspar1992.github.io/angular-helpers/demo/openlayers)**
-
----
+👉 **[OpenLayers Docs](https://gaspar1992.github.io/angular-helpers/docs/openlayers)**
+👉 **[OpenLayers Live Demo](https://gaspar1992.github.io/angular-helpers/demo/openlayers)**
 
 ## License
 

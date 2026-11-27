@@ -1,522 +1,87 @@
-# 🚀 Angular Helpers
+# ⚡ Angular Helpers
 
-A suite of Angular libraries that helps you build secure, browser-integrated applications with a clean developer experience.
+> Production-ready, zoneless-first **Angular 22+** utility suite — signal-driven Browser Web APIs, tree-shakable client security, tiered L1/L2 storage, off-main-thread Web Worker HTTP, OpenLayers, Yjs CRDTs, and testing utilities.
 
----
-
-## 📦 Available Packages
-
-| Package                                                                   | Description                                                                                         | Documentation                                                              |
-| :------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- |
-| [`@angular-helpers/core`](#--angular-helperscore)                         | Reactive timing operators (`debouncedSignal`, `throttledSignal`, `timerSignal`), boundary reporters | [Docs](https://gaspar1992.github.io/angular-helpers/docs/core)             |
-| [`@angular-helpers/security`](#--angular-helperssecurity)                 | ReDoS prevention in Web Workers, WebCrypto, SecureStorage, input sanitization                       | [Docs](https://gaspar1992.github.io/angular-helpers/docs/security)         |
-| [`@angular-helpers/browser-web-apis`](#--angular-helpersbrowser-web-apis) | 14+ signal-based Web API primitives (Camera, Geolocation, WakeLock, Observers, etc.)                | [Docs](https://gaspar1992.github.io/angular-helpers/docs/browser-web-apis) |
-| [`@angular-helpers/worker-http`](#--angular-helpersworker-http)           | Offload HTTP network I/O, encryption, and serialization to dedicated Web Workers                    | [Docs](https://gaspar1992.github.io/angular-helpers/docs/worker-http)      |
-| [`@angular-helpers/openlayers`](#--angular-helpersopenlayers)             | Declarative Signals-first wrapper for OpenLayers with APF secondary entry points                    | [Docs](https://gaspar1992.github.io/angular-helpers/docs/openlayers)       |
-| [`@angular-helpers/storage`](#--angular-helpersstorage)                   | High-performance reactive storage engine (`storageResource`, entity store, workers)                 | [Docs](https://gaspar1992.github.io/angular-helpers/docs/storage)          |
-| [`@angular-helpers/testing`](#--angular-helperstesting)                   | Testing harnesses, mocks (`provideMockService`, `render`, `flushEffects`), headless browser mocks   | [Docs](https://gaspar1992.github.io/angular-helpers/docs/testing)          |
-| [`@angular-helpers/yjs`](#--angular-helpersyjs)                           | Reactive Signal bindings and collaborative CRDT primitives for Yjs (`yjsSignal`, undo, awareness)   | [Docs](https://gaspar1992.github.io/angular-helpers/docs/yjs)              |
+[![CI](https://github.com/Gaspar1992/angular-helpers/actions/workflows/ci.yml/badge.svg)](https://github.com/Gaspar1992/angular-helpers/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-live-blue)](https://gaspar1992.github.io/angular-helpers/docs)
+[![Demos](https://img.shields.io/badge/demos-interactive-violet)](https://gaspar1992.github.io/angular-helpers/demo)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
 
-### ⚡ `@angular-helpers/core`
+## Packages
 
-_Lightweight, high-performance, and SSR-safe timing signal operators and core utilities_
+| Package                                                                | Purpose                                                                                                     | Docs                                                                       | Demo                                                                   |
+| :--------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :--------------------------------------------------------------------- |
+| [`@angular-helpers/core`](libs/core/README.md)                         | Signal primitives (`debouncedSignal`, `previousSignal`), `injectWorkerPool`, `injectPlatform`               | [Docs](https://gaspar1992.github.io/angular-helpers/docs/core)             | —                                                                      |
+| [`@angular-helpers/browser-web-apis`](libs/browser-web-apis/README.md) | Signal-first Browser APIs (`injectFullscreen`, `injectNotifications`, `injectWebShare`, observers, sensors) | [Docs](https://gaspar1992.github.io/angular-helpers/docs/browser-web-apis) | [Demo](https://gaspar1992.github.io/angular-helpers/demo/browser-apis) |
+| [`@angular-helpers/security`](libs/security/README.md)                 | Tree-shakable `provideSecurity(with*())`, WebCrypto, ReDoS worker, `injectRateLimiter`, `injectSessionIdle` | [Docs](https://gaspar1992.github.io/angular-helpers/docs/security)         | [Demo](https://gaspar1992.github.io/angular-helpers/demo/security)     |
+| [`@angular-helpers/storage`](libs/storage/README.md)                   | Tiered L1/L2 storage, reactive `Signal<string>` keys, `injectStorageResource`, O(1) `EntityStore`           | [Docs](https://gaspar1992.github.io/angular-helpers/docs/storage)          | [Demo](https://gaspar1992.github.io/angular-helpers/demo/storage)      |
+| [`@angular-helpers/worker-http`](libs/worker-http/README.md)           | Off-main-thread Angular `HttpClient` & `httpResource` over Web Workers + `ng add` schematic                 | [Docs](https://gaspar1992.github.io/angular-helpers/docs/worker-http)      | [Demo](https://gaspar1992.github.io/angular-helpers/demo/worker-http)  |
+| [`@angular-helpers/openlayers`](libs/openlayers/README.md)             | Modular standalone OpenLayers components (`core`, `layers`, `controls`, `interactions`, `overlays`)         | [Docs](https://gaspar1992.github.io/angular-helpers/docs/openlayers)       | [Demo](https://gaspar1992.github.io/angular-helpers/demo/openlayers)   |
+| [`@angular-helpers/yjs`](libs/yjs/README.md)                           | Reactive Yjs CRDT signals, multi-doc `YjsDocService`, WebSocket & IndexedDB sync                            | [Docs](https://gaspar1992.github.io/angular-helpers/docs/yjs)              | [Demo](https://gaspar1992.github.io/angular-helpers/demo/yjs)          |
+| [`@angular-helpers/testing`](libs/testing/README.md)                   | Zoneless `render()` with typed `ComponentOutputs<T>`, `getByRole`, `getByText`, `rerender()`                | [Docs](https://gaspar1992.github.io/angular-helpers/docs/testing)          | —                                                                      |
+| [`@angular-helpers/schematics`](libs/schematics/README.md)             | Angular CLI `ng add` & service generators                                                                   | [Docs](https://gaspar1992.github.io/angular-helpers/docs/schematics)       | —                                                                      |
 
-🌐 **Documentation**: https://gaspar1992.github.io/angular-helpers/docs/core
+---
 
-**🎯 What it solves:**
+## Quick Start (Angular 22+)
 
-- Avoiding RxJS interoperability overhead (`toObservable` and `toSignal` back-and-forth conversion).
-- Stabilisation hangs during Server-Side Rendering (SSR) by safely bypassing timer registrations.
-- Complex and error-prone memory management with automatic `DestroyRef` cleanup.
-
-**✨ Key features:**
-
-- ⏱️ **`debouncedSignal`** — delays emitting values until a specified time window of silence.
-- 🚀 **`throttledSignal`** — limits emissions to at most once per specified time window, supporting leading/trailing configurations.
-- 🕐 **`timerSignal`** — native delay and periodic interval signals.
-- ⚙️ **Custom Injector support** — allowing execution outside of an active injection context.
-
-**💡 Example usage:**
+```bash
+pnpm add @angular-helpers/browser-web-apis @angular-helpers/security @angular-helpers/storage
+```
 
 ```typescript
-// Debounce search inputs
-const search = signal('');
-const debouncedSearch = debouncedSignal(search, 300);
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideBrowserWebApis } from '@angular-helpers/browser-web-apis';
+import { provideSecurity, withWebCrypto, withRateLimiter } from '@angular-helpers/security';
+import { provideStorage } from '@angular-helpers/storage';
 
-// Throttled scroll triggers
-const scrolled = throttledSignal(scrollOffset, 150);
-
-// Periodic ticker
-const timer = timerSignal(1000, 2000); // starts after 1s, ticks every 2s
-```
-
-**📥 Installation:**
-
-```bash
-pnpm add @angular-helpers/core
-```
-
----
-
-### 🔐 `@angular-helpers/security`
-
-_Advanced regular expression security and ReDoS prevention_
-
-🌐 **Documentation**: https://gaspar1992.github.io/angular-helpers/docs/security
-
-**🎯 What it solves:**
-
-- **ReDoS (Regular Expression Denial of Service)** attacks caused by malicious or expensive patterns.
-- Safe validation of complex regular expressions without blocking your app.
-- Controlled regex execution with timeout and security analysis.
-
-**✨ Key features:**
-
-- 🛡️ **ReDoS prevention** with automatic risky pattern checks.
-- ⚡ **Web Worker execution** to avoid blocking the main thread.
-- 🕐 **Configurable timeout** to limit expensive regex operations.
-- 📊 **Risk analysis** with complexity metrics and recommendations.
-- 🏗️ **Builder pattern** for fluent secure-regex configuration.
-
-**💡 Example usage:**
-
-```typescript
-// Safe regex validation for user input
-const result = await securityService.testRegex(userInput, text, {
-  timeout: 5000,
-  safeMode: true,
-});
-
-// Builder pattern for complex patterns
-const { pattern, security } = RegexSecurityService.builder()
-  .pattern('\\d+')
-  .timeout(3000)
-  .safeMode()
-  .build();
-```
-
-**📥 Installation:**
-
-```bash
-pnpm add @angular-helpers/security
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserWebApis(),
+    provideSecurity(withWebCrypto(), withRateLimiter()),
+    provideStorage(),
+  ],
+};
 ```
 
 ---
 
-### 🌐 `@angular-helpers/browser-web-apis`
+## Monorepo Structure
 
-_Unified and safe browser API access with permissions and robust error handling_
-
-🌐 **Documentation**: https://gaspar1992.github.io/angular-helpers/docs/browser-web-apis
-
-**🎯 What it solves:**
-
-- **API fragmentation** across browsers.
-- **Permission complexity** for sensitive browser features.
-- **Compatibility checks** that usually require repetitive boilerplate.
-- **Inconsistent error handling** across web APIs.
-
-**✨ Key features:**
-
-- 📸 **Camera** access and stream control.
-- 🗺️ **Geolocation** with watch support and typed errors.
-- 🔔 **Notifications** with permission-aware behavior.
-- 📋 **Clipboard** utilities.
-- 🎥 **Media Devices** enumeration and media access.
-- 🔐 **Centralized permission utilities**.
-- ✅ **Device/browser API wrappers** with fallback checks.
-- ⚡ **Signal Fn primitives** — 14 zero-boilerplate reactive inject functions (`injectPageVisibility`, `injectResizeObserver`, `injectIntersectionObserver`, `injectNetworkInformation`, `injectScreenOrientation`, `injectMutationObserver`, `injectPerformanceObserver`, `injectIdleDetector`, `injectGamepad`, `injectClipboard`, `injectGeolocation`, `injectBattery`, `injectWakeLock`, `injectEyeDropper`) with automatic cleanup and `viewChild` signal support.
-- 🔒 **Web Locks** — Cross-tab resource coordination.
-- 💾 **Storage Manager** — Storage quotas and persistence.
-- 📦 **Compression Streams** — Gzip/deflate compression.
-
-**📥 Installation:**
-
-```bash
-pnpm add @angular-helpers/browser-web-apis
-```
-
----
-
-### 🚀 `@angular-helpers/worker-http`
-
-_Angular HTTP over Web Workers — off-main-thread HTTP pipelines_
-
-🌐 **Documentation**: https://gaspar1992.github.io/angular-helpers/docs/worker-http
-
-**🎯 What it solves:**
-
-- **Main-thread blocking** from heavy HTTP payloads and serialization.
-- **Request signing complexity** with WebCrypto HMAC.
-- **Serialization overhead** with pluggable format support.
-
-**✨ Key features:**
-
-- 🔀 **Off-main-thread HTTP** pipelines via Web Workers.
-- 🔌 **Typed RPC bridge** for structured worker communication.
-- 🔐 **WebCrypto HMAC** request signing.
-- 📦 **Pluggable serializers** (TOON, seroval, auto-detect).
-- 📡 **Telemetry hooks** for APM / metrics integration.
-- 🌍 **SSR + hydration** — automatic fallback with transfer cache support.
-- 🛠️ **`ng add` schematic** for zero-config setup.
-
-**📥 Installation:**
-
-```bash
-pnpm add @angular-helpers/worker-http
-```
-
----
-
-### 🗺️ `@angular-helpers/openlayers`
-
-_A modern Angular wrapper for OpenLayers with modular architecture and standalone components_
-
-🌐 **Documentation**: https://gaspar1992.github.io/angular-helpers/docs/openlayers
-
-**🎯 What it solves:**
-
-- **Imperative OpenLayers API** — wraps it in declarative Angular components.
-- **Bundle bloat** — modular sub-entry points import only what you need.
-
-**✨ Key features:**
-
-- 🗺️ **Standalone components** for maps, layers, controls, interactions, and overlays.
-- 📡 **Signals integration** — native Angular signals for reactive state.
-- 🎯 **Modular loading** — `core`, `layers`, `controls`, `interactions`, `overlays` sub-entries.
-- 💬 **Popups & tooltips** — declarative and programmatic overlay API.
-- ⏱️ **Time-series playback** — 60FPS animation timing loop running off-zone via `requestAnimationFrame` and a premium `<ol-timeline>` control panel.
-
-**📥 Installation:**
-
-```bash
-pnpm add @angular-helpers/openlayers ol
-```
-
----
-
-### 📐 `@angular-helpers/storage`
-
-_Premium, high-performance, and secure reactive storage system with L1/L2 caching, schema drift validation, and encryption_
-
-🌐 **Documentation**: https://gaspar1992.github.io/angular-helpers/docs/storage
-
-**🎯 What it solves:**
-
-- **Local state synchronization** between synchronous UI signals and asynchronous storage backends.
-- **Data corruption/schema drift** on client databases across application updates.
-- **Storage size limitations** and **unencrypted local data** at rest.
-
-**✨ Key features:**
-
-- ⚡ **L1 + L2 Cache** — Synchronous Signal state backed by asynchronous IndexedDB, Cache API, or WebStorage.
-- 🛡️ **Schema Drift Validation** — Native validation guards with automatic database self-repair.
-- 📦 **TOON Compression** — Reduces JSON payloads by 30-60%, bypassing standard 5MB browser limits.
-- 🔐 **AES-GCM Encryption** — Native WebCrypto asynchronous encryption for secure data at rest.
-- 🗃️ **Entity Store** — Surgical key-level reactive state management with frozen runtime immutability.
-
-**💡 Example usage:**
-
-```typescript
-const userPref = injectStorageSignal('user-pref', 'light-mode', {
-  storageType: 'local',
-  validator: (data): data is 'light-mode' | 'dark-mode' =>
-    data === 'light-mode' || data === 'dark-mode',
-});
-```
-
-**📥 Installation:**
-
-```bash
-pnpm add @angular-helpers/storage
-```
-
----
-
-### 🧪 `@angular-helpers/testing`
-
-_Lightweight, high-performance testing utilities and mocks for modern Angular applications_
-
-🌐 **Documentation**: https://gaspar1992.github.io/angular-helpers/docs/testing
-
-**🎯 What it solves:**
-
-- **Verbose TestBed boilerplate** when writing unit/integration tests.
-- **Complex mock setups** for components, pipes, services, and routers.
-- **Asynchronous effect evaluation** in testing environments.
-
-**✨ Key features:**
-
-- 🎭 **`render()`** — Intuitive wrapper for rendering standalone components, binding inputs/outputs, and testing `<ng-content>`.
-- 🧩 **Mocking Utilities** — Quick spies and mocks via `provideMockService()`, `MockComponent()`, and `MockPipe()`.
-- 🗺️ **Routing Mocks** — Seamless routing simulations with `provideMockRouter()` and `provideMockActivatedRoute()`.
-- ⚡ **Signal Testing** — `flushEffects()` to manually trigger and evaluate `effect()` queues synchronously.
-
-**📥 Installation:**
-
-```bash
-pnpm add @angular-helpers/testing -D
-```
-
----
-
-### 🔄 `@angular-helpers/yjs`
-
-_Bidirectional Angular Signal bindings and collaborative CRDT primitives for Yjs_
-
-🌐 **Documentation**: https://gaspar1992.github.io/angular-helpers/docs/yjs
-
-**🎯 What it solves:**
-
-- **Bidirectional synchronization** between Angular `WritableSignals` and Yjs CRDT types with zero feedback loops.
-- **Dangling cursors and text selection jumps** during concurrent collaborative editing.
-- **Zombies / ghost users in presence tracking** when browser tabs unmount or throttle timers in the background.
-- **SSR hydration mismatches** when restoring offline state from IndexedDB.
-
-**✨ Key features:**
-
-- 🔄 **`yjsSignal`** — Bidirectional WritableSignal adapter for `Y.Map`, `Y.Array`, `Y.Text` with non-destructive incremental reconciliation, key filtering, and microtask batching.
-- 📝 **`YjsTextDirective` (`[yjsText]`)** — Collaborative text input/textarea directive preserving relative cursor selection ranges.
-- ↺ **`injectYjsUndoManager`** — Reactive `canUndo()` and `canRedo()` signals with automatic capture of local signal/directive origins.
-- 👥 **`injectYjsAwareness`** — Multi-user presence, active peer signals, and automatic resync on tab visibility.
-- 💾 **`injectYjsIndexeddb`** — SSR-safe IndexedDB offline persistence with `isHydrated` signals for `@defer`.
-- 📋 **Angular Signal Forms** — Native model driver for `@angular/forms/signals` with zero glue code.
-
-**💡 Example usage:**
-
-```typescript
-const yMap = doc.getMap('settings');
-
-// WritableSignal bound to a single Y.Map key with non-destructive reconciliation
-const title = yjsSignal<string>(yMap, { key: 'title', initialValue: 'My Document' });
-
-// Undo/Redo tracking
-const undo = injectYjsUndoManager(yMap);
-```
-
-**📥 Installation:**
-
-```bash
-pnpm add @angular-helpers/yjs yjs
-```
-
----
-
-## 🎯 Why Angular Helpers?
-
-### ⚡ Immediate Productivity
-
-- Unified APIs for common browser capabilities.
-- Strict TypeScript support and better autocomplete.
-- Practical examples and ready-to-use patterns.
-- End-to-end browser test coverage in CI.
-
-### 🛡️ Security by Default
-
-- ReDoS prevention tools for regex-heavy flows.
-- Permission-aware wrappers for sensitive APIs.
-- Worker-based isolation for expensive operations.
-- Predictable error handling paths.
-
-### 🔄 Modern Stack Alignment
-
-- Built for modern Angular versions and patterns.
-- Browser-focused utilities tested with Playwright.
-- Actively maintained workflows and test harnesses.
-
----
-
-## 🚀 Quick Start
-
-### Workspace Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/Gaspar1992/angular-helpers
-cd angular-helpers
-
-# Install dependencies
-pnpm install
-
-# Generate local SSL certificates
-pnpm run ssl:generate
-
-# Start demo app over HTTPS
-pnpm run start:https
-```
-
-### Use in Your Project
-
-```bash
-# Install the packages you need
-pnpm add @angular-helpers/core
-pnpm add @angular-helpers/security
-pnpm add @angular-helpers/browser-web-apis
-pnpm add @angular-helpers/storage
-pnpm add @angular-helpers/worker-http
-pnpm add @angular-helpers/openlayers ol
-pnpm add @angular-helpers/yjs yjs
-pnpm add @angular-helpers/testing -D
-```
-
-For modern Angular standalone integration, check each package's own README.
-
----
-
-## 📊 Comparison
-
-| Feature              | Angular Helpers  | Manual Implementation | Other Libraries |
-| -------------------- | ---------------- | --------------------- | --------------- |
-| **ReDoS Protection** | ✅ Built-in      | ❌ Manual             | ⚠️ Partial      |
-| **Browser APIs**     | ✅ Unified       | ❌ Fragmented         | ⚠️ Limited      |
-| **Worker HTTP**      | ✅ Drop-in       | ❌ Complex            | ❌ None         |
-| **OpenLayers**       | ✅ Declarative   | ❌ Imperative         | ⚠️ Limited      |
-| **Yjs CRDTs**        | ✅ Reactive      | ❌ Complex            | ⚠️ Basic        |
-| **TypeScript**       | ✅ Full support  | ⚠️ Partial            | ❌ Minimal      |
-| **Testing**          | ✅ Included      | ❌ Manual             | ⚠️ Basic        |
-| **Documentation**    | ✅ Comprehensive | ❌ Missing            | ⚠️ Basic        |
-| **Support**          | ✅ Active        | ❌ Team-owned only    | ⚠️ Varies       |
-
----
-
-## 🛠️ Development
-
-### Available Scripts
-
-```bash
-# Generate SSL certificates (local/CI)
-pnpm run ssl:generate
-
-# Local HTTPS development (required for secure browser APIs)
-pnpm run start:https
-
-# Build all packages
-pnpm run build:packages
-
-# Unit tests
-pnpm test
-
-# Browser tests on Chromium
-pnpm run test:browser
-
-# Browser tests for CI (Chromium, 1 worker)
-pnpm run test:browser:ci
-
-# Cross-browser smoke tests (Firefox + WebKit)
-pnpm run test:browser:cross
-
-# Workspace linting
-pnpm run lint
-```
-
-### Project Structure
-
-```
+```text
 angular-helpers/
-├── libs/
-│   ├── core/              # 📦 @angular-helpers/core
-│   ├── security/          # 📦 @angular-helpers/security
-│   ├── browser-web-apis/  # 📦 @angular-helpers/browser-web-apis
-│   ├── storage/           # 📦 @angular-helpers/storage
-│   ├── worker-http/       # 📦 @angular-helpers/worker-http
-│   ├── openlayers/        # 📦 @angular-helpers/openlayers
-│   ├── yjs/               # 📦 @angular-helpers/yjs
-│   └── testing/           # 📦 @angular-helpers/testing
-├── apps/web/              # 🚀 Demo & Documentation web application
-├── docs/                  # 📚 Documentation
-└── scripts/               # 🔧 Automation scripts
+├── apps/
+│   ├── web/            # Documentation, Interactive Demos & Blog (Angular 22 SSR/SSG)
+│   └── web-e2e/        # Playwright E2E smoke & visual specs
+├── libs/               # 9 modular Angular libraries
+├── docs/               # Internal architecture, SDDs & guides (see docs/README.md)
+└── scripts/            # Build, lint-packages (publint + attw), llms.txt & release automation
 ```
 
 ---
 
-## 📈 Roadmap
+## Common Workspace Commands
 
-### Planned 🚧
-
-- **@angular-helpers/pwa** — Service Worker and PWA capabilities.
-
-### In Progress 🔄
-
-- Runtime and bundle-size improvements across all packages.
-- More real-world examples and demos.
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome.
-
-### Getting Started
-
-```bash
-# Fork and clone
-git clone https://github.com/your-user/angular-helpers
-# or fork from https://github.com/Gaspar1992/angular-helpers
-cd angular-helpers
-
-# Create a feature branch
-git checkout -b feature/your-feature
-
-# Commit and push
-git commit -m "feat: add your feature"
-git push origin feature/your-feature
-```
-
-### Contribution Guides
-
-- 📖 [SSR/SSG Implementation](./docs/ssr-ssg-implementation.md)
+| Command                    | Description                                                        |
+| :------------------------- | :----------------------------------------------------------------- |
+| `pnpm test:ci`             | Run full Vitest suite across libraries and `apps/web`              |
+| `pnpm build:packages:prod` | Build all publishable packages in production mode (`ng-packagr`)   |
+| `pnpm lint:packages`       | Validate package exports and TypeScript types (`publint` + `attw`) |
+| `pnpm nx build web`        | Build `apps/web` with SSR + 151 prerendered routes                 |
+| `pnpm nx serve web`        | Start local docs & demo dev server                                 |
+| `pnpm format:check`        | Verify formatting with `oxfmt`                                     |
 
 ---
 
-## 📄 License
+## Internal Documentation & Releases
 
-MIT License — see [LICENSE](./LICENSE) for details.
+- 📚 **[Internal Docs Index](docs/README.md)** — SSR/SSG architecture, worker deployment, and SDDs.
+- 📝 **[Changelog](CHANGELOG.md)** — Recent `22.x` releases and DX/UX modernization history.
+- 🤖 **[`llms.txt`](https://gaspar1992.github.io/angular-helpers/llms.txt)** — LLM-friendly full documentation index.
 
----
+## License
 
-## � Blog
-
-Articles about library design decisions, Angular patterns, and the evolution of Angular Helpers.
-They live as Markdown files in [`public/content/blog/`](./public/content/blog/) and are rendered on the [web](https://gaspar1992.github.io/angular-helpers/blog).
-
-| Date | Article |
-| 2026-05-16 | [openlayers v0.5.0: Proj4 projections, Geodesic precision, and WebGL MVT](./public/content/blog/openlayers-v0-5-0.md) |
-| 2026-04-27 | [openlayers v0.3.0: Overlays — Popups, Tooltips, and Dynamic Angular Components on the Map](./public/content/blog/openlayers-overlays.md) |
-| 2026-04-27 | [openlayers v0.2.0: SRP-refactored interactions, Circle draw, and a native-style toolbar](./public/content/blog/openlayers-interactions-srp.md) |
-| 2026-04-26 | [worker-http v21.2.0: TOON serializer — 30–60% smaller postMessage payloads](./public/content/blog/worker-http-toon-serializer.md) |
-| 2026-04-26 | [worker-http v21.1: per-request cancellation with AbortSignal and typed timeouts](./public/content/blog/worker-http-cancellation.md) |
-| 2026-04-25 | [worker-http v1.0.0: The Journey from Proof-of-Concept to Production](./public/content/blog/worker-http-v1-0.md) |
-| 2026-04-24 | [OpenLayers for Angular — Phase 2 Complete](./public/content/blog/openlayers-phase2.md) |
-| 2026-04-21 | [worker-http v0.7.0: hardening — cancellation that actually cancels, real timeouts, and a latent AES bug](./public/content/blog/worker-http-hardening.md) |
-| 2026-04-21 | [security v21.3: JWT, HIBP, rate limiter, and a two-paradigm forms bridge](./public/content/blog/security-utilities-expansion.md) |
-| 2026-04-19 | [browser-web-apis v21.11: Signal-based Injection & Composition-First API](./public/content/blog/browser-web-apis-v21-11-signal-injection.md) |
-| 2026-04-19 | [browser-web-apis v21.11: log levels, experimental policy, and composition-first providers](./public/content/blog/log-levels-and-experimental-policy.md) |
-| 2026-04-18 | [browser-web-apis v21.9: signal primitives for clipboard, geolocation, battery, and wake-lock](./public/content/blog/signal-primitives-for-browser-apis.md) |
-| 2026-04-18 | [browser-web-apis v21.8: WebWorker request/response with timeout, signals for status](./public/content/blog/web-worker-request-response.md) |
-| 2026-04-18 | [browser-web-apis v21.7: WebStorage that survives Safari private mode + a unified API](./public/content/blog/web-storage-safari-private-and-unified-api.md) |
-| 2026-04-18 | [browser-web-apis v21.6: stateful WebSocket client with signals, request/response, and a real reconnect](./public/content/blog/websocket-stateful-client.md) |
-| 2026-04-18 | [browser-web-apis v21.10: Web Locks, Storage Manager, Compression Streams](./public/content/blog/three-new-web-apis-locks-storage-compression.md) |
-| 2026-04-13 | [worker-http v0.3.0: Angular HttpBackend integration — HTTP off the main thread](./public/content/blog/worker-http-backend-phase3.md) |
-| 2026-04-13 | [browser-web-apis v21.5: real tree-shaking, bug fixes, and signal consistency](./public/content/blog/browser-web-apis-v21-5-improvements.md) |
-| 2026-04-13 | [browser-web-apis: robustness deep-dive — spec compliance, leak prevention, and unified architecture](./public/content/blog/browser-web-apis-robustness-improvements.md) |
-| 2026-04-12 | [Redesigning the web & our vision as a library ecosystem](./public/content/blog/web-redesign-and-library-vision.md) |
-
----
-
-## �🔗 Useful Links
-
-- **🐛 Issues & Feature Requests**: [GitHub Issues](https://github.com/Gaspar1992/angular-helpers/issues)
-- **💬 Discussions**: [GitHub Discussions](https://github.com/Gaspar1992/angular-helpers/discussions)
-- **📦 NPM Organization**: [npmjs.com/org/angular-helpers](https://www.npmjs.com/org/angular-helpers)
-
----
-
-<div align="center">
-
-**⭐ If Angular Helpers helps your team, consider starring the repository.**
-
-Made with ❤️ by the Angular Helpers Team
-
-</div>
+MIT © [Gaspar](https://github.com/Gaspar1992)

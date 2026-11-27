@@ -1,3 +1,23 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [Unreleased]
+
+### Features & DX Modernization (`22.x` Series)
+
+- **Tree-Shakable Security (`@angular-helpers/security`)**: Added 14 `with*()` feature helpers for `provideSecurity(...)`, zoneless `SessionIdleService` (optional `NgZone`), `injectSessionIdle()`, and `injectRateLimiter()`.
+- **Worker HTTP Schematics (`@angular-helpers/worker-http`)**: Fixed `ng-add` fallback worker entry import and wired `withWorkerRoutes(...)` into `app.config.ts`.
+- **OpenLayers Providers & Types (`@angular-helpers/openlayers`)**: Bound `ROTATE_CONTROL_MAP_SERVICE` to `OlMapService`, converted interaction helpers to `OlFeature<'interactions'>`, and made `Feature<P>` generic.
+- **Browser Web APIs (`@angular-helpers/browser-web-apis`)**: Made `DeviceMotionService` & `DeviceOrientationService` zoneless-safe and added `injectFullscreen()`, `injectNotifications()`, and `injectWebShare()`.
+- **Storage & Core (`@angular-helpers/storage`, `@angular-helpers/core`)**: Added reactive `Signal<string>` keys for `injectStorageSignal` / `injectStorageResource`, O(1) `EntityStore.entitySignal(id)`, and `previousSignal()`.
+- **Yjs & Testing (`@angular-helpers/yjs`, `@angular-helpers/testing`)**: Added multi-doc `YjsDocService` + `provideYjsDoc()`, typed `ComponentOutputs<T>`, `getByText` / `getByRole` / `getByLabelText`, `rerender()`, and optional peer dependency metadata.
+- **Docs, Demos & Blog (`apps/web`)**: Eliminated initial bundle & CSS budget warnings, enabled incremental hydration (`withIncrementalHydration()`), added Package Manager Switcher, Prev/Next navigation, Live Demo links, weighted search ranking, and GFM callouts + TOC in blog posts.
+
+## [22.2.0 – 22.10.0] - 2026
+
+- Aligned all 8 publishable `@angular-helpers/*` packages with **Angular v22** (default `OnPush`, zoneless compatibility, `@boundary`, `resource()` / `httpResource()` integrations).
+
 ## [1.41.1](https://github.com/Gaspar1992/angular-helpers/compare/v1.41.0...v1.41.1) (2026-05-10)
 
 

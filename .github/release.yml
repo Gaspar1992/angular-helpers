@@ -1,0 +1,29 @@
+changelog:
+  exclude:
+    authors:
+      - dependabot[bot]
+      - renovate[bot]
+  categories:
+    - title: Features
+      labels:
+        - feat
+        - enhancement
+    - title: Bug Fixes
+      labels:
+        - fix
+        - bug
+    - title: Performance & Bundle
+      labels:
+        - perf
+    - title: Documentation
+      labels:
+        - docs
+    - title: Maintenance & CI
+      labels:
+        - chore
+        - ci
+        - refactor
+        - test
+    - title: Other Changes
+      labels:
+        - '*'

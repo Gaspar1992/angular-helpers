@@ -155,14 +155,54 @@ async function main() {
         console.log(`⏭️  [SKIP] GitHub Release ${tag} already exists.`);
       } else {
         console.log(`🏷️  Creating GitHub Release ${tag}...`);
-        const ghRes = await runCommand(
-          'gh',
-          ['release', 'create', tag, '--title', tag, '--generate-notes'],
-          {
-            echoStdout: true,
-            echoStderr: true,
-          },
-        );
+        let prevTag = '';
+        try {
+          const tagListRes = await runCommand('git', [
+            'tag',
+            '-l',
+            `${pkgName}@*`,
+            '--sort=-v:refname',
+          ]);
+          if (tagListRes.code === 0) {
+            const tags = tagListRes.stdout
+              .split(/\r?\n/)
+              .map((t) => t.trim())
+              .filter((t) => t && t !== tag);
+            prevTag = tags[0] ?? '';
+          }
+        } catch {
+          prevTag = '';
+        }
+
+        const releaseHeader = [
+          `## ${pkgName} \`${pkgVersion}\``,
+          '',
+          '### Install',
+          '',
+          '```bash',
+          `pnpm add ${pkgName}@${pkgVersion}`,
+          '```',
+          '',
+          `- **Docs**: https://gaspar1992.github.io/angular-helpers/docs/${pkg}`,
+          `- **Package README**: https://github.com/Gaspar1992/angular-helpers/blob/main/libs/${pkg}/README.md`,
+        ].join('\n');
+
+        const ghArgs = [
+          'release',
+          'create',
+          tag,
+          '--title',
+          tag,
+          '--notes',
+          releaseHeader,
+          '--generate-notes',
+          ...(prevTag ? ['--notes-start-tag', prevTag] : []),
+        ];
+
+        const ghRes = await runCommand('gh', ghArgs, {
+          echoStdout: true,
+          echoStderr: true,
+        });
         if (ghRes.code === 0) {
           console.log(`✅ Successfully created GitHub Release ${tag}`);
         } else {
