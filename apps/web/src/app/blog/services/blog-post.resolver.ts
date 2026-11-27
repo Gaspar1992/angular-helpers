@@ -125,6 +125,21 @@ function isSafeUrl(value: string): boolean {
   );
 }
 
+function findTagEnd(html: string, start: number): number {
+  let quote: '"' | "'" | null = null;
+  for (let idx = start; idx < html.length; idx++) {
+    const ch = html[idx];
+    if (quote) {
+      if (ch === quote) quote = null;
+    } else if (ch === '"' || ch === "'") {
+      quote = ch;
+    } else if (ch === '>') {
+      return idx;
+    }
+  }
+  return -1;
+}
+
 /**
  * Deterministic, SSR-safe allowlist HTML sanitizer for rendered Markdown blog posts.
  * Drops blocked container elements and strips disallowed tags, event handlers, and unsafe URLs.
@@ -145,7 +160,7 @@ export function sanitizeBlogHtml(html: string): string {
       out.push(html.slice(i, lt));
     }
 
-    const gt = html.indexOf('>', lt + 1);
+    const gt = findTagEnd(html, lt + 1);
     if (gt === -1) break;
 
     const rawTag = html.slice(lt + 1, gt).trim();
