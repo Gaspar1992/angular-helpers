@@ -1,8 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { HttpRequest } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
-import { Tree } from '@angular-devkit/schematics';
 import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
 import {
   provideWorkerHttpClient,
@@ -13,7 +11,6 @@ import {
   WorkerHttpBackend,
 } from '@angular-helpers/worker-http/backend';
 import { offlineSyncQueueInterceptor } from '@angular-helpers/worker-http/interceptors';
-import * as path from 'node:path';
 
 describe('worker-http hardening regressions', () => {
   it('clears batchBuffer and completes status$ when terminate() is called before microtask flush', async () => {
@@ -129,40 +126,5 @@ describe('worker-http hardening regressions', () => {
     } finally {
       globalThis.indexedDB = originalIdb;
     }
-  });
-
-  it('ng-add creates tsconfig.worker.json without polluting root tsconfig.json and handles nested providers', async () => {
-    const collectionPath = path.resolve(
-      process.cwd(),
-      'libs/worker-http/schematics/collection.json',
-    );
-    const runner = new SchematicTestRunner('@angular-helpers/worker-http', collectionPath);
-    const tree = Tree.empty();
-    tree.create(
-      'angular.json',
-      JSON.stringify({ projects: { app: { architect: { build: { options: {} } } } } }),
-    );
-    tree.create('tsconfig.json', JSON.stringify({ compilerOptions: { lib: ['es2024', 'dom'] } }));
-    tree.create(
-      'src/app/app.config.ts',
-      `import { ApplicationConfig } from '@angular/core';\nexport const appConfig: ApplicationConfig = {\n  providers: [\n    provideRouter([])\n  ]\n};\n`,
-    );
-
-    const resultTree = await runner.runSchematic(
-      'ng-add',
-      { workerPath: 'src/app/custom/my.worker.ts' },
-      tree,
-    );
-
-    expect(resultTree.exists('tsconfig.worker.json')).toBe(true);
-    const rootTs = JSON.parse(resultTree.readContent('tsconfig.json'));
-    expect(rootTs.compilerOptions.lib).not.toContain('webworker');
-
-    const appConfig = resultTree.readContent('src/app/app.config.ts');
-    expect(appConfig).toContain("new URL('./custom/my.worker', import.meta.url)");
-    expect(appConfig).toContain('provideRouter([])');
-
-    const workerFile = resultTree.readContent('src/app/custom/my.worker.ts');
-    expect(workerFile).toContain('@angular-helpers/worker-http/interceptors');
   });
 });

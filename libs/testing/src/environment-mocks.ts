@@ -405,7 +405,30 @@ export function mockIndexedDB(): () => void {
       writable: true,
     });
   }
+  const originalKeyRange = globalThis.IDBKeyRange;
+  if (typeof globalThis.IDBKeyRange === 'undefined') {
+    Object.defineProperty(globalThis, 'IDBKeyRange', {
+      value: {
+        lowerBound: (lower: unknown) => ({ lower }),
+        upperBound: (upper: unknown) => ({ upper }),
+        bound: (lower: unknown, upper: unknown) => ({ lower, upper }),
+        only: (value: unknown) => ({ lower: value, upper: value }),
+      },
+      configurable: true,
+      writable: true,
+    });
+  }
   return () => {
+    if (originalKeyRange !== undefined) {
+      Object.defineProperty(globalThis, 'IDBKeyRange', {
+        value: originalKeyRange,
+        configurable: true,
+        writable: true,
+      });
+    } else {
+      // @ts-expect-error Safe deletion for mock restoration
+      delete globalThis.IDBKeyRange;
+    }
     if (original !== undefined) {
       Object.defineProperty(globalThis, 'indexedDB', {
         value: original,
