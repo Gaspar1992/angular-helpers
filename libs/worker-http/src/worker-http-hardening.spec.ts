@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { HttpRequest } from '@angular/common/http';
+import { HttpBackend, HttpRequest } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { createWorkerTransport } from '@angular-helpers/worker-http/transport';
 import {
@@ -67,7 +67,8 @@ describe('worker-http hardening regressions', () => {
         ],
       });
 
-      const backend = TestBed.inject(WorkerHttpBackend);
+      const backend = TestBed.inject(HttpBackend);
+      expect(backend).toBeInstanceOf(WorkerHttpBackend);
       const req = new HttpRequest('POST', '/api/items', { largePayload: 'hello-world-123456' });
       const sub = backend.handle(req).subscribe({ error: () => {} });
 

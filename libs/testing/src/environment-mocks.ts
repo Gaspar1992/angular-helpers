@@ -353,6 +353,7 @@ export function mockIndexedDB(): () => void {
           clear: () => makeRequest(undefined),
           count: () => makeRequest(0),
           openCursor: () => makeRequest(null),
+          openKeyCursor: () => makeRequest(null),
           createIndex: () => ({}),
         };
         const mockDb = {
