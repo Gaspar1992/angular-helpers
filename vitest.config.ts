@@ -24,6 +24,11 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    server: {
+      deps: {
+        inline: ['magic-string', '@angular-devkit/schematics', '@angular-devkit/core'],
+      },
+    },
     reporters: process.env.CI ? ['default', 'github-actions', 'junit'] : ['default'],
     outputFile: {
       junit: './coverage/junit.xml',

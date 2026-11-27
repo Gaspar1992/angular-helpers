@@ -187,7 +187,7 @@ export function injectWebTransportResource(
 
         const cleanup = () => {
           active = false;
-          if (datagramReader) {
+          if (typeof datagramReader?.cancel === 'function') {
             void datagramReader.cancel().catch(() => {});
           }
           if (currentTransport === transport) {

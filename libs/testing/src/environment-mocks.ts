@@ -325,10 +325,46 @@ export function mockIndexedDB(): () => void {
   if (typeof globalThis.indexedDB === 'undefined') {
     const mockFactory: Partial<IDBFactory> = {
       open: () => {
+        const makeRequest = (result: unknown = undefined) => {
+          const idbReq: Record<string, unknown> = {
+            result,
+            error: null,
+            readyState: 'pending',
+            onsuccess: null,
+            onerror: null,
+            addEventListener: () => {},
+            removeEventListener: () => {},
+          };
+          queueMicrotask(() => {
+            idbReq['readyState'] = 'done';
+            if (typeof idbReq['onsuccess'] === 'function') {
+              (idbReq['onsuccess'] as (ev: unknown) => void)({ target: idbReq });
+            }
+          });
+          return idbReq;
+        };
+        const mockStore = {
+          get: () => makeRequest(undefined),
+          getAll: () => makeRequest([]),
+          getAllKeys: () => makeRequest([]),
+          put: () => makeRequest(undefined),
+          add: () => makeRequest(undefined),
+          delete: () => makeRequest(undefined),
+          clear: () => makeRequest(undefined),
+          count: () => makeRequest(0),
+          openCursor: () => makeRequest(null),
+          createIndex: () => ({}),
+        };
         const mockDb = {
           objectStoreNames: { contains: () => false },
-          createObjectStore: () => ({}),
-          transaction: () => ({}),
+          createObjectStore: () => mockStore,
+          transaction: () => ({
+            objectStore: () => mockStore,
+            oncomplete: null,
+            onerror: null,
+            onabort: null,
+            abort: () => {},
+          }),
           close: () => {},
         };
         const req: Record<string, unknown> = {

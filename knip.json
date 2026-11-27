@@ -1,48 +1,45 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": [
-    "apps/web/src/main.ts",
-    "apps/web/src/main.server.ts",
-    "apps/web/src/server.ts",
-    "vite.config.ts",
-    "vitest.config.ts",
-    "apps/web-e2e/playwright.config.ts",
-    "scripts/*.js",
-    "scripts/*.mjs",
-    "scripts/*.ts",
-    "apps/web/src/workers/*.ts",
-    "**/*.spec.ts"
-  ],
-  "project": [
-    "apps/**/*.ts",
-    "libs/**/*.ts",
-    "scripts/**/*.js",
-    "scripts/**/*.mjs",
-    "scripts/**/*.ts"
-  ],
-  "ignoreDependencies": [
-    "@angular-devkit/*",
-    "@oxc-project/runtime",
-    "vite-tsconfig-paths",
-    "web-streams-polyfill",
-    "concurrently",
-    "daisyui",
-    "@tailwindcss/typography"
-  ],
   "workspaces": {
+    ".": {
+      "entry": [
+        "vite.config.ts",
+        "vitest.config.ts",
+        "scripts/*.js",
+        "scripts/*.mjs",
+        "scripts/*.ts"
+      ],
+      "project": ["scripts/**/*.js", "scripts/**/*.mjs", "scripts/**/*.ts"],
+      "ignoreDependencies": [
+        "@analogjs/vitest-angular",
+        "@angular-devkit/*",
+        "@oxc-project/runtime",
+        "@tailwindcss/typography",
+        "@toon-format/toon",
+        "concurrently",
+        "daisyui",
+        "seroval",
+        "vite-tsconfig-paths",
+        "web-streams-polyfill",
+        "y-indexeddb",
+        "y-websocket"
+      ]
+    },
     "libs/*": {
       "entry": [
         "src/index.ts",
         "src/public-api.ts",
         "**/src/index.ts",
+        "**/src/public-api.ts",
+        "src/create-package/index.ts",
         "src/workers/*.ts",
-        "src/worker/*.ts",
-        "src/**/*.spec.ts"
+        "src/**/*.spec.ts",
+        "test/**/*.spec.ts"
       ],
-      "project": ["src/**/*.ts", "**/src/**/*.ts"],
-      "ignoreDependencies": ["tslib"]
+      "project": ["src/**/*.ts", "**/src/**/*.ts", "test/**/*.ts"],
+      "ignoreDependencies": ["@angular-helpers/testing"]
     },
-    "apps/*": {
+    "apps/web": {
       "entry": [
         "src/main.ts",
         "src/main.server.ts",
@@ -51,6 +48,10 @@
         "src/**/*.spec.ts"
       ],
       "project": ["src/**/*.ts"]
+    },
+    "apps/web-e2e": {
+      "entry": ["playwright.config.ts", "src/**/*.spec.ts"],
+      "project": ["**/*.ts"]
     }
   }
 }
