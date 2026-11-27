@@ -264,7 +264,7 @@ import { VitalsPanelComponent } from './vitals-panel.component';
               type="button"
               class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold text-base-content/70 hover:text-base-content hover:bg-base-content/5 border border-border-subtle transition-colors cursor-pointer"
               (click)="copyPageMarkdown()"
-              [attr.aria-label]="copiedMd() ? 'Markdown copied' : 'Copy page as Markdown'"
+              title="Copy page as Markdown"
             >
               <span>{{ copiedMd() ? '✓ Copied MD' : 'Copy MD' }}</span>
             </button>
