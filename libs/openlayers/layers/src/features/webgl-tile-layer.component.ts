@@ -1,7 +1,15 @@
 // OlWebGLTileLayerComponent
 // GPU-accelerated tile layer with style expressions for color manipulation.
 
-import { afterNextRender, Component, DestroyRef, effect, inject, input } from '@angular/core';
+import {
+  afterNextRender,
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { OlMapService, OlZoneHelper } from '@angular-helpers/openlayers/core';
 import WebGLTileLayer from 'ol/layer/WebGLTile';
 import type { Style as WebGLTileStyle } from 'ol/layer/WebGLTile';
@@ -29,6 +37,7 @@ import MVT from 'ol/format/MVT';
  * ```
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'ol-webgl-tile-layer',
   template: '',
 })

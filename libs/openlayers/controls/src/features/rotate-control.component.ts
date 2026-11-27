@@ -7,6 +7,7 @@ import {
   inject,
   input,
   InjectionToken,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { OlZoneHelper } from '@angular-helpers/openlayers/core';
 import type OLMap from 'ol/Map';
@@ -33,6 +34,7 @@ export const ROTATE_CONTROL_MAP_SERVICE = new InjectionToken<RotateControlMapSer
 );
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'ol-rotate-control',
   template: '',
 })

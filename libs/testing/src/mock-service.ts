@@ -15,7 +15,9 @@ export function provideMockService<T>(type: Type<T>, mockOverrides?: Partial<T>)
   let currentProto = type.prototype;
   while (currentProto && currentProto !== Object.prototype) {
     Object.getOwnPropertyNames(currentProto).forEach((prop) => {
-      if (prop !== 'constructor' && typeof currentProto[prop] === 'function' && !mock[prop]) {
+      if (prop === 'constructor' || mock[prop]) return;
+      const descriptor = Object.getOwnPropertyDescriptor(currentProto, prop);
+      if (descriptor && typeof descriptor.value === 'function') {
         mock[prop] = vi.fn();
       }
     });

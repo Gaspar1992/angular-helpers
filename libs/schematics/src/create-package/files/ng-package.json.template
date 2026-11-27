@@ -4,11 +4,6 @@
   "lib": {
     "entryFile": "src/public-api.ts"
   },
-  "allowedNonPeerDependencies": [
-    "@angular/core",
-    "@angular/common",
-    "@angular/platform-browser",
-    "rxjs",
-    "tslib"
-  ]
+  "assets": ["README.md"],
+  "allowedNonPeerDependencies": ["tslib"]
 }

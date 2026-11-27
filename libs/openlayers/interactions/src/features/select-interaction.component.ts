@@ -1,4 +1,12 @@
-import { Component, DestroyRef, effect, inject, input, output } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  output,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { outputFromObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 import { OlInteractionService } from '../services/interaction.service';
@@ -8,6 +16,7 @@ import type { SelectHoverEvent } from '../models/interaction.types';
  * Declarative component to configure an OpenLayers Select Interaction.
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'ol-select-interaction',
   template: '',
 })

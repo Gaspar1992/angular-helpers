@@ -1,6 +1,6 @@
 # 🧪 @angular-helpers/testing
 
-Streamlined testing utilities and intuitive mocks for modern Angular applications. Provides a lightweight, ergonomic `render()` wrapper over `TestBed` designed specifically for Angular Signals, Standalone Components, and Zoneless testing with Vitest and Jest.
+Streamlined testing utilities and intuitive mocks for modern Angular applications. Provides a lightweight, ergonomic `render()` wrapper over `TestBed` designed specifically for Angular Signals, Standalone Components, and Zoneless testing with Vitest.
 
 ---
 

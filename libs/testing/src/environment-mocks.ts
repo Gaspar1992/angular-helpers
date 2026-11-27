@@ -275,9 +275,10 @@ export function mockBroadcastChannel(): () => void {
 /**
  * Mocks HTMLCanvasElement 2D rendering context for headless tests.
  */
-export function mockCanvas2D(): void {
-  if (typeof HTMLCanvasElement === 'undefined') return;
+export function mockCanvas2D(): () => void {
+  if (typeof HTMLCanvasElement === 'undefined') return () => {};
 
+  const originalGetContext = HTMLCanvasElement.prototype.getContext;
   const mockContext = {
     createLinearGradient: () => ({ addColorStop: () => {} }),
     createRadialGradient: () => ({ addColorStop: () => {} }),
@@ -310,6 +311,10 @@ export function mockCanvas2D(): void {
   HTMLCanvasElement.prototype.getContext = function () {
     return mockContext as unknown as RenderingContext;
   } as unknown as typeof HTMLCanvasElement.prototype.getContext;
+
+  return () => {
+    HTMLCanvasElement.prototype.getContext = originalGetContext;
+  };
 }
 
 /**
@@ -320,14 +325,32 @@ export function mockIndexedDB(): () => void {
   if (typeof globalThis.indexedDB === 'undefined') {
     const mockFactory: Partial<IDBFactory> = {
       open: () => {
+        const mockDb = {
+          objectStoreNames: { contains: () => false },
+          createObjectStore: () => ({}),
+          transaction: () => ({}),
+          close: () => {},
+        };
         const req: Record<string, unknown> = {
-          result: null,
+          result: mockDb,
           error: null,
-          readyState: 'done',
+          readyState: 'pending',
+          onsuccess: null,
+          onerror: null,
+          onupgradeneeded: null,
           addEventListener: () => {},
           removeEventListener: () => {},
           dispatchEvent: () => true,
         };
+        queueMicrotask(() => {
+          req['readyState'] = 'done';
+          if (typeof req['onupgradeneeded'] === 'function') {
+            (req['onupgradeneeded'] as (ev: unknown) => void)({ target: req });
+          }
+          if (typeof req['onsuccess'] === 'function') {
+            (req['onsuccess'] as (ev: unknown) => void)({ target: req });
+          }
+        });
         return req as unknown as IDBOpenDBRequest;
       },
       deleteDatabase: () => {

@@ -1,6 +1,13 @@
 // OlLayerSwitcherComponent - UI control for managing layer visibility
 
-import { Component, input, type OnInit, output, signal } from '@angular/core';
+import {
+  Component,
+  input,
+  type OnInit,
+  output,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import type { LayerSwitcherItem } from '../models/layer-switcher.types';
 
 /**
@@ -20,6 +27,7 @@ import type { LayerSwitcherItem } from '../models/layer-switcher.types';
  * ```
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'ol-layer-switcher',
   template: `
     <div

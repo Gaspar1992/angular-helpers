@@ -6,12 +6,14 @@ import {
   effect,
   inject,
   input,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { OlMapService, type Feature } from '@angular-helpers/openlayers/core';
 import { OlLayerService } from '../services/layer.service';
 import type { HeatmapLayerConfig } from '../models/layer.types';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'ol-heatmap-layer',
   template: '',
 })

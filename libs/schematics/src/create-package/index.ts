@@ -28,9 +28,9 @@ function updateTsConfig(options: Schema): Rule {
 
     const content = contentBytes.toString('utf-8');
 
-    // Check if mapping already exists to prevent duplicate entries
-    const searchString = `@angular-helpers/${options.name}`;
-    if (content.includes(searchString)) {
+    // Check if mapping already exists to prevent duplicate entries (exact key match)
+    const exactKey = `"@angular-helpers/${options.name}":`;
+    if (content.includes(exactKey)) {
       return tree;
     }
 
@@ -54,13 +54,18 @@ function updateTsConfig(options: Schema): Rule {
 }
 
 export function createPackage(options: Schema): Rule {
-  return (_tree: Tree, context: SchematicContext) => {
+  return (tree: Tree, context: SchematicContext) => {
     // Validate package name using the pattern from schema.json
     const nameRegex = /^[a-z][a-z0-9-]*$/;
     if (!nameRegex.test(options.name)) {
       throw new SchematicsException(
         `Invalid package name: "${options.name}". Name must start with a lowercase letter and contain only lowercase letters, numbers, and hyphens.`,
       );
+    }
+
+    const targetDir = `libs/${options.name}`;
+    if (tree.exists(`${targetDir}/package.json`)) {
+      throw new SchematicsException(`Package directory "${targetDir}" already exists.`);
     }
 
     const templateSource = apply(url('./files'), [

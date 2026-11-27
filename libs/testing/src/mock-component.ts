@@ -59,7 +59,7 @@ export function MockComponent<T>(options: MockOptions): Type<T> {
 
   const decorator = Component({
     selector: options.selector,
-    template: '',
+    template: '<ng-content />',
     inputs: mergedInputs,
     outputs: mergedOutputs,
     providers: providers,

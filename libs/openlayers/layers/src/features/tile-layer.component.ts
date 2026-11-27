@@ -1,11 +1,20 @@
 // OlTileLayerComponent
 
-import { afterNextRender, Component, DestroyRef, effect, inject, input } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+} from '@angular/core';
 import { OlLayerService } from '../services/layer.service';
 import type { TileLayerConfig } from '../models/layer.types';
 
 @Component({
   selector: 'ol-tile-layer',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: '',
 })
 export class OlTileLayerComponent {
@@ -21,22 +30,24 @@ export class OlTileLayerComponent {
   opacity = input<number>(1);
   visible = input<boolean>(true);
 
+  private initialized = false;
+
   constructor() {
     // Initialize layer after DOM is ready
     afterNextRender(() => {
-      this.layerService.addLayer({
-        id: this.id(),
-        type: 'tile',
-        source: {
-          type: this.source(),
-          url: this.url(),
-          attributions: this.attributions(),
-          params: this.params(),
-        },
-        zIndex: this.zIndex(),
-        opacity: this.opacity(),
-        visible: this.visible(),
-      } as TileLayerConfig);
+      this.initialized = true;
+      this.addOrReplaceLayer();
+    });
+
+    effect(() => {
+      const _id = this.id();
+      const _source = this.source();
+      const _url = this.url();
+      const _attributions = this.attributions();
+      const _params = this.params();
+      if (!this.initialized) return;
+      this.layerService.removeLayer(_id);
+      this.addOrReplaceLayer();
     });
 
     effect(() => {
@@ -55,5 +66,21 @@ export class OlTileLayerComponent {
     this.destroyRef.onDestroy(() => {
       this.layerService.removeLayer(this.id());
     });
+  }
+
+  private addOrReplaceLayer(): void {
+    this.layerService.addLayer({
+      id: this.id(),
+      type: 'tile',
+      source: {
+        type: this.source(),
+        url: this.url(),
+        attributions: this.attributions(),
+        params: this.params(),
+      },
+      zIndex: this.zIndex(),
+      opacity: this.opacity(),
+      visible: this.visible(),
+    } as TileLayerConfig);
   }
 }
